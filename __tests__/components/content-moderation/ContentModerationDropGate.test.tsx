@@ -327,7 +327,9 @@ describe("ContentModerationDropGate", () => {
       screen.getByTestId("content-moderation-tombstone-blocked")
     ).toBeInTheDocument();
     expect(screen.getByText("Blocked author post")).toBeInTheDocument();
-    expect(screen.getByText("@alice")).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Open @alice's profile" })
+    ).toHaveAttribute("href", "/alice");
   });
 
   it("ends a blocked-post reveal when the viewer hides that post", () => {

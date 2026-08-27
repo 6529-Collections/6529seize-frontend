@@ -19,6 +19,9 @@ jest.mock("@/components/header/ProfilePreferencesSettings", () => () => (
 jest.mock("@/components/preferences/ContentPreferencesSettings", () => () => (
   <div>Content settings panel</div>
 ));
+jest.mock("@/components/preferences/ReportsPreferencesSettings", () => () => (
+  <div>Reports settings panel</div>
+));
 describe("PreferencesPageClient", () => {
   beforeEach(() => {
     (useAuth as jest.Mock).mockReturnValue({
@@ -50,18 +53,26 @@ describe("PreferencesPageClient", () => {
     expect(container.querySelector("main")).toHaveClass("tw-min-h-dvh");
   });
 
-  it("renders the content tab and preserves its deep link", () => {
-    render(<PreferencesPageClient activeTab="content" />);
+  it("renders the blocked profiles tab and preserves its deep link", () => {
+    render(<PreferencesPageClient activeTab="blocked-profiles" />);
 
-    expect(screen.getByRole("link", { name: "Content" })).toHaveAttribute(
-      "href",
-      "/preferences?tab=content"
-    );
-    expect(screen.getByRole("link", { name: "Content" })).toHaveAttribute(
+    expect(
+      screen.getByRole("link", { name: "Blocked Profiles" })
+    ).toHaveAttribute("href", "/preferences?tab=blocked-profiles");
+    expect(
+      screen.getByRole("link", { name: "Blocked Profiles" })
+    ).toHaveAttribute("aria-current", "page");
+    expect(screen.getByText("Content settings panel")).toBeVisible();
+  });
+
+  it("renders the reports tab", () => {
+    render(<PreferencesPageClient activeTab="reports" />);
+
+    expect(screen.getByRole("link", { name: "Reports" })).toHaveAttribute(
       "aria-current",
       "page"
     );
-    expect(screen.getByText("Content settings panel")).toBeVisible();
+    expect(screen.getByText("Reports settings panel")).toBeVisible();
   });
 
   it("offers profile creation when an authenticated wallet has no profile", () => {
@@ -98,7 +109,7 @@ describe("PreferencesPageClient", () => {
       hasValidWalletAuth: false,
     });
 
-    render(<PreferencesPageClient activeTab="content" />);
+    render(<PreferencesPageClient activeTab="blocked-profiles" />);
 
     expect(
       screen.getByText(

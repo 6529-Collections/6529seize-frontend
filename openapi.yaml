@@ -1960,6 +1960,37 @@ paths:
                   $ref: "#/components/schemas/ApiContentModerationQueueItem"
         "403":
           description: Moderator access required
+  /content-moderation/reports/mine:
+    get:
+      tags:
+        - ContentModeration
+      summary: List reports submitted by the authenticated profile.
+      operationId: getMyContentModerationReports
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+        - name: before
+          in: query
+          required: false
+          description: Opaque cursor returned by the previous report item.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Reports submitted by the authenticated profile
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiContentModerationUserReport"
   /content-moderation/drops/{drop_id}/reports/mine:
     delete:
       tags:
@@ -16270,6 +16301,54 @@ components:
           $ref: "#/components/schemas/ApiContentModerationReportStatus"
         drop_status:
           $ref: "#/components/schemas/ApiDropModerationStatus"
+    ApiContentModerationUserReport:
+      type: object
+      required:
+        - id
+        - drop_id
+        - author_profile_id
+        - author_handle
+        - author_pfp
+        - reason
+        - notes
+        - status
+        - created_at
+        - resolved_at
+        - drop_status
+        - cursor
+      properties:
+        id:
+          type: string
+          format: uuid
+        drop_id:
+          type: string
+        author_profile_id:
+          type: string
+        author_handle:
+          type: string
+          nullable: true
+        author_pfp:
+          type: string
+          nullable: true
+        reason:
+          $ref: "#/components/schemas/ApiContentModerationReportReason"
+        notes:
+          type: string
+          nullable: true
+        status:
+          $ref: "#/components/schemas/ApiContentModerationReportStatus"
+        created_at:
+          type: integer
+          format: int64
+        resolved_at:
+          type: integer
+          format: int64
+          nullable: true
+        drop_status:
+          $ref: "#/components/schemas/ApiDropModerationStatus"
+        cursor:
+          type: string
+          description: Opaque cursor for fetching reports after this item.
     ApiContentModeratorAccess:
       type: object
       required:

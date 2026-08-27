@@ -1,5 +1,6 @@
 import ContentModerationPageClient from "@/app/content-moderation/page.client";
 import type { ApiContentModerationQueueItem } from "@/generated/models/ApiContentModerationQueueItem";
+import { ApiContentModerationRecommendation } from "@/generated/models/ApiContentModerationRecommendation";
 import { ApiContentModerationReportReason } from "@/generated/models/ApiContentModerationReportReason";
 import { ApiContentModerationReportStatus } from "@/generated/models/ApiContentModerationReportStatus";
 import { ApiDropModerationStatus } from "@/generated/models/ApiDropModerationStatus";
@@ -98,6 +99,51 @@ describe("ContentModerationPageClient pagination", () => {
     );
 
     expect(await screen.findByText("Reported by @reporter1")).toBeVisible();
+  });
+
+  it("hides a neutral AI category instead of rendering Category: None", async () => {
+    const item = createQueueItem(1);
+    item.ai_recommendation =
+      ApiContentModerationRecommendation.NoViolationDetected;
+    item.ai_category = "NONE";
+    item.ai_confidence = 0.95;
+    mockFetchContentModerationQueue.mockResolvedValue([item]);
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <ContentModerationPageClient />
+      </QueryClientProvider>
+    );
+
+    expect(await screen.findByText(/No Violation Detected/)).toBeVisible();
+    expect(screen.queryByText(/Potential category:/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Category: None/i)).not.toBeInTheDocument();
+  });
+
+  it("labels a substantive AI category as a potential category", async () => {
+    const item = createQueueItem(1);
+    item.ai_recommendation =
+      ApiContentModerationRecommendation.NeedsHumanReview;
+    item.ai_category = "SCAM_OR_PHISHING";
+    item.ai_confidence = 0.85;
+    mockFetchContentModerationQueue.mockResolvedValue([item]);
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <ContentModerationPageClient />
+      </QueryClientProvider>
+    );
+
+    await userEvent.click(await screen.findByText(/AI assessment:/i));
+    expect(
+      await screen.findByText("Potential category: Scam Or Phishing")
+    ).toBeVisible();
   });
 
   it("attributes each state-history action to its actor", async () => {

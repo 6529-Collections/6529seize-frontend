@@ -36,7 +36,8 @@
         "An open report can be withdrawn from a separate confirmation state until a moderator resolves it. A successful withdrawal closes the dialog, leaves the post hidden, does not affect other reporters, and an allowed resolution may be reported again later.",
         "Reporters see only Awaiting review, No action taken, or Content removed outcomes; moderator identity, internal notes, AI details, and other reporters remain private.",
         "Personally hidden posts and posts from blocked authors keep their original layout under a non-interactive blur. Reveal is temporary; Unhide and Unblock persist through the API and update mounted posts immediately.",
-        "Notification, messaging, and blocked-profile settings are combined at /preferences. The Content tab is available at /preferences?tab=content, and /content-preferences redirects there.",
+        "Notification, messaging, blocked-profile, and report-history settings are combined at /preferences. Blocked Profiles is available at /preferences?tab=blocked-profiles, Reports is available at /preferences?tab=reports, and the older content-preferences paths resolve to Blocked Profiles.",
+        "The Reports tab lists reports submitted by the current profile and their public review status. Open reports can be withdrawn there; AI assessments, internal notes or reasons, moderator identity, and other reporters are not exposed.",
         "Preferences are profile-scoped. An authenticated wallet without a profile sees a Create profile action instead of a connection prompt, and the controls become available after profile creation.",
         "A blocked profile's avatar and handle in Preferences link to its public profile. Its profile header shows a red-tinted Blocked status beside the handle, keeps Direct Message available, and puts a separate confirmation-backed Unblock action where Follow normally appears.",
         "Blocking hides the profile's content, treats its activity as muted, automatically unfollows it, and prevents following again until it is unblocked. It does not notify the blocked profile or remove that profile's subscription to the blocker.",
@@ -49,14 +50,17 @@
         "Only server-authorized moderators see and can use the WatchTower side-navigation item at /content-moderation on desktop, mobile browser, and mobile app. It is not in the profile menu. The page heading is WatchTower - Content Moderation.",
         "WatchTower identifies both the author and reporter, separates Open reports, Resolved reports, and Suspended profiles, and lets moderators select one explained content decision, optionally add an internal note, and apply it once.",
         "Allow keeps or restores a post to visible and closes its reports; Quarantine hides it globally while reports remain open; Remove hides it globally and closes its reports as removed.",
-        "Author suspension is separate from the post decision, prevents future creates and edits without changing existing posts, and can be reversed from the central Suspended profiles view.",
+        "Profile suspension is separate from the post decision, prevents future creates and edits without changing existing posts, and can be reversed from the central Suspended profiles view or a moderator-only profile action. A moderator's personal Blocked state remains independent.",
+        "WatchTower omits the neutral AI category NONE and labels a substantive AI result as a Potential category because the moderator decision remains authoritative.",
+        "If a connected profile's session expires, authenticated actions preserve the connection and profile selection, request a new signature, and continue. If the signer is unavailable, the user receives an explicit reconnect message instead of a silent no-op.",
         "WatchTower shows a red navigation indicator while open reports need review and refreshes that lightweight state periodically while the app is active.",
         "Someone who opens /content-moderation without moderator access sees a countdown and is redirected home; a failed access check shows an error instead of being treated as a denial."
       ],
       "canonical_path": "/preferences",
       "link_label": "Preferences",
       "related_paths": [
-        "/preferences?tab=content",
+        "/preferences?tab=blocked-profiles",
+        "/preferences?tab=reports",
         "/content-moderation",
         "/waves"
       ],
@@ -67,6 +71,7 @@
         "app/content-moderation/page.client.tsx",
         "components/content-moderation/ContentModerationDropActions.tsx",
         "components/content-moderation/ContentModerationDropGate.tsx",
+        "components/preferences/ReportsPreferencesSettings.tsx",
         "components/user/user-page-header/BlockedProfileHeaderIndicator.tsx",
         "components/user/user-page-header/ProfileBlockActionMenu.tsx",
         "services/content-moderation/content-moderation-query.ts"

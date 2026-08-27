@@ -16,6 +16,7 @@ import {
 import { t } from "@/i18n/messages";
 import {
   getAuthJwt,
+  invalidateAuthSessionForAddress,
   PROFILE_SWITCHED_EVENT,
   removeAuthJwt,
 } from "@/services/auth/auth.utils";
@@ -47,6 +48,7 @@ import {
   createAuthRequestGuard,
   type AuthRequestGuard,
 } from "./authRequestGuard";
+import { createTimedAbortSignal } from "./authRequestAbortSignal";
 import { createAuthRequestSignIn } from "./authRequestSignIn";
 
 type SignMessage = (message: string) => Promise<{
@@ -115,27 +117,6 @@ const dispatchProfileSwitchedEvent = (profileProxy: ApiProfileProxy | null) => {
       detail: { profileProxy },
     })
   );
-};
-
-const createTimedAbortSignal = ({
-  timeoutMs,
-}: {
-  readonly timeoutMs: number;
-}): {
-  readonly signal: AbortSignal;
-  readonly cleanup: () => void;
-} => {
-  const controller = new AbortController();
-  const timeoutId = globalThis.setTimeout(() => {
-    controller.abort();
-  }, timeoutMs);
-
-  return {
-    signal: controller.signal,
-    cleanup: () => {
-      globalThis.clearTimeout(timeoutId);
-    },
-  };
 };
 
 export function createAuthRequestActions({
@@ -403,8 +384,23 @@ export function createAuthRequestActions({
     if (!validationResult.requiresSessionUpgrade) {
       setSignModalReason("auth");
       setSessionUpgradeRequired(false);
+      if (!canSignActiveWallet) {
+        setToast({
+          message: "Reconnect the wallet for this profile and try again.",
+          type: "error",
+        });
+        return false;
+      }
       if (!serverRejected) {
-        await removeAuthJwt();
+        const didInvalidate =
+          await invalidateAuthSessionForAddress(walletAddress);
+        if (!didInvalidate) {
+          setToast({
+            message: "Reconnect the wallet for this profile and try again.",
+            type: "error",
+          });
+          return false;
+        }
       }
       return true;
     }

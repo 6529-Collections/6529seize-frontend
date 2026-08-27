@@ -9,7 +9,9 @@ import { t } from "@/i18n/messages";
 import { faBell, faBellSlash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
+  ArrowPathIcon,
   EllipsisHorizontalIcon,
+  MinusCircleIcon,
   NoSymbolIcon,
 } from "@heroicons/react/24/outline";
 
@@ -19,40 +21,75 @@ const TRIGGER_CLASS_NAME =
 export default function ProfileBlockActionMenu({
   handle,
   disabled,
+  moderationAction,
   onBlock,
+  showPersonalActions = true,
 }: {
   readonly handle: string;
   readonly disabled: boolean;
+  readonly moderationAction?:
+    | {
+        readonly kind: "suspend" | "reinstate";
+        readonly label: string;
+        readonly onSelect: () => void;
+      }
+    | undefined;
   readonly onBlock: () => void;
+  readonly showPersonalActions?: boolean | undefined;
 }) {
   const locale = useBrowserLocale();
   const isMobileLayoutViewport = useIsMobileLayoutViewport();
   const mute = useProfileMute(handle);
   const menuLabel = t(locale, "contentModeration.profile.actionsMenu");
   const items: readonly CompactMenuItem[] = [
-    {
-      id: "toggle-notifications",
-      label: t(
-        locale,
-        mute.isMuted ? "profile.mute.action.unmute" : "profile.mute.action.mute"
-      ),
-      icon: (
-        <FontAwesomeIcon
-          aria-hidden="true"
-          icon={mute.isMuted ? faBellSlash : faBell}
-          className="tw-size-4"
-        />
-      ),
-      onSelect: () => void mute.toggleMute(),
-      disabled: mute.isPending,
-    },
-    {
-      id: "block-profile",
-      label: t(locale, "contentModeration.actions.blockProfile"),
-      icon: <NoSymbolIcon aria-hidden="true" className="tw-size-4" />,
-      onSelect: onBlock,
-      className: "tw-text-red desktop-hover:hover:tw-text-red",
-    },
+    ...(showPersonalActions
+      ? ([
+          {
+            id: "toggle-notifications",
+            label: t(
+              locale,
+              mute.isMuted
+                ? "profile.mute.action.unmute"
+                : "profile.mute.action.mute"
+            ),
+            icon: (
+              <FontAwesomeIcon
+                aria-hidden="true"
+                icon={mute.isMuted ? faBellSlash : faBell}
+                className="tw-size-4"
+              />
+            ),
+            onSelect: () => void mute.toggleMute(),
+            disabled: mute.isPending,
+          },
+          {
+            id: "block-profile",
+            label: t(locale, "contentModeration.actions.blockProfile"),
+            icon: <NoSymbolIcon aria-hidden="true" className="tw-size-4" />,
+            onSelect: onBlock,
+            className: "tw-text-red desktop-hover:hover:tw-text-red",
+          },
+        ] satisfies CompactMenuItem[])
+      : []),
+    ...(moderationAction
+      ? ([
+          {
+            id: `moderator-${moderationAction.kind}`,
+            label: moderationAction.label,
+            icon:
+              moderationAction.kind === "suspend" ? (
+                <MinusCircleIcon aria-hidden="true" className="tw-size-4" />
+              ) : (
+                <ArrowPathIcon aria-hidden="true" className="tw-size-4" />
+              ),
+            onSelect: moderationAction.onSelect,
+            className:
+              moderationAction.kind === "suspend"
+                ? "tw-text-amber-300 desktop-hover:hover:tw-text-amber-200"
+                : undefined,
+          },
+        ] satisfies CompactMenuItem[])
+      : []),
   ];
   const trigger = (
     <EllipsisHorizontalIcon aria-hidden="true" className="tw-size-5" />

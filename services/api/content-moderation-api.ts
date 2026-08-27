@@ -8,6 +8,7 @@ import type { ApiContentModerationQueueItem } from "@/generated/models/ApiConten
 import type { ApiContentModerationReportRequest } from "@/generated/models/ApiContentModerationReportRequest";
 import type { ApiContentModerationReportResponse } from "@/generated/models/ApiContentModerationReportResponse";
 import type { ApiContentModerationReportWithdrawalResponse } from "@/generated/models/ApiContentModerationReportWithdrawalResponse";
+import type { ApiContentModerationUserReport } from "@/generated/models/ApiContentModerationUserReport";
 import type { ApiContentModeratorAccess } from "@/generated/models/ApiContentModeratorAccess";
 import {
   commonApiDelete,
@@ -74,6 +75,22 @@ export const fetchContentModeratorAccess =
       endpoint: "content-moderation/moderator-access",
       errorMode: "structured",
     });
+
+export const fetchMyContentModerationReports = ({
+  limit = 50,
+  before,
+}: {
+  readonly limit?: number | undefined;
+  readonly before?: string | undefined;
+} = {}): Promise<ApiContentModerationUserReport[]> =>
+  commonApiFetch<ApiContentModerationUserReport[], Record<string, string>>({
+    endpoint: "content-moderation/reports/mine",
+    params: {
+      limit: String(limit),
+      ...(before === undefined ? {} : { before }),
+    },
+    errorMode: "structured",
+  });
 
 export const fetchContentModerationQueue = ({
   limit = 50,

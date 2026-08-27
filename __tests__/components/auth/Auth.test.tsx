@@ -117,6 +117,7 @@ jest.mock("@/services/auth/auth.utils", () => ({
         )
       )
   ),
+  invalidateAuthSessionForAddress: jest.fn(async () => true),
   removeAuthJwt: jest.fn(),
   setActiveWalletAccount: jest.fn(() => true),
   setAuthJwt: jest.fn(),
@@ -926,7 +927,9 @@ describe("Auth component", () => {
       const authUtils =
         require("@/services/auth/auth.utils") as typeof AuthUtilsModule;
       const mockGetAuthJwt = jest.mocked(authUtils.getAuthJwt);
-      const mockRemoveAuthJwt = jest.mocked(authUtils.removeAuthJwt);
+      const mockInvalidateAuthSession = jest.mocked(
+        authUtils.invalidateAuthSessionForAddress
+      );
       const mockValidateJwt =
         require("@/services/auth/jwt-validation.utils").validateJwt;
       const sessionV2 = require("@/services/auth/session-v2.utils");
@@ -939,8 +942,9 @@ describe("Auth component", () => {
       };
       let currentJwt: string | null = "expired-legacy-jwt";
       mockGetAuthJwt.mockImplementation(() => currentJwt);
-      mockRemoveAuthJwt.mockImplementation(async () => {
+      mockInvalidateAuthSession.mockImplementation(async () => {
         currentJwt = null;
+        return true;
       });
       mockValidateJwt.mockResolvedValue({
         isValid: false,
@@ -991,7 +995,7 @@ describe("Auth component", () => {
           screen.getByTestId("expired-upgrade-action-result")
         ).toHaveTextContent("true")
       );
-      expect(mockRemoveAuthJwt).toHaveBeenCalled();
+      expect(mockInvalidateAuthSession).toHaveBeenCalledWith(validAddress);
       expect(sessionV2.getSessionNonce).toHaveBeenCalledWith({
         signerAddress: validAddress,
       });
@@ -1060,9 +1064,13 @@ describe("Auth component", () => {
       walletAddress = validAddress;
       enableAuthMigrationDeadline();
       const authUtils = require("@/services/auth/auth.utils");
-      const mockGetAuthJwt = authUtils.getAuthJwt as jest.MockedFunction<any>;
-      const mockRemoveAuthJwt =
-        authUtils.removeAuthJwt as jest.MockedFunction<any>;
+      const mockGetAuthJwt = authUtils.getAuthJwt as jest.MockedFunction<
+        typeof authUtils.getAuthJwt
+      >;
+      const mockInvalidateAuthSession =
+        authUtils.invalidateAuthSessionForAddress as jest.MockedFunction<
+          typeof authUtils.invalidateAuthSessionForAddress
+        >;
       const mockValidateJwt =
         require("@/services/auth/jwt-validation.utils").validateJwt;
       const sessionV2 = require("@/services/auth/session-v2.utils");
@@ -1125,7 +1133,7 @@ describe("Auth component", () => {
           role: null,
         })
       );
-      expect(mockRemoveAuthJwt).toHaveBeenCalled();
+      expect(mockInvalidateAuthSession).toHaveBeenCalledWith(validAddress);
       expect(sessionV2.getSessionNonce).toHaveBeenCalledWith({
         signerAddress: validAddress,
       });
@@ -1145,6 +1153,51 @@ describe("Auth component", () => {
       expect(
         screen.queryByText("Upgrade Authentication")
       ).not.toBeInTheDocument();
+    });
+
+    it("asks for an explicit reconnect when an expired profile session has no signer", async () => {
+      const validAddress = "0x1111111111111111111111111111111111111111";
+      walletAddress = validAddress;
+      canSignActiveWallet = false;
+      enableAuthMigrationDeadline();
+      const authUtils = require("@/services/auth/auth.utils");
+      const mockGetAuthJwt = authUtils.getAuthJwt as jest.MockedFunction<any>;
+      const mockInvalidateAuthSession =
+        authUtils.invalidateAuthSessionForAddress as jest.MockedFunction<any>;
+      const mockValidateJwt =
+        require("@/services/auth/jwt-validation.utils").validateJwt;
+      const { toast } = require("react-toastify");
+      mockGetAuthJwt.mockReturnValue("expired-legacy-jwt");
+      mockValidateJwt.mockResolvedValue({
+        isValid: false,
+        wasCancelled: false,
+      });
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <RequestAuthButton />
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      await userEvent.click(screen.getByTestId("req"));
+
+      await waitFor(() =>
+        expect(toast).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.objectContaining({ type: "error" })
+        )
+      );
+      const renderedToast = toast.mock.calls.at(-1)?.[0];
+      render(renderedToast);
+      expect(
+        screen.getByText("Reconnect the wallet for this profile and try again.")
+      ).toBeVisible();
+      expect(mockInvalidateAuthSession).not.toHaveBeenCalled();
+      expect(mockSignMessage).not.toHaveBeenCalled();
     });
 
     it("uses session nonce signable_message for web sign-in", async () => {
@@ -2757,16 +2810,18 @@ describe("Auth component", () => {
       expect(mockTrackAuthSessionRefreshProductImpact).toHaveBeenCalledTimes(2);
     });
 
-    it("retries validation after JWT removal fails", async () => {
+    it("retries validation after session invalidation fails", async () => {
       walletAddress = "0x1111111111111111111111111111111111111111";
       const authUtils = require("@/services/auth/auth.utils");
       const mockGetAuthJwt = authUtils.getAuthJwt as jest.MockedFunction<any>;
-      const mockRemoveAuthJwt =
-        authUtils.removeAuthJwt as jest.MockedFunction<any>;
+      const mockInvalidateAuthSession =
+        authUtils.invalidateAuthSessionForAddress as jest.MockedFunction<any>;
       const mockValidateAuthImmediate =
         require("@/services/auth/immediate-validation.utils").validateAuthImmediate;
       mockGetAuthJwt.mockReturnValue("invalid-jwt");
-      mockRemoveAuthJwt.mockRejectedValueOnce(new Error("storage failure"));
+      mockInvalidateAuthSession.mockRejectedValueOnce(
+        new Error("storage failure")
+      );
       mockValidateAuthImmediate
         .mockImplementationOnce(async ({ callbacks }) => {
           try {
@@ -2780,7 +2835,7 @@ describe("Auth component", () => {
               shouldShowModal: true,
             };
           }
-          throw new Error("Expected JWT removal to fail");
+          throw new Error("Expected session invalidation to fail");
         })
         .mockResolvedValueOnce({
           isValid: true,
@@ -2811,15 +2866,15 @@ describe("Auth component", () => {
       await waitFor(() => {
         expect(mockValidateAuthImmediate).toHaveBeenCalledTimes(2);
       });
-      expect(mockRemoveAuthJwt).toHaveBeenCalledTimes(1);
+      expect(mockInvalidateAuthSession).toHaveBeenCalledTimes(1);
     });
 
     it("tracks forced logout when the session upgrade deadline has expired", async () => {
       const validAddress = "0x1111111111111111111111111111111111111111";
       walletAddress = validAddress;
       enableAuthMigrationDeadline("2000-01-01T00:00:00.000Z");
-      const mockRemoveAuthJwt = require("@/services/auth/auth.utils")
-        .removeAuthJwt as jest.MockedFunction<any>;
+      const mockInvalidateAuthSession = require("@/services/auth/auth.utils")
+        .invalidateAuthSessionForAddress as jest.MockedFunction<any>;
 
       render(
         <ReactQueryWrapperContext.Provider
@@ -2839,7 +2894,7 @@ describe("Auth component", () => {
           "false"
         );
       });
-      expect(mockRemoveAuthJwt).toHaveBeenCalled();
+      expect(mockInvalidateAuthSession).toHaveBeenCalledWith(validAddress);
       expect(mockTrackAuthImpactEvent).toHaveBeenCalledWith(
         "Auth Forced Logout",
         {
@@ -2859,8 +2914,8 @@ describe("Auth component", () => {
       const validAddress = "0x1111111111111111111111111111111111111111";
       walletAddress = validAddress;
       enableAuthMigrationDeadline("2000-01-01T00:00:00.000Z");
-      const mockRemoveAuthJwt = require("@/services/auth/auth.utils")
-        .removeAuthJwt as jest.MockedFunction<any>;
+      const mockInvalidateAuthSession = require("@/services/auth/auth.utils")
+        .invalidateAuthSessionForAddress as jest.MockedFunction<any>;
 
       render(
         <ReactQueryWrapperContext.Provider
@@ -2876,14 +2931,14 @@ describe("Auth component", () => {
       await user.click(screen.getByTestId("request-session-upgrade"));
 
       await waitFor(() => {
-        expect(mockRemoveAuthJwt).toHaveBeenCalledTimes(1);
+        expect(mockInvalidateAuthSession).toHaveBeenCalledTimes(1);
       });
 
-      mockRemoveAuthJwt.mockClear();
+      mockInvalidateAuthSession.mockClear();
       await user.click(screen.getByTestId("request-session-upgrade"));
 
       await waitFor(() => {
-        expect(mockRemoveAuthJwt).toHaveBeenCalledTimes(1);
+        expect(mockInvalidateAuthSession).toHaveBeenCalledTimes(1);
       });
     });
 
@@ -2929,8 +2984,8 @@ describe("Auth component", () => {
       walletAddress = validAddress;
       const mockValidateAuthImmediate =
         require("@/services/auth/immediate-validation.utils").validateAuthImmediate;
-      const mockRemoveAuthJwt = require("@/services/auth/auth.utils")
-        .removeAuthJwt as jest.MockedFunction<any>;
+      const mockInvalidateAuthSession = require("@/services/auth/auth.utils")
+        .invalidateAuthSessionForAddress as jest.MockedFunction<any>;
       mockValidateAuthImmediate.mockImplementation(async ({ callbacks }) => {
         callbacks.onSessionUpgradeRequired();
         return {
@@ -2960,7 +3015,7 @@ describe("Auth component", () => {
       expect(
         screen.queryByText("Upgrade Authentication")
       ).not.toBeInTheDocument();
-      expect(mockRemoveAuthJwt).not.toHaveBeenCalled();
+      expect(mockInvalidateAuthSession).not.toHaveBeenCalled();
     });
 
     it("does not rotate a connected local v2 web session during immediate validation", async () => {
@@ -3828,15 +3883,15 @@ describe("Auth component", () => {
       });
     });
 
-    it("clears auth when the configured migration deadline has expired", async () => {
+    it("invalidates the session when the configured migration deadline has expired", async () => {
       const now = Date.UTC(2026, 5, 17, 12, 0, 0);
       jest.spyOn(Date, "now").mockReturnValue(now);
       enableAuthMigrationDeadline(new Date(now - 1).toISOString());
       walletAddress = "0x1111111111111111111111111111111111111111";
       const mockValidateAuthImmediate =
         require("@/services/auth/immediate-validation.utils").validateAuthImmediate;
-      const mockRemoveAuthJwt = require("@/services/auth/auth.utils")
-        .removeAuthJwt as jest.MockedFunction<any>;
+      const mockInvalidateAuthSession = require("@/services/auth/auth.utils")
+        .invalidateAuthSessionForAddress as jest.MockedFunction<any>;
       const invalidateAll = jest.fn();
       mockValidateAuthImmediate.mockImplementation(async ({ callbacks }) => {
         callbacks.onSessionUpgradeRequired();
@@ -3856,7 +3911,7 @@ describe("Auth component", () => {
       );
 
       await waitFor(() => {
-        expect(mockRemoveAuthJwt).toHaveBeenCalled();
+        expect(mockInvalidateAuthSession).toHaveBeenCalledWith(walletAddress);
       });
       expect(invalidateAll).toHaveBeenCalled();
       expect(

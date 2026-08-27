@@ -4,19 +4,21 @@ import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import ProfilePreferencesSettings from "@/components/header/ProfilePreferencesSettings";
 import ContentPreferencesSettings from "@/components/preferences/ContentPreferencesSettings";
+import ReportsPreferencesSettings from "@/components/preferences/ReportsPreferencesSettings";
 import UserSetUpProfileCta from "@/components/user/utils/set-up-profile/UserSetUpProfileCta";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import Link from "next/link";
 
-export type PreferencesTab = "notifications" | "content";
+export type PreferencesTab = "notifications" | "blocked-profiles" | "reports";
 
 const TABS: ReadonlyArray<{
   readonly id: PreferencesTab;
   readonly href: string;
   readonly labelKey:
     | "preferences.tabs.notifications"
-    | "preferences.tabs.content";
+    | "preferences.tabs.blockedProfiles"
+    | "preferences.tabs.reports";
 }> = [
   {
     id: "notifications",
@@ -24,9 +26,14 @@ const TABS: ReadonlyArray<{
     labelKey: "preferences.tabs.notifications",
   },
   {
-    id: "content",
-    href: "/preferences?tab=content",
-    labelKey: "preferences.tabs.content",
+    id: "blocked-profiles",
+    href: "/preferences?tab=blocked-profiles",
+    labelKey: "preferences.tabs.blockedProfiles",
+  },
+  {
+    id: "reports",
+    href: "/preferences?tab=reports",
+    labelKey: "preferences.tabs.reports",
   },
 ];
 
@@ -107,8 +114,13 @@ export default function PreferencesPageClient({
               </p>
             </section>
           )}
-          {canManagePreferences && activeTab === "content" ? (
+          {canManagePreferences && activeTab === "blocked-profiles" ? (
             <ContentPreferencesSettings
+              key={connectedProfile?.id ?? "signed-out"}
+            />
+          ) : null}
+          {canManagePreferences && activeTab === "reports" ? (
+            <ReportsPreferencesSettings
               key={connectedProfile?.id ?? "signed-out"}
             />
           ) : null}

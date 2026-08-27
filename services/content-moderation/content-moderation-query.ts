@@ -20,6 +20,11 @@ export const BLOCKED_PROFILES_QUERY_KEY = [
   QueryKey.CONTENT_MODERATION_BLOCKED_PROFILES,
 ] as const;
 
+export const MY_CONTENT_MODERATION_REPORTS_QUERY_KEY = [
+  QueryKey.CONTENT_MODERATION_REPORTS,
+  "mine",
+] as const;
+
 const CONTENT_PRESENTATION_QUERY_ROOTS = [
   QueryKey.DROP,
   QueryKey.DROPS,

@@ -135,16 +135,10 @@ export default function ContentPreferencesSettings() {
 
   return (
     <section
-      aria-labelledby="blocked-profiles-heading"
+      aria-label={t(locale, "contentModeration.preferences.blockedTitle")}
       className="tw-rounded-2xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-5 tw-py-5 sm:tw-px-6"
     >
-      <h2
-        id="blocked-profiles-heading"
-        className="tw-m-0 tw-text-xl tw-font-semibold tw-text-iron-100"
-      >
-        {t(locale, "contentModeration.preferences.blockedTitle")}
-      </h2>
-      <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-text-iron-400">
+      <p className="tw-m-0 tw-text-sm tw-text-iron-400">
         {t(locale, "contentModeration.preferences.description")}
       </p>
       {!canLoad && (

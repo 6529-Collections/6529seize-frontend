@@ -134,4 +134,38 @@ describe("ProfileBlockActionMenu", () => {
     expect(unmute.querySelector("svg")).not.toBeNull();
     expect(block.querySelector("svg")).not.toBeNull();
   });
+
+  it("can show a moderator action independently of personal profile actions", async () => {
+    const user = userEvent.setup();
+    const onSuspend = jest.fn();
+
+    render(
+      <ProfileBlockActionMenu
+        handle="alice"
+        disabled={false}
+        showPersonalActions={false}
+        moderationAction={{
+          kind: "suspend",
+          label: "Suspend Profile",
+          onSelect: onSuspend,
+        }}
+        onBlock={jest.fn()}
+      />
+    );
+
+    const menu = screen.getByTestId("desktop-profile-actions");
+    expect(
+      within(menu).queryByRole("button", { name: "Mute notifications" })
+    ).not.toBeInTheDocument();
+    expect(
+      within(menu).queryByRole("button", { name: "Block profile" })
+    ).not.toBeInTheDocument();
+    const suspend = within(menu).getByRole("button", {
+      name: "Suspend Profile",
+    });
+    expect(suspend.querySelector("svg")).not.toBeNull();
+
+    await user.click(suspend);
+    expect(onSuspend).toHaveBeenCalledTimes(1);
+  });
 });
