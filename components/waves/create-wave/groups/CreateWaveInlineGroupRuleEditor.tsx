@@ -103,26 +103,15 @@ export default function CreateWaveInlineGroupRuleEditor({
           beneficiaryGrantMatchMode={
             draft.group.is_beneficiary_of_grant_match_mode
           }
-          setBeneficiaryGrantId={(is_beneficiary_of_grant_id) =>
+          setBeneficiaryGrant={(
+            is_beneficiary_of_grant_id,
+            is_beneficiary_of_grant_match_mode
+          ) =>
             onDraftChange({
               ...draft,
               group: {
                 ...draft.group,
                 is_beneficiary_of_grant_id: is_beneficiary_of_grant_id ?? null,
-                ...(is_beneficiary_of_grant_id
-                  ? {}
-                  : {
-                      is_beneficiary_of_grant_match_mode:
-                        ApiGroupBeneficiaryGrantMatchMode.AnyToken,
-                    }),
-              },
-            })
-          }
-          setBeneficiaryGrantMatchMode={(is_beneficiary_of_grant_match_mode) =>
-            onDraftChange({
-              ...draft,
-              group: {
-                ...draft.group,
                 is_beneficiary_of_grant_match_mode:
                   is_beneficiary_of_grant_match_mode ??
                   ApiGroupBeneficiaryGrantMatchMode.AnyToken,
