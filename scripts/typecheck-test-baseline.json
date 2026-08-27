@@ -419,7 +419,6 @@
     "__tests__/components/the-memes/MemePageTimeline.test.tsx": 1,
     "__tests__/components/the-memes/MemeShared.test.tsx": 6,
     "__tests__/components/the-memes/TheMemes.extra.test.tsx": 1,
-    "__tests__/components/user/brain/UserPageBrainSidebar.test.tsx": 5,
     "__tests__/components/user/collected/cards/UserPageCollectedCard.test.tsx": 1,
     "__tests__/components/user/collected/cards/UserPageCollectedCardsNoCards.test.tsx": 1,
     "__tests__/components/user/collected/filters/UserPageCollectedFiltersSzn.test.tsx": 1,
