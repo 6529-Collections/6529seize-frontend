@@ -2480,7 +2480,8 @@
         "Optional sections are named for their contents instead of repeating Advanced settings. They show Customized for non-default values and open automatically when a hidden field needs attention.",
         "The Groups step shows all access and moderation rows immediately, organized from Visibility through Admins without an Advanced settings disclosure.",
         "In Groups, Visibility controls wave access; followers who can view the wave may get a notification when it is created.",
-        "Each Groups access row offers Replace criteria and Choose group; Replace criteria contains Add identity and the rule choices, Back to criteria returns from identity search, and Next stays disabled until the pending replacement is created, discarded, or replaced by a saved group.",
+        "Each Groups access row offers Edit criteria and Choose group; Edit criteria keeps Identities alongside the rule choices, supports explicitly included and excluded identities, and Next stays disabled until the pending replacement is created, discarded, or replaced by a saved group.",
+        "The inline Identities editor can add either included or excluded identities through profile search, an authenticated EMMA allowlist, or a dragged or selected CSV file. Source wallets are normalized and deduplicated, source choices persist while the group remains an unsaved draft, and the latest include or exclude action wins when the same wallet appears on both sides.",
         "Inline group identity search ranks exact, prefix, and substring profile-handle matches before ENS-only matches, then orders each match group by profile level, highest first.",
         "An empty Visibility, drop, vote, or chat scope is labeled Public without a Current group heading; after a group is selected, the heading and its current eligible identity count are shown.",
         "A selected saved access group shows its current eligible identity count; View members opens a paginated, searchable member browser without leaving wave creation.",
@@ -3158,6 +3159,7 @@
         "Group creation requires the relevant connected profile permissions.",
         "Groups can be used later in workflows such as wave access or participation settings.",
         "Include and exclude identity search ranks exact, prefix, and substring profile-handle matches before ENS-only matches, then orders each match group by profile level, highest first.",
+        "Across group cards, group details, Wave configuration, member previews, and draft criteria summaries, REP and NIC identity wallets are shown as profile handles when available; identities without a resolvable handle remain visible as wallets.",
         "Publishing a replacement for a group used by a Wave is rejected if it would leave any active Drop, Vote, Chat, or Admins group member outside that Wave's Visibility group."
       ],
       "canonical_path": "/network/groups",

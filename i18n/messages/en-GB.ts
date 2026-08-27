@@ -484,6 +484,79 @@ export const EN_GB_MESSAGES = {
     "Create a new group or choose an existing group.",
   "waves.create.groups.dialog.changeDescription":
     "Create a new group or choose a different existing group.",
+  "waves.create.groups.identities": "Identities",
+  "waves.create.groups.actions.editCriteria": "Edit criteria",
+  "waves.create.groups.inlineIdentities.modeLabel": "Identity treatment",
+  "waves.create.groups.inlineIdentities.included.label": "Included",
+  "waves.create.groups.inlineIdentities.included.searchLabel":
+    "Find an identity to include",
+  "waves.create.groups.inlineIdentities.included.searchPlaceholder":
+    "Search identities to include...",
+  "waves.create.groups.inlineIdentities.included.emptyHelper":
+    "No identities are explicitly included.",
+  "waves.create.groups.inlineIdentities.excluded.label": "Excluded",
+  "waves.create.groups.inlineIdentities.excluded.searchLabel":
+    "Find an identity to exclude",
+  "waves.create.groups.inlineIdentities.excluded.searchPlaceholder":
+    "Search identities to exclude...",
+  "waves.create.groups.inlineIdentities.excluded.emptyHelper":
+    "No identities are explicitly excluded.",
+  "waves.create.groups.inlineIdentities.includeMe": "Include me",
+  "waves.create.groups.inlineIdentities.sources.emma.title": "EMMA",
+  "waves.create.groups.inlineIdentities.sources.emma.description":
+    "Add every wallet from one of your EMMA allowlists.",
+  "waves.create.groups.inlineIdentities.sources.emma.searchLabel":
+    "Search allowlists",
+  "waves.create.groups.inlineIdentities.sources.emma.searchLoading":
+    "Loading allowlists...",
+  "waves.create.groups.inlineIdentities.sources.emma.searchEmpty":
+    "No allowlists found",
+  "waves.create.groups.inlineIdentities.sources.emma.empty":
+    "No allowlist added.",
+  "waves.create.groups.inlineIdentities.sources.emma.loading":
+    "Adding allowlist identities...",
+  "waves.create.groups.inlineIdentities.sources.emma.load": "Load allowlist",
+  "waves.create.groups.inlineIdentities.sources.emma.error":
+    "Couldn't load this allowlist. Try again.",
+  "waves.create.groups.inlineIdentities.sources.emma.authenticationRequired":
+    "Connect your wallet to load this allowlist.",
+  "waves.create.groups.inlineIdentities.sources.emma.remove":
+    "Remove EMMA allowlist",
+  "waves.create.groups.inlineIdentities.sources.csv.title": "CSV file",
+  "waves.create.groups.inlineIdentities.sources.csv.description":
+    "Import Ethereum wallets from a CSV file.",
+  "waves.create.groups.inlineIdentities.sources.csv.dropLabel":
+    "Drop a CSV file here, or choose a file",
+  "waves.create.groups.inlineIdentities.sources.csv.includeInputLabel":
+    "Choose a CSV file of identities to include",
+  "waves.create.groups.inlineIdentities.sources.csv.excludeInputLabel":
+    "Choose a CSV file of identities to exclude",
+  "waves.create.groups.inlineIdentities.sources.csv.invalidFile":
+    "Choose a CSV file.",
+  "waves.create.groups.inlineIdentities.sources.csv.readError":
+    "Couldn't read this file. Try another CSV file.",
+  "waves.create.groups.inlineIdentities.sources.csv.noWallets":
+    "No valid Ethereum wallet addresses were found.",
+  "waves.create.groups.inlineIdentities.sources.csv.empty":
+    "No CSV file added.",
+  "waves.create.groups.inlineIdentities.sources.csv.remove": "Remove CSV file",
+  "waves.create.groups.inlineIdentities.sources.count.one":
+    "{count} identity added",
+  "waves.create.groups.inlineIdentities.sources.count.other":
+    "{count} identities added",
+  "waves.create.groups.inlineIdentities.sources.total.included.one":
+    "{count} unique identity included",
+  "waves.create.groups.inlineIdentities.sources.total.included.other":
+    "{count} unique identities included",
+  "waves.create.groups.inlineIdentities.sources.total.excluded.one":
+    "{count} unique identity excluded",
+  "waves.create.groups.inlineIdentities.sources.total.excluded.other":
+    "{count} unique identities excluded",
+  "waves.create.groups.inlineIdentities.sources.includeLimit":
+    "A group can include at most {limit} identities.",
+  "waves.create.groups.inlineIdentities.sources.excludeLimit":
+    "A group can exclude at most {limit} identities.",
+  "waves.create.groups.inlineIdentities.sources.retry": "Try again",
   "waves.create.groups.members.currentCount.one": "{count} user",
   "waves.create.groups.members.currentCount.other": "{count} users",
   "waves.create.groups.members.countLoading": "Checking current audience…",
@@ -556,6 +629,12 @@ export const EN_GB_MESSAGES = {
   "waves.create.groups.members.criteria.excluded.other":
     "{count} explicitly excluded users",
   "waves.create.groups.members.criteria.grant": "xTDH grant {grantId}",
+  "waves.create.groups.members.criteria.grant.collection":
+    "xTDH grant for {collectionName}",
+  "waves.create.groups.members.criteria.grant.selected": "Selected xTDH grant",
+  "waves.create.groups.xtdhGrant.change": "Change grant",
+  "waves.create.groups.xtdhGrant.cancelChange": "Cancel change",
+  "waves.create.groups.xtdhGrant.remove": "Remove grant",
   "waves.create.groups.validation.checking": "Checking group access…",
   "waves.create.groups.validation.unavailableTitle":
     "Couldn't verify group access.",

@@ -8,6 +8,15 @@ import { ApiGroupOwnsNftNameEnum } from "@/generated/models/ApiGroupOwnsNft";
 import { ApiXTdhGrantStatus } from "@/generated/models/ApiXTdhGrantStatus";
 import { ApiXTdhGrantTargetTokenMode } from "@/generated/models/ApiXTdhGrantTargetTokenMode";
 import { GroupDescriptionType } from "@/entities/IGroup";
+import { useGroupCriteriaIdentityLabels } from "@/hooks/useGroupCriteriaIdentityLabels";
+
+jest.mock("@/hooks/useGroupCriteriaIdentityLabels", () => ({
+  useGroupCriteriaIdentityLabels: jest.fn(),
+}));
+
+const useGroupCriteriaIdentityLabelsMock = jest.mocked(
+  useGroupCriteriaIdentityLabels
+);
 
 jest.mock(
   "@/components/groups/page/list/card/GroupCardConfig",
@@ -27,6 +36,10 @@ const emptyGroupDescription = {
 };
 
 describe("GroupCardConfigs", () => {
+  beforeEach(() => {
+    useGroupCriteriaIdentityLabelsMock.mockReturnValue({});
+  });
+
   it("shows default manual list hint when group undefined", () => {
     const { getByTestId } = render(
       <GroupCardConfigs group={undefined as any} />
@@ -69,6 +82,34 @@ describe("GroupCardConfigs", () => {
     expect(
       getByTestId(`config-${GroupDescriptionType.WALLETS}`)
     ).toHaveTextContent("7");
+  });
+
+  it("shows a resolved handle instead of a wallet in identity criteria", () => {
+    const wallet = "0xfd22004806a6846ea67ad883356be810f0428793";
+    useGroupCriteriaIdentityLabelsMock.mockReturnValue({
+      [wallet]: "pinkapewife",
+    });
+    const group: any = {
+      group: {
+        ...emptyGroupDescription,
+        rep: {
+          min: 1,
+          max: null,
+          category: null,
+          user_identity: wallet,
+          direction: ApiGroupFilterDirection.Received,
+        },
+      },
+    };
+
+    const { getByTestId } = render(<GroupCardConfigs group={group} />);
+
+    expect(getByTestId(`config-${GroupDescriptionType.REP}`)).toHaveTextContent(
+      "from identity: pinkapewife"
+    );
+    expect(
+      getByTestId(`config-${GroupDescriptionType.REP}`)
+    ).not.toHaveTextContent(wallet);
   });
 
   it("labels internal NFT requirements", () => {

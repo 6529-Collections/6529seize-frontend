@@ -249,7 +249,9 @@ describe("CreateWaveOutcomesManual", () => {
       const mockOnOutcome = await submitPositions("3-1");
 
       expect(
-        screen.getByText("Range 3-1 is backwards — put the lower position first")
+        screen.getByText(
+          "Range 3-1 is backwards — put the lower position first"
+        )
       ).toBeInTheDocument();
       expect(mockOnOutcome).not.toHaveBeenCalled();
     });
@@ -342,7 +344,9 @@ describe("CreateWaveOutcomesManual", () => {
       const mockOnOutcome = await submitPositions("1-3,9-5");
 
       expect(
-        screen.getByText("Range 9-5 is backwards — put the lower position first")
+        screen.getByText(
+          "Range 9-5 is backwards — put the lower position first"
+        )
       ).toBeInTheDocument();
       expect(mockOnOutcome).not.toHaveBeenCalled();
     });
