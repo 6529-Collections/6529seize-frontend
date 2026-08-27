@@ -69,6 +69,24 @@ const createParams = ({
 });
 
 describe("useStormPartActions", () => {
+  it("starts an empty storm without creating a placeholder part", async () => {
+    const expandMentionAliases = jest.fn();
+    const params = {
+      ...createParams({ expandMentionAliases }),
+      canAddPart: false,
+    };
+    const { result } = renderHook(() => useStormPartActions(params));
+
+    await act(async () => {
+      await result.current.breakIntoStorm();
+    });
+
+    expect(expandMentionAliases).not.toHaveBeenCalled();
+    expect(params.finalizeAndAddDropPartDraft).not.toHaveBeenCalled();
+    expect(params.setIsStormMode).toHaveBeenCalledWith(true);
+    expect(params.collapseOptions).toHaveBeenCalledTimes(1);
+  });
+
   it("expands mention aliases before finalizing the first storm part", async () => {
     const expandMentionAliases = jest.fn(async () => ({
       completed: true,
