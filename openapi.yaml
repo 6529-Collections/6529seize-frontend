@@ -2014,6 +2014,33 @@ paths:
         "403":
           description: Moderator access required
   /content-moderation/profiles/{profile_id}/status:
+    get:
+      tags:
+        - ContentModeration
+      summary: Get the public moderation status of a profile.
+      operationId: getPublicContentModerationProfileStatus
+      security: []
+      parameters:
+        - name: profile_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Current public profile moderation status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiContentModerationProfileStatusResponse"
+        "404":
+          description: Profile not found
+      x-6529-router:
+        enabled: true
+        auth: none
+        handler:
+          import: "@/api/content-moderation/get-public-profile-status.handler"
+          name: handleGetPublicContentModerationProfileStatus
     post:
       tags:
         - ContentModeration
@@ -15943,6 +15970,57 @@ components:
       enum:
         - boosted
         - unboosted
+    ApiContentModerationAuditEntry:
+      type: object
+      required:
+        - id
+        - created_at
+        - actor_profile_id
+        - actor_handle
+        - actor_pfp
+        - action
+        - target_drop_id
+        - target_profile_id
+        - previous_state
+        - new_state
+        - reason
+        - metadata
+      properties:
+        id:
+          type: string
+        created_at:
+          type: integer
+          format: int64
+        actor_profile_id:
+          type: string
+          nullable: true
+        actor_handle:
+          type: string
+          nullable: true
+        actor_pfp:
+          type: string
+          nullable: true
+        action:
+          type: string
+        target_drop_id:
+          type: string
+          nullable: true
+        target_profile_id:
+          type: string
+          nullable: true
+        previous_state:
+          type: string
+          nullable: true
+        new_state:
+          type: string
+          nullable: true
+        reason:
+          type: string
+          nullable: true
+        metadata:
+          type: object
+          nullable: true
+          additionalProperties: true
     ApiContentModerationDropDecisionRequest:
       type: object
       required:
@@ -16124,8 +16202,7 @@ components:
         history:
           type: array
           items:
-            type: object
-            additionalProperties: true
+            $ref: "#/components/schemas/ApiContentModerationAuditEntry"
     ApiContentModerationRecommendation:
       type: string
       enum:

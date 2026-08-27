@@ -100,6 +100,61 @@ describe("ContentModerationPageClient pagination", () => {
     expect(await screen.findByText("Reported by @reporter1")).toBeVisible();
   });
 
+  it("attributes each state-history action to its actor", async () => {
+    const item = createQueueItem(1);
+    item.history = [
+      {
+        id: "audit-1",
+        created_at: Date.UTC(2026, 7, 24, 11, 0),
+        actor_profile_id: "moderator-2",
+        actor_handle: "watcher",
+        actor_pfp: "https://example.com/watcher.png",
+        action: "CONTENT_REPORTED",
+        target_drop_id: item.drop_id,
+        target_profile_id: null,
+        previous_state: null,
+        new_state: null,
+        reason: "Reported for review",
+        metadata: null,
+      },
+      {
+        id: "audit-2",
+        created_at: Date.UTC(2026, 7, 24, 11, 1),
+        actor_profile_id: "moderator-2",
+        actor_handle: "watcher",
+        actor_pfp: null,
+        action: "DROP_HIDDEN",
+        target_drop_id: item.drop_id,
+        target_profile_id: null,
+        previous_state: "SHOWN",
+        new_state: "HIDDEN",
+        reason: null,
+        metadata: null,
+      },
+    ];
+    mockFetchContentModerationQueue.mockResolvedValue([item]);
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <ContentModerationPageClient />
+      </QueryClientProvider>
+    );
+
+    await userEvent.click(await screen.findByText("State history (2)"));
+
+    expect(screen.getByText("Content Reported")).toBeVisible();
+    expect(screen.getByText("Drop Hidden")).toBeVisible();
+    expect(screen.getAllByRole("link", { name: "@watcher" })).toHaveLength(2);
+    screen
+      .getAllByRole("link", { name: "@watcher" })
+      .forEach((link) => expect(link).toHaveAttribute("href", "/watcher"));
+    expect(screen.getByText("Shown → Hidden")).toBeVisible();
+    expect(screen.queryByText("moderator-2")).not.toBeInTheDocument();
+  });
+
   it("shows a neutral permission check while profile state is hydrating", () => {
     mockFetchingProfile = true;
     const queryClient = new QueryClient({

@@ -14,6 +14,8 @@ import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useIdentity } from "@/hooks/useIdentity";
 import { useProfileBlockState } from "@/hooks/content-moderation/useProfileBlockState";
 
+let mockIsSuspended = false;
+
 jest.mock("next/dynamic", () => () => () => <div />);
 jest.mock(
   "@/components/user/user-page-header/banner/UserPageHeaderBanner",
@@ -137,6 +139,14 @@ jest.mock("@/hooks/content-moderation/useProfileBlockState", () => ({
     unblock: jest.fn(),
   })),
 }));
+jest.mock(
+  "@/hooks/content-moderation/usePublicProfileModerationStatus",
+  () => ({
+    usePublicProfileModerationStatus: () => ({
+      isSuspended: mockIsSuspended,
+    }),
+  })
+);
 jest.mock("@/hooks/useIdentity", () => ({ useIdentity: jest.fn() }));
 jest.mock("next/navigation", () => ({
   useParams: jest.fn(),
@@ -168,6 +178,7 @@ const proxiedOwnProfileAuth = {
 
 describe("UserPageHeader", () => {
   beforeEach(() => {
+    mockIsSuspended = false;
     (useIdentity as jest.Mock).mockReturnValue({ profile });
     (useProfileBlockState as jest.Mock).mockReturnValue({
       isBlocked: false,
@@ -270,6 +281,43 @@ describe("UserPageHeader", () => {
     );
     fireEvent.click(within(dialog).getByRole("button", { name: "Unblock" }));
     await waitFor(() => expect(unblock).toHaveBeenCalledTimes(1));
+  });
+
+  it("shows public suspended and viewer-specific blocked states independently", () => {
+    mockIsSuspended = true;
+    (useProfileBlockState as jest.Mock).mockReturnValue({
+      isBlocked: true,
+      canManage: true,
+      isLoading: false,
+      isBlocking: false,
+      isUnblocking: false,
+      block: jest.fn(),
+      unblock: jest.fn(),
+    });
+
+    render(
+      <AuthContext.Provider value={auth}>
+        <UserPageHeaderClient
+          profile={{ ...profile, id: "profile-bob" }}
+          handleOrWallet="bob"
+          fallbackMainAddress="0x1"
+          defaultBanner1="#000000"
+          defaultBanner2="#111111"
+          initialStatements={[]}
+          profileEnabledAt="2024-01-01T00:00:00Z"
+          followersCount={5}
+          cmsWebsiteHref={null}
+        />
+      </AuthContext.Provider>
+    );
+
+    expect(screen.getByText("Suspended")).toBeVisible();
+    expect(screen.getByText("Suspended").parentElement).toHaveClass(
+      "tw-border-amber-400/35",
+      "tw-bg-amber-400/10",
+      "tw-text-amber-300"
+    );
+    expect(screen.getByText("Blocked")).toBeVisible();
   });
 
   it("offers profile blocking from the action menu and confirms it", async () => {

@@ -1,6 +1,7 @@
 import ContentModerationDropGate from "@/components/content-moderation/ContentModerationDropGate";
 import ReportDropModal from "@/components/content-moderation/ReportDropModal";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiContentModerationReportResponse } from "@/generated/models/ApiContentModerationReportResponse";
 import { ApiDropModerationStatus } from "@/generated/models/ApiDropModerationStatus";
 import {
   blockProfile,
@@ -266,7 +267,9 @@ describe("ReportDropModal", () => {
   });
 
   it("combines reporting and personal choices in the report request", async () => {
-    renderModal();
+    const deferred = createDeferred<ApiContentModerationReportResponse>();
+    jest.mocked(reportDrop).mockReturnValue(deferred.promise);
+    const { onClose } = renderModal();
 
     await userEvent.click(
       screen.getByRole("checkbox", { name: "Report post" })
@@ -284,6 +287,18 @@ describe("ReportDropModal", () => {
       })
     );
     expect(hideDrop).not.toHaveBeenCalled();
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    expect(screen.getByText("Reporting…")).toBeVisible();
+    expect(getDropHiddenOverride("viewer-1", "drop-1")).toBeUndefined();
+    expect(onClose).not.toHaveBeenCalled();
+
+    deferred.resolve({
+      id: "report-1",
+      status: "OPEN" as never,
+      drop_status: ApiDropModerationStatus.Visible,
+    });
+
+    await waitFor(() => expect(onClose).toHaveBeenCalled());
     expect(getDropHiddenOverride("viewer-1", "drop-1")).toBe(true);
   });
 

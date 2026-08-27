@@ -46,6 +46,7 @@ import {
   getSnapshotAssets,
   getSnapshotContent,
 } from "./content-moderation-page.helpers";
+import ContentModerationHistory from "./ContentModerationHistory";
 import SuspendedProfileCard from "./SuspendedProfileCard";
 
 type ModerationTab = "OPEN" | "RESOLVED" | "SUSPENDED";
@@ -318,62 +319,7 @@ function ModerationQueueCard({
         )}
       </details>
 
-      <details className="tw-mt-4 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900/30 tw-p-4">
-        <summary className="tw-cursor-pointer tw-text-sm tw-font-semibold tw-text-iron-300">
-          {t(locale, "contentModeration.moderator.history", {
-            count: formatInteger(locale, item.history.length),
-          })}
-        </summary>
-        {item.history.length === 0 ? (
-          <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-text-iron-500">
-            {t(locale, "contentModeration.moderator.noHistory")}
-          </p>
-        ) : (
-          <ol className="tw-mb-0 tw-mt-3 tw-space-y-3 tw-pl-5">
-            {item.history.map((entry: unknown, index) => {
-              const entryRecord = getRecord(entry);
-              if (entryRecord === null) return null;
-              const action = formatEvidence(
-                entryRecord["action"] ??
-                  t(locale, "contentModeration.moderator.stateChanged")
-              );
-              const previous = entryRecord["previous_state"];
-              const next = entryRecord["new_state"];
-              const entryReason = entryRecord["reason"];
-              const actor = entryRecord["actor_profile_id"];
-              const timestamp = formatTimestamp(
-                entryRecord["created_at"],
-                locale
-              );
-              return (
-                <li
-                  key={`${item.id}-history-${index}`}
-                  className="tw-text-sm tw-text-iron-400"
-                >
-                  <span className="tw-font-semibold tw-text-iron-300">
-                    {formatContentModerationEnum(action)}
-                  </span>
-                  {typeof previous === "string" && typeof next === "string" && (
-                    <span>{` — ${formatContentModerationEnum(previous)} → ${formatContentModerationEnum(next)}`}</span>
-                  )}
-                  {typeof entryReason === "string" && entryReason && (
-                    <p className="tw-mb-0 tw-mt-1 tw-text-iron-500">
-                      {entryReason}
-                    </p>
-                  )}
-                  {(timestamp !== null || typeof actor === "string") && (
-                    <p className="tw-mb-0 tw-mt-1 tw-text-xs tw-text-iron-600">
-                      {[timestamp, typeof actor === "string" ? actor : null]
-                        .filter(Boolean)
-                        .join(" · ")}
-                    </p>
-                  )}
-                </li>
-              );
-            })}
-          </ol>
-        )}
-      </details>
+      <ContentModerationHistory itemId={item.id} history={item.history} />
 
       {isResolved ? (
         <div className="tw-mt-5 tw-rounded-xl tw-bg-iron-900/55 tw-p-4">

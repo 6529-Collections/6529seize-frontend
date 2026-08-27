@@ -242,6 +242,33 @@ describe("ContentModerationDropGate", () => {
     expect(unhideDrop).not.toHaveBeenCalled();
   });
 
+  it("does not repeat Hidden when a hidden post already has report status", () => {
+    renderGate(
+      <ContentModerationDropGate
+        drop={createDrop({
+          viewer_context: {
+            author_blocked: false,
+            drop_hidden: true,
+            report_status: ApiContentModerationReportStatus.Open,
+          },
+          moderation: {
+            status: ApiDropModerationStatus.Visible,
+            can_view: true,
+          },
+        })}
+      >
+        <p>Reported and hidden post</p>
+      </ContentModerationDropGate>
+    );
+
+    expect(
+      screen.getByRole("button", { name: "Reported · Awaiting review" })
+    ).toBeVisible();
+    expect(screen.queryByText("Hidden")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Reveal" })).toBeVisible();
+    expect(screen.getByRole("button", { name: "Unhide" })).toBeVisible();
+  });
+
   it("restores the exact hidden override when unhide fails", async () => {
     jest.mocked(unhideDrop).mockRejectedValueOnce(new Error("request failed"));
     renderGate(

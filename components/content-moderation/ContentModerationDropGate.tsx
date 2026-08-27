@@ -54,6 +54,40 @@ interface ContentModerationDropGateProps {
 
 const AUTHENTICATION_CANCELLED_MESSAGE = "Authentication was cancelled";
 
+const getEffectiveVisibility = ({
+  isRevealed,
+  optimisticHiddenState,
+  visibility,
+}: {
+  readonly isRevealed: boolean;
+  readonly optimisticHiddenState: boolean | undefined;
+  readonly visibility: ReturnType<
+    typeof useContentModerationVisibility
+  >["visibility"];
+}) => {
+  if (visibility.kind === "global") {
+    return visibility;
+  }
+  if (isRevealed) {
+    return { kind: "visible" } as const;
+  }
+  if (visibility.kind === "blocked") {
+    return visibility;
+  }
+  if (optimisticHiddenState === true) {
+    return { kind: "hidden" } as const;
+  }
+  if (optimisticHiddenState === false && visibility.kind === "hidden") {
+    return { kind: "visible" } as const;
+  }
+  return visibility;
+};
+
+const getGlobalModerationStatus = (
+  visibility: ReturnType<typeof getEffectiveVisibility>
+): ApiDropModerationStatus | null =>
+  visibility.kind === "global" ? visibility.status : null;
+
 function PersonalModerationAction({
   label,
   tooltip,
@@ -235,26 +269,13 @@ export default function ContentModerationDropGate({
       setOptimisticHiddenState(previous);
     };
   }, []);
-  const effectiveVisibility = (() => {
-    if (visibility.kind === "global") {
-      return visibility;
-    }
-    if (isRevealed) {
-      return { kind: "visible" } as const;
-    }
-    if (visibility.kind === "blocked") {
-      return visibility;
-    }
-    if (optimisticHiddenState === true) {
-      return { kind: "hidden" } as const;
-    }
-    if (optimisticHiddenState === false && visibility.kind === "hidden") {
-      return { kind: "visible" } as const;
-    }
-    return visibility;
-  })();
+  const effectiveVisibility = getEffectiveVisibility({
+    isRevealed,
+    optimisticHiddenState,
+    visibility,
+  });
   const globalModerationStatus =
-    effectiveVisibility.kind === "global" ? effectiveVisibility.status : null;
+    getGlobalModerationStatus(effectiveVisibility);
   const openReportDetails = useCallback(() => setIsReportModalOpen(true), []);
   const gateContext = useMemo(
     () => ({
@@ -398,14 +419,17 @@ export default function ContentModerationDropGate({
         testId="content-moderation-tombstone-hidden"
         controls={
           <>
-            {reportStatus !== null && (
+            {reportStatus !== null ? (
               <>
                 <ContentModerationReportStatusButton compact />
                 <span aria-hidden="true">·</span>
               </>
+            ) : (
+              <>
+                <span>{t(locale, "contentModeration.tombstone.hidden")}</span>
+                <span aria-hidden="true">·</span>
+              </>
             )}
-            <span>{t(locale, "contentModeration.tombstone.hidden")}</span>
-            <span aria-hidden="true">·</span>
             <PersonalModerationAction
               label={t(locale, "contentModeration.actions.reveal")}
               tooltip={t(locale, "contentModeration.tooltips.revealHidden")}

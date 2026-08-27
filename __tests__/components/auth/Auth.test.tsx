@@ -919,6 +919,142 @@ describe("Auth component", () => {
       ).not.toBeInTheDocument();
     });
 
+    it("replaces an expired legacy session during an explicit authenticated action", async () => {
+      const validAddress = "0x1111111111111111111111111111111111111111";
+      walletAddress = validAddress;
+      enableAuthMigrationDeadline("2000-01-01T00:00:00.000Z");
+      const authUtils =
+        require("@/services/auth/auth.utils") as typeof AuthUtilsModule;
+      const mockGetAuthJwt = jest.mocked(authUtils.getAuthJwt);
+      const mockRemoveAuthJwt = jest.mocked(authUtils.removeAuthJwt);
+      const mockValidateJwt =
+        require("@/services/auth/jwt-validation.utils").validateJwt;
+      const sessionV2 = require("@/services/auth/session-v2.utils");
+      const sessionResponse = {
+        client_type: "web",
+        address: validAddress,
+        role: null,
+        access_token: TEST_SESSION_VALUE,
+        access_token_expires_at: "2026-06-10T00:00:00.000Z",
+      };
+      let currentJwt: string | null = "expired-legacy-jwt";
+      mockGetAuthJwt.mockImplementation(() => currentJwt);
+      mockRemoveAuthJwt.mockImplementation(async () => {
+        currentJwt = null;
+      });
+      mockValidateJwt.mockResolvedValue({
+        isValid: false,
+        wasCancelled: false,
+        requiresSessionUpgrade: true,
+      });
+      sessionV2.loginWithSessionV2.mockResolvedValue(sessionResponse);
+      sessionV2.persistSessionResponse.mockImplementation(async () => {
+        currentJwt = TEST_SESSION_VALUE;
+        return true;
+      });
+
+      const Child = () => {
+        const { requestAuth } = React.useContext(AuthContext);
+        const [result, setResult] = React.useState("pending");
+        return (
+          <>
+            <button
+              type="button"
+              onClick={() => {
+                void requestAuth().then(({ success }) => {
+                  setResult(String(success));
+                });
+              }}
+              data-testid="expired-upgrade-action"
+            >
+              auth
+            </button>
+            <span data-testid="expired-upgrade-action-result">{result}</span>
+          </>
+        );
+      };
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <Child />
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      await userEvent.click(screen.getByTestId("expired-upgrade-action"));
+
+      await waitFor(() =>
+        expect(
+          screen.getByTestId("expired-upgrade-action-result")
+        ).toHaveTextContent("true")
+      );
+      expect(mockRemoveAuthJwt).toHaveBeenCalled();
+      expect(sessionV2.getSessionNonce).toHaveBeenCalledWith({
+        signerAddress: validAddress,
+      });
+      expect(mockSignMessage).toHaveBeenCalledWith("sign this message exactly");
+      expect(sessionV2.loginWithSessionV2).toHaveBeenCalledWith({
+        serverSignature: "server-signature",
+        clientSignature: "0xsignature",
+        signerAddress: validAddress,
+        role: null,
+      });
+      expect(mockSeizeDisconnect).not.toHaveBeenCalled();
+    });
+
+    it("fails an explicit action visibly when session validation throws", async () => {
+      const validAddress = "0x1111111111111111111111111111111111111111";
+      walletAddress = validAddress;
+      const mockValidateJwt =
+        require("@/services/auth/jwt-validation.utils").validateJwt;
+      const toast = require("react-toastify").toast;
+      mockValidateJwt.mockRejectedValue(new Error("validation unavailable"));
+
+      const Child = () => {
+        const { requestAuth } = React.useContext(AuthContext);
+        const [result, setResult] = React.useState("pending");
+        return (
+          <>
+            <button
+              type="button"
+              onClick={() => {
+                void requestAuth().then(({ success }) => {
+                  setResult(String(success));
+                });
+              }}
+            >
+              auth with validation failure
+            </button>
+            <span>{result}</span>
+          </>
+        );
+      };
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <Child />
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      await userEvent.click(
+        screen.getByRole("button", { name: "auth with validation failure" })
+      );
+
+      await waitFor(() => expect(screen.getByText("false")).toBeVisible());
+      expect(toast).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ type: "error" })
+      );
+      expect(mockSignMessage).not.toHaveBeenCalled();
+    });
+
     it("reauthenticates invalid legacy auth during the session-v2 grace window", async () => {
       const validAddress = "0x1111111111111111111111111111111111111111";
       walletAddress = validAddress;
