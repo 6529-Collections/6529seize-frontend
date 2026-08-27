@@ -16272,12 +16272,23 @@ components:
       additionalProperties: false
       required:
         - wave_id
+        - wave_name
+        - wave_picture
+        - wave_is_direct_message
         - title
         - parts
       properties:
         wave_id:
           type: string
           nullable: true
+        wave_name:
+          type: string
+          nullable: true
+        wave_picture:
+          type: string
+          nullable: true
+        wave_is_direct_message:
+          type: boolean
         title:
           type: string
           nullable: true

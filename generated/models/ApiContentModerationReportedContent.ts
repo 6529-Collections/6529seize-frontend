@@ -16,6 +16,9 @@ import { HttpFile } from '../http/http';
 
 export class ApiContentModerationReportedContent {
     'wave_id': string | null;
+    'wave_name': string | null;
+    'wave_picture': string | null;
+    'wave_is_direct_message': boolean;
     'title': string | null;
     'parts': Array<ApiContentModerationReportedContentPart>;
 
@@ -28,6 +31,24 @@ export class ApiContentModerationReportedContent {
             "name": "wave_id",
             "baseName": "wave_id",
             "type": "string",
+            "format": ""
+        },
+        {
+            "name": "wave_name",
+            "baseName": "wave_name",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "wave_picture",
+            "baseName": "wave_picture",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "wave_is_direct_message",
+            "baseName": "wave_is_direct_message",
+            "type": "boolean",
             "format": ""
         },
         {

@@ -540,28 +540,38 @@ export default function ContentModerationPageClient() {
   const tabs: ReadonlyArray<{
     readonly id: ModerationTab;
     readonly label: string;
+    readonly compactLabel: string;
     readonly count: number;
   }> = [
     {
       id: "OPEN",
       label: t(locale, "contentModeration.moderator.tabs.open"),
+      compactLabel: t(locale, "contentModeration.moderator.tabs.openCompact"),
       count: accessQuery.data?.open_report_count ?? 0,
     },
     {
       id: "RESOLVED",
       label: t(locale, "contentModeration.moderator.tabs.resolved"),
+      compactLabel: t(
+        locale,
+        "contentModeration.moderator.tabs.resolvedCompact"
+      ),
       count: accessQuery.data?.resolved_report_count ?? 0,
     },
     {
       id: "SUSPENDED",
       label: t(locale, "contentModeration.moderator.tabs.suspended"),
+      compactLabel: t(
+        locale,
+        "contentModeration.moderator.tabs.suspendedCompact"
+      ),
       count: accessQuery.data?.suspended_profile_count ?? 0,
     },
   ];
 
   return (
     <main className="tailwind-scope tw-min-h-dvh tw-w-full tw-bg-black tw-px-4 tw-py-8 sm:tw-px-6 sm:tw-py-12">
-      <h1 className="tw-m-0 tw-text-3xl tw-font-semibold tw-tracking-tight tw-text-iron-50">
+      <h1 className="tw-m-0 tw-text-2xl tw-font-semibold tw-tracking-tight tw-text-iron-50 sm:tw-text-3xl">
         {t(locale, "contentModeration.moderator.title")}
       </h1>
       <p className="tw-mb-0 tw-mt-3 tw-max-w-2xl tw-text-base tw-leading-7 tw-text-iron-400">
@@ -582,7 +592,7 @@ export default function ContentModerationPageClient() {
           <div
             role="tablist"
             aria-label={t(locale, "contentModeration.moderator.tabs.label")}
-            className="tw-mt-8 tw-flex tw-flex-wrap tw-gap-2 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800"
+            className="tw-mt-8 tw-flex tw-flex-nowrap tw-gap-0 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 sm:tw-flex-wrap sm:tw-gap-2"
           >
             {tabs.map((tab) => (
               <button
@@ -590,15 +600,24 @@ export default function ContentModerationPageClient() {
                 type="button"
                 role="tab"
                 aria-selected={activeTab === tab.id}
+                aria-label={`${tab.label} (${formatInteger(locale, tab.count)})`}
                 onClick={() => setActiveTab(tab.id)}
-                className={`tw-cursor-pointer tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-bg-transparent tw-px-3 tw-py-3 tw-text-sm tw-font-semibold focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 ${
+                className={`tw-min-w-0 tw-flex-1 tw-cursor-pointer tw-whitespace-nowrap tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-bg-transparent tw-px-1 tw-py-3 tw-text-sm tw-font-semibold focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 sm:tw-flex-none sm:tw-px-3 ${
                   activeTab === tab.id
                     ? "tw-border-primary-400 tw-text-iron-50"
                     : "tw-border-transparent tw-text-iron-400 hover:tw-text-iron-100"
                 }`}
               >
-                {tab.label}
-                <span className="tw-ml-2 tw-rounded-full tw-bg-iron-800 tw-px-2 tw-py-0.5 tw-text-xs tw-text-iron-200">
+                <span aria-hidden="true" className="sm:tw-hidden">
+                  {tab.compactLabel}
+                </span>
+                <span aria-hidden="true" className="tw-hidden sm:tw-inline">
+                  {tab.label}
+                </span>
+                <span
+                  aria-hidden="true"
+                  className="tw-ml-1.5 tw-rounded-full tw-bg-iron-800 tw-px-1.5 tw-py-0.5 tw-text-xs tw-text-iron-200 sm:tw-ml-2 sm:tw-px-2"
+                >
                   {formatInteger(locale, tab.count)}
                 </span>
               </button>

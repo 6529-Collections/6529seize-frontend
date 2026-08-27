@@ -45,6 +45,9 @@ const report = (
   drop_status: ApiDropModerationStatus.Visible,
   reported_content: {
     wave_id: "wave-1",
+    wave_name: "PRXT WAVE",
+    wave_picture: "https://example.com/wave.png",
+    wave_is_direct_message: false,
     title: null,
     parts: [
       {
@@ -109,6 +112,9 @@ describe("ReportsPreferencesSettings", () => {
         drop_status: ApiDropModerationStatus.ModeratorRemoved,
         reported_content: {
           wave_id: "wave-1",
+          wave_name: "PRXT WAVE",
+          wave_picture: "https://example.com/wave.png",
+          wave_is_direct_message: false,
           title: "Reported title",
           parts: [
             {
@@ -136,8 +142,12 @@ describe("ReportsPreferencesSettings", () => {
     expect(await screen.findByText("Removed reported message")).toBeVisible();
     expect(screen.getByText("Reported title")).toBeVisible();
     expect(screen.getByText("Media and files (2)")).toBeVisible();
+    expect(screen.getByRole("link", { name: "PRXT WAVE" })).toHaveAttribute(
+      "href",
+      "/waves/wave-1"
+    );
     expect(
-      screen.queryByRole("link", { name: "View in context" })
+      screen.queryByRole("link", { name: "View post in Wave" })
     ).not.toBeInTheDocument();
   });
 
@@ -147,8 +157,32 @@ describe("ReportsPreferencesSettings", () => {
     renderSettings();
 
     expect(
-      await screen.findByRole("link", { name: "View in context" })
+      await screen.findByRole("link", { name: "PRXT WAVE" })
+    ).toHaveAttribute("href", "/waves/wave-1");
+    expect(
+      screen.getByRole("link", { name: "View post in Wave" })
     ).toHaveAttribute("href", "/waves/wave-1?drop=drop-1");
+  });
+
+  it("links direct-message reports through the messages route", async () => {
+    jest.mocked(fetchMyContentModerationReports).mockResolvedValue([
+      report({
+        reported_content: {
+          ...report().reported_content,
+          wave_name: "Direct message",
+          wave_is_direct_message: true,
+        },
+      }),
+    ]);
+
+    renderSettings();
+
+    expect(
+      await screen.findByRole("link", { name: "Direct message" })
+    ).toHaveAttribute("href", "/messages/wave-1");
+    expect(
+      screen.getByRole("link", { name: "View post in Wave" })
+    ).toHaveAttribute("href", "/messages/wave-1?drop=drop-1");
   });
 
   it("allows an open report to be withdrawn", async () => {
