@@ -494,6 +494,8 @@ function useCreateWaveGroupInlinePanelController({
         ...("emmaWallets" in update ? (update.emmaWallets ?? []) : []),
         ...("uploadedWallets" in update ? (update.uploadedWallets ?? []) : []),
       ];
+      // A source replacement only moves wallets present in the new source. Wallets
+      // removed with the old source stay removed from the opposite side by design.
       const walletKeys = getWalletKeys(newlyAddedWallets);
 
       if (direction === "included") {

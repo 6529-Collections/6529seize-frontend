@@ -50,15 +50,17 @@ jest.mock("@/components/utils/input/emma/EmmaListSearch", () => ({
 const distributionPlanApiFetchMock = jest.mocked(distributionPlanApiFetch);
 const requestAuth = jest.fn().mockResolvedValue({ success: true });
 
-function renderSources(direction: "included" | "excluded" = "included") {
+function renderSources(
+  direction: "included" | "excluded" = "included",
+  initialSources: WalletSources = createEmptyInlineGroupWalletSources(),
+  connectedProfile: { readonly handle: string } | null = { handle: "tester" }
+) {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
 
   function Harness() {
-    const [sources, setSources] = useState<WalletSources>(() =>
-      createEmptyInlineGroupWalletSources()
-    );
+    const [sources, setSources] = useState<WalletSources>(() => initialSources);
     return (
       <CreateWaveInlineGroupWalletSources
         direction={direction}
@@ -75,7 +77,7 @@ function renderSources(direction: "included" | "excluded" = "included") {
       <AuthContext.Provider
         value={
           {
-            connectedProfile: { handle: "tester" },
+            connectedProfile,
             fetchingProfile: false,
             connectionStatus: ProfileConnectedStatus.HAVE_PROFILE,
             receivedProfileProxies: [],
@@ -124,6 +126,30 @@ describe("CreateWaveInlineGroupWalletSources", () => {
       screen.getByRole("button", { name: "Remove EMMA allowlist" })
     );
     expect(screen.getByText("No allowlist added.")).toBeInTheDocument();
+  });
+
+  it("offers an authentication retry for a restored allowlist while signed out", async () => {
+    renderSources(
+      "included",
+      {
+        ...createEmptyInlineGroupWalletSources(),
+        selectedAllowlist: {
+          id: "allowlist-1",
+          name: "Core contributors",
+          description: "Core contributors",
+          createdAt: 1,
+        },
+      },
+      null
+    );
+    const user = userEvent.setup();
+
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Couldn't load this allowlist. Try again."
+    );
+    await user.click(screen.getByRole("button", { name: "Try again" }));
+
+    await waitFor(() => expect(requestAuth).toHaveBeenCalledTimes(1));
   });
 
   it("imports wallets from the file picker and keeps the file name", async () => {

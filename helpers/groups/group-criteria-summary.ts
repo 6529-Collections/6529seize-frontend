@@ -380,14 +380,12 @@ export const getGroupCriteriaSummary = ({
   if (group.is_beneficiary_of_grant_id?.trim()) {
     const embeddedGrantCollectionName =
       "is_beneficiary_of_grant" in group
-        ? group.is_beneficiary_of_grant?.target_collection_name?.trim()
-        : null;
+        ? (group.is_beneficiary_of_grant?.target_collection_name?.trim() ?? "")
+        : "";
     parts.push(
       grantCriterionOverride ??
         t(locale, "waves.create.groups.members.criteria.grant", {
           grantId:
-            embeddedGrantCollectionName !== null &&
-            embeddedGrantCollectionName !== undefined &&
             embeddedGrantCollectionName.length > 0
               ? embeddedGrantCollectionName
               : group.is_beneficiary_of_grant_id.trim(),

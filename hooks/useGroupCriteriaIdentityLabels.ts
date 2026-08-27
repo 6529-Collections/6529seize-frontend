@@ -36,6 +36,7 @@ export function useGroupCriteriaIdentityLabels(
     [cicIdentity, repIdentity]
   );
   const identityQueries = useQueries({
+    // Criteria have exactly two identity-backed fields: REP and NIC.
     queries: identityWallets.map((wallet) => ({
       ...getIdentityQueryOptions({ handleOrWallet: wallet }),
       retry: false,

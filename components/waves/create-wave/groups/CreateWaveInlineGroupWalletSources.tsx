@@ -201,22 +201,17 @@ function EmmaWalletSource({
                 "waves.create.groups.inlineIdentities.sources.emma.error"
               )}
             </p>
-            {connectedProfile?.handle ? (
-              <button
-                type="button"
-                onClick={() => {
-                  if (sources.selectedAllowlist) {
-                    void loadAllowlist(sources.selectedAllowlist);
-                  }
-                }}
-                className="tw-mt-1 tw-border-0 tw-bg-transparent tw-p-0 tw-text-xs tw-font-semibold tw-text-primary-300 tw-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
-              >
-                {t(
-                  locale,
-                  "waves.create.groups.inlineIdentities.sources.retry"
-                )}
-              </button>
-            ) : null}
+            <button
+              type="button"
+              onClick={() => {
+                if (sources.selectedAllowlist) {
+                  void loadAllowlist(sources.selectedAllowlist);
+                }
+              }}
+              className="tw-mt-1 tw-border-0 tw-bg-transparent tw-p-0 tw-text-xs tw-font-semibold tw-text-primary-300 tw-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+            >
+              {t(locale, "waves.create.groups.inlineIdentities.sources.retry")}
+            </button>
           </div>
         ) : null}
         {sources.emmaWallets !== null ? (
