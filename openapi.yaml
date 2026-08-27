@@ -4367,15 +4367,21 @@ paths:
     get:
       tags:
         - Identities
-      summary: Search for identities
+      summary: Search or list identities
+      description: >-
+        When handle is supplied, exact and prefix matches are ranked before
+        other substring matches, with higher raw profile level first within each
+        match bucket. Without handle, identities are ordered by raw profile
+        level descending.
       operationId: searchIdentities
       parameters:
         - name: handle
-          description: At least 3 characters of a handle
+          description: At least 3 characters of a handle when supplied
           in: query
-          required: true
+          required: false
           schema:
             type: string
+            minLength: 3
         - name: wave_id
           description: Search only users who can view given wave
           in: query
@@ -4403,6 +4409,20 @@ paths:
           required: false
           schema:
             type: boolean
+        - name: classification
+          description: Filter by profile classification
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/ApiProfileClassification"
+        - name: subclassification
+          description: Filter by exact profile subclassification
+          in: query
+          required: false
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 255
       responses:
         "200":
           description: successful operation
@@ -4412,6 +4432,8 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/ApiIdentity"
+        "400":
+          description: Invalid handle, limit, classification, or subclassification
   /identities/{identity_key}:
     get:
       tags:
