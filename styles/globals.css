@@ -102,6 +102,9 @@
     .mobile-wrapper-dialog-overflow-content {
     overflow-y: auto;
   }
+  body.capacitor-native w3m-modal {
+    bottom: min(var(--native-keyboard-inset-bottom, 0px), 8rem);
+  }
   [data-pull-to-refresh-transform-root="true"]
     [data-pull-to-refresh-fixed-overlay="true"] {
     translate: 0 calc(var(--pull-to-refresh-fixed-overlay-offset, 0px) * -1);
