@@ -110,9 +110,12 @@ const CreateDropStormParts: FC<CreateDropStormPartsProps> = ({
 
     const partsList = partsListRef.current;
     if (partsList) {
-      partsList.scrollTop = partsList.scrollHeight;
+      partsList.scrollTo({
+        top: partsList.scrollHeight,
+        behavior: prefersReducedMotion ? "auto" : "smooth",
+      });
     }
-  }, [parts.length]);
+  }, [parts.length, prefersReducedMotion]);
 
   useEffect(() => {
     if (isConfirmingDiscard) {
@@ -154,7 +157,7 @@ const CreateDropStormParts: FC<CreateDropStormPartsProps> = ({
         className="create-drop-storm-surface -tw-mx-4 -tw-mt-2 tw-mb-3 tw-flex tw-min-h-0 tw-flex-col tw-border-b tw-border-l-2 tw-border-r-0 tw-border-t-0 tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-pb-2 tw-pl-3.5 tw-pr-4"
         style={{ borderLeftColor: "#406AFE" }}
       >
-        <header className="tw-flex tw-min-w-0 tw-items-start tw-justify-between tw-gap-3 tw-px-0 tw-py-2.5 sm:tw-items-center sm:tw-py-3">
+        <header className="tw-flex tw-min-w-0 tw-items-center tw-justify-between tw-gap-3 tw-px-0 tw-py-2.5 sm:tw-py-3">
           <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-2">
             <span className="tw-flex tw-h-8 tw-w-4 tw-flex-none tw-items-center tw-text-primary-300">
               <svg
@@ -270,36 +273,33 @@ const CreateDropStormParts: FC<CreateDropStormPartsProps> = ({
               </p>
             </li>
           )}
-          <AnimatePresence mode="popLayout" initial={false}>
-            {parts.map((part, partIndex) => (
-              <m.li
-                layout="position"
-                key={getPartKey(part, partIndex)}
-                initial={prefersReducedMotion ? false : { opacity: 0, y: 4 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -4 }}
-                transition={{ duration: prefersReducedMotion ? 0 : 0.18 }}
-              >
-                <CreateDropStormPart
-                  partIndex={partIndex}
-                  partsCount={parts.length}
-                  part={part}
-                  mentionedUsers={mentionedUsers}
-                  mentionedGroups={mentionedGroups}
-                  mentionedWaves={mentionedWaves}
-                  referencedNfts={referencedNfts}
-                  isEditing={editingPartIndex === partIndex}
-                  controlsDisabled={
-                    controlsDisabled || editingPartIndex !== null
-                  }
-                  canEdit={canEditParts}
-                  onEditPart={onEditPart}
-                  onMovePart={onMovePart}
-                  onRemovePart={onRemovePart}
-                />
-              </m.li>
-            ))}
-          </AnimatePresence>
+          {parts.map((part, partIndex) => (
+            <m.li
+              layout={prefersReducedMotion ? false : "position"}
+              key={getPartKey(part, partIndex)}
+              transition={{
+                layout: { duration: 0.2, ease: [0.2, 0, 0, 1] },
+              }}
+            >
+              <CreateDropStormPart
+                partIndex={partIndex}
+                partsCount={parts.length}
+                part={part}
+                mentionedUsers={mentionedUsers}
+                mentionedGroups={mentionedGroups}
+                mentionedWaves={mentionedWaves}
+                referencedNfts={referencedNfts}
+                isEditing={editingPartIndex === partIndex}
+                controlsDisabled={
+                  controlsDisabled || editingPartIndex !== null
+                }
+                canEdit={canEditParts}
+                onEditPart={onEditPart}
+                onMovePart={onMovePart}
+                onRemovePart={onRemovePart}
+              />
+            </m.li>
+          ))}
         </ol>
         {editingPartIndex !== null && (
           <footer className="tw-flex tw-items-center tw-justify-between tw-gap-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.025] tw-bg-black/10 tw-px-3 tw-py-2.5 sm:tw-px-4 sm:tw-py-3">

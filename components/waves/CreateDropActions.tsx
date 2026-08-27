@@ -393,20 +393,20 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                     className="tw-col-span-2 tw-col-start-2 tw-row-start-3 tw-mt-2 tw-overflow-hidden md:tw-col-span-1"
                   >
                     <div className="tw-rounded-2xl tw-border tw-border-white/10 tw-bg-iron-950/95 tw-p-2 tw-pl-0 tw-shadow-[0_12px_32px_rgba(0,0,0,0.28)]">
-                      <div className="tw-flex tw-flex-wrap tw-items-start tw-justify-start tw-gap-5">
+                      <div className="tw-flex tw-flex-wrap tw-items-start tw-justify-start tw-gap-6">
                         {isDropMode && (
                           <CompactActionButton
                             label={metadataLabel}
                             required={isRequiredMetadataMissing}
                             onClick={() => runCompactAction(onAddMetadataClick)}
-                            icon={<CodeBracketIcon className="tw-size-6" />}
+                            icon={<CodeBracketIcon className="tw-size-5" />}
                           />
                         )}
                         <CompactActionButton
                           label={uploadLabel}
                           required={isRequiredMediaMissing}
                           onClick={() => runCompactAction(onUploadClick)}
-                          icon={<ArrowUpTrayIcon className="tw-size-6" />}
+                          icon={<ArrowUpTrayIcon className="tw-size-5" />}
                         />
                         <CompactActionButton
                           label={gifLabel}
@@ -414,7 +414,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                             runCompactAction(() => setShowGifPicker(true))
                           }
                           icon={
-                            <span className="tw-text-xs tw-font-bold tw-tracking-[-0.02em]">
+                            <span className="tw-text-[11px] tw-font-bold tw-tracking-[-0.02em]">
                               GIF
                             </span>
                           }
@@ -425,7 +425,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                             disabled={isStormMode}
                             pressed={isPollActive}
                             onClick={() => runCompactAction(onTogglePoll)}
-                            icon={<ChartBarIcon className="tw-size-6" />}
+                            icon={<ChartBarIcon className="tw-size-5" />}
                           />
                         )}
                         <CompactActionButton
@@ -435,7 +435,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                           onClick={() => runCompactAction(breakIntoStorm)}
                           icon={
                             <svg
-                              className="tw-size-6"
+                              className="tw-size-5"
                               viewBox="0 0 24 24"
                               fill="none"
                               xmlns="http://www.w3.org/2000/svg"

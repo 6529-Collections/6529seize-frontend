@@ -2,6 +2,8 @@ import { CHAT_LINK_RESTRICTION_MESSAGE } from "@/helpers/waves/chat-link-restric
 import { t } from "@/i18n/messages";
 import type { SupportedLocale } from "@/i18n/locales";
 import { AnimatePresence, LazyMotion, domAnimation, m } from "framer-motion";
+import MobileWrapperDialog from "../../mobile-wrapper-dialog/MobileWrapperDialog";
+import Button from "../../utils/button/Button";
 import CreateDropActions from "../CreateDropActions";
 import { CreateDropContentFiles } from "../CreateDropContentFiles";
 import CreateDropContentRequirements from "../CreateDropContentRequirements";
@@ -23,6 +25,7 @@ export default function CreateDropComposer({
   activeDrop,
   submitting,
   wave,
+  isApp,
   isDropMode,
   isStormModeActive,
   setActionsContainerRef,
@@ -99,6 +102,7 @@ export default function CreateDropComposer({
       submitLabel = t(locale, "waves.stormComposer.postStorm");
     }
   }
+  const postLabel = t(locale, "waves.header.postLabel.one");
   return (
     <>
       {isStormModeActive && (
@@ -192,40 +196,76 @@ export default function CreateDropComposer({
             }
           />
         </div>
-        {(pollDraft !== null || showCurationDropModeWarning) && (
+        {showCurationDropModeWarning && (
           <div
             className={`tw-col-span-3 tw-col-start-1 tw-min-w-0 md:tw-col-span-1 md:tw-col-start-2 ${
               isCompactLayout ? "tw-row-start-4" : "tw-row-start-3"
             }`}
           >
-            {pollDraft && (
-              <CreateDropPoll
-                draft={pollDraft}
-                disabled={submitting}
-                validationError={pollValidationError}
-                onChange={updatePollDraft}
-                onRemove={removePoll}
-              />
-            )}
-            {showCurationDropModeWarning && (
-              <div className="tw-mt-2 tw-text-[11px] tw-leading-4 tw-text-amber-200/90">
-                This looks like a curation URL.{" "}
-                {canSubmitCurationUrl ? (
-                  <button
-                    type="button"
-                    className="tw-border-0 tw-bg-transparent tw-p-0 tw-text-[11px] tw-font-medium tw-text-amber-300 tw-underline tw-transition desktop-hover:hover:tw-text-amber-100"
-                    onClick={onSwitchToDropMode}
-                  >
-                    Submit it as a drop
-                  </button>
-                ) : (
-                  <span>{curationUrlSubmitRestrictionMessage}</span>
-                )}
-              </div>
-            )}
+            <div className="tw-mt-2 tw-text-[11px] tw-leading-4 tw-text-amber-200/90">
+              This looks like a curation URL.{" "}
+              {canSubmitCurationUrl ? (
+                <button
+                  type="button"
+                  className="tw-border-0 tw-bg-transparent tw-p-0 tw-text-[11px] tw-font-medium tw-text-amber-300 tw-underline tw-transition desktop-hover:hover:tw-text-amber-100"
+                  onClick={onSwitchToDropMode}
+                >
+                  Submit it as a drop
+                </button>
+              ) : (
+                <span>{curationUrlSubmitRestrictionMessage}</span>
+              )}
+            </div>
           </div>
         )}
       </div>
+      {pollDraft && !isApp && (
+        <CreateDropPoll
+          draft={pollDraft}
+          disabled={submitting}
+          validationError={pollValidationError}
+          onChange={updatePollDraft}
+          onRemove={removePoll}
+        />
+      )}
+      {isApp && pollDraft && (
+        <MobileWrapperDialog
+          title="Create Poll"
+          ariaLabel="Create Poll"
+          isOpen
+          onClose={removePoll}
+          onBack={submitting ? undefined : removePoll}
+          dismissible={!submitting}
+          noPadding
+          enableDragToClose
+          showHeaderCloseButton={false}
+          showHeaderDivider
+          surfaceClassName="tw-bg-iron-950"
+        >
+          <CreateDropPoll
+            draft={pollDraft}
+            disabled={submitting}
+            validationError={pollValidationError}
+            onChange={updatePollDraft}
+            onRemove={removePoll}
+            presentation="sheet"
+          />
+          <div className="tw-sticky tw-bottom-0 tw-z-10 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-bg-iron-950/95 tw-px-4 tw-pb-3 tw-pt-3 tw-backdrop-blur">
+            <Button
+              onClick={submitWithResolvedAliases}
+              loading={submitting}
+              disabled={!canSubmit}
+              variant="primary"
+              size="lg"
+              fullWidth
+              aria-label={submitting ? `${postLabel} in progress` : postLabel}
+              hideChildrenWhenLoading
+            >
+              {postLabel}
+            </Button>
+          </div>
+        </MobileWrapperDialog>
+      )}
       {isDropMode && (
         <CreateDropContentRequirements
           canSubmit={canSubmit}

@@ -446,10 +446,10 @@ const CreateDropInput = forwardRef<
                 }
                 placeholder={
                   <span
-                    className={`editor-placeholder tw-block tw-max-w-[calc(100%-3.5rem)] tw-overflow-hidden tw-text-ellipsis tw-whitespace-nowrap ${
+                    className={`editor-placeholder tw-block tw-max-w-[calc(100%-3.5rem)] tw-translate-y-0 tw-overflow-hidden tw-text-ellipsis tw-whitespace-nowrap sm:tw-translate-y-0.5 ${
                       isCompact
-                        ? "tw-translate-y-0.5 tw-text-sm tw-leading-5"
-                        : "tw-translate-y-0.5 tw-text-base tw-leading-6 sm:tw-text-sm"
+                        ? "tw-text-sm tw-leading-5"
+                        : "tw-text-base tw-leading-6 sm:tw-text-sm"
                     } ${submitting ? "tw-opacity-50" : ""}`}
                   >
                     {placeholderText}

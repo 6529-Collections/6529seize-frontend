@@ -42,6 +42,7 @@ export interface CreateDropLayoutProps {
   readonly dropId: string | null;
   readonly submitting: boolean;
   readonly wave: ApiWave;
+  readonly isApp: boolean;
   readonly isDropMode: boolean;
   readonly isStormModeActive: boolean;
   readonly showIdentityField: boolean;

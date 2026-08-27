@@ -261,6 +261,7 @@ export const useCreateDropSubmission = ({
   activeDrop,
   wave,
   isDropMode,
+  isStormMode,
   canExitDropMode,
   isChatBlockedBySlowMode,
   isChatLinksRestrictionActive,
@@ -307,6 +308,7 @@ export const useCreateDropSubmission = ({
   readonly activeDrop: ActiveDropState | null;
   readonly wave: ApiWave;
   readonly isDropMode: boolean;
+  readonly isStormMode: boolean;
   readonly canExitDropMode: boolean;
   readonly isChatBlockedBySlowMode: boolean;
   readonly isChatLinksRestrictionActive: boolean;
@@ -739,7 +741,7 @@ export const useCreateDropSubmission = ({
     const hasCurrentContent =
       (submissionMarkdown?.trim().length ?? 0) > 0 || files.length > 0;
 
-    if (hasPartsInDrop && hasCurrentContent) {
+    if ((isStormMode || hasPartsInDrop) && hasCurrentContent) {
       finalizeAndAddDropPart(submissionMarkdown);
       return;
     }
