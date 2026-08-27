@@ -253,9 +253,6 @@ export function useCreateDropContentController({
     () => (editorState ? exportComposerMarkdown(editorState) : null),
     [editorState]
   );
-  const showStormHint =
-    ((editorState ? getMarkdown : initialMarkdown)?.trim().length ?? 0) === 0 &&
-    files.length === 0;
   const collapseOptions = useCallback(() => {
     setShowOptionsState((current) =>
       current?.scopeKey === wave.id && current.value === false
@@ -716,7 +713,6 @@ export function useCreateDropContentController({
     setActionsContainerRef,
     isLinksSubmitBlocked,
     canAddPart,
-    showStormHint,
     isCompactLayout: !keepDesktopOptionsVisible,
     showOptions,
     animateOptions,

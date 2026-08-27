@@ -28,7 +28,6 @@ export default function CreateDropComposer({
   setActionsContainerRef,
   isLinksSubmitBlocked,
   canAddPart,
-  showStormHint,
   isCompactLayout,
   showOptions,
   animateOptions,
@@ -137,7 +136,6 @@ export default function CreateDropComposer({
           isStormMode={isStormModeActive}
           isDropMode={isDropMode}
           canAddPart={canAddPart}
-          showStormHint={showStormHint}
           submitting={submitting}
           isCompactLayout={isCompactLayout}
           showOptions={showOptions}

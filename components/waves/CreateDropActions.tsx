@@ -27,7 +27,6 @@ interface CreateDropActionsProps {
   readonly isStormMode: boolean;
   readonly isDropMode: boolean;
   readonly canAddPart: boolean;
-  readonly showStormHint?: boolean | undefined;
   readonly submitting: boolean;
   readonly isCompactLayout?: boolean;
   readonly showOptions: boolean;
@@ -51,7 +50,6 @@ interface CompactActionButtonProps {
   readonly disabled?: boolean;
   readonly pressed?: boolean;
   readonly required?: boolean;
-  readonly describedBy?: string | undefined;
 }
 
 const getCompactActionSurfaceStyles = ({
@@ -117,14 +115,12 @@ const CompactActionButton: React.FC<CompactActionButtonProps> = ({
   disabled = false,
   pressed,
   required = false,
-  describedBy,
 }) => (
   <button
     type="button"
     onClick={onClick}
     disabled={disabled}
     aria-pressed={pressed}
-    aria-describedby={describedBy}
     className={`tw-group tw-flex tw-w-11 tw-flex-none tw-flex-col tw-items-center tw-gap-1.5 tw-rounded-xl tw-border-0 tw-bg-transparent tw-px-0 tw-py-2 tw-transition focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 ${
       disabled
         ? "tw-cursor-default tw-text-iron-600"
@@ -150,7 +146,6 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
     isStormMode,
     isDropMode,
     canAddPart,
-    showStormHint = false,
     submitting,
     isCompactLayout = false,
     showOptions,
@@ -170,7 +165,6 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
     const prefersReducedMotion = useReducedMotion();
     const locale = useBrowserLocale();
     const actionTrayId = useId();
-    const stormHintId = `${actionTrayId}-storm-hint`;
     const addGifLabel = t(locale, "waves.gifPicker.open");
     const showActionsLabel = t(locale, "waves.composer.actions.show");
     const hideActionsLabel = t(locale, "waves.composer.actions.hide");
@@ -181,7 +175,6 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
     const pollLabel = t(locale, "waves.composer.actions.poll");
     const closePollLabel = t(locale, "waves.composer.actions.closePoll");
     const stormLabel = t(locale, "waves.composer.actions.storm");
-    const stormHint = t(locale, "waves.stormComposer.startHint");
     const gifPickerKey = publicEnv.GIPHY_API_KEY;
     const [showGifPicker, setShowGifPicker] = useState(false);
     const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -426,11 +419,6 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                           label={stormLabel}
                           disabled={isStormMode || !canAddPart || submitting}
                           pressed={isStormMode}
-                          describedBy={
-                            !isStormMode && showStormHint && !submitting
-                              ? stormHintId
-                              : undefined
-                          }
                           onClick={() => runCompactAction(breakIntoStorm)}
                           icon={
                             <svg
@@ -450,14 +438,6 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                           }
                         />
                       </div>
-                      {!isStormMode && showStormHint && !submitting && (
-                        <p
-                          id={stormHintId}
-                          className="tw-mb-0 tw-mt-1.5 tw-pl-1 tw-text-left tw-text-[11px] tw-leading-4 tw-text-iron-400"
-                        >
-                          {stormHint}
-                        </p>
-                      )}
                     </div>
                   </motion.div>
                 )}

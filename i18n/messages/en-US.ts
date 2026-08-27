@@ -1686,7 +1686,6 @@ const WAVE_STORM_COMPOSER_MESSAGES = objectMessages("waves.stormComposer", {
   cancelEdit: "Cancel edit",
   writePart: "Write part {number}",
   breakIntoStorm: "Break into storm",
-  startHint: "Write or add media to start a storm.",
   addPart: "Add part",
   saveChanges: "Save changes",
   postStorm: "Post storm",
