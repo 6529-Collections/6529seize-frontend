@@ -103,7 +103,7 @@
     overflow-y: auto;
   }
   body.capacitor-native w3m-modal {
-    bottom: var(--native-keyboard-inset-bottom, 0px);
+    bottom: min(var(--native-keyboard-inset-bottom, 0px), 8rem);
   }
   [data-pull-to-refresh-transform-root="true"]
     [data-pull-to-refresh-fixed-overlay="true"] {
