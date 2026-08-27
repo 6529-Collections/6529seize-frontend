@@ -128,18 +128,20 @@ export function useCreateDropContentController({
     Dispatch<SetStateAction<EditorState | null>>
   >((nextEditorState) => {
     setEditorContent((current) => {
-      const editorState =
+      const resolvedEditorState =
         typeof nextEditorState === "function"
           ? nextEditorState(current.editorState)
           : nextEditorState;
 
-      if (editorState === current.editorState) {
+      if (resolvedEditorState === current.editorState) {
         return current;
       }
 
       return {
-        editorState,
-        markdown: editorState ? exportComposerMarkdown(editorState) : null,
+        editorState: resolvedEditorState,
+        markdown: resolvedEditorState
+          ? exportComposerMarkdown(resolvedEditorState)
+          : null,
       };
     });
   }, []);
