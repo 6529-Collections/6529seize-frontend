@@ -378,6 +378,9 @@ export * from '../models/ApiProfileProxyAction';
 export * from '../models/ApiProfileProxyActionType';
 export * from '../models/ApiProfileRepCategorySummary';
 export * from '../models/ApiProfileWave';
+export * from '../models/ApiProfileWaveActivity';
+export * from '../models/ApiProfileWaveActivityPage';
+export * from '../models/ApiProfileWaveActivityType';
 export * from '../models/ApiPublishProfileCmsPackageRequest';
 export * from '../models/ApiPushNotificationDevice';
 export * from '../models/ApiPushNotificationSettings';
@@ -1061,6 +1064,9 @@ import { ApiProfileProxyAction             } from '../models/ApiProfileProxyActi
 import { ApiProfileProxyActionType } from '../models/ApiProfileProxyActionType';
 import { ApiProfileRepCategorySummary } from '../models/ApiProfileRepCategorySummary';
 import { ApiProfileWave } from '../models/ApiProfileWave';
+import { ApiProfileWaveActivity } from '../models/ApiProfileWaveActivity';
+import { ApiProfileWaveActivityPage } from '../models/ApiProfileWaveActivityPage';
+import { ApiProfileWaveActivityType } from '../models/ApiProfileWaveActivityType';
 import { ApiPublishProfileCmsPackageRequest } from '../models/ApiPublishProfileCmsPackageRequest';
 import { ApiPushNotificationDevice } from '../models/ApiPushNotificationDevice';
 import { ApiPushNotificationSettings } from '../models/ApiPushNotificationSettings';
@@ -1459,6 +1465,7 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiProfilePreferencesDirectMessagePolicyEnum",
     "ApiProfilePreferencesNotificationLevelEnum",
     "ApiProfileProxyActionType",
+    "ApiProfileWaveActivityType",
     "ApiRateMatter",
     "ApiRedeemConnectionShareRequestTargetClientTypeEnum",
     "ApiRedeemConnectionShareResponseClientTypeEnum",
@@ -1932,6 +1939,8 @@ let typeMap: {[index: string]: any} = {
     "ApiProfileProxyAction": ApiProfileProxyAction,
     "ApiProfileRepCategorySummary": ApiProfileRepCategorySummary,
     "ApiProfileWave": ApiProfileWave,
+    "ApiProfileWaveActivity": ApiProfileWaveActivity,
+    "ApiProfileWaveActivityPage": ApiProfileWaveActivityPage,
     "ApiPublishProfileCmsPackageRequest": ApiPublishProfileCmsPackageRequest,
     "ApiPushNotificationDevice": ApiPushNotificationDevice,
     "ApiPushNotificationSettings": ApiPushNotificationSettings,
