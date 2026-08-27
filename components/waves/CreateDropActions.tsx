@@ -80,10 +80,10 @@ const CompactActionButton: React.FC<CompactActionButtonProps> = ({
         pressed
           ? "tw-bg-primary-500/15 tw-text-primary-200"
           : disabled
-            ? "tw-bg-transparent tw-text-iron-600"
+            ? "tw-bg-iron-900 tw-text-iron-600"
             : required
               ? "tw-bg-amber-300/10 tw-text-amber-200"
-              : "tw-bg-transparent tw-text-iron-300 group-hover:tw-bg-white/5 group-hover:tw-text-white"
+              : "tw-bg-iron-800 tw-text-iron-300 group-hover:tw-bg-iron-700 group-hover:tw-text-white"
       }`}
       aria-hidden="true"
     >
