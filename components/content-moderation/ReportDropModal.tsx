@@ -454,13 +454,8 @@ export default function ReportDropModal({
       };
     },
     onSuccess: (results, _variables, context) => {
-      const {
-        blockFailed,
-        failedActions,
-        failures,
-        hideFailed,
-        reportResult,
-      } = getPostActionOutcome(results, context);
+      const { blockFailed, failedActions, failures, hideFailed, reportResult } =
+        getPostActionOutcome(results, context);
       applySuccessfulViewerActions(reportResult, context);
       rollbackFailedViewerActions({ blockFailed, context, hideFailed });
       if (context?.blockAuthor && !blockFailed) {
@@ -751,10 +746,13 @@ export default function ReportDropModal({
                     loading={mutation.isPending}
                     disabled={!hasSelection}
                   >
-                    {t(locale, getSubmitLabelKey({
-                      isPending: mutation.isPending,
-                      reportPost,
-                    }))}
+                    {t(
+                      locale,
+                      getSubmitLabelKey({
+                        isPending: mutation.isPending,
+                        reportPost,
+                      })
+                    )}
                   </Button>
                 </div>
               </form>

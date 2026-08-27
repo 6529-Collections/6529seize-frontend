@@ -17,7 +17,11 @@ export default async function PreferencesPage({
   }>;
 }) {
   const requestedTab = (await searchParams)?.tab;
-  const activeTab: PreferencesTab =
-    requestedTab === "content" ? "content" : "notifications";
+  let activeTab: PreferencesTab = "notifications";
+  if (requestedTab === "blocked-profiles" || requestedTab === "content") {
+    activeTab = "blocked-profiles";
+  } else if (requestedTab === "reports") {
+    activeTab = "reports";
+  }
   return <PreferencesPageClient activeTab={activeTab} />;
 }

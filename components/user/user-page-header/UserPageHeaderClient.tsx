@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
 import { useContext, useMemo, useState } from "react";
 
@@ -18,11 +18,18 @@ import { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
 import { createDirectMessageWave } from "@/helpers/waves/waves.helpers";
 import { getBannerColorValue } from "@/helpers/profile-banner.helpers";
 import { useProfileBlockState } from "@/hooks/content-moderation/useProfileBlockState";
+import { useContentModeratorAccess } from "@/hooks/content-moderation/useContentModeratorAccess";
 import { usePublicProfileModerationStatus } from "@/hooks/content-moderation/usePublicProfileModerationStatus";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useIdentity } from "@/hooks/useIdentity";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import { ApiModeratedProfileStatus } from "@/generated/models/ApiModeratedProfileStatus";
+import { setModeratedProfileStatus } from "@/services/api/content-moderation-api";
+import {
+  PUBLIC_PROFILE_MODERATION_STATUS_QUERY_KEY,
+  SUSPENDED_MODERATION_PROFILES_QUERY_KEY,
+} from "@/services/content-moderation/content-moderation-query";
 import { commonApiFetch } from "@/services/api/common-api";
 import { faSliders } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -75,13 +82,14 @@ export default function UserPageHeaderClient({
 }: Readonly<Props>) {
   const params = useParams();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { hasTouchScreen, isApp } = useDeviceInfo();
   const routeHandleOrWallet = params["user"]?.toString().toLowerCase() ?? null;
   const normalizedHandleOrWallet =
     routeHandleOrWallet ?? handleOrWallet.toLowerCase();
 
   const { address } = useSeizeConnectContext();
-  const { connectedProfile, activeProfileProxy, setToast } =
+  const { connectedProfile, activeProfileProxy, requestAuth, setToast } =
     useContext(AuthContext);
 
   const { profile: hydratedProfile } = useIdentity({
@@ -114,7 +122,7 @@ export default function UserPageHeaderClient({
   const [directMessageLoading, setDirectMessageLoading] =
     useState<boolean>(false);
   const [profileBlockConfirmation, setProfileBlockConfirmation] = useState<
-    "block" | "unblock" | null
+    "block" | "unblock" | "suspend" | "reinstate" | null
   >(null);
 
   const isMyProfile = useMemo(
@@ -177,6 +185,50 @@ export default function UserPageHeaderClient({
     profilePfp: profile.pfp,
   });
   const profileModerationStatus = usePublicProfileModerationStatus(profile.id);
+  const moderatorAccess = useContentModeratorAccess();
+  const canModerateProfile =
+    !isMyProfile && !!profile.id && moderatorAccess.data?.moderator === true;
+  const profileModerationMutation = useMutation({
+    mutationFn: async (status: ApiModeratedProfileStatus) => {
+      if (!profile.id) {
+        throw new Error("Profile ID unavailable");
+      }
+      const { success } = await requestAuth();
+      if (!success) {
+        throw new Error("Authentication was cancelled");
+      }
+      return setModeratedProfileStatus(profile.id, { status, reason: null });
+    },
+    onSuccess: async () => {
+      setProfileBlockConfirmation(null);
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: [...PUBLIC_PROFILE_MODERATION_STATUS_QUERY_KEY, profile.id],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: SUSPENDED_MODERATION_PROFILES_QUERY_KEY,
+        }),
+      ]);
+      setToast({
+        message: t(locale, "contentModeration.moderator.profileSuccess"),
+        type: "success",
+      });
+    },
+    onError: (error) => {
+      if (
+        error instanceof Error &&
+        error.message === "Authentication was cancelled"
+      ) {
+        return;
+      }
+      setToast({
+        type: "error",
+        title: t(locale, "contentModeration.moderator.profileError"),
+        description: t(locale, "contentModeration.error.retry"),
+        details: getToastErrorDetails(error),
+      });
+    },
+  });
   const canManageProfilePreferences = isMyProfile && !activeProfileProxy;
   const showSubscriptionStatus = canManageProfilePreferences;
 
@@ -215,8 +267,10 @@ export default function UserPageHeaderClient({
 
   const isProfileBlockMutationPending =
     profileBlockState.isBlocking || profileBlockState.isUnblocking;
+  const isProfileActionPending =
+    isProfileBlockMutationPending || profileModerationMutation.isPending;
   const closeProfileBlockConfirmation = () => {
-    if (!isProfileBlockMutationPending) {
+    if (!isProfileActionPending) {
       setProfileBlockConfirmation(null);
     }
   };
@@ -227,8 +281,15 @@ export default function UserPageHeaderClient({
     try {
       if (profileBlockConfirmation === "block") {
         await profileBlockState.block();
-      } else {
+      } else if (profileBlockConfirmation === "unblock") {
         await profileBlockState.unblock();
+      } else {
+        profileModerationMutation.mutate(
+          profileBlockConfirmation === "suspend"
+            ? ApiModeratedProfileStatus.Suspended
+            : ApiModeratedProfileStatus.Active
+        );
+        return;
       }
       setProfileBlockConfirmation(null);
     } catch {
@@ -238,6 +299,49 @@ export default function UserPageHeaderClient({
   const confirmationProfileLabel = profile.handle
     ? `@${profile.handle}`
     : profileLabel;
+  const confirmationCopy = (() => {
+    switch (profileBlockConfirmation) {
+      case "block":
+        return {
+          title: t(locale, "contentModeration.block.confirmTitle", {
+            profile: confirmationProfileLabel,
+          }),
+          message: t(locale, "contentModeration.report.blockDescription"),
+          confirmText: t(locale, "contentModeration.actions.blockProfile"),
+          confirmVariant: "destructive" as const,
+        };
+      case "unblock":
+        return {
+          title: t(locale, "contentModeration.unblock.confirmTitle", {
+            profile: confirmationProfileLabel,
+          }),
+          message: t(locale, "contentModeration.unblock.confirmDescription"),
+          confirmText: t(locale, "contentModeration.actions.unblock"),
+          confirmVariant: "primary" as const,
+        };
+      case "suspend":
+        return {
+          title: t(locale, "contentModeration.moderator.suspend"),
+          message: t(locale, "contentModeration.moderator.confirmSuspend"),
+          confirmText: t(locale, "contentModeration.moderator.suspend"),
+          confirmVariant: "destructive" as const,
+        };
+      case "reinstate":
+        return {
+          title: t(locale, "contentModeration.moderator.reinstate"),
+          message: t(locale, "contentModeration.moderator.confirmReinstate"),
+          confirmText: t(locale, "contentModeration.moderator.reinstate"),
+          confirmVariant: "primary" as const,
+        };
+      case null:
+        return {
+          title: "",
+          message: "",
+          confirmText: "",
+          confirmVariant: "primary" as const,
+        };
+    }
+  })();
 
   return (
     <div className="tailwind-scope">
@@ -432,12 +536,33 @@ export default function UserPageHeaderClient({
                     ) : null}
                     {followHandle &&
                     profileBlockState.canManage &&
-                    !profileBlockState.isBlocked ? (
+                    (!profileBlockState.isBlocked || canModerateProfile) ? (
                       <ProfileBlockActionMenu
                         handle={followHandle}
                         disabled={
-                          profileBlockState.isLoading ||
-                          profileBlockState.isBlocking
+                          profileBlockState.isLoading || isProfileActionPending
+                        }
+                        showPersonalActions={!profileBlockState.isBlocked}
+                        moderationAction={
+                          canModerateProfile
+                            ? {
+                                kind: profileModerationStatus.isSuspended
+                                  ? "reinstate"
+                                  : "suspend",
+                                label: t(
+                                  locale,
+                                  profileModerationStatus.isSuspended
+                                    ? "contentModeration.moderator.reinstate"
+                                    : "contentModeration.moderator.suspend"
+                                ),
+                                onSelect: () =>
+                                  setProfileBlockConfirmation(
+                                    profileModerationStatus.isSuspended
+                                      ? "reinstate"
+                                      : "suspend"
+                                  ),
+                              }
+                            : undefined
                         }
                         onBlock={() => setProfileBlockConfirmation("block")}
                       />
@@ -480,30 +605,12 @@ export default function UserPageHeaderClient({
         isOpen={profileBlockConfirmation !== null}
         onClose={closeProfileBlockConfirmation}
         onConfirm={() => void confirmProfileBlockChange()}
-        title={
-          profileBlockConfirmation === "block"
-            ? t(locale, "contentModeration.block.confirmTitle", {
-                profile: confirmationProfileLabel,
-              })
-            : t(locale, "contentModeration.unblock.confirmTitle", {
-                profile: confirmationProfileLabel,
-              })
-        }
-        message={
-          profileBlockConfirmation === "block"
-            ? t(locale, "contentModeration.report.blockDescription")
-            : t(locale, "contentModeration.unblock.confirmDescription")
-        }
-        confirmText={
-          profileBlockConfirmation === "block"
-            ? t(locale, "contentModeration.actions.blockProfile")
-            : t(locale, "contentModeration.actions.unblock")
-        }
+        title={confirmationCopy.title}
+        message={confirmationCopy.message}
+        confirmText={confirmationCopy.confirmText}
         cancelText={t(locale, "contentModeration.report.cancel")}
-        isConfirming={isProfileBlockMutationPending}
-        confirmVariant={
-          profileBlockConfirmation === "block" ? "destructive" : "primary"
-        }
+        isConfirming={isProfileActionPending}
+        confirmVariant={confirmationCopy.confirmVariant}
       />
     </div>
   );

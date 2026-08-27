@@ -27,7 +27,7 @@ export default function ContentModerationDropBody({
   return (
     <div
       data-testid="content-moderation-inline-global-state"
-      className="tw-inline-flex tw-items-center tw-gap-2 tw-py-1 tw-text-sm tw-text-iron-400"
+      className="tw-inline-flex tw-items-center tw-gap-2 tw-align-middle tw-text-sm tw-leading-6 tw-text-iron-400"
     >
       <ShieldExclamationIcon
         aria-hidden="true"

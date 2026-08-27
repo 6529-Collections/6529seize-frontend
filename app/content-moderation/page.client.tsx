@@ -295,7 +295,8 @@ function ModerationQueueCard({
           {getAiRecommendationText(item, locale)}
         </summary>
         {typeof item.ai_category === "string" &&
-          item.ai_category.length > 0 && (
+          item.ai_category.length > 0 &&
+          item.ai_category !== "NONE" && (
             <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-text-iron-300">
               {t(locale, "contentModeration.moderator.aiCategory", {
                 value: formatContentModerationEnum(item.ai_category),

@@ -16,6 +16,12 @@ yet have a profile, `/preferences` offers **Create profile** instead of asking
 the user to connect again. The preference controls become available after the
 profile is created.
 
+The combined `/preferences` page uses three explicit tabs:
+**Notifications & messages**, **Blocked Profiles**, and **Reports**. The
+Blocked Profiles view manages personal blocks. Reports tracks reports submitted
+by the current profile and their public outcomes without exposing internal
+moderation or AI detail.
+
 ## Direct Messages
 
 `Who can start a direct message with me?` offers:

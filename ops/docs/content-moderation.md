@@ -17,14 +17,17 @@ being objectionable.
 
 - Open a post's More menu on desktop, or its action sheet on mobile, and select
   the final **Flag Content** entry.
-- Open `/preferences?tab=content` to manage blocked profiles. The older
-  `/content-preferences` path redirects to this tab.
+- Open `/preferences?tab=blocked-profiles` to manage blocked profiles, or the
+  adjacent **Reports** tab to track reports and their public outcomes. The
+  older `/content-preferences` and `?tab=content` routes remain compatible and
+  resolve to the blocked-profile view.
 - Authorized moderators can open **WatchTower** at `/content-moderation` from
   the desktop, mobile-browser, and mobile-app side navigation. It is not shown
   in the profile menu. The page heading is **WatchTower - Content Moderation**.
 
-The unified `/preferences` page contains Notification, Messages, and Content
-tabs and fills the available page height. Preferences are saved to a profile.
+The unified `/preferences` page contains **Notifications & messages**,
+**Blocked Profiles**, and **Reports** tabs and fills the available page height.
+Preferences are saved to a profile.
 An authenticated wallet without a profile is offered the existing profile
 creation flow before the controls in either tab become available.
 
@@ -126,6 +129,12 @@ Withdrawal is auditable, does not affect other reporters, and does not become
 available again after resolution. An allowed resolution may be reported again
 later.
 
+The **Reports** tab at `/preferences?tab=reports` lists the current profile's
+own reports, the reported profile, reason, submission date, and public status.
+Open reports can also be withdrawn there. Resolved reports show the public
+moderator outcome, but never expose AI assessment details, internal notes or
+reasons, moderator identity, or other reporters.
+
 ## Posts from blocked profiles
 
 Blocking a profile changes the current viewer's experience; it does not alter
@@ -139,9 +148,9 @@ profile picture, handle, and centered **Blocked · Reveal · Unblock** controls.
   posts by that profile immediately.
 
 Blocked profiles remain reachable through their public profile pages. They can
-also be unblocked from the Content tab under `/preferences`; the profile picture
-and handle in that list link to the public profile. A blocked profile's header
-shows a red-tinted **Blocked** status beside the handle and a separate
+also be unblocked from the **Blocked Profiles** tab under `/preferences`; the
+profile picture and handle in that list link to the public profile. A blocked
+profile's header shows a red-tinted **Blocked** status beside the handle and a separate
 **Unblock** action where **Follow** normally appears. Follow and
 notification-mute actions are hidden while the block is active because the
 block already provides those states. Direct message remains available. Unblock
@@ -195,18 +204,22 @@ Authorized moderators can review open reports in **WatchTower** at
 WatchTower separates **Open reports**, **Resolved reports**, and **Suspended
 profiles**, each with a current count. Each report identifies both the author
 and the profile that submitted it, makes the content primary, shows a compact
-AI summary with expandable detail, and keeps audit history available. For an
-open report the moderator first selects one explained content decision, may
-add an optional internal note, and then applies it once:
+AI summary with expandable detail, and keeps audit history available. A neutral
+AI category is omitted; a substantive category is labelled **Potential
+category** to make clear that it is not the moderator decision. For an open
+report the moderator first selects one explained content decision, may add an
+optional internal note, and then applies it once:
 
 - **Allow** keeps or restores the post to visible and closes its reports;
 - **Quarantine** hides it globally while its reports stay open; and
 - **Remove** hides it globally and closes its reports as removed.
 
-Author suspension is a separate, confirmation-backed action. **Suspend author**
+Author suspension is a separate, confirmation-backed action. **Suspend Profile**
 prevents future creates and edits without changing existing posts. Suspended
 profiles can be found and reinstated from the central Suspended profiles view,
-without first locating a report.
+without first locating a report. Moderators also see **Suspend Profile** or
+**Reinstate Profile** in another profile's action menu. That global moderation
+action remains independent of the moderator's personal Blocked state.
 
 In primary Wave chat views, globally quarantined or moderator-removed posts
 keep their author, time, and Wave context while only the post body is replaced
@@ -260,6 +273,11 @@ mistake.
   the partial failure so the user can retry the remaining action.
 - If reported-content AI assessment is unavailable, the report is retained for
   human review rather than discarded.
+- If an existing connected profile's saved session expires, authenticated
+  actions invalidate only that session, preserve the connected profile and
+  selection, request a new signature, and continue after authentication. A
+  missing signer produces an explicit reconnect message instead of a silent
+  no-op.
 - If a moderation WebSocket update is missed, the next API refresh converges on
   the saved server state.
 
@@ -272,8 +290,9 @@ mistake.
 - Attachment safety is asynchronous and separate from the text gate.
 - There is no continuous hold-before-publish review queue and no requirement
   for a full-time moderator.
-- Reporters see only their report status and public outcome. Open reports can
-  be withdrawn; resolved report history is available only in WatchTower.
+- Reporters see only their own report status and public outcome in Preferences.
+  Open reports can be withdrawn; the full moderation record remains available
+  only in WatchTower.
 
 ## Related pages
 

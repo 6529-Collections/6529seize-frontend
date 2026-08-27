@@ -8,13 +8,16 @@ import {
 } from "@testing-library/react";
 import UserPageHeaderClient from "@/components/user/user-page-header/UserPageHeaderClient";
 import { AuthContext } from "@/components/auth/Auth";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useIdentity } from "@/hooks/useIdentity";
 import { useProfileBlockState } from "@/hooks/content-moderation/useProfileBlockState";
+import { useContentModeratorAccess } from "@/hooks/content-moderation/useContentModeratorAccess";
+import { setModeratedProfileStatus } from "@/services/api/content-moderation-api";
 
 let mockIsSuspended = false;
+let mockIsModerator = false;
 
 jest.mock("next/dynamic", () => () => () => <div />);
 jest.mock(
@@ -57,12 +60,31 @@ jest.mock(
 jest.mock(
   "@/components/user/user-page-header/ProfileBlockActionMenu",
   () =>
-    ({ onBlock }: { readonly onBlock: () => void }) => (
+    ({
+      moderationAction,
+      onBlock,
+      showPersonalActions = true,
+    }: {
+      readonly moderationAction?:
+        | { readonly label: string; readonly onSelect: () => void }
+        | undefined;
+      readonly onBlock: () => void;
+      readonly showPersonalActions?: boolean | undefined;
+    }) => (
       <div data-testid="profile-actions-menu">
-        <button type="button">Mute notifications</button>
-        <button type="button" onClick={onBlock}>
-          Block profile
-        </button>
+        {showPersonalActions ? (
+          <>
+            <button type="button">Mute notifications</button>
+            <button type="button" onClick={onBlock}>
+              Block profile
+            </button>
+          </>
+        ) : null}
+        {moderationAction ? (
+          <button type="button" onClick={moderationAction.onSelect}>
+            {moderationAction.label}
+          </button>
+        ) : null}
       </div>
     )
 );
@@ -127,7 +149,11 @@ jest.mock("@/components/user/utils/level/UserLevel", () => () => (
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: jest.fn(),
 }));
-jest.mock("@tanstack/react-query", () => ({ useQuery: jest.fn() }));
+jest.mock("@tanstack/react-query", () => ({
+  useMutation: jest.fn(),
+  useQuery: jest.fn(),
+  useQueryClient: jest.fn(),
+}));
 jest.mock("@/hooks/content-moderation/useProfileBlockState", () => ({
   useProfileBlockState: jest.fn(() => ({
     isBlocked: false,
@@ -147,6 +173,12 @@ jest.mock(
     }),
   })
 );
+jest.mock("@/hooks/content-moderation/useContentModeratorAccess", () => ({
+  useContentModeratorAccess: jest.fn(),
+}));
+jest.mock("@/services/api/content-moderation-api", () => ({
+  setModeratedProfileStatus: jest.fn(),
+}));
 jest.mock("@/hooks/useIdentity", () => ({ useIdentity: jest.fn() }));
 jest.mock("next/navigation", () => ({
   useParams: jest.fn(),
@@ -164,6 +196,7 @@ useRouterMock.mockReturnValue({ push: jest.fn() });
 const auth = {
   connectedProfile: { handle: "alice" },
   activeProfileProxy: null,
+  requestAuth: jest.fn().mockResolvedValue({ success: true }),
   setToast: jest.fn(),
 } as any;
 const ownProfileAuth = {
@@ -179,6 +212,25 @@ const proxiedOwnProfileAuth = {
 describe("UserPageHeader", () => {
   beforeEach(() => {
     mockIsSuspended = false;
+    mockIsModerator = false;
+    jest.clearAllMocks();
+    (useContentModeratorAccess as jest.Mock).mockImplementation(() => ({
+      data: { moderator: mockIsModerator },
+    }));
+    (useQueryClient as jest.Mock).mockReturnValue({
+      invalidateQueries: jest.fn().mockResolvedValue(undefined),
+    });
+    (useMutation as jest.Mock).mockImplementation((options) => ({
+      isPending: false,
+      mutate: (status: unknown) => {
+        void Promise.resolve(options.mutationFn(status)).then(
+          options.onSuccess,
+          options.onError
+        );
+      },
+    }));
+    (setModeratedProfileStatus as jest.Mock).mockResolvedValue(undefined);
+    auth.requestAuth.mockResolvedValue({ success: true });
     (useIdentity as jest.Mock).mockReturnValue({ profile });
     (useProfileBlockState as jest.Mock).mockReturnValue({
       isBlocked: false,
@@ -193,6 +245,83 @@ describe("UserPageHeader", () => {
       isFetched: true,
       data: [{ statement_type: "BIO", statement_group: "GENERAL" }],
     });
+  });
+
+  it("lets only moderators suspend and reinstate a profile without changing personal block state", async () => {
+    mockIsModerator = true;
+    (useIdentity as jest.Mock).mockReturnValue({
+      profile: { ...profile, id: "profile-bob" },
+    });
+    (useContentModeratorAccess as jest.Mock).mockReturnValue({
+      data: { moderator: true },
+    });
+    const block = jest.fn();
+    const unblock = jest.fn();
+    (useProfileBlockState as jest.Mock).mockReturnValue({
+      isBlocked: true,
+      canManage: true,
+      isLoading: false,
+      isBlocking: false,
+      isUnblocking: false,
+      block,
+      unblock,
+    });
+
+    render(
+      <AuthContext.Provider value={auth}>
+        <UserPageHeaderClient
+          profile={{ ...profile, id: "profile-bob" }}
+          handleOrWallet="bob"
+          fallbackMainAddress="0x1"
+          defaultBanner1="#000000"
+          defaultBanner2="#111111"
+          initialStatements={[]}
+          profileEnabledAt="2024-01-01T00:00:00Z"
+          followersCount={5}
+          cmsWebsiteHref={null}
+        />
+      </AuthContext.Provider>
+    );
+
+    expect(
+      screen.queryByRole("button", { name: "Block profile" })
+    ).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Suspend Profile" }));
+    const dialog = screen.getByRole("dialog", { name: "Suspend Profile" });
+    fireEvent.click(
+      within(dialog).getByRole("button", { name: "Suspend Profile" })
+    );
+
+    await waitFor(() =>
+      expect(setModeratedProfileStatus).toHaveBeenCalledWith("profile-bob", {
+        status: "SUSPENDED",
+        reason: null,
+      })
+    );
+    expect(block).not.toHaveBeenCalled();
+    expect(unblock).not.toHaveBeenCalled();
+  });
+
+  it("does not expose profile suspension controls to non-moderators", () => {
+    render(
+      <AuthContext.Provider value={auth}>
+        <UserPageHeaderClient
+          profile={{ ...profile, id: "profile-bob" }}
+          handleOrWallet="bob"
+          fallbackMainAddress="0x1"
+          defaultBanner1="#000000"
+          defaultBanner2="#111111"
+          initialStatements={[]}
+          profileEnabledAt="2024-01-01T00:00:00Z"
+          followersCount={5}
+          cmsWebsiteHref={null}
+        />
+      </AuthContext.Provider>
+    );
+
+    expect(
+      screen.queryByRole("button", { name: "Suspend Profile" })
+    ).not.toBeInTheDocument();
   });
 
   it("renders follow button and about section", () => {

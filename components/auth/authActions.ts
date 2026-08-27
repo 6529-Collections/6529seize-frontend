@@ -16,6 +16,7 @@ import {
 import { t } from "@/i18n/messages";
 import {
   getAuthJwt,
+  invalidateAuthSessionForAddress,
   PROFILE_SWITCHED_EVENT,
   removeAuthJwt,
 } from "@/services/auth/auth.utils";
@@ -403,8 +404,23 @@ export function createAuthRequestActions({
     if (!validationResult.requiresSessionUpgrade) {
       setSignModalReason("auth");
       setSessionUpgradeRequired(false);
+      if (!canSignActiveWallet) {
+        setToast({
+          message: "Reconnect the wallet for this profile and try again.",
+          type: "error",
+        });
+        return false;
+      }
       if (!serverRejected) {
-        await removeAuthJwt();
+        const didInvalidate =
+          await invalidateAuthSessionForAddress(walletAddress);
+        if (!didInvalidate) {
+          setToast({
+            message: "Reconnect the wallet for this profile and try again.",
+            type: "error",
+          });
+          return false;
+        }
       }
       return true;
     }

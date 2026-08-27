@@ -91,6 +91,15 @@ export const CONTENT_MODERATION_MESSAGES = {
   "contentModeration.preferences.openProfile": "Open {profile}'s profile",
   "contentModeration.preferences.signIn":
     "Connect an authenticated profile to manage content preferences.",
+  "contentModeration.preferences.reports.description":
+    "Track reports you have submitted and their outcomes.",
+  "contentModeration.preferences.reports.loading": "Loading your reports…",
+  "contentModeration.preferences.reports.loadError":
+    "Couldn't load your reports.",
+  "contentModeration.preferences.reports.empty":
+    "You haven't submitted any reports.",
+  "contentModeration.preferences.reports.withdrawn": "Withdrawn",
+  "contentModeration.preferences.reports.reason": "Reported for {reason}",
   "contentModeration.moderator.menu": "WatchTower",
   "contentModeration.moderator.metaTitle": "WatchTower - Content Moderation",
   "contentModeration.moderator.metaDescription": "Review reported content.",
@@ -129,14 +138,14 @@ export const CONTENT_MODERATION_MESSAGES = {
     "Remove the post globally and close its open reports.",
   "contentModeration.moderator.applyDecision": "Apply decision",
   "contentModeration.moderator.resolvedAs": "Resolved: {decision}",
-  "contentModeration.moderator.authorStatus": "Author status",
-  "contentModeration.moderator.suspend": "Suspend author",
-  "contentModeration.moderator.reinstate": "Reinstate author",
+  "contentModeration.moderator.authorStatus": "Profile status",
+  "contentModeration.moderator.suspend": "Suspend Profile",
+  "contentModeration.moderator.reinstate": "Reinstate Profile",
   "contentModeration.moderator.confirm": "Confirm",
   "contentModeration.moderator.confirmSuspend":
-    "Suspend this author? They will be unable to create or edit posts. Existing posts are unchanged.",
+    "Suspend this profile? They will be unable to create or edit posts. Existing posts are unchanged.",
   "contentModeration.moderator.confirmReinstate":
-    "Reinstate this author and allow them to create and edit posts again?",
+    "Reinstate this profile and allow them to create and edit posts again?",
   "contentModeration.moderator.decisionSuccess": "Moderation decision saved.",
   "contentModeration.moderator.decisionError":
     "Couldn't save the moderation decision.",
@@ -154,7 +163,7 @@ export const CONTENT_MODERATION_MESSAGES = {
   "contentModeration.moderator.noTextContent": "No text content",
   "contentModeration.moderator.aiAssessment": "AI assessment",
   "contentModeration.moderator.aiRecommendation": "AI recommendation: {value}",
-  "contentModeration.moderator.aiCategory": "Category: {value}",
+  "contentModeration.moderator.aiCategory": "Potential category: {value}",
   "contentModeration.moderator.noAiRecommendation":
     "No AI recommendation is available.",
   "contentModeration.moderator.history": "State history ({count})",
@@ -176,5 +185,6 @@ export const CONTENT_MODERATION_MESSAGES = {
   "preferences.createProfile": "Create a profile to manage preferences.",
   "preferences.tabs.ariaLabel": "Preference sections",
   "preferences.tabs.notifications": "Notifications & messages",
-  "preferences.tabs.content": "Content",
+  "preferences.tabs.blockedProfiles": "Blocked Profiles",
+  "preferences.tabs.reports": "Reports",
 } as const;

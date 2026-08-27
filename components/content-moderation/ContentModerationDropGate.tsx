@@ -30,6 +30,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
+import Link from "next/link";
 import WavePicture from "@/components/waves/WavePicture";
 import { getTimeAgoShort } from "@/helpers/Helpers";
 import {
@@ -274,8 +275,7 @@ export default function ContentModerationDropGate({
     optimisticHiddenState,
     visibility,
   });
-  const globalModerationStatus =
-    getGlobalModerationStatus(effectiveVisibility);
+  const globalModerationStatus = getGlobalModerationStatus(effectiveVisibility);
   const openReportDetails = useCallback(() => setIsReportModalOpen(true), []);
   const gateContext = useMemo(
     () => ({
@@ -459,25 +459,38 @@ export default function ContentModerationDropGate({
         testId="content-moderation-tombstone-blocked"
         controls={
           <>
-            <span className="tw-relative tw-size-5 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-full tw-bg-iron-800">
-              {drop.author.pfp ? (
-                <Image
-                  src={resolveIpfsUrlSync(drop.author.pfp)}
-                  alt=""
-                  fill
-                  sizes="20px"
-                  className="tw-object-cover tw-grayscale"
-                />
-              ) : (
-                <UserCircleIcon
-                  aria-hidden="true"
-                  className="tw-size-full tw-text-iron-500"
-                />
+            <Link
+              href={`/${encodeURIComponent(handle ?? drop.author.id)}`}
+              aria-label={t(
+                locale,
+                "contentModeration.preferences.openProfile",
+                {
+                  profile: profileLabel,
+                }
               )}
-            </span>
-            <span className="tw-min-w-0 tw-max-w-20 tw-truncate tw-text-iron-300 sm:tw-max-w-32">
-              {profileLabel}
-            </span>
+              onClick={(event) => event.stopPropagation()}
+              className="tw-inline-flex tw-min-w-0 tw-items-center tw-gap-1.5 tw-rounded tw-text-inherit tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-text-white"
+            >
+              <span className="tw-relative tw-size-5 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-full tw-bg-iron-800">
+                {drop.author.pfp ? (
+                  <Image
+                    src={resolveIpfsUrlSync(drop.author.pfp)}
+                    alt=""
+                    fill
+                    sizes="20px"
+                    className="tw-object-cover tw-grayscale"
+                  />
+                ) : (
+                  <UserCircleIcon
+                    aria-hidden="true"
+                    className="tw-size-full tw-text-iron-500"
+                  />
+                )}
+              </span>
+              <span className="tw-min-w-0 tw-max-w-20 tw-truncate tw-text-iron-300 sm:tw-max-w-32">
+                {profileLabel}
+              </span>
+            </Link>
             <span aria-hidden="true">·</span>
             <span>{t(locale, "contentModeration.tombstone.blockedShort")}</span>
             <span aria-hidden="true">·</span>
