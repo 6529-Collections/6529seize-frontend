@@ -164,23 +164,6 @@ const AUDITED_REVEAL_EXEMPTIONS: readonly AuditedRevealExemption[] = [
       "The title and metadata overlay is pointer-events-none supplementary content; the card and author control have independent visible targets.",
   },
   {
-    file: "components/waves/winners/podium/WavePodiumItem.tsx",
-    marker: "tw-top-1/2 tw-ml-2 -tw-translate-y-1/2",
-    literalHash:
-      "6c495c84006e65e1116ebdac27efe93d03ebbe99b90f05cea1479428974c4c14",
-    reason:
-      "The external-link arrow is decorative feedback beside an already visible and fully operable profile link.",
-  },
-  {
-    file: "components/waves/winners/podium/WavePodiumItem.tsx",
-    marker:
-      "tw-left-[100%] tw-ml-2 desktop-hover:group-hover/link:tw-opacity-100",
-    literalHash:
-      "45ab45ab8b895343e261065876d1639d6354954512fa4422ce412a662e945826",
-    reason:
-      "The external-link arrow is decorative feedback beside an already visible and fully operable profile link.",
-  },
-  {
     file: "app/join/FocusSections.tsx",
     marker: "tw-bg-[linear-gradient(90deg,transparent_0%",
     literalHash:
