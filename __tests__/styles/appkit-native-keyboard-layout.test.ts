@@ -7,12 +7,12 @@ const globalStyles = fs.readFileSync(
 );
 
 describe("AppKit native keyboard layout", () => {
-  it("bounds the AppKit modal by the native keyboard inset only in Capacitor", () => {
+  it("caps the AppKit keyboard lift only in Capacitor", () => {
     expect(globalStyles).toMatch(
-      /body\.capacitor-native w3m-modal\s*\{\s*bottom:\s*var\(--native-keyboard-inset-bottom,\s*0px\);\s*\}/u
+      /body\.capacitor-native w3m-modal\s*\{\s*bottom:\s*min\(var\(--native-keyboard-inset-bottom,\s*0px\),\s*8rem\);\s*\}/u
     );
     expect(globalStyles).not.toMatch(
-      /(?:^|\n)\s*w3m-modal\s*\{\s*bottom:\s*var\(--native-keyboard-inset-bottom/mu
+      /(?:^|\n)\s*w3m-modal\s*\{\s*bottom:\s*min\(var\(--native-keyboard-inset-bottom/mu
     );
   });
 });
