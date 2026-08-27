@@ -57,6 +57,9 @@ then run `Test` or `Create`.
   - `Include Identities`
   - `Exclude Identities`
   - Sources: identity search, EMMA list import, CSV upload
+  - Identity search shows exact, prefix, and substring profile-handle matches
+    in that order before ENS-only matches, and orders each match group by
+    profile level, highest first.
   - Combined wallets are deduplicated and normalized to lowercase.
 - `Include me` behavior:
   - Turning on adds the connected profile primary wallet (if present) to

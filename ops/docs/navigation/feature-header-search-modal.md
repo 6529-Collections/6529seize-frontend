@@ -40,6 +40,15 @@ The search control opens one of two clearly scoped experiences:
 - Site-wide browse:
   - In `All`, each category shows a 3-result preview.
   - `View all <Category>` opens the full list for that category.
+- Profile results:
+  - Exact, prefix, and substring profile-handle matches appear in that order,
+    before results that match only by ENS.
+  - Within each match group, profiles are ordered by level from highest to
+    lowest.
+  - Profiles at the same level keep the order supplied by search.
+- Wave results:
+  - The `Waves` category includes only non-direct-message Waves.
+  - Direct-message conversations remain available through `DMs` navigation.
 - Pages catalog:
   - Page results can include top-level navigation destinations such as
     `NFTs`, `Museum`, `Waves`, `DMs`, `Join 6529`, and `About`, secondary
