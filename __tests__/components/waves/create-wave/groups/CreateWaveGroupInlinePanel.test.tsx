@@ -1,7 +1,10 @@
 import React from "react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { ApiGroupBeneficiaryGrantMatchMode } from "@/generated/models/ApiGroupBeneficiaryGrantMatchMode";
+import { ApiGroupFilterDirection } from "@/generated/models/ApiGroupFilterDirection";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import { ApiGroupTdhInclusionStrategy } from "@/generated/models/ApiGroupTdhInclusionStrategy";
 import { useXtdhGrantQuery } from "@/hooks/useXtdhGrantQuery";
 import { useGroupCriteriaIdentityLabels } from "@/hooks/useGroupCriteriaIdentityLabels";
 import CreateWaveGroupInlinePanel from "@/components/waves/create-wave/groups/CreateWaveGroupInlinePanel";
@@ -246,24 +249,34 @@ const defaultIncludedIdentity = {
   pfp: "me.png",
 };
 
-const savedGroupCriteria = {
-  cic: { min: null, max: null, user_identity: null, direction: "RECEIVED" },
+const savedGroupCriteria: ApiGroupFull["group"] = {
+  cic: {
+    min: null,
+    max: null,
+    user_identity: null,
+    direction: ApiGroupFilterDirection.Received,
+  },
   rep: {
     min: null,
     max: null,
     user_identity: null,
-    direction: "RECEIVED",
+    direction: ApiGroupFilterDirection.Received,
     category: null,
   },
   level: { min: null, max: null },
-  tdh: { min: null, max: null, inclusion_strategy: "BOTH" },
+  tdh: {
+    min: null,
+    max: null,
+    inclusion_strategy: ApiGroupTdhInclusionStrategy.Both,
+  },
   owns_nfts: [],
   identity_group_id: null,
   identity_group_identities_count: 0,
   excluded_identity_group_id: null,
   excluded_identity_group_identities_count: 0,
   is_beneficiary_of_grant_id: null,
-  is_beneficiary_of_grant_match_mode: "ANY_TOKEN",
+  is_beneficiary_of_grant_match_mode:
+    ApiGroupBeneficiaryGrantMatchMode.AnyToken,
   is_beneficiary_of_grant: null,
 };
 
