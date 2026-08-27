@@ -668,6 +668,7 @@ export const useCreateDropSubmission = ({
       if (isIdentityPickerAllowed) {
         disableIdentityPickerAutoOpen();
       }
+      setIsStormMode(false);
       refreshState();
     } catch (error) {
       setToast({

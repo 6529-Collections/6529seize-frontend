@@ -137,7 +137,8 @@ export function useCreateDropContentController({
 
     prevWaveIdRef.current = wave.id;
     closeOnNextInputRef.current = false;
-  }, [wave.id]);
+    setIsStormMode(false);
+  }, [setIsStormMode, wave.id]);
   const dropModeSessionScopeKey = `${wave.id}:drop-mode:${dropModeSessionEpoch}`;
   const keepDesktopOptionsVisible = !isMobile && isWideContainer;
   // Keep the scoped collapse state live so resizing back to a narrow layout
@@ -346,6 +347,11 @@ export function useCreateDropContentController({
     drop: dropForPartLimit,
     hasPendingInlineImageUpload,
   });
+  const hasCurrentDraft =
+    (getMarkdown?.trim().length ?? 0) > 0 ||
+    files.length > 0 ||
+    uploadingFiles.length > 0 ||
+    hasPendingInlineImageUpload;
   const latestEditableChatDropTarget = useLatestEditableChatDropTarget({
     waveId: wave.id,
     connectedProfile,
@@ -363,10 +369,7 @@ export function useCreateDropContentController({
   const canEditLastDropWithArrow =
     isComposerReadyForArrowEdit && latestEditableChatDropTarget !== null;
   const handleRequestEditLastDrop = useCallback((): boolean => {
-    if (
-      !isComposerReadyForArrowEdit ||
-      latestEditableChatDropTarget === null
-    ) {
+    if (!isComposerReadyForArrowEdit || latestEditableChatDropTarget === null) {
       return false;
     }
 
@@ -475,12 +478,12 @@ export function useCreateDropContentController({
     submitting,
   });
   const breakIntoStorm = useCallback(() => {
-    if (!keepDesktopOptionsVisible && pollDraft !== null) {
+    if (pollDraft !== null) {
       return;
     }
 
     void startStorm();
-  }, [keepDesktopOptionsVisible, pollDraft, startStorm]);
+  }, [pollDraft, startStorm]);
 
   useCreateDropFocusBehavior({
     activeDrop,
@@ -633,17 +636,6 @@ export function useCreateDropContentController({
     [actionsContainerRef, keepDesktopOptionsVisible, wave.id]
   );
 
-  useEffect(() => {
-    if (!drop) {
-      setIsStormMode(false);
-      return;
-    }
-
-    if (!drop.parts.length) {
-      setIsStormMode(false);
-    }
-  }, [drop, setIsStormMode]);
-
   const openMetadata = useCallback(() => {
     setMetadataOpenState({
       scopeKey: dropModeSessionScopeKey,
@@ -661,12 +653,12 @@ export function useCreateDropContentController({
     waveId: wave.id,
   });
   const togglePoll = useCallback(() => {
-    if (!keepDesktopOptionsVisible && isStormMode && pollDraft === null) {
+    if (isStormMode && pollDraft === null) {
       return;
     }
 
     togglePollDraft();
-  }, [isStormMode, keepDesktopOptionsVisible, pollDraft, togglePollDraft]);
+  }, [isStormMode, pollDraft, togglePollDraft]);
 
   const { onChangeKey, onChangeValue, onAddMetadata, onRemoveMetadata } =
     createMetadataHandlers({
@@ -713,6 +705,7 @@ export function useCreateDropContentController({
     setActionsContainerRef,
     isLinksSubmitBlocked,
     canAddPart,
+    hasCurrentDraft,
     isCompactLayout: !keepDesktopOptionsVisible,
     showOptions,
     animateOptions,

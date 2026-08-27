@@ -28,6 +28,7 @@ export default function CreateDropComposer({
   setActionsContainerRef,
   isLinksSubmitBlocked,
   canAddPart,
+  hasCurrentDraft,
   isCompactLayout,
   showOptions,
   animateOptions,
@@ -92,7 +93,7 @@ export default function CreateDropComposer({
   if (isStormModeActive) {
     if (editingPartIndex !== null) {
       submitLabel = t(locale, "waves.stormComposer.saveChanges");
-    } else if (canAddPart) {
+    } else if (canAddPart || (drop?.parts.length ?? 0) === 0) {
       submitLabel = t(locale, "waves.stormComposer.addPart");
     } else {
       submitLabel = t(locale, "waves.stormComposer.postStorm");
@@ -100,7 +101,7 @@ export default function CreateDropComposer({
   }
   return (
     <>
-      {isStormModeActive && (drop?.parts.length ?? 0) > 0 && (
+      {isStormModeActive && (
         <CreateDropStormParts
           parts={drop?.parts ?? []}
           mentionedUsers={drop?.mentioned_users ?? []}
@@ -110,6 +111,7 @@ export default function CreateDropComposer({
           editingPartIndex={editingPartIndex}
           controlsDisabled={submitting}
           canEditParts={!canAddPart && editingPartIndex === null}
+          hasCurrentDraft={hasCurrentDraft}
           onEditPart={onEditPart}
           onCancelPartEdit={onCancelPartEdit}
           onMovePart={onMovePart}
@@ -135,7 +137,6 @@ export default function CreateDropComposer({
         <CreateDropActions
           isStormMode={isStormModeActive}
           isDropMode={isDropMode}
-          canAddPart={canAddPart}
           submitting={submitting}
           isCompactLayout={isCompactLayout}
           showOptions={showOptions}

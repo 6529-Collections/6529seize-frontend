@@ -26,7 +26,6 @@ import StormButton from "./StormButton";
 interface CreateDropActionsProps {
   readonly isStormMode: boolean;
   readonly isDropMode: boolean;
-  readonly canAddPart: boolean;
   readonly submitting: boolean;
   readonly isCompactLayout?: boolean;
   readonly showOptions: boolean;
@@ -108,6 +107,22 @@ const getCompactToggleStyles = ({
   return "tw-border-white/10 tw-bg-iron-800 tw-text-iron-300 desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-text-white";
 };
 
+const getPollActionStyles = ({
+  isStormMode,
+  isPollActive,
+}: {
+  readonly isStormMode: boolean;
+  readonly isPollActive: boolean;
+}) => {
+  if (isStormMode) {
+    return "tw-cursor-default tw-bg-iron-900 tw-text-iron-600 desktop-hover:hover:tw-bg-iron-900";
+  }
+  if (isPollActive) {
+    return "tw-cursor-pointer tw-bg-primary-500/20 tw-text-primary-200";
+  }
+  return "tw-cursor-pointer tw-bg-iron-700 tw-text-iron-300";
+};
+
 const CompactActionButton: React.FC<CompactActionButtonProps> = ({
   label,
   icon,
@@ -145,7 +160,6 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
   ({
     isStormMode,
     isDropMode,
-    canAddPart,
     submitting,
     isCompactLayout = false,
     showOptions,
@@ -310,11 +324,10 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
           aria-label={isPollActive ? "Remove poll" : "Add poll"}
           aria-pressed={isPollActive}
           onClick={onTogglePoll}
-          className={`tw-flex tw-size-8 tw-flex-shrink-0 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-transition tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 desktop-hover:hover:tw-bg-iron-700/70 lg:tw-size-7 ${
-            isPollActive
-              ? "tw-text-primary-200 tw-bg-primary-500/20"
-              : "tw-bg-iron-700 tw-text-iron-300"
-          }`}
+          disabled={isStormMode}
+          className={`tw-flex tw-size-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-transition tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 desktop-hover:hover:tw-bg-iron-700/70 lg:tw-size-7 ${getPollActionStyles(
+            { isStormMode, isPollActive }
+          )}`}
           data-tooltip-id="add-poll-tooltip"
         >
           <ChartBarIcon
@@ -417,7 +430,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                         )}
                         <CompactActionButton
                           label={stormLabel}
-                          disabled={isStormMode || !canAddPart || submitting}
+                          disabled={isStormMode || submitting}
                           pressed={isStormMode}
                           onClick={() => runCompactAction(breakIntoStorm)}
                           icon={
@@ -593,7 +606,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                         {!isStormMode && (
                           <StormButton
                             isStormMode={false}
-                            canAddPart={canAddPart}
+                            isPollActive={isPollActive}
                             submitting={submitting}
                             breakIntoStorm={breakIntoStorm}
                           />

@@ -83,13 +83,14 @@ jest.mock("framer-motion", () => {
       ),
     LayoutGroup: ({ children }: { children: React.ReactNode }) =>
       React.createElement(React.Fragment, null, children),
+    useReducedMotion: () => false,
   };
 });
 
 jest.mock("@/components/waves/StormButton", () => {
   return function MockStormButton({
     isStormMode,
-    canAddPart,
+    isPollActive,
     submitting,
     breakIntoStorm,
   }: any) {
@@ -97,7 +98,7 @@ jest.mock("@/components/waves/StormButton", () => {
       <button
         data-testid="storm-button"
         onClick={breakIntoStorm}
-        disabled={submitting || !canAddPart}
+        disabled={submitting || isPollActive}
       >
         {isStormMode ? "Storm Mode" : "Storm"}
       </button>
@@ -153,7 +154,6 @@ describe("CreateDropActions", () => {
   const defaultProps = {
     isStormMode: false,
     isDropMode: true,
-    canAddPart: true,
     submitting: false,
     isRequiredMetadataMissing: false,
     isRequiredMediaMissing: false,
@@ -324,6 +324,30 @@ describe("CreateDropActions", () => {
     expect(pollButton).toHaveClass("tw-bg-primary-500/20");
   });
 
+  it("disables the storm action while a poll is active", () => {
+    render(
+      <CreateDropActions
+        {...defaultProps}
+        canCreatePoll={true}
+        isPollActive={true}
+      />
+    );
+
+    expect(screen.getByTestId("storm-button")).toBeDisabled();
+  });
+
+  it("disables the poll action while a storm is active", () => {
+    render(
+      <CreateDropActions
+        {...defaultProps}
+        canCreatePoll={true}
+        isStormMode={true}
+      />
+    );
+
+    expect(screen.getByLabelText("Add poll")).toBeDisabled();
+  });
+
   it("calls onAddMetadataClick when metadata button is clicked", async () => {
     render(<CreateDropActions {...defaultProps} />);
 
@@ -469,7 +493,6 @@ describe("CreateDropActions", () => {
       <CreateDropActions
         {...defaultProps}
         isStormMode={true}
-        canAddPart={false}
         submitting={true}
       />
     );

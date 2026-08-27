@@ -35,6 +35,7 @@ interface CreateDropStormPartsProps {
   readonly editingPartIndex: number | null;
   readonly controlsDisabled: boolean;
   readonly canEditParts: boolean;
+  readonly hasCurrentDraft: boolean;
   readonly onEditPart: (partIndex: number) => void;
   readonly onCancelPartEdit: () => void;
   readonly onMovePart: (partIndex: number, direction: -1 | 1) => void;
@@ -64,6 +65,7 @@ const CreateDropStormParts: FC<CreateDropStormPartsProps> = ({
   editingPartIndex,
   controlsDisabled,
   canEditParts,
+  hasCurrentDraft,
   onEditPart,
   onCancelPartEdit,
   onMovePart,
@@ -89,6 +91,7 @@ const CreateDropStormParts: FC<CreateDropStormPartsProps> = ({
       : "waves.stormComposer.partsCountOther",
     { count: formatInteger(locale, parts.length) }
   );
+  const isPristineDraft = parts.length === 0 && !hasCurrentDraft;
   useEffect(() => {
     if (previousPartsCountRef.current === parts.length) {
       return;
@@ -131,6 +134,14 @@ const CreateDropStormParts: FC<CreateDropStormPartsProps> = ({
   const handleDiscard = () => {
     setIsConfirmingDiscard(false);
     onDiscardStorm();
+  };
+
+  const handleDiscardTrigger = () => {
+    if (isPristineDraft) {
+      onDiscardStorm();
+      return;
+    }
+    setIsConfirmingDiscard(true);
   };
 
   return (
@@ -177,11 +188,36 @@ const CreateDropStormParts: FC<CreateDropStormPartsProps> = ({
             <button
               ref={discardTriggerRef}
               type="button"
-              onClick={() => setIsConfirmingDiscard(true)}
+              onClick={handleDiscardTrigger}
               disabled={controlsDisabled}
-              className="tw-inline-flex tw-h-11 tw-flex-none tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-2.5 tw-text-xs tw-font-medium tw-text-iron-400 tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-40 desktop-hover:hover:tw-bg-error/[0.06] desktop-hover:hover:tw-text-error sm:tw-h-auto sm:tw-py-1.5"
+              className={`tw-inline-flex tw-h-11 tw-flex-none tw-cursor-pointer tw-items-center tw-justify-center tw-gap-1 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-2.5 tw-text-xs tw-font-medium tw-text-iron-400 tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-40 sm:tw-h-auto sm:tw-py-1.5 ${
+                isPristineDraft
+                  ? "desktop-hover:hover:tw-bg-white/[0.035] desktop-hover:hover:tw-text-iron-200"
+                  : "desktop-hover:hover:tw-bg-error/[0.06] desktop-hover:hover:tw-text-error"
+              }`}
             >
-              {t(locale, "waves.stormComposer.discard")}
+              {isPristineDraft && (
+                <svg
+                  className="tw-size-3.5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  aria-hidden="true"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M6 6l12 12M18 6L6 18"
+                  />
+                </svg>
+              )}
+              {t(
+                locale,
+                isPristineDraft
+                  ? "waves.stormComposer.closeDraft"
+                  : "waves.stormComposer.discard"
+              )}
             </button>
           )}
         </header>
@@ -227,6 +263,13 @@ const CreateDropStormParts: FC<CreateDropStormPartsProps> = ({
           ref={partsListRef}
           className="tw-m-0 tw-flex tw-max-h-[30dvh] tw-min-h-0 tw-flex-1 tw-list-none tw-flex-col tw-gap-2 tw-overflow-y-auto tw-px-0 tw-py-1 sm:tw-max-h-[40vh]"
         >
+          {parts.length === 0 && (
+            <li className="tw-flex tw-min-h-14 tw-items-center tw-rounded-xl tw-bg-white/[0.025] tw-px-3 tw-py-3">
+              <p className="tw-m-0 tw-text-sm tw-leading-5 tw-text-iron-500">
+                {t(locale, "waves.stormComposer.emptyDraft")}
+              </p>
+            </li>
+          )}
           <AnimatePresence mode="popLayout" initial={false}>
             {parts.map((part, partIndex) => (
               <m.li

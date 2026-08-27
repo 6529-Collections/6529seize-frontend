@@ -5315,12 +5315,12 @@
         "post"
       ],
       "facts": [
-        "Write the first part and select Storm in the compact composer or Break into storm in the expanded composer to open the private Storm draft workspace.",
-        "When the current part is empty, the compact composer shows a small left-aligned hint below its actions explaining that text or media can start a storm.",
-        "The primary action says Add part while writing a new part, Save changes while editing, and Post storm when the current editor is empty.",
-        "Saved parts have visible controls to edit, move earlier or later, and remove; Discard clears the complete draft after confirmation.",
+        "Select Storm in the compact composer or Break into storm in the expanded composer to open the private Storm draft workspace before writing the first part.",
+        "An empty Storm draft shows 0 parts and Write part 1; if valid text or media is already present, selecting Storm saves it as part 1.",
+        "The primary action says Add part until at least one valid part is saved, Save changes while editing, and Post storm when a saved Storm has an empty current editor.",
+        "Close exits an untouched empty Storm immediately; once the Storm has saved or unsaved content, Discard clears the complete draft after confirmation.",
         "Blank or whitespace-only text is not saved as a storm part, while media-only parts are allowed.",
-        "The storm is published as one drop with multiple ordered parts."
+        "An empty Storm draft cannot be posted, Poll and Storm cannot be started together, and the storm is published as one drop with multiple ordered parts."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/messages"],

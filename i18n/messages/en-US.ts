@@ -1661,6 +1661,8 @@ const WAVE_COMPOSER_ACTION_MESSAGES = objectMessages("waves.composer.actions", {
 
 const WAVE_STORM_COMPOSER_MESSAGES = objectMessages("waves.stormComposer", {
   draftTitle: "Storm draft",
+  emptyDraft: "Your storm parts will appear here.",
+  closeDraft: "Close",
   privateDraftHint: "Only you can see this until you post it.",
   partsCountOne: "{count} part",
   partsCountOther: "{count} parts",
