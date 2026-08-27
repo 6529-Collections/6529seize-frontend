@@ -63,10 +63,95 @@ type FailedPostActionResult = Extract<
   { readonly success: false }
 >;
 
+type SuccessfulPostActionResult = Extract<
+  PostActionResult,
+  { readonly success: true }
+>;
+
+interface PostActionMutationContext {
+  readonly blockAuthor: boolean;
+  readonly hidePost: boolean;
+  readonly previousBlocked: boolean | undefined;
+  readonly previousHidden: boolean | undefined;
+  readonly rollbackLocalHidden: (() => void) | undefined;
+  readonly viewerProfileId: string | null | undefined;
+}
+
 const AUTHENTICATION_CANCELLED_ERROR = "Authentication was cancelled";
 
 const isAuthenticationCancelled = (error: unknown): boolean =>
   error instanceof Error && error.message === AUTHENTICATION_CANCELLED_ERROR;
+
+const getReportOptionStatus = ({
+  locale,
+  reportIsOpen,
+  reportPost,
+  reportWasAllowed,
+  reportWasRemoved,
+}: {
+  readonly locale: ReturnType<typeof useBrowserLocale>;
+  readonly reportIsOpen: boolean;
+  readonly reportPost: boolean;
+  readonly reportWasAllowed: boolean;
+  readonly reportWasRemoved: boolean;
+}): string | undefined => {
+  if (reportPost) return undefined;
+  if (reportIsOpen) {
+    return t(locale, "contentModeration.report.awaitingReview");
+  }
+  if (reportWasAllowed) {
+    return t(locale, "contentModeration.report.noActionTaken");
+  }
+  if (reportWasRemoved) {
+    return t(locale, "contentModeration.report.contentRemoved");
+  }
+  return undefined;
+};
+
+const getSubmitLabelKey = ({
+  isPending,
+  reportPost,
+}: {
+  readonly isPending: boolean;
+  readonly reportPost: boolean;
+}): MessageKey => {
+  if (isPending) {
+    return reportPost
+      ? "contentModeration.report.submittingReport"
+      : "contentModeration.report.submittingActions";
+  }
+  return reportPost
+    ? "contentModeration.report.submitReport"
+    : "contentModeration.report.submitActions";
+};
+
+const getPostActionOutcome = (
+  results: ReadonlyArray<PostActionResult>,
+  context: PostActionMutationContext | undefined
+) => {
+  const failures = results.filter(
+    (result): result is FailedPostActionResult => !result.success
+  );
+  const failedActions = new Set(failures.map(({ action }) => action));
+  const reportResult = results.find(
+    (result): result is SuccessfulPostActionResult =>
+      result.action === "report" && result.success
+  );
+  const reportFailed = failedActions.has("report");
+  const hideFailed =
+    failedActions.has("hide") || (reportFailed && context?.hidePost === true);
+  const blockFailed =
+    failedActions.has("block") ||
+    (reportFailed && context?.blockAuthor === true);
+
+  return {
+    blockFailed,
+    failedActions,
+    failures,
+    hideFailed,
+    reportResult,
+  };
+};
 
 const getPostActionOptionStateClass = (
   checked: boolean,
@@ -218,16 +303,13 @@ export default function ReportDropModal({
     reportStatus === ApiContentModerationReportStatus.ResolvedRemoved;
   const effectiveHide = reportPost || hidePost;
   const hasSelection = reportPost || hidePost || blockAuthor;
-  let reportOptionStatus: string | undefined;
-  if (!reportPost) {
-    if (reportIsOpen) {
-      reportOptionStatus = t(locale, "contentModeration.report.awaitingReview");
-    } else if (reportWasAllowed) {
-      reportOptionStatus = t(locale, "contentModeration.report.noActionTaken");
-    } else if (reportWasRemoved) {
-      reportOptionStatus = t(locale, "contentModeration.report.contentRemoved");
-    }
-  }
+  const reportOptionStatus = getReportOptionStatus({
+    locale,
+    reportIsOpen,
+    reportPost,
+    reportWasAllowed,
+    reportWasRemoved,
+  });
 
   const closeModal = () => {
     setReason(ApiContentModerationReportReason.ScamOrPhishing);
@@ -250,6 +332,50 @@ export default function ReportDropModal({
         viewerProfileId,
         drop.id,
         ApiContentModerationReportStatus.Open
+      );
+    }
+  };
+
+  const applySuccessfulViewerActions = (
+    reportResult: SuccessfulPostActionResult | undefined,
+    context: PostActionMutationContext | undefined
+  ) => {
+    applySuccessfulReport(reportResult, context?.viewerProfileId);
+    if (reportResult && context?.hidePost) {
+      dropGateContext?.setOptimisticHidden(true);
+      if (context.viewerProfileId) {
+        setDropHiddenOverride(context.viewerProfileId, drop.id, true);
+      }
+    }
+    if (reportResult && context?.blockAuthor && context.viewerProfileId) {
+      setProfileBlockedOverride(context.viewerProfileId, drop.author.id, true);
+    }
+  };
+
+  const rollbackFailedViewerActions = ({
+    blockFailed,
+    context,
+    hideFailed,
+  }: {
+    readonly blockFailed: boolean;
+    readonly context: PostActionMutationContext | undefined;
+    readonly hideFailed: boolean;
+  }) => {
+    if (hideFailed && context?.hidePost) {
+      context.rollbackLocalHidden?.();
+      if (context.viewerProfileId) {
+        setDropHiddenOverride(
+          context.viewerProfileId,
+          drop.id,
+          context.previousHidden
+        );
+      }
+    }
+    if (blockFailed && context?.blockAuthor && context.viewerProfileId) {
+      setProfileBlockedOverride(
+        context.viewerProfileId,
+        drop.author.id,
+        context.previousBlocked
       );
     }
   };
@@ -328,53 +454,15 @@ export default function ReportDropModal({
       };
     },
     onSuccess: (results, _variables, context) => {
-      const failures = results.filter(
-        (result): result is FailedPostActionResult => !result.success
-      );
-      const failedActions = new Set(failures.map(({ action }) => action));
-      const reportResult = results.find(
-        (result) => result.action === "report" && result.success
-      );
-      const reportFailed = failedActions.has("report");
-      const hideFailed =
-        failedActions.has("hide") || (reportFailed && context?.hidePost);
-      const blockFailed =
-        failedActions.has("block") || (reportFailed && context?.blockAuthor);
-      applySuccessfulReport(reportResult, context?.viewerProfileId);
-      if (reportResult?.success && context?.hidePost) {
-        dropGateContext?.setOptimisticHidden(true);
-        if (context.viewerProfileId) {
-          setDropHiddenOverride(context.viewerProfileId, drop.id, true);
-        }
-      }
-      if (
-        reportResult?.success &&
-        context?.blockAuthor &&
-        context.viewerProfileId
-      ) {
-        setProfileBlockedOverride(
-          context.viewerProfileId,
-          drop.author.id,
-          true
-        );
-      }
-      if (hideFailed && context?.hidePost) {
-        context.rollbackLocalHidden?.();
-        if (context.viewerProfileId) {
-          setDropHiddenOverride(
-            context.viewerProfileId,
-            drop.id,
-            context.previousHidden
-          );
-        }
-      }
-      if (blockFailed && context?.blockAuthor && context.viewerProfileId) {
-        setProfileBlockedOverride(
-          context.viewerProfileId,
-          drop.author.id,
-          context.previousBlocked
-        );
-      }
+      const {
+        blockFailed,
+        failedActions,
+        failures,
+        hideFailed,
+        reportResult,
+      } = getPostActionOutcome(results, context);
+      applySuccessfulViewerActions(reportResult, context);
+      rollbackFailedViewerActions({ blockFailed, context, hideFailed });
       if (context?.blockAuthor && !blockFailed) {
         void reconcileIdentityFollowingAfterBlockChange(
           queryClient,
@@ -663,16 +751,10 @@ export default function ReportDropModal({
                     loading={mutation.isPending}
                     disabled={!hasSelection}
                   >
-                    {t(
-                      locale,
-                      mutation.isPending
-                        ? reportPost
-                          ? "contentModeration.report.submittingReport"
-                          : "contentModeration.report.submittingActions"
-                        : reportPost
-                          ? "contentModeration.report.submitReport"
-                          : "contentModeration.report.submitActions"
-                    )}
+                    {t(locale, getSubmitLabelKey({
+                      isPending: mutation.isPending,
+                      reportPost,
+                    }))}
                   </Button>
                 </div>
               </form>

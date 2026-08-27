@@ -900,10 +900,10 @@ describe("Auth component", () => {
       const validAddress = "0x1111111111111111111111111111111111111111";
       walletAddress = validAddress;
       enableAuthMigrationDeadline("2000-01-01T00:00:00.000Z");
-      const authUtils = require("@/services/auth/auth.utils");
-      const mockGetAuthJwt = authUtils.getAuthJwt as jest.MockedFunction<any>;
-      const mockRemoveAuthJwt =
-        authUtils.removeAuthJwt as jest.MockedFunction<any>;
+      const authUtils =
+        require("@/services/auth/auth.utils") as typeof AuthUtilsModule;
+      const mockGetAuthJwt = jest.mocked(authUtils.getAuthJwt);
+      const mockRemoveAuthJwt = jest.mocked(authUtils.removeAuthJwt);
       const mockValidateJwt =
         require("@/services/auth/jwt-validation.utils").validateJwt;
       const sessionV2 = require("@/services/auth/session-v2.utils");
