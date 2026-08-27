@@ -2,6 +2,7 @@ import React, { createRef } from "react";
 import { render, act } from "@testing-library/react";
 import NewMentionsPlugin, {
   MentionTypeaheadOption,
+  type NewMentionsPluginHandles,
 } from "@/components/drops/create/lexical/plugins/mentions/MentionsPlugin";
 import { MentionSearchScopeProvider } from "@/components/drops/create/lexical/plugins/mentions/MentionSearchScopeContext";
 
@@ -96,13 +97,13 @@ describe("MentionsPlugin", () => {
       refetch,
     });
     mockEditorText = "hi";
-    const ref = createRef<any>();
+    const ref = createRef<NewMentionsPluginHandles>();
 
     render(<NewMentionsPlugin waveId="w1" onSelect={jest.fn()} ref={ref} />);
 
     let result: { completed: boolean } | undefined;
     await act(async () => {
-      result = await ref.current.expandMentionAliases();
+      result = await ref.current?.expandMentionAliases();
     });
 
     expect(result?.completed).toBe(true);

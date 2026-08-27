@@ -1,16 +1,13 @@
 "use client";
 
-import { useContentModerationDropGateContext } from "@/components/content-moderation/ContentModerationDropGateContext";
 import { useCompactMode } from "@/contexts/CompactModeContext";
 import { useEditingDrop } from "@/contexts/EditingDropContext";
 import type { ApiCreateDropPart } from "@/generated/models/ApiCreateDropPart";
 import type { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
-import { ApiDropModerationStatus } from "@/generated/models/ApiDropModerationStatus";
 import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ApiUpdateDropRequest } from "@/generated/models/ApiUpdateDropRequest";
-import { DropClientDeliveryState } from "@/helpers/waves/drop.helpers";
 import { useDropUpdateMutation } from "@/hooks/drops/useDropUpdateMutation";
 import useDropActionInteractionMode from "@/hooks/useDropActionInteractionMode";
 import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
@@ -62,6 +59,7 @@ import {
 } from "./WaveDrop.helpers";
 import type { WaveDropProps } from "./WaveDrop.types";
 import { ModerationRejectedDeliveryStatus } from "./ModerationRejectedDeliveryStatus";
+import { useWaveDropModerationPresentation } from "./useWaveDropModerationPresentation";
 
 const WaveDropInner = ({
   drop,
@@ -118,15 +116,8 @@ const WaveDropInner = ({
   const isActiveDrop = activeDrop?.drop.id === drop.id;
   const isStorm = drop.parts.length > 1;
   const isDrop = drop.drop_type === ApiDropType.Participatory;
-  const isModerationRejected =
-    drop.clientDeliveryState === DropClientDeliveryState.MODERATION_REJECTED;
-  const moderationGate = useContentModerationDropGateContext();
-  const isGloballyUnavailable =
-    moderationGate?.globalModerationStatus !== null &&
-    moderationGate?.globalModerationStatus !== undefined &&
-    moderationGate.globalModerationStatus !== ApiDropModerationStatus.Visible;
-  const effectiveShowInteractions =
-    showInteractions && !isModerationRejected && !isGloballyUnavailable;
+  const { isModerationRejected, effectiveShowInteractions } =
+    useWaveDropModerationPresentation(drop, showInteractions);
 
   const shouldGroupWithPreviousDrop = shouldGroupCurrentDrop({
     isDrop,
