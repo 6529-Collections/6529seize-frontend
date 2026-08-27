@@ -119,6 +119,15 @@ describe("GroupCreateWallets", () => {
     );
   });
 
+  it.each([GroupCreateWalletsType.INCLUDE, GroupCreateWalletsType.EXCLUDE])(
+    "requests level-ranked identity results for %s",
+    (type) => {
+      renderComp({ type, walletsLimit: 5 });
+
+      expect(identitiesProps.sort).toBe("level");
+    }
+  );
+
   it("removes wallets when remove button clicked", async () => {
     const user = userEvent.setup();
     const { setWallets } = renderComp({ walletsLimit: 5 });
