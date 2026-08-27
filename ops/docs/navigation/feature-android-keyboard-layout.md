@@ -44,6 +44,8 @@ blank space.
   the keyboard is open.
 - Create Wave flow on iOS: extra bottom margin used in non-keyboard state is
   removed while typing.
+- AppKit wallet search on iOS and Android: the wallet sheet docks above the
+  keyboard while its wallet results remain scrollable.
 
 ## Edge Cases
 
