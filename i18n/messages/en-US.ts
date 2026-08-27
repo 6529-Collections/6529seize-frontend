@@ -1248,6 +1248,8 @@ const WAVE_CREATE_GROUPS_MESSAGES = objectMessages("waves.create.groups", {
   "inlineIdentities.sources.emma.loading": "Adding allowlist identities...",
   "inlineIdentities.sources.emma.error":
     "Couldn't load this allowlist. Try again.",
+  "inlineIdentities.sources.emma.authenticationRequired":
+    "Connect your wallet to load this allowlist.",
   "inlineIdentities.sources.emma.remove": "Remove EMMA allowlist",
   "inlineIdentities.sources.csv.title": "CSV file",
   "inlineIdentities.sources.csv.description":

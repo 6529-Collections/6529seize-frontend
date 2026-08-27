@@ -500,6 +500,8 @@ export const ES_ES_MESSAGES = {
     "Añadiendo identidades de la lista...",
   "waves.create.groups.inlineIdentities.sources.emma.error":
     "No se pudo cargar esta lista. Inténtalo de nuevo.",
+  "waves.create.groups.inlineIdentities.sources.emma.authenticationRequired":
+    "Conecta tu billetera para cargar esta lista.",
   "waves.create.groups.inlineIdentities.sources.emma.remove":
     "Eliminar la lista EMMA",
   "waves.create.groups.inlineIdentities.sources.csv.title": "Archivo CSV",

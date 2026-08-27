@@ -500,6 +500,8 @@ export const DE_DE_MESSAGES = {
     "Allowlist-Identitäten werden hinzugefügt...",
   "waves.create.groups.inlineIdentities.sources.emma.error":
     "Diese Allowlist konnte nicht geladen werden. Versuche es erneut.",
+  "waves.create.groups.inlineIdentities.sources.emma.authenticationRequired":
+    "Verbinde deine Wallet, um diese Allowlist zu laden.",
   "waves.create.groups.inlineIdentities.sources.emma.remove":
     "EMMA-Allowlist entfernen",
   "waves.create.groups.inlineIdentities.sources.csv.title": "CSV-Datei",

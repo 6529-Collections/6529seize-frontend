@@ -145,7 +145,7 @@ describe("CreateWaveInlineGroupWalletSources", () => {
     const user = userEvent.setup();
 
     expect(screen.getByRole("alert")).toHaveTextContent(
-      "Couldn't load this allowlist. Try again."
+      "Connect your wallet to load this allowlist."
     );
     await user.click(screen.getByRole("button", { name: "Try again" }));
 

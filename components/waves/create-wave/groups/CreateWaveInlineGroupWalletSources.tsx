@@ -135,10 +135,15 @@ function EmmaWalletSource({
     setLoadState("idle");
     onChange({ selectedAllowlist: null, emmaWallets: null });
   };
+  const authenticationRequired =
+    selectedId !== null &&
+    sources.emmaWallets === null &&
+    !connectedProfile?.handle;
   const hasLoadError =
     selectedId !== null &&
     sources.emmaWallets === null &&
-    (!connectedProfile?.handle || loadState !== "loading");
+    !!connectedProfile?.handle &&
+    loadState !== "loading";
   const isLoading =
     selectedId !== null &&
     sources.emmaWallets === null &&
@@ -193,12 +198,14 @@ function EmmaWalletSource({
             )}
           </p>
         ) : null}
-        {hasLoadError ? (
+        {authenticationRequired || hasLoadError ? (
           <div role="alert" className="tw-min-w-0">
             <p className="tw-m-0 tw-text-xs tw-font-medium tw-text-error">
               {t(
                 locale,
-                "waves.create.groups.inlineIdentities.sources.emma.error"
+                authenticationRequired
+                  ? "waves.create.groups.inlineIdentities.sources.emma.authenticationRequired"
+                  : "waves.create.groups.inlineIdentities.sources.emma.error"
               )}
             </p>
             <button

@@ -484,6 +484,8 @@ export const EN_GB_MESSAGES = {
     "Adding allowlist identities...",
   "waves.create.groups.inlineIdentities.sources.emma.error":
     "Couldn't load this allowlist. Try again.",
+  "waves.create.groups.inlineIdentities.sources.emma.authenticationRequired":
+    "Connect your wallet to load this allowlist.",
   "waves.create.groups.inlineIdentities.sources.emma.remove":
     "Remove EMMA allowlist",
   "waves.create.groups.inlineIdentities.sources.csv.title": "CSV file",
