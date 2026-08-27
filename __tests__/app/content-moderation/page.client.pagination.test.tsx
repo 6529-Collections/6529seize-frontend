@@ -1,5 +1,6 @@
 import ContentModerationPageClient from "@/app/content-moderation/page.client";
 import type { ApiContentModerationQueueItem } from "@/generated/models/ApiContentModerationQueueItem";
+import { ApiContentModerationRecommendation } from "@/generated/models/ApiContentModerationRecommendation";
 import { ApiContentModerationReportReason } from "@/generated/models/ApiContentModerationReportReason";
 import { ApiContentModerationReportStatus } from "@/generated/models/ApiContentModerationReportStatus";
 import { ApiDropModerationStatus } from "@/generated/models/ApiDropModerationStatus";
@@ -102,7 +103,8 @@ describe("ContentModerationPageClient pagination", () => {
 
   it("hides a neutral AI category instead of rendering Category: None", async () => {
     const item = createQueueItem(1);
-    item.ai_recommendation = "NO_VIOLATION_DETECTED";
+    item.ai_recommendation =
+      ApiContentModerationRecommendation.NoViolationDetected;
     item.ai_category = "NONE";
     item.ai_confidence = 0.95;
     mockFetchContentModerationQueue.mockResolvedValue([item]);
@@ -123,7 +125,8 @@ describe("ContentModerationPageClient pagination", () => {
 
   it("labels a substantive AI category as a potential category", async () => {
     const item = createQueueItem(1);
-    item.ai_recommendation = "NEEDS_HUMAN_REVIEW";
+    item.ai_recommendation =
+      ApiContentModerationRecommendation.NeedsHumanReview;
     item.ai_category = "SCAM_OR_PHISHING";
     item.ai_confidence = 0.85;
     mockFetchContentModerationQueue.mockResolvedValue([item]);

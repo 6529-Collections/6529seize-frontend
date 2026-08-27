@@ -60,7 +60,11 @@ const renderSettings = () => {
 describe("ReportsPreferencesSettings", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.mocked(withdrawDropReport).mockResolvedValue(undefined);
+    jest.mocked(withdrawDropReport).mockResolvedValue({
+      drop_id: "drop-1",
+      status: ApiContentModerationReportStatus.Withdrawn,
+      drop_status: ApiDropModerationStatus.Visible,
+    });
   });
 
   it("lists only the reporter-facing status and final decision", async () => {
