@@ -37,15 +37,12 @@ const STATUS_LABELS: Record<ApiXTdhGrantStatus, string> = {
 export default function CreateWaveInlineGroupXtdhGrant({
   beneficiaryGrantId,
   beneficiaryGrantMatchMode,
-  setBeneficiaryGrantId,
-  setBeneficiaryGrantMatchMode,
+  setBeneficiaryGrant,
 }: {
   readonly beneficiaryGrantId: ApiCreateGroupDescription["is_beneficiary_of_grant_id"];
   readonly beneficiaryGrantMatchMode: ApiCreateGroupDescription["is_beneficiary_of_grant_match_mode"];
-  readonly setBeneficiaryGrantId: (
-    grantId: ApiCreateGroupDescription["is_beneficiary_of_grant_id"]
-  ) => void;
-  readonly setBeneficiaryGrantMatchMode: (
+  readonly setBeneficiaryGrant: (
+    grantId: ApiCreateGroupDescription["is_beneficiary_of_grant_id"],
     matchMode: ApiCreateGroupDescription["is_beneficiary_of_grant_match_mode"]
   ) => void;
 }) {
@@ -109,15 +106,21 @@ export default function CreateWaveInlineGroupXtdhGrant({
     hasSelectedGrant,
     isLookupFresh,
     matchMode: beneficiaryGrantMatchMode,
-    setMatchMode: setBeneficiaryGrantMatchMode,
+    setMatchMode: (matchMode) =>
+      setBeneficiaryGrant(
+        hasSelectedGrant ? normalizedGrantId : null,
+        matchMode
+      ),
   });
 
   const onInputChange = (nextValue: string) => {
     const normalized = nextValue.trim();
-    setBeneficiaryGrantId(normalized.length ? normalized : null);
-    if (!normalized.length) {
-      setBeneficiaryGrantMatchMode(DEFAULT_BENEFICIARY_GRANT_MATCH_MODE);
-    }
+    setBeneficiaryGrant(
+      normalized.length ? normalized : null,
+      normalized.length
+        ? beneficiaryGrantMatchMode
+        : DEFAULT_BENEFICIARY_GRANT_MATCH_MODE
+    );
   };
 
   const onResetFilters = () => {
@@ -180,7 +183,12 @@ export default function CreateWaveInlineGroupXtdhGrant({
         isLookupFresh={isLookupFresh}
         lookupGrantId={lookupGrantId}
         matchMode={effectiveMatchMode}
-        setMatchMode={setBeneficiaryGrantMatchMode}
+        setMatchMode={(matchMode) =>
+          setBeneficiaryGrant(
+            hasSelectedGrant ? normalizedGrantId : null,
+            matchMode
+          )
+        }
         showLookupError={showLookupError}
         showNonGrantedWarning={showNonGrantedWarning}
       />
@@ -293,9 +301,9 @@ export default function CreateWaveInlineGroupXtdhGrant({
                       interactive={true}
                       asListItem={true}
                       onSelect={(selectedGrant) => {
-                        setBeneficiaryGrantId(selectedGrant.id);
                         setLookupGrantId(selectedGrant.id);
-                        setBeneficiaryGrantMatchMode(
+                        setBeneficiaryGrant(
+                          selectedGrant.id,
                           getGrantCompatibleMatchMode(
                             selectedGrant,
                             effectiveMatchMode
