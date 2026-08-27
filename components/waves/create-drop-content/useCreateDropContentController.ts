@@ -6,7 +6,9 @@ import useIsMobileScreen from "@/hooks/isMobileScreen";
 import { useEditingDrop } from "@/contexts/EditingDropContext";
 import type { EditorState } from "lexical";
 import {
+  type Dispatch,
   type FocusEvent,
+  type SetStateAction,
   useCallback,
   useContext,
   useEffect,
@@ -118,7 +120,29 @@ export function useCreateDropContentController({
 
   const [submitting, setSubmitting] = useState(false);
   const [editingPartIndex, setEditingPartIndex] = useState<number | null>(null);
-  const [editorState, setEditorState] = useState<EditorState | null>(null);
+  const [{ editorState, markdown: getMarkdown }, setEditorContent] = useState<{
+    readonly editorState: EditorState | null;
+    readonly markdown: string | null;
+  }>({ editorState: null, markdown: null });
+  const setEditorState = useCallback<
+    Dispatch<SetStateAction<EditorState | null>>
+  >((nextEditorState) => {
+    setEditorContent((current) => {
+      const editorState =
+        typeof nextEditorState === "function"
+          ? nextEditorState(current.editorState)
+          : nextEditorState;
+
+      if (editorState === current.editorState) {
+        return current;
+      }
+
+      return {
+        editorState,
+        markdown: editorState ? exportComposerMarkdown(editorState) : null,
+      };
+    });
+  }, []);
   const [files, setFiles] = useState<File[]>([]);
   const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
   const [metadataOpenState, setMetadataOpenState] =
@@ -128,7 +152,6 @@ export function useCreateDropContentController({
   const [showOptionsState, setShowOptionsState] =
     useState<ScopedValueState<boolean> | null>(null);
   const closeOnNextInputRef = useRef(false);
-  const shouldCollapseOptionsAfterMarkdownSyncRef = useRef(false);
   const prevIsDropModeRef = useRef(isDropMode);
   const [dropModeSessionEpoch, setDropModeSessionEpoch] = useState(0);
   useLayoutEffect(() => {
@@ -138,7 +161,6 @@ export function useCreateDropContentController({
 
     prevWaveIdRef.current = wave.id;
     closeOnNextInputRef.current = false;
-    shouldCollapseOptionsAfterMarkdownSyncRef.current = false;
     setIsStormMode(false);
   }, [setIsStormMode, wave.id]);
   const dropModeSessionScopeKey = `${wave.id}:drop-mode:${dropModeSessionEpoch}`;
@@ -252,10 +274,6 @@ export function useCreateDropContentController({
   const hasPollValidationError =
     pollDraft !== null && pollValidation.error !== null;
 
-  const getMarkdown = useMemo(
-    () => (editorState ? exportComposerMarkdown(editorState) : null),
-    [editorState]
-  );
   const collapseOptions = useCallback(() => {
     setShowOptionsState((current) =>
       current?.scopeKey === wave.id && current.value === false
@@ -264,16 +282,6 @@ export function useCreateDropContentController({
     );
     closeOnNextInputRef.current = false;
   }, [wave.id]);
-  useLayoutEffect(() => {
-    if (!shouldCollapseOptionsAfterMarkdownSyncRef.current) {
-      return;
-    }
-
-    shouldCollapseOptionsAfterMarkdownSyncRef.current = false;
-    if ((getMarkdown?.trim().length ?? 0) > 0) {
-      collapseOptions();
-    }
-  }, [collapseOptions, getMarkdown]);
   const currentPartMentionedGroups = useMemo(
     () =>
       editorState
@@ -620,10 +628,16 @@ export function useCreateDropContentController({
 
   const handleEditorStateChange = useCallback(
     (newEditorState: EditorState) => {
-      setEditorState(newEditorState);
-      shouldCollapseOptionsAfterMarkdownSyncRef.current = true;
+      const nextMarkdown = exportComposerMarkdown(newEditorState);
+      setEditorContent({
+        editorState: newEditorState,
+        markdown: nextMarkdown,
+      });
 
-      if (!keepDesktopOptionsVisible && closeOnNextInputRef.current) {
+      if (
+        nextMarkdown.trim().length > 0 ||
+        (!keepDesktopOptionsVisible && closeOnNextInputRef.current)
+      ) {
         collapseOptions();
       }
     },
