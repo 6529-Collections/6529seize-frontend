@@ -113,7 +113,9 @@ action.
 - `Create App Wallet` closes the sheet while the existing wallet-creation
   dialog is open, then returns to the App Wallets list when creation is closed.
 - `External Wallets` opens Reown's external-wallet browser. App Wallets are not
-  repeated in that browser.
+  repeated in that browser. Coinbase Wallet is excluded from new connections
+  in the Capacitor app; web connections and existing native sessions remain
+  unchanged.
 - `Scan Connection QR` opens the native scanner in connection-only mode. This
   entry accepts only canonical 6529 connection-share deep links and routes a
   valid result to `/accept-connection-sharing`.

@@ -63,6 +63,7 @@ interface CreateAuthRequestActionsParams {
   readonly enableWalletAuthentication: boolean;
   readonly expireSessionUpgradeAuth: (walletAddress: string) => Promise<void>;
   readonly invalidateAll: () => void;
+  readonly isActiveChainSupported: () => boolean;
   readonly isAddressAuthorized: boolean;
   readonly seizeDisconnect: () => Promise<void>;
   readonly resetSessionUpgradeExpiryDedupe: (walletAddress: string) => void;
@@ -145,6 +146,7 @@ export function createAuthRequestActions({
   enableWalletAuthentication,
   expireSessionUpgradeAuth,
   invalidateAll,
+  isActiveChainSupported,
   isAddressAuthorized,
   seizeDisconnect,
   resetSessionUpgradeExpiryDedupe,
@@ -227,6 +229,16 @@ export function createAuthRequestActions({
     userRejected: boolean;
     failureToastShown: boolean;
   }> => {
+    if (!isActiveChainSupported()) {
+      // AppKit already explains the unsupported-network state. Suppress the
+      // generic authentication failure toast without covering its UI.
+      return {
+        signature: null,
+        userRejected: false,
+        failureToastShown: true,
+      };
+    }
+
     try {
       const result = await signMessage(message);
       let failureToastShown = false;
@@ -581,13 +593,20 @@ export function createAuthRequestActions({
   const requestAuth = async (
     options?: RequestAuthOptions
   ): Promise<{ success: boolean }> => {
-    const authRequestGuard = createAuthRequestGuard(options ?? {});
-    if (!authRequestGuard.isCurrent()) {
+    const connectedAddress = ensureConnectedWalletAddress();
+    if (!connectedAddress) {
       return { success: false };
     }
 
-    const connectedAddress = ensureConnectedWalletAddress();
-    if (!connectedAddress) {
+    if (!isActiveChainSupported()) {
+      return { success: false };
+    }
+
+    const authRequestGuard = createAuthRequestGuard(
+      options ?? {},
+      isActiveChainSupported
+    );
+    if (!authRequestGuard.isCurrent()) {
       return { success: false };
     }
 
@@ -619,7 +638,9 @@ export function createAuthRequestActions({
       });
       return { success: false };
     } finally {
-      if (authRequestGuard.isCurrent()) {
+      // A chain change makes the request guard stale, but must still release
+      // the signing state so authentication can resume after switching back.
+      if (authRequestGuard.isCurrent() || !isActiveChainSupported()) {
         setAuthLoadingState("idle");
       }
     }
@@ -637,6 +658,11 @@ export function createAuthRequestActions({
 
     if (!enableWalletAuthentication) {
       return { success: true };
+    }
+
+    if (canSignActiveWallet && !isActiveChainSupported()) {
+      // Leave AppKit's network-switch interface as the only active prompt.
+      return { success: false };
     }
 
     setAuthLoadingState("signing");
@@ -660,13 +686,26 @@ export function createAuthRequestActions({
         return { success: false };
       }
 
+      const authRequestGuard = createAuthRequestGuard(
+        {},
+        isActiveChainSupported
+      );
+      if (!authRequestGuard.isCurrent()) {
+        return { success: false };
+      }
+
       const role = activeProfileProxy
         ? validateRoleForAuthentication(activeProfileProxy)
         : null;
       const { success } = await requestSignIn({
         signerAddress: upgradeAddress,
         role,
+        authRequestGuard,
       });
+
+      if (!authRequestGuard.isCurrent()) {
+        return { success: false };
+      }
 
       if (!success) {
         return { success: await handleAuthorizedWalletSignInFailure(true) };
@@ -701,13 +740,28 @@ export function createAuthRequestActions({
       return;
     }
 
+    if (!isActiveChainSupported()) {
+      return;
+    }
+
+    const authRequestGuard = createAuthRequestGuard({}, isActiveChainSupported);
+
     await removeAuthJwt();
+    if (!authRequestGuard.isCurrent()) {
+      setToast({
+        message:
+          "Network changed. Switch to a supported network to continue signing in.",
+        type: "error",
+      });
+      return;
+    }
     try {
       const { success } = await requestSignIn({
         signerAddress: address,
         role: profileProxy ? validateRoleForAuthentication(profileProxy) : null,
+        authRequestGuard,
       });
-      if (success) {
+      if (success && authRequestGuard.isCurrent()) {
         setActiveProfileProxy(profileProxy);
         dispatchProfileSwitchedEvent(profileProxy);
       }
