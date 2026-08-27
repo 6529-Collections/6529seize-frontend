@@ -11,6 +11,46 @@ import type { MessageKey } from "@/i18n/messages/en-US";
 const RETRY_LABEL = "Erneut versuchen";
 
 export const DE_DE_MESSAGES = {
+  "user.brain.sidebar.createdHeading": "Erstellte Waves",
+  "user.brain.sidebar.createdMobileHeading": "Erstellt",
+  "user.brain.sidebar.recentlyActiveHeading": "Kürzlich aktiv in",
+  "user.brain.sidebar.lastPost": "Letzter Beitrag {time}",
+  "user.brain.sidebar.noPostsByProfile": "Keine Beiträge von diesem Profil",
+  "user.brain.sidebar.totalWavePosts.one":
+    "{count} Beitrag insgesamt in der Wave",
+  "user.brain.sidebar.totalWavePosts.other":
+    "{count} Beiträge insgesamt in der Wave",
+  "user.brain.sidebar.privateWave": "Private Wave",
+  "user.brain.sidebar.loadingWaveActivity":
+    "Wave-Aktivität des Profils wird geladen",
+  "user.brain.sidebar.loadingMoreWaveActivity":
+    "Weitere Wave-Aktivität des Profils wird geladen",
+  "user.brain.sidebar.mobileStripLabel": "Brain-Waves",
+  "user.brain.sidebar.createdEmpty": "Keine zugänglichen erstellten Waves.",
+  "user.brain.sidebar.recentEmpty": "Keine kürzlichen Wave-Beiträge.",
+  "user.brain.sidebar.createdLoadError":
+    "Erstellte Waves konnten nicht geladen werden.",
+  "user.brain.sidebar.recentLoadError":
+    "Die kürzliche Wave-Aktivität konnte nicht geladen werden.",
+  "user.brain.sidebar.loadMoreError":
+    "Weitere Waves konnten nicht geladen werden.",
+  "user.brain.sidebar.retry": "Erneut versuchen",
+  "user.brain.sidebar.retryLoadMore": "Mehr erneut laden",
+  "user.brain.sidebar.loadMore": "Mehr laden",
+  "user.brain.sidebar.loadingMore": "Wird geladen…",
+  "user.brain.sidebar.allWavesLoaded": "Alle Waves sind geladen.",
+  "user.brain.sidebar.more": "Mehr",
+  "user.brain.sidebar.showLess": "Weniger anzeigen",
+  "user.brain.sidebar.showMore": "Mehr anzeigen",
+  "user.brain.sidebar.viewMoreCreatedWaves": "Weitere erstellte Waves anzeigen",
+  "user.brain.sidebar.createdModalTitle": "Waves von {profile}",
+  "user.brain.sidebar.loadedCreatedCount.one":
+    "{count} geladene Wave wird angezeigt",
+  "user.brain.sidebar.loadedCreatedCount.other":
+    "{count} geladene Waves werden angezeigt",
+  "user.brain.sidebar.createdCount.one": "{count} erstellte Wave",
+  "user.brain.sidebar.createdCount.other": "{count} erstellte Waves",
+  "user.brain.sidebar.closeCreatedWaves": "Erstellte Waves schließen",
   "linkPreview.twitter.kind.article": "Artikel",
   "linkPreview.twitter.kind.post": "Beitrag",
   "linkPreview.twitter.article.provider": "Artikel auf X",
