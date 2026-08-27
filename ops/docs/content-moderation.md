@@ -130,10 +130,13 @@ available again after resolution. An allowed resolution may be reported again
 later.
 
 The **Reports** tab at `/preferences?tab=reports` lists the current profile's
-own reports, the reported profile, reason, submission date, and public status.
-Open reports can also be withdrawn there. Resolved reports show the public
-moderator outcome, but never expose AI assessment details, internal notes or
-reasons, moderator identity, or other reporters.
+own reports, the reported profile, a snapshot of the reported post, reason,
+submission date, and public status. The snapshot remains available when the
+live post has been removed, while media and files stay collapsed by default.
+Visible posts link back to their wave context. Open reports can also be
+withdrawn there. Resolved reports show the public moderator outcome, but never
+expose AI assessment details, reply-parent evidence, internal notes or reasons,
+moderator identity, or other reporters.
 
 ## Posts from blocked profiles
 

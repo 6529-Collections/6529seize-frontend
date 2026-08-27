@@ -100,6 +100,12 @@ export const CONTENT_MODERATION_MESSAGES = {
     "You haven't submitted any reports.",
   "contentModeration.preferences.reports.withdrawn": "Withdrawn",
   "contentModeration.preferences.reports.reason": "Reported for {reason}",
+  "contentModeration.preferences.reports.reportedContent": "Reported content",
+  "contentModeration.preferences.reports.noText":
+    "This post did not contain text.",
+  "contentModeration.preferences.reports.assets": "Media and files ({count})",
+  "contentModeration.preferences.reports.media": "Media · {type}",
+  "contentModeration.preferences.reports.viewInContext": "View in context",
   "contentModeration.moderator.menu": "WatchTower",
   "contentModeration.moderator.metaTitle": "WatchTower - Content Moderation",
   "contentModeration.moderator.metaDescription": "Review reported content.",

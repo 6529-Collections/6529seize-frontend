@@ -16240,6 +16240,85 @@ components:
         - NO_VIOLATION_DETECTED
         - NEEDS_HUMAN_REVIEW
         - URGENT_QUARANTINE
+    ApiContentModerationReportedAttachment:
+      type: object
+      additionalProperties: false
+      required:
+        - original_file_name
+        - kind
+        - declared_mime
+        - detected_mime
+        - size_bytes
+        - ipfs_url
+      properties:
+        original_file_name:
+          type: string
+        kind:
+          type: string
+        declared_mime:
+          type: string
+        detected_mime:
+          type: string
+          nullable: true
+        size_bytes:
+          type: integer
+          format: int64
+          nullable: true
+        ipfs_url:
+          type: string
+          nullable: true
+    ApiContentModerationReportedContent:
+      type: object
+      additionalProperties: false
+      required:
+        - wave_id
+        - title
+        - parts
+      properties:
+        wave_id:
+          type: string
+          nullable: true
+        title:
+          type: string
+          nullable: true
+        parts:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiContentModerationReportedContentPart"
+    ApiContentModerationReportedContentPart:
+      type: object
+      additionalProperties: false
+      required:
+        - part_no
+        - content
+        - media
+        - attachments
+      properties:
+        part_no:
+          type: integer
+          format: int64
+        content:
+          type: string
+          nullable: true
+        media:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiContentModerationReportedMedia"
+        attachments:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiContentModerationReportedAttachment"
+    ApiContentModerationReportedMedia:
+      type: object
+      additionalProperties: false
+      required:
+        - url
+        - mime_type
+      properties:
+        url:
+          type: string
+        mime_type:
+          type: string
     ApiContentModerationReportReason:
       type: string
       enum:
@@ -16315,6 +16394,7 @@ components:
         - created_at
         - resolved_at
         - drop_status
+        - reported_content
         - cursor
       properties:
         id:
@@ -16346,6 +16426,8 @@ components:
           nullable: true
         drop_status:
           $ref: "#/components/schemas/ApiDropModerationStatus"
+        reported_content:
+          $ref: "#/components/schemas/ApiContentModerationReportedContent"
         cursor:
           type: string
           description: Opaque cursor for fetching reports after this item.

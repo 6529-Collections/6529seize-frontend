@@ -550,7 +550,6 @@ export const handleComposerFileChange = ({
   setToast,
   setFiles,
   setShowOptionsState,
-  shouldAnimateOptionsRef,
   closeOnNextInputRef,
 }: {
   readonly newFiles: File[];
@@ -563,7 +562,6 @@ export const handleComposerFileChange = ({
   readonly setShowOptionsState: React.Dispatch<
     React.SetStateAction<ScopedValueState<boolean> | null>
   >;
-  readonly shouldAnimateOptionsRef: MutableCurrentRef<boolean>;
   readonly closeOnNextInputRef: MutableCurrentRef<boolean>;
 }) => {
   try {
@@ -628,7 +626,6 @@ export const handleComposerFileChange = ({
   }
 
   if (!keepOptionsVisible) {
-    shouldAnimateOptionsRef.current = true;
     setShowOptionsState({ scopeKey: waveId, value: false });
     closeOnNextInputRef.current = false;
   }
