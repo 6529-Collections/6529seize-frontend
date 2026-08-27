@@ -1387,9 +1387,13 @@
       "facts": [
         "The Profile Brain tab surfaces Brain-related profile activity and wave context.",
         "Brain views include activity and wave sidebar surfaces where available.",
-        "Created Waves is labeled Wave posts, and each row's Last activity time refers to the newest post by anyone in that wave.",
-        "Most Active In is labeled All time and ranks accessible non-direct-message waves by how many posts the identity has written in them across all time.",
-        "Most Active In shows up to five ranked waves and labels each desktop row Last post with when the viewed identity last posted in that specific wave.",
+        "Created Waves lists accessible non-direct-message root waves and subwaves created by the profile, ordered by that profile's latest post in each wave; waves without a qualifying profile post appear after active waves.",
+        "Recently Active In lists accessible non-direct-message root waves and subwaves ordered by the profile's latest post, whether or not the profile created them; a wave can appear in both sections.",
+        "Each row labels the profile-specific time as Last post. Created Waves also labels its separate total wave posts count, which includes retained CHAT posts by all authors; Recently Active In does not show that wave-wide total.",
+        "Created Waves initially shows five rows on desktop, and both lists provide Load more controls so cursor pages remain reachable.",
+        "On small screens, More opens the Created waves modal with the same profile-specific ordering and Load more pagination; it does not show a partial page count as a total.",
+        "When a focused Load more control retrieves the final cursor page, focus moves to an All waves loaded status so keyboard focus is preserved.",
+        "Created Waves and Recently Active In load and recover independently, and results refresh for a connected-viewer change so private-wave access is not reused across viewers.",
         "Use /{user}/brain for profile-specific Brain context."
       ],
       "canonical_path": "/{user}/brain",

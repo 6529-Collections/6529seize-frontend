@@ -24,8 +24,8 @@ owned by:
   12-month public-post summary card above the Brain feed, with day-by-day
   activity cells and fallback states.
 - [Profile Brain Tab Wave Sidebar](feature-brain-wave-sidebar.md): `Created
-  Waves` / `Most Active In` companion surfaces, mobile strip behavior, and the
-  created-waves modal on `/{user}/brain`.
+  Waves` / `Recently Active In` companion surfaces, cursor pagination, mobile
+  strip behavior, and the created-waves modal on `/{user}/brain`.
 - [Collected Tab, Stats Summary, and Transfer Mode](feature-collected-tab.md):
   native and network holdings browsing, integrated stats details, and owner
   transfer mode at `/{user}/collected`.

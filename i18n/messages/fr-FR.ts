@@ -9,6 +9,45 @@ import stormComposerFrMessages from "@/i18n/messages/stormComposer.fr-FR.json";
 import type { MessageKey } from "@/i18n/messages/en-US";
 
 export const FR_FR_MESSAGES = {
+  "user.brain.sidebar.createdHeading": "Waves créées",
+  "user.brain.sidebar.createdMobileHeading": "Créées",
+  "user.brain.sidebar.recentlyActiveHeading": "Activité récente dans",
+  "user.brain.sidebar.lastPost": "Dernière publication {time}",
+  "user.brain.sidebar.noPostsByProfile": "Aucune publication par ce profil",
+  "user.brain.sidebar.totalWavePosts.one":
+    "{count} publication totale dans la Wave",
+  "user.brain.sidebar.totalWavePosts.other":
+    "{count} publications totales dans la Wave",
+  "user.brain.sidebar.privateWave": "Wave privée",
+  "user.brain.sidebar.loadingWaveActivity":
+    "Chargement de l’activité du profil dans les Waves",
+  "user.brain.sidebar.loadingMoreWaveActivity":
+    "Chargement d’autres activités du profil dans les Waves",
+  "user.brain.sidebar.mobileStripLabel": "Waves du Brain",
+  "user.brain.sidebar.createdEmpty": "Aucune Wave créée accessible.",
+  "user.brain.sidebar.recentEmpty":
+    "Aucune publication récente dans les Waves.",
+  "user.brain.sidebar.createdLoadError":
+    "Impossible de charger les Waves créées.",
+  "user.brain.sidebar.recentLoadError":
+    "Impossible de charger l’activité récente dans les Waves.",
+  "user.brain.sidebar.loadMoreError": "Impossible de charger d’autres Waves.",
+  "user.brain.sidebar.retry": "Réessayer",
+  "user.brain.sidebar.retryLoadMore": "Réessayer d’en charger davantage",
+  "user.brain.sidebar.loadMore": "Charger plus",
+  "user.brain.sidebar.loadingMore": "Chargement…",
+  "user.brain.sidebar.allWavesLoaded": "Toutes les Waves sont chargées.",
+  "user.brain.sidebar.more": "Plus",
+  "user.brain.sidebar.showLess": "Afficher moins",
+  "user.brain.sidebar.showMore": "Afficher plus",
+  "user.brain.sidebar.viewMoreCreatedWaves": "Afficher plus de Waves créées",
+  "user.brain.sidebar.createdModalTitle": "Waves créées par {profile}",
+  "user.brain.sidebar.loadedCreatedCount.one": "{count} Wave chargée affichée",
+  "user.brain.sidebar.loadedCreatedCount.other":
+    "{count} Waves chargées affichées",
+  "user.brain.sidebar.createdCount.one": "{count} Wave créée",
+  "user.brain.sidebar.createdCount.other": "{count} Waves créées",
+  "user.brain.sidebar.closeCreatedWaves": "Fermer les Waves créées",
   "linkPreview.twitter.kind.article": "Article",
   "linkPreview.twitter.kind.post": "Publication",
   "linkPreview.twitter.article.provider": "Article sur X",

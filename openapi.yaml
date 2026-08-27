@@ -11944,6 +11944,64 @@ paths:
                 $ref: "#/components/schemas/ApiWaveOverviewPage"
         "400":
           description: Invalid request
+  /v2/waves/profile-activity/{identity}:
+    get:
+      tags:
+        - WavesV2
+      summary: Get profile wave activity
+      description: >-
+        Returns accessible non-direct-message waves created by, or recently
+        posted to by, the resolved profile. latest_post_timestamp is the
+        profile's latest authored drop in the exact wave, including the wave
+        description drop, replies, and CHAT, PARTICIPATORY, and WINNER drop
+        types. It excludes reactions, votes, subscriptions, reads, and drops
+        authored by other identities.
+      operationId: getProfileWaveActivity
+      x-6529-router:
+        enabled: true
+        auth: optional
+        handler:
+          import: "@/api/waves/profile-wave-activity.handler"
+          name: handleGetProfileWaveActivity
+      parameters:
+        - name: identity
+          in: path
+          description: Profile id, wallet, ENS, or handle to resolve.
+          required: true
+          schema:
+            type: string
+            maxLength: 200
+        - name: activity_type
+          in: query
+          required: true
+          schema:
+            $ref: "#/components/schemas/ApiProfileWaveActivityType"
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 50
+            default: 20
+        - name: cursor
+          in: query
+          description: Opaque cursor returned by the previous page.
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiProfileWaveActivityPage"
+        "400":
+          description: Invalid request or cursor
+        "404":
+          description: Identity not found
   /v2/waves/{id}/metadata:
     get:
       tags:
@@ -21234,6 +21292,55 @@ components:
         profile_curation_id:
           type: string
           nullable: true
+    ApiProfileWaveActivity:
+      type: object
+      required:
+        - wave_id
+        - wave_name
+        - wave_picture
+        - is_private
+        - total_drops_count
+        - latest_post_timestamp
+      properties:
+        wave_id:
+          type: string
+        wave_name:
+          type: string
+        wave_picture:
+          type: string
+          nullable: true
+        is_private:
+          type: boolean
+        total_drops_count:
+          type: integer
+          format: int64
+          description: Total retained CHAT drops in the wave, across all authors.
+        latest_post_timestamp:
+          type: integer
+          format: int64
+          nullable: true
+          description: >-
+            Latest qualifying authored drop timestamp for the resolved profile
+            in this exact wave, including the wave description drop and replies.
+            Null when a CREATED result has no qualifying authored drop.
+    ApiProfileWaveActivityPage:
+      type: object
+      required:
+        - data
+        - next_cursor
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiProfileWaveActivity"
+        next_cursor:
+          type: string
+          nullable: true
+    ApiProfileWaveActivityType:
+      type: string
+      enum:
+        - CREATED
+        - RECENT
     ApiPublishProfileCmsPackageRequest:
       type: object
       required:
