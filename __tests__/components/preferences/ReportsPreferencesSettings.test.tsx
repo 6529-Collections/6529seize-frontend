@@ -43,6 +43,18 @@ const report = (
   created_at: Date.UTC(2026, 7, 27, 8, 42),
   resolved_at: null,
   drop_status: ApiDropModerationStatus.Visible,
+  reported_content: {
+    wave_id: "wave-1",
+    title: null,
+    parts: [
+      {
+        part_no: 1,
+        content: "The reported message",
+        media: [],
+        attachments: [],
+      },
+    ],
+  },
   cursor: "cursor-1",
   ...overrides,
 });
@@ -86,7 +98,57 @@ describe("ReportsPreferencesSettings", () => {
     );
     expect(screen.getByText("Reported · Awaiting review")).toBeVisible();
     expect(screen.getByText("Reviewed · Content removed")).toBeVisible();
+    expect(screen.getAllByText("The reported message")).toHaveLength(2);
     expect(screen.queryByText(/AI assessment/i)).not.toBeInTheDocument();
+  });
+
+  it("keeps removed content recognizable without linking to the removed drop", async () => {
+    jest.mocked(fetchMyContentModerationReports).mockResolvedValue([
+      report({
+        status: ApiContentModerationReportStatus.ResolvedRemoved,
+        drop_status: ApiDropModerationStatus.ModeratorRemoved,
+        reported_content: {
+          wave_id: "wave-1",
+          title: "Reported title",
+          parts: [
+            {
+              part_no: 1,
+              content: "Removed reported message",
+              media: [{ url: "ipfs://image", mime_type: "image/png" }],
+              attachments: [
+                {
+                  original_file_name: "evidence.pdf",
+                  kind: "DOCUMENT",
+                  declared_mime: "application/pdf",
+                  detected_mime: "application/pdf",
+                  size_bytes: 1024,
+                  ipfs_url: "ipfs://attachment",
+                },
+              ],
+            },
+          ],
+        },
+      }),
+    ]);
+
+    renderSettings();
+
+    expect(await screen.findByText("Removed reported message")).toBeVisible();
+    expect(screen.getByText("Reported title")).toBeVisible();
+    expect(screen.getByText("Media and files (2)")).toBeVisible();
+    expect(
+      screen.queryByRole("link", { name: "View in context" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("links a visible report back to its wave context", async () => {
+    jest.mocked(fetchMyContentModerationReports).mockResolvedValue([report()]);
+
+    renderSettings();
+
+    expect(
+      await screen.findByRole("link", { name: "View in context" })
+    ).toHaveAttribute("href", "/waves/wave-1?drop=drop-1");
   });
 
   it("allows an open report to be withdrawn", async () => {

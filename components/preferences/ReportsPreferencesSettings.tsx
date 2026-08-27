@@ -1,6 +1,7 @@
 "use client";
 
 import MobileWrapperConfirmationDialog from "@/components/mobile-wrapper-dialog/MobileWrapperConfirmationDialog";
+import ReportedContentPreview from "@/components/preferences/ReportedContentPreview";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import { ApiContentModerationReportStatus } from "@/generated/models/ApiContentModerationReportStatus";
 import type { ApiContentModerationUserReport } from "@/generated/models/ApiContentModerationUserReport";
@@ -129,6 +130,11 @@ function ReportRow({
           <p className="tw-text-primary-200 tw-mb-0 tw-mt-1 tw-text-sm tw-font-semibold">
             {getReportStatusLabel(report, locale)}
           </p>
+          <ReportedContentPreview
+            content={report.reported_content}
+            dropId={report.drop_id}
+            dropStatus={report.drop_status}
+          />
         </div>
         {report.status === ApiContentModerationReportStatus.Open && (
           <button

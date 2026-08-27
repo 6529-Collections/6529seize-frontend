@@ -116,6 +116,10 @@ export * from '../models/ApiContentModerationReportRequest';
 export * from '../models/ApiContentModerationReportResponse';
 export * from '../models/ApiContentModerationReportStatus';
 export * from '../models/ApiContentModerationReportWithdrawalResponse';
+export * from '../models/ApiContentModerationReportedAttachment';
+export * from '../models/ApiContentModerationReportedContent';
+export * from '../models/ApiContentModerationReportedContentPart';
+export * from '../models/ApiContentModerationReportedMedia';
 export * from '../models/ApiContentModerationUserReport';
 export * from '../models/ApiContentModeratorAccess';
 export * from '../models/ApiCreateAttachmentMultipartUploadRequest';
@@ -795,7 +799,11 @@ import { ApiContentModerationReportRequest     } from '../models/ApiContentModer
 import { ApiContentModerationReportResponse    } from '../models/ApiContentModerationReportResponse';
 import { ApiContentModerationReportStatus } from '../models/ApiContentModerationReportStatus';
 import { ApiContentModerationReportWithdrawalResponse    } from '../models/ApiContentModerationReportWithdrawalResponse';
-import { ApiContentModerationUserReport             } from '../models/ApiContentModerationUserReport';
+import { ApiContentModerationReportedAttachment } from '../models/ApiContentModerationReportedAttachment';
+import { ApiContentModerationReportedContent } from '../models/ApiContentModerationReportedContent';
+import { ApiContentModerationReportedContentPart } from '../models/ApiContentModerationReportedContentPart';
+import { ApiContentModerationReportedMedia } from '../models/ApiContentModerationReportedMedia';
+import { ApiContentModerationUserReport              } from '../models/ApiContentModerationUserReport';
 import { ApiContentModeratorAccess } from '../models/ApiContentModeratorAccess';
 import { ApiCreateAttachmentMultipartUploadRequest   } from '../models/ApiCreateAttachmentMultipartUploadRequest';
 import { ApiCreateAttachmentMultipartUploadResponse     } from '../models/ApiCreateAttachmentMultipartUploadResponse';
@@ -1686,6 +1694,10 @@ let typeMap: {[index: string]: any} = {
     "ApiContentModerationReportRequest": ApiContentModerationReportRequest,
     "ApiContentModerationReportResponse": ApiContentModerationReportResponse,
     "ApiContentModerationReportWithdrawalResponse": ApiContentModerationReportWithdrawalResponse,
+    "ApiContentModerationReportedAttachment": ApiContentModerationReportedAttachment,
+    "ApiContentModerationReportedContent": ApiContentModerationReportedContent,
+    "ApiContentModerationReportedContentPart": ApiContentModerationReportedContentPart,
+    "ApiContentModerationReportedMedia": ApiContentModerationReportedMedia,
     "ApiContentModerationUserReport": ApiContentModerationUserReport,
     "ApiContentModeratorAccess": ApiContentModeratorAccess,
     "ApiCreateAttachmentMultipartUploadRequest": ApiCreateAttachmentMultipartUploadRequest,
