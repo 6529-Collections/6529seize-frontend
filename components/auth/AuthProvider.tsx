@@ -75,6 +75,7 @@ import {
   runImmediateAuthValidation,
 } from "./authValidation";
 import { useSeizeConnectContext } from "./SeizeConnectContext";
+import { useAuthChainGuard } from "./useAuthChainGuard";
 
 export default function Auth({
   children,
@@ -90,7 +91,7 @@ export default function Auth({
   const pathname = usePathname();
   const router = useRouter();
   const seizeSettingsContext = useSeizeSettingsOptional();
-
+  const authChainGuard = useAuthChainGuard();
   const {
     address,
     hasValidWalletAuth: isAddressAuthorized,
@@ -104,7 +105,6 @@ export default function Auth({
     isSafeWallet,
     connectionState,
   } = useSeizeConnectContext();
-
   const {
     signMessage,
     isSigningPending,
@@ -561,6 +561,7 @@ export default function Auth({
       expireSessionUpgradeAuth,
       invalidateAll,
       isAddressAuthorized,
+      isActiveChainSupported: authChainGuard.isLatestChainSupported,
       seizeDisconnect,
       resetSessionUpgradeExpiryDedupe,
       setActiveProfileProxy,
@@ -686,7 +687,6 @@ export default function Auth({
     sessionUpgradeCanDismiss,
     signModalReason,
   ]);
-
   const isSignRequestInProgress =
     isSigningPending || authLoadingState === "signing";
   const isSessionUpgradePrompt = signModalReason === "session-upgrade";
@@ -697,15 +697,15 @@ export default function Auth({
     sessionUpgradePromptMode === "sign" &&
     !canSignActiveWallet &&
     getSessionClientType() === "web";
-
-  const shouldShowSignModal =
-    showSignModal &&
-    !isSigningOutAll &&
-    !(
-      authLoadingState === "validating" &&
-      signModalReason !== "session-upgrade"
-    ) &&
-    (connectionState === "connected" || isDisconnectedWebSessionUpgradePrompt);
+  const shouldShowSignModal = authChainGuard.shouldShowSignModal({
+    authLoadingState,
+    connectionState,
+    isConnectionShareUpgradePrompt,
+    isDisconnectedWebSessionUpgradePrompt,
+    isSigningOutAll,
+    showSignModal,
+    signModalReason,
+  });
 
   useEffect(() => {
     syncVisibleAuthPromptTracking({
