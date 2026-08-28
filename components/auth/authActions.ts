@@ -1,5 +1,4 @@
 import { isAddress } from "viem";
-import type { AppToastInput } from "@/components/utils/toast/AppToast";
 import { getNodeEnv, publicEnv } from "@/config/env";
 import {
   InvalidRoleStateError,
@@ -32,12 +31,8 @@ import {
   hasSessionUpgradeRollout,
 } from "./authSessionUpgrade";
 import type {
-  AuthLoadingState,
-  AuthRolloutSettings,
   AuthorizedWalletValidationResult,
   RequestAuthOptions,
-  SessionUpgradePromptStatus,
-  SignModalReason,
 } from "./authTypes";
 import {
   AuthenticationNonceError,
@@ -50,53 +45,10 @@ import {
 } from "./authRequestGuard";
 import { createTimedAbortSignal } from "./authRequestAbortSignal";
 import { createAuthRequestSignIn } from "./authRequestSignIn";
-
-type SignMessage = (message: string) => Promise<{
-  readonly signature: string | null;
-  readonly userRejected: boolean;
-  readonly error?: unknown;
-}>;
-
-interface CreateAuthRequestActionsParams {
-  readonly activeProfileProxy: ApiProfileProxy | null;
-  readonly address: string | undefined;
-  readonly authRolloutSettings: AuthRolloutSettings;
-  readonly canSignActiveWallet: boolean;
-  readonly enableWalletAuthentication: boolean;
-  readonly expireSessionUpgradeAuth: (walletAddress: string) => Promise<void>;
-  readonly invalidateAll: () => void;
-  readonly isActiveChainSupported: () => boolean;
-  readonly isAddressAuthorized: boolean;
-  readonly seizeDisconnect: () => Promise<void>;
-  readonly resetSessionUpgradeExpiryDedupe: (walletAddress: string) => void;
-  readonly setActiveProfileProxy: (
-    profileProxy: ApiProfileProxy | null
-  ) => void;
-  readonly setAuthLoadingState: (state: AuthLoadingState) => void;
-  readonly setSessionUpgradeRequired: (required: boolean) => void;
-  readonly setShowSignModal: (show: boolean) => void;
-  readonly setSignModalReason: (reason: SignModalReason) => void;
-  readonly setToast: (toast: AppToastInput) => void;
-  readonly showSessionUpgradePrompt: (
-    walletAddress: string,
-    options?: {
-      readonly forceShow?: boolean;
-      readonly allowWithoutDeadline?: boolean;
-    }
-  ) => SessionUpgradePromptStatus;
-  readonly signMessage: SignMessage;
-  readonly signModalReason: SignModalReason;
-}
-
-interface AuthRequestActions {
-  readonly onActiveProfileProxy: (
-    profileProxy: ApiProfileProxy | null
-  ) => Promise<void>;
-  readonly requestAuth: (
-    options?: RequestAuthOptions
-  ) => Promise<{ success: boolean }>;
-  readonly requestSessionUpgrade: () => Promise<{ success: boolean }>;
-}
+import type {
+  AuthRequestActions,
+  CreateAuthRequestActionsParams,
+} from "./authActionTypes";
 
 const MANUAL_AUTH_VALIDATION_TIMEOUT_MS = 30_000;
 
