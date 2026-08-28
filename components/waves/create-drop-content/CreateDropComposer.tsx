@@ -2,7 +2,6 @@ import { CHAT_LINK_RESTRICTION_MESSAGE } from "@/helpers/waves/chat-link-restric
 import { t } from "@/i18n/messages";
 import type { SupportedLocale } from "@/i18n/locales";
 import { AnimatePresence, LazyMotion, domAnimation, m } from "framer-motion";
-import { useId } from "react";
 import MobileWrapperDialog from "../../mobile-wrapper-dialog/MobileWrapperDialog";
 import Button from "../../utils/button/Button";
 import CreateDropActions from "../CreateDropActions";
@@ -90,7 +89,6 @@ export default function CreateDropComposer({
   locale,
   submitWithResolvedAliases,
 }: CreateDropComposerProps) {
-  const pollQuestionErrorId = useId();
   const displayedStormPartNumber =
     editingPartIndex === null
       ? (drop?.parts.length ?? 0) + 1
@@ -160,36 +158,36 @@ export default function CreateDropComposer({
           setShowOptions={handleSetShowOptions}
           onGifDrop={onGifDrop}
         />
-        <div className="tw-col-start-2 tw-row-start-2 tw-w-full tw-min-w-0">
-          <CreateDropInput
-            waveId={wave.id}
-            key={dropEditorRefreshKey}
-            ref={createDropInputRef}
-            editorState={editorState}
-            initialEditorStateJson={initialDraftJson}
-            type={activeDrop?.action ?? null}
-            submitting={submitting}
-            isStormMode={isStormModeActive}
-            stormPartNumber={displayedStormPartNumber}
-            isDropMode={isDropMode}
-            isPollActive={hasPoll}
-            canMentionAll={canMentionAll}
-            canSubmit={canSubmit}
-            onEditorState={handleEditorStateChange}
-            onEditorBlur={handleEditorBlur}
-            onReferencedNft={onReferencedNft}
-            onMentionedUser={onMentionedUser}
-            onMentionedWave={onMentionedWave}
-            onAttachmentFiles={handleFileChange}
-            canEditLastDropWithArrow={canEditLastDropWithArrow}
-            onRequestEditLastDrop={handleRequestEditLastDrop}
-            initialMarkdown={initialMarkdown}
-            initialMarkdownKey={initialMarkdownKey}
-            hasValidationError={pollQuestionError !== null}
-            validationErrorId={pollQuestionErrorId}
-            onDrop={submitWithResolvedAliases}
-          />
-        </div>
+        <CreateDropInput
+          waveId={wave.id}
+          key={dropEditorRefreshKey}
+          ref={createDropInputRef}
+          editorState={editorState}
+          initialEditorStateJson={initialDraftJson}
+          type={activeDrop?.action ?? null}
+          submitting={submitting}
+          isStormMode={isStormModeActive}
+          stormPartNumber={displayedStormPartNumber}
+          isDropMode={isDropMode}
+          isPollActive={hasPoll}
+          containerClassName="tw-col-start-2 tw-row-start-2 tw-w-full tw-min-w-0"
+          canMentionAll={canMentionAll}
+          canSubmit={canSubmit}
+          onEditorState={handleEditorStateChange}
+          onEditorBlur={handleEditorBlur}
+          onReferencedNft={onReferencedNft}
+          onMentionedUser={onMentionedUser}
+          onMentionedWave={onMentionedWave}
+          onAttachmentFiles={handleFileChange}
+          canEditLastDropWithArrow={canEditLastDropWithArrow}
+          onRequestEditLastDrop={handleRequestEditLastDrop}
+          initialMarkdown={initialMarkdown}
+          initialMarkdownKey={initialMarkdownKey}
+          hasValidationError={pollQuestionError !== null}
+          validationHelperText={pollQuestionError}
+          validationHelperClassName="tw-col-start-2 tw-row-start-3 tw-mb-0 tw-mt-2 tw-text-[11px] tw-font-medium tw-leading-4 tw-text-amber-200/90"
+          onDrop={submitWithResolvedAliases}
+        />
         <div className="tw-col-start-3 tw-row-start-2 tw-self-end md:tw-row-span-2">
           <CreateDropSubmit
             submitting={submitting}
@@ -203,19 +201,10 @@ export default function CreateDropComposer({
             }
           />
         </div>
-        {pollQuestionError && (
-          <p
-            id={pollQuestionErrorId}
-            role="alert"
-            className="tw-col-start-2 tw-row-start-3 tw-mb-0 tw-mt-2 tw-text-[11px] tw-font-medium tw-leading-4 tw-text-amber-200/90"
-          >
-            {pollQuestionError}
-          </p>
-        )}
         {showCurationDropModeWarning && (
           <div
             className={`tw-col-span-3 tw-col-start-1 tw-min-w-0 md:tw-col-span-1 md:tw-col-start-2 ${
-              isCompactLayout ? "tw-row-start-4" : "tw-row-start-3"
+              pollQuestionError ? "tw-row-start-4" : "tw-row-start-3"
             }`}
           >
             <div className="tw-mt-2 tw-text-[11px] tw-leading-4 tw-text-amber-200/90">

@@ -43,10 +43,11 @@ export const useCreateDropPollActions = ({
     () => validateCreateDropPollDraft(pollDraft, locale),
     [locale, pollDraft]
   );
+  const isPollQuestionMissing = (markdown?.trim().length ?? 0) === 0;
   const pollQuestionError =
     pollDraft !== null &&
-    isPollQuestionTouched &&
-    (markdown?.trim().length ?? 0) === 0
+    isPollQuestionMissing &&
+    (isPollQuestionTouched || pollValidation.request !== null)
       ? t(locale, "waves.poll.composer.questionRequired")
       : null;
 
@@ -85,8 +86,7 @@ export const useCreateDropPollActions = ({
   }, [pollDraft, waveId]);
 
   return {
-    hasPollValidationError:
-      pollDraft !== null && pollValidation.error !== null,
+    hasPollValidationError: pollDraft !== null && pollValidation.error !== null,
     hasValidPoll: pollValidation.request !== null,
     markPollQuestionTouched,
     pollQuestionError,

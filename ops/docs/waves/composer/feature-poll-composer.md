@@ -26,9 +26,10 @@ can be posted.
 
 ## Validation and Recovery
 
-- Opening a poll keeps the required question field neutral. If the field loses
-  focus while empty, it shows **Add a poll question.** without shifting the
-  question field or Post action out of alignment.
+- Opening a poll keeps the required question field neutral. It shows **Add a
+  poll question.** if the field loses focus while empty or if the other poll
+  settings become valid and the missing question is the only remaining block.
+  The message stays aligned directly below the question field.
 - Empty option rows show **Enter at least 2 options.**
 - Duplicate options, overlong options, and non-future closing times show a
   specific message next to the poll fields.

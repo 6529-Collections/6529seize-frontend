@@ -273,17 +273,13 @@ const CreateDropStormParts: FC<CreateDropStormPartsProps> = ({
         {showEditBlockedHint && (
           <p
             id={editBlockedHintId}
-            role="status"
             className={
               isCompactLayout
                 ? "tw-m-0 tw-px-1 tw-pb-1.5 tw-text-[11px] tw-leading-4 tw-text-iron-400"
                 : "tw-sr-only"
             }
           >
-            {t(
-              locale,
-              "waves.stormComposer.finishCurrentPartBeforeEditing"
-            )}
+            {t(locale, "waves.stormComposer.finishCurrentPartBeforeEditing")}
           </p>
         )}
 
@@ -315,9 +311,7 @@ const CreateDropStormParts: FC<CreateDropStormPartsProps> = ({
                 mentionedWaves={mentionedWaves}
                 referencedNfts={referencedNfts}
                 isEditing={editingPartIndex === partIndex}
-                controlsDisabled={
-                  controlsDisabled || editingPartIndex !== null
-                }
+                controlsDisabled={controlsDisabled || editingPartIndex !== null}
                 canEdit={canEditParts}
                 editDisabledDescriptionId={
                   showEditBlockedHint ? editBlockedHintId : undefined
