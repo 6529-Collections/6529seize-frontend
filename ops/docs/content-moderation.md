@@ -121,13 +121,15 @@ review**, **Reviewed · No action taken**, and **Reviewed · Content removed**.
 Only the reporter sees this personal report state. Internal moderator notes,
 AI details, moderator identity, and other reporters are never exposed.
 
-Opening **Flag Content** again while the viewer has an open report shows the
-existing report instead of permitting a duplicate. **Withdraw report** is
-available until a moderator resolves it and opens a separate confirmation
-state. A successful withdrawal closes the dialog and leaves the post hidden.
-Withdrawal is auditable, does not affect other reporters, and does not become
-available again after resolution. An allowed resolution may be reported again
-later.
+Opening **Flag Content** again after the viewer submits a report shows the
+existing report state with the Report option checked and locked instead of
+permitting a duplicate. **Withdraw report** is available until a moderator
+resolves it and opens a separate confirmation state. A successful withdrawal
+closes the dialog and leaves the post hidden. Withdrawal is auditable, does not
+affect other reporters, and does not become available again after resolution.
+The same profile cannot report the unchanged post again after either reviewed
+outcome, while other profiles may still report it independently. Withdrawing
+an open report permits that profile to submit a later report.
 
 The **Reports** tab at `/preferences?tab=reports` lists the current profile's
 own reports, the reported profile, a snapshot of the reported post, reason,
