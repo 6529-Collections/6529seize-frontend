@@ -9,6 +9,7 @@ import { ApiGroupBeneficiaryGrantMatchMode } from "@/generated/models/ApiGroupBe
 import { ApiGroupFilterDirection } from "@/generated/models/ApiGroupFilterDirection";
 import { ApiGroupTdhInclusionStrategy } from "@/generated/models/ApiGroupTdhInclusionStrategy";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import { createDeferredPromise } from "@/__tests__/utils/deferredPromise";
 
 const mockSubmitInlineGroup = jest.fn();
 const mockValidateWaveGroups = jest.fn();
@@ -481,13 +482,8 @@ describe("WaveGroupEditButtons", () => {
   });
 
   it("disables access shortcuts while a wave update is pending", async () => {
-    let resolveMutation: ((value: object) => void) | null = null;
-    mutateAsync.mockImplementationOnce(
-      async () =>
-        await new Promise<object>((resolve) => {
-          resolveMutation = resolve;
-        })
-    );
+    const pendingMutation = createDeferredPromise<object>();
+    mutateAsync.mockImplementationOnce(() => pendingMutation.promise);
     render(<WaveGroupEditButtons wave={wave} type={WaveGroupType.VIEW} />, {
       wrapper,
     });
@@ -502,7 +498,7 @@ describe("WaveGroupEditButtons", () => {
       ).toBeDisabled();
     });
 
-    resolveMutation?.({});
+    pendingMutation.resolve({});
     await waitFor(() => expect(mutateAsync).toHaveBeenCalled());
   });
 
