@@ -29,6 +29,10 @@ export default function ContentModerationReportStatusButton({
       ? "contentModeration.report.reportedShort"
       : "contentModeration.report.reviewedShort"
   );
+  const visibleLabel =
+    status === ApiContentModerationReportStatus.ResolvedAllowed
+      ? fullLabel
+      : shortLabel;
 
   return (
     <button
@@ -42,11 +46,11 @@ export default function ContentModerationReportStatusButton({
       className={`tw-text-primary-200 tw-inline-flex tw-cursor-pointer tw-items-center tw-gap-1 tw-rounded-full tw-border tw-border-solid tw-border-primary-400/25 tw-bg-primary-500/10 tw-align-middle tw-font-semibold tw-transition-colors hover:tw-border-primary-400/45 hover:tw-bg-primary-500/15 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 ${
         compact
           ? "tw-px-1.5 tw-py-0.5 tw-text-[10px]"
-          : "tw-mr-2 tw-self-start tw-px-2 tw-py-0.5 tw-text-xs"
+          : "tw-self-start tw-px-2 tw-py-0.5 tw-text-xs"
       }`}
     >
       <FlagIcon aria-hidden="true" className="tw-size-3.5 tw-flex-none" />
-      <span>{shortLabel}</span>
+      <span>{visibleLabel}</span>
     </button>
   );
 }
