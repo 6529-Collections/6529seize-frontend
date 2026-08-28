@@ -2509,6 +2509,49 @@ describe("Auth component", () => {
       expect(mockSignMessage).not.toHaveBeenCalled();
     });
 
+    it("does not continue a session upgrade if the chain becomes unsupported", async () => {
+      const validAddress = "0x1111111111111111111111111111111111111111";
+      walletAddress = validAddress;
+      const sessionV2 = require("@/services/auth/session-v2.utils");
+      const nonce = createDeferredPromise<{
+        readonly signable_message: string;
+        readonly server_signature: string;
+      }>();
+      sessionV2.getSessionNonce.mockReturnValueOnce(nonce.promise);
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <SessionUpgradeProbe />
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      fireEvent.click(screen.getByTestId("request-session-upgrade"));
+      await waitFor(() => {
+        expect(sessionV2.getSessionNonce).toHaveBeenCalledWith({
+          signerAddress: validAddress,
+        });
+      });
+
+      mockActiveChainId = 137;
+      nonce.resolve({
+        signable_message: "sign this message exactly",
+        server_signature: "server-signature",
+      });
+
+      await waitFor(() => {
+        expect(screen.getByTestId("session-upgrade-result")).toHaveTextContent(
+          "false"
+        );
+      });
+      expect(mockSignMessage).not.toHaveBeenCalled();
+      expect(sessionV2.loginWithSessionV2).not.toHaveBeenCalled();
+      expect(mockSeizeDisconnect).not.toHaveBeenCalled();
+    });
+
     it("tracks a connected reauth prompt once for a visible auth incident", async () => {
       mockUsePathname.mockReturnValue("/waves/wave-1");
       const mockValidateAuthImmediate =

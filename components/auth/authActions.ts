@@ -651,11 +651,10 @@ export function createAuthRequestActions({
         return { success: false };
       }
 
-      const authRequestGuard = createAuthRequestGuard(
-        {},
-        isActiveChainSupported
+      const signingAuthRequestGuard = createSigningAuthRequestGuard(
+        createAuthRequestGuard({})
       );
-      if (!authRequestGuard.isCurrent()) {
+      if (!signingAuthRequestGuard.isCurrent()) {
         return { success: false };
       }
 
@@ -665,10 +664,10 @@ export function createAuthRequestActions({
       const { success } = await requestSignIn({
         signerAddress: upgradeAddress,
         role,
-        authRequestGuard,
+        authRequestGuard: signingAuthRequestGuard,
       });
 
-      if (!authRequestGuard.isCurrent()) {
+      if (!signingAuthRequestGuard.isCurrent()) {
         return { success: false };
       }
 
@@ -709,10 +708,12 @@ export function createAuthRequestActions({
       return;
     }
 
-    const authRequestGuard = createAuthRequestGuard({}, isActiveChainSupported);
+    const signingAuthRequestGuard = createSigningAuthRequestGuard(
+      createAuthRequestGuard({})
+    );
 
     await removeAuthJwt();
-    if (!authRequestGuard.isCurrent()) {
+    if (!signingAuthRequestGuard.isCurrent()) {
       setToast({
         message:
           "Network changed. Switch to a supported network to continue signing in.",
@@ -724,9 +725,9 @@ export function createAuthRequestActions({
       const { success } = await requestSignIn({
         signerAddress: address,
         role: profileProxy ? validateRoleForAuthentication(profileProxy) : null,
-        authRequestGuard,
+        authRequestGuard: signingAuthRequestGuard,
       });
-      if (success && authRequestGuard.isCurrent()) {
+      if (success && signingAuthRequestGuard.isCurrent()) {
         setActiveProfileProxy(profileProxy);
         dispatchProfileSwitchedEvent(profileProxy);
       }
