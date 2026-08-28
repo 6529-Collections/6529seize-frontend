@@ -173,6 +173,30 @@ describe("CommunityMembersGroupFilter", () => {
     });
   });
 
+  it("shows the structured create-group error toast", async () => {
+    const user = userEvent.setup();
+    submit.mockResolvedValue({
+      ok: false,
+      reason: "request",
+      error: "Backend refused the group.",
+    });
+    renderFilter();
+
+    await user.click(
+      screen.getByRole("button", { name: "Create filter group" })
+    );
+
+    await waitFor(() => {
+      expect(setToast).toHaveBeenCalledWith({
+        type: "error",
+        title: "Couldn't create this group.",
+        description: "Please check the group setup and try again.",
+        details: "Backend refused the group.",
+      });
+    });
+    expect(onGroupChange).not.toHaveBeenCalled();
+  });
+
   it("applies or clears an existing group without creating one", async () => {
     const user = userEvent.setup();
     renderFilter();
