@@ -31,12 +31,15 @@ The same wave can appear in both lists. Direct-message waves are excluded.
    page when one is available. `Show less` restores the compact view.
 4. Desktop shows the first page of recent activity. Select `Load more` to
    append the next page.
-5. Small screens show the first created-wave pill and recent-activity pills in
+5. On desktop, scroll anywhere inside the right sidebar to move through both
+   lists without moving the Brain feed. The sidebar remains one scroll area,
+   and keyboard focus moves it as controls come into view.
+6. Small screens show the first created-wave pill and recent-activity pills in
    a horizontally scrollable strip.
-6. If more created results are loaded or another created page is available,
+7. If more created results are loaded or another created page is available,
    select `More` to open the created-waves modal. The modal uses the same
    ordering and supports `Load more` until every created result is reachable.
-7. Select a wave row or pill to open `/waves/{waveId}`.
+8. Select a wave row or pill to open `/waves/{waveId}`.
 
 When the final cursor page finishes loading from a focused `Load more` control,
 focus moves to the visible `All waves loaded.` status instead of falling back to
@@ -71,6 +74,9 @@ the document.
   visibility from the preceding viewer is not reused.
 - The compact created view remains limited to five visible rows, but cursor
   pagination keeps all results reachable.
+- On desktop, the sidebar becomes independently scrollable only when its
+  content is taller than the available viewport. Short, loading, empty, and
+  error states keep their natural height.
 
 ## Failure and Recovery
 
