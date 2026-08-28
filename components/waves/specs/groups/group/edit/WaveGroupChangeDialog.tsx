@@ -1,28 +1,26 @@
 "use client";
 
-import { useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useMemo, useState, type ReactNode } from "react";
+import { ArrowPathIcon, GlobeAltIcon } from "@heroicons/react/24/outline";
 import GroupAssignmentDialog from "@/components/groups/assignment/GroupAssignmentDialog";
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import MobileWrapperConfirmationDialog from "@/components/mobile-wrapper-dialog/MobileWrapperConfirmationDialog";
+import Button from "@/components/utils/button/Button";
 import { buildInlineGroupName } from "@/components/waves/create-wave/groups/createWaveInlineGroupBuilder";
+import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import {
   CREATE_WAVE_NONE_GROUP_LABELS,
   CREATE_WAVE_SELECT_GROUP_LABELS,
 } from "@/helpers/waves/waves.constants";
 import type { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
 import type { ApiGroup } from "@/generated/models/ApiGroup";
-import { ApiGroupBeneficiaryGrantMatchMode } from "@/generated/models/ApiGroupBeneficiaryGrantMatchMode";
-import { ApiGroupFilterDirection } from "@/generated/models/ApiGroupFilterDirection";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
-import { ApiGroupTdhInclusionStrategy } from "@/generated/models/ApiGroupTdhInclusionStrategy";
-import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { t } from "@/i18n/messages";
-import { commonApiFetch } from "@/services/api/common-api";
+import { t, type MessageKey } from "@/i18n/messages";
 import { CreateWaveGroupConfigType } from "@/types/waves.types";
 import { WaveGroupType } from "../WaveGroup.types";
+import { areWaveGroupCriteriaEqual } from "./buttons/utils/waveGroupCriteriaMatch";
+import { useWaveGroupCriteria } from "./hooks/useWaveGroupCriteria";
 
 const WAVE_GROUP_TO_CREATE_GROUP_TYPE = {
   [WaveGroupType.VIEW]: CreateWaveGroupConfigType.CAN_VIEW,
@@ -32,83 +30,79 @@ const WAVE_GROUP_TO_CREATE_GROUP_TYPE = {
   [WaveGroupType.ADMIN]: CreateWaveGroupConfigType.ADMIN,
 } satisfies Record<WaveGroupType, CreateWaveGroupConfigType>;
 
-const createEmptyGroupDescription = (): ApiGroupFull["group"] => ({
-  tdh: {
-    min: null,
-    max: null,
-    inclusion_strategy: ApiGroupTdhInclusionStrategy.Both,
-  },
-  rep: {
-    min: null,
-    max: null,
-    direction: ApiGroupFilterDirection.Received,
-    user_identity: null,
-    category: null,
-  },
-  cic: {
-    min: null,
-    max: null,
-    direction: ApiGroupFilterDirection.Received,
-    user_identity: null,
-  },
-  level: { min: null, max: null },
-  owns_nfts: [],
-  identity_group_id: null,
-  identity_group_identities_count: 0,
-  excluded_identity_group_id: null,
-  excluded_identity_group_identities_count: 0,
-  is_beneficiary_of_grant_id: null,
-  is_beneficiary_of_grant_match_mode:
-    ApiGroupBeneficiaryGrantMatchMode.AnyToken,
-  is_beneficiary_of_grant: null,
-});
+const VISIBILITY_MATCH_TYPES = new Set<WaveGroupType>([
+  WaveGroupType.DROP,
+  WaveGroupType.VOTE,
+  WaveGroupType.CHAT,
+]);
 
-const createUnknownGroupAuthor = (): ApiProfileMin => ({
-  id: "unknown",
-  handle: null,
-  pfp: null,
-  banner1_color: null,
-  banner2_color: null,
-  cic: 0,
-  rep: 0,
-  tdh: 0,
-  tdh_rate: 0,
-  xtdh: 0,
-  xtdh_rate: 0,
-  level: 0,
-  primary_address: "",
-  subscribed_actions: [],
-  archived: false,
-  active_main_stage_submission_ids: [],
-  winner_main_stage_drop_ids: [],
-  artist_of_prevote_cards: [],
-  profile_wave_id: null,
-  is_wave_creator: false,
-  classification: ApiProfileClassification.Pseudonym,
-  sub_classification: null,
-});
+const MAKE_PUBLIC_ACTION = "make-public";
 
-const getSelectedGroup = (group: ApiGroup | null): ApiGroupFull | null => {
-  if (!group?.id || !group.name) {
-    return null;
-  }
+const EDIT_ACCESS_MESSAGES = {
+  title: "waves.create.groups.editAccess.title",
+  description: "waves.create.groups.editAccess.description",
+  makePublic: "waves.create.groups.editAccess.makePublic",
+  makePublicDescription: "waves.create.groups.editAccess.makePublicDescription",
+  useVisibility: "waves.create.groups.editAccess.useVisibility",
+  useVisibilityDescription:
+    "waves.create.groups.editAccess.useVisibilityDescription",
+  useVisibilityPublicDescription:
+    "waves.create.groups.editAccess.useVisibilityPublicDescription",
+  makePublicConfirmTitle:
+    "waves.create.groups.editAccess.makePublicConfirmTitle",
+  useVisibilityConfirmTitle:
+    "waves.create.groups.editAccess.useVisibilityConfirmTitle",
+  makePublicConfirmMessage:
+    "waves.create.groups.editAccess.makePublicConfirmMessage",
+  useVisibilityConfirmMessage:
+    "waves.create.groups.editAccess.useVisibilityConfirmMessage",
+  useVisibilityPublicConfirmMessage:
+    "waves.create.groups.editAccess.useVisibilityPublicConfirmMessage",
+  confirmMakePublic: "waves.create.groups.editAccess.confirmMakePublic",
+  confirmUseVisibility: "waves.create.groups.editAccess.confirmUseVisibility",
+} as const;
 
-  return {
-    id: group.id,
-    name: group.name,
-    group: createEmptyGroupDescription(),
-    created_at: group.created_at ?? 0,
-    created_by: group.author ?? createUnknownGroupAuthor(),
-    visible: !group.is_hidden,
-    is_private: false,
-    is_direct_message: group.is_direct_message ?? false,
-  };
-};
+type ConfirmationAction = typeof MAKE_PUBLIC_ACTION | "use-visibility";
+
+function AccessShortcut({
+  description,
+  disabled,
+  icon,
+  label,
+  onClick,
+}: {
+  readonly description: string;
+  readonly disabled: boolean;
+  readonly icon: ReactNode;
+  readonly label: string;
+  readonly onClick: () => void;
+}) {
+  return (
+    <div className="tw-flex tw-flex-col tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900/70 tw-p-3 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
+      <p className="tw-mb-0 tw-text-sm tw-leading-5 tw-text-iron-300">
+        {description}
+      </p>
+      <Button
+        variant="secondary"
+        size="sm"
+        disabled={disabled}
+        className="tw-w-full sm:tw-w-auto"
+        onClick={onClick}
+      >
+        {icon}
+        {label}
+      </Button>
+    </div>
+  );
+}
 
 export default function WaveGroupChangeDialog({
   wave,
   type,
   currentGroup,
+  defaultIncludedIdentity,
+  accessLabel,
+  disabled = false,
   onClose,
   onGroupChange,
   onCreateGroup,
@@ -116,33 +110,27 @@ export default function WaveGroupChangeDialog({
   readonly wave: ApiWave;
   readonly type: WaveGroupType;
   readonly currentGroup: ApiGroup | null;
+  readonly defaultIncludedIdentity: CommunityMemberMinimal | null;
+  readonly accessLabel: string;
+  readonly disabled?: boolean;
   readonly onClose: () => void;
-  readonly onGroupChange: (group: ApiGroupFull | null) => void | Promise<void>;
+  readonly onGroupChange: (
+    group: ApiGroupFull | null
+  ) => void | boolean | Promise<void | boolean>;
   readonly onCreateGroup: (
     payload: ApiCreateGroup
   ) => Promise<ApiGroupFull | null>;
 }) {
   const locale = useBrowserLocale();
-  const selectedGroup = useMemo(
-    () => getSelectedGroup(currentGroup),
-    [currentGroup]
+  const [confirmationAction, setConfirmationAction] =
+    useState<ConfirmationAction | null>(null);
+  const [isConfirming, setIsConfirming] = useState(false);
+  const currentCriteria = useWaveGroupCriteria(currentGroup?.id ?? null);
+  const canMatchVisibility = VISIBILITY_MATCH_TYPES.has(type);
+  const visibilityGroupId = wave.visibility.scope.group?.id ?? null;
+  const visibilityCriteria = useWaveGroupCriteria(
+    canMatchVisibility ? visibilityGroupId : null
   );
-  const currentGroupId = currentGroup?.id ?? "";
-  const {
-    data: restoredGroup,
-    isError: isGroupError,
-    isLoading: isGroupLoading,
-  } = useQuery<ApiGroupFull>({
-    queryKey: [QueryKey.GROUP, currentGroupId],
-    queryFn: async ({ signal }) =>
-      await commonApiFetch<ApiGroupFull>({
-        endpoint: `groups/${encodeURIComponent(currentGroupId)}`,
-        signal,
-      }),
-    enabled: currentGroupId.length > 0,
-    staleTime: 60_000,
-  });
-  const resolvedSelectedGroup = restoredGroup ?? selectedGroup;
   const groupConfigType = WAVE_GROUP_TO_CREATE_GROUP_TYPE[type];
   const groupLabel =
     CREATE_WAVE_SELECT_GROUP_LABELS[wave.wave.type][groupConfigType];
@@ -152,35 +140,130 @@ export default function WaveGroupChangeDialog({
     groupLabel,
     fallbackName: t(locale, "waves.create.groups.defaultGroupName"),
   });
-  const title = t(
-    locale,
-    resolvedSelectedGroup
-      ? "waves.create.groups.dialog.changeTitle"
-      : "waves.create.groups.dialog.addTitle"
-  );
-  const description = resolvedSelectedGroup
-    ? t(locale, "waves.create.groups.dialog.changeDescription")
-    : t(locale, "waves.create.groups.dialog.addDescription");
-  let selectedGroupCriteriaStatus: "loading" | "unavailable" | undefined;
-  if (isGroupLoading) {
-    selectedGroupCriteriaStatus = "loading";
-  } else if (isGroupError) {
-    selectedGroupCriteriaStatus = "unavailable";
+  const criteriaMatch = useMemo(() => {
+    if (
+      !canMatchVisibility ||
+      currentCriteria.criteria === null ||
+      visibilityCriteria.criteria === null
+    ) {
+      return null;
+    }
+    return areWaveGroupCriteriaEqual(
+      currentCriteria.criteria,
+      visibilityCriteria.criteria
+    );
+  }, [
+    canMatchVisibility,
+    currentCriteria.criteria,
+    visibilityCriteria.criteria,
+  ]);
+  const showMakePublic = type === WaveGroupType.VIEW && currentGroup !== null;
+  const showUseVisibility = canMatchVisibility && criteriaMatch === false;
+  const visibilityIsPublic = visibilityGroupId === null;
+  let shortcut: ReactNode = null;
+  if (showMakePublic) {
+    shortcut = (
+      <AccessShortcut
+        description={t(locale, EDIT_ACCESS_MESSAGES.makePublicDescription)}
+        disabled={disabled}
+        icon={<GlobeAltIcon aria-hidden="true" className="tw-size-4" />}
+        label={t(locale, EDIT_ACCESS_MESSAGES.makePublic)}
+        onClick={() => setConfirmationAction(MAKE_PUBLIC_ACTION)}
+      />
+    );
+  } else if (showUseVisibility) {
+    const descriptionKey = visibilityIsPublic
+      ? EDIT_ACCESS_MESSAGES.useVisibilityPublicDescription
+      : EDIT_ACCESS_MESSAGES.useVisibilityDescription;
+    shortcut = (
+      <AccessShortcut
+        description={t(locale, descriptionKey, { groupLabel: accessLabel })}
+        disabled={disabled}
+        icon={<ArrowPathIcon aria-hidden="true" className="tw-size-4" />}
+        label={t(locale, EDIT_ACCESS_MESSAGES.useVisibility)}
+        onClick={() => setConfirmationAction("use-visibility")}
+      />
+    );
   }
 
+  const confirmShortcut = async () => {
+    if (confirmationAction === null || disabled || isConfirming) {
+      return;
+    }
+    setIsConfirming(true);
+    try {
+      const nextGroup =
+        confirmationAction === MAKE_PUBLIC_ACTION
+          ? null
+          : (visibilityCriteria.criteria?.group ?? null);
+      await onGroupChange(nextGroup);
+    } finally {
+      setIsConfirming(false);
+      setConfirmationAction(null);
+    }
+  };
+  const confirmationIsPublic =
+    confirmationAction === MAKE_PUBLIC_ACTION || visibilityIsPublic;
+  const confirmationTitleKey =
+    confirmationAction === MAKE_PUBLIC_ACTION
+      ? EDIT_ACCESS_MESSAGES.makePublicConfirmTitle
+      : EDIT_ACCESS_MESSAGES.useVisibilityConfirmTitle;
+  let confirmationMessageKey: MessageKey =
+    EDIT_ACCESS_MESSAGES.useVisibilityConfirmMessage;
+  if (confirmationAction === MAKE_PUBLIC_ACTION) {
+    confirmationMessageKey = EDIT_ACCESS_MESSAGES.makePublicConfirmMessage;
+  } else if (confirmationIsPublic) {
+    confirmationMessageKey =
+      EDIT_ACCESS_MESSAGES.useVisibilityPublicConfirmMessage;
+  }
+  const confirmationConfirmTextKey = confirmationIsPublic
+    ? EDIT_ACCESS_MESSAGES.confirmMakePublic
+    : EDIT_ACCESS_MESSAGES.confirmUseVisibility;
+
   return (
-    <GroupAssignmentDialog
-      title={title}
-      description={description}
-      suggestedName={suggestedName}
-      defaultLabel={defaultLabel}
-      selectedGroup={resolvedSelectedGroup}
-      membersRoleLabel={groupLabel}
-      selectedGroupCriteriaStatus={selectedGroupCriteriaStatus}
-      allowGroupClear={false}
-      onClose={onClose}
-      onChange={onGroupChange}
-      onCreateGroup={onCreateGroup}
-    />
+    <>
+      <GroupAssignmentDialog
+        title={t(locale, EDIT_ACCESS_MESSAGES.title, {
+          groupLabel: accessLabel,
+        })}
+        description={t(locale, EDIT_ACCESS_MESSAGES.description, {
+          groupLabel: accessLabel,
+        })}
+        suggestedName={suggestedName}
+        defaultLabel={defaultLabel}
+        selectedGroup={currentCriteria.criteria?.group ?? null}
+        selectedGroupIncludedWallets={currentCriteria.criteria?.includedWallets}
+        selectedGroupExcludedWallets={currentCriteria.criteria?.excludedWallets}
+        defaultIncludedIdentity={defaultIncludedIdentity}
+        membersRoleLabel={groupLabel}
+        allowGroupClear={false}
+        disabled={disabled}
+        startMode="criteria"
+        beforePanel={shortcut}
+        isContentLoading={currentCriteria.isLoading}
+        contentError={currentCriteria.isError}
+        paused={confirmationAction !== null}
+        onRetry={currentCriteria.retry}
+        onClose={onClose}
+        onChange={onGroupChange}
+        onCreateGroup={onCreateGroup}
+      />
+      <MobileWrapperConfirmationDialog
+        isOpen={confirmationAction !== null}
+        title={t(locale, confirmationTitleKey)}
+        message={t(locale, confirmationMessageKey, {
+          groupLabel: accessLabel,
+        })}
+        confirmText={t(locale, confirmationConfirmTextKey)}
+        cancelText={t(locale, "waves.create.actions.cancel")}
+        confirmVariant="destructive"
+        isConfirming={isConfirming}
+        confirmDisabled={disabled}
+        onClose={() => setConfirmationAction(null)}
+        onConfirm={() => {
+          void confirmShortcut();
+        }}
+      />
+    </>
   );
 }

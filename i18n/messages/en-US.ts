@@ -1242,6 +1242,38 @@ const WAVE_CREATE_GROUPS_MESSAGES = objectMessages("waves.create.groups", {
   allowAdminsToDeletePosts: "Allow admins to delete posts",
   defaultGroupName: "Wave Group",
   notAppliedYet: "Not applied yet.",
+  hideCriteriaAndMembers: "Hide criteria and members",
+  hideCriteriaAndMembersTooltip:
+    "The criteria and member list are visible to members of this group, but hidden from everyone else.",
+  hideCriteriaAndMembersInfoLabel: "About criteria and member visibility",
+  "editAccess.title": "Edit {groupLabel} access",
+  "editAccess.triggerLabel": "Edit {groupLabel} access",
+  "editAccess.chatLabel": "Chat",
+  "editAccess.description":
+    "The current criteria are prefilled. Saving creates a new group and changes only {groupLabel} access.",
+  "editAccess.loading": "Loading current criteria…",
+  "editAccess.loadErrorTitle": "Couldn't load the current criteria.",
+  "editAccess.loadErrorDescription":
+    "Nothing has been changed. Try loading the group again.",
+  "editAccess.retry": "Try again",
+  "editAccess.makePublic": "Make wave public",
+  "editAccess.makePublicDescription":
+    "Remove the Visibility restriction so everyone can access this wave.",
+  "editAccess.useVisibility": "Use visibility criteria",
+  "editAccess.useVisibilityDescription":
+    "Set {groupLabel} access to the same criteria as Visibility.",
+  "editAccess.useVisibilityPublicDescription":
+    "Visibility is public. Set {groupLabel} access to public too.",
+  "editAccess.makePublicConfirmTitle": "Make wave public?",
+  "editAccess.makePublicConfirmMessage":
+    "Everyone will be able to find and view this wave. Only Visibility access will change.",
+  "editAccess.useVisibilityConfirmTitle": "Use visibility criteria?",
+  "editAccess.useVisibilityConfirmMessage":
+    "{groupLabel} access will use the same group as Visibility. Only this access setting will change.",
+  "editAccess.useVisibilityPublicConfirmMessage":
+    "Visibility is public, so {groupLabel} access will become public too. Only this access setting will change.",
+  "editAccess.confirmMakePublic": "Make public",
+  "editAccess.confirmUseVisibility": "Use visibility criteria",
   "actions.editCriteria": "Edit criteria",
   "actions.chooseGroup": "Choose group",
   "draft.notReadyTitle": "Not ready yet.",
@@ -1835,6 +1867,16 @@ const NETWORK_GROUP_INSPECTION_MESSAGES = objectMessages(
       "This group may be private, deleted, or temporarily unavailable.",
   } as const
 );
+
+const NETWORK_GROUP_FILTER_MESSAGES = objectMessages("network.groupFilter", {
+  title: "Filter Network",
+  suggestedName: "Network filter",
+  defaultLabel: "All Network members",
+  membersRoleLabel: "Network",
+  createErrorTitle: "Couldn't create this group.",
+  createErrorDescription: "Please check the group setup and try again.",
+  createSuccess: "Group created and applied as the Network filter.",
+} as const);
 
 const WAVE_LOADING_MESSAGES = objectMessages("waves", {
   loadingStatus: "Loading waves",
@@ -3466,6 +3508,7 @@ export const EN_US_MESSAGES = {
   ...WAVE_STORM_COMPOSER_MESSAGES,
   ...WAVE_CHAT_SETTINGS_MESSAGES,
   ...NETWORK_GROUP_INSPECTION_MESSAGES,
+  ...NETWORK_GROUP_FILTER_MESSAGES,
   ...WAVE_LOADING_MESSAGES,
   ...WAVE_DROPS_SEARCH_MODAL_MESSAGES,
   ...WAVE_GIF_PICKER_MESSAGES,

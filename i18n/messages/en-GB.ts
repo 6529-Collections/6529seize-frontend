@@ -519,6 +519,42 @@ export const EN_GB_MESSAGES = {
   "waves.create.groups.dialog.changeDescription":
     "Create a new group or choose a different existing group.",
   "waves.create.groups.identities": "Identities",
+  "waves.create.groups.hideCriteriaAndMembers": "Hide criteria and members",
+  "waves.create.groups.hideCriteriaAndMembersTooltip":
+    "The criteria and member list are visible to members of this group, but hidden from everyone else.",
+  "waves.create.groups.hideCriteriaAndMembersInfoLabel":
+    "About criteria and member visibility",
+  "waves.create.groups.editAccess.title": "Edit {groupLabel} access",
+  "waves.create.groups.editAccess.triggerLabel": "Edit {groupLabel} access",
+  "waves.create.groups.editAccess.chatLabel": "Chat",
+  "waves.create.groups.editAccess.description":
+    "The current criteria are prefilled. Saving creates a new group and changes only {groupLabel} access.",
+  "waves.create.groups.editAccess.loading": "Loading current criteria…",
+  "waves.create.groups.editAccess.loadErrorTitle":
+    "Couldn't load the current criteria.",
+  "waves.create.groups.editAccess.loadErrorDescription":
+    "Nothing has been changed. Try loading the group again.",
+  "waves.create.groups.editAccess.retry": "Try again",
+  "waves.create.groups.editAccess.makePublic": "Make wave public",
+  "waves.create.groups.editAccess.makePublicDescription":
+    "Remove the Visibility restriction so everyone can access this wave.",
+  "waves.create.groups.editAccess.useVisibility": "Use visibility criteria",
+  "waves.create.groups.editAccess.useVisibilityDescription":
+    "Set {groupLabel} access to the same criteria as Visibility.",
+  "waves.create.groups.editAccess.useVisibilityPublicDescription":
+    "Visibility is public. Set {groupLabel} access to public too.",
+  "waves.create.groups.editAccess.makePublicConfirmTitle": "Make wave public?",
+  "waves.create.groups.editAccess.makePublicConfirmMessage":
+    "Everyone will be able to find and view this wave. Only Visibility access will change.",
+  "waves.create.groups.editAccess.useVisibilityConfirmTitle":
+    "Use visibility criteria?",
+  "waves.create.groups.editAccess.useVisibilityConfirmMessage":
+    "{groupLabel} access will use the same group as Visibility. Only this access setting will change.",
+  "waves.create.groups.editAccess.useVisibilityPublicConfirmMessage":
+    "Visibility is public, so {groupLabel} access will become public too. Only this access setting will change.",
+  "waves.create.groups.editAccess.confirmMakePublic": "Make public",
+  "waves.create.groups.editAccess.confirmUseVisibility":
+    "Use visibility criteria",
   "waves.create.groups.actions.editCriteria": "Edit criteria",
   "waves.create.groups.inlineIdentities.modeLabel": "Identity treatment",
   "waves.create.groups.inlineIdentities.included.label": "Included",

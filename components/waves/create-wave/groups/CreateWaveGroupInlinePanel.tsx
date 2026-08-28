@@ -6,5 +6,5 @@ import type { CreateWaveGroupInlinePanelProps } from "./useCreateWaveGroupInline
 export default function CreateWaveGroupInlinePanel(
   props: CreateWaveGroupInlinePanelProps
 ) {
-  return <GroupAssignmentPanel {...props} layout="inline" />;
+  return <GroupAssignmentPanel {...props} />;
 }
