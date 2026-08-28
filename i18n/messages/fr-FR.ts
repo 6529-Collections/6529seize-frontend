@@ -23,6 +23,7 @@ export const FR_FR_MESSAGES = {
     "Chargement de l’activité du profil dans les Waves",
   "user.brain.sidebar.loadingMoreWaveActivity":
     "Chargement d’autres activités du profil dans les Waves",
+  "user.brain.sidebar.desktopScrollRegionLabel": "Waves du Brain",
   "user.brain.sidebar.mobileStripLabel": "Waves du Brain",
   "user.brain.sidebar.createdEmpty": "Aucune Wave créée accessible.",
   "user.brain.sidebar.recentEmpty":
