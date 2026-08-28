@@ -24,6 +24,24 @@ import {
 } from "./createWaveInlineGroupBuilder";
 import CreateWaveGroupInlinePanel from "./CreateWaveGroupInlinePanel";
 
+function getSelectedGroupWallets({
+  selectedGroup,
+  identityGroupId,
+  restoredWallets,
+}: {
+  readonly selectedGroup: ApiGroupFull | null;
+  readonly identityGroupId: string | null;
+  readonly restoredWallets: readonly string[] | undefined;
+}): readonly string[] | undefined {
+  if (selectedGroup === null) {
+    return undefined;
+  }
+  if (identityGroupId === null) {
+    return [];
+  }
+  return restoredWallets;
+}
+
 export default function CreateWaveGroup({
   waveName,
   waveType,
@@ -112,6 +130,78 @@ export default function CreateWaveGroup({
     staleTime: 60_000,
   });
   const selectedGroup = cachedSelectedGroup ?? restoredSelectedGroup ?? null;
+  const selectedGroupIdentityGroupId =
+    selectedGroup?.group.identity_group_id ?? null;
+  const selectedGroupExcludedIdentityGroupId =
+    selectedGroup?.group.excluded_identity_group_id ?? null;
+  const selectedGroupIdForWallets = selectedGroup?.id ?? "";
+  const {
+    data: restoredIncludedWallets,
+    isError: isIncludedWalletRestoreError,
+    isFetching: isRestoringIncludedWallets,
+    refetch: retryIncludedWalletRestore,
+  } = useQuery<string[]>({
+    queryKey: [
+      QueryKey.GROUP_WALLET_GROUP_WALLETS,
+      {
+        group_id: selectedGroupIdForWallets,
+        wallet_group_id: selectedGroupIdentityGroupId,
+      },
+    ],
+    queryFn: async ({ signal }) =>
+      await commonApiFetch<string[]>({
+        endpoint: `groups/${encodeURIComponent(
+          selectedGroupIdForWallets
+        )}/identity_groups/${encodeURIComponent(
+          selectedGroupIdentityGroupId ?? ""
+        )}`,
+        signal,
+      }),
+    enabled: selectedGroup !== null && selectedGroupIdentityGroupId !== null,
+    staleTime: 60_000,
+  });
+  const {
+    data: restoredExcludedWallets,
+    isError: isExcludedWalletRestoreError,
+    isFetching: isRestoringExcludedWallets,
+    refetch: retryExcludedWalletRestore,
+  } = useQuery<string[]>({
+    queryKey: [
+      QueryKey.GROUP_WALLET_GROUP_WALLETS,
+      {
+        group_id: selectedGroupIdForWallets,
+        wallet_group_id: selectedGroupExcludedIdentityGroupId,
+      },
+    ],
+    queryFn: async ({ signal }) =>
+      await commonApiFetch<string[]>({
+        endpoint: `groups/${encodeURIComponent(
+          selectedGroupIdForWallets
+        )}/identity_groups/${encodeURIComponent(
+          selectedGroupExcludedIdentityGroupId ?? ""
+        )}`,
+        signal,
+      }),
+    enabled:
+      selectedGroup !== null && selectedGroupExcludedIdentityGroupId !== null,
+    staleTime: 60_000,
+  });
+  const selectedGroupIncludedWallets = getSelectedGroupWallets({
+    selectedGroup,
+    identityGroupId: selectedGroupIdentityGroupId,
+    restoredWallets: restoredIncludedWallets,
+  });
+  const selectedGroupExcludedWallets = getSelectedGroupWallets({
+    selectedGroup,
+    identityGroupId: selectedGroupExcludedIdentityGroupId,
+    restoredWallets: restoredExcludedWallets,
+  });
+  const isRestoringCriteria =
+    isRestoring || isRestoringIncludedWallets || isRestoringExcludedWallets;
+  const hasRestoreError =
+    isRestoreError ||
+    isIncludedWalletRestoreError ||
+    isExcludedWalletRestoreError;
   const isNotChatWave = waveType !== ApiWaveType.Chat;
   const inputDisabled =
     isNotChatWave &&
@@ -151,10 +241,10 @@ export default function CreateWaveGroup({
   const labelId = `wave-group-${groupType.toLowerCase()}-label`;
   const errorId = `wave-group-${groupType.toLowerCase()}-error`;
   const restoreErrorId = `wave-group-${groupType.toLowerCase()}-restore-error`;
-  const hasError = Boolean(errorMessage) || isRestoreError;
+  const hasError = Boolean(errorMessage) || hasRestoreError;
   const describedBy = [
     errorMessage ? errorId : null,
-    isRestoreError ? restoreErrorId : null,
+    hasRestoreError ? restoreErrorId : null,
   ]
     .filter((value): value is string => value !== null)
     .join(" ");
@@ -202,6 +292,8 @@ export default function CreateWaveGroup({
         defaultLabel={defaultLabel}
         disabled={inputDisabled}
         selectedGroup={selectedGroup}
+        selectedGroupIncludedWallets={selectedGroupIncludedWallets}
+        selectedGroupExcludedWallets={selectedGroupExcludedWallets}
         membersRoleLabel={groupLabel}
         defaultMembersPreviewTarget={defaultMembersPreviewTarget}
         defaultIncludedIdentity={defaultIncludedIdentity}
@@ -209,12 +301,12 @@ export default function CreateWaveGroup({
         onChange={onSelectedGroupChange}
         onCreateGroup={onInlineGroupCreate}
       />
-      {isRestoring ? (
+      {isRestoringCriteria ? (
         <output className="tw-m-0 tw-block tw-text-sm tw-text-iron-400">
           {t(locale, "waves.create.groups.restore.loading")}
         </output>
       ) : null}
-      {isRestoreError ? (
+      {hasRestoreError ? (
         <div
           id={restoreErrorId}
           className="tw-flex tw-flex-wrap tw-items-center tw-gap-3"
@@ -226,7 +318,17 @@ export default function CreateWaveGroup({
           <Button
             variant="secondary"
             size="sm"
-            onClick={() => void retryRestore()}
+            onClick={() => {
+              if (isRestoreError) {
+                void retryRestore();
+              }
+              if (isIncludedWalletRestoreError) {
+                void retryIncludedWalletRestore();
+              }
+              if (isExcludedWalletRestoreError) {
+                void retryExcludedWalletRestore();
+              }
+            }}
           >
             {t(locale, "waves.create.groups.restore.retry")}
           </Button>
