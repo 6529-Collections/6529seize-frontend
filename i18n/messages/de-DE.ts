@@ -517,6 +517,7 @@ export const DE_DE_MESSAGES = {
   "waves.create.groups.editAccess.title": "Zugriff für {groupLabel} bearbeiten",
   "waves.create.groups.editAccess.triggerLabel":
     "Zugriff für {groupLabel} bearbeiten",
+  "waves.create.groups.editAccess.chatLabel": "Chat",
   "waves.create.groups.editAccess.description":
     "Die aktuellen Kriterien sind vorausgefüllt. Beim Speichern wird eine neue Gruppe erstellt und nur der Zugriff für {groupLabel} geändert.",
   "waves.create.groups.editAccess.loading":

@@ -458,6 +458,9 @@ describe("CreateWaveGroupInlinePanel", () => {
       name: "Hide criteria and members",
     });
     expect(privacyToggle).not.toBeChecked();
+    expect(privacyToggle.nextElementSibling).toHaveClass(
+      "peer-focus-visible:tw-ring-2"
+    );
 
     await user.click(privacyToggle);
     expect(privacyToggle).toBeChecked();

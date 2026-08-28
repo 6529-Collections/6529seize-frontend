@@ -526,6 +526,7 @@ export const EN_GB_MESSAGES = {
     "About criteria and member visibility",
   "waves.create.groups.editAccess.title": "Edit {groupLabel} access",
   "waves.create.groups.editAccess.triggerLabel": "Edit {groupLabel} access",
+  "waves.create.groups.editAccess.chatLabel": "Chat",
   "waves.create.groups.editAccess.description":
     "The current criteria are prefilled. Saving creates a new group and changes only {groupLabel} access.",
   "waves.create.groups.editAccess.loading": "Loading current criteria…",

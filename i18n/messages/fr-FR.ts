@@ -522,6 +522,7 @@ export const FR_FR_MESSAGES = {
   "waves.create.groups.editAccess.title": "Modifier l’accès {groupLabel}",
   "waves.create.groups.editAccess.triggerLabel":
     "Modifier l’accès {groupLabel}",
+  "waves.create.groups.editAccess.chatLabel": "Discussion",
   "waves.create.groups.editAccess.description":
     "Les critères actuels sont préremplis. L’enregistrement crée un nouveau groupe et modifie uniquement l’accès {groupLabel}.",
   "waves.create.groups.editAccess.loading": "Chargement des critères actuels…",

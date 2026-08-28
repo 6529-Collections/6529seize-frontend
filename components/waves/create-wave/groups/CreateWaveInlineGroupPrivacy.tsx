@@ -66,13 +66,13 @@ export default function CreateWaveInlineGroupPrivacy({
           className="tw-peer tw-sr-only"
         />
         <span
-          className={`tw-flex-shrink-0 tw-rounded-full tw-bg-gradient-to-b tw-p-px ${
+          className={`tw-flex-shrink-0 tw-rounded-full tw-bg-gradient-to-b tw-p-px peer-focus-visible:tw-ring-2 peer-focus-visible:tw-ring-primary-400 peer-focus-visible:tw-ring-offset-2 peer-focus-visible:tw-ring-offset-iron-950 ${
             isPrivate ? "tw-from-primary-300" : "tw-from-iron-600"
           }`}
         >
           <span
             aria-hidden="true"
-            className={`tw-relative tw-flex tw-h-5 tw-w-9 tw-items-center tw-rounded-full tw-border-2 tw-border-transparent tw-p-0 tw-transition-colors tw-duration-200 tw-ease-in-out peer-focus-visible:tw-ring-2 peer-focus-visible:tw-ring-primary-400 peer-focus-visible:tw-ring-offset-2 peer-focus-visible:tw-ring-offset-iron-950 ${
+            className={`tw-relative tw-flex tw-h-5 tw-w-9 tw-items-center tw-rounded-full tw-border-2 tw-border-transparent tw-p-0 tw-transition-colors tw-duration-200 tw-ease-in-out ${
               isPrivate ? "tw-bg-primary-500" : "tw-bg-iron-700"
             }`}
           >

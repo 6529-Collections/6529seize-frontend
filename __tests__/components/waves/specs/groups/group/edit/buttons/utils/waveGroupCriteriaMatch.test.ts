@@ -11,11 +11,15 @@ const createCriteria = ({
   level = 1,
   includedWallets = ["0xA", "0xB"],
   nftOrder = ["2", "1"],
+  repCategory = "Builder",
+  repIdentity = "ALICE",
 }: {
   readonly id: string;
   readonly level?: number;
   readonly includedWallets?: readonly string[];
   readonly nftOrder?: readonly string[];
+  readonly repCategory?: string;
+  readonly repIdentity?: string;
 }): WaveGroupCriteria => ({
   group: {
     id,
@@ -30,8 +34,8 @@ const createCriteria = ({
         min: 5,
         max: null,
         direction: ApiGroupFilterDirection.Received,
-        user_identity: "ALICE",
-        category: "Builder",
+        user_identity: repIdentity,
+        category: repCategory,
       },
       cic: {
         min: 2,
@@ -81,7 +85,7 @@ describe("areWaveGroupCriteriaEqual", () => {
     ).toBe(false);
   });
 
-  it("matches equivalent criteria from different groups regardless of ordering and case", () => {
+  it("matches equivalent criteria regardless of wallet and token ordering or case", () => {
     expect(
       areWaveGroupCriteriaEqual(
         createCriteria({ id: "one" }),
@@ -92,6 +96,19 @@ describe("areWaveGroupCriteriaEqual", () => {
         })
       )
     ).toBe(true);
+  });
+
+  it("keeps user-authored criteria identifiers locale-neutral and case-sensitive", () => {
+    expect(
+      areWaveGroupCriteriaEqual(
+        createCriteria({ id: "one" }),
+        createCriteria({
+          id: "two",
+          repCategory: "builder",
+          repIdentity: "alice",
+        })
+      )
+    ).toBe(false);
   });
 
   it("detects a meaningful criteria difference", () => {

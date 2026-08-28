@@ -109,7 +109,11 @@ jest.mock(
       return props.isOpen ? (
         <div role="alertdialog" aria-label={props.title}>
           <p>{props.message}</p>
-          <button type="button" onClick={props.onConfirm}>
+          <button
+            type="button"
+            disabled={props.confirmDisabled || props.isConfirming}
+            onClick={props.onConfirm}
+          >
             {props.confirmText}
           </button>
           <button type="button" onClick={props.onClose}>
@@ -474,6 +478,32 @@ describe("WaveGroupEditButtons", () => {
     await waitFor(() => expect(auth.setToast).toHaveBeenCalled());
     expect(mutateAsync).not.toHaveBeenCalled();
     expect(screen.getByTestId("inline-panel")).toBeInTheDocument();
+  });
+
+  it("disables access shortcuts while a wave update is pending", async () => {
+    let resolveMutation: ((value: object) => void) | null = null;
+    mutateAsync.mockImplementationOnce(
+      async () =>
+        await new Promise<object>((resolve) => {
+          resolveMutation = resolve;
+        })
+    );
+    render(<WaveGroupEditButtons wave={wave} type={WaveGroupType.VIEW} />, {
+      wrapper,
+    });
+    fireEvent.click(
+      screen.getByRole("button", { name: "Edit Visibility access" })
+    );
+    fireEvent.click(screen.getByText("select existing group"));
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("button", { name: "Make wave public" })
+      ).toBeDisabled();
+    });
+
+    resolveMutation?.({});
+    await waitFor(() => expect(mutateAsync).toHaveBeenCalled());
   });
 
   it("makes Visibility public only after confirmation", async () => {

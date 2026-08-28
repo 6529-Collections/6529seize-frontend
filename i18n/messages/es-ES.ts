@@ -514,6 +514,7 @@ export const ES_ES_MESSAGES = {
   "waves.create.groups.editAccess.title": "Editar acceso de {groupLabel}",
   "waves.create.groups.editAccess.triggerLabel":
     "Editar acceso de {groupLabel}",
+  "waves.create.groups.editAccess.chatLabel": "Chat",
   "waves.create.groups.editAccess.description":
     "Los criterios actuales aparecen precargados. Al guardar se crea un grupo nuevo y solo cambia el acceso de {groupLabel}.",
   "waves.create.groups.editAccess.loading": "Cargando los criterios actuales…",

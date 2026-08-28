@@ -66,11 +66,13 @@ type ConfirmationAction = typeof MAKE_PUBLIC_ACTION | "use-visibility";
 
 function AccessShortcut({
   description,
+  disabled,
   icon,
   label,
   onClick,
 }: {
   readonly description: string;
+  readonly disabled: boolean;
   readonly icon: ReactNode;
   readonly label: string;
   readonly onClick: () => void;
@@ -83,6 +85,7 @@ function AccessShortcut({
       <Button
         variant="secondary"
         size="sm"
+        disabled={disabled}
         className="tw-w-full sm:tw-w-auto"
         onClick={onClick}
       >
@@ -162,6 +165,7 @@ export default function WaveGroupChangeDialog({
     shortcut = (
       <AccessShortcut
         description={t(locale, EDIT_ACCESS_MESSAGES.makePublicDescription)}
+        disabled={disabled}
         icon={<GlobeAltIcon aria-hidden="true" className="tw-size-4" />}
         label={t(locale, EDIT_ACCESS_MESSAGES.makePublic)}
         onClick={() => setConfirmationAction(MAKE_PUBLIC_ACTION)}
@@ -174,6 +178,7 @@ export default function WaveGroupChangeDialog({
     shortcut = (
       <AccessShortcut
         description={t(locale, descriptionKey, { groupLabel: accessLabel })}
+        disabled={disabled}
         icon={<ArrowPathIcon aria-hidden="true" className="tw-size-4" />}
         label={t(locale, EDIT_ACCESS_MESSAGES.useVisibility)}
         onClick={() => setConfirmationAction("use-visibility")}
@@ -182,7 +187,7 @@ export default function WaveGroupChangeDialog({
   }
 
   const confirmShortcut = async () => {
-    if (confirmationAction === null) {
+    if (confirmationAction === null || disabled || isConfirming) {
       return;
     }
     setIsConfirming(true);
@@ -253,6 +258,7 @@ export default function WaveGroupChangeDialog({
         cancelText={t(locale, "waves.create.actions.cancel")}
         confirmVariant="destructive"
         isConfirming={isConfirming}
+        confirmDisabled={disabled}
         onClose={() => setConfirmationAction(null)}
         onConfirm={() => {
           void confirmShortcut();
