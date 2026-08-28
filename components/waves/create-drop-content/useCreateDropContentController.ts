@@ -268,13 +268,24 @@ export function useCreateDropContentController({
     canCreatePoll && pollDraftState?.scopeKey === wave.id
       ? pollDraftState.value
       : null;
+  const [pollQuestionTouchedState, setPollQuestionTouchedState] =
+    useState<ScopedValueState<boolean> | null>(null);
+  const isPollQuestionTouched =
+    pollQuestionTouchedState?.scopeKey === wave.id &&
+    pollQuestionTouchedState.value;
   const pollValidation = useMemo(
-    () => validateCreateDropPollDraft(pollDraft),
-    [pollDraft]
+    () => validateCreateDropPollDraft(pollDraft, locale),
+    [locale, pollDraft]
   );
   const hasValidPoll = pollValidation.request !== null;
   const hasPollValidationError =
     pollDraft !== null && pollValidation.error !== null;
+  const pollQuestionError =
+    pollDraft !== null &&
+    isPollQuestionTouched &&
+    (getMarkdown?.trim().length ?? 0) === 0
+      ? t(locale, "waves.poll.composer.questionRequired")
+      : null;
 
   const collapseOptions = useCallback(() => {
     setShowOptionsState((current) =>
@@ -347,6 +358,7 @@ export function useCreateDropContentController({
       parts: drop?.parts ?? [],
       hasMetadata,
       hasValidPoll,
+      hasPoll: pollDraft !== null,
       hasPendingInlineImageUpload,
       hasMetadataValidationErrors,
       hasPollValidationError,
@@ -648,6 +660,9 @@ export function useCreateDropContentController({
 
   const handleEditorBlur = useCallback(
     (event: FocusEvent<HTMLDivElement>) => {
+      if (pollDraft !== null) {
+        setPollQuestionTouchedState({ scopeKey: wave.id, value: true });
+      }
       if (keepDesktopOptionsVisible) {
         return;
       }
@@ -658,7 +673,7 @@ export function useCreateDropContentController({
       setShowOptionsState({ scopeKey: wave.id, value: false });
       closeOnNextInputRef.current = false;
     },
-    [actionsContainerRef, keepDesktopOptionsVisible, wave.id]
+    [actionsContainerRef, keepDesktopOptionsVisible, pollDraft, wave.id]
   );
 
   const openMetadata = useCallback(() => {
@@ -669,7 +684,7 @@ export function useCreateDropContentController({
   }, [dropModeSessionScopeKey]);
 
   const {
-    removePoll,
+    removePoll: removePollDraft,
     togglePoll: togglePollDraft,
     updatePollDraft,
   } = useCreateDropPollActions({
@@ -682,8 +697,13 @@ export function useCreateDropContentController({
       return;
     }
 
+    setPollQuestionTouchedState({ scopeKey: wave.id, value: false });
     togglePollDraft();
-  }, [isStormMode, pollDraft, togglePollDraft]);
+  }, [isStormMode, pollDraft, togglePollDraft, wave.id]);
+  const removePoll = useCallback(() => {
+    setPollQuestionTouchedState({ scopeKey: wave.id, value: false });
+    removePollDraft();
+  }, [removePollDraft, wave.id]);
 
   const { onChangeKey, onChangeValue, onAddMetadata, onRemoveMetadata } =
     createMetadataHandlers({
@@ -771,6 +791,7 @@ export function useCreateDropContentController({
     initialMarkdownKey,
     onDrop,
     pollDraft,
+    pollQuestionError,
     pollValidationError: pollValidation.error,
     updatePollDraft,
     removePoll,

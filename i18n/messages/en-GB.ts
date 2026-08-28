@@ -455,6 +455,34 @@ export const EN_GB_MESSAGES = {
   "waves.poll.actions.changeVote": "Change vote",
   "waves.poll.status.voted": "Voted",
   "waves.poll.status.updated": "Updated",
+  "waves.poll.composer.title": "Create poll",
+  "waves.poll.composer.questionPlaceholder": "Ask a poll question",
+  "waves.poll.composer.questionRequired": "Add a poll question.",
+  "waves.poll.composer.mode.groupLabel": "Poll response type",
+  "waves.poll.composer.mode.single": "Single",
+  "waves.poll.composer.mode.multiple": "Multiple",
+  "waves.poll.composer.mode.singleDescription":
+    "Voters can select one option.",
+  "waves.poll.composer.mode.multipleDescription":
+    "Voters can select more than one option.",
+  "waves.poll.composer.optionLabel": "Poll option {number}",
+  "waves.poll.composer.optionPlaceholder": "Option {number}",
+  "waves.poll.composer.removeOption": "Remove option {number}",
+  "waves.poll.composer.add": "Add poll",
+  "waves.poll.composer.addOption": "Add option",
+  "waves.poll.composer.remove": "Remove poll",
+  "waves.poll.composer.closingTime": "Closing time",
+  "waves.poll.composer.onlyDroppersCanRespond":
+    "Only people who can chat can respond",
+  "waves.poll.composer.anonymous": "Anonymous poll",
+  "waves.poll.composer.validation.minimumOptions":
+    "Enter at least {count} options.",
+  "waves.poll.composer.validation.optionLength":
+    "Options can be up to {max} characters.",
+  "waves.poll.composer.validation.uniqueOptions":
+    "Poll options must be unique.",
+  "waves.poll.composer.validation.futureClosingTime":
+    "Choose a future closing time.",
   "common.close": "Close",
   "waves.create.dialog.subwaveTitle": "Create subwave",
   "waves.create.dialog.waveTitle": "Create Wave",

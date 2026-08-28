@@ -25,6 +25,7 @@ interface CreateDropStormPartProps {
   readonly isEditing: boolean;
   readonly controlsDisabled: boolean;
   readonly canEdit: boolean;
+  readonly editDisabledDescriptionId?: string | undefined;
   readonly onEditPart: (partIndex: number) => void;
   readonly onMovePart: (partIndex: number, direction: -1 | 1) => void;
   readonly onRemovePart: (partIndex: number) => void;
@@ -120,6 +121,7 @@ const CreateDropStormPart: React.FC<CreateDropStormPartProps> = ({
   isEditing,
   controlsDisabled,
   canEdit,
+  editDisabledDescriptionId,
   onEditPart,
   onMovePart,
   onRemovePart,
@@ -129,9 +131,13 @@ const CreateDropStormPart: React.FC<CreateDropStormPartProps> = ({
   const tooltipScopeId = useId();
   const partNumber = partIndex + 1;
   const editDisabled = controlsDisabled || !canEdit;
-  const editTitle = canEdit
-    ? t(locale, "waves.stormComposer.editPart", { number: partNumber })
-    : t(locale, "waves.stormComposer.finishCurrentPartBeforeEditing");
+  const editTitle = t(locale, "waves.stormComposer.editPart", {
+    number: partNumber,
+  });
+  const editDisabledDescription = t(
+    locale,
+    "waves.stormComposer.finishCurrentPartBeforeEditing"
+  );
   const iconButtonBaseClass =
     "tw-inline-flex tw-size-11 tw-flex-none tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-p-1.5 tw-text-iron-500 tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-35 sm:tw-size-7";
   const moveIconButtonClass = `${iconButtonBaseClass} desktop-hover:hover:tw-bg-white/[0.04] desktop-hover:hover:tw-text-iron-200`;
@@ -204,6 +210,9 @@ const CreateDropStormPart: React.FC<CreateDropStormPartProps> = ({
             }}
             aria-disabled={editDisabled}
             aria-label={editTitle}
+            aria-describedby={
+              !canEdit ? editDisabledDescriptionId : undefined
+            }
             {...getTooltipTargetProps(
               !isMobileScreen && !canEdit,
               editTooltipId
@@ -235,7 +244,7 @@ const CreateDropStormPart: React.FC<CreateDropStormPartProps> = ({
               positionStrategy="fixed"
               style={TOOLTIP_STYLES}
             >
-              <span className="tw-text-xs">{editTitle}</span>
+              <span className="tw-text-xs">{editDisabledDescription}</span>
             </Tooltip>
           )}
           <div className="tw-flex tw-items-center tw-border-x tw-border-y-0 tw-border-solid tw-border-white/[0.05] tw-px-1 sm:tw-mx-1">

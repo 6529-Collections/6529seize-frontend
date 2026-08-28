@@ -33,6 +33,7 @@ interface CreateDropStormPartsProps {
   readonly mentionedWaves: ApiMentionedWave[];
   readonly referencedNfts: ReferencedNft[];
   readonly editingPartIndex: number | null;
+  readonly isCompactLayout?: boolean | undefined;
   readonly controlsDisabled: boolean;
   readonly canEditParts: boolean;
   readonly hasCurrentDraft: boolean;
@@ -63,6 +64,7 @@ const CreateDropStormParts: FC<CreateDropStormPartsProps> = ({
   mentionedWaves,
   referencedNfts,
   editingPartIndex,
+  isCompactLayout = false,
   controlsDisabled,
   canEditParts,
   hasCurrentDraft,
@@ -74,6 +76,7 @@ const CreateDropStormParts: FC<CreateDropStormPartsProps> = ({
 }) => {
   const locale = useBrowserLocale();
   const headingId = useId();
+  const editBlockedHintId = useId();
   const prefersReducedMotion = useReducedMotion();
   const [isConfirmingDiscard, setIsConfirmingDiscard] = useState(false);
   const [partsStatus, setPartsStatus] = useState("");
@@ -92,6 +95,11 @@ const CreateDropStormParts: FC<CreateDropStormPartsProps> = ({
     { count: formatInteger(locale, parts.length) }
   );
   const isPristineDraft = parts.length === 0 && !hasCurrentDraft;
+  const showEditBlockedHint =
+    parts.length > 0 &&
+    editingPartIndex === null &&
+    hasCurrentDraft &&
+    !canEditParts;
   useEffect(() => {
     if (previousPartsCountRef.current === parts.length) {
       return;
@@ -262,6 +270,23 @@ const CreateDropStormParts: FC<CreateDropStormPartsProps> = ({
           )}
         </AnimatePresence>
 
+        {showEditBlockedHint && (
+          <p
+            id={editBlockedHintId}
+            role="status"
+            className={
+              isCompactLayout
+                ? "tw-m-0 tw-px-1 tw-pb-1.5 tw-text-[11px] tw-leading-4 tw-text-iron-400"
+                : "tw-sr-only"
+            }
+          >
+            {t(
+              locale,
+              "waves.stormComposer.finishCurrentPartBeforeEditing"
+            )}
+          </p>
+        )}
+
         <ol
           ref={partsListRef}
           className="tw-m-0 tw-flex tw-max-h-[30dvh] tw-min-h-0 tw-flex-1 tw-list-none tw-flex-col tw-gap-2 tw-overflow-y-auto tw-px-0 tw-py-1 sm:tw-max-h-[40vh]"
@@ -294,6 +319,9 @@ const CreateDropStormParts: FC<CreateDropStormPartsProps> = ({
                   controlsDisabled || editingPartIndex !== null
                 }
                 canEdit={canEditParts}
+                editDisabledDescriptionId={
+                  showEditBlockedHint ? editBlockedHintId : undefined
+                }
                 onEditPart={onEditPart}
                 onMovePart={onMovePart}
                 onRemovePart={onRemovePart}

@@ -841,6 +841,36 @@ export const FR_FR_MESSAGES = {
   "waves.poll.actions.changeVote": "Modifier le vote",
   "waves.poll.status.voted": "Voté",
   "waves.poll.status.updated": "Mis à jour",
+  "waves.poll.composer.title": "Créer un sondage",
+  "waves.poll.composer.questionPlaceholder":
+    "Posez la question du sondage",
+  "waves.poll.composer.questionRequired":
+    "Ajoutez une question au sondage.",
+  "waves.poll.composer.mode.groupLabel": "Type de réponse au sondage",
+  "waves.poll.composer.mode.single": "Unique",
+  "waves.poll.composer.mode.multiple": "Multiple",
+  "waves.poll.composer.mode.singleDescription":
+    "Les votants peuvent sélectionner une seule option.",
+  "waves.poll.composer.mode.multipleDescription":
+    "Les votants peuvent sélectionner plusieurs options.",
+  "waves.poll.composer.optionLabel": "Option de sondage {number}",
+  "waves.poll.composer.optionPlaceholder": "Option {number}",
+  "waves.poll.composer.removeOption": "Supprimer l’option {number}",
+  "waves.poll.composer.add": "Ajouter un sondage",
+  "waves.poll.composer.addOption": "Ajouter une option",
+  "waves.poll.composer.remove": "Supprimer le sondage",
+  "waves.poll.composer.closingTime": "Heure de clôture",
+  "waves.poll.composer.onlyDroppersCanRespond":
+    "Seules les personnes autorisées à discuter peuvent répondre",
+  "waves.poll.composer.anonymous": "Sondage anonyme",
+  "waves.poll.composer.validation.minimumOptions":
+    "Renseignez au moins {count} options.",
+  "waves.poll.composer.validation.optionLength":
+    "Les options peuvent contenir jusqu’à {max} caractères.",
+  "waves.poll.composer.validation.uniqueOptions":
+    "Les options du sondage doivent être uniques.",
+  "waves.poll.composer.validation.futureClosingTime":
+    "Choisissez une heure de clôture ultérieure.",
   "theMemes.documentTitle": "The Memes | Collections",
   "theMemes.description.collections": "Collections",
   "theMemes.detail.live.artwork.mintDateLabel": "Date de mint :",

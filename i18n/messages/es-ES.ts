@@ -835,6 +835,36 @@ export const ES_ES_MESSAGES = {
   "waves.poll.actions.changeVote": "Cambiar voto",
   "waves.poll.status.voted": "Votado",
   "waves.poll.status.updated": "Actualizado",
+  "waves.poll.composer.title": "Crear encuesta",
+  "waves.poll.composer.questionPlaceholder":
+    "Haz una pregunta para la encuesta",
+  "waves.poll.composer.questionRequired":
+    "Añade una pregunta para la encuesta.",
+  "waves.poll.composer.mode.groupLabel": "Tipo de respuesta de la encuesta",
+  "waves.poll.composer.mode.single": "Única",
+  "waves.poll.composer.mode.multiple": "Múltiple",
+  "waves.poll.composer.mode.singleDescription":
+    "Los votantes pueden seleccionar una opción.",
+  "waves.poll.composer.mode.multipleDescription":
+    "Los votantes pueden seleccionar más de una opción.",
+  "waves.poll.composer.optionLabel": "Opción de encuesta {number}",
+  "waves.poll.composer.optionPlaceholder": "Opción {number}",
+  "waves.poll.composer.removeOption": "Eliminar la opción {number}",
+  "waves.poll.composer.add": "Añadir encuesta",
+  "waves.poll.composer.addOption": "Añadir opción",
+  "waves.poll.composer.remove": "Eliminar encuesta",
+  "waves.poll.composer.closingTime": "Hora de cierre",
+  "waves.poll.composer.onlyDroppersCanRespond":
+    "Solo pueden responder quienes pueden participar en el chat",
+  "waves.poll.composer.anonymous": "Encuesta anónima",
+  "waves.poll.composer.validation.minimumOptions":
+    "Introduce al menos {count} opciones.",
+  "waves.poll.composer.validation.optionLength":
+    "Las opciones pueden tener hasta {max} caracteres.",
+  "waves.poll.composer.validation.uniqueOptions":
+    "Las opciones de la encuesta deben ser únicas.",
+  "waves.poll.composer.validation.futureClosingTime":
+    "Elige una hora de cierre futura.",
   "theMemes.documentTitle": "The Memes | Colecciones",
   "theMemes.description.collections": "Colecciones",
   "theMemes.detail.live.artwork.mintDateLabel": "Fecha de mint:",

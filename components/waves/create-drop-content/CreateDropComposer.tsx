@@ -2,6 +2,7 @@ import { CHAT_LINK_RESTRICTION_MESSAGE } from "@/helpers/waves/chat-link-restric
 import { t } from "@/i18n/messages";
 import type { SupportedLocale } from "@/i18n/locales";
 import { AnimatePresence, LazyMotion, domAnimation, m } from "framer-motion";
+import { useId } from "react";
 import MobileWrapperDialog from "../../mobile-wrapper-dialog/MobileWrapperDialog";
 import Button from "../../utils/button/Button";
 import CreateDropActions from "../CreateDropActions";
@@ -65,6 +66,7 @@ export default function CreateDropComposer({
   initialMarkdown,
   initialMarkdownKey,
   pollDraft,
+  pollQuestionError,
   pollValidationError,
   updatePollDraft,
   removePoll,
@@ -88,6 +90,7 @@ export default function CreateDropComposer({
   locale,
   submitWithResolvedAliases,
 }: CreateDropComposerProps) {
+  const pollQuestionErrorId = useId();
   const displayedStormPartNumber =
     editingPartIndex === null
       ? (drop?.parts.length ?? 0) + 1
@@ -113,6 +116,7 @@ export default function CreateDropComposer({
           mentionedWaves={drop?.mentioned_waves ?? []}
           referencedNfts={drop?.referenced_nfts ?? []}
           editingPartIndex={editingPartIndex}
+          isCompactLayout={isCompactLayout}
           controlsDisabled={submitting}
           canEditParts={!canAddPart && editingPartIndex === null}
           hasCurrentDraft={hasCurrentDraft}
@@ -168,6 +172,7 @@ export default function CreateDropComposer({
             isStormMode={isStormModeActive}
             stormPartNumber={displayedStormPartNumber}
             isDropMode={isDropMode}
+            isPollActive={hasPoll}
             canMentionAll={canMentionAll}
             canSubmit={canSubmit}
             onEditorState={handleEditorStateChange}
@@ -180,6 +185,8 @@ export default function CreateDropComposer({
             onRequestEditLastDrop={handleRequestEditLastDrop}
             initialMarkdown={initialMarkdown}
             initialMarkdownKey={initialMarkdownKey}
+            hasValidationError={pollQuestionError !== null}
+            validationErrorId={pollQuestionErrorId}
             onDrop={submitWithResolvedAliases}
           />
         </div>
@@ -196,6 +203,15 @@ export default function CreateDropComposer({
             }
           />
         </div>
+        {pollQuestionError && (
+          <p
+            id={pollQuestionErrorId}
+            role="alert"
+            className="tw-col-start-2 tw-row-start-3 tw-mb-0 tw-mt-2 tw-text-[11px] tw-font-medium tw-leading-4 tw-text-amber-200/90"
+          >
+            {pollQuestionError}
+          </p>
+        )}
         {showCurationDropModeWarning && (
           <div
             className={`tw-col-span-3 tw-col-start-1 tw-min-w-0 md:tw-col-span-1 md:tw-col-start-2 ${
@@ -230,8 +246,8 @@ export default function CreateDropComposer({
       )}
       {isApp && pollDraft && (
         <MobileWrapperDialog
-          title="Create Poll"
-          ariaLabel="Create Poll"
+          title={t(locale, "waves.poll.composer.title")}
+          ariaLabel={t(locale, "waves.poll.composer.title")}
           isOpen
           onClose={removePoll}
           onBack={submitting ? undefined : removePoll}

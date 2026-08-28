@@ -73,21 +73,14 @@ const getCompactActionSurfaceStyles = ({
 };
 
 const getCompactToggleLabel = ({
-  isPollActive,
   showOptions,
-  closePollLabel,
   hideActionsLabel,
   showActionsLabel,
 }: {
-  readonly isPollActive: boolean;
   readonly showOptions: boolean;
-  readonly closePollLabel: string;
   readonly hideActionsLabel: string;
   readonly showActionsLabel: string;
 }) => {
-  if (isPollActive) {
-    return closePollLabel;
-  }
   return showOptions ? hideActionsLabel : showActionsLabel;
 };
 
@@ -109,16 +102,11 @@ const getCompactToggleStyles = ({
 
 const getPollActionStyles = ({
   isStormMode,
-  isPollActive,
 }: {
   readonly isStormMode: boolean;
-  readonly isPollActive: boolean;
 }) => {
   if (isStormMode) {
     return "tw-cursor-default tw-bg-iron-900 tw-text-iron-600 desktop-hover:hover:tw-bg-iron-900";
-  }
-  if (isPollActive) {
-    return "tw-cursor-pointer tw-bg-primary-500/20 tw-text-primary-200";
   }
   return "tw-cursor-pointer tw-bg-iron-700 tw-text-iron-300";
 };
@@ -187,7 +175,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
     const uploadLabel = t(locale, "waves.composer.actions.upload");
     const gifLabel = t(locale, "waves.composer.actions.gif");
     const pollLabel = t(locale, "waves.composer.actions.poll");
-    const closePollLabel = t(locale, "waves.composer.actions.closePoll");
+    const addPollLabel = t(locale, "waves.poll.composer.add");
     const stormLabel = t(locale, "waves.composer.actions.storm");
     const gifPickerKey = publicEnv.GIPHY_API_KEY;
     const [showGifPicker, setShowGifPicker] = useState(false);
@@ -302,13 +290,11 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
           transition: { duration: 0 },
         };
 
-    const isCompactToggleActive = showOptions || isPollActive;
+    const isCompactToggleActive = showOptions;
     const isCompactToggleRequired =
       (isDropMode && isRequiredMetadataMissing) || isRequiredMediaMissing;
     const compactToggleLabel = getCompactToggleLabel({
-      isPollActive,
       showOptions,
-      closePollLabel,
       hideActionsLabel,
       showActionsLabel,
     });
@@ -317,16 +303,15 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
       isRequired: isCompactToggleRequired,
     });
 
-    const pollAction = canCreatePoll ? (
+    const pollAction = canCreatePoll && !isPollActive ? (
       <>
         <button
           type="button"
-          aria-label={isPollActive ? "Remove poll" : "Add poll"}
-          aria-pressed={isPollActive}
+          aria-label={addPollLabel}
           onClick={onTogglePoll}
           disabled={isStormMode}
           className={`tw-flex tw-size-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-transition tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 desktop-hover:hover:tw-bg-iron-700/70 lg:tw-size-7 ${getPollActionStyles(
-            { isStormMode, isPollActive }
+            { isStormMode }
           )}`}
           data-tooltip-id="add-poll-tooltip"
         >
@@ -344,9 +329,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
             positionStrategy="fixed"
             style={TOOLTIP_STYLES}
           >
-            <span className="tw-text-xs">
-              {isPollActive ? "Remove poll" : "Add poll"}
-            </span>
+            <span className="tw-text-xs">{addPollLabel}</span>
           </Tooltip>
         )}
       </>
@@ -357,30 +340,31 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
         <div className="tw-contents">
           {isCompactLayout ? (
             <>
-              <div className="tw-col-start-1 tw-row-start-2 tw-mb-0.5 tw-self-end">
-                <motion.button
-                  data-testid="drop-actions-toggle-motion"
-                  type="button"
-                  onClick={isPollActive ? onTogglePoll : onSetShowIconsClick}
-                  disabled={isPollActive && submitting}
-                  aria-label={compactToggleLabel}
-                  aria-expanded={isPollActive ? undefined : showOptions}
-                  aria-controls={isPollActive ? undefined : actionTrayId}
-                  animate={{ rotate: showOptions || isPollActive ? 45 : 0 }}
-                  transition={
-                    shouldAnimateOptions
-                      ? optionMotionTransition
-                      : { duration: 0 }
-                  }
-                  className={`tw-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-full tw-border tw-transition focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 ${compactToggleStyles}`}
-                >
-                  <FontAwesomeIcon
-                    icon={faPlus}
-                    aria-hidden="true"
-                    className="tw-size-4"
-                  />
-                </motion.button>
-              </div>
+              {!isPollActive && (
+                <div className="tw-col-start-1 tw-row-start-2 tw-mb-0.5 tw-self-end">
+                  <motion.button
+                    data-testid="drop-actions-toggle-motion"
+                    type="button"
+                    onClick={onSetShowIconsClick}
+                    aria-label={compactToggleLabel}
+                    aria-expanded={showOptions}
+                    aria-controls={actionTrayId}
+                    animate={{ rotate: showOptions ? 45 : 0 }}
+                    transition={
+                      shouldAnimateOptions
+                        ? optionMotionTransition
+                        : { duration: 0 }
+                    }
+                    className={`tw-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-full tw-border tw-transition focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 ${compactToggleStyles}`}
+                  >
+                    <FontAwesomeIcon
+                      icon={faPlus}
+                      aria-hidden="true"
+                      className="tw-size-4"
+                    />
+                  </motion.button>
+                </div>
+              )}
               <AnimatePresence initial={false}>
                 {showOptions && !isPollActive && (
                   <motion.div
@@ -423,7 +407,6 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                           <CompactActionButton
                             label={pollLabel}
                             disabled={isStormMode}
-                            pressed={isPollActive}
                             onClick={() => runCompactAction(onTogglePoll)}
                             icon={<ChartBarIcon className="tw-size-5" />}
                           />

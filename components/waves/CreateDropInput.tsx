@@ -9,6 +9,7 @@ import {
   useImperativeHandle,
   useCallback,
   useEffect,
+  useId,
   useRef,
 } from "react";
 import type { EditorState, LexicalEditor } from "lexical";
@@ -217,6 +218,7 @@ const CreateDropInput = forwardRef<
     readonly stormPartNumber?: number | undefined;
     readonly submitting: boolean;
     readonly isDropMode: boolean;
+    readonly isPollActive?: boolean | undefined;
     readonly canMentionAll?: boolean | undefined;
     readonly onDrop?: (() => void) | undefined;
     readonly onEditorState: (editorState: EditorState) => void;
@@ -229,6 +231,7 @@ const CreateDropInput = forwardRef<
     readonly onAttachmentFiles?: ((files: File[]) => void) | undefined;
     readonly hasValidationError?: boolean | undefined;
     readonly validationHelperText?: string | null | undefined;
+    readonly validationErrorId?: string | undefined;
     readonly canEditLastDropWithArrow?: boolean | undefined;
     readonly onRequestEditLastDrop?: (() => boolean) | undefined;
     readonly initialMarkdown?: string | null | undefined;
@@ -245,6 +248,7 @@ const CreateDropInput = forwardRef<
       isStormMode,
       stormPartNumber = 1,
       isDropMode,
+      isPollActive = false,
       canMentionAll = false,
       submitting,
       onEditorState,
@@ -255,6 +259,7 @@ const CreateDropInput = forwardRef<
       onAttachmentFiles,
       hasValidationError = false,
       validationHelperText = null,
+      validationErrorId,
       canEditLastDropWithArrow = false,
       onRequestEditLastDrop,
       initialMarkdown = null,
@@ -265,6 +270,10 @@ const CreateDropInput = forwardRef<
   ) => {
     const { isCapacitor } = useCapacitor();
     const locale = useBrowserLocale();
+    const validationHelperTextId = useId();
+    const resolvedValidationErrorId =
+      validationErrorId ??
+      (validationHelperText ? validationHelperTextId : undefined);
     const composerDensity = useDropComposerDensity();
     const isCompact = composerDensity === "compact";
     const editorConfig: InitialConfigType = {
@@ -335,6 +344,9 @@ const CreateDropInput = forwardRef<
         return t(locale, "waves.stormComposer.writePart", {
           number: stormPartNumber,
         });
+      }
+      if (isPollActive) {
+        return t(locale, "waves.poll.composer.questionPlaceholder");
       }
       if (type === null) {
         return isDropMode ? "Create a drop" : "Write a chat message";
@@ -429,6 +441,13 @@ const CreateDropInput = forwardRef<
                       spellCheck={true}
                       autoCorrect="on"
                       ariaLabel={placeholderText}
+                      ariaDescribedBy={
+                        hasValidationError
+                          ? resolvedValidationErrorId
+                          : undefined
+                      }
+                      ariaRequired={isPollActive}
+                      aria-invalid={hasValidationError || undefined}
                       style={{ touchAction: "manipulation" }}
                       onBlur={onEditorBlur}
                       className={`editor-input-one-liner tw-form-input tw-block tw-max-h-[40vh] tw-w-full tw-resize-none tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-pl-3 tw-font-normal tw-text-white tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out tw-scrollbar-thin tw-scrollbar-track-iron-900 tw-scrollbar-thumb-iron-600 placeholder:tw-text-iron-500 focus:tw-bg-iron-950 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 ${
@@ -511,6 +530,7 @@ const CreateDropInput = forwardRef<
         </LexicalComposer>
         {hasValidationError && validationHelperText && (
           <div
+            id={validationHelperTextId}
             role="alert"
             className="tw-mt-2 tw-text-xs tw-font-medium tw-text-error"
           >
