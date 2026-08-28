@@ -17,6 +17,7 @@ export const EN_GB_MESSAGES = {
   "user.brain.sidebar.loadingWaveActivity": "Loading profile wave activity",
   "user.brain.sidebar.loadingMoreWaveActivity":
     "Loading more profile wave activity",
+  "user.brain.sidebar.desktopScrollRegionLabel": "Brain waves",
   "user.brain.sidebar.mobileStripLabel": "Brain waves",
   "user.brain.sidebar.createdEmpty": "No accessible created waves.",
   "user.brain.sidebar.recentEmpty": "No recent wave posts.",
