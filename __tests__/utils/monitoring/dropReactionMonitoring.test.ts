@@ -11,17 +11,21 @@ import {
   recordReactionRollbackApplied,
 } from "@/utils/monitoring/dropReactionMonitoring";
 import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
+import { classifyReactionError } from "@/utils/monitoring/dropReactionErrorClassification";
 
 const mockSetExtras = jest.fn();
+const mockSetFingerprint = jest.fn();
+const mockSetLevel = jest.fn();
+const mockSetTag = jest.fn();
 
 jest.mock("@sentry/nextjs", () => ({
   __esModule: true,
   addBreadcrumb: jest.fn(),
   withScope: jest.fn((callback: (scope: any) => void) => {
     const scope = {
-      setLevel: jest.fn(),
-      setFingerprint: jest.fn(),
-      setTag: jest.fn(),
+      setLevel: mockSetLevel,
+      setFingerprint: mockSetFingerprint,
+      setTag: mockSetTag,
       setExtras: mockSetExtras,
     };
     callback(scope);
@@ -169,6 +173,129 @@ describe("dropReactionMonitoring", () => {
       })
     );
   });
+
+  it("captures queued reaction timeouts as distinct warnings without an HTTP status", () => {
+    const mutation = beginReactionMutation({
+      dropId: "drop-timeout",
+      waveId: "wave-1",
+      source: "picker",
+      action: "add",
+      previousReaction: null,
+      intendedReaction: ":smile:",
+      optimisticReaction: ":smile:",
+      profileId: "profile-1",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    recordReactionRequestSent(mutation, {
+      endpoint: "drops/drop-timeout/reaction",
+      method: "POST",
+    });
+
+    dateNowSpy.mockReturnValue(16_001);
+    recordReactionRequestFailed(
+      mutation,
+      new DOMException("Reaction request timed out", "TimeoutError")
+    );
+
+    expect(addBreadcrumbMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: "reaction.request_failed",
+        data: expect.objectContaining({
+          error_kind: "timeout",
+          latency_bucket: "over_15s",
+          status_code: undefined,
+        }),
+      })
+    );
+    expect(mockSetLevel).toHaveBeenCalledWith("warning");
+    expect(mockSetFingerprint).toHaveBeenCalledWith([
+      "drop-reaction",
+      "timeout",
+    ]);
+    expect(mockSetTag).toHaveBeenCalledWith("error_kind", "timeout");
+    expect(mockSetExtras).toHaveBeenCalledWith(
+      expect.objectContaining({
+        error_kind: "timeout",
+        latency_bucket: "over_15s",
+        status_code: undefined,
+      })
+    );
+    expect(captureExceptionMock).toHaveBeenCalledWith(
+      expect.objectContaining({ message: "Drop reaction request failed" })
+    );
+
+    const serializedTelemetry = JSON.stringify({
+      breadcrumbs: addBreadcrumbMock.mock.calls,
+      exceptions: captureExceptionMock.mock.calls,
+      extras: mockSetExtras.mock.calls,
+    });
+    expect(serializedTelemetry).not.toContain("status_code");
+    expect(serializedTelemetry).not.toContain("Reaction request timed out");
+  });
+
+  it("keeps an ordinary error with code 23 in the server failure cohort", () => {
+    const mutation = beginReactionMutation({
+      dropId: "drop-coded-error",
+      waveId: "wave-1",
+      source: "chip",
+      action: "add",
+      previousReaction: null,
+      intendedReaction: ":smile:",
+      optimisticReaction: ":smile:",
+      profileId: "profile-1",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    recordReactionRequestSent(mutation, {
+      endpoint: "drops/drop-coded-error/reaction",
+      method: "POST",
+    });
+
+    const error = Object.assign(new Error("Unexpected coded failure"), {
+      code: 23,
+    });
+    recordReactionRequestFailed(mutation, error);
+
+    expect(addBreadcrumbMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: "reaction.request_failed",
+        data: expect.objectContaining({
+          error_kind: "server",
+          status_code: 23,
+        }),
+      })
+    );
+    expect(mockSetLevel).toHaveBeenCalledWith("error");
+    expect(mockSetFingerprint).toHaveBeenCalledWith([
+      "drop-reaction",
+      "server",
+    ]);
+    expect(captureExceptionMock).toHaveBeenCalledWith(
+      expect.objectContaining({ message: "Drop reaction request failed" })
+    );
+  });
+
+  it.each([
+    { statusCode: 401, errorKind: "auth" },
+    { statusCode: 403, errorKind: "auth" },
+    { statusCode: 404, errorKind: "endpoint-contract" },
+    { statusCode: 405, errorKind: "endpoint-contract" },
+    { statusCode: 429, errorKind: "rate-limit" },
+    { statusCode: 500, errorKind: "server" },
+  ] as const)(
+    "keeps HTTP $statusCode classified as $errorKind",
+    ({ statusCode, errorKind }) => {
+      const error = Object.assign(new Error("HTTP request failed"), {
+        status: statusCode,
+      });
+
+      expect(classifyReactionError(error)).toEqual({
+        statusCode,
+        errorKind,
+      });
+    }
+  );
 
   it("breadcrumbs the exact proxy reaction permission denial without capturing it", () => {
     const mutation = beginReactionMutation({

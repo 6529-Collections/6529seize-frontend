@@ -7,6 +7,7 @@ const WAVE_REACTION_DISABLED_MESSAGE =
 
 type ReactionErrorKind =
   | "network"
+  | "timeout"
   | "auth"
   | "rate-limit"
   | "server"
@@ -49,10 +50,22 @@ function isNetworkError(error: unknown): boolean {
   );
 }
 
+function isReactionRequestTimeout(error: unknown): boolean {
+  return (
+    typeof DOMException !== "undefined" &&
+    error instanceof DOMException &&
+    error.name === "TimeoutError"
+  );
+}
+
 export function classifyReactionError(error: unknown): {
   statusCode: number | null;
   errorKind: ReactionErrorKind;
 } {
+  if (isReactionRequestTimeout(error)) {
+    return { statusCode: null, errorKind: "timeout" };
+  }
+
   const statusCode = extractErrorStatusCode(error);
 
   if (statusCode === 401 || statusCode === 403) {

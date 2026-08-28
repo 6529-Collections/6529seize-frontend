@@ -33,6 +33,13 @@ the sample rate and exact `duration_ms` attached. Warnings, failures, and
 product-unavailable outcomes remain always eligible for Sentry delivery.
 Cancellation remains a non-failure classification.
 
+The reaction request queue's application-created `DOMException` named
+`TimeoutError` is a distinct handled timeout failure. It uses
+`error_kind=timeout`, omits `status_code`, stays at warning level with its own
+fingerprint, and remains reportable outside the browser-transport sampler.
+Ordinary errors carrying numeric code `23` and real HTTP responses keep their
+existing classifications.
+
 Drop-reaction error telemetry has one narrower transport-noise policy. After
 the producer's 60-second dedupe window, only the exact privacy-safe
 `Drop reaction request failed` warning with the `drop-reaction` feature,
