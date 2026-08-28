@@ -280,11 +280,12 @@ mistake.
   the partial failure so the user can retry the remaining action.
 - If reported-content AI assessment is unavailable, the report is retained for
   human review rather than discarded.
-- If an existing connected profile's saved session expires, authenticated
-  actions invalidate only that session, preserve the connected profile and
-  selection, request a new signature, and continue after authentication. A
-  missing signer produces an explicit reconnect message instead of a silent
-  no-op.
+- A still-valid saved session remains usable without an active wallet
+  connection or supported signing network. If the session expires,
+  authenticated actions preserve the connected profile and selection, verify
+  that signing is available before invalidating only that session, request a
+  new signature, and continue after authentication. An unavailable signer or
+  signing network leaves the session intact and does not start signing.
 - If a moderation WebSocket update is missed, the next API refresh converges on
   the saved server state.
 

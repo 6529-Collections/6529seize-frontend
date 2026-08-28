@@ -4,6 +4,7 @@ import { GROUP_CREATE_PANEL_STYLES } from "../../GroupCreate.styles";
 import { useRef, useCallback } from "react";
 import GroupCreateWalletsCount from "./GroupCreateWalletsCount";
 import type { GroupCreateWalletsType } from "./GroupCreateWallets";
+import { parseGroupWalletCsv } from "@/helpers/groups/group-wallet-csv";
 
 export default function CreateGroupWalletsUpload({
   type,
@@ -16,33 +17,12 @@ export default function CreateGroupWalletsUpload({
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const getAddresses = (lines: string[]): string[] => {
-    const delimiterRegex = /[\s,;]+/;
-    const addresses = lines.flatMap((line) => {
-      return line.split(delimiterRegex).map((part) => {
-        const address = part.trim();
-        if (address.match(/^0x[a-fA-F0-9]{40}$/)) {
-          return address.toLowerCase();
-        }
-        return null;
-      });
-    });
-
-    // Filter out nulls
-    const filteredAddresses = addresses.filter((address) => address !== null);
-
-    // Create a set to remove duplicates
-    const uniqueAddresses = new Set(filteredAddresses);
-    return Array.from(uniqueAddresses) as string[];
-  };
-
   const onFileChange = useCallback(
     (file: File) => {
       const reader = new FileReader();
       reader.onload = (e) => {
         const content = e.target?.result;
-        const lines = (content as string).split(/\r?\n/);
-        setWallets(getAddresses(lines));
+        setWallets(parseGroupWalletCsv(content as string));
       };
       reader.readAsText(file);
     },

@@ -16,6 +16,7 @@ import CreateWaveInlineGroupHeader from "@/components/waves/create-wave/groups/C
 import CreateWaveInlineGroupIdentities from "@/components/waves/create-wave/groups/CreateWaveInlineGroupIdentities";
 import CreateWaveInlineGroupRuleEditor from "@/components/waves/create-wave/groups/CreateWaveInlineGroupRuleEditor";
 import {
+  CreateWaveInlineGroupIdentityEditorPanel,
   CreateWaveInlineGroupRuleEditorPanel,
   CreateWaveInlineGroupRuleList,
 } from "@/components/waves/create-wave/groups/CreateWaveInlineGroupRules";
@@ -207,7 +208,7 @@ function DialogNewGroupActions({
             className="tw-size-4 tw-flex-shrink-0"
           />
         }
-        label={t(locale, "waves.create.groups.addIdentity")}
+        label={t(locale, "waves.create.groups.identities")}
         count={identityCount}
         disabled={disabled}
         active={identityActive}
@@ -288,6 +289,7 @@ function DialogGroupAssignmentPanel({
     membersRoleLabel,
   } = panelProps;
   const {
+    addExcludedIdentity,
     addIdentity,
     canCreateDraft,
     canResetDraft,
@@ -307,12 +309,15 @@ function DialogGroupAssignmentPanel({
     openRule,
     panelRef,
     removeIdentity,
+    removeExcludedIdentity,
     setDraft,
     showDraftFooter,
     togglePanel,
     toggleRule,
     unsavedGroupDescription,
     unsavedGroupSummary,
+    updateExcludedWalletSources,
+    updateIncludedWalletSources,
   } = panelState;
 
   const openExistingTab = () => {
@@ -325,7 +330,9 @@ function DialogGroupAssignmentPanel({
       togglePanel("actions", false);
     }
   };
-  const identityCount = displayedBuilder.identities.length;
+  const identityCount =
+    (displayedBuilder.draft.group.identity_addresses?.length ?? 0) +
+    (displayedBuilder.draft.group.excluded_identity_addresses?.length ?? 0);
   const ruleCount = getInlineGroupRuleCount(displayedBuilder.draft);
 
   return (
@@ -378,9 +385,16 @@ function DialogGroupAssignmentPanel({
                 cancelLabel={t(locale, "waves.create.groups.done")}
               >
                 <CreateWaveInlineGroupIdentities
-                  identities={displayedBuilder.identities}
-                  onIdentitySelect={addIdentity}
-                  onRemove={removeIdentity}
+                  includedIdentities={displayedBuilder.identities}
+                  excludedIdentities={displayedBuilder.excludedIdentities}
+                  includedWalletSources={displayedBuilder.includedWalletSources}
+                  excludedWalletSources={displayedBuilder.excludedWalletSources}
+                  onIncludedIdentitySelect={addIdentity}
+                  onIncludedIdentityRemove={removeIdentity}
+                  onExcludedIdentitySelect={addExcludedIdentity}
+                  onExcludedIdentityRemove={removeExcludedIdentity}
+                  onIncludedWalletSourcesChange={updateIncludedWalletSources}
+                  onExcludedWalletSourcesChange={updateExcludedWalletSources}
                   resultsLayout="inline"
                 />
               </CreateWaveInlineGroupExpandedPanel>
@@ -454,8 +468,10 @@ function InlineGroupAssignmentPanel({
     membersRoleLabel,
   } = panelProps;
   const {
+    addExcludedIdentity,
     addIdentity,
     canCreateDraft,
+    canReplaceCriteria,
     canResetDraft,
     currentGroupLabel,
     displayedBuilder,
@@ -473,6 +489,7 @@ function InlineGroupAssignmentPanel({
     openRule,
     panelRef,
     removeIdentity,
+    removeExcludedIdentity,
     returnToCriteria,
     setDraft,
     showDraftFooter,
@@ -480,6 +497,8 @@ function InlineGroupAssignmentPanel({
     toggleRule,
     unsavedGroupDescription,
     unsavedGroupSummary,
+    updateExcludedWalletSources,
+    updateIncludedWalletSources,
   } = panelState;
 
   return (
@@ -499,6 +518,7 @@ function InlineGroupAssignmentPanel({
             />
             <CreateWaveInlineGroupActions
               disabled={disabled}
+              criteriaDisabled={!canReplaceCriteria}
               criteriaActive={isCriteriaReplacementActive}
               searchActive={isSearchPanel}
               onReplaceCriteria={onReplaceCriteria}
@@ -507,16 +527,25 @@ function InlineGroupAssignmentPanel({
           </div>
 
           {displayedBuilder.panel === "identity" ? (
-            <CreateWaveInlineGroupExpandedPanel
-              onCancel={returnToCriteria}
-              showCancel={false}
-            >
-              <CreateWaveInlineGroupIdentities
-                identities={displayedBuilder.identities}
-                onIdentitySelect={addIdentity}
-                onRemove={removeIdentity}
-                onCancel={returnToCriteria}
-              />
+            <CreateWaveInlineGroupExpandedPanel onCancel={returnToCriteria}>
+              <CreateWaveInlineGroupIdentityEditorPanel
+                disabled={disabled}
+                onIdentityToggle={returnToCriteria}
+                onRuleToggle={toggleRule}
+              >
+                <CreateWaveInlineGroupIdentities
+                  includedIdentities={displayedBuilder.identities}
+                  excludedIdentities={displayedBuilder.excludedIdentities}
+                  includedWalletSources={displayedBuilder.includedWalletSources}
+                  excludedWalletSources={displayedBuilder.excludedWalletSources}
+                  onIncludedIdentitySelect={addIdentity}
+                  onIncludedIdentityRemove={removeIdentity}
+                  onExcludedIdentitySelect={addExcludedIdentity}
+                  onExcludedIdentityRemove={removeExcludedIdentity}
+                  onIncludedWalletSourcesChange={updateIncludedWalletSources}
+                  onExcludedWalletSourcesChange={updateExcludedWalletSources}
+                />
+              </CreateWaveInlineGroupIdentityEditorPanel>
             </CreateWaveInlineGroupExpandedPanel>
           ) : null}
 
@@ -539,6 +568,7 @@ function InlineGroupAssignmentPanel({
               <CreateWaveInlineGroupRuleEditorPanel
                 activeRule={displayedBuilder.activeRule}
                 disabled={disabled}
+                onIdentityToggle={() => togglePanel("identity", false)}
                 onRuleToggle={toggleRule}
               >
                 <CreateWaveInlineGroupRuleEditor
