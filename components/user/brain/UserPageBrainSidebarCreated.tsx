@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import type { ProfileWaveActivityQueryState } from "@/hooks/useProfileWaveActivityWaves";
 import { getUserPageBrainSidebarMessage } from "./userPageBrainSidebar.messages";
@@ -24,6 +24,7 @@ export default function UserPageBrainSidebarCreated({
   state,
 }: UserPageBrainSidebarCreatedProps) {
   const locale = useBrowserLocale();
+  const toggleButtonRef = useRef<HTMLButtonElement>(null);
   const [expandedIdentity, setExpandedIdentity] = useState<string | null>(null);
   const isExpanded = expandedIdentity === identity;
   const visibleWaves = isExpanded
@@ -31,6 +32,13 @@ export default function UserPageBrainSidebarCreated({
     : state.waves.slice(0, DEFAULT_VISIBLE_CREATED_WAVES);
   const canRevealMore =
     state.waves.length > DEFAULT_VISIBLE_CREATED_WAVES || state.hasNextPage;
+
+  useLayoutEffect(() => {
+    const button = toggleButtonRef.current;
+    if (button && globalThis.document.activeElement === button) {
+      button.scrollIntoView({ block: "nearest", inline: "nearest" });
+    }
+  }, [isExpanded]);
 
   return (
     <section aria-labelledby="brain-created-waves-heading">
@@ -65,6 +73,7 @@ export default function UserPageBrainSidebarCreated({
           {(canRevealMore || isExpanded) && (
             <div className="tw-mt-2 tw-flex tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1">
               <button
+                ref={toggleButtonRef}
                 type="button"
                 onClick={() =>
                   setExpandedIdentity(isExpanded ? null : identity)

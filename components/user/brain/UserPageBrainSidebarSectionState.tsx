@@ -5,7 +5,7 @@ import type { ProfileWaveActivityQueryState } from "@/hooks/useProfileWaveActivi
 import { getUserPageBrainSidebarMessage } from "./userPageBrainSidebar.messages";
 
 export const BRAIN_SIDEBAR_ACTION_BUTTON_CLASS =
-  "tw-cursor-pointer tw-rounded-sm tw-border-none tw-bg-transparent tw-px-1 tw-py-1 tw-text-xs tw-font-semibold tw-text-iron-500 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-wait disabled:tw-opacity-60 desktop-hover:hover:tw-text-iron-300 motion-reduce:tw-transition-none";
+  "tw-cursor-pointer tw-rounded-sm tw-border-none tw-bg-transparent tw-px-1 tw-py-1 tw-text-xs tw-font-semibold tw-text-iron-500 tw-transition-colors aria-disabled:tw-cursor-wait aria-disabled:tw-opacity-60 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-wait disabled:tw-opacity-60 desktop-hover:hover:tw-text-iron-300 motion-reduce:tw-transition-none";
 
 export const BRAIN_SIDEBAR_COMPLETION_CLASS =
   "tw-m-0 tw-block tw-rounded-sm tw-px-1 tw-py-1 tw-text-xs tw-font-semibold tw-text-iron-500 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400";

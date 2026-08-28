@@ -120,6 +120,52 @@ describe("UserPageBrainSidebar", () => {
     });
   });
 
+  it("exposes the desktop lists as one keyboard-scrollable region", () => {
+    createdState = makeState({ waves: [makeWave()] });
+    recentState = makeState({
+      waves: [makeWave({ id: "wave-2", name: "Recent Wave" })],
+    });
+
+    render(<UserPageBrainSidebar profile={baseProfile} />);
+
+    const scrollRegion = screen.getByRole("region", {
+      name: "Created Waves Recently Active In",
+    });
+
+    expect(scrollRegion).toBe(screen.getByTestId("brain-sidebar-desktop"));
+    expect(scrollRegion).toHaveAttribute("tabindex", "0");
+    expect(scrollRegion).toHaveClass(
+      "lg:tw-max-h-[calc(100dvh-4rem)]",
+      "lg:tw-overflow-y-auto",
+      "lg:tw-overscroll-y-contain"
+    );
+    expect(
+      screen.getByTestId("brain-sidebar-mobile-strip")
+    ).not.toHaveAttribute("tabindex");
+
+    Object.defineProperties(scrollRegion, {
+      clientHeight: { configurable: true, value: 100 },
+      scrollHeight: { configurable: true, value: 200 },
+    });
+    scrollRegion.scrollTop = 100;
+
+    expect(
+      fireEvent.wheel(scrollRegion, { cancelable: true, deltaY: 40 })
+    ).toBe(false);
+    expect(
+      fireEvent.keyDown(scrollRegion, { cancelable: true, key: "PageDown" })
+    ).toBe(false);
+
+    scrollRegion.scrollTop = 50;
+    expect(
+      fireEvent.wheel(scrollRegion, { cancelable: true, deltaY: 40 })
+    ).toBe(true);
+    expect(
+      fireEvent.keyDown(scrollRegion, { cancelable: true, key: "PageDown" })
+    ).toBe(false);
+    expect(scrollRegion.scrollTop).toBe(100);
+  });
+
   it("keeps a successful recent section when created waves fail", () => {
     createdState = makeState({
       status: "error",
@@ -199,6 +245,7 @@ describe("UserPageBrainSidebar", () => {
     const toggle = within(createdSection).getByRole("button", {
       name: "Show more",
     });
+    toggle.scrollIntoView = jest.fn();
     toggle.focus();
 
     fireEvent.click(toggle);
@@ -206,6 +253,10 @@ describe("UserPageBrainSidebar", () => {
       within(createdSection).getByRole("button", { name: "Show less" })
     ).toBe(toggle);
     expect(globalThis.document.activeElement).toBe(toggle);
+    expect(toggle.scrollIntoView).toHaveBeenLastCalledWith({
+      block: "nearest",
+      inline: "nearest",
+    });
     expect(within(createdSection).getByText("Hidden Wave")).toBeInTheDocument();
 
     fireEvent.click(toggle);
@@ -213,7 +264,52 @@ describe("UserPageBrainSidebar", () => {
       within(createdSection).getByRole("button", { name: "Show more" })
     ).toBe(toggle);
     expect(globalThis.document.activeElement).toBe(toggle);
+    expect(toggle.scrollIntoView).toHaveBeenCalledTimes(2);
     expect(within(createdSection).queryByText("Hidden Wave")).toBeNull();
+  });
+
+  it("keeps a focused load-more control visible after a non-final page", () => {
+    recentState = makeState({
+      waves: [makeWave({ id: "wave-2", name: "Recent Wave" })],
+      hasNextPage: true,
+    });
+
+    const { rerender } = render(<UserPageBrainSidebar profile={baseProfile} />);
+    const recentSection = screen.getByRole("region", {
+      name: "Recently Active In",
+    });
+    const loadMore = within(recentSection).getByRole("button", {
+      name: "Load more",
+    });
+    loadMore.scrollIntoView = jest.fn();
+    loadMore.focus();
+
+    recentState = makeState({
+      waves: [makeWave({ id: "wave-2", name: "Recent Wave" })],
+      hasNextPage: true,
+      isFetchingNextPage: true,
+    });
+    rerender(<UserPageBrainSidebar profile={baseProfile} />);
+
+    expect(loadMore).toHaveAttribute("aria-busy", "true");
+    expect(loadMore).toHaveAttribute("aria-disabled", "true");
+    expect(loadMore).not.toBeDisabled();
+    expect(globalThis.document.activeElement).toBe(loadMore);
+
+    recentState = makeState({
+      waves: [
+        makeWave({ id: "wave-2", name: "Recent Wave" }),
+        makeWave({ id: "wave-3", name: "Another Recent Wave" }),
+      ],
+      hasNextPage: true,
+    });
+    rerender(<UserPageBrainSidebar profile={baseProfile} />);
+
+    expect(globalThis.document.activeElement).toBe(loadMore);
+    expect(loadMore.scrollIntoView).toHaveBeenCalledWith({
+      block: "nearest",
+      inline: "nearest",
+    });
   });
 
   it("uses truthful mobile and modal copy while more created pages exist", () => {
@@ -275,6 +371,8 @@ describe("UserPageBrainSidebar", () => {
     const loadMore = within(recentSection).getByRole("button", {
       name: "Load more",
     });
+    const scrollRegion = screen.getByTestId("brain-sidebar-desktop");
+    scrollRegion.scrollTop = 64;
     loadMore.focus();
     fireEvent.click(loadMore);
 
@@ -293,6 +391,7 @@ describe("UserPageBrainSidebar", () => {
     });
 
     const completion = within(recentSection).getByRole("status");
+    expect(scrollRegion.scrollTop).toBe(64);
     expect(completion).toHaveTextContent("All waves loaded.");
     expect(globalThis.document.activeElement).toBe(completion);
     expect(
