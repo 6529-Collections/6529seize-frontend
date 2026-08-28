@@ -50,14 +50,23 @@ step is user-reachable for `Chat`, `Rank`, and `Approve`.
 
 ## Group Picker Behavior
 
-- Each access row offers `Replace criteria` and `Choose group`. `Replace
-criteria` opens the criteria editor, where `Add identity` appears alongside
-  the rule choices instead of as a separate row-level action. The identity
-  search uses `Back to criteria` to return to those choices.
+- Each access row offers `Edit criteria` and `Choose group`. `Edit criteria`
+  opens the criteria editor, where `Identities` remains available alongside the
+  rule choices. The identity editor supports both explicitly included and
+  explicitly excluded identities.
+- For either identity treatment, users can search for profiles, import every
+  wallet from one EMMA allowlist, or drag and drop/select a CSV file. EMMA and
+  CSV choices remain attached to the unsaved group when the identity editor is
+  closed and reopened.
+- Wallets from profile search, EMMA, and CSV are normalized and deduplicated.
+  If the same wallet is later added to the opposite treatment, the latest
+  action wins so it is not both included and excluded.
+- The identity editor shows the unique total for the active treatment. Inline
+  groups can include up to 10,000 identities and exclude up to 1,000.
 - Inline identity search shows exact, prefix, and substring profile-handle
   matches in that order before ENS-only matches, and orders each match group by
   profile level, highest first.
-- Opening `Replace criteria` starts a pending replacement for that row. `Next`
+- Opening `Edit criteria` starts a pending replacement for that row. `Next`
   remains disabled until the user applies it with `Create and use new group`,
   abandons it with `Discard draft`, or selects a saved group with `Choose
 group`. Navigating away from `Groups`, including moving backward from the
@@ -115,6 +124,11 @@ group`. Navigating away from `Groups`, including moving backward from the
 ## Failure and Recovery
 
 - If search shows no matches, clear or change search text and retry.
+- If an EMMA allowlist cannot load, use `Try again` or remove it and select a
+  different allowlist. Authentication is required to read its results.
+- CSV import accepts `.csv` files, ignores malformed entries, and reports when
+  no valid Ethereum wallet addresses are found. A failed import does not clear
+  wallets already added from profile search or EMMA.
 - If the current member list cannot load, the member browser keeps the draft
   intact and offers `Try again`.
 - If an older saved draft references a group whose criteria are no longer
@@ -151,5 +165,6 @@ group`. Navigating away from `Groups`, including moving backward from the
 - [Wave Creation Rules Step](feature-rules-step.md)
 - [Wave Creation Description Step](feature-description-step.md)
 - [Wave Right Sidebar Group and Curation Management](../sidebars/feature-right-sidebar-group-management.md)
+- [Group Creation and Edit Flow](../../groups/feature-group-create-and-edit.md)
 - [Groups List Filters](../../groups/feature-groups-list-filters.md)
 - [Docs Home](../../README.md)

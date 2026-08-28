@@ -506,6 +506,81 @@ export const DE_DE_MESSAGES = {
     "Erstelle eine neue Gruppe oder wähle eine vorhandene aus.",
   "waves.create.groups.dialog.changeDescription":
     "Erstelle eine neue Gruppe oder wähle eine andere vorhandene aus.",
+  "waves.create.groups.identities": "Identitäten",
+  "waves.create.groups.actions.editCriteria": "Kriterien bearbeiten",
+  "waves.create.groups.inlineIdentities.modeLabel":
+    "Behandlung von Identitäten",
+  "waves.create.groups.inlineIdentities.included.label": "Eingeschlossen",
+  "waves.create.groups.inlineIdentities.included.searchLabel":
+    "Identität zum Einschließen suchen",
+  "waves.create.groups.inlineIdentities.included.searchPlaceholder":
+    "Identitäten zum Einschließen suchen...",
+  "waves.create.groups.inlineIdentities.included.emptyHelper":
+    "Keine Identitäten sind ausdrücklich eingeschlossen.",
+  "waves.create.groups.inlineIdentities.excluded.label": "Ausgeschlossen",
+  "waves.create.groups.inlineIdentities.excluded.searchLabel":
+    "Identität zum Ausschließen suchen",
+  "waves.create.groups.inlineIdentities.excluded.searchPlaceholder":
+    "Identitäten zum Ausschließen suchen...",
+  "waves.create.groups.inlineIdentities.excluded.emptyHelper":
+    "Keine Identitäten sind ausdrücklich ausgeschlossen.",
+  "waves.create.groups.inlineIdentities.includeMe": "Mich einschließen",
+  "waves.create.groups.inlineIdentities.sources.emma.title": "EMMA",
+  "waves.create.groups.inlineIdentities.sources.emma.description":
+    "Füge alle Wallets aus einer deiner EMMA-Allowlists hinzu.",
+  "waves.create.groups.inlineIdentities.sources.emma.searchLabel":
+    "Allowlists durchsuchen",
+  "waves.create.groups.inlineIdentities.sources.emma.searchLoading":
+    "Allowlists werden geladen...",
+  "waves.create.groups.inlineIdentities.sources.emma.searchEmpty":
+    "Keine Allowlists gefunden",
+  "waves.create.groups.inlineIdentities.sources.emma.empty":
+    "Keine Allowlist hinzugefügt.",
+  "waves.create.groups.inlineIdentities.sources.emma.loading":
+    "Allowlist-Identitäten werden hinzugefügt...",
+  "waves.create.groups.inlineIdentities.sources.emma.load": "Allowlist laden",
+  "waves.create.groups.inlineIdentities.sources.emma.error":
+    "Diese Allowlist konnte nicht geladen werden. Versuche es erneut.",
+  "waves.create.groups.inlineIdentities.sources.emma.authenticationRequired":
+    "Verbinde deine Wallet, um diese Allowlist zu laden.",
+  "waves.create.groups.inlineIdentities.sources.emma.remove":
+    "EMMA-Allowlist entfernen",
+  "waves.create.groups.inlineIdentities.sources.csv.title": "CSV-Datei",
+  "waves.create.groups.inlineIdentities.sources.csv.description":
+    "Importiere Ethereum-Wallets aus einer CSV-Datei.",
+  "waves.create.groups.inlineIdentities.sources.csv.dropLabel":
+    "CSV-Datei hier ablegen oder Datei auswählen",
+  "waves.create.groups.inlineIdentities.sources.csv.includeInputLabel":
+    "CSV-Datei mit einzuschließenden Identitäten auswählen",
+  "waves.create.groups.inlineIdentities.sources.csv.excludeInputLabel":
+    "CSV-Datei mit auszuschließenden Identitäten auswählen",
+  "waves.create.groups.inlineIdentities.sources.csv.invalidFile":
+    "Wähle eine CSV-Datei aus.",
+  "waves.create.groups.inlineIdentities.sources.csv.readError":
+    "Diese Datei konnte nicht gelesen werden. Versuche eine andere CSV-Datei.",
+  "waves.create.groups.inlineIdentities.sources.csv.noWallets":
+    "Es wurden keine gültigen Ethereum-Wallet-Adressen gefunden.",
+  "waves.create.groups.inlineIdentities.sources.csv.empty":
+    "Keine CSV-Datei hinzugefügt.",
+  "waves.create.groups.inlineIdentities.sources.csv.remove":
+    "CSV-Datei entfernen",
+  "waves.create.groups.inlineIdentities.sources.count.one":
+    "{count} Identität hinzugefügt",
+  "waves.create.groups.inlineIdentities.sources.count.other":
+    "{count} Identitäten hinzugefügt",
+  "waves.create.groups.inlineIdentities.sources.total.included.one":
+    "{count} eindeutige Identität eingeschlossen",
+  "waves.create.groups.inlineIdentities.sources.total.included.other":
+    "{count} eindeutige Identitäten eingeschlossen",
+  "waves.create.groups.inlineIdentities.sources.total.excluded.one":
+    "{count} eindeutige Identität ausgeschlossen",
+  "waves.create.groups.inlineIdentities.sources.total.excluded.other":
+    "{count} eindeutige Identitäten ausgeschlossen",
+  "waves.create.groups.inlineIdentities.sources.includeLimit":
+    "Eine Gruppe kann höchstens {limit} Identitäten einschließen.",
+  "waves.create.groups.inlineIdentities.sources.excludeLimit":
+    "Eine Gruppe kann höchstens {limit} Identitäten ausschließen.",
+  "waves.create.groups.inlineIdentities.sources.retry": RETRY_LABEL,
   "waves.create.groups.members.currentCount.one": "{count} Benutzer",
   "waves.create.groups.members.currentCount.other": "{count} Benutzer",
   "waves.create.groups.members.countLoading":
@@ -585,6 +660,13 @@ export const DE_DE_MESSAGES = {
   "waves.create.groups.members.criteria.excluded.other":
     "{count} ausdrücklich ausgeschlossene Benutzer",
   "waves.create.groups.members.criteria.grant": "xTDH-Zuschuss {grantId}",
+  "waves.create.groups.members.criteria.grant.collection":
+    "xTDH-Zuschuss für {collectionName}",
+  "waves.create.groups.members.criteria.grant.selected":
+    "Ausgewählter xTDH-Zuschuss",
+  "waves.create.groups.xtdhGrant.change": "Zuschuss ändern",
+  "waves.create.groups.xtdhGrant.cancelChange": "Änderung abbrechen",
+  "waves.create.groups.xtdhGrant.remove": "Zuschuss entfernen",
   "waves.create.groups.validation.checking": "Gruppenzugriff wird geprüft…",
   "waves.create.groups.validation.unavailableTitle":
     "Der Gruppenzugriff konnte nicht geprüft werden.",

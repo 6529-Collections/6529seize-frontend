@@ -87,7 +87,32 @@ describe("CreateWaveGroup", () => {
   const exampleGroup: ApiGroupFull = {
     id: "group-1",
     name: "Alpha Group",
-    description: "Example",
+    group: {
+      tdh: { min: null, max: null, inclusion_strategy: "BOTH" },
+      rep: {
+        min: null,
+        max: null,
+        direction: "RECEIVED",
+        user_identity: null,
+        category: null,
+      },
+      cic: {
+        min: null,
+        max: null,
+        direction: "RECEIVED",
+        user_identity: null,
+      },
+      level: { min: null, max: null },
+      owns_nfts: [],
+      identity_group_id: null,
+      identity_group_identities_count: 0,
+      excluded_identity_group_id: null,
+      excluded_identity_group_identities_count: 0,
+      is_beneficiary_of_grant_id: null,
+      is_beneficiary_of_grant_match_mode: "ANY_TOKEN",
+      is_beneficiary_of_grant: null,
+    },
+    is_private: false,
     created_by: {
       id: "creator-1",
       handle: "alpha",
@@ -188,6 +213,57 @@ describe("CreateWaveGroup", () => {
     );
     expect(mockOnGroupResolutionChange.mock.calls).toEqual([[true], [false]]);
     expect(inlinePanelProps?.selectedGroup).toEqual(exampleGroup);
+  });
+
+  it("restores included and excluded identity wallets for editing", async () => {
+    const groupWithIdentityLists = {
+      ...exampleGroup,
+      group: {
+        ...exampleGroup.group,
+        identity_group_id: "included-list",
+        identity_group_identities_count: 1,
+        excluded_identity_group_id: "excluded-list",
+        excluded_identity_group_identities_count: 1,
+      },
+    };
+    mockedCommonApiFetch.mockImplementation(async ({ endpoint }) => {
+      if (endpoint.endsWith("/identity_groups/included-list")) {
+        return ["0xincluded"];
+      }
+      if (endpoint.endsWith("/identity_groups/excluded-list")) {
+        return ["0xexcluded"];
+      }
+      throw new Error(`Unexpected endpoint: ${endpoint}`);
+    });
+
+    renderComponent({
+      groups: {
+        ...defaultGroups,
+        canDrop: groupWithIdentityLists.id,
+      },
+      groupsCache: {
+        [groupWithIdentityLists.id]: groupWithIdentityLists,
+      },
+    });
+
+    await waitFor(() => {
+      expect(inlinePanelProps?.selectedGroupIncludedWallets).toEqual([
+        "0xincluded",
+      ]);
+      expect(inlinePanelProps?.selectedGroupExcludedWallets).toEqual([
+        "0xexcluded",
+      ]);
+    });
+    expect(mockedCommonApiFetch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        endpoint: "groups/group-1/identity_groups/included-list",
+      })
+    );
+    expect(mockedCommonApiFetch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        endpoint: "groups/group-1/identity_groups/excluded-list",
+      })
+    );
   });
 
   it("passes the suggested group name and simplified callbacks to the inline panel", () => {

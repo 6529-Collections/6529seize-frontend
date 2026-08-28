@@ -79,7 +79,7 @@ jest.mock(
   () =>
     function MockCreateWaveInlineGroupIdentities(props: {
       readonly resultsLayout?: string;
-      readonly onIdentitySelect: (identity: {
+      readonly onIncludedIdentitySelect: (identity: {
         readonly profile_id: string;
         readonly handle: string;
         readonly normalised_handle: string;
@@ -100,7 +100,7 @@ jest.mock(
           <button
             type="button"
             onClick={() =>
-              props.onIdentitySelect({
+              props.onIncludedIdentitySelect({
                 profile_id: "profile-1",
                 handle: "alpha",
                 normalised_handle: "alpha",
@@ -247,7 +247,7 @@ describe("GroupAssignmentPanel dialog layout", () => {
     await user.click(screen.getByRole("tab", { name: "New group" }));
 
     expect(
-      screen.getByRole("button", { name: "Add identity" })
+      screen.getByRole("button", { name: "Identities" })
     ).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Add rule" })
@@ -263,7 +263,7 @@ describe("GroupAssignmentPanel dialog layout", () => {
     renderDialogPanel();
 
     await user.click(screen.getByRole("tab", { name: "New group" }));
-    await user.click(screen.getByRole("button", { name: "Add identity" }));
+    await user.click(screen.getByRole("button", { name: "Identities" }));
 
     expect(screen.getByTestId("identity-builder")).toHaveAttribute(
       "data-results-layout",
@@ -283,16 +283,14 @@ describe("GroupAssignmentPanel dialog layout", () => {
     renderDialogPanel();
 
     await user.click(screen.getByRole("tab", { name: "New group" }));
-    await user.click(screen.getByRole("button", { name: "Add identity" }));
+    await user.click(screen.getByRole("button", { name: "Identities" }));
     await user.click(screen.getByRole("button", { name: "add identity" }));
 
     expect(
       screen.getAllByText("1 explicitly included user").length
     ).toBeGreaterThan(0);
     expect(
-      within(screen.getByRole("button", { name: "Add identity" })).getByText(
-        "1"
-      )
+      within(screen.getByRole("button", { name: "Identities" })).getByText("1")
     ).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Add rule" }));

@@ -1209,14 +1209,17 @@ const WAVE_CREATE_GROUPS_MESSAGES = objectMessages("waves.create.groups", {
   "dialog.addDescription": "Create a new group or choose an existing group.",
   "dialog.changeDescription":
     "Create a new group or choose a different existing group.",
-  addIdentity: "Add identity",
+  identities: "Identities",
   addRule: "Add rule",
+  "xtdhGrant.change": "Change grant",
+  "xtdhGrant.cancelChange": "Cancel change",
+  "xtdhGrant.remove": "Remove grant",
   done: "Done",
   enableChat: "Enable chat",
   allowAdminsToDeletePosts: "Allow admins to delete posts",
   defaultGroupName: "Wave Group",
   notAppliedYet: "Not applied yet.",
-  "actions.replaceCriteria": "Replace criteria",
+  "actions.editCriteria": "Edit criteria",
   "actions.chooseGroup": "Choose group",
   "draft.notReadyTitle": "Not ready yet.",
   "draft.notReadyDescription":
@@ -1234,8 +1237,65 @@ const WAVE_CREATE_GROUPS_MESSAGES = objectMessages("waves.create.groups", {
   "validation.invalidTitle": "Some access groups need attention.",
   "validation.invalidDescription":
     "Every Drop, Vote, Chat, and Admins group member must also belong to the Visibility group.",
-  "inlineIdentities.emptyHelper":
-    "Add identities one by one to build this access group.",
+  "inlineIdentities.modeLabel": "Identity treatment",
+  "inlineIdentities.included.label": "Included",
+  "inlineIdentities.included.searchLabel": "Find an identity to include",
+  "inlineIdentities.included.searchPlaceholder":
+    "Search identities to include...",
+  "inlineIdentities.included.emptyHelper":
+    "No identities are explicitly included.",
+  "inlineIdentities.excluded.label": "Excluded",
+  "inlineIdentities.excluded.searchLabel": "Find an identity to exclude",
+  "inlineIdentities.excluded.searchPlaceholder":
+    "Search identities to exclude...",
+  "inlineIdentities.excluded.emptyHelper":
+    "No identities are explicitly excluded.",
+  "inlineIdentities.includeMe": "Include me",
+  "inlineIdentities.sources.emma.title": "EMMA",
+  "inlineIdentities.sources.emma.description":
+    "Add every wallet from one of your EMMA allowlists.",
+  "inlineIdentities.sources.emma.searchLabel": "Search allowlists",
+  "inlineIdentities.sources.emma.searchLoading": "Loading allowlists...",
+  "inlineIdentities.sources.emma.searchEmpty": "No allowlists found",
+  "inlineIdentities.sources.emma.empty": "No allowlist added.",
+  "inlineIdentities.sources.emma.loading": "Adding allowlist identities...",
+  "inlineIdentities.sources.emma.load": "Load allowlist",
+  "inlineIdentities.sources.emma.error":
+    "Couldn't load this allowlist. Try again.",
+  "inlineIdentities.sources.emma.authenticationRequired":
+    "Connect your wallet to load this allowlist.",
+  "inlineIdentities.sources.emma.remove": "Remove EMMA allowlist",
+  "inlineIdentities.sources.csv.title": "CSV file",
+  "inlineIdentities.sources.csv.description":
+    "Import Ethereum wallets from a CSV file.",
+  "inlineIdentities.sources.csv.dropLabel":
+    "Drop a CSV file here, or choose a file",
+  "inlineIdentities.sources.csv.includeInputLabel":
+    "Choose a CSV file of identities to include",
+  "inlineIdentities.sources.csv.excludeInputLabel":
+    "Choose a CSV file of identities to exclude",
+  "inlineIdentities.sources.csv.invalidFile": "Choose a CSV file.",
+  "inlineIdentities.sources.csv.readError":
+    "Couldn't read this file. Try another CSV file.",
+  "inlineIdentities.sources.csv.noWallets":
+    "No valid Ethereum wallet addresses were found.",
+  "inlineIdentities.sources.csv.empty": "No CSV file added.",
+  "inlineIdentities.sources.csv.remove": "Remove CSV file",
+  "inlineIdentities.sources.count.one": "{count} identity added",
+  "inlineIdentities.sources.count.other": "{count} identities added",
+  "inlineIdentities.sources.total.included.one":
+    "{count} unique identity included",
+  "inlineIdentities.sources.total.included.other":
+    "{count} unique identities included",
+  "inlineIdentities.sources.total.excluded.one":
+    "{count} unique identity excluded",
+  "inlineIdentities.sources.total.excluded.other":
+    "{count} unique identities excluded",
+  "inlineIdentities.sources.includeLimit":
+    "A group can include at most {limit} identities.",
+  "inlineIdentities.sources.excludeLimit":
+    "A group can exclude at most {limit} identities.",
+  "inlineIdentities.sources.retry": "Try again",
   "inlineIdentities.creatorExcludedWarning":
     "Warning: You are not included in this group. If it controls who can view the wave, you may not be able to access the wave after creating it.",
   "members.currentCount.one": "{count} user",
@@ -1302,6 +1362,8 @@ const WAVE_CREATE_GROUPS_MESSAGES = objectMessages("waves.create.groups", {
   "members.criteria.excluded.one": "{count} explicitly excluded user",
   "members.criteria.excluded.other": "{count} explicitly excluded users",
   "members.criteria.grant": "xTDH grant {grantId}",
+  "members.criteria.grant.collection": "xTDH grant for {collectionName}",
+  "members.criteria.grant.selected": "Selected xTDH grant",
   "restore.loading": "Restoring the selected group…",
   "restore.error":
     "This selected group could not be loaded. Retry, replace its criteria, or choose another group before continuing.",
