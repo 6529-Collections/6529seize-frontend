@@ -18,8 +18,9 @@ require a wallet signature.
 
 - Write and submit a new chat message in a wave with guidelines.
 - Submit a reply or chat post with typed, non-whitespace text as the first post
-  from that profile in the wave. Poll-only and attachment-only submissions keep
-  their normal flow.
+  from that profile in the wave. Polls require typed question text and follow
+  this first-message review flow. Attachment-only submissions keep their normal
+  flow.
 
 The review opens only when the profile has posted neither a chat message nor a
 participation drop in the wave.
