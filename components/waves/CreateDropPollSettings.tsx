@@ -1,3 +1,5 @@
+import type { SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { CalendarIcon, CheckIcon } from "@heroicons/react/24/outline";
 import type { RefObject } from "react";
 import type { CreateDropPollDraft } from "./CreateDropPoll";
@@ -5,6 +7,7 @@ import type { CreateDropPollDraft } from "./CreateDropPoll";
 interface CreateDropPollSettingsProps {
   readonly draft: CreateDropPollDraft;
   readonly disabled: boolean;
+  readonly locale: SupportedLocale;
   readonly closingTimeInputId: string;
   readonly minClosingTime: string;
   readonly closingTimeInputRef: RefObject<HTMLInputElement | null>;
@@ -70,6 +73,7 @@ function PollCheckbox({
 export default function CreateDropPollSettings({
   draft,
   disabled,
+  locale,
   closingTimeInputId,
   minClosingTime,
   closingTimeInputRef,
@@ -85,7 +89,7 @@ export default function CreateDropPollSettings({
           htmlFor={closingTimeInputId}
           className="tw-mb-0 tw-text-[12.5px] tw-font-medium tw-leading-4 tw-text-iron-400"
         >
-          Closing time
+          {t(locale, "waves.poll.composer.closingTime")}
         </label>
         <label
           htmlFor={closingTimeInputId}
@@ -115,7 +119,7 @@ export default function CreateDropPollSettings({
           id={responderScopeInputId}
           checked={draft.onlyDroppersCanRespond}
           disabled={disabled}
-          label="Only people who can chat can respond"
+          label={t(locale, "waves.poll.composer.onlyDroppersCanRespond")}
           onChange={(checked) =>
             onChange({ ...draft, onlyDroppersCanRespond: checked })
           }
@@ -124,7 +128,7 @@ export default function CreateDropPollSettings({
           id={anonymousInputId}
           checked={draft.anonymous}
           disabled={disabled}
-          label="Anonymous poll"
+          label={t(locale, "waves.poll.composer.anonymous")}
           onChange={(checked) => onChange({ ...draft, anonymous: checked })}
         />
       </div>

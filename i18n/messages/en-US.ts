@@ -652,6 +652,28 @@ const WAVE_POLL_MESSAGES = objectMessages("waves.poll", {
   "actions.changeVote": "Change vote",
   "status.voted": "Voted",
   "status.updated": "Updated",
+  "composer.title": "Create poll",
+  "composer.questionPlaceholder": "Ask a poll question",
+  "composer.questionRequired": "Add a poll question.",
+  "composer.mode.groupLabel": "Poll response type",
+  "composer.mode.single": "Single",
+  "composer.mode.multiple": "Multiple",
+  "composer.mode.singleDescription": "Voters can select one option.",
+  "composer.mode.multipleDescription":
+    "Voters can select more than one option.",
+  "composer.optionLabel": "Poll option {number}",
+  "composer.optionPlaceholder": "Option {number}",
+  "composer.removeOption": "Remove option {number}",
+  "composer.add": "Add poll",
+  "composer.addOption": "Add option",
+  "composer.remove": "Remove poll",
+  "composer.closingTime": "Closing time",
+  "composer.onlyDroppersCanRespond": "Only people who can chat can respond",
+  "composer.anonymous": "Anonymous poll",
+  "composer.validation.minimumOptions": "Enter at least {count} options.",
+  "composer.validation.optionLength": "Options can be up to {max} characters.",
+  "composer.validation.uniqueOptions": "Poll options must be unique.",
+  "composer.validation.futureClosingTime": "Choose a future closing time.",
 } as const);
 
 const WAVE_SUBMISSION_BUTTON_LABEL_MESSAGES = objectMessages(
@@ -1734,6 +1756,18 @@ const WAVE_COMPOSER_ACTION_MESSAGES = objectMessages("waves.composer.actions", {
   closePoll: "Close poll",
   storm: "Storm",
 } as const);
+
+const WAVE_COMPOSER_PLACEHOLDER_MESSAGES = objectMessages(
+  "waves.composer.placeholder",
+  {
+    createDrop: "Create a drop",
+    writeChatMessage: "Write a chat message",
+    dropReply: "Drop a reply",
+    postReply: "Post a reply",
+    quoteDrop: "Quote a drop",
+    postQuote: "Post a quote",
+  } as const
+);
 
 const WAVE_STORM_COMPOSER_MESSAGES = objectMessages("waves.stormComposer", {
   draftTitle: "Storm draft",
@@ -3428,6 +3462,7 @@ export const EN_US_MESSAGES = {
   ...NOTIFICATIONS_WAVE_FOLLOW_BUTTON_MESSAGES,
   ...WAVE_CHAT_MESSAGES,
   ...WAVE_COMPOSER_ACTION_MESSAGES,
+  ...WAVE_COMPOSER_PLACEHOLDER_MESSAGES,
   ...WAVE_STORM_COMPOSER_MESSAGES,
   ...WAVE_CHAT_SETTINGS_MESSAGES,
   ...NETWORK_GROUP_INSPECTION_MESSAGES,

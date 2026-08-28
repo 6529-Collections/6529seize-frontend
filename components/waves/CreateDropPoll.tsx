@@ -1,6 +1,9 @@
 "use client";
 
 import type { ApiCreateDropPollRequest } from "@/generated/models/ApiCreateDropPollRequest";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { PlusIcon, TrashIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useId, useRef, useState } from "react";
 import CreateDropPollModeSelector from "./CreateDropPollModeSelector";
@@ -53,7 +56,8 @@ const getUniqueNormalizedOptions = (options: readonly string[]): Set<string> =>
   new Set(options.map((option) => option.trim().toLowerCase()));
 
 export const validateCreateDropPollDraft = (
-  draft: CreateDropPollDraft | null
+  draft: CreateDropPollDraft | null,
+  locale: SupportedLocale = DEFAULT_LOCALE
 ): {
   readonly request: ApiCreateDropPollRequest | null;
   readonly error: string | null;
@@ -69,21 +73,25 @@ export const validateCreateDropPollDraft = (
   if (options.length < MIN_POLL_OPTIONS) {
     return {
       request: null,
-      error: `Add at least ${MIN_POLL_OPTIONS} options.`,
+      error: t(locale, "waves.poll.composer.validation.minimumOptions", {
+        count: MIN_POLL_OPTIONS,
+      }),
     };
   }
 
   if (options.some((option) => option.length > MAX_POLL_OPTION_LENGTH)) {
     return {
       request: null,
-      error: `Options can be up to ${MAX_POLL_OPTION_LENGTH} characters.`,
+      error: t(locale, "waves.poll.composer.validation.optionLength", {
+        max: MAX_POLL_OPTION_LENGTH,
+      }),
     };
   }
 
   if (getUniqueNormalizedOptions(options).size !== options.length) {
     return {
       request: null,
-      error: "Poll options must be unique.",
+      error: t(locale, "waves.poll.composer.validation.uniqueOptions"),
     };
   }
 
@@ -91,7 +99,7 @@ export const validateCreateDropPollDraft = (
   if (!Number.isFinite(closingTime) || closingTime <= Date.now()) {
     return {
       request: null,
-      error: "Choose a future closing time.",
+      error: t(locale, "waves.poll.composer.validation.futureClosingTime"),
     };
   }
 
@@ -115,10 +123,13 @@ export default function CreateDropPoll({
   onRemove,
   presentation = "inline",
 }: CreateDropPollProps) {
+  const locale = useBrowserLocale();
   const isSheet = presentation === "sheet";
   const canAddOption = draft.options.length < MAX_POLL_OPTIONS;
   const canRemoveOption = draft.options.length > MIN_POLL_OPTIONS;
   const closingTimeInputId = useId();
+  const modeDescriptionId = useId();
+  const validationErrorId = useId();
   const anonymousInputId = useId();
   const responderScopeInputId = useId();
   const optionKeyBaseId = useId();
@@ -207,6 +218,9 @@ export default function CreateDropPoll({
   return (
     <div
       data-testid="create-drop-poll"
+      role="group"
+      aria-label={t(locale, "waves.poll.composer.title")}
+      aria-describedby={validationError ? validationErrorId : undefined}
       className={
         isSheet
           ? "tw-flex-none tw-overflow-hidden tw-bg-iron-950"
@@ -218,6 +232,8 @@ export default function CreateDropPoll({
           <CreateDropPollModeSelector
             draft={draft}
             disabled={disabled}
+            descriptionId={modeDescriptionId}
+            locale={locale}
             onChange={onChange}
           />
         </div>
@@ -225,19 +241,21 @@ export default function CreateDropPoll({
         <div className="tw-grid tw-grid-cols-[minmax(0,1fr)_auto] tw-items-center tw-gap-x-3 tw-gap-y-2 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/10 tw-px-4 tw-py-3 sm:tw-flex sm:tw-items-center sm:tw-justify-between sm:tw-gap-3">
           <div className="tw-contents sm:tw-flex sm:tw-min-w-0 sm:tw-items-center sm:tw-gap-3">
             <h3 className="tw-col-start-1 tw-row-start-1 tw-m-0 tw-flex tw-h-8 tw-items-center tw-text-[13.5px] tw-font-bold tw-tracking-wide tw-text-iron-50">
-              Create Poll
+              {t(locale, "waves.poll.composer.title")}
             </h3>
             <div className="tw-col-span-2 tw-col-start-1 tw-row-start-2 sm:tw-flex sm:tw-items-center">
               <CreateDropPollModeSelector
                 draft={draft}
                 disabled={disabled}
+                descriptionId={modeDescriptionId}
+                locale={locale}
                 onChange={onChange}
               />
             </div>
           </div>
           <button
             type="button"
-            aria-label="Remove poll"
+            aria-label={t(locale, "waves.poll.composer.remove")}
             disabled={disabled}
             onClick={onRemove}
             className="tw-col-start-2 tw-row-start-1 tw-flex tw-size-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-400 tw-transition-colors disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-bg-white/[0.04] desktop-hover:hover:tw-text-white"
@@ -248,6 +266,17 @@ export default function CreateDropPoll({
       )}
 
       <div className="tw-flex tw-flex-col tw-gap-3 tw-px-4 tw-py-3">
+        <p
+          id={modeDescriptionId}
+          className="tw-m-0 tw-text-xs tw-font-medium tw-leading-4 tw-text-iron-400"
+        >
+          {t(
+            locale,
+            draft.multichoice
+              ? "waves.poll.composer.mode.multipleDescription"
+              : "waves.poll.composer.mode.singleDescription"
+          )}
+        </p>
         <div className="tw-flex tw-flex-col tw-gap-2">
           {optionRows.map(({ index, key, option }) => {
             const hasOptionValue = option.trim().length > 0;
@@ -282,14 +311,22 @@ export default function CreateDropPoll({
                   value={option}
                   disabled={disabled}
                   maxLength={MAX_POLL_OPTION_LENGTH}
-                  aria-label={`Poll option ${index + 1}`}
+                  aria-label={t(locale, "waves.poll.composer.optionLabel", {
+                    number: index + 1,
+                  })}
                   onChange={(event) => updateOption(index, event.target.value)}
                   className="tw-min-w-0 tw-flex-1 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800/80 tw-px-3 tw-py-2.5 tw-text-[13px] tw-font-medium tw-text-iron-50 tw-outline-none tw-transition-all placeholder:tw-text-iron-500 hover:tw-border-iron-600 hover:tw-bg-iron-800 focus:tw-border-white/30 focus:tw-bg-iron-800 disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
-                  placeholder={`Option ${index + 1}`}
+                  placeholder={t(
+                    locale,
+                    "waves.poll.composer.optionPlaceholder",
+                    { number: index + 1 }
+                  )}
                 />
                 <button
                   type="button"
-                  aria-label={`Remove option ${index + 1}`}
+                  aria-label={t(locale, "waves.poll.composer.removeOption", {
+                    number: index + 1,
+                  })}
                   disabled={disabled || !canRemoveOption}
                   onClick={() => removeOption(index)}
                   className={`tw-flex tw-size-7 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-400 tw-transition-all disabled:tw-cursor-not-allowed desktop-hover:hover:tw-bg-white/[0.04] desktop-hover:hover:tw-text-rose-400 ${
@@ -314,10 +351,16 @@ export default function CreateDropPoll({
               <span className="tw-flex tw-size-4 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-dashed tw-border-iron-600">
                 <PlusIcon className="tw-size-2.5" aria-hidden="true" />
               </span>
-              <span className="tw-text-sm tw-font-medium">Add option</span>
+              <span className="tw-text-sm tw-font-medium">
+                {t(locale, "waves.poll.composer.addOption")}
+              </span>
             </button>
             {validationError && (
-              <p className="tw-mb-0 tw-min-w-0 tw-text-left tw-text-[11px] tw-font-medium tw-text-amber-200 sm:tw-truncate sm:tw-text-right">
+              <p
+                id={validationErrorId}
+                role="alert"
+                className="tw-mb-0 tw-min-w-0 tw-text-left tw-text-[11px] tw-font-medium tw-text-amber-200 sm:tw-truncate sm:tw-text-right"
+              >
                 {validationError}
               </p>
             )}
@@ -327,6 +370,7 @@ export default function CreateDropPoll({
         <CreateDropPollSettings
           draft={draft}
           disabled={disabled}
+          locale={locale}
           closingTimeInputId={closingTimeInputId}
           minClosingTime={minClosingTime}
           closingTimeInputRef={closingTimeInputRef}
