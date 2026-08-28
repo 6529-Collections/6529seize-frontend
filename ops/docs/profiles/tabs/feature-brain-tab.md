@@ -7,8 +7,8 @@ replies.
 The `Activity` card above the feed is documented separately in
 [Profile Brain Activity Heatmap](feature-brain-activity-heatmap.md).
 Clicking a drop body or quote preview opens that thread in Waves or Messages.
-The companion `Created Waves` and `Most Active In` surfaces inside this tab are
-documented separately in
+The companion `Created Waves` and `Recently Active In` surfaces inside this tab
+are documented separately in
 [Profile Brain Tab Wave Sidebar](feature-brain-wave-sidebar.md).
 On your own profile, the compact `Quick Tags` section appears beneath
 `Activity`. Its manager stays in the card; create and edit forms use a mobile

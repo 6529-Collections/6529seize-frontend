@@ -9,6 +9,44 @@ import stormComposerEsMessages from "@/i18n/messages/stormComposer.es-ES.json";
 import type { MessageKey } from "@/i18n/messages/en-US";
 
 export const ES_ES_MESSAGES = {
+  "user.brain.sidebar.createdHeading": "Waves creadas",
+  "user.brain.sidebar.createdMobileHeading": "Creadas",
+  "user.brain.sidebar.recentlyActiveHeading": "Actividad reciente en",
+  "user.brain.sidebar.lastPost": "Última publicación {time}",
+  "user.brain.sidebar.noPostsByProfile": "Este perfil no tiene publicaciones",
+  "user.brain.sidebar.totalWavePosts.one":
+    "{count} publicación total en la Wave",
+  "user.brain.sidebar.totalWavePosts.other":
+    "{count} publicaciones totales en la Wave",
+  "user.brain.sidebar.privateWave": "Wave privada",
+  "user.brain.sidebar.loadingWaveActivity":
+    "Cargando la actividad del perfil en Waves",
+  "user.brain.sidebar.loadingMoreWaveActivity":
+    "Cargando más actividad del perfil en Waves",
+  "user.brain.sidebar.mobileStripLabel": "Waves del Brain",
+  "user.brain.sidebar.createdEmpty": "No hay Waves creadas accesibles.",
+  "user.brain.sidebar.recentEmpty": "No hay publicaciones recientes en Waves.",
+  "user.brain.sidebar.createdLoadError":
+    "No se pudieron cargar las Waves creadas.",
+  "user.brain.sidebar.recentLoadError":
+    "No se pudo cargar la actividad reciente en Waves.",
+  "user.brain.sidebar.loadMoreError": "No se pudieron cargar más Waves.",
+  "user.brain.sidebar.retry": "Reintentar",
+  "user.brain.sidebar.retryLoadMore": "Reintentar cargar más",
+  "user.brain.sidebar.loadMore": "Cargar más",
+  "user.brain.sidebar.loadingMore": "Cargando…",
+  "user.brain.sidebar.allWavesLoaded": "Todas las Waves están cargadas.",
+  "user.brain.sidebar.more": "Más",
+  "user.brain.sidebar.showLess": "Mostrar menos",
+  "user.brain.sidebar.showMore": "Mostrar más",
+  "user.brain.sidebar.viewMoreCreatedWaves": "Ver más Waves creadas",
+  "user.brain.sidebar.createdModalTitle": "Waves creadas por {profile}",
+  "user.brain.sidebar.loadedCreatedCount.one": "Mostrando {count} Wave cargada",
+  "user.brain.sidebar.loadedCreatedCount.other":
+    "Mostrando {count} Waves cargadas",
+  "user.brain.sidebar.createdCount.one": "{count} Wave creada",
+  "user.brain.sidebar.createdCount.other": "{count} Waves creadas",
+  "user.brain.sidebar.closeCreatedWaves": "Cerrar las Waves creadas",
   "linkPreview.twitter.kind.article": "Artículo",
   "linkPreview.twitter.kind.post": "Publicación",
   "linkPreview.twitter.article.provider": "Artículo en X",
