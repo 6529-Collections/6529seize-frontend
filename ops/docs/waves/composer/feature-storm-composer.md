@@ -81,6 +81,9 @@ current editor posts the storm.
   the storm so its total text stays below the supported limit.
 - If `Post storm` is not shown, save or clear the current part first.
 - If `Edit` is unavailable, add or clear the current unsaved part.
+- On narrow layouts, this recovery instruction appears above the saved parts
+  while Edit is unavailable. Each unavailable Edit control also references the
+  instruction for assistive technology.
 - If authentication, upload, signature, or submission fails, correct the error
   and retry from the restored draft.
 - If a part is removed accidentally, rewrite it before posting; individual

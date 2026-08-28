@@ -65,6 +65,7 @@ export default function CreateDropComposer({
   initialMarkdown,
   initialMarkdownKey,
   pollDraft,
+  pollQuestionError,
   pollValidationError,
   updatePollDraft,
   removePoll,
@@ -113,6 +114,7 @@ export default function CreateDropComposer({
           mentionedWaves={drop?.mentioned_waves ?? []}
           referencedNfts={drop?.referenced_nfts ?? []}
           editingPartIndex={editingPartIndex}
+          isCompactLayout={isCompactLayout}
           controlsDisabled={submitting}
           canEditParts={!canAddPart && editingPartIndex === null}
           hasCurrentDraft={hasCurrentDraft}
@@ -156,33 +158,36 @@ export default function CreateDropComposer({
           setShowOptions={handleSetShowOptions}
           onGifDrop={onGifDrop}
         />
-        <div className="tw-col-start-2 tw-row-start-2 tw-w-full tw-min-w-0">
-          <CreateDropInput
-            waveId={wave.id}
-            key={dropEditorRefreshKey}
-            ref={createDropInputRef}
-            editorState={editorState}
-            initialEditorStateJson={initialDraftJson}
-            type={activeDrop?.action ?? null}
-            submitting={submitting}
-            isStormMode={isStormModeActive}
-            stormPartNumber={displayedStormPartNumber}
-            isDropMode={isDropMode}
-            canMentionAll={canMentionAll}
-            canSubmit={canSubmit}
-            onEditorState={handleEditorStateChange}
-            onEditorBlur={handleEditorBlur}
-            onReferencedNft={onReferencedNft}
-            onMentionedUser={onMentionedUser}
-            onMentionedWave={onMentionedWave}
-            onAttachmentFiles={handleFileChange}
-            canEditLastDropWithArrow={canEditLastDropWithArrow}
-            onRequestEditLastDrop={handleRequestEditLastDrop}
-            initialMarkdown={initialMarkdown}
-            initialMarkdownKey={initialMarkdownKey}
-            onDrop={submitWithResolvedAliases}
-          />
-        </div>
+        <CreateDropInput
+          waveId={wave.id}
+          key={dropEditorRefreshKey}
+          ref={createDropInputRef}
+          editorState={editorState}
+          initialEditorStateJson={initialDraftJson}
+          type={activeDrop?.action ?? null}
+          submitting={submitting}
+          isStormMode={isStormModeActive}
+          stormPartNumber={displayedStormPartNumber}
+          isDropMode={isDropMode}
+          isPollActive={hasPoll}
+          containerClassName="tw-col-start-2 tw-row-start-2 tw-w-full tw-min-w-0"
+          canMentionAll={canMentionAll}
+          canSubmit={canSubmit}
+          onEditorState={handleEditorStateChange}
+          onEditorBlur={handleEditorBlur}
+          onReferencedNft={onReferencedNft}
+          onMentionedUser={onMentionedUser}
+          onMentionedWave={onMentionedWave}
+          onAttachmentFiles={handleFileChange}
+          canEditLastDropWithArrow={canEditLastDropWithArrow}
+          onRequestEditLastDrop={handleRequestEditLastDrop}
+          initialMarkdown={initialMarkdown}
+          initialMarkdownKey={initialMarkdownKey}
+          hasValidationError={pollQuestionError !== null}
+          validationHelperText={pollQuestionError}
+          validationHelperClassName="tw-col-start-2 tw-row-start-3 tw-mb-0 tw-mt-2 tw-text-[11px] tw-font-medium tw-leading-4 tw-text-amber-200/90"
+          onDrop={submitWithResolvedAliases}
+        />
         <div className="tw-col-start-3 tw-row-start-2 tw-self-end md:tw-row-span-2">
           <CreateDropSubmit
             submitting={submitting}
@@ -199,7 +204,7 @@ export default function CreateDropComposer({
         {showCurationDropModeWarning && (
           <div
             className={`tw-col-span-3 tw-col-start-1 tw-min-w-0 md:tw-col-span-1 md:tw-col-start-2 ${
-              isCompactLayout ? "tw-row-start-4" : "tw-row-start-3"
+              pollQuestionError ? "tw-row-start-4" : "tw-row-start-3"
             }`}
           >
             <div className="tw-mt-2 tw-text-[11px] tw-leading-4 tw-text-amber-200/90">
@@ -230,8 +235,8 @@ export default function CreateDropComposer({
       )}
       {isApp && pollDraft && (
         <MobileWrapperDialog
-          title="Create Poll"
-          ariaLabel="Create Poll"
+          title={t(locale, "waves.poll.composer.title")}
+          ariaLabel={t(locale, "waves.poll.composer.title")}
           isOpen
           onClose={removePoll}
           onBack={submitting ? undefined : removePoll}

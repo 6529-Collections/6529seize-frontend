@@ -310,7 +310,7 @@ describe("CreateDropActions", () => {
     ).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
   });
 
-  it("shows active poll action state", () => {
+  it("hides the poll action while a poll is active", () => {
     render(
       <CreateDropActions
         {...defaultProps}
@@ -319,9 +319,8 @@ describe("CreateDropActions", () => {
       />
     );
 
-    const pollButton = screen.getByLabelText("Remove poll");
-    expect(pollButton).toHaveAttribute("aria-pressed", "true");
-    expect(pollButton).toHaveClass("tw-bg-primary-500/20");
+    expect(screen.queryByLabelText("Add poll")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Remove poll")).not.toBeInTheDocument();
   });
 
   it("disables the storm action while a poll is active", () => {

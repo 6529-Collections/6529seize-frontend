@@ -115,6 +115,7 @@ export const canSubmitDrop = ({
   parts,
   hasMetadata,
   hasValidPoll,
+  hasPoll = hasValidPoll,
   hasPendingInlineImageUpload,
   hasMetadataValidationErrors,
   hasPollValidationError,
@@ -124,6 +125,7 @@ export const canSubmitDrop = ({
   readonly parts: CreateDropPart[];
   readonly hasMetadata: boolean;
   readonly hasValidPoll: boolean;
+  readonly hasPoll?: boolean;
   readonly hasPendingInlineImageUpload: boolean;
   readonly hasMetadataValidationErrors: boolean;
   readonly hasPollValidationError: boolean;
@@ -135,6 +137,7 @@ export const canSubmitDrop = ({
     hasMetadata,
     hasPoll: hasValidPoll,
   }) &&
+  (!hasPoll || (markdown?.trim().length ?? 0) > 0) &&
   !hasPendingInlineImageUpload &&
   !hasMetadataValidationErrors &&
   !hasPollValidationError &&

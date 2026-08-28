@@ -2758,7 +2758,8 @@
         "Agree sends the pending first message and prevents repeat prompts in that wave. Decline or dismissing the dialog does not send the message, keeps the draft, and shows the guidelines again on the next submit attempt.",
         "Composer docs cover markdown, mentions, NFT hashtag references, curation URLs, media uploads, and Enter-key behavior.",
         "On narrow composer rows, the plus button opens a labeled action tray below the input for available Upload, GIF, Poll, Storm, and Metadata actions.",
-        "Poll and Storm are mutually exclusive on narrow composer rows: while Poll is open, the plus control becomes an X that closes Poll and the action tray stays unavailable; while Storm is active, Poll remains visible but unavailable until the Storm is finished or discarded.",
+        "Poll posts require a question, at least two unique options, and a future closing time. The composer explains whether voters can select one option or multiple options and keeps Post unavailable until the poll is valid.",
+        "Poll and Storm are mutually exclusive on narrow composer rows: while Poll is open, the plus control and separate Poll action are hidden and the poll header close control removes the poll; while Storm is active, Poll remains visible but unavailable until the Storm is finished or discarded.",
         "On mobile and in the app, the GIF picker uses the same drag handle and swipe-down dismissal as the emoji picker.",
         "Composer availability depends on the wave, groups, permissions, and current state.",
         "If an authenticated wallet has no profile handle yet, public wave content can stay readable while the composer prompts the user to create a profile before participating."
@@ -2768,6 +2769,7 @@
       "tags": ["waves", "composer", "drops"],
       "source_refs": [
         "ops/docs/waves/composer/README.md",
+        "ops/docs/waves/composer/feature-poll-composer.md",
         "ops/docs/waves/composer/feature-enter-key-behavior.md",
         "ops/docs/waves/composer/feature-first-message-guidelines.md",
         "ops/docs/waves/chat/feature-chat-composer-availability.md"
@@ -5480,7 +5482,7 @@
         "An empty Storm draft shows 0 parts and Write part 1; if valid text or media is already present, selecting Storm saves it as part 1.",
         "The primary action says Add part until at least one valid part is saved, Save changes while editing, and Post storm when a saved Storm has an empty current editor.",
         "Close exits an untouched empty Storm immediately; once the Storm has saved or unsaved content, Discard clears the complete draft after confirmation.",
-        "Blank or whitespace-only text is not saved as a storm part, while media-only parts are allowed.",
+        "Blank or whitespace-only text is not saved as a storm part, while media-only parts are allowed. If a current unsaved part blocks editing saved parts, narrow layouts show an instruction to add or clear it.",
         "An empty Storm draft cannot be posted, Poll and Storm cannot be started together, and the storm is published as one drop with multiple ordered parts."
       ],
       "canonical_path": "/waves",

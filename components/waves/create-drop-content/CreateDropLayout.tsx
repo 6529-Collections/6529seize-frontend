@@ -105,6 +105,7 @@ export interface CreateDropLayoutProps {
   readonly initialMarkdownKey: string | null;
   readonly onDrop: (resolvedMarkdown?: string) => Promise<void>;
   readonly pollDraft: CreateDropPollDraft | null;
+  readonly pollQuestionError: string | null;
   readonly pollValidationError: string | null;
   readonly updatePollDraft: (value: CreateDropPollDraft) => void;
   readonly removePoll: () => void;

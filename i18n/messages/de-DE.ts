@@ -836,6 +836,40 @@ export const DE_DE_MESSAGES = {
   "waves.poll.actions.changeVote": "Stimme ändern",
   "waves.poll.status.voted": "Abgestimmt",
   "waves.poll.status.updated": "Aktualisiert",
+  "waves.composer.placeholder.createDrop": "Drop erstellen",
+  "waves.composer.placeholder.writeChatMessage": "Chatnachricht schreiben",
+  "waves.composer.placeholder.dropReply": "Antwort als Drop verfassen",
+  "waves.composer.placeholder.postReply": "Antwort posten",
+  "waves.composer.placeholder.quoteDrop": "Drop zitieren",
+  "waves.composer.placeholder.postQuote": "Zitat posten",
+  "waves.poll.composer.title": "Umfrage erstellen",
+  "waves.poll.composer.questionPlaceholder": "Umfragefrage stellen",
+  "waves.poll.composer.questionRequired": "Füge eine Frage zur Umfrage hinzu.",
+  "waves.poll.composer.mode.groupLabel": "Antworttyp der Umfrage",
+  "waves.poll.composer.mode.single": "Einfach",
+  "waves.poll.composer.mode.multiple": "Mehrfach",
+  "waves.poll.composer.mode.singleDescription":
+    "Teilnehmende können eine Option auswählen.",
+  "waves.poll.composer.mode.multipleDescription":
+    "Teilnehmende können mehrere Optionen auswählen.",
+  "waves.poll.composer.optionLabel": "Umfrageoption {number}",
+  "waves.poll.composer.optionPlaceholder": "Option {number}",
+  "waves.poll.composer.removeOption": "Option {number} entfernen",
+  "waves.poll.composer.add": "Umfrage hinzufügen",
+  "waves.poll.composer.addOption": "Option hinzufügen",
+  "waves.poll.composer.remove": "Umfrage entfernen",
+  "waves.poll.composer.closingTime": "Endzeit",
+  "waves.poll.composer.onlyDroppersCanRespond":
+    "Nur Personen mit Chatberechtigung können antworten",
+  "waves.poll.composer.anonymous": "Anonyme Umfrage",
+  "waves.poll.composer.validation.minimumOptions":
+    "Gib mindestens {count} Optionen ein.",
+  "waves.poll.composer.validation.optionLength":
+    "Optionen dürfen höchstens {max} Zeichen lang sein.",
+  "waves.poll.composer.validation.uniqueOptions":
+    "Umfrageoptionen müssen eindeutig sein.",
+  "waves.poll.composer.validation.futureClosingTime":
+    "Wähle eine Endzeit in der Zukunft.",
   "theMemes.documentTitle": "The Memes | Sammlungen",
   "theMemes.description.collections": "Sammlungen",
   "theMemes.detail.live.artwork.mintDateLabel": "Mint-Datum:",
