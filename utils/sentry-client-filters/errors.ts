@@ -61,6 +61,11 @@ const sentryBrowserPathTokens = ["@sentry/browser", "@sentry+browser"];
 const anonymousUnsafeEvalRawChunkPathPattern =
   /^app:\/\/\/_next\/static\/chunks\/[a-z0-9._~-]+\.js$/i;
 const anonymousUnsafeEvalRawWrapperLineNumbers = new Set([3, 7]);
+const anonymousUnsafeEvalRawWrapperSignatures = [
+  { functionName: "n", lineNumber: 3, columnNumber: 4853 },
+  { functionName: "n", lineNumber: 7, columnNumber: 4853 },
+  { functionName: "r", lineNumber: 7, columnNumber: 6173 },
+] as const;
 const twitterUserAgentPattern =
   /(?:^|[\s;(])twitter(?:android| for iphone)?\//i;
 const twitterConfigAddEventListenerMechanism =
@@ -340,11 +345,17 @@ function isAnonymousUnsafeEvalRawWrapperFrame(
   }
 
   const paths = getFramePaths(frame);
+  const functionName = frame.function?.trim();
+  const hasKnownWrapperSignature =
+    anonymousUnsafeEvalRawWrapperSignatures.some(
+      (signature) =>
+        signature.functionName === functionName &&
+        signature.lineNumber === frame.lineno &&
+        signature.columnNumber === frame.colno
+    );
+
   return (
-    frame.function?.trim() === "n" &&
-    frame.lineno !== undefined &&
-    anonymousUnsafeEvalRawWrapperLineNumbers.has(frame.lineno) &&
-    frame.colno === 4853 &&
+    hasKnownWrapperSignature &&
     paths.length > 0 &&
     paths.every((path) =>
       anonymousUnsafeEvalRawChunkPathPattern.test(path.trim())
