@@ -79,13 +79,5 @@
   "waves.sidebar.rightPanel.settings.approvalTabs": "Approval tabs",
   "waves.sidebar.rightPanel.settings.approvalRule": "Approval rule",
   "waves.sidebar.rightPanel.settings.chat": "Chat",
-  "waves.sidebar.rightPanel.settings.access": "Access",
-  "waves.sidebar.rightPanel.group.options": "Group options",
-  "waves.sidebar.rightPanel.group.includeIdentity": "Include identity",
-  "waves.sidebar.rightPanel.group.excludeIdentity": "Exclude identity",
-  "waves.sidebar.rightPanel.group.change": "Change group",
-  "waves.sidebar.rightPanel.group.add": "Add group",
-  "waves.sidebar.rightPanel.group.remove": "Remove group",
-  "waves.sidebar.rightPanel.group.editAriaLabel": "Edit group",
-  "waves.sidebar.rightPanel.group.editTitle": "Edit"
+  "waves.sidebar.rightPanel.settings.access": "Access"
 }

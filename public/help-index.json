@@ -2329,6 +2329,7 @@
         "The Groups step shows all access and moderation rows immediately, organized from Visibility through Admins without an Advanced settings disclosure.",
         "In Groups, Visibility controls wave access; followers who can view the wave may get a notification when it is created.",
         "Each Groups access row offers Edit criteria and Choose group; Edit criteria keeps Identities alongside the rule choices, supports explicitly included and excluded identities, and Next stays disabled until the pending replacement is created, discarded, or replaced by a saved group.",
+        "The inline criteria editor includes a Hide criteria and members switch. Its tooltip explains that the criteria and member list remain visible to group members but are hidden from everyone else. The switch starts off for a new inline group, preserves the setting copied from a selected saved group, and applies the current setting when Create and use new group is selected.",
         "The inline Identities editor can add either included or excluded identities through profile search, an authenticated EMMA allowlist, or a dragged or selected CSV file. Source wallets are normalized and deduplicated, source choices persist while the group remains an unsaved draft, and the latest include or exclude action wins when the same wallet appears on both sides.",
         "Inline group identity search ranks exact, prefix, and substring profile-handle matches before ENS-only matches, then orders each match group by profile level, highest first.",
         "An empty Visibility, drop, vote, or chat scope is labeled Public without a Current group heading; after a group is selected, the heading and its current eligible identity count are shown.",
@@ -2779,6 +2780,58 @@
         "components/waves/specs/WaveSlowMode.tsx",
         "components/waves/SlowModeChatNotice.tsx",
         "generated/models/ApiWaveChatConfig.ts"
+      ]
+    },
+    {
+      "id": "waves.configuration-access-group-editor",
+      "kind": "ui_affordance",
+      "title": "Edit wave access groups from Configuration",
+      "aliases": [
+        "edit wave access",
+        "change visibility group",
+        "restrict fully public wave",
+        "make wave public",
+        "use visibility criteria",
+        "edit drop group",
+        "edit vote group",
+        "edit chat access",
+        "edit admin group"
+      ],
+      "keywords": [
+        "waves",
+        "configuration",
+        "access",
+        "group",
+        "criteria",
+        "visibility",
+        "public",
+        "drop",
+        "vote",
+        "chat",
+        "admins"
+      ],
+      "facts": [
+        "Selecting an access-row gear in Wave Configuration opens the group editor directly without an intermediate context menu.",
+        "The Configuration modal renders the same group assignment editor as wave creation, including Edit criteria and Choose group, the privacy row, criteria chips, expanded editors, draft summary, and save actions. It preloads the row's rules, included and excluded identities, NFT and grant requirements, and criteria/member privacy setting.",
+        "A public access row starts a new criteria draft with the editor's primary wallet explicitly included by default; Include me can be turned off from Identities.",
+        "An already restricted row keeps its saved included and excluded identities and does not add the editor automatically.",
+        "Saving edited criteria creates a separate group and normally updates only the selected access row; it does not mutate the original group or other access rows that use it.",
+        "When Visibility, Drop, Vote, and Chat access are all public, assigning a Visibility group assigns that same group to all four non-admin access rows in one save and leaves Admins unchanged.",
+        "The Visibility cascade does not run when any non-admin access row is already restricted; in that case only Visibility changes and normal containment validation applies.",
+        "Visibility offers Make wave public when it is restricted, with a confirmation explaining that everyone will be able to find and view the wave.",
+        "Drop, Vote, and Chat access offer Use visibility criteria when their effective criteria differ from Visibility; if Visibility is public, the selected access row becomes public after confirmation.",
+        "Admins never offers the Use visibility criteria shortcut.",
+        "If the existing criteria or identity lists cannot be loaded, the editor shows a retry state instead of substituting empty criteria."
+      ],
+      "canonical_path": "/waves",
+      "related_paths": ["/waves?create=wave"],
+      "tags": ["waves", "configuration", "access", "groups", "settings"],
+      "source_refs": [
+        "components/waves/specs/groups/group/edit/WaveGroupEditButtons.tsx",
+        "components/waves/specs/groups/group/edit/WaveGroupChangeDialog.tsx",
+        "components/groups/assignment/GroupAssignmentDialog.tsx",
+        "components/groups/assignment/GroupAssignmentPanel.tsx",
+        "ops/docs/waves/sidebars/feature-right-sidebar-group-management.md"
       ]
     },
     {
@@ -5891,14 +5944,18 @@
         "controls"
       ],
       "facts": [
-        "The Network identities leaderboard is documented under Network features.",
-        "It has controls and URL state for browsing identity rankings.",
+        "The Network filter opens the same criteria builder used for Wave group assignment, with criteria creation open by default and Choose group available for searching saved groups.",
+        "Create and use new group saves the criteria as a new group and immediately applies it to the Network member list; All Network members clears the scope.",
+        "When a group is already active, reopening the filter prefills its criteria and identity lists. Saving edits creates a new group without mutating the original.",
+        "If active group criteria cannot be loaded, the filter shows a retry state instead of an empty draft.",
+        "The leaderboard also has sorting, pagination, profile links, and URL state for browsing identity rankings.",
         "Use the Network area when users ask for global profile or identity rankings."
       ],
       "canonical_path": "/network",
       "related_paths": ["/network/tdh", "/network/levels"],
       "tags": ["network", "leaderboard"],
       "source_refs": [
+        "components/community/CommunityMembersGroupFilter.tsx",
         "ops/docs/network/feature-network-identities-leaderboard.md"
       ]
     },
