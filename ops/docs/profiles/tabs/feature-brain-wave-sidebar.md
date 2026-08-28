@@ -32,8 +32,9 @@ The same wave can appear in both lists. Direct-message waves are excluded.
 4. Desktop shows the first page of recent activity. Select `Load more` to
    append the next page.
 5. On desktop, scroll anywhere inside the right sidebar to move through both
-   lists without moving the Brain feed. The sidebar remains one scroll area,
-   and keyboard focus moves it as controls come into view.
+   lists without moving the Brain feed. The sidebar remains one scroll area.
+   Keyboard users can focus the region and use navigation keys to scroll it;
+   focused controls remain visible after content updates.
 6. Small screens show the first created-wave pill and recent-activity pills in
    a horizontally scrollable strip.
 7. If more created results are loaded or another created page is available,

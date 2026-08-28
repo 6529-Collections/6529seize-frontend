@@ -24,6 +24,7 @@ export default function UserPageBrainSidebarLoadMore({
 }: UserPageBrainSidebarLoadMoreProps) {
   const locale = useBrowserLocale();
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const fetchInFlightRef = useRef(false);
   const pendingCompletionFocusRef = useRef(false);
   const [showCompletion, setShowCompletion] = useState(false);
   const shouldShowCompletion =
@@ -75,9 +76,10 @@ export default function UserPageBrainSidebarLoadMore({
             pendingCompletionFocusRef.current = false;
           }}
           onClick={() => {
-            if (state.isFetchingNextPage) {
+            if (state.isFetchingNextPage || fetchInFlightRef.current) {
               return;
             }
+            fetchInFlightRef.current = true;
             pendingCompletionFocusRef.current =
               globalThis.document.activeElement === buttonRef.current;
             setShowCompletion(false);
@@ -92,6 +94,9 @@ export default function UserPageBrainSidebarLoadMore({
               })
               .catch(() => {
                 pendingCompletionFocusRef.current = false;
+              })
+              .finally(() => {
+                fetchInFlightRef.current = false;
               });
           }}
           aria-busy={state.isFetchingNextPage}

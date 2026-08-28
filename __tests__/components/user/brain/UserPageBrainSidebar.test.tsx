@@ -128,11 +128,10 @@ describe("UserPageBrainSidebar", () => {
 
     render(<UserPageBrainSidebar profile={baseProfile} />);
 
-    const scrollRegion = screen.getByRole("region", {
-      name: "Created Waves Recently Active In",
-    });
+    const scrollRegion = screen.getByTestId("brain-sidebar-desktop");
 
-    expect(scrollRegion).toBe(screen.getByTestId("brain-sidebar-desktop"));
+    expect(scrollRegion).toHaveAccessibleName("Brain waves");
+    expect(scrollRegion.tagName).toBe("SECTION");
     expect(scrollRegion).toHaveAttribute("tabindex", "0");
     expect(scrollRegion).toHaveClass(
       "lg:tw-max-h-[calc(100dvh-4rem)]",
@@ -310,6 +309,41 @@ describe("UserPageBrainSidebar", () => {
       block: "nearest",
       inline: "nearest",
     });
+  });
+
+  it("blocks repeated load-more activations until the request settles", async () => {
+    let resolveNextPage:
+      | ((result: { readonly isComplete: boolean }) => void)
+      | undefined;
+    const fetchNextPage = jest.fn(
+      async () =>
+        await new Promise<{ readonly isComplete: boolean }>((resolve) => {
+          resolveNextPage = resolve;
+        })
+    );
+    recentState = makeState({
+      waves: [makeWave({ id: "wave-2", name: "Recent Wave" })],
+      hasNextPage: true,
+      fetchNextPage,
+    });
+
+    render(<UserPageBrainSidebar profile={baseProfile} />);
+    const loadMore = within(
+      screen.getByRole("region", { name: "Recently Active In" })
+    ).getByRole("button", { name: "Load more" });
+
+    fireEvent.click(loadMore);
+    fireEvent.click(loadMore);
+
+    expect(fetchNextPage).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      resolveNextPage?.({ isComplete: false });
+      await Promise.resolve();
+    });
+
+    fireEvent.click(loadMore);
+    expect(fetchNextPage).toHaveBeenCalledTimes(2);
   });
 
   it("uses truthful mobile and modal copy while more created pages exist", () => {
