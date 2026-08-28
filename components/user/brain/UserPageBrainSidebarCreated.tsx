@@ -10,6 +10,7 @@ import UserPageBrainSidebarSectionState, {
   BRAIN_SIDEBAR_COMPLETION_CLASS,
 } from "./UserPageBrainSidebarSectionState";
 import UserPageBrainSidebarWaveItem from "./UserPageBrainSidebarWaveItem";
+import { keepFocusedSidebarControlVisible } from "./userPageBrainSidebar.helpers";
 
 const DEFAULT_VISIBLE_CREATED_WAVES = 5;
 const CREATED_WAVES_LIST_ID = "brain-created-waves-list";
@@ -36,7 +37,7 @@ export default function UserPageBrainSidebarCreated({
   useLayoutEffect(() => {
     const button = toggleButtonRef.current;
     if (button && globalThis.document.activeElement === button) {
-      button.scrollIntoView({ block: "nearest", inline: "nearest" });
+      keepFocusedSidebarControlVisible(button);
     }
   }, [isExpanded]);
 
