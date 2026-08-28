@@ -1161,10 +1161,11 @@ describe("Auth component", () => {
         const mockInvalidateAuthSession = jest.mocked(
           authUtils.invalidateAuthSessionForAddress
         );
+        const mockGetAuthJwt = jest.mocked(authUtils.getAuthJwt);
         const mockValidateJwt =
           require("@/services/auth/jwt-validation.utils").validateJwt;
         const sessionV2 = require("@/services/auth/session-v2.utils");
-        authUtils.getAuthJwt.mockReturnValue("expired-legacy-jwt");
+        mockGetAuthJwt.mockReturnValue("expired-legacy-jwt");
         mockValidateJwt.mockResolvedValue({
           isValid: false,
           wasCancelled: false,
