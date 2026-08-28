@@ -25,6 +25,7 @@ export const DE_DE_MESSAGES = {
     "Wave-Aktivität des Profils wird geladen",
   "user.brain.sidebar.loadingMoreWaveActivity":
     "Weitere Wave-Aktivität des Profils wird geladen",
+  "user.brain.sidebar.desktopScrollRegionLabel": "Brain-Waves",
   "user.brain.sidebar.mobileStripLabel": "Brain-Waves",
   "user.brain.sidebar.createdEmpty": "Keine zugänglichen erstellten Waves.",
   "user.brain.sidebar.recentEmpty": "Keine kürzlichen Wave-Beiträge.",
