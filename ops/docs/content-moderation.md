@@ -121,22 +121,26 @@ review**, **Reviewed · No action taken**, and **Reviewed · Content removed**.
 Only the reporter sees this personal report state. Internal moderator notes,
 AI details, moderator identity, and other reporters are never exposed.
 
-Opening **Flag Content** again while the viewer has an open report shows the
-existing report instead of permitting a duplicate. **Withdraw report** is
-available until a moderator resolves it and opens a separate confirmation
-state. A successful withdrawal closes the dialog and leaves the post hidden.
-Withdrawal is auditable, does not affect other reporters, and does not become
-available again after resolution. An allowed resolution may be reported again
-later.
+Opening **Flag Content** again after the viewer submits a report shows the
+existing report state with the Report option checked and locked instead of
+permitting a duplicate. **Withdraw report** is available until a moderator
+resolves it and opens a separate confirmation state. A successful withdrawal
+closes the dialog and leaves the post hidden. Withdrawal is auditable, does not
+affect other reporters, and does not become available again after resolution.
+The same profile cannot report the unchanged post again after either reviewed
+outcome, while other profiles may still report it independently. Withdrawing
+an open report permits that profile to submit a later report.
 
 The **Reports** tab at `/preferences?tab=reports` lists the current profile's
 own reports, the reported profile, a snapshot of the reported post, reason,
 submission date, and public status. The snapshot remains available when the
 live post has been removed, while media and files stay collapsed by default.
-Visible posts link back to their wave context. Open reports can also be
-withdrawn there. Resolved reports show the public moderator outcome, but never
-expose AI assessment details, reply-parent evidence, internal notes or reasons,
-moderator identity, or other reporters.
+Each report keeps the current Wave name and picture visible and links to that
+Wave even when the post itself has been removed. Visible posts also provide a
+direct link to the exact post, using the direct-message route when applicable.
+Open reports can also be withdrawn there. Resolved reports show the public
+moderator outcome, but never expose AI assessment details, reply-parent
+evidence, internal notes or reasons, moderator identity, or other reporters.
 
 ## Posts from blocked profiles
 
@@ -276,11 +280,12 @@ mistake.
   the partial failure so the user can retry the remaining action.
 - If reported-content AI assessment is unavailable, the report is retained for
   human review rather than discarded.
-- If an existing connected profile's saved session expires, authenticated
-  actions invalidate only that session, preserve the connected profile and
-  selection, request a new signature, and continue after authentication. A
-  missing signer produces an explicit reconnect message instead of a silent
-  no-op.
+- A still-valid saved session remains usable without an active wallet
+  connection or supported signing network. If the session expires,
+  authenticated actions preserve the connected profile and selection, verify
+  that signing is available before invalidating only that session, request a
+  new signature, and continue after authentication. An unavailable signer or
+  signing network leaves the session intact and does not start signing.
 - If a moderation WebSocket update is missed, the next API refresh converges on
   the saved server state.
 

@@ -1134,6 +1134,69 @@ describe("Auth component", () => {
       expect(mockSeizeDisconnect).not.toHaveBeenCalled();
     });
 
+    it.each([
+      {
+        chainId: undefined,
+        chainState: "unknown",
+        canSign: false,
+        wagmiConnected: false,
+      },
+      {
+        chainId: 137,
+        chainState: "unsupported",
+        canSign: true,
+        wagmiConnected: true,
+      },
+    ])(
+      "keeps an expired legacy session intact when the active chain is $chainState",
+      async ({ chainId, canSign, wagmiConnected }) => {
+        const validAddress = "0x1111111111111111111111111111111111111111";
+        walletAddress = validAddress;
+        canSignActiveWallet = canSign;
+        mockActiveChainId = chainId;
+        mockWagmiIsConnected = wagmiConnected;
+        enableAuthMigrationDeadline("2000-01-01T00:00:00.000Z");
+        const authUtils =
+          require("@/services/auth/auth.utils") as typeof AuthUtilsModule;
+        const mockInvalidateAuthSession = jest.mocked(
+          authUtils.invalidateAuthSessionForAddress
+        );
+        const mockGetAuthJwt = jest.mocked(authUtils.getAuthJwt);
+        const mockValidateJwt =
+          require("@/services/auth/jwt-validation.utils").validateJwt;
+        const sessionV2 = require("@/services/auth/session-v2.utils");
+        mockGetAuthJwt.mockReturnValue("expired-legacy-jwt");
+        mockValidateJwt.mockResolvedValue({
+          isValid: false,
+          wasCancelled: false,
+          requiresSessionUpgrade: true,
+        });
+
+        render(
+          <ReactQueryWrapperContext.Provider
+            value={{ invalidateAll: jest.fn() } as any}
+          >
+            <Auth>
+              <RequestAuthResultButton />
+            </Auth>
+          </ReactQueryWrapperContext.Provider>
+        );
+
+        await userEvent.click(screen.getByTestId("request-auth-result"));
+
+        await waitFor(() => {
+          expect(screen.getByTestId("request-auth-success")).toHaveTextContent(
+            "false"
+          );
+        });
+        expect(mockValidateJwt).toHaveBeenCalled();
+        expect(mockInvalidateAuthSession).not.toHaveBeenCalled();
+        expect(sessionV2.getSessionNonce).not.toHaveBeenCalled();
+        expect(mockSignMessage).not.toHaveBeenCalled();
+        expect(mockSeizeDisconnect).not.toHaveBeenCalled();
+      }
+    );
+
     it("fails an explicit action visibly when session validation throws", async () => {
       const validAddress = "0x1111111111111111111111111111111111111111";
       walletAddress = validAddress;

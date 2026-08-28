@@ -2,6 +2,7 @@ import ContentModerationDropGate from "@/components/content-moderation/ContentMo
 import ReportDropModal from "@/components/content-moderation/ReportDropModal";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiContentModerationReportResponse } from "@/generated/models/ApiContentModerationReportResponse";
+import { ApiContentModerationReportStatus } from "@/generated/models/ApiContentModerationReportStatus";
 import { ApiDropModerationStatus } from "@/generated/models/ApiDropModerationStatus";
 import {
   blockProfile,
@@ -415,4 +416,39 @@ describe("ReportDropModal", () => {
       type: "success",
     });
   });
+
+  it.each([
+    [
+      ApiContentModerationReportStatus.ResolvedAllowed,
+      "Reviewed · No action taken",
+    ],
+    [
+      ApiContentModerationReportStatus.ResolvedRemoved,
+      "Reviewed · Content removed",
+    ],
+  ])(
+    "keeps a %s report checked and locked while personal actions remain available",
+    (reportStatus, statusLabel) => {
+      const drop = createDrop("drop-1");
+      drop.viewer_context = {
+        author_blocked: false,
+        drop_hidden: true,
+        report_status: reportStatus,
+      };
+      renderModal({ drop });
+
+      const reportOption = screen.getByRole("checkbox", {
+        name: "Report post",
+      });
+      expect(reportOption).toBeChecked();
+      expect(reportOption).toBeDisabled();
+      expect(screen.getByText(statusLabel)).toBeInTheDocument();
+      expect(
+        screen.getByRole("checkbox", { name: "Hide post" })
+      ).toBeEnabled();
+      expect(
+        screen.getByRole("checkbox", { name: "Block author" })
+      ).toBeEnabled();
+    }
+  );
 });

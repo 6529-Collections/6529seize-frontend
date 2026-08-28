@@ -301,6 +301,8 @@ export default function ReportDropModal({
     reportStatus === ApiContentModerationReportStatus.ResolvedAllowed;
   const reportWasRemoved =
     reportStatus === ApiContentModerationReportStatus.ResolvedRemoved;
+  const reportAlreadySubmitted =
+    reportIsOpen || reportWasAllowed || reportWasRemoved;
   const effectiveHide = reportPost || hidePost;
   const hasSelection = reportPost || hidePost || blockAuthor;
   const reportOptionStatus = getReportOptionStatus({
@@ -634,12 +636,12 @@ export default function ReportDropModal({
                   </legend>
                   <div className="tw-space-y-1">
                     <PostActionOption
-                      checked={reportIsOpen || reportPost}
+                      checked={reportAlreadySubmitted || reportPost}
                       description={t(
                         locale,
                         "contentModeration.report.reportDescription"
                       )}
-                      disabled={reportIsOpen}
+                      disabled={reportAlreadySubmitted}
                       icon={<FlagIcon className="tw-size-4" />}
                       label={t(locale, "contentModeration.report.reportLabel")}
                       onChange={setReportPost}

@@ -243,6 +243,15 @@ describe("ContentModerationPageClient pagination", () => {
         name: "WatchTower - Content Moderation",
       })
     ).toBeVisible();
+    expect(screen.getByRole("tab", { name: "Open reports (51)" })).toHaveClass(
+      "tw-flex-1",
+      "sm:tw-flex-none"
+    );
+    expect(screen.getByText("Open")).toHaveClass("sm:tw-hidden");
+    expect(screen.getByText("Open reports")).toHaveClass(
+      "tw-hidden",
+      "sm:tw-inline"
+    );
     expect(container.querySelector("main")).toHaveClass("tw-min-h-dvh");
     expect(container.querySelector("main")).not.toHaveClass("tw-max-w-4xl");
     expect(screen.getByRole("link", { name: "author1" })).toHaveAttribute(
