@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import type { ProfileWaveActivityQueryState } from "@/hooks/useProfileWaveActivityWaves";
 import { getUserPageBrainSidebarMessage } from "./userPageBrainSidebar.messages";
@@ -24,10 +24,18 @@ export default function UserPageBrainSidebarLoadMore({
 }: UserPageBrainSidebarLoadMoreProps) {
   const locale = useBrowserLocale();
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const fetchInFlightRef = useRef(false);
   const pendingCompletionFocusRef = useRef(false);
   const [showCompletion, setShowCompletion] = useState(false);
   const shouldShowCompletion =
     showCompletion && !state.hasNextPage && !state.isFetchNextPageError;
+
+  useLayoutEffect(() => {
+    const button = buttonRef.current;
+    if (button && globalThis.document.activeElement === button) {
+      button.scrollIntoView({ block: "nearest", inline: "nearest" });
+    }
+  }, [state.waves.length]);
 
   const focusCompletion = useCallback((element: HTMLOutputElement | null) => {
     if (!element || !pendingCompletionFocusRef.current) {
@@ -68,6 +76,10 @@ export default function UserPageBrainSidebarLoadMore({
             pendingCompletionFocusRef.current = false;
           }}
           onClick={() => {
+            if (state.isFetchingNextPage || fetchInFlightRef.current) {
+              return;
+            }
+            fetchInFlightRef.current = true;
             pendingCompletionFocusRef.current =
               globalThis.document.activeElement === buttonRef.current;
             setShowCompletion(false);
@@ -82,9 +94,13 @@ export default function UserPageBrainSidebarLoadMore({
               })
               .catch(() => {
                 pendingCompletionFocusRef.current = false;
+              })
+              .finally(() => {
+                fetchInFlightRef.current = false;
               });
           }}
-          disabled={state.isFetchingNextPage}
+          aria-busy={state.isFetchingNextPage}
+          aria-disabled={state.isFetchingNextPage}
           className={buttonClassName}
         >
           {getUserPageBrainSidebarMessage(locale, buttonMessageKey)}

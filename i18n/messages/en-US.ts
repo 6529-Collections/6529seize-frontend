@@ -137,6 +137,7 @@ const USER_BRAIN_SIDEBAR_MESSAGES = objectMessages("user.brain.sidebar", {
   privateWave: "Private wave",
   loadingWaveActivity: "Loading profile wave activity",
   loadingMoreWaveActivity: "Loading more profile wave activity",
+  desktopScrollRegionLabel: "Brain waves",
   mobileStripLabel: "Brain waves",
   createdEmpty: "No accessible created waves.",
   recentEmpty: "No recent wave posts.",

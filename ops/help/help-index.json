@@ -1544,6 +1544,7 @@
         "Recently Active In lists accessible non-direct-message root waves and subwaves ordered by the profile's latest post, whether or not the profile created them; a wave can appear in both sections.",
         "Each row labels the profile-specific time as Last post. Created Waves also labels its separate total wave posts count, which includes retained CHAT posts by all authors; Recently Active In does not show that wave-wide total.",
         "Created Waves initially shows five rows on desktop, and both lists provide Load more controls so cursor pages remain reachable.",
+        "On desktop, Created Waves and Recently Active In share one independently scrollable sidebar, so scrolling it does not advance the Brain feed.",
         "On small screens, More opens the Created waves modal with the same profile-specific ordering and Load more pagination; it does not show a partial page count as a total.",
         "When a focused Load more control retrieves the final cursor page, focus moves to an All waves loaded status so keyboard focus is preserved.",
         "Created Waves and Recently Active In load and recover independently, and results refresh for a connected-viewer change so private-wave access is not reused across viewers.",
