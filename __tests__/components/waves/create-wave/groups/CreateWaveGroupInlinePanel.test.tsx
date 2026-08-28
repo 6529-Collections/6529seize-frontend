@@ -444,6 +444,38 @@ describe("CreateWaveGroupInlinePanel", () => {
     expect(onCriteriaReplacementChange.mock.calls).toEqual([[true], [false]]);
   });
 
+  it("creates a private inline group when privacy is enabled", async () => {
+    const user = userEvent.setup();
+    const onCreateGroup = jest.fn().mockResolvedValue(createdGroup);
+    renderInlinePanel({
+      includedIdentity: defaultIncludedIdentity,
+      onCreateGroup,
+    });
+
+    await user.click(screen.getByRole("button", { name: "Edit criteria" }));
+
+    const privacyToggle = screen.getByRole("switch", {
+      name: "Hide criteria and members",
+    });
+    expect(privacyToggle).not.toBeChecked();
+    expect(privacyToggle.nextElementSibling).toHaveClass(
+      "peer-focus-visible:tw-ring-2"
+    );
+
+    await user.click(privacyToggle);
+    expect(privacyToggle).toBeChecked();
+
+    await user.click(
+      screen.getByRole("button", { name: "Create and use new group" })
+    );
+
+    await waitFor(() => {
+      expect(onCreateGroup).toHaveBeenCalledWith(
+        expect.objectContaining({ is_private: true })
+      );
+    });
+  });
+
   it("opens the identity panel", async () => {
     const user = userEvent.setup();
     renderInlinePanel();
@@ -645,7 +677,7 @@ describe("CreateWaveGroupInlinePanel", () => {
       id: "group-saved",
       name: "Saved visibility",
       created_by: { handle: "builder" },
-      is_private: false,
+      is_private: true,
       group: {
         tdh: { min: 1, max: null, inclusion_strategy: "BOTH" },
         rep: {
@@ -686,6 +718,10 @@ describe("CreateWaveGroupInlinePanel", () => {
     await user.click(screen.getByRole("button", { name: "Edit criteria" }));
 
     expect(
+      screen.getByRole("switch", { name: "Hide criteria and members" })
+    ).toBeChecked();
+
+    expect(
       screen.getAllByText(/TDH \+ xTDH at least 1/).length
     ).toBeGreaterThan(0);
     expect(
@@ -715,7 +751,7 @@ describe("CreateWaveGroupInlinePanel", () => {
     await waitFor(() => {
       expect(onCreateGroup).toHaveBeenCalledWith({
         name: "My Wave Visibility",
-        is_private: false,
+        is_private: true,
         group: {
           tdh: { min: 1, max: null, inclusion_strategy: "BOTH" },
           rep: {

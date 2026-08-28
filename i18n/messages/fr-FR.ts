@@ -513,6 +513,46 @@ export const FR_FR_MESSAGES = {
   "waves.create.groups.dialog.changeDescription":
     "Créez un groupe ou choisissez un autre groupe existant.",
   "waves.create.groups.identities": "Identités",
+  "waves.create.groups.hideCriteriaAndMembers":
+    "Masquer les critères et les membres",
+  "waves.create.groups.hideCriteriaAndMembersTooltip":
+    "Les critères et la liste des membres sont visibles par les membres de ce groupe, mais masqués pour tous les autres.",
+  "waves.create.groups.hideCriteriaAndMembersInfoLabel":
+    "À propos de la visibilité des critères et des membres",
+  "waves.create.groups.editAccess.title": "Modifier l’accès {groupLabel}",
+  "waves.create.groups.editAccess.triggerLabel":
+    "Modifier l’accès {groupLabel}",
+  "waves.create.groups.editAccess.chatLabel": "Discussion",
+  "waves.create.groups.editAccess.description":
+    "Les critères actuels sont préremplis. L’enregistrement crée un nouveau groupe et modifie uniquement l’accès {groupLabel}.",
+  "waves.create.groups.editAccess.loading": "Chargement des critères actuels…",
+  "waves.create.groups.editAccess.loadErrorTitle":
+    "Impossible de charger les critères actuels.",
+  "waves.create.groups.editAccess.loadErrorDescription":
+    "Aucune modification n’a été effectuée. Réessayez de charger le groupe.",
+  "waves.create.groups.editAccess.retry": "Réessayer",
+  "waves.create.groups.editAccess.makePublic": "Rendre la wave publique",
+  "waves.create.groups.editAccess.makePublicDescription":
+    "Supprimez la restriction de visibilité afin que tout le monde puisse accéder à cette wave.",
+  "waves.create.groups.editAccess.useVisibility":
+    "Utiliser les critères de visibilité",
+  "waves.create.groups.editAccess.useVisibilityDescription":
+    "Appliquez à l’accès {groupLabel} les mêmes critères que pour la visibilité.",
+  "waves.create.groups.editAccess.useVisibilityPublicDescription":
+    "La visibilité est publique. Rendez également l’accès {groupLabel} public.",
+  "waves.create.groups.editAccess.makePublicConfirmTitle":
+    "Rendre la wave publique ?",
+  "waves.create.groups.editAccess.makePublicConfirmMessage":
+    "Tout le monde pourra trouver et voir cette wave. Seul l’accès de visibilité sera modifié.",
+  "waves.create.groups.editAccess.useVisibilityConfirmTitle":
+    "Utiliser les critères de visibilité ?",
+  "waves.create.groups.editAccess.useVisibilityConfirmMessage":
+    "L’accès {groupLabel} utilisera le même groupe que la visibilité. Seul ce paramètre d’accès sera modifié.",
+  "waves.create.groups.editAccess.useVisibilityPublicConfirmMessage":
+    "La visibilité est publique ; l’accès {groupLabel} deviendra donc public lui aussi. Seul ce paramètre d’accès sera modifié.",
+  "waves.create.groups.editAccess.confirmMakePublic": "Rendre publique",
+  "waves.create.groups.editAccess.confirmUseVisibility":
+    "Utiliser les critères de visibilité",
   "waves.create.groups.actions.editCriteria": "Modifier les critères",
   "waves.create.groups.inlineIdentities.modeLabel": "Traitement des identités",
   "waves.create.groups.inlineIdentities.included.label": "Incluses",
