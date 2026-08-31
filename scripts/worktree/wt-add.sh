@@ -31,6 +31,8 @@ if [[ -z "${NODE_AUTH_TOKEN:-}" ]]; then
   echo "NODE_AUTH_TOKEN with read-only GitHub Packages access is required before creating a worktree." >&2
   exit 1
 fi
+PACKAGE_AUTH_TOKEN="$NODE_AUTH_TOKEN"
+unset NODE_AUTH_TOKEN
 
 ARG_COUNT=$#
 WORKTREE_NAME=$1
@@ -262,7 +264,7 @@ echo "Bootstrapping 6529 command in $WORKTREE_NAME..."
   trap - EXIT
 
   echo "Running secure install in $WORKTREE_NAME..."
-  6529 install
+  NODE_AUTH_TOKEN="$PACKAGE_AUTH_TOKEN" 6529 install
 )
 
 echo "✅ Worktree '$WORKTREE_NAME' is ready."

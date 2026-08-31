@@ -354,6 +354,16 @@ describe("private GitHub Packages repository policy", () => {
         `${validWorkspace()}overrides:\n  innocent: npm:${policy.ALLOWED_SCOPE}/another-package@1.0.0\n`
       )
     ).toThrow("pnpm-workspace.yaml cannot indirectly resolve");
+    expect(() =>
+      policy.validateWorkspace(
+        `${validWorkspace()}overrides:\n  innocent: "npm:\\u00406529-collections/another-package@1.0.0"\n`
+      )
+    ).toThrow("pnpm-workspace.yaml cannot indirectly resolve");
+    expect(() =>
+      policy.validateWorkspace(
+        `${validWorkspace()}overrides:\n  innocent: "https://npm.pkg.github.com/download/another-package"\n`
+      )
+    ).toThrow("cannot contain npm.pkg.github.com resolver URLs");
   });
 
   it("checks dependency fields without rejecting unrelated package text", () => {
@@ -794,7 +804,6 @@ describe("host-specific Socket Firewall routing", () => {
   });
 
   it("rejects indirect private-package resolvers before authenticated pnpm", () => {
-    writeValidRepositoryPolicyFiles(temporaryDirectory);
     const packageJson = JSON.parse(validPackageJson()) as Record<
       string,
       unknown
@@ -802,21 +811,41 @@ describe("host-specific Socket Firewall routing", () => {
     packageJson["dependencies"] = {
       innocent: `npm:${policy.ALLOWED_SCOPE}/another-package@1.0.0`,
     };
-    fs.writeFileSync(
-      path.join(temporaryDirectory, "package.json"),
-      JSON.stringify(packageJson)
-    );
-    const spawn = jest.fn(() => ({ status: 0 }));
+    for (const fixture of [
+      {
+        packageJson: JSON.stringify(packageJson),
+        workspace: validWorkspace(),
+      },
+      {
+        packageJson: validPackageJson(),
+        workspace: `${validWorkspace()}overrides:\n  innocent: "npm:\\u00406529-collections/another-package@1.0.0"\n`,
+      },
+      {
+        packageJson: validPackageJson(),
+        workspace: `${validWorkspace()}overrides:\n  innocent: "https://npm.pkg.github.com/download/another-package"\n`,
+      },
+    ]) {
+      writeValidRepositoryPolicyFiles(temporaryDirectory);
+      fs.writeFileSync(
+        path.join(temporaryDirectory, "package.json"),
+        fixture.packageJson
+      );
+      fs.writeFileSync(
+        path.join(temporaryDirectory, "pnpm-workspace.yaml"),
+        fixture.workspace
+      );
+      const spawn = jest.fn(() => ({ status: 0 }));
 
-    expect(() =>
-      routing.runPnpm({
-        args: ["install"],
-        environment: socketEnvironment(socketCaPath),
-        repositoryRoot: temporaryDirectory,
-        spawn,
-      })
-    ).toThrow("cannot alias or indirectly resolve");
-    expect(spawn).not.toHaveBeenCalled();
+      expect(() =>
+        routing.runPnpm({
+          args: ["install"],
+          environment: socketEnvironment(socketCaPath),
+          repositoryRoot: temporaryDirectory,
+          spawn,
+        })
+      ).toThrow(/cannot (?:alias|contain|indirectly resolve)/);
+      expect(spawn).not.toHaveBeenCalled();
+    }
   });
 
   it("rebuilds workspace-approved pending packages exactly once without auth", () => {
@@ -957,15 +986,36 @@ describe("documented private-package setup flows", () => {
       authPreflightIndex
     );
     const dependencyInstallIndex = setupScript.indexOf(
-      "install_dependencies",
+      'install_dependencies "$package_auth_token"',
       authPreflightIndex
     );
+    const authUnsetIndex = setupScript.indexOf(
+      "unset NODE_AUTH_TOKEN",
+      authPreflightIndex
+    );
+    const localTokenUnsetIndex = setupScript.indexOf(
+      "unset package_auth_token",
+      dependencyInstallIndex
+    );
+    const buildIndex = setupScript.indexOf(
+      "build_project",
+      dependencyInstallIndex
+    );
+    const startIndex = setupScript.indexOf("start_pm2", dependencyInstallIndex);
 
     expect(authGuardIndex).toBeGreaterThanOrEqual(0);
     expect(authPreflightIndex).toBeGreaterThan(authGuardIndex);
+    expect(authUnsetIndex).toBeGreaterThan(authPreflightIndex);
+    expect(authUnsetIndex).toBeLessThan(inputIndex);
     expect(authPreflightIndex).toBeLessThan(inputIndex);
     expect(authPreflightIndex).toBeLessThan(envWriteIndex);
     expect(authPreflightIndex).toBeLessThan(dependencyInstallIndex);
+    expect(setupScript).toContain(
+      'NODE_AUTH_TOKEN="$package_auth_token" ./bin/6529 install:frozen'
+    );
+    expect(localTokenUnsetIndex).toBeGreaterThan(dependencyInstallIndex);
+    expect(localTokenUnsetIndex).toBeLessThan(buildIndex);
+    expect(localTokenUnsetIndex).toBeLessThan(startIndex);
     expect(setupScript).toContain('rm -rf "$REPO_ROOT/node_modules"');
     expect(setupScript).toContain("./bin/6529 install:frozen");
     expect(setupScript).not.toContain("gh auth token");
@@ -979,8 +1029,13 @@ describe("documented private-package setup flows", () => {
     const authGuardIndex = worktreeScript.indexOf(
       '[[ -z "${NODE_AUTH_TOKEN:-}" ]]'
     );
+    const authUnsetIndex = worktreeScript.indexOf("unset NODE_AUTH_TOKEN");
+    const scopedInstallIndex = worktreeScript.indexOf(
+      'NODE_AUTH_TOKEN="$PACKAGE_AUTH_TOKEN" 6529 install'
+    );
 
     expect(authGuardIndex).toBeGreaterThanOrEqual(0);
+    expect(authUnsetIndex).toBeGreaterThan(authGuardIndex);
     for (const mutation of [
       'mkdir -p "$worktree_parent"',
       'git -C "$MAIN_REPO" fetch origin',
@@ -989,8 +1044,17 @@ describe("documented private-package setup flows", () => {
       "./bin/6529 bootstrap",
       "6529 install",
     ]) {
-      expect(authGuardIndex).toBeLessThan(worktreeScript.indexOf(mutation));
+      const mutationIndex = worktreeScript.indexOf(mutation);
+      expect(authGuardIndex).toBeLessThan(mutationIndex);
+      expect(authUnsetIndex).toBeLessThan(mutationIndex);
     }
+    expect(authUnsetIndex).toBeLessThan(
+      worktreeScript.indexOf("./bin/6529 bootstrap")
+    );
+    expect(scopedInstallIndex).toBeGreaterThan(
+      worktreeScript.indexOf("./bin/6529 bootstrap")
+    );
+    expect(worktreeScript).not.toContain("export PACKAGE_AUTH_TOKEN");
     expect(worktreeScript).not.toContain("gh auth token");
   });
 

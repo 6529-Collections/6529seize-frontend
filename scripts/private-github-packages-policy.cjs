@@ -359,6 +359,113 @@ function stripYamlQuotes(value) {
     : trimmed;
 }
 
+function semanticYamlLine(rawLine) {
+  let semanticLine = "";
+
+  for (let index = 0; index < rawLine.length; index += 1) {
+    const character = rawLine[index];
+    if (character === "#") {
+      break;
+    }
+    if (character === "'") {
+      let closed = false;
+      for (index += 1; index < rawLine.length; index += 1) {
+        if (rawLine[index] !== "'") {
+          semanticLine += rawLine[index];
+          continue;
+        }
+        if (rawLine[index + 1] === "'") {
+          semanticLine += "'";
+          index += 1;
+          continue;
+        }
+        closed = true;
+        break;
+      }
+      if (!closed) {
+        throw policyError(
+          "pnpm-workspace.yaml contains an unterminated single-quoted scalar"
+        );
+      }
+      continue;
+    }
+    if (character === '"') {
+      let closed = false;
+      for (index += 1; index < rawLine.length; index += 1) {
+        const quotedCharacter = rawLine[index];
+        if (quotedCharacter === '"') {
+          closed = true;
+          break;
+        }
+        if (quotedCharacter !== "\\") {
+          semanticLine += quotedCharacter;
+          continue;
+        }
+
+        const escapeType = rawLine[index + 1];
+        const unicodeWidths = { x: 2, u: 4, U: 8 };
+        const unicodeWidth = unicodeWidths[escapeType];
+        if (unicodeWidth !== undefined) {
+          const hexadecimal = rawLine.slice(
+            index + 2,
+            index + 2 + unicodeWidth
+          );
+          if (!new RegExp(`^[0-9A-Fa-f]{${unicodeWidth}}$`).test(hexadecimal)) {
+            throw policyError(
+              "pnpm-workspace.yaml contains an invalid Unicode escape"
+            );
+          }
+          const codePoint = Number.parseInt(hexadecimal, 16);
+          if (codePoint > 0x10ffff) {
+            throw policyError(
+              "pnpm-workspace.yaml contains an invalid Unicode code point"
+            );
+          }
+          semanticLine += String.fromCodePoint(codePoint);
+          index += unicodeWidth + 1;
+          continue;
+        }
+
+        const escapedCharacters = {
+          0: "\0",
+          a: "\x07",
+          b: "\b",
+          t: "\t",
+          n: "\n",
+          v: "\v",
+          f: "\f",
+          r: "\r",
+          e: "\x1b",
+          " ": " ",
+          '"': '"',
+          "/": "/",
+          "\\": "\\",
+          N: "\u0085",
+          _: "\u00a0",
+          L: "\u2028",
+          P: "\u2029",
+        };
+        if (!Object.hasOwn(escapedCharacters, escapeType)) {
+          throw policyError(
+            "pnpm-workspace.yaml contains an unsupported quoted escape"
+          );
+        }
+        semanticLine += escapedCharacters[escapeType];
+        index += 1;
+      }
+      if (!closed) {
+        throw policyError(
+          "pnpm-workspace.yaml contains an unterminated double-quoted scalar"
+        );
+      }
+      continue;
+    }
+    semanticLine += character;
+  }
+
+  return semanticLine;
+}
+
 function effectiveLockfileLines(lockfileText) {
   const lines = [];
   for (const line of lockfileText.split(/\r?\n/)) {
@@ -637,7 +744,7 @@ function validateWorkspace(workspaceText) {
     if (trimmed === "" || trimmed.startsWith("#")) {
       continue;
     }
-    effectiveLines.push(line);
+    effectiveLines.push(semanticYamlLine(line));
 
     const topLevelKey = /^([^\s:#][^:]*):/.exec(line)?.[1];
     const normalizedTopLevelKey = topLevelKey
@@ -696,6 +803,15 @@ function validateWorkspace(workspaceText) {
   if (privateScopeReferenceCount !== 1) {
     throw policyError(
       `pnpm-workspace.yaml cannot indirectly resolve another ${ALLOWED_SCOPE} package`
+    );
+  }
+  if (
+    effectiveLines.some((line) =>
+      line.toLowerCase().includes(ALLOWED_REGISTRY_HOST)
+    )
+  ) {
+    throw policyError(
+      `pnpm-workspace.yaml cannot contain ${ALLOWED_REGISTRY_HOST} resolver URLs`
     );
   }
 }

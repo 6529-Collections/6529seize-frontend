@@ -95,7 +95,13 @@ tarball, integrity, or network routing is extended or changed. Project-level
 registry, credential, proxy, TLS, CA, and pnpm project/workspace relocation
 overrides are rejected rather than forwarded to an authenticated command.
 Dependency aliases, overrides, resolutions, and catalogs also cannot point an
-otherwise innocent package name at the private scope.
+otherwise innocent package name at the private scope. Workspace policy checks
+decode quoted YAML escapes and reject private-host resolver URLs before pnpm
+starts.
+
+The worktree and staging setup helpers keep the token out of bootstrap, build,
+and long-running application processes. They attach it only to the secure
+install command and remove it again before continuing.
 
 Socket Firewall Free cannot proxy this private registry correctly. For this one
 case, pnpm connects directly to `npm.pkg.github.com` with normal TLS certificate
