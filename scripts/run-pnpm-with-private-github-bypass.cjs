@@ -29,7 +29,10 @@ const IGNORE_SCRIPTS_ENVIRONMENT_VARIABLE = "npm_config_ignore_scripts";
 const USER_CONFIG_ENVIRONMENT_VARIABLE = "npm_config_userconfig";
 const GLOBAL_CONFIG_ENVIRONMENT_VARIABLE = "npm_config_globalconfig";
 const NPM_GLOBAL_CONFIG_ENVIRONMENT_VARIABLE = "npm_config_npm_globalconfig";
+const AUTHENTICATED_FROZEN_INSTALL_ARGUMENTS = ["install", "--frozen-lockfile"];
+const TOKEN_FREE_LOCKFILE_ARGUMENTS = ["install", "--lockfile-only"];
 const TOKEN_FREE_REBUILD_ARGUMENTS = ["rebuild", "--pending"];
+const LOCKFILE_ONLY_COMMANDS = new Set(["add", "install", "update"]);
 
 function parseNoProxy(value) {
   if (!value) {
@@ -170,6 +173,42 @@ function canonicalizeEnvironmentVariable(environment, variableName) {
   }
 }
 
+function argumentsEqual(left, right) {
+  return (
+    left.length === right.length &&
+    left.every((argument, index) => argument === right[index])
+  );
+}
+
+function isAuthenticatedFrozenInstall(args) {
+  return (
+    argumentsEqual(args, AUTHENTICATED_FROZEN_INSTALL_ARGUMENTS) ||
+    argumentsEqual(args, [...AUTHENTICATED_FROZEN_INSTALL_ARGUMENTS, "--prod"])
+  );
+}
+
+function tokenFreeResolutionArguments(args) {
+  return LOCKFILE_ONLY_COMMANDS.has(args[0])
+    ? [...args, "--lockfile-only"]
+    : args;
+}
+
+function spawnPnpm({ args, environment, platform, repositoryRoot, spawn }) {
+  const invocation = pnpmSpawnArguments(args, platform);
+  const result = spawn(invocation.command, invocation.commandArguments, {
+    cwd: repositoryRoot,
+    env: environment,
+    stdio: "inherit",
+    shell: invocation.shell,
+  });
+
+  if (result.error) {
+    throw result.error;
+  }
+
+  return result.status ?? 1;
+}
+
 function runPnpm({
   args = process.argv.slice(2),
   environment = process.env,
@@ -195,61 +234,75 @@ function runPnpm({
     [IGNORE_PNPMFILE_ENVIRONMENT_VARIABLE]: "true",
     [IGNORE_SCRIPTS_ENVIRONMENT_VARIABLE]: "true",
   };
+  const tokenFreeResolutionEnvironment = { ...authenticatedEnvironment };
+  removeEnvironmentVariableCaseInsensitive(
+    tokenFreeResolutionEnvironment,
+    AUTH_ENVIRONMENT_VARIABLE
+  );
+
+  let authenticatedArguments = args;
+  if (!isAuthenticatedFrozenInstall(args)) {
+    const resolutionArguments = tokenFreeResolutionArguments(args);
+    console.error(
+      "Secure pnpm routing: dependency changes resolve without package credentials."
+    );
+    const resolutionStatus = spawnPnpm({
+      args: resolutionArguments,
+      environment: tokenFreeResolutionEnvironment,
+      platform,
+      repositoryRoot,
+      spawn,
+    });
+    if (resolutionStatus !== 0) {
+      return resolutionStatus;
+    }
+    validateRepositoryFiles(repositoryRoot);
+
+    if (!argumentsEqual(resolutionArguments, TOKEN_FREE_LOCKFILE_ARGUMENTS)) {
+      const lockfileStatus = spawnPnpm({
+        args: TOKEN_FREE_LOCKFILE_ARGUMENTS,
+        environment: tokenFreeResolutionEnvironment,
+        platform,
+        repositoryRoot,
+        spawn,
+      });
+      if (lockfileStatus !== 0) {
+        return lockfileStatus;
+      }
+      validateRepositoryFiles(repositoryRoot);
+    }
+
+    authenticatedArguments = AUTHENTICATED_FROZEN_INSTALL_ARGUMENTS;
+  }
+
   console.error(
     `Secure pnpm routing: ${ALLOWED_REGISTRY_HOST} uses direct verified HTTPS; all other hosts use Socket Firewall.`
   );
-
-  const authenticatedInvocation = pnpmSpawnArguments(args, platform);
-  const result = spawn(
-    authenticatedInvocation.command,
-    authenticatedInvocation.commandArguments,
-    {
-      cwd: repositoryRoot,
-      env: authenticatedEnvironment,
-      stdio: "inherit",
-      shell: authenticatedInvocation.shell,
-    }
-  );
-
-  if (result.error) {
-    throw result.error;
-  }
-
-  const status = result.status ?? 1;
+  const status = spawnPnpm({
+    args: authenticatedArguments,
+    environment: authenticatedEnvironment,
+    platform,
+    repositoryRoot,
+    spawn,
+  });
   if (status !== 0) {
     return status;
   }
 
   validateRepositoryFiles(repositoryRoot);
 
-  const tokenFreeEnvironment = { ...authenticatedEnvironment };
-  removeEnvironmentVariableCaseInsensitive(
-    tokenFreeEnvironment,
-    AUTH_ENVIRONMENT_VARIABLE
-  );
+  const tokenFreeEnvironment = { ...tokenFreeResolutionEnvironment };
   delete tokenFreeEnvironment[IGNORE_SCRIPTS_ENVIRONMENT_VARIABLE];
   console.error(
     "Secure pnpm routing: approved dependency lifecycle scripts rebuild without package credentials."
   );
-  const rebuildInvocation = pnpmSpawnArguments(
-    TOKEN_FREE_REBUILD_ARGUMENTS,
-    platform
-  );
-  const rebuildResult = spawn(
-    rebuildInvocation.command,
-    rebuildInvocation.commandArguments,
-    {
-      cwd: repositoryRoot,
-      env: tokenFreeEnvironment,
-      stdio: "inherit",
-      shell: rebuildInvocation.shell,
-    }
-  );
-  if (rebuildResult.error) {
-    throw rebuildResult.error;
-  }
-
-  const rebuildStatus = rebuildResult.status ?? 1;
+  const rebuildStatus = spawnPnpm({
+    args: TOKEN_FREE_REBUILD_ARGUMENTS,
+    environment: tokenFreeEnvironment,
+    platform,
+    repositoryRoot,
+    spawn,
+  });
   if (rebuildStatus !== 0) {
     return rebuildStatus;
   }
@@ -272,6 +325,7 @@ if (require.main === module) {
 }
 
 module.exports = {
+  AUTHENTICATED_FROZEN_INSTALL_ARGUMENTS,
   LOOPBACK_NO_PROXY_ENTRIES,
   ROUTED_NO_PROXY,
   ROUTED_NO_PROXY_ENTRIES,
@@ -280,8 +334,10 @@ module.exports = {
   USER_CONFIG_ENVIRONMENT_VARIABLE,
   GLOBAL_CONFIG_ENVIRONMENT_VARIABLE,
   NPM_GLOBAL_CONFIG_ENVIRONMENT_VARIABLE,
+  TOKEN_FREE_LOCKFILE_ARGUMENTS,
   TOKEN_FREE_REBUILD_ARGUMENTS,
   createRoutedEnvironment,
+  isAuthenticatedFrozenInstall,
   isLoopbackProxy,
   parseNoProxy,
   pnpmSpawnArguments,

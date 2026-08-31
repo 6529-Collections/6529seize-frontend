@@ -76,6 +76,12 @@ intentionally rejected before pnpm starts. The repository can check that the tok
 present and used only for the approved host, but it cannot inspect the token's
 GitHub permissions.
 
+Commands that may change dependency resolution first update the manifest and
+lockfile without package credentials. The helper validates the resulting
+policy before it runs a fixed authenticated `install --frozen-lockfile`, so
+new public package metadata cannot use the private token to resolve another
+GitHub Package.
+
 The authenticated fetch phase disables lifecycle scripts and pnpm hook files.
 Repository-local pnpm hooks and pnpm config dependencies are rejected before
 the command starts. User and global npm config layers are pinned to the same

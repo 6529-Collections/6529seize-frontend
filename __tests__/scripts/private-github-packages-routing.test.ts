@@ -44,14 +44,17 @@ type PolicyModule = {
 };
 
 type RoutingModule = {
+  AUTHENTICATED_FROZEN_INSTALL_ARGUMENTS: string[];
   GLOBAL_CONFIG_ENVIRONMENT_VARIABLE: string;
   IGNORE_PNPMFILE_ENVIRONMENT_VARIABLE: string;
   IGNORE_SCRIPTS_ENVIRONMENT_VARIABLE: string;
   NPM_GLOBAL_CONFIG_ENVIRONMENT_VARIABLE: string;
   ROUTED_NO_PROXY: string;
+  TOKEN_FREE_LOCKFILE_ARGUMENTS: string[];
   TOKEN_FREE_REBUILD_ARGUMENTS: string[];
   USER_CONFIG_ENVIRONMENT_VARIABLE: string;
   createRoutedEnvironment: (environment: Environment) => Environment;
+  isAuthenticatedFrozenInstall: (args: string[]) => boolean;
   isLoopbackProxy: (proxyValue: unknown) => boolean;
   parseNoProxy: (value: string | undefined) => string[];
   pnpmSpawnArguments: (
@@ -794,13 +797,87 @@ describe("host-specific Socket Firewall routing", () => {
       [string, string[], { env: Environment }]
     >;
 
-    expect(spawnCalls[0]?.[1]).toEqual(["audit", "--fix"]);
+    expect(spawnCalls.map((call) => call[1])).toEqual([
+      ["audit", "--fix"],
+      routing.TOKEN_FREE_LOCKFILE_ARGUMENTS,
+      routing.AUTHENTICATED_FROZEN_INSTALL_ARGUMENTS,
+      routing.TOKEN_FREE_REBUILD_ARGUMENTS,
+    ]);
     expect(spawnCalls[0]?.[2].env).toEqual(
       expect.objectContaining({
         [routing.IGNORE_PNPMFILE_ENVIRONMENT_VARIABLE]: "true",
         [routing.IGNORE_SCRIPTS_ENVIRONMENT_VARIABLE]: "true",
       })
     );
+    expect(spawnCalls[0]?.[2].env).not.toHaveProperty("NODE_AUTH_TOKEN");
+    expect(spawnCalls[1]?.[2].env).not.toHaveProperty("NODE_AUTH_TOKEN");
+    expect(spawnCalls[2]?.[2].env.NODE_AUTH_TOKEN).toBe(TEST_TOKEN);
+    expect(spawnCalls[3]?.[2].env).not.toHaveProperty("NODE_AUTH_TOKEN");
+  });
+
+  it("resolves package mutations without auth before the fixed frozen fetch", () => {
+    const spawn = jest.fn(() => ({ status: 0 }));
+    const consoleError = jest.spyOn(console, "error").mockImplementation();
+
+    expect(
+      routing.runPnpm({
+        args: ["add", "public-package@1.0.0"],
+        environment: socketEnvironment(socketCaPath),
+        repositoryRoot: REPOSITORY_ROOT,
+        spawn,
+      })
+    ).toBe(0);
+    const spawnCalls = spawn.mock.calls as unknown as Array<
+      [string, string[], { env: Environment }]
+    >;
+
+    expect(spawnCalls.map((call) => call[1])).toEqual([
+      ["add", "public-package@1.0.0", "--lockfile-only"],
+      routing.TOKEN_FREE_LOCKFILE_ARGUMENTS,
+      routing.AUTHENTICATED_FROZEN_INSTALL_ARGUMENTS,
+      routing.TOKEN_FREE_REBUILD_ARGUMENTS,
+    ]);
+    for (const call of [spawnCalls[0], spawnCalls[1], spawnCalls[3]]) {
+      expect(call?.[2].env).not.toHaveProperty("NODE_AUTH_TOKEN");
+    }
+    expect(spawnCalls[2]?.[2].env.NODE_AUTH_TOKEN).toBe(TEST_TOKEN);
+    expect(JSON.stringify(consoleError.mock.calls)).not.toContain(TEST_TOKEN);
+  });
+
+  it("rejects a newly resolved private dependency before auth is attached", () => {
+    writeValidRepositoryPolicyFiles(temporaryDirectory);
+    const spawn = jest.fn(
+      (_command: string, _args: string[], _options: { env: Environment }) => {
+        const packageJson = JSON.parse(validPackageJson()) as Record<
+          string,
+          unknown
+        >;
+        packageJson["dependencies"] = {
+          publicPackage: `npm:${policy.ALLOWED_SCOPE}/another-package@1.0.0`,
+        };
+        fs.writeFileSync(
+          path.join(temporaryDirectory, "package.json"),
+          JSON.stringify(packageJson)
+        );
+        return { status: 0 };
+      }
+    );
+
+    expect(() =>
+      routing.runPnpm({
+        args: ["add", "public-package@1.0.0"],
+        environment: socketEnvironment(socketCaPath),
+        repositoryRoot: temporaryDirectory,
+        spawn,
+      })
+    ).toThrow(`cannot alias or indirectly resolve ${policy.ALLOWED_SCOPE}`);
+    expect(spawn).toHaveBeenCalledTimes(1);
+    const firstCall = spawn.mock.calls[0] as unknown as [
+      string,
+      string[],
+      { env: Environment },
+    ];
+    expect(firstCall[2].env).not.toHaveProperty("NODE_AUTH_TOKEN");
   });
 
   it("quotes every inner pnpm argument before using the Windows shell", () => {
