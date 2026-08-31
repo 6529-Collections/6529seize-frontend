@@ -471,6 +471,11 @@ const MEMES_QUICK_VOTE_MESSAGES = objectMessages("memes.quickVote", {
   inMemesWave: "{leftThisRound}, {unrated} in the memes wave",
 } as const);
 
+const MEMES_SUBMISSION_MESSAGES = objectMessages("memes.submission", {
+  "media.missingUpload": "Select artwork or choose Interactive HTML.",
+  "media.missingInteractive": "Enter a valid hash or choose Upload File.",
+} as const);
+
 const MEMES_WAVE_FOOTER_MESSAGES = objectMessages("memes.waveFooter", {
   "quickVote.label": "Quick vote",
   "quickVote.open": "Open quick vote",
@@ -3592,6 +3597,7 @@ export const EN_US_MESSAGES = {
   ...PROFILE_CURATION_MESSAGES,
   ...WAVE_SCORE_NAVIGATION_MESSAGES,
   ...MEMES_QUICK_VOTE_MESSAGES,
+  ...MEMES_SUBMISSION_MESSAGES,
   ...MEMES_WAVE_FOOTER_MESSAGES,
   ...DROP_REACTION_MESSAGES,
   ...WAVES_MOBILE_MESSAGES,

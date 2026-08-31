@@ -184,6 +184,7 @@ const AirdropConfig: React.FC<AirdropConfigProps> = ({
                 className="tw-flex-1 tw-pb-0"
               >
                 <EnsAddressInput
+                  variant="dark"
                   value={entry.address}
                   placeholder="0x... or ENS"
                   onAddressChange={(addr) => handleAddressChange(index, addr)}

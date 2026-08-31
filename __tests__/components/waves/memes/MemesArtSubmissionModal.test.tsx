@@ -52,12 +52,16 @@ describe("MemesArtSubmissionModal", () => {
     expect(onClose).toHaveBeenCalled();
   });
 
-  it("uses full mobile viewport height constraints", () => {
+  it("uses keyboard-aware mobile viewport height constraints", () => {
     render(
       <MemesArtSubmissionModal isOpen={true} wave={wave} onClose={jest.fn()} />
     );
     const panel = screen.getByTestId("memes-art-submission-modal-panel");
-    expect(panel).toHaveClass("tw-h-[100dvh]");
-    expect(panel).toHaveClass("tw-max-h-[100dvh]");
+    expect(panel).toHaveClass(
+      "tw-h-[calc(100dvh-var(--native-keyboard-inset-bottom,0px))]"
+    );
+    expect(panel).toHaveClass(
+      "tw-max-h-[calc(100dvh-var(--native-keyboard-inset-bottom,0px))]"
+    );
   });
 });

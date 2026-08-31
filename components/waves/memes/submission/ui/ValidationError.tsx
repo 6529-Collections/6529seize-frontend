@@ -12,14 +12,14 @@ interface ValidationErrorProps {
 const ValidationError: React.FC<ValidationErrorProps> = ({
   error,
   id,
-  className = "",
+  className = "tw-mt-1.5",
 }) => {
   if (!error) return null;
 
   return (
     <div
       id={id}
-      className={`tw-text-red tw-text-xs tw-mt-1.5 tw-font-normal ${className}`}
+      className={`tw-text-xs tw-font-normal tw-text-red ${className}`}
       role="alert"
       aria-live="polite"
     >
