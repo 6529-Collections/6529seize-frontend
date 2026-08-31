@@ -320,6 +320,42 @@ describe("private GitHub Packages repository policy", () => {
     );
   });
 
+  it("rejects private-package aliases and indirect resolver settings", () => {
+    const packageJson = JSON.parse(validPackageJson()) as Record<
+      string,
+      unknown
+    >;
+    packageJson["dependencies"] = {
+      innocent: `npm:${policy.ALLOWED_SCOPE}/another-package@1.0.0`,
+    };
+    expect(() =>
+      policy.validatePackageJson(JSON.stringify(packageJson))
+    ).toThrow("cannot alias or indirectly resolve");
+
+    packageJson["dependencies"] = {
+      innocent: `npm:${policy.ALLOWED_PACKAGE_SPEC}`,
+    };
+    expect(() =>
+      policy.validatePackageJson(JSON.stringify(packageJson))
+    ).toThrow("cannot alias or indirectly resolve");
+
+    delete packageJson["dependencies"];
+    packageJson["pnpm"] = {
+      overrides: {
+        innocent: `npm:${policy.ALLOWED_SCOPE}/another-package@1.0.0`,
+      },
+    };
+    expect(() =>
+      policy.validatePackageJson(JSON.stringify(packageJson))
+    ).toThrow("package.json pnpm cannot indirectly resolve");
+
+    expect(() =>
+      policy.validateWorkspace(
+        `${validWorkspace()}overrides:\n  innocent: npm:${policy.ALLOWED_SCOPE}/another-package@1.0.0\n`
+      )
+    ).toThrow("pnpm-workspace.yaml cannot indirectly resolve");
+  });
+
   it("checks dependency fields without rejecting unrelated package text", () => {
     const packageJson = JSON.parse(validPackageJson()) as Record<
       string,
@@ -755,6 +791,32 @@ describe("host-specific Socket Firewall routing", () => {
     expect(() => policy.validateRepositoryFiles(temporaryDirectory)).toThrow(
       "package-lock.json is not allowed"
     );
+  });
+
+  it("rejects indirect private-package resolvers before authenticated pnpm", () => {
+    writeValidRepositoryPolicyFiles(temporaryDirectory);
+    const packageJson = JSON.parse(validPackageJson()) as Record<
+      string,
+      unknown
+    >;
+    packageJson["dependencies"] = {
+      innocent: `npm:${policy.ALLOWED_SCOPE}/another-package@1.0.0`,
+    };
+    fs.writeFileSync(
+      path.join(temporaryDirectory, "package.json"),
+      JSON.stringify(packageJson)
+    );
+    const spawn = jest.fn(() => ({ status: 0 }));
+
+    expect(() =>
+      routing.runPnpm({
+        args: ["install"],
+        environment: socketEnvironment(socketCaPath),
+        repositoryRoot: temporaryDirectory,
+        spawn,
+      })
+    ).toThrow("cannot alias or indirectly resolve");
+    expect(spawn).not.toHaveBeenCalled();
   });
 
   it("rebuilds workspace-approved pending packages exactly once without auth", () => {

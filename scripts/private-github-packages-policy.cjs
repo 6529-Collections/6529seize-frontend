@@ -256,6 +256,33 @@ function parsePackageJson(packageJsonText) {
   }
 }
 
+function findPrivateScopeReference(value) {
+  if (typeof value === "string") {
+    return value.match(
+      /@6529-collections\/[A-Za-z0-9._-]+(?:@[^\s"',}\]]+)?/
+    )?.[0];
+  }
+  if (Array.isArray(value)) {
+    for (const entry of value) {
+      const reference = findPrivateScopeReference(entry);
+      if (reference !== undefined) {
+        return reference;
+      }
+    }
+    return undefined;
+  }
+  if (value !== null && typeof value === "object") {
+    for (const [key, entry] of Object.entries(value)) {
+      const reference =
+        findPrivateScopeReference(key) ?? findPrivateScopeReference(entry);
+      if (reference !== undefined) {
+        return reference;
+      }
+    }
+  }
+  return undefined;
+}
+
 function validatePackageJson(packageJsonText) {
   const packageJson = parsePackageJson(packageJsonText);
   const dependencyGroups = [
@@ -294,6 +321,28 @@ function validatePackageJson(packageJsonText) {
           "package.json dependency specs cannot contain GitHub Packages URLs"
         );
       }
+
+      const indirectPrivatePackage = findPrivateScopeReference(packageSpec);
+      if (indirectPrivatePackage !== undefined) {
+        throw policyError(
+          `${name} cannot alias or indirectly resolve ${indirectPrivatePackage}`
+        );
+      }
+    }
+  }
+
+  for (const [settingName, resolverSettings] of [
+    ["overrides", packageJson.overrides],
+    ["resolutions", packageJson.resolutions],
+    ["catalog", packageJson.catalog],
+    ["catalogs", packageJson.catalogs],
+    ["pnpm", packageJson.pnpm],
+  ]) {
+    const indirectPrivatePackage = findPrivateScopeReference(resolverSettings);
+    if (indirectPrivatePackage !== undefined) {
+      throw policyError(
+        `package.json ${settingName} cannot indirectly resolve ${indirectPrivatePackage}`
+      );
     }
   }
 }
@@ -574,6 +623,7 @@ function validateLockfile(lockfileText) {
 
 function validateWorkspace(workspaceText) {
   const lines = workspaceText.split(/\r?\n/);
+  const effectiveLines = [];
   const releaseAgeExceptions = [];
   let foundReleaseAgeExceptions = false;
   let inReleaseAgeExceptions = false;
@@ -587,6 +637,7 @@ function validateWorkspace(workspaceText) {
     if (trimmed === "" || trimmed.startsWith("#")) {
       continue;
     }
+    effectiveLines.push(line);
 
     const topLevelKey = /^([^\s:#][^:]*):/.exec(line)?.[1];
     const normalizedTopLevelKey = topLevelKey
@@ -635,6 +686,16 @@ function validateWorkspace(workspaceText) {
   ) {
     throw policyError(
       `pnpm-workspace.yaml must keep the ${ALLOWED_PACKAGE_SPEC} release-age exception`
+    );
+  }
+
+  const privateScopeReferenceCount = effectiveLines.reduce(
+    (count, line) => count + line.split(`${ALLOWED_SCOPE}/`).length - 1,
+    0
+  );
+  if (privateScopeReferenceCount !== 1) {
+    throw policyError(
+      `pnpm-workspace.yaml cannot indirectly resolve another ${ALLOWED_SCOPE} package`
     );
   }
 }

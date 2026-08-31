@@ -94,6 +94,8 @@ starts pnpm. It fails closed if the private host, scope, package, version,
 tarball, integrity, or network routing is extended or changed. Project-level
 registry, credential, proxy, TLS, CA, and pnpm project/workspace relocation
 overrides are rejected rather than forwarded to an authenticated command.
+Dependency aliases, overrides, resolutions, and catalogs also cannot point an
+otherwise innocent package name at the private scope.
 
 Socket Firewall Free cannot proxy this private registry correctly. For this one
 case, pnpm connects directly to `npm.pkg.github.com` with normal TLS certificate
