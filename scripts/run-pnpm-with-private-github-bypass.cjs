@@ -148,6 +148,7 @@ function runPnpm({
       repositoryRoot,
       args,
       environment: routedEnvironment,
+      validateEnvironmentOverrides: true,
     });
   }
 

@@ -73,6 +73,58 @@ function parseNpmrc(npmrcText) {
   return entries;
 }
 
+function urlHostname(value) {
+  if (typeof value !== "string" || value === "") {
+    return null;
+  }
+
+  try {
+    return new URL(value).hostname;
+  } catch {
+    return null;
+  }
+}
+
+function npmrcKeyHostname(key) {
+  if (!key.startsWith("//")) {
+    return null;
+  }
+
+  const pathIndex = key.indexOf("/", 2);
+  const authority = pathIndex === -1 ? key : key.slice(0, pathIndex + 1);
+  return urlHostname(`https:${authority}`);
+}
+
+function isExactRegistryOrigin(value, expectedOrigin) {
+  if (typeof value !== "string") {
+    return false;
+  }
+
+  try {
+    const parsed = new URL(value);
+    const expected = new URL(expectedOrigin);
+    return (
+      parsed.protocol === expected.protocol &&
+      parsed.hostname === expected.hostname &&
+      parsed.port === expected.port &&
+      parsed.username === "" &&
+      parsed.password === "" &&
+      parsed.pathname === "/" &&
+      parsed.search === "" &&
+      parsed.hash === ""
+    );
+  } catch {
+    return false;
+  }
+}
+
+function argumentUrlHostname(argument) {
+  const separatorIndex = argument.indexOf("=");
+  const candidate =
+    separatorIndex === -1 ? argument : argument.slice(separatorIndex + 1);
+  return urlHostname(candidate);
+}
+
 function validateNpmrc(npmrcText) {
   const entries = parseNpmrc(npmrcText);
 
@@ -90,8 +142,8 @@ function validateNpmrc(npmrcText) {
 
   for (const [key, value] of entries) {
     const referencesAllowedHost =
-      key.includes(ALLOWED_REGISTRY_HOST) ||
-      value.includes(ALLOWED_REGISTRY_HOST);
+      npmrcKeyHostname(key) === ALLOWED_REGISTRY_HOST ||
+      urlHostname(value) === ALLOWED_REGISTRY_HOST;
     const isAllowedHostEntry =
       (key === SCOPE_REGISTRY_KEY && value === ALLOWED_REGISTRY_ORIGIN) ||
       (key === AUTH_KEY && value === AUTH_PLACEHOLDER);
@@ -120,20 +172,6 @@ function parsePackageJson(packageJsonText) {
 
 function validatePackageJson(packageJsonText) {
   const packageJson = parsePackageJson(packageJsonText);
-  const scopedPackageNames =
-    packageJsonText.match(/@6529-collections\/[A-Za-z0-9._-]+/g) ?? [];
-  for (const packageName of scopedPackageNames) {
-    if (packageName !== ALLOWED_PACKAGE_NAME) {
-      throw policyError(
-        `${packageName} cannot extend the ${ALLOWED_SCOPE} private-registry bypass`
-      );
-    }
-  }
-
-  if (packageJsonText.includes(ALLOWED_REGISTRY_HOST)) {
-    throw policyError("package.json cannot contain GitHub Packages URLs");
-  }
-
   const dependencyGroups = [
     ["dependencies", packageJson.dependencies ?? {}],
     ["devDependencies", packageJson.devDependencies ?? {}],
@@ -151,7 +189,7 @@ function validatePackageJson(packageJsonText) {
   }
 
   for (const [groupName, dependencies] of dependencyGroups) {
-    for (const name of Object.keys(dependencies)) {
+    for (const [name, packageSpec] of Object.entries(dependencies)) {
       if (
         name.startsWith(`${ALLOWED_SCOPE}/`) &&
         name !== ALLOWED_PACKAGE_NAME
@@ -163,6 +201,12 @@ function validatePackageJson(packageJsonText) {
 
       if (name === ALLOWED_PACKAGE_NAME && groupName !== "devDependencies") {
         throw policyError(`${ALLOWED_PACKAGE_NAME} must remain dev-only`);
+      }
+
+      if (urlHostname(packageSpec) === ALLOWED_REGISTRY_HOST) {
+        throw policyError(
+          "package.json dependency specs cannot contain GitHub Packages URLs"
+        );
       }
     }
   }
@@ -179,15 +223,6 @@ function validateLockfile(lockfileText) {
     }
   }
 
-  const hostReferenceCount = (
-    lockfileText.match(/npm\.pkg\.github\.com/g) ?? []
-  ).length;
-  if (hostReferenceCount !== 1) {
-    throw policyError(
-      `pnpm-lock.yaml must contain exactly one ${ALLOWED_REGISTRY_HOST} tarball`
-    );
-  }
-
   const expectedResolution =
     `resolution: {integrity: ${ALLOWED_INTEGRITY}, ` +
     `tarball: ${ALLOWED_TARBALL_URL}}`;
@@ -198,6 +233,7 @@ function validateLockfile(lockfileText) {
   }
 
   const registryUrls = lockfileText.match(/https?:\/\/[^\s,'"}\]]+/g) ?? [];
+  const allowedRegistryUrls = [];
   for (const registryUrl of registryUrls) {
     let parsedUrl;
     try {
@@ -208,14 +244,22 @@ function validateLockfile(lockfileText) {
       );
     }
 
-    if (
-      parsedUrl.hostname === ALLOWED_REGISTRY_HOST &&
-      parsedUrl.href !== ALLOWED_TARBALL_URL
-    ) {
+    if (parsedUrl.hostname !== ALLOWED_REGISTRY_HOST) {
+      continue;
+    }
+
+    allowedRegistryUrls.push(parsedUrl.href);
+    if (parsedUrl.href !== ALLOWED_TARBALL_URL) {
       throw policyError(
         `unexpected ${ALLOWED_REGISTRY_HOST} lockfile URL: ${registryUrl}`
       );
     }
+  }
+
+  if (allowedRegistryUrls.length !== 1) {
+    throw policyError(
+      `pnpm-lock.yaml must contain exactly one ${ALLOWED_REGISTRY_HOST} tarball`
+    );
   }
 }
 
@@ -263,7 +307,7 @@ function normalizedOptionName(argument) {
 
 function validatePnpmArguments(args) {
   for (const argument of args) {
-    if (argument.includes(ALLOWED_REGISTRY_HOST)) {
+    if (argumentUrlHostname(argument) === ALLOWED_REGISTRY_HOST) {
       throw policyError(
         `${ALLOWED_REGISTRY_HOST} URLs cannot be supplied on the command line`
       );
@@ -309,7 +353,7 @@ function validatePnpmConfigEnvironment(environment) {
     }
 
     if (normalizedKey === "npm_config__6529_collections_registry") {
-      if (environment[key] !== ALLOWED_REGISTRY_ORIGIN) {
+      if (!isExactRegistryOrigin(environment[key], ALLOWED_REGISTRY_ORIGIN)) {
         throw policyError(
           `${key} must equal the committed ${ALLOWED_REGISTRY_ORIGIN}`
         );
@@ -318,7 +362,7 @@ function validatePnpmConfigEnvironment(environment) {
     }
 
     if (normalizedKey === "npm_config_registry") {
-      if (environment[key] !== PUBLIC_REGISTRY_ORIGIN) {
+      if (!isExactRegistryOrigin(environment[key], PUBLIC_REGISTRY_ORIGIN)) {
         throw policyError(
           `${key} must equal the default ${PUBLIC_REGISTRY_ORIGIN}`
         );
@@ -330,10 +374,14 @@ function validatePnpmConfigEnvironment(environment) {
       normalizedKey.startsWith("npm_config_") &&
       normalizedKey.includes("registry")
     ) {
-      if (String(environment[key]).includes(ALLOWED_REGISTRY_HOST)) {
+      const registryValue = environment[key];
+      if (urlHostname(registryValue) === ALLOWED_REGISTRY_HOST) {
         throw policyError(
           `${key} cannot extend ${ALLOWED_REGISTRY_HOST} to another scope`
         );
+      }
+      if (urlHostname(registryValue) === null) {
+        throw policyError(`${key} must contain a valid registry URL`);
       }
       continue;
     }

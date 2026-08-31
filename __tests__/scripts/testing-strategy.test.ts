@@ -303,7 +303,8 @@ describe("testing strategy CI plan", () => {
     expect(plan.checks["playwright_critical_shell"]!.required).toBe(false);
     expect(plan.security).toMatchObject({
       secrets_allowed: false,
-      token_permissions: "contents:read",
+      token_permissions:
+        "contents:read; packages:read only in same-repository frozen-install jobs",
     });
   });
 
@@ -313,6 +314,9 @@ describe("testing strategy CI plan", () => {
     });
 
     expect(plan.untrusted_pr).toBe(true);
+    expect(plan.security.fork_pr_policy).toContain(
+      "do not execute for fork PRs"
+    );
     expect(plan.risk.computed_floor).toBe(2);
     expect(plan.checks.install.required).toBe(true);
     expect(plan.checks.lint_changed.required).toBe(true);
@@ -359,9 +363,7 @@ describe("testing strategy CI plan", () => {
     expect(resolveIndex).toBeGreaterThan(guardIndex);
     expect(resolveIndex).toBeGreaterThan(fileGuardIndex);
     const fileGuardBlock = workflow.slice(fileGuardIndex, resolveIndex);
-    expect(fileGuardBlock).toContain(
-      "Skipping non-file Jest discovery output"
-    );
+    expect(fileGuardBlock).toContain("Skipping non-file Jest discovery output");
     expect(fileGuardBlock).toContain("continue");
   });
 
@@ -610,7 +612,7 @@ describe("testing strategy CI plan", () => {
       >;
     };
     expect(parsed.jobs["app-checks"]).toMatchObject({
-      if: "needs.plan.outputs.install_required == 'true'",
+      if: "needs.plan.outputs.install_required == 'true' && github.event.pull_request.head.repo.full_name == github.repository",
       "runs-on": "${{ matrix.runner }}",
       strategy: {
         matrix: "${{ fromJSON(needs.plan.outputs.app_check_matrix) }}",
@@ -637,7 +639,7 @@ describe("testing strategy CI plan", () => {
       ])
     );
     expect(parsed.jobs["core-playwright-checks"]).toMatchObject({
-      if: "needs.plan.outputs.core_playwright_required == 'true'",
+      if: "needs.plan.outputs.core_playwright_required == 'true' && github.event.pull_request.head.repo.full_name == github.repository",
       "runs-on": "${{ matrix.runner }}",
       "timeout-minutes": 20,
       container: {

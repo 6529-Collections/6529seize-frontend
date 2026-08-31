@@ -205,6 +205,25 @@ describe("private GitHub Packages repository policy", () => {
     );
   });
 
+  it("checks dependency fields without rejecting unrelated package text", () => {
+    const packageJson = JSON.parse(validPackageJson()) as Record<
+      string,
+      unknown
+    >;
+    packageJson["description"] =
+      "Documentation may mention @6529-collections/another-package.";
+    expect(() =>
+      policy.validatePackageJson(JSON.stringify(packageJson))
+    ).not.toThrow();
+
+    packageJson["dependencies"] = {
+      external: `${policy.ALLOWED_TARBALL_URL}/unexpected`,
+    };
+    expect(() =>
+      policy.validatePackageJson(JSON.stringify(packageJson))
+    ).toThrow("dependency specs cannot contain GitHub Packages URLs");
+  });
+
   it("rejects lockfile integrity, tarball, and package extensions", () => {
     expect(() =>
       policy.validateLockfile(
@@ -267,6 +286,11 @@ describe("private GitHub Packages repository policy", () => {
     expect(() =>
       policy.validatePnpmConfigEnvironment({
         npm_config_registry: policy.PUBLIC_REGISTRY_ORIGIN,
+      })
+    ).not.toThrow();
+    expect(() =>
+      policy.validatePnpmConfigEnvironment({
+        npm_config_registry: "https://registry.npmjs.org",
       })
     ).not.toThrow();
     expect(() =>
@@ -444,7 +468,7 @@ describe("host-specific Socket Firewall routing", () => {
 });
 
 describe("GitHub Actions package access", () => {
-  it("grants read-only package access only to frozen-install jobs", () => {
+  it("keeps package auth, Socket routing, and fork handling narrow", () => {
     const workflowDirectory = path.join(REPOSITORY_ROOT, ".github/workflows");
     const workflowFiles = fs
       .readdirSync(workflowDirectory)
@@ -455,6 +479,10 @@ describe("GitHub Actions package access", () => {
       const workflow = parseYaml(
         fs.readFileSync(path.join(workflowDirectory, workflowFile), "utf8")
       ) as {
+        on?: {
+          pull_request?: unknown;
+          [key: string]: unknown;
+        };
         permissions?: {
           packages?: string;
           [key: string]: string | undefined;
@@ -462,6 +490,7 @@ describe("GitHub Actions package access", () => {
         jobs?: Record<
           string,
           {
+            if?: string;
             permissions?: {
               packages?: string;
               [key: string]: string | undefined;
@@ -469,6 +498,7 @@ describe("GitHub Actions package access", () => {
             steps?: Array<{
               env?: {
                 NODE_AUTH_TOKEN?: string;
+                SFW_BIN?: string;
                 [key: string]: string | undefined;
               };
               run?: string;
@@ -477,9 +507,15 @@ describe("GitHub Actions package access", () => {
         >;
       };
 
+      const handlesForkPullRequests = workflow.on?.pull_request !== undefined;
+
       for (const [jobName, job] of Object.entries(workflow.jobs ?? {})) {
         const frozenInstallSteps = (job.steps ?? []).filter((step) =>
-          step.run?.includes("./bin/6529 install:frozen")
+          [
+            "./bin/6529 install:frozen",
+            "node scripts/release-bus-install-dependencies.cjs",
+            'node "$RELEASE_BUS_INSTALL_TOOL"',
+          ].some((command) => step.run?.includes(command))
         );
         const effectivePermissions =
           job.permissions ?? workflow.permissions ?? {};
@@ -490,6 +526,15 @@ describe("GitHub Actions package access", () => {
           for (const installStep of frozenInstallSteps) {
             expect(installStep.env?.NODE_AUTH_TOKEN).toBe(
               "${{ github.token }}"
+            );
+            expect(installStep.env?.SFW_BIN).toMatch(
+              /^\${{ steps\.[A-Za-z0-9_-]+\.outputs\.firewall-path-binary }}$/
+            );
+          }
+
+          if (handlesForkPullRequests) {
+            expect(job.if).toContain(
+              "github.event.pull_request.head.repo.full_name == github.repository"
             );
           }
         }

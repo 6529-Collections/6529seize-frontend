@@ -272,7 +272,9 @@ jobs:
   core-playwright-checks:
     name: App check / ${{ matrix.label }}
     needs: plan
-    if: needs.plan.outputs.core_playwright_required == 'true'
+    if: >-
+      needs.plan.outputs.core_playwright_required == 'true' &&
+      github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 20
     permissions:
@@ -377,7 +379,9 @@ jobs:
   app-checks:
     name: App check / ${{ matrix.label }}
     needs: plan
-    if: needs.plan.outputs.install_required == 'true'
+    if: >-
+      needs.plan.outputs.install_required == 'true' &&
+      github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 60
     permissions:

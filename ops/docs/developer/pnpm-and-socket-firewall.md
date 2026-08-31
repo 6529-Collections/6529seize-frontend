@@ -50,11 +50,8 @@ shell after running it, or activate it immediately in the current shell:
 source <(./bin/6529 bootstrap --print-export)
 ```
 
-Then install dependencies:
-
-```bash
-6529 install
-```
+Then supply the private-package authentication described below before
+installing dependencies.
 
 ### Private GitHub Packages authentication
 
@@ -62,13 +59,21 @@ The repository has one narrow private-package exception for
 `@6529-collections/release-request@0.0.1`. Supply `NODE_AUTH_TOKEN` at runtime
 with GitHub Packages `read:packages` access and no package write or delete
 access. Do not save the token in the repository, pnpm configuration, shell
-history, or command arguments. The repository can check that the token is
-present and used only for the approved host, but it cannot inspect the token's
-GitHub permissions.
+history, or command arguments. Read it silently into the current shell, run
+the package command, and remove it when finished:
 
 ```bash
-NODE_AUTH_TOKEN="<read-only-token>" 6529 install
+read -rs NODE_AUTH_TOKEN
+export NODE_AUTH_TOKEN
+6529 install
+unset NODE_AUTH_TOKEN
 ```
+
+The token must be present for every `6529` command that can resolve or install
+dependencies, including frozen installs and updates. A token-free install is
+intentionally rejected before pnpm starts. The repository can check that the token is
+present and used only for the approved host, but it cannot inspect the token's
+GitHub permissions.
 
 The existing `6529` commands remain the only supported entrypoint. The secure
 pnpm helper checks the committed `.npmrc`, package manifest, lockfile integrity,
@@ -82,7 +87,8 @@ verification. The helper keeps Socket's loopback proxy for every other host,
 including `registry.npmjs.org`, and keeps Socket's CA as an additional trusted
 root for those proxied requests. There is no general skip-Socket option.
 
-To apply audit fixes, use the same secure wrapper path:
+To apply audit fixes, keep the runtime token exported and use the same secure
+wrapper path:
 
 ```bash
 6529 update
