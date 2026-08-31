@@ -66,6 +66,8 @@ profile's current Level and progress toward the next Level.
 - The `Your Level` summary uses profile data already loaded by the app. It is
   omitted while profile data is loading or unavailable.
 - An active profile proxy takes precedence over the connected wallet profile.
+- The current Level is the active profile's assigned Level. The next target and
+  remaining amount use the reference thresholds shown on the page.
 - The chart uses a logarithmic y-axis to handle wide threshold ranges.
 - The chart has an accessible description, and every exact threshold is also
   available in the semantic table rather than only through hover or color.

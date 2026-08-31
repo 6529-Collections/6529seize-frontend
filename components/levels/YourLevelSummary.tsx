@@ -1,4 +1,6 @@
 import levels from "@/constants/levels.json";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import { formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -8,11 +10,9 @@ interface LevelData {
   readonly threshold: number;
 }
 
-export interface LevelSummaryProfile {
-  readonly level: number;
-  readonly rep: number;
-  readonly tdh: number;
-}
+type LevelSummaryProfile =
+  | Pick<ApiIdentity, "level" | "rep" | "tdh">
+  | Pick<ApiProfileMin, "level" | "rep" | "tdh">;
 
 interface LevelProgress {
   readonly combinedTdhRep: number;
@@ -23,7 +23,7 @@ interface LevelProgress {
 
 const LEVELS = levels as readonly LevelData[];
 
-export function getLevelProgress(
+function getLevelProgress(
   profile: LevelSummaryProfile
 ): LevelProgress | null {
   const { level, rep, tdh } = profile;
@@ -42,6 +42,8 @@ export function getLevelProgress(
     return null;
   }
 
+  // The API-assigned profile Level is authoritative. Local thresholds only
+  // provide the next target and the remaining TDH + Rep shown beside it.
   const nextLevel = LEVELS.find((entry) => entry.level > level) ?? null;
 
   return {
