@@ -39,11 +39,7 @@ const UploadArea: React.FC<UploadAreaProps> = ({
       </div>
     </div>
 
-    <div
-      className={`tw-relative tw-z-10 tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-items-center tw-py-3 ${
-        error ? "tw-justify-end" : "tw-justify-center"
-      }`}
-    >
+    <div className="tw-relative tw-z-10 tw-flex tw-min-h-0 tw-flex-col tw-items-center tw-justify-center tw-py-3">
       {/* Abstract art-themed upload indicator */}
       <div className="tw-relative tw-mb-2">
         <div className="tw-w-32 tw-h-32 tw-relative">
@@ -83,7 +79,7 @@ const UploadArea: React.FC<UploadAreaProps> = ({
     </div>
 
     {/* Error and file type indicators */}
-    <div className="tw-relative tw-z-10 tw-mt-2 tw-flex tw-w-full tw-flex-shrink-0 tw-flex-col tw-items-center tw-gap-3">
+    <div className="tw-absolute tw-bottom-5 tw-left-4 tw-right-4 tw-z-10 tw-flex tw-flex-col tw-items-center tw-gap-3 sm:tw-bottom-6">
       {error && (
         <ErrorMessage
           error={error}
