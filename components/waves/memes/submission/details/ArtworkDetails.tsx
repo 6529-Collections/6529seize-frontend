@@ -1,9 +1,12 @@
 "use client";
 
-import React, { useRef, useCallback, useMemo } from "react";
+import { CheckCircleIcon } from "@heroicons/react/24/outline";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { formatInteger } from "@/i18n/format";
+import type { SupportedLocale } from "@/i18n/locales";
+import React, { useCallback, useMemo, useRef } from "react";
 import FormSection from "../ui/FormSection";
 import ValidationError from "../ui/ValidationError";
-import { CheckCircleIcon } from "@heroicons/react/24/outline";
 import {
   METADATA_VALUE_DESCRIPTION_MAX_LENGTH,
   METADATA_VALUE_TITLE_MAX_LENGTH,
@@ -64,10 +67,12 @@ const FieldCharacterCount = ({
   length,
   maxLength,
   dangerThreshold,
+  locale,
 }: {
   readonly length: number;
   readonly maxLength: number;
   readonly dangerThreshold: number;
+  readonly locale: SupportedLocale;
 }) => {
   const isAtLimit = length >= maxLength;
   const isDanger = length >= dangerThreshold;
@@ -87,11 +92,11 @@ const FieldCharacterCount = ({
   }
 
   return (
-    <div className="tw-mt-1.5 tw-flex tw-justify-end">
-      <span className={`tw-text-xs tw-font-medium ${colorClass}`}>
-        {length.toLocaleString()} / {maxLength.toLocaleString()}
-      </span>
-    </div>
+    <span
+      className={`tw-ml-auto tw-flex-shrink-0 tw-text-xs tw-font-medium ${colorClass}`}
+    >
+      {formatInteger(locale, length)} / {formatInteger(locale, maxLength)}
+    </span>
   );
 };
 
@@ -120,13 +125,13 @@ const AdditionalActionPromiseCheckbox = ({
         type="checkbox"
         checked={checked}
         onChange={handleChange}
-        className="tw-mt-0.5 tw-h-4 tw-w-4 tw-rounded tw-border-iron-700 tw-bg-iron-950 tw-text-primary-500 focus:tw-ring-primary-500"
+        className="tw-form-checkbox tw-mt-0.5 tw-h-4 tw-w-4 tw-flex-shrink-0 tw-cursor-pointer tw-rounded tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-800 tw-text-primary-400 focus:tw-ring-primary-400 focus:tw-ring-offset-0"
       />
       <span className="tw-flex tw-flex-col tw-gap-1">
         <span className="tw-text-sm tw-font-medium tw-text-iron-100">
           Additional Action
         </span>
-        <span className="tw-text-xs tw-leading-5 tw-text-iron-400">
+        <span className="tw-text-pretty tw-text-xs tw-leading-5 tw-text-iron-400">
           Check this if the submission includes a real-world commitment, such as
           an event, donation, physical item, airdrop, or future deliverable.
         </span>
@@ -141,6 +146,7 @@ const AdditionalActionPromiseCheckbox = ({
  * Extreme simplification using uncontrolled inputs with refs for maximum performance
  */
 const ArtworkDetails: React.FC<ArtworkDetailsProps> = (props) => {
+  const locale = useBrowserLocale();
   const {
     title,
     description,
@@ -288,6 +294,7 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = (props) => {
                 onInput={handleTitleInput}
                 onBlur={handleTitleBlur}
                 aria-invalid={!!titleError}
+                aria-required={showRequiredMarkers}
                 aria-describedby={titleError ? "title-error" : undefined}
                 data-field="title"
                 className={`tw-form-input tw-w-full tw-cursor-text tw-rounded-lg tw-border-0 tw-bg-iron-900 ${size === "sm" ? "tw-px-3 tw-py-2.5" : "tw-px-4 tw-py-3.5"} tw-text-base tw-text-iron-100 tw-outline-none tw-ring-1 tw-transition-all tw-duration-500 tw-ease-in-out placeholder:tw-text-iron-500 sm:tw-text-sm ${titleStateClass} ${
@@ -312,14 +319,20 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = (props) => {
                 </div>
               )}
             </div>
-            <FieldCharacterCount
-              length={titleLength}
-              maxLength={METADATA_VALUE_TITLE_MAX_LENGTH}
-              dangerThreshold={TITLE_CHARACTER_DANGER_THRESHOLD}
-            />
+            <div className="tw-mt-1.5 tw-flex tw-items-start tw-gap-3">
+              <ValidationError
+                error={titleError}
+                id="title-error"
+                className="tw-mt-0 tw-min-w-0 tw-flex-1"
+              />
+              <FieldCharacterCount
+                length={titleLength}
+                maxLength={METADATA_VALUE_TITLE_MAX_LENGTH}
+                dangerThreshold={TITLE_CHARACTER_DANGER_THRESHOLD}
+                locale={locale}
+              />
+            </div>
           </div>
-
-          <ValidationError error={titleError} id="title-error" />
         </div>
 
         <div className="tw-group tw-relative">
@@ -349,6 +362,7 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = (props) => {
                 onBlur={handleDescriptionBlur}
                 rows={4}
                 aria-invalid={!!descriptionError}
+                aria-required={showRequiredMarkers}
                 aria-describedby={
                   descriptionError ? "description-error" : undefined
                 }
@@ -378,14 +392,20 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = (props) => {
                 </div>
               )}
             </div>
-            <FieldCharacterCount
-              length={descriptionLength}
-              maxLength={METADATA_VALUE_DESCRIPTION_MAX_LENGTH}
-              dangerThreshold={DESCRIPTION_CHARACTER_DANGER_THRESHOLD}
-            />
+            <div className="tw-mt-1.5 tw-flex tw-items-start tw-gap-3">
+              <ValidationError
+                error={descriptionError}
+                id="description-error"
+                className="tw-mt-0 tw-min-w-0 tw-flex-1"
+              />
+              <FieldCharacterCount
+                length={descriptionLength}
+                maxLength={METADATA_VALUE_DESCRIPTION_MAX_LENGTH}
+                dangerThreshold={DESCRIPTION_CHARACTER_DANGER_THRESHOLD}
+                locale={locale}
+              />
+            </div>
           </div>
-
-          <ValidationError error={descriptionError} id="description-error" />
 
           {additionalActionPromiseProps ? (
             <AdditionalActionPromiseCheckbox

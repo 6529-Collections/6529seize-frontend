@@ -24,7 +24,7 @@ export function MemesArtSubmissionShell({
         <div className="tw-relative tw-z-10 tw-flex tw-h-full tw-flex-col">
           <div className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-px-4 tw-pb-6 md:tw-px-8">
             <div className="tw-flex tw-w-full tw-flex-shrink-0 tw-items-center tw-justify-between tw-pt-6 lg:tw-border-b-0">
-              <motion.h3 className="tw-mb-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-iron-100 md:tw-text-2xl">
+              <motion.h3 className="tw-mb-0 tw-mt-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-iron-100 md:tw-text-2xl">
                 {title}
               </motion.h3>
               <motion.button
