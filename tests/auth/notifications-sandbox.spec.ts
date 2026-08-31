@@ -57,13 +57,18 @@ test.describe("Notifications local sandbox @auth @medium @local-only", () => {
       timeout: 1500,
     });
 
-    await page.getByRole("button", { name: "Reactions", exact: true }).click();
+    await page.getByRole("button", { name: /^Filter notifications:/ }).click();
+    await page
+      .getByRole("menuitemcheckbox", { name: "Reactions", exact: true })
+      .click();
     await expect(page.getByText("New reactions").first()).toBeVisible({
       timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
     });
     await expect(page.getByText("mentioned you")).toHaveCount(0);
 
-    await page.getByRole("button", { name: "Invites", exact: true }).click();
+    await page
+      .getByRole("menuitemcheckbox", { name: "Invites", exact: true })
+      .click();
     await expect(page.getByText("created a wave you can access:")).toBeVisible({
       timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
     });
@@ -90,17 +95,99 @@ test.describe("Notifications local sandbox @auth @medium @local-only", () => {
     await expectNoUnsafeSandboxMutations(baseURL);
   });
 
-  test("captures reply composer visual states", async (
-    { baseURL, page },
-    testInfo
-  ) => {
+  test("switches filter presentation at the mobile layout boundary", async ({
+    baseURL,
+    page,
+  }, testInfo) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/notifications", { waitUntil: "domcontentloaded" });
+    await waitForRouteReady(page);
+
+    const trigger = page.getByRole("button", {
+      name: /^Filter notifications:/,
+    });
+    await expect(trigger).toHaveAttribute("aria-haspopup", "dialog");
+    await trigger.click();
+
+    const dialog = page.getByRole("dialog", {
+      name: "Filter notifications",
+    });
+    await expect(dialog).toBeVisible();
+    await expect(page.getByRole("menu")).toHaveCount(0);
+    await expect
+      .poll(() =>
+        page.evaluate(
+          () => globalThis.getComputedStyle(document.documentElement).overflow
+        )
+      )
+      .toBe("hidden");
+
+    await dialog.getByRole("checkbox", { name: "Mentions" }).click();
+    await dialog.getByRole("checkbox", { name: "Reactions" }).click();
+    await expect(dialog).toBeVisible();
+    await expect(trigger).toHaveAccessibleName(
+      "Filter notifications: 2 selected"
+    );
+    await expect(
+      dialog.getByRole("checkbox", { name: "Mentions" })
+    ).toHaveAttribute("aria-checked", "true");
+    await expect(
+      dialog.getByRole("checkbox", { name: "Reactions" })
+    ).toHaveAttribute("aria-checked", "true");
+    await expectNoHorizontalOverflow(page);
+    await captureSafeScreenshot(
+      page,
+      testInfo,
+      "notifications-mobile-filter-sheet"
+    );
+
+    await dialog.getByRole("button", { name: "Close" }).click();
+    await expect(dialog).toHaveCount(0);
+    await expect(trigger).toBeFocused();
+
+    await trigger.click();
+    const reopenedDialog = page.getByRole("dialog", {
+      name: "Filter notifications",
+    });
+    await expect(
+      reopenedDialog.getByRole("checkbox", { name: "Mentions" })
+    ).toHaveAttribute("aria-checked", "true");
+    await reopenedDialog.getByRole("checkbox", { name: /^All/ }).click();
+    await expect(trigger).toHaveAccessibleName("Filter notifications: All");
+
+    await page.setViewportSize({ width: 1023, height: 768 });
+    await expect(reopenedDialog).toBeVisible();
+    await page.setViewportSize({ width: 1024, height: 768 });
+    await expect(reopenedDialog).toHaveCount(0);
+    await expect(trigger).toBeFocused();
+    await expect(trigger).toHaveAttribute("aria-expanded", "false");
+    await expect(trigger).toHaveAttribute("aria-haspopup", "menu");
+
+    await trigger.click();
+    await expect(page.getByRole("menu")).toBeVisible();
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+    await captureSafeScreenshot(
+      page,
+      testInfo,
+      "notifications-desktop-filter-menu"
+    );
+    await page.keyboard.press("Escape");
+    await expect(page.getByRole("menu")).toHaveCount(0);
+    await expect(trigger).toBeFocused();
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
+
+  test("captures reply composer visual states", async ({
+    baseURL,
+    page,
+  }, testInfo) => {
     await page.emulateMedia({ reducedMotion: "no-preference" });
     await page.goto("/notifications", { waitUntil: "domcontentloaded" });
     await waitForRouteReady(page);
 
-    await expect(
-      page.getByText("mentioned you")
-    ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
+    await expect(page.getByText("mentioned you")).toBeVisible({
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
     const mentionedDropText =
       "Mentioned @playwright inside the sandbox notification flow.";
     await page.getByText(mentionedDropText).hover();
