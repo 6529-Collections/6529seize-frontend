@@ -1,6 +1,6 @@
 import type { ComponentProps } from "react";
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import ArtworkStep from "@/components/waves/memes/submission/steps/ArtworkStep";
 import type { TraitsData } from "@/components/waves/memes/submission/types/TraitsData";
 import type { InteractiveMediaMimeType } from "@/components/waves/memes/submission/constants/media";
@@ -8,10 +8,14 @@ import type { InteractiveMediaMimeType } from "@/components/waves/memes/submissi
 const mockArtworkDetails = jest.fn((props: any) => (
   <div data-testid="details" onClick={() => props.onTitleChange("t")} />
 ));
-
-jest.mock("@/components/waves/memes/MemesArtSubmissionFile", () => () => (
-  <div data-testid="file" />
+const mockArtworkFile = jest.fn((props: any) => (
+  <div data-testid="file">{props.missingMediaError}</div>
 ));
+
+jest.mock(
+  "@/components/waves/memes/MemesArtSubmissionFile",
+  () => (props: any) => mockArtworkFile(props)
+);
 jest.mock(
   "@/components/waves/memes/submission/details/ArtworkDetails",
   () => (props: any) => mockArtworkDetails(props)
@@ -121,6 +125,7 @@ const createProps = (
 describe("ArtworkStep", () => {
   beforeEach(() => {
     mockArtworkDetails.mockClear();
+    mockArtworkFile.mockClear();
   });
 
   it("renders responsive content container with mobile scroll and desktop split behavior", () => {
@@ -129,12 +134,20 @@ describe("ArtworkStep", () => {
     expect(contentContainer).toHaveClass("tw-overflow-y-auto");
   });
 
-  it("shows upload tooltip when artwork missing", () => {
-    render(<ArtworkStep {...createProps()} />);
-    expect(screen.getByTestId("submit")).toBeDisabled();
-    expect(screen.getByTestId("submit").getAttribute("title")).toMatch(
-      "Please upload artwork"
-    );
+  it("keeps Continue actionable and surfaces missing artwork", () => {
+    const onSubmit = jest.fn();
+    render(<ArtworkStep {...createProps({ onSubmit })} />);
+
+    const submit = screen.getByTestId("submit");
+    expect(submit).not.toBeDisabled();
+    expect(submit).not.toHaveAttribute("title");
+
+    fireEvent.click(submit);
+
+    expect(
+      screen.getByText("Select artwork or choose Interactive HTML.")
+    ).toBeInTheDocument();
+    expect(onSubmit).not.toHaveBeenCalled();
   });
 
   it("enables submit when complete", () => {
