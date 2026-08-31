@@ -359,7 +359,7 @@ function stripYamlQuotes(value) {
     : trimmed;
 }
 
-function semanticYamlLine(rawLine) {
+function semanticYamlLine(rawLine, filename = "pnpm-workspace.yaml") {
   let semanticLine = "";
 
   for (let index = 0; index < rawLine.length; index += 1) {
@@ -384,7 +384,7 @@ function semanticYamlLine(rawLine) {
       }
       if (!closed) {
         throw policyError(
-          "pnpm-workspace.yaml contains an unterminated single-quoted scalar"
+          `${filename} contains an unterminated single-quoted scalar`
         );
       }
       continue;
@@ -411,14 +411,12 @@ function semanticYamlLine(rawLine) {
             index + 2 + unicodeWidth
           );
           if (!new RegExp(`^[0-9A-Fa-f]{${unicodeWidth}}$`).test(hexadecimal)) {
-            throw policyError(
-              "pnpm-workspace.yaml contains an invalid Unicode escape"
-            );
+            throw policyError(`${filename} contains an invalid Unicode escape`);
           }
           const codePoint = Number.parseInt(hexadecimal, 16);
           if (codePoint > 0x10ffff) {
             throw policyError(
-              "pnpm-workspace.yaml contains an invalid Unicode code point"
+              `${filename} contains an invalid Unicode code point`
             );
           }
           semanticLine += String.fromCodePoint(codePoint);
@@ -447,7 +445,7 @@ function semanticYamlLine(rawLine) {
         };
         if (!Object.hasOwn(escapedCharacters, escapeType)) {
           throw policyError(
-            "pnpm-workspace.yaml contains an unsupported quoted escape"
+            `${filename} contains an unsupported quoted escape`
           );
         }
         semanticLine += escapedCharacters[escapeType];
@@ -455,12 +453,16 @@ function semanticYamlLine(rawLine) {
       }
       if (!closed) {
         throw policyError(
-          "pnpm-workspace.yaml contains an unterminated double-quoted scalar"
+          `${filename} contains an unterminated double-quoted scalar`
         );
       }
       continue;
     }
     semanticLine += character;
+  }
+
+  if (/[\u0000-\u001f\u007f-\u009f\u2028\u2029]/.test(semanticLine)) {
+    throw policyError(`${filename} contains a non-canonical control character`);
   }
 
   return semanticLine;
@@ -489,7 +491,7 @@ function effectiveLockfileLines(lockfileText) {
     if (line.trim() === "" || line.trimStart().startsWith("#")) {
       continue;
     }
-    lines.push(line);
+    lines.push(semanticYamlLine(line, "pnpm-lock.yaml"));
   }
   return lines;
 }
@@ -758,9 +760,10 @@ function validateWorkspace(workspaceText) {
     if (trimmed === "" || trimmed.startsWith("#")) {
       continue;
     }
-    effectiveLines.push(semanticYamlLine(line));
+    const semanticLine = semanticYamlLine(line);
+    effectiveLines.push(semanticLine);
 
-    const topLevelKey = /^([^\s:#][^:]*):/.exec(line)?.[1];
+    const topLevelKey = /^([^\s:#][^:]*):/.exec(semanticLine)?.[1];
     const normalizedTopLevelKey = topLevelKey
       ?.toLowerCase()
       .replace(/[^a-z0-9]/g, "");
@@ -770,6 +773,11 @@ function validateWorkspace(workspaceText) {
     ) {
       throw policyError(
         "pnpm-workspace.yaml cannot configure pnpm hooks or config dependencies"
+      );
+    }
+    if (normalizedTopLevelKey === "packages") {
+      throw policyError(
+        "pnpm-workspace.yaml cannot add workspace projects during authenticated package commands"
       );
     }
 

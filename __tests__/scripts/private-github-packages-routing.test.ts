@@ -413,6 +413,32 @@ describe("private GitHub Packages repository policy", () => {
     expect(() => policy.validateLockfile(commentSpoof)).toThrow(
       "must keep its exact tarball and integrity"
     );
+
+    const escapedUnexpectedTarball = validLockfile().replace(
+      "snapshots:",
+      [
+        "  'public-package@1.0.0':",
+        '    resolution: {tarball: "https://npm.pkg.github.c\\u006fm/download/public-package/1.0.0/not-allowed"}',
+        "",
+        "snapshots:",
+      ].join("\n")
+    );
+    expect(() => policy.validateLockfile(escapedUnexpectedTarball)).toThrow(
+      `unexpected ${policy.ALLOWED_REGISTRY_HOST} lockfile URL`
+    );
+
+    const controlEscapedTarball = validLockfile().replace(
+      "snapshots:",
+      [
+        "  'public-package@1.0.0':",
+        '    resolution: {tarball: "https://npm.pkg.github.c\\nom/download/public-package/1.0.0/not-allowed"}',
+        "",
+        "snapshots:",
+      ].join("\n")
+    );
+    expect(() => policy.validateLockfile(controlEscapedTarball)).toThrow(
+      "pnpm-lock.yaml contains a non-canonical control character"
+    );
   });
 
   it("rejects CLI attempts to change routing or extend the package bypass", () => {
@@ -853,6 +879,25 @@ describe("host-specific Socket Firewall routing", () => {
     }
   });
 
+  it("rejects additional workspace projects before authenticated pnpm", () => {
+    writeValidRepositoryPolicyFiles(temporaryDirectory);
+    fs.writeFileSync(
+      path.join(temporaryDirectory, "pnpm-workspace.yaml"),
+      `${validWorkspace()}packages:\n  - "packages/*"\n`
+    );
+    const spawn = jest.fn(() => ({ status: 0 }));
+
+    expect(() =>
+      routing.runPnpm({
+        args: ["install"],
+        environment: socketEnvironment(socketCaPath),
+        repositoryRoot: temporaryDirectory,
+        spawn,
+      })
+    ).toThrow("cannot add workspace projects");
+    expect(spawn).not.toHaveBeenCalled();
+  });
+
   it("rebuilds workspace-approved pending packages exactly once without auth", () => {
     const workspace = parseYaml(
       fs.readFileSync(path.join(REPOSITORY_ROOT, "pnpm-workspace.yaml"), "utf8")
@@ -1024,6 +1069,35 @@ describe("documented private-package setup flows", () => {
     expect(setupScript).toContain('rm -rf "$REPO_ROOT/node_modules"');
     expect(setupScript).toContain("./bin/6529 install:frozen");
     expect(setupScript).not.toContain("gh auth token");
+  });
+
+  it("scopes runtime auth to the staging refresh install", () => {
+    const stagingScript = fs.readFileSync(
+      path.join(REPOSITORY_ROOT, "scripts", "staging.sh"),
+      "utf8"
+    );
+    const authGuardIndex = stagingScript.indexOf(
+      '[[ -z "${NODE_AUTH_TOKEN:-}" ]]'
+    );
+    const authUnsetIndex = stagingScript.indexOf("unset NODE_AUTH_TOKEN");
+    const pullIndex = stagingScript.indexOf("git pull --ff-only");
+    const scopedInstallIndex = stagingScript.indexOf(
+      'NODE_AUTH_TOKEN="$package_auth_token" ./bin/6529 install:frozen'
+    );
+    const localTokenUnsetIndex = stagingScript.indexOf(
+      "unset package_auth_token"
+    );
+    const buildIndex = stagingScript.indexOf("./bin/6529 run build");
+    const pm2Index = stagingScript.indexOf("pm2 start bash");
+
+    expect(authGuardIndex).toBeGreaterThanOrEqual(0);
+    expect(authUnsetIndex).toBeGreaterThan(authGuardIndex);
+    expect(authUnsetIndex).toBeLessThan(pullIndex);
+    expect(scopedInstallIndex).toBeGreaterThan(pullIndex);
+    expect(localTokenUnsetIndex).toBeGreaterThan(scopedInstallIndex);
+    expect(localTokenUnsetIndex).toBeLessThan(buildIndex);
+    expect(localTokenUnsetIndex).toBeLessThan(pm2Index);
+    expect(stagingScript).not.toContain("export package_auth_token");
   });
 
   it("requires runtime auth before worktree setup can mutate repository state", () => {

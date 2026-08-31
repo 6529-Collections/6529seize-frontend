@@ -7,6 +7,13 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 cd "$REPO_ROOT"
 
+if [[ -z "${NODE_AUTH_TOKEN:-}" ]]; then
+  echo "NODE_AUTH_TOKEN is required for the private GitHub Package install." >&2
+  exit 1
+fi
+package_auth_token="$NODE_AUTH_TOKEN"
+unset NODE_AUTH_TOKEN
+
 public_review_destinations_source="${PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_FILE:-}"
 unset PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_FILE
 
@@ -37,7 +44,8 @@ fi
 
 # Step 2: Reinstall dependencies
 print_message "Reinstalling dependencies..."
-./bin/6529 install:frozen
+NODE_AUTH_TOKEN="$package_auth_token" ./bin/6529 install:frozen
+unset package_auth_token
 
 # Step 3: Rebuild the project
 print_message "Rebuilding the project..."
