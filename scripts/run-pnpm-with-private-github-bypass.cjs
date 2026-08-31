@@ -29,24 +29,7 @@ const IGNORE_SCRIPTS_ENVIRONMENT_VARIABLE = "npm_config_ignore_scripts";
 const USER_CONFIG_ENVIRONMENT_VARIABLE = "npm_config_userconfig";
 const GLOBAL_CONFIG_ENVIRONMENT_VARIABLE = "npm_config_globalconfig";
 const NPM_GLOBAL_CONFIG_ENVIRONMENT_VARIABLE = "npm_config_npm_globalconfig";
-const TOKEN_FREE_REBUILD_PACKAGES = [
-  "@nestjs/core",
-  "@openapitools/openapi-generator-cli",
-  "@parcel/watcher",
-  "@reown/appkit",
-  "@sentry/cli",
-  "bufferutil",
-  "esbuild",
-  "keccak",
-  "sharp",
-  "unrs-resolver",
-  "utf-8-validate",
-];
-const TOKEN_FREE_REBUILD_ARGUMENTS = [
-  "rebuild",
-  ...TOKEN_FREE_REBUILD_PACKAGES,
-];
-const TOKEN_FREE_ROOT_REBUILD_ARGUMENTS = ["rebuild", "--pending"];
+const TOKEN_FREE_REBUILD_ARGUMENTS = ["rebuild", "--pending"];
 
 function parseNoProxy(value) {
   if (!value) {
@@ -271,29 +254,8 @@ function runPnpm({
     return rebuildStatus;
   }
 
-  const rootRebuildInvocation = pnpmSpawnArguments(
-    TOKEN_FREE_ROOT_REBUILD_ARGUMENTS,
-    platform
-  );
-  const rootRebuildResult = spawn(
-    rootRebuildInvocation.command,
-    rootRebuildInvocation.commandArguments,
-    {
-      cwd: repositoryRoot,
-      env: tokenFreeEnvironment,
-      stdio: "inherit",
-      shell: rootRebuildInvocation.shell,
-    }
-  );
-  if (rootRebuildResult.error) {
-    throw rootRebuildResult.error;
-  }
-
-  const rootRebuildStatus = rootRebuildResult.status ?? 1;
-  if (rootRebuildStatus === 0) {
-    validateRepositoryFiles(repositoryRoot);
-  }
-  return rootRebuildStatus;
+  validateRepositoryFiles(repositoryRoot);
+  return rebuildStatus;
 }
 
 function main() {
@@ -319,8 +281,6 @@ module.exports = {
   GLOBAL_CONFIG_ENVIRONMENT_VARIABLE,
   NPM_GLOBAL_CONFIG_ENVIRONMENT_VARIABLE,
   TOKEN_FREE_REBUILD_ARGUMENTS,
-  TOKEN_FREE_REBUILD_PACKAGES,
-  TOKEN_FREE_ROOT_REBUILD_ARGUMENTS,
   createRoutedEnvironment,
   isLoopbackProxy,
   parseNoProxy,

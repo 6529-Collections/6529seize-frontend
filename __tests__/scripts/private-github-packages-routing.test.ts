@@ -50,8 +50,6 @@ type RoutingModule = {
   NPM_GLOBAL_CONFIG_ENVIRONMENT_VARIABLE: string;
   ROUTED_NO_PROXY: string;
   TOKEN_FREE_REBUILD_ARGUMENTS: string[];
-  TOKEN_FREE_REBUILD_PACKAGES: string[];
-  TOKEN_FREE_ROOT_REBUILD_ARGUMENTS: string[];
   USER_CONFIG_ENVIRONMENT_VARIABLE: string;
   createRoutedEnvironment: (environment: Environment) => Environment;
   isLoopbackProxy: (proxyValue: unknown) => boolean;
@@ -664,21 +662,7 @@ describe("host-specific Socket Firewall routing", () => {
     expect(spawnCalls[1]?.[2].env).not.toHaveProperty(
       routing.IGNORE_SCRIPTS_ENVIRONMENT_VARIABLE
     );
-    expect(spawn).toHaveBeenNthCalledWith(
-      3,
-      "pnpm",
-      routing.TOKEN_FREE_ROOT_REBUILD_ARGUMENTS,
-      expect.objectContaining({
-        env: expect.objectContaining({
-          [routing.IGNORE_PNPMFILE_ENVIRONMENT_VARIABLE]: "true",
-        }),
-      })
-    );
-    expect(spawnCalls[2]?.[2].env).not.toHaveProperty("NODE_AUTH_TOKEN");
-    expect(spawnCalls[2]?.[2].env).not.toHaveProperty(
-      routing.IGNORE_SCRIPTS_ENVIRONMENT_VARIABLE
-    );
-    expect(spawn).toHaveBeenCalledTimes(3);
+    expect(spawn).toHaveBeenCalledTimes(2);
     expect(JSON.stringify(spawn.mock.calls[0]?.slice(0, 2))).not.toContain(
       TEST_TOKEN
     );
@@ -773,20 +757,17 @@ describe("host-specific Socket Firewall routing", () => {
     );
   });
 
-  it("rebuilds exactly the workspace-approved packages without auth", () => {
+  it("rebuilds workspace-approved pending packages exactly once without auth", () => {
     const workspace = parseYaml(
       fs.readFileSync(path.join(REPOSITORY_ROOT, "pnpm-workspace.yaml"), "utf8")
     ) as { allowBuilds?: Record<string, boolean> };
-    const approvedPackages = Object.entries(workspace.allowBuilds ?? {})
-      .filter(([, allowed]) => allowed)
-      .map(([packageName]) => packageName);
 
-    expect(routing.TOKEN_FREE_REBUILD_PACKAGES).toEqual(approvedPackages);
+    expect(Object.keys(workspace.allowBuilds ?? {})).not.toHaveLength(0);
+    expect(Object.values(workspace.allowBuilds ?? {})).toEqual(
+      expect.arrayContaining([true])
+    );
+    expect(Object.values(workspace.allowBuilds ?? {})).not.toContain(false);
     expect(routing.TOKEN_FREE_REBUILD_ARGUMENTS).toEqual([
-      "rebuild",
-      ...approvedPackages,
-    ]);
-    expect(routing.TOKEN_FREE_ROOT_REBUILD_ARGUMENTS).toEqual([
       "rebuild",
       "--pending",
     ]);
