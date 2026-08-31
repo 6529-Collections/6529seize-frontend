@@ -191,14 +191,15 @@ describe("UserPageBrainSidebar", () => {
     expect(within(recentSection).getByText("Recent Wave")).toBeInTheDocument();
   });
 
-  it("shows independent empty states", () => {
+  it("hides an empty created section and keeps the recent empty state", () => {
     render(<UserPageBrainSidebar profile={baseProfile} />);
 
     expect(
-      within(screen.getByRole("region", { name: "Created Waves" })).getByText(
-        "No accessible created waves."
-      )
-    ).toBeInTheDocument();
+      screen.queryByRole("region", { name: "Created Waves" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("No accessible created waves.")
+    ).not.toBeInTheDocument();
     expect(
       within(
         screen.getByRole("region", { name: "Recently Active In" })
