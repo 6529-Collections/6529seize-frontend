@@ -61,9 +61,11 @@ type SecureRunnerModule = {
   runSecurePnpm: (options: {
     args: string[];
     environment: Environment;
+    platform?: NodeJS.Platform;
     repositoryRoot: string;
     spawn: jest.Mock;
   }) => number;
+  quoteWindowsShellArgument: (value: string) => string;
 };
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -264,6 +266,12 @@ describe("private GitHub Packages repository policy", () => {
       ])
     ).toThrow("registry, credential, proxy, and TLS overrides are not allowed");
     expect(() =>
+      policy.validatePnpmArguments(["install", "--no-strict-ssl"])
+    ).toThrow("registry, credential, proxy, and TLS overrides are not allowed");
+    expect(() =>
+      policy.validatePnpmArguments(["install", "--no-proxy"])
+    ).toThrow("registry, credential, proxy, and TLS overrides are not allowed");
+    expect(() =>
       policy.validatePnpmArguments([
         "add",
         `${policy.ALLOWED_REGISTRY_ORIGIN}/download/package.tgz`,
@@ -373,6 +381,19 @@ describe("host-specific Socket Firewall routing", () => {
     expect(routed.npm_config_globalconfig).toBeUndefined();
   });
 
+  it("removes mixed-case pnpm CA and global config overrides", () => {
+    const environment = socketEnvironment(socketCaPath);
+    environment["npm_config_GlobalConfig"] = "/tmp/alternate-globalconfig";
+    environment["NpM_CoNfIg_CaFiLe"] = "/tmp/alternate-ca";
+    environment["npm_config_store_dir"] = "/tmp/pnpm-store";
+
+    const routed = routing.createRoutedEnvironment(environment);
+
+    expect(routed["npm_config_GlobalConfig"]).toBeUndefined();
+    expect(routed["NpM_CoNfIg_CaFiLe"]).toBeUndefined();
+    expect(routed["npm_config_store_dir"]).toBe("/tmp/pnpm-store");
+  });
+
   it("rejects a non-loopback Socket proxy or a pre-existing broad bypass", () => {
     const nonLoopback = socketEnvironment(socketCaPath);
     nonLoopback.HTTPS_PROXY = "http://proxy.example.com:8080";
@@ -464,6 +485,38 @@ describe("host-specific Socket Firewall routing", () => {
     expect(JSON.stringify(spawn.mock.calls[0]?.slice(0, 2))).not.toContain(
       TEST_TOKEN
     );
+  });
+
+  it("quotes every Windows shell path and argument", () => {
+    const spawn = jest.fn(() => ({ status: 0 }));
+    const environment = {
+      PATH: process.env["PATH"],
+      NODE_AUTH_TOKEN: TEST_TOKEN,
+    };
+
+    expect(
+      secureRunner.runSecurePnpm({
+        args: ["install", "--frozen-lockfile"],
+        environment,
+        platform: "win32",
+        repositoryRoot: REPOSITORY_ROOT,
+        spawn,
+      })
+    ).toBe(0);
+
+    expect(spawn).toHaveBeenCalledWith(
+      '"sfw"',
+      [
+        process.execPath,
+        secureRunner.ROUTING_HELPER_PATH,
+        "install",
+        "--frozen-lockfile",
+      ].map(secureRunner.quoteWindowsShellArgument),
+      expect.objectContaining({ shell: true })
+    );
+    expect(() =>
+      secureRunner.quoteWindowsShellArgument("unsafe%PATH%")
+    ).toThrow("shell expansion characters");
   });
 });
 

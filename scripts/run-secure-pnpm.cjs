@@ -31,11 +31,26 @@ function resolveSfwCommand(environment = process.env) {
   return configuredBinary;
 }
 
+function quoteWindowsShellArgument(value) {
+  if (/[\r\n"%!^]/.test(value)) {
+    throw new Error(
+      "Windows package command paths and arguments cannot contain shell expansion characters."
+    );
+  }
+
+  const escapedTrailingBackslashes = value.replace(
+    /\\+$/,
+    (backslashes) => `${backslashes}${backslashes}`
+  );
+  return `"${escapedTrailingBackslashes}"`;
+}
+
 function runSecurePnpm({
   args = process.argv.slice(2),
   environment = process.env,
   repositoryRoot = REPOSITORY_ROOT,
   spawn = spawnSync,
+  platform = process.platform,
 }) {
   if (args.length === 0) {
     throw new Error("Usage: node scripts/run-secure-pnpm.cjs <pnpm-args...>");
@@ -49,13 +64,20 @@ function runSecurePnpm({
   });
 
   const sfwCommand = resolveSfwCommand(environment);
+  const useWindowsShell = platform === "win32";
+  const command = useWindowsShell
+    ? quoteWindowsShellArgument(sfwCommand)
+    : sfwCommand;
+  const commandArguments = [process.execPath, ROUTING_HELPER_PATH, ...args];
   const result = spawn(
-    sfwCommand,
-    [process.execPath, ROUTING_HELPER_PATH, ...args],
+    command,
+    useWindowsShell
+      ? commandArguments.map(quoteWindowsShellArgument)
+      : commandArguments,
     {
       cwd: repositoryRoot,
       stdio: "inherit",
-      shell: process.platform === "win32",
+      shell: useWindowsShell,
       env: {
         ...environment,
         SEIZE_SECURE_INSTALL: "1",
@@ -91,6 +113,7 @@ if (require.main === module) {
 module.exports = {
   REPOSITORY_ROOT,
   ROUTING_HELPER_PATH,
+  quoteWindowsShellArgument,
   resolveSfwCommand,
   runSecurePnpm,
 };

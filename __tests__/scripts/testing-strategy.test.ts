@@ -971,6 +971,25 @@ describe("testing strategy CI security checks", () => {
     expect(result).toMatchObject({ ok: true, findings: [] });
   });
 
+  it.each(["${NODE_AUTH_TOKEN}extra", '"${NODE_AUTH_TOKEN}"'])(
+    "rejects the near-miss npm auth placeholder %s",
+    (tokenValue) => {
+      fs.writeFileSync(
+        path.join(tempDir, ".npmrc"),
+        `//npm.pkg.github.com/:_authToken=${tokenValue}\n`
+      );
+
+      const result = scanFilesForSecrets([".npmrc"], tempDir);
+
+      expect(result.ok).toBe(false);
+      expect(result.findings).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ pattern: "npm-auth-token" }),
+        ])
+      );
+    }
+  );
+
   it("reports raw JWT-shaped tokens in JSON payload files", () => {
     const fakeJwt = [
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9",

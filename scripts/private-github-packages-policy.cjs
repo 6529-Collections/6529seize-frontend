@@ -305,6 +305,20 @@ function normalizedOptionName(argument) {
   return optionName(argument).replace(/[^a-z0-9]/g, "");
 }
 
+function forbiddenOptionName(argument) {
+  const normalizedName = normalizedOptionName(argument);
+  if (FORBIDDEN_PNPM_OPTION_NAMES.has(normalizedName)) {
+    return normalizedName;
+  }
+
+  const nonNegatedName = normalizedName.startsWith("no")
+    ? normalizedName.slice(2)
+    : normalizedName;
+  return FORBIDDEN_PNPM_OPTION_NAMES.has(nonNegatedName)
+    ? nonNegatedName
+    : null;
+}
+
 function validatePnpmArguments(args) {
   for (const argument of args) {
     if (argumentUrlHostname(argument) === ALLOWED_REGISTRY_HOST) {
@@ -313,7 +327,7 @@ function validatePnpmArguments(args) {
       );
     }
 
-    if (FORBIDDEN_PNPM_OPTION_NAMES.has(normalizedOptionName(argument))) {
+    if (forbiddenOptionName(argument) !== null) {
       throw policyError(
         `registry, credential, proxy, and TLS overrides are not allowed: ${optionName(argument)}`
       );

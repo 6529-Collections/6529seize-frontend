@@ -16,6 +16,11 @@ const ROUTED_NO_PROXY_ENTRIES = [
   ALLOWED_REGISTRY_HOST,
 ];
 const ROUTED_NO_PROXY = ROUTED_NO_PROXY_ENTRIES.join(",");
+const REMOVED_ROUTED_CONFIG_NAMES = new Set([
+  "cafile",
+  "globalconfig",
+  "npmglobalconfig",
+]);
 
 function parseNoProxy(value) {
   if (!value) {
@@ -103,12 +108,19 @@ function createRoutedEnvironment(environment) {
 
   delete routedEnvironment.SSL_CERT_FILE;
   delete routedEnvironment.SSL_CERT_DIR;
-  delete routedEnvironment.npm_config_cafile;
-  delete routedEnvironment.NPM_CONFIG_CAFILE;
-  delete routedEnvironment.npm_config_npm_globalconfig;
-  delete routedEnvironment.NPM_CONFIG_NPM_GLOBALCONFIG;
-  delete routedEnvironment.npm_config_globalconfig;
-  delete routedEnvironment.NPM_CONFIG_GLOBALCONFIG;
+  for (const key of Object.keys(routedEnvironment)) {
+    const normalizedKey = key.toLowerCase();
+    if (!normalizedKey.startsWith("npm_config_")) {
+      continue;
+    }
+
+    const normalizedConfigName = normalizedKey
+      .replace(/^npm_config_/, "")
+      .replace(/[^a-z0-9]/g, "");
+    if (REMOVED_ROUTED_CONFIG_NAMES.has(normalizedConfigName)) {
+      delete routedEnvironment[key];
+    }
+  }
 
   return routedEnvironment;
 }
