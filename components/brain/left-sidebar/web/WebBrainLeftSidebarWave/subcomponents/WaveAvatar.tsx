@@ -104,18 +104,19 @@ export const WaveAvatar = ({
   const dropIconClasses = isLarge
     ? "tw-size-3 tw-flex-shrink-0 tw-text-[#E8D48A]"
     : DROP_ICON_CLASSES;
+  let avatarStateClasses =
+    "tw-opacity-80 tw-ring-1 tw-ring-white/20 desktop-hover:group-hover:tw-opacity-100";
+  if (isAnnouncement) {
+    avatarStateClasses = "tw-opacity-100";
+  } else if (isActive) {
+    avatarStateClasses = activeRingClasses;
+  }
 
   return (
     <div
       className={`tw-relative ${avatarSizeClasses} ${
         isAnnouncement ? "tw-rounded-lg" : "tw-rounded-full"
-      } tw-transition tw-duration-300 desktop-hover:group-hover:tw-brightness-110 ${
-        isAnnouncement
-          ? "tw-opacity-100"
-          : isActive
-            ? activeRingClasses
-            : "tw-opacity-80 tw-ring-1 tw-ring-white/20 desktop-hover:group-hover:tw-opacity-100"
-      }`}
+      } tw-transition tw-duration-300 desktop-hover:group-hover:tw-brightness-110 ${avatarStateClasses}`}
     >
       {isAnnouncement ? (
         <AnnouncementWaveIcon />
