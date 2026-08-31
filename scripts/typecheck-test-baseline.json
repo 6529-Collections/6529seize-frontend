@@ -259,7 +259,6 @@
     "__tests__/components/groups/page/create/config/rep/PositiveOnlyToggle.test.tsx": 1,
     "__tests__/components/groups/page/list/card/GroupCardChat.test.tsx": 3,
     "__tests__/components/groups/page/list/card/GroupCardConfigs.test.tsx": 1,
-    "__tests__/components/groups/page/list/card/GroupCardHeader.test.tsx": 1,
     "__tests__/components/groups/page/list/card/GroupCardView.test.tsx": 3,
     "__tests__/components/groups/page/list/card/utils/GroupCardActionCreditDirection.test.tsx": 2,
     "__tests__/components/groups/page/list/card/utils/GroupCardActionStats.test.tsx": 1,
