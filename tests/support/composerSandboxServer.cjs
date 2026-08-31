@@ -1431,7 +1431,7 @@ function isExpectedCreateRuleGroupBody(body) {
     typeof body.name !== "string" ||
     body.name.length === 0 ||
     body.name.length > 250 ||
-    !/(?:Who can view|Who can drop|Who can vote|Who can rate|Who can chat|Admin)$/.test(
+    !/(?:Visibility|Who can view|Who can drop|Who can vote|Who can rate|Who can chat|Admin|Admins)$/.test(
       body.name
     ) ||
     (body.is_private !== undefined && body.is_private !== false) ||
