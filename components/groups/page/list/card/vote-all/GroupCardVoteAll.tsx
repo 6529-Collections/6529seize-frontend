@@ -24,6 +24,8 @@ import GroupCardVoteAllInputs from "./GroupCardVoteAllInputs";
 import { ApiCommunityMembersSortOption } from "@/generated/models/ApiCommunityMembersSortOption";
 import type { ApiBulkRateRequest } from "@/generated/models/ApiBulkRateRequest";
 import type { ApiBulkRateResponse } from "@/generated/models/ApiBulkRateResponse";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
 export default function GroupCardVoteAll({
   matter,
@@ -36,9 +38,10 @@ export default function GroupCardVoteAll({
   readonly onCancel: () => void;
   readonly viewerIdentityKey: string | null;
 }) {
+  const locale = useBrowserLocale();
   const SUCCESS_LABEL: Record<GroupCardRateMatter, string> = {
-    [ApiRateMatter.Cic]: "NIC distributed.",
-    [ApiRateMatter.Rep]: "Rep distributed.",
+    [ApiRateMatter.Cic]: t(locale, "network.groupInspection.bulkNicSuccess"),
+    [ApiRateMatter.Rep]: t(locale, "network.groupInspection.bulkRepSuccess"),
   };
 
   // Ref to track if the component is mounted

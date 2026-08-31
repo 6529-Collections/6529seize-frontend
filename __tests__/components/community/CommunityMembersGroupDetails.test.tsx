@@ -4,7 +4,7 @@ import { ApiRateMatter } from "@/generated/models/ApiRateMatter";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { commonApiFetch } from "@/services/api/common-api";
 import { useQuery } from "@tanstack/react-query";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 
 jest.mock("@tanstack/react-query", () => ({
   useQuery: jest.fn(),
@@ -260,7 +260,7 @@ describe("CommunityMembersGroupDetails", () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it("opens one bulk rating form at a time for the active criteria", () => {
+  it("opens one bulk rating form at a time for the active criteria", async () => {
     useQueryMock.mockReturnValue({
       data: createInspectableGroup(),
       isLoading: false,
@@ -281,6 +281,10 @@ describe("CommunityMembersGroupDetails", () => {
       })
     );
 
+    const bulkForm = screen.getByRole("region", {
+      name: "REP everyone matching criteria",
+    });
+    await waitFor(() => expect(bulkForm).toHaveFocus());
     expect(screen.getByTestId("bulk-rate-form")).toHaveAttribute(
       "data-matter",
       ApiRateMatter.Rep
@@ -296,6 +300,10 @@ describe("CommunityMembersGroupDetails", () => {
     ).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Cancel bulk rating" }));
+    const repButton = screen.getByRole("button", {
+      name: "REP everyone matching criteria",
+    });
+    await waitFor(() => expect(repButton).toHaveFocus());
     expect(
       screen.getByRole("button", {
         name: "NIC everyone matching criteria",

@@ -15,7 +15,7 @@ import { t } from "@/i18n/messages";
 import { commonApiFetch } from "@/services/api/common-api";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 type InspectableGroup = ApiGroupFull & Pick<Partial<ApiGroup>, "is_hidden">;
 
@@ -36,6 +36,21 @@ export default function CommunityMembersGroupDetails({
   }>({ groupId, matter: null });
   const activeRateMatter =
     activeRateSelection.groupId === groupId ? activeRateSelection.matter : null;
+  const bulkFormRef = useRef<HTMLDivElement>(null);
+  const repButtonRef = useRef<HTMLButtonElement>(null);
+  const nicButtonRef = useRef<HTMLButtonElement>(null);
+
+  const openBulkRateForm = (matter: GroupCardRateMatter) => {
+    setActiveRateSelection({ groupId, matter });
+    requestAnimationFrame(() => bulkFormRef.current?.focus());
+  };
+
+  const closeBulkRateForm = () => {
+    const triggerRef =
+      activeRateMatter === ApiRateMatter.Rep ? repButtonRef : nicButtonRef;
+    setActiveRateSelection({ groupId, matter: null });
+    requestAnimationFrame(() => triggerRef.current?.focus());
+  };
 
   const {
     data: group,
@@ -139,30 +154,26 @@ export default function CommunityMembersGroupDetails({
             {groupName}
           </h2>
           {showBulkRateActions && activeRateMatter === null ? (
-            <div className="tw-mt-3 tw-flex tw-flex-col tw-gap-2 sm:tw-flex-row sm:tw-flex-wrap">
+            <div
+              role="group"
+              aria-label={t(locale, "network.groupInspection.bulkActionsLabel")}
+              className="tw-mt-3 tw-flex tw-flex-col tw-gap-2 sm:tw-flex-row sm:tw-flex-wrap"
+            >
               <Button
+                ref={repButtonRef}
                 variant="secondary"
                 size="sm"
                 className="!tw-h-auto tw-min-h-9 tw-w-full !tw-whitespace-normal tw-py-2 tw-text-center sm:tw-w-auto"
-                onClick={() =>
-                  setActiveRateSelection({
-                    groupId,
-                    matter: ApiRateMatter.Rep,
-                  })
-                }
+                onClick={() => openBulkRateForm(ApiRateMatter.Rep)}
               >
                 {t(locale, "network.groupInspection.bulkRep")}
               </Button>
               <Button
+                ref={nicButtonRef}
                 variant="secondary"
                 size="sm"
                 className="!tw-h-auto tw-min-h-9 tw-w-full !tw-whitespace-normal tw-py-2 tw-text-center sm:tw-w-auto"
-                onClick={() =>
-                  setActiveRateSelection({
-                    groupId,
-                    matter: ApiRateMatter.Cic,
-                  })
-                }
+                onClick={() => openBulkRateForm(ApiRateMatter.Cic)}
               >
                 {t(locale, "network.groupInspection.bulkNic")}
               </Button>
@@ -172,12 +183,23 @@ export default function CommunityMembersGroupDetails({
         {closeButton}
       </div>
       {showBulkRateActions && activeRateMatter !== null ? (
-        <div className="tw-mt-3 tw-overflow-hidden tw-rounded-lg tw-bg-black/20 tw-ring-1 tw-ring-inset tw-ring-white/5">
+        <div
+          ref={bulkFormRef}
+          role="region"
+          aria-label={t(
+            locale,
+            activeRateMatter === ApiRateMatter.Rep
+              ? "network.groupInspection.bulkRep"
+              : "network.groupInspection.bulkNic"
+          )}
+          tabIndex={-1}
+          className="tw-mt-3 tw-overflow-hidden tw-rounded-lg tw-bg-black/20 tw-ring-1 tw-ring-inset tw-ring-white/5 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+        >
           <GroupCardVoteAll
             group={group}
             matter={activeRateMatter}
             viewerIdentityKey={viewerIdentityKey}
-            onCancel={() => setActiveRateSelection({ groupId, matter: null })}
+            onCancel={closeBulkRateForm}
           />
         </div>
       ) : null}

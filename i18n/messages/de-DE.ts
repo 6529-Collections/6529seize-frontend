@@ -15,6 +15,11 @@ export const DE_DE_MESSAGES = {
     "Allen Profilen, die den Kriterien entsprechen, REP geben",
   "network.groupInspection.bulkNic":
     "Allen Profilen, die den Kriterien entsprechen, NIC geben",
+  "network.groupInspection.bulkActionsLabel": "Massenbewertungsaktionen",
+  "network.groupInspection.bulkRepSuccess": "REP wurde verteilt.",
+  "network.groupInspection.bulkNicSuccess": "NIC wurde verteilt.",
+  "network.groupInspection.source":
+    "Quelle: Filter und optionale manuelle Liste",
   "user.brain.sidebar.createdHeading": "Erstellte Waves",
   "user.brain.sidebar.createdMobileHeading": "Erstellt",
   "user.brain.sidebar.recentlyActiveHeading": "Kürzlich aktiv in",
