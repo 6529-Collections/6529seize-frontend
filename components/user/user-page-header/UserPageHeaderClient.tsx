@@ -15,7 +15,7 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { amIUser } from "@/helpers/Helpers";
 import { navigateToDirectMessage } from "@/helpers/navigation.helpers";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
-import { STATEMENT_GROUP } from "@/helpers/Types";
+import { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
 import { createDirectMessageWave } from "@/helpers/waves/waves.helpers";
 import { getBannerColorValue } from "@/helpers/profile-banner.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
@@ -56,6 +56,7 @@ type Props = {
 };
 
 const PROFILE_PREFERENCES_BUTTON_KEY = "profilePreferences.button";
+const ABOUT_STATEMENT_TYPE: CicStatement["statement_type"] = STATEMENT_TYPE.BIO;
 
 type WebsiteAction = Readonly<{
   href: string;
@@ -68,7 +69,7 @@ function getAboutStatement(
   return (
     statements?.find(
       (statement) =>
-        statement.statement_type === "BIO" &&
+        statement.statement_type === ABOUT_STATEMENT_TYPE &&
         statement.statement_group === STATEMENT_GROUP.GENERAL
     ) ?? null
   );

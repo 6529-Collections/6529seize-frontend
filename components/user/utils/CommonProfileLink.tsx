@@ -33,6 +33,7 @@ export default function CommonProfileLink({
   return (
     <Link
       href={url}
+      aria-label={handleOrWallet}
       className={`${
         isCurrentUser ? "tw-pointer-events-none tw-no-underline" : ""
       } tw-p-0 tw-leading-4 tw-no-underline hover:tw-no-underline`}

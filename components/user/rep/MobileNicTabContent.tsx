@@ -3,7 +3,9 @@ import type { ActivityLogParams } from "@/components/profile-activity/ProfileAct
 import Button from "@/components/utils/button/Button";
 import type { ApiCicOverview } from "@/generated/models/ApiCicOverview";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import { formatNumberWithCommas } from "@/helpers/Helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { formatInteger, formatNumber } from "@/i18n/format";
+import { t, tRich } from "@/i18n/messages";
 import { RateMatter } from "@/types/enums";
 import { useMemo } from "react";
 import { FingerprintIcon } from "../identity/header/RateNicCta";
@@ -26,8 +28,16 @@ export default function MobileNicTabContent({
   readonly canEditNic: boolean;
   readonly onRateNic: () => void;
 }) {
+  const locale = useBrowserLocale();
   const cic = cicOverview?.total_cic ?? profile.cic;
   const contributorCount = cicOverview?.contributor_count ?? 0;
+  const contributorCountLabel = t(
+    locale,
+    new Intl.PluralRules(locale).select(contributorCount) === "one"
+      ? "user.profile.rep.contributors.raters.one"
+      : "user.profile.rep.contributors.raters.other",
+    { count: formatInteger(locale, contributorCount) }
+  );
   const cicAvatarItems = useMemo(
     () =>
       buildRepAvatarItems(cicOverview?.contributors.data ?? [], 3, {
@@ -60,8 +70,7 @@ export default function MobileNicTabContent({
               </span>
             )}
             <span className="tw-whitespace-nowrap tw-text-xs tw-font-normal tw-text-iron-400">
-              {formatNumberWithCommas(contributorCount)}{" "}
-              {contributorCount === 1 ? "rater" : "raters"}
+              {contributorCountLabel}
             </span>
           </span>
 
@@ -78,17 +87,24 @@ export default function MobileNicTabContent({
                   cicOverview.authenticated_user_contribution !== 0 ? (
                     <span className="tw-flex tw-items-center tw-gap-2 tw-text-xs tw-font-medium tw-text-iron-500">
                       <FingerprintIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-emerald-400" />
-                      Your Rating:{" "}
-                      <span className="tw-font-semibold tw-text-iron-300">
-                        {cicOverview.authenticated_user_contribution > 0 && "+"}
-                        {formatNumberWithCommas(
-                          cicOverview.authenticated_user_contribution
-                        )}
-                      </span>
+                      {tRich(locale, "user.profile.rep.nic.yourRating", {
+                        value: (
+                          <span className="tw-font-semibold tw-text-iron-300">
+                            {formatNumber(
+                              locale,
+                              cicOverview.authenticated_user_contribution,
+                              {
+                                maximumFractionDigits: 0,
+                                signDisplay: "exceptZero",
+                              }
+                            )}
+                          </span>
+                        ),
+                      })}
                     </span>
                   ) : null}
                   <Button variant="success" size="sm" onClick={onRateNic}>
-                    Rate NIC
+                    {t(locale, "user.profile.rep.nic.rateAction")}
                   </Button>
                 </div>
               </UserPageRateWrapper>

@@ -44,4 +44,36 @@ describe("CommonProfileLink", () => {
     expect(getProfileTargetRoute).toHaveBeenCalled();
     expect(screen.getByRole("link")).toHaveAttribute("href", "/target");
   });
+
+  it("abbreviates a wallet visually while preserving its full accessible name", () => {
+    const wallet = "0x1234567890abcdef1234567890abcdef12345678";
+
+    render(
+      <CommonProfileLink
+        handleOrWallet={wallet}
+        isCurrentUser={false}
+        tabTarget={USER_PAGE_TAB_IDS.COLLECTED}
+      />
+    );
+
+    expect(screen.getByText("0x1234...5678")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: wallet })).toBeInTheDocument();
+  });
+
+  it("preserves the generated-profile prefix around an abbreviated wallet", () => {
+    const generatedHandle = "id-0x1234567890abcdef1234567890abcdef12345678";
+
+    render(
+      <CommonProfileLink
+        handleOrWallet={generatedHandle}
+        isCurrentUser={false}
+        tabTarget={USER_PAGE_TAB_IDS.COLLECTED}
+      />
+    );
+
+    expect(screen.getByText("id-0x1234...5678")).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: generatedHandle })
+    ).toBeInTheDocument();
+  });
 });
