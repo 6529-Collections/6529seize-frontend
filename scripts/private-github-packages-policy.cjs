@@ -18,6 +18,48 @@ const AUTH_PLACEHOLDER = `\${${AUTH_ENVIRONMENT_VARIABLE}}`;
 const SCOPE_REGISTRY_KEY = `${ALLOWED_SCOPE}:registry`;
 const AUTH_KEY = `//${ALLOWED_REGISTRY_HOST}/:_authToken`;
 const ALLOWED_PNPM_COMMANDS = new Set(["add", "audit", "install", "update"]);
+const FORBIDDEN_NPMRC_CONFIG_NAMES = new Set([
+  "alwaysauth",
+  "ca",
+  "cafile",
+  "cert",
+  "globalconfig",
+  "httpsproxy",
+  "key",
+  "nodeoptions",
+  "noproxy",
+  "npmglobalconfig",
+  "proxy",
+  "registry",
+  "strictssl",
+  "userconfig",
+]);
+const FORBIDDEN_PROJECT_LOCATION_OPTION_NAMES = new Set([
+  "c",
+  "configdir",
+  "cwd",
+  "dir",
+  "f",
+  "filter",
+  "filterprod",
+  "g",
+  "global",
+  "globalbindir",
+  "globaldir",
+  "ignoreworkspace",
+  "location",
+  "lockfiledir",
+  "lockfiledirectory",
+  "modulesdir",
+  "prefix",
+  "r",
+  "recursive",
+  "virtualstoredir",
+  "w",
+  "workspace",
+  "workspacedir",
+  "workspaceroot",
+]);
 
 const FORBIDDEN_PNPM_OPTION_NAMES = new Set([
   "registry",
@@ -153,12 +195,20 @@ function validateNpmrc(npmrcText) {
 
   for (const [key, value] of entries) {
     const normalizedConfigName = key.toLowerCase().replace(/[^a-z0-9]/g, "");
+    const unprefixedConfigName = normalizedConfigName.startsWith("config")
+      ? normalizedConfigName.slice("config".length)
+      : normalizedConfigName;
     if (
       normalizedConfigName.includes("pnpmfile") ||
       normalizedConfigName.includes("configdependencies")
     ) {
       throw policyError(
         "pnpm hooks and config dependencies are not allowed during authenticated package commands"
+      );
+    }
+    if (FORBIDDEN_PROJECT_LOCATION_OPTION_NAMES.has(unprefixedConfigName)) {
+      throw policyError(
+        `project, workspace, global, and lockfile-root settings are not allowed in .npmrc: ${key}`
       );
     }
 
@@ -178,6 +228,21 @@ function validateNpmrc(npmrcText) {
     if (value.includes(AUTH_PLACEHOLDER) && key !== AUTH_KEY) {
       throw policyError(
         `${AUTH_ENVIRONMENT_VARIABLE} may only authenticate ${ALLOWED_REGISTRY_HOST}`
+      );
+    }
+
+    const isApprovedSecurityEntry =
+      (key === SCOPE_REGISTRY_KEY && value === ALLOWED_REGISTRY_ORIGIN) ||
+      (key === AUTH_KEY && value === AUTH_PLACEHOLDER);
+    if (
+      !isApprovedSecurityEntry &&
+      (key.startsWith("//") ||
+        key.toLowerCase().endsWith(":registry") ||
+        /(auth|token|username|password)/.test(normalizedConfigName) ||
+        FORBIDDEN_NPMRC_CONFIG_NAMES.has(unprefixedConfigName))
+    ) {
+      throw policyError(
+        `unapproved registry, credential, proxy, or TLS setting in .npmrc: ${key}`
       );
     }
   }
@@ -609,6 +674,29 @@ function forbiddenOptionName(argument) {
     : null;
 }
 
+function forbiddenProjectLocationOptionName(argument) {
+  if (!argument.startsWith("-")) {
+    return null;
+  }
+
+  const rawOptionName = argument.split("=", 1)[0];
+  if (rawOptionName.startsWith("-C") || rawOptionName.startsWith("-F")) {
+    return rawOptionName;
+  }
+
+  const normalizedName = normalizedOptionName(argument);
+  if (FORBIDDEN_PROJECT_LOCATION_OPTION_NAMES.has(normalizedName)) {
+    return normalizedName;
+  }
+
+  const nonNegatedName = normalizedName.startsWith("no")
+    ? normalizedName.slice(2)
+    : normalizedName;
+  return FORBIDDEN_PROJECT_LOCATION_OPTION_NAMES.has(nonNegatedName)
+    ? nonNegatedName
+    : null;
+}
+
 function validatePnpmArguments(args) {
   if (!ALLOWED_PNPM_COMMANDS.has(args[0])) {
     throw policyError(
@@ -620,6 +708,12 @@ function validatePnpmArguments(args) {
     if (argumentUrlHostname(argument) === ALLOWED_REGISTRY_HOST) {
       throw policyError(
         `${ALLOWED_REGISTRY_HOST} URLs cannot be supplied on the command line`
+      );
+    }
+
+    if (forbiddenProjectLocationOptionName(argument) !== null) {
+      throw policyError(
+        `project, workspace, global, and lockfile-root overrides are not allowed: ${optionName(argument)}`
       );
     }
 
@@ -699,6 +793,14 @@ function validatePnpmConfigEnvironment(environment) {
     const normalizedConfigName = normalizedKey
       .replace(/^npm_config_/, "")
       .replace(/[^a-z0-9]/g, "");
+    if (
+      normalizedKey.startsWith("npm_config_") &&
+      FORBIDDEN_PROJECT_LOCATION_OPTION_NAMES.has(normalizedConfigName)
+    ) {
+      throw policyError(
+        `pnpm project, workspace, global, or lockfile-root environment is not allowed: ${key}`
+      );
+    }
     if (
       normalizedKey.startsWith("npm_config_") &&
       ["ignorescripts", "ignorepnpmfile"].includes(normalizedConfigName)

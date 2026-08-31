@@ -191,6 +191,7 @@ describe("private GitHub Packages repository policy", () => {
     expect(() =>
       policy.validatePnpmArguments(["add", "-D", policy.ALLOWED_PACKAGE_SPEC])
     ).not.toThrow();
+    expect(() => policy.validatePnpmArguments(["add", "f"])).not.toThrow();
   });
 
   it("parses the effective release-age exception instead of YAML comments", () => {
@@ -250,6 +251,26 @@ describe("private GitHub Packages repository policy", () => {
         `${validNpmrc()}global-pnpmfile=/tmp/untrusted-pnpmfile.cjs\n`
       )
     ).toThrow("pnpm hooks and config dependencies are not allowed");
+  });
+
+  it("rejects unapproved registry, credential, proxy, and TLS settings in .npmrc", () => {
+    for (const setting of [
+      "strict-ssl=false",
+      "cafile=/tmp/untrusted-ca.pem",
+      "proxy=http://proxy.example.invalid",
+      "@another-scope:registry=https://registry.npmjs.org",
+      "//registry.npmjs.org/:_authToken=unapproved",
+    ]) {
+      expect(() => policy.validateNpmrc(`${validNpmrc()}${setting}\n`)).toThrow(
+        "unapproved registry, credential, proxy, or TLS setting"
+      );
+    }
+  });
+
+  it("rejects project relocation settings in .npmrc", () => {
+    expect(() =>
+      policy.validateNpmrc(`${validNpmrc()}dir=/tmp/other-project\n`)
+    ).toThrow("settings are not allowed in .npmrc");
   });
 
   it("rejects another private package or a version change", () => {
@@ -356,6 +377,17 @@ describe("private GitHub Packages repository policy", () => {
     expect(() =>
       policy.validatePnpmArguments(["install", "--ignore-pnpmfile=false"])
     ).toThrow("registry, credential, proxy, and TLS overrides are not allowed");
+    for (const args of [
+      ["update", "--dir", "/tmp/other-project"],
+      ["add", "-C/tmp/other-project", policy.ALLOWED_PACKAGE_SPEC],
+      ["update", "--global"],
+      ["install", "--lockfile-dir=/tmp/other-project"],
+      ["update", "--filter", "other-workspace-package"],
+    ]) {
+      expect(() => policy.validatePnpmArguments(args)).toThrow(
+        "project, workspace, global, and lockfile-root overrides are not allowed"
+      );
+    }
     expect(() =>
       policy.validatePnpmArguments([
         "add",
@@ -421,6 +453,11 @@ describe("private GitHub Packages repository policy", () => {
         npm_config_pnpmfile: "/tmp/untrusted-pnpmfile.cjs",
       })
     ).toThrow("pnpm hook or config-dependency environment is not allowed");
+    expect(() =>
+      policy.validatePnpmConfigEnvironment({
+        npm_config_dir: "/tmp/other-project",
+      })
+    ).toThrow("pnpm project, workspace, global, or lockfile-root environment");
     expect(() =>
       policy.validatePnpmConfigEnvironment({
         npm_config__auth_token: "another-token",
