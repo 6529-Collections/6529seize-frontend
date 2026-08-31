@@ -368,13 +368,30 @@ function stripYamlQuotes(value) {
     : trimmed;
 }
 
-function semanticYamlLine(rawLine, filename = "pnpm-workspace.yaml") {
+function semanticYamlLine(
+  rawLine,
+  filename = "pnpm-workspace.yaml",
+  rejectYamlReferences = false
+) {
   let semanticLine = "";
 
   for (let index = 0; index < rawLine.length; index += 1) {
     const character = rawLine[index];
     if (character === "#") {
       break;
+    }
+    const previousCharacter = rawLine[index - 1];
+    const startsYamlToken = index === 0 || /[\s,[{:-]/.test(previousCharacter);
+    if (
+      rejectYamlReferences &&
+      startsYamlToken &&
+      ((["&", "*"].includes(character) &&
+        /[^\s,[\]{}]/.test(rawLine[index + 1] ?? "")) ||
+        rawLine.startsWith("<<", index))
+    ) {
+      throw policyError(
+        `${filename} cannot use YAML anchors, aliases, or merge keys`
+      );
     }
     if (character === "'") {
       let closed = false;
@@ -500,7 +517,7 @@ function effectiveLockfileLines(lockfileText) {
     if (line.trim() === "" || line.trimStart().startsWith("#")) {
       continue;
     }
-    lines.push(semanticYamlLine(line, "pnpm-lock.yaml"));
+    lines.push(semanticYamlLine(line, "pnpm-lock.yaml", true));
   }
   return lines;
 }
@@ -769,7 +786,7 @@ function validateWorkspace(workspaceText) {
     if (trimmed === "" || trimmed.startsWith("#")) {
       continue;
     }
-    const semanticLine = semanticYamlLine(line);
+    const semanticLine = semanticYamlLine(line, "pnpm-workspace.yaml", true);
     effectiveLines.push(semanticLine);
 
     const topLevelKey = /^([^\s#].*?):(?:\s|$)/.exec(semanticLine)?.[1];
