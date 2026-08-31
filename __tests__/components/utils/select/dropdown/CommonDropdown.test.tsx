@@ -147,7 +147,7 @@ describe("CommonDropdown", () => {
       expect(screen.getByText("Item 1")).toBeInTheDocument();
     });
 
-    it("should render toolbar variant as a compact framed trigger", () => {
+    it("should render toolbar variant as a framed trigger", () => {
       render(
         <CommonDropdown {...defaultProps} variant="toolbar" showFilterLabel />
       );
@@ -156,12 +156,13 @@ describe("CommonDropdown", () => {
         name: "Test Filter: Item 1",
       });
       expect(button).toHaveClass(
-        "tw-inline-flex",
-        "tw-h-9",
-        "tw-border-white/10",
-        "tw-bg-iron-950"
+        "tw-w-full",
+        "tw-py-3",
+        "tw-rounded-lg",
+        "tw-bg-iron-950",
+        "tw-ring-inset",
+        "tw-ring-iron-800"
       );
-      expect(button).not.toHaveClass("tw-w-full");
       expect(screen.getByText("Test Filter:")).toHaveClass(
         "tw-font-medium",
         "tw-text-iron-500"

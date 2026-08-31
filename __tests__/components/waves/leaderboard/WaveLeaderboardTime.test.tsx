@@ -55,7 +55,11 @@ describe("WaveLeaderboardTime", () => {
     render(<WaveLeaderboardTime wave={{} as any} />);
     const header = screen.getByTestId("header");
     expect(header).toBeInTheDocument();
-    expect(header.parentElement).toHaveClass("tw-border-white/10");
+    expect(header.parentElement).toHaveClass(
+      "tw-box-border",
+      "tw-h-10",
+      "tw-border-white/[0.08]"
+    );
     expect(screen.queryByTestId("drop")).toBeNull();
   });
 
