@@ -69,7 +69,7 @@ export const TraitWrapper: React.FC<TraitWrapperProps> = ({
       <div className="tw-relative">
         <label
           htmlFor={fieldId}
-          className={`tw-absolute -tw-top-2 tw-left-3 tw-z-10 tw-rounded-sm tw-bg-iron-900 tw-px-1 tw-font-medium tw-transition-all ${hasLabelRightAdornment ? "tw-flex tw-items-center tw-gap-1" : ""} ${size === "sm" ? "tw-text-[11px]" : "tw-text-xs"} ${labelClassName}`}
+          className={`tw-absolute -tw-top-2 tw-left-3 tw-z-10 tw-whitespace-nowrap tw-rounded-sm tw-bg-iron-900 tw-px-1 tw-font-medium tw-transition-all ${hasLabelRightAdornment ? "tw-flex tw-items-center tw-gap-1" : ""} ${size === "sm" ? "tw-text-[11px]" : "tw-text-xs"} ${labelClassName}`}
         >
           <span className="tw-inline-flex tw-items-center tw-gap-0.5">
             <span>{label}</span>
@@ -89,6 +89,7 @@ export const TraitWrapper: React.FC<TraitWrapperProps> = ({
                 ...child.props,
                 id: fieldId,
                 "aria-invalid": hasError,
+                "aria-required": showRequiredMarker && !readOnly,
                 "aria-describedby": errorId,
               });
             }

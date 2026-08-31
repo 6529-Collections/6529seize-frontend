@@ -118,6 +118,7 @@ export const DropdownTrait: React.FC<DropdownTraitProps> = React.memo(
         label={label}
         className={className}
         error={error}
+        id={`field-${field}`}
         isFieldFilled={isFieldFilled}
         showRequiredMarker={showRequiredMarker}
         labelRightAdornment={
