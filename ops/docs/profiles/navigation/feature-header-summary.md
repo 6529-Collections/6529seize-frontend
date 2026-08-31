@@ -32,6 +32,8 @@ The profile header appears on profile routes under `/{user}` and shows:
 3. The header renders:
    - banner (image or gradient fallback)
    - profile picture (image or gradient fallback)
+   - profile picture overlapping the lower banner edge, with the name and
+     metadata on the content surface below the banner
    - title row (display name, CIC icon, level, optional artist badge)
    - metadata row (classification and `Profile enabled: <Month Year>` when data
      exists)
@@ -57,10 +59,10 @@ The profile header appears on profile routes under `/{user}` and shows:
    - smaller and touch-first layouts show an `Edit profile` action that opens
      an editing hub for those same identity fields
    - `Preferences` remains a distinct owner action for privacy, direct-message,
-     and notification settings; it sits in the far-right owner area on desktop,
-     becomes an icon-only action beside `Edit profile` on touch-first and phone
-     layouts, and sits to the right of the identity on smaller fine-pointer
-     layouts
+     and notification settings; it sits in the right-side action area below the
+     banner on desktop, remains an icon-only action beside `Edit profile` in the
+     banner's top-right corner on touch-first and phone layouts, and sits to the
+     right of the identity on smaller fine-pointer layouts
    - subscription coverage remains a separate status and navigation surface:
      a subtle row beneath Preferences on desktop layouts, and a full-width
      subtle row below the identity block on smaller layouts
@@ -79,12 +81,14 @@ The profile header appears on profile routes under `/{user}` and shows:
   value.
 - Long About text (`>240` chars) is clamped on mobile with `See more` /
   `See less`; desktop stays expanded.
-- Mobile profile banners show the artwork at full strength. Desktop banners use
-  dark gradients where profile content overlaps the artwork.
+- Mobile profile banners retain their existing full-strength artwork and
+  top-right owner controls. Desktop banners fade into the content surface at
+  the bottom; only the profile picture crosses that boundary.
 - The subscription status can link directly to the relevant settings,
   upcoming-drops, or top-up section. The complete status row is the link, with
-  its current state and contextual action grouped on the second line. It
-  remains a full-width contextual row on smaller layouts.
+  its label, current state, and contextual action kept inline when space allows.
+  It remains a full-width contextual row on smaller layouts and can wrap when
+  translated or dynamic content cannot fit.
 - Touch-first layouts use the profile editing hub; fine-pointer desktop layouts
   retain the field-level editing controls.
 - `Followers` opens a modal list; it does not navigate to a followers tab.
