@@ -670,6 +670,15 @@ function normalizedOptionName(argument) {
 }
 
 function forbiddenOptionName(argument) {
+  if (!argument.startsWith("-")) {
+    return null;
+  }
+
+  const rawName = optionName(argument);
+  if (/^-{1,2}config[.:]/.test(rawName)) {
+    return rawName;
+  }
+
   const normalizedName = normalizedOptionName(argument);
   if (FORBIDDEN_PNPM_OPTION_NAMES.has(normalizedName)) {
     return normalizedName;

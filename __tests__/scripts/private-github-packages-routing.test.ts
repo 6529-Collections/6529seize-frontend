@@ -377,6 +377,20 @@ describe("private GitHub Packages repository policy", () => {
         "--auth-token=must-not-be-an-argument",
       ])
     ).toThrow("registry, credential, proxy, and TLS overrides are not allowed");
+    for (const compoundConfigOverride of [
+      "--config.@evil:registry=https://evil.example",
+      `--config.//evil.example/:_authToken=${policy.AUTH_PLACEHOLDER}`,
+    ]) {
+      expect(() =>
+        policy.validatePnpmArguments([
+          "add",
+          "@evil/foo",
+          compoundConfigOverride,
+        ])
+      ).toThrow(
+        "registry, credential, proxy, and TLS overrides are not allowed"
+      );
+    }
     expect(() =>
       policy.validatePnpmArguments(["install", "--no-strict-ssl"])
     ).toThrow("registry, credential, proxy, and TLS overrides are not allowed");
