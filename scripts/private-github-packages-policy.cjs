@@ -836,7 +836,10 @@ function validatePnpmConfigEnvironment(environment) {
 
     if (
       normalizedKey.startsWith("npm_config_") &&
-      /(proxy|noproxy|strict_ssl|cafile|^npm_config_ca$)/.test(normalizedKey)
+      (normalizedConfigName.includes("proxy") ||
+        normalizedConfigName.includes("strictssl") ||
+        normalizedConfigName.includes("cafile") ||
+        normalizedConfigName === "ca")
     ) {
       throw policyError(
         `pnpm network override environment is not allowed: ${key}`

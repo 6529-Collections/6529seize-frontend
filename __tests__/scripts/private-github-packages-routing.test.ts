@@ -445,6 +445,16 @@ describe("private GitHub Packages repository policy", () => {
     ).toThrow("pnpm network override environment is not allowed");
     expect(() =>
       policy.validatePnpmConfigEnvironment({
+        "npm_config_strict-ssl": "false",
+      })
+    ).toThrow("pnpm network override environment is not allowed");
+    expect(() =>
+      policy.validatePnpmConfigEnvironment({
+        "NPM_CONFIG_STRICT-SSL": "false",
+      })
+    ).toThrow("pnpm network override environment is not allowed");
+    expect(() =>
+      policy.validatePnpmConfigEnvironment({
         npm_config_ignore_scripts: "false",
       })
     ).toThrow("pnpm lifecycle or hook override environment is not allowed");
