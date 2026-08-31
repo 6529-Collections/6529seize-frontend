@@ -47,6 +47,7 @@ type RoutingModule = {
   ROUTED_NO_PROXY: string;
   TOKEN_FREE_REBUILD_ARGUMENTS: string[];
   TOKEN_FREE_REBUILD_PACKAGES: string[];
+  TOKEN_FREE_ROOT_REBUILD_ARGUMENTS: string[];
   createRoutedEnvironment: (environment: Environment) => Environment;
   isLoopbackProxy: (proxyValue: unknown) => boolean;
   parseNoProxy: (value: string | undefined) => string[];
@@ -504,7 +505,15 @@ describe("host-specific Socket Firewall routing", () => {
         env: expect.not.objectContaining({ NODE_AUTH_TOKEN: expect.anything() }),
       })
     );
-    expect(spawn).toHaveBeenCalledTimes(2);
+    expect(spawn).toHaveBeenNthCalledWith(
+      3,
+      "pnpm",
+      routing.TOKEN_FREE_ROOT_REBUILD_ARGUMENTS,
+      expect.objectContaining({
+        env: expect.not.objectContaining({ NODE_AUTH_TOKEN: expect.anything() }),
+      })
+    );
+    expect(spawn).toHaveBeenCalledTimes(3);
     expect(JSON.stringify(spawn.mock.calls[0]?.slice(0, 2))).not.toContain(
       TEST_TOKEN
     );
@@ -523,6 +532,10 @@ describe("host-specific Socket Firewall routing", () => {
     expect(routing.TOKEN_FREE_REBUILD_ARGUMENTS).toEqual([
       "rebuild",
       ...approvedPackages,
+    ]);
+    expect(routing.TOKEN_FREE_ROOT_REBUILD_ARGUMENTS).toEqual([
+      "rebuild",
+      "--pending",
     ]);
   });
 

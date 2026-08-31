@@ -41,6 +41,7 @@ const TOKEN_FREE_REBUILD_ARGUMENTS = [
   "rebuild",
   ...TOKEN_FREE_REBUILD_PACKAGES,
 ];
+const TOKEN_FREE_ROOT_REBUILD_ARGUMENTS = ["rebuild", "--pending"];
 
 function parseNoProxy(value) {
   if (!value) {
@@ -202,10 +203,25 @@ function runPnpm({
   }
 
   const rebuildStatus = rebuildResult.status ?? 1;
-  if (rebuildStatus === 0) {
+  if (rebuildStatus !== 0) {
+    return rebuildStatus;
+  }
+
+  const rootRebuildResult = spawn("pnpm", TOKEN_FREE_ROOT_REBUILD_ARGUMENTS, {
+    cwd: repositoryRoot,
+    env: tokenFreeEnvironment,
+    stdio: "inherit",
+    shell: process.platform === "win32",
+  });
+  if (rootRebuildResult.error) {
+    throw rootRebuildResult.error;
+  }
+
+  const rootRebuildStatus = rootRebuildResult.status ?? 1;
+  if (rootRebuildStatus === 0) {
     validateRepositoryFiles(repositoryRoot);
   }
-  return rebuildStatus;
+  return rootRebuildStatus;
 }
 
 function main() {
@@ -228,6 +244,7 @@ module.exports = {
   AUTHENTICATED_PNPM_ARGUMENTS,
   TOKEN_FREE_REBUILD_ARGUMENTS,
   TOKEN_FREE_REBUILD_PACKAGES,
+  TOKEN_FREE_ROOT_REBUILD_ARGUMENTS,
   createRoutedEnvironment,
   isLoopbackProxy,
   parseNoProxy,
