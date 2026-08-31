@@ -121,9 +121,22 @@ test.describe("Public groups, tools, and calendar read-only coverage @surface @m
   }) => {
     await gotoReady(page, "/network");
 
-    // Resolve a real group id from the app's own unfiltered groups request
-    // (fired when the filter panel opens) so the test stays portable across
-    // local, staging, and production data sets.
+    await openGroupFilters(page);
+    const chooseGroupButton = page
+      .getByRole("button", { name: "Choose group" })
+      .filter({ visible: true });
+    await expect(chooseGroupButton).toBeVisible({ timeout: 30000 });
+    await chooseGroupButton.click();
+
+    const groupSearch = page
+      .getByRole("combobox", { name: /Search groups/i })
+      .filter({ visible: true });
+    await expect(groupSearch).toBeVisible();
+
+    // Resolve a real group id from the saved-group search's unfiltered request
+    // so the test stays portable across local, staging, and production data
+    // sets. The criteria builder opens by default, so the request starts only
+    // after switching to Choose group and focusing its search field.
     const groupsResponsePromise = page.waitForResponse(
       (response) =>
         response.request().method() === "GET" &&
@@ -131,10 +144,7 @@ test.describe("Public groups, tools, and calendar read-only coverage @surface @m
         response.ok(),
       { timeout: 30000 }
     );
-    await openGroupFilters(page);
-    await expect(page.getByLabel(/^(By )?Group [Nn]ame$/).first()).toBeVisible({
-      timeout: 30000,
-    });
+    await groupSearch.focus();
     const groupsResponse = await groupsResponsePromise;
     const groupsPayload = (await groupsResponse.json()) as
       | { readonly id?: string; readonly name?: string }[]
@@ -153,19 +163,23 @@ test.describe("Public groups, tools, and calendar read-only coverage @surface @m
     await expect(page).toHaveURL(
       (url) => url.searchParams.get("group") === groupId
     );
-    await openGroupFilters(page);
 
-    // The active-group block is required: "Members:" in the desktop sidebar,
-    // "Active filter" in the mobile sheet.
-    await expect(page.getByText(/Members:|Active filter/).first()).toBeVisible({
-      timeout: 30000,
-    });
+    // The current Network UI exposes the active state in the filter trigger and
+    // the selected-group summary on both desktop and mobile layouts.
+    await expect(
+      page.getByRole("button", { name: "Open group filters (active)" })
+    ).toBeVisible({ timeout: 30000 });
+    await expect(page.getByText("Selected group", { exact: true })).toBeVisible(
+      {
+        timeout: 30000,
+      }
+    );
 
     // Clearing the group exercises the state transition back to null and
     // must drop the URL param.
     const clearButton = page
-      .getByRole("button", { name: /remove|clear group/i })
-      .first();
+      .getByRole("button", { name: "Clear selected group" })
+      .filter({ visible: true });
     await expect(clearButton).toBeVisible({ timeout: 15000 });
     await clearButton.click();
     await expect(page).toHaveURL(
