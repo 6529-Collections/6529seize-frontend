@@ -7,6 +7,7 @@ const { spawnSync } = require("node:child_process");
 const {
   AUTH_ENVIRONMENT_VARIABLE,
   ALLOWED_REGISTRY_HOST,
+  SECURE_REPOSITORY_ROOT_ARGUMENT,
   validateRepositoryFiles,
   validateRepositoryPolicy,
 } = require("./private-github-packages-policy.cjs");
@@ -313,7 +314,24 @@ function runPnpm({
 
 function main() {
   try {
-    process.exitCode = runPnpm({});
+    const invocationArguments = process.argv.slice(2);
+    if (
+      invocationArguments[0] !== SECURE_REPOSITORY_ROOT_ARGUMENT ||
+      invocationArguments[2] !== "--"
+    ) {
+      throw new Error(
+        "Private GitHub Packages routing must be invoked by the trusted secure package helper."
+      );
+    }
+    const repositoryRoot = invocationArguments[1];
+    if (!path.isAbsolute(repositoryRoot)) {
+      throw new Error("Secure package repository root must be absolute.");
+    }
+
+    process.exitCode = runPnpm({
+      args: invocationArguments.slice(3),
+      repositoryRoot: fs.realpathSync(repositoryRoot),
+    });
   } catch (error) {
     console.error(error instanceof Error ? error.message : String(error));
     process.exitCode = 1;

@@ -5,6 +5,7 @@ const path = require("node:path");
 const { spawnSync } = require("node:child_process");
 
 const {
+  SECURE_REPOSITORY_ROOT_ARGUMENT,
   validateRepositoryPolicy,
 } = require("./private-github-packages-policy.cjs");
 
@@ -68,7 +69,14 @@ function runSecurePnpm({
   const command = useWindowsShell
     ? quoteWindowsShellArgument(sfwCommand)
     : sfwCommand;
-  const commandArguments = [process.execPath, ROUTING_HELPER_PATH, ...args];
+  const commandArguments = [
+    process.execPath,
+    ROUTING_HELPER_PATH,
+    SECURE_REPOSITORY_ROOT_ARGUMENT,
+    repositoryRoot,
+    "--",
+    ...args,
+  ];
   const result = spawn(
     command,
     useWindowsShell
@@ -97,9 +105,26 @@ function runSecurePnpm({
   return result.status ?? 1;
 }
 
+function parseSecureInvocationArguments(args) {
+  if (args[0] !== SECURE_REPOSITORY_ROOT_ARGUMENT) {
+    return { args, repositoryRoot: REPOSITORY_ROOT };
+  }
+  if (args[2] !== "--" || !path.isAbsolute(args[1])) {
+    throw new Error(
+      `${SECURE_REPOSITORY_ROOT_ARGUMENT} requires an absolute path followed by --`
+    );
+  }
+
+  return {
+    args: args.slice(3),
+    repositoryRoot: fs.realpathSync(args[1]),
+  };
+}
+
 function main() {
   try {
-    process.exitCode = runSecurePnpm({});
+    const invocation = parseSecureInvocationArguments(process.argv.slice(2));
+    process.exitCode = runSecurePnpm(invocation);
   } catch (error) {
     console.error(error instanceof Error ? error.message : String(error));
     process.exitCode = 1;
@@ -112,7 +137,9 @@ if (require.main === module) {
 
 module.exports = {
   REPOSITORY_ROOT,
+  SECURE_REPOSITORY_ROOT_ARGUMENT,
   ROUTING_HELPER_PATH,
+  parseSecureInvocationArguments,
   quoteWindowsShellArgument,
   resolveSfwCommand,
   runSecurePnpm,

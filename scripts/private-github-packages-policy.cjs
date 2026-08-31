@@ -17,6 +17,7 @@ const AUTH_ENVIRONMENT_VARIABLE = "NODE_AUTH_TOKEN";
 const AUTH_PLACEHOLDER = `\${${AUTH_ENVIRONMENT_VARIABLE}}`;
 const SCOPE_REGISTRY_KEY = `${ALLOWED_SCOPE}:registry`;
 const AUTH_KEY = `//${ALLOWED_REGISTRY_HOST}/:_authToken`;
+const SECURE_REPOSITORY_ROOT_ARGUMENT = "--seize-secure-repository-root";
 const ALLOWED_PNPM_COMMANDS = new Set(["add", "audit", "install", "update"]);
 const FORBIDDEN_NPMRC_CONFIG_NAMES = new Set([
   "alwaysauth",
@@ -922,6 +923,12 @@ function validatePnpmArguments(args) {
   }
 
   for (const argument of args) {
+    if (argument === SECURE_REPOSITORY_ROOT_ARGUMENT) {
+      throw policyError(
+        `${SECURE_REPOSITORY_ROOT_ARGUMENT} is reserved for trusted package tooling`
+      );
+    }
+
     if (argumentUrlHostname(argument) === ALLOWED_REGISTRY_HOST) {
       throw policyError(
         `${ALLOWED_REGISTRY_HOST} URLs cannot be supplied on the command line`
@@ -1121,6 +1128,7 @@ module.exports = {
   AUTH_PLACEHOLDER,
   SCOPE_REGISTRY_KEY,
   PUBLIC_REGISTRY_ORIGIN,
+  SECURE_REPOSITORY_ROOT_ARGUMENT,
   validateAuthEnvironment,
   validateLockfile,
   validateNpmrc,

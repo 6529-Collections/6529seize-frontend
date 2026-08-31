@@ -32,6 +32,7 @@ type PolicyModule = {
   AUTH_KEY: string;
   AUTH_PLACEHOLDER: string;
   PUBLIC_REGISTRY_ORIGIN: string;
+  SECURE_REPOSITORY_ROOT_ARGUMENT: string;
   SCOPE_REGISTRY_KEY: string;
   validateAuthEnvironment: (environment: Environment) => void;
   validateLockfile: (lockfileText: string) => void;
@@ -77,6 +78,11 @@ type RoutingModule = {
 
 type SecureRunnerModule = {
   ROUTING_HELPER_PATH: string;
+  SECURE_REPOSITORY_ROOT_ARGUMENT: string;
+  parseSecureInvocationArguments: (args: string[]) => {
+    args: string[];
+    repositoryRoot: string;
+  };
   runSecurePnpm: (options: {
     args: string[];
     environment: Environment;
@@ -472,6 +478,12 @@ describe("private GitHub Packages repository policy", () => {
         "--auth-token=must-not-be-an-argument",
       ])
     ).toThrow("registry, credential, proxy, and TLS overrides are not allowed");
+    expect(() =>
+      policy.validatePnpmArguments([
+        "install",
+        policy.SECURE_REPOSITORY_ROOT_ARGUMENT,
+      ])
+    ).toThrow("reserved for trusted package tooling");
     for (const compoundConfigOverride of [
       "--config.@evil:registry=https://evil.example",
       `--config.//evil.example/:_authToken=${policy.AUTH_PLACEHOLDER}`,
@@ -1026,6 +1038,9 @@ describe("host-specific Socket Firewall routing", () => {
       [
         process.execPath,
         secureRunner.ROUTING_HELPER_PATH,
+        secureRunner.SECURE_REPOSITORY_ROOT_ARGUMENT,
+        REPOSITORY_ROOT,
+        "--",
         "install",
         "--frozen-lockfile",
       ],
@@ -1039,6 +1054,22 @@ describe("host-specific Socket Firewall routing", () => {
     expect(JSON.stringify(spawn.mock.calls[0]?.slice(0, 2))).not.toContain(
       TEST_TOKEN
     );
+    expect(
+      secureRunner.parseSecureInvocationArguments([
+        secureRunner.SECURE_REPOSITORY_ROOT_ARGUMENT,
+        REPOSITORY_ROOT,
+        "--",
+        "install",
+      ])
+    ).toEqual({ args: ["install"], repositoryRoot: REPOSITORY_ROOT });
+    expect(() =>
+      secureRunner.parseSecureInvocationArguments([
+        secureRunner.SECURE_REPOSITORY_ROOT_ARGUMENT,
+        "relative/path",
+        "--",
+        "install",
+      ])
+    ).toThrow("requires an absolute path");
   });
 
   it("quotes every Windows shell path and argument", () => {
@@ -1063,6 +1094,9 @@ describe("host-specific Socket Firewall routing", () => {
       [
         process.execPath,
         secureRunner.ROUTING_HELPER_PATH,
+        secureRunner.SECURE_REPOSITORY_ROOT_ARGUMENT,
+        REPOSITORY_ROOT,
+        "--",
         "install",
         "--frozen-lockfile",
       ].map(secureRunner.quoteWindowsShellArgument),
@@ -1187,7 +1221,13 @@ describe("documented private-package setup flows", () => {
     );
     const authUnsetIndex = worktreeScript.indexOf("unset NODE_AUTH_TOKEN");
     const scopedInstallIndex = worktreeScript.indexOf(
-      'NODE_AUTH_TOKEN="$PACKAGE_AUTH_TOKEN" 6529 install'
+      'NODE_AUTH_TOKEN="$PACKAGE_AUTH_TOKEN" \\'
+    );
+    const localTokenUnsetIndex = worktreeScript.indexOf(
+      "unset PACKAGE_AUTH_TOKEN"
+    );
+    const targetBootstrapIndex = worktreeScript.lastIndexOf(
+      "./bin/6529 bootstrap"
     );
 
     expect(authGuardIndex).toBeGreaterThanOrEqual(0);
@@ -1198,7 +1238,7 @@ describe("documented private-package setup flows", () => {
       'git -C "$MAIN_REPO" worktree add',
       '"$SCRIPT_DIR/wt-sync.sh" "$WORKTREE_NAME"',
       "./bin/6529 bootstrap",
-      "6529 install",
+      '"$MAIN_REPO/scripts/run-secure-pnpm.cjs"',
     ]) {
       const mutationIndex = worktreeScript.indexOf(mutation);
       expect(authGuardIndex).toBeLessThan(mutationIndex);
@@ -1207,9 +1247,18 @@ describe("documented private-package setup flows", () => {
     expect(authUnsetIndex).toBeLessThan(
       worktreeScript.indexOf("./bin/6529 bootstrap")
     );
-    expect(scopedInstallIndex).toBeGreaterThan(
-      worktreeScript.indexOf("./bin/6529 bootstrap")
+    expect(scopedInstallIndex).toBeGreaterThan(authUnsetIndex);
+    expect(worktreeScript).toContain(
+      '"$NODE_BINARY" "$MAIN_REPO/scripts/run-secure-pnpm.cjs"'
     );
+    expect(worktreeScript).toContain(
+      '--seize-secure-repository-root "$WORKTREE_PATH" -- install'
+    );
+    expect(worktreeScript).not.toContain(
+      'NODE_AUTH_TOKEN="$PACKAGE_AUTH_TOKEN" 6529'
+    );
+    expect(localTokenUnsetIndex).toBeGreaterThan(scopedInstallIndex);
+    expect(targetBootstrapIndex).toBeGreaterThan(localTokenUnsetIndex);
     expect(worktreeScript).not.toContain("export PACKAGE_AUTH_TOKEN");
     expect(worktreeScript).not.toContain("gh auth token");
   });
