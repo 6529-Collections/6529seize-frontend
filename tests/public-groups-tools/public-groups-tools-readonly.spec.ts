@@ -138,10 +138,15 @@ test.describe("Public groups, tools, and calendar read-only coverage @surface @m
     // sets. The criteria builder opens by default, so the request starts only
     // after switching to Choose group and focusing its search field.
     const groupsResponsePromise = page.waitForResponse(
-      (response) =>
-        response.request().method() === "GET" &&
-        /\/groups(\?|$)/.test(response.url()) &&
-        response.ok(),
+      (response) => {
+        const responseUrl = new URL(response.url());
+        return (
+          response.request().method() === "GET" &&
+          /\/groups\/?$/.test(responseUrl.pathname) &&
+          !responseUrl.searchParams.has("group_name") &&
+          response.ok()
+        );
+      },
       { timeout: 30000 }
     );
     await groupSearch.focus();
@@ -156,7 +161,9 @@ test.describe("Public groups, tools, and calendar read-only coverage @surface @m
       0
     );
     const groupId = groups[0]?.id;
-    expect(typeof groupId).toBe("string");
+    if (typeof groupId !== "string") {
+      throw new Error("Expected the first public group to have an id");
+    }
 
     // Deep-link the group: the URL param hydrates the active-group state.
     await gotoReady(page, `/network?group=${groupId}`);
