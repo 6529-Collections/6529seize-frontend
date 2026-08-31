@@ -50,7 +50,6 @@ const EXTENSION_CONTENT_TYPES = new Map<
   ApiMediaUploadMimeType | ApiAttachmentUploadMimeType
 >([
   [".glb", ApiMediaUploadMimeType.ModelGltfBinary],
-  [".gltf", ApiMediaUploadMimeType.ModelGltfBinary],
   [".mp4", ApiMediaUploadMimeType.VideoMp4],
   [".mov", ApiMediaUploadMimeType.VideoQuicktime],
   [".avi", ApiMediaUploadMimeType.VideoXMsvideo],

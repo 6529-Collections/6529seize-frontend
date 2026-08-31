@@ -18,7 +18,7 @@ interface FileUploaderHook {
   /** Current state of the file uploader */
   state: FileUploaderState;
   /** Process a file for upload */
-  processFile: (file: File) => void;
+  processFile: (file: File) => Promise<void>;
   /** Retry processing the current file */
   handleRetry: () => void;
   /** Reset the file uploader state */
@@ -47,6 +47,30 @@ interface UseFileUploaderProps {
     | undefined;
 }
 
+const testAndStoreVideoCompatibility = async (
+  file: File,
+  dispatch: React.Dispatch<FileUploaderAction>
+): Promise<void> => {
+  try {
+    const compatibilityResult = await testVideoCompatibility(file);
+    dispatch({
+      type: "SET_COMPATIBILITY_RESULT",
+      payload: compatibilityResult,
+    });
+  } catch (error) {
+    dispatch({
+      type: "SET_COMPATIBILITY_RESULT",
+      payload: {
+        canPlay: false,
+        tested: true,
+        errorMessage: "Video compatibility check failed",
+        technicalReason:
+          error instanceof Error ? error.message : String(error),
+      },
+    });
+  }
+};
+
 /**
  * Hook for managing file upload state and logic
  *
@@ -69,77 +93,64 @@ const useFileUploader = ({
 
   // Process file with error handling and validation
   const processFile = useCallback(
-    (file: File): void => {
+    async (file: File): Promise<void> => {
       // Start processing and store the file for potential retries
       dispatch({ type: "START_PROCESSING", payload: file });
 
       // Validate file
-      const result = validateFile(file);
+      const result = await validateFile(file);
 
-      if (result.valid) {
-        try {
-          // Clean up any existing object URL
-          if (state.objectUrl) {
-            URL.revokeObjectURL(state.objectUrl);
-          }
-
-          // Set a timeout to prevent indefinite processing
-          const timeoutId = window.setTimeout(() => {
-            dispatch({ type: "PROCESSING_TIMEOUT" });
-          }, PROCESSING_TIMEOUT_MS);
-
-          // Create a new object URL for local preview if needed
-          const newObjectUrl = URL.createObjectURL(file);
-
-          // Clear the timeout since processing completed
-          window.clearTimeout(timeoutId);
-
-          // Update state with success
-          dispatch({
-            type: "PROCESSING_SUCCESS",
-            payload: {
-              objectUrl: newObjectUrl,
-              file: file,
-            },
-          });
-
-          // Start compatibility check for video files
-          if (file.type.startsWith("video/")) {
-            // Use a small delay to avoid blocking the main thread
-            setTimeout(() => {
-              testVideoCompatibility(file).then((result) => {
-                dispatch({
-                  type: "SET_COMPATIBILITY_RESULT",
-                  payload: result,
-                });
-              });
-            }, 100);
-          }
-
-          // Handle file selection (delegated to parent)
-          onFileSelect(file);
-        } catch (e) {
-          // Handle any unexpected errors during processing
-          console.error("Error processing file:", e);
-          const errorMessage =
-            e instanceof Error ? e.message : "Unexpected error processing file";
-
-          dispatch({ type: "PROCESSING_ERROR", payload: errorMessage });
-
-          if (showToast) {
-            showToast({
-              type: "error",
-              message: errorMessage,
-            });
-          }
-        }
-      } else {
+      if (!result.valid) {
         const errorMessage = result.error ?? "Invalid file";
+        dispatch({ type: "PROCESSING_ERROR", payload: errorMessage });
+        showToast?.({ type: "error", message: errorMessage });
+        return;
+      }
 
-        // Dispatch error state
+      try {
+        // Clean up any existing object URL
+        if (state.objectUrl) {
+          URL.revokeObjectURL(state.objectUrl);
+        }
+
+        // Set a timeout to prevent indefinite processing
+        const timeoutId = window.setTimeout(() => {
+          dispatch({ type: "PROCESSING_TIMEOUT" });
+        }, PROCESSING_TIMEOUT_MS);
+
+        // Create a new object URL for local preview if needed
+        const newObjectUrl = URL.createObjectURL(file);
+
+        // Clear the timeout since processing completed
+        window.clearTimeout(timeoutId);
+
+        // Update state with success
+        dispatch({
+          type: "PROCESSING_SUCCESS",
+          payload: {
+            objectUrl: newObjectUrl,
+            file: file,
+          },
+        });
+
+        // Start compatibility check for video files
+        if (file.type.startsWith("video/")) {
+          // Use a small delay to avoid blocking the main thread
+          setTimeout(() => {
+            void testAndStoreVideoCompatibility(file, dispatch);
+          }, 100);
+        }
+
+        // Handle file selection (delegated to parent)
+        onFileSelect(file);
+      } catch (e) {
+        // Handle any unexpected errors during processing
+        console.error("Error processing file:", e);
+        const errorMessage =
+          e instanceof Error ? e.message : "Unexpected error processing file";
+
         dispatch({ type: "PROCESSING_ERROR", payload: errorMessage });
 
-        // Show toast for better user feedback
         if (showToast) {
           showToast({
             type: "error",
@@ -155,7 +166,7 @@ const useFileUploader = ({
   const handleRetry = useCallback((): void => {
     if (state.processingFile) {
       dispatch({ type: "PROCESSING_RETRY" });
-      processFile(state.processingFile);
+      void processFile(state.processingFile);
     }
   }, [state.processingFile, processFile]);
 

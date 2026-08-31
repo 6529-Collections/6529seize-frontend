@@ -2,7 +2,7 @@
  * Constants for the file upload system
  */
 
-export const FILE_SIZE_LIMIT: number = 200 * 1024 * 1024;
+export const FILE_SIZE_LIMIT: number = 250 * 1024 * 1024;
 
 /**
  * Maximum number of processing attempts before giving up
