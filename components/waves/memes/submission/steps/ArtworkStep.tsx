@@ -108,12 +108,13 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
     mediaSource === "url" && externalValidationStatus === "pending";
   const hasValidMedia =
     mediaSource === "url" ? isExternalMediaValid : artworkUploaded;
-  const missingMediaError =
-    mediaSubmitAttempted && !hasValidMedia && !isMediaValidationPending
-      ? mediaSource === "upload"
+  let missingMediaError: string | null = null;
+  if (mediaSubmitAttempted && !hasValidMedia && !isMediaValidationPending) {
+    missingMediaError =
+      mediaSource === "upload"
         ? t(locale, "memes.submission.media.missingUpload")
-        : t(locale, "memes.submission.media.missingInteractive")
-      : null;
+        : t(locale, "memes.submission.media.missingInteractive");
+  }
 
   // Create callback handlers for title and description
   const handleTitleChange = useCallback(

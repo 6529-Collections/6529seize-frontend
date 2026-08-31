@@ -50,7 +50,7 @@ export const TraitWrapper: React.FC<TraitWrapperProps> = ({
 
   if (isBoolean) {
     return (
-      <div className={`tw-group tw-relative ${className ?? ""}`}>
+      <div id={fieldId} className={`tw-group tw-relative ${className ?? ""}`}>
         <div className="tw-flex tw-items-center tw-justify-between tw-rounded-lg tw-border tw-border-solid tw-border-iron-700/60 tw-bg-iron-900 tw-px-4 tw-py-2.5">
           <label
             htmlFor={fieldId}

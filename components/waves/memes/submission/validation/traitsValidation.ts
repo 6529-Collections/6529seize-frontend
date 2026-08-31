@@ -104,21 +104,17 @@ function validateRequiredFields(
   // Title and description appear before trait fields in the form, so validate
   // them first to preserve visual and keyboard order when focusing errors.
   if (
-    options.mode === "all" ||
-    (options.touchedFields && options.touchedFields.has("title"))
+    (options.mode === "all" || options.touchedFields?.has("title")) &&
+    (!traits.title || traits.title.trim() === "")
   ) {
-    if (!traits.title || traits.title.trim() === "") {
-      errors["title"] = "Title is required";
-    }
+    errors["title"] = "Title is required";
   }
 
   if (
-    options.mode === "all" ||
-    (options.touchedFields && options.touchedFields.has("description"))
+    (options.mode === "all" || options.touchedFields?.has("description")) &&
+    (!traits.description || traits.description.trim() === "")
   ) {
-    if (!traits.description || traits.description.trim() === "") {
-      errors["description"] = "Description is required";
-    }
+    errors["description"] = "Description is required";
   }
 
   // Check each field in the traits data
