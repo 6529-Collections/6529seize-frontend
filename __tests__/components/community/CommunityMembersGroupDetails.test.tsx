@@ -1,4 +1,6 @@
 import CommunityMembersGroupDetails from "@/components/community/CommunityMembersGroupDetails";
+import { useAuth } from "@/components/auth/Auth";
+import { ApiRateMatter } from "@/generated/models/ApiRateMatter";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { commonApiFetch } from "@/services/api/common-api";
 import { useQuery } from "@tanstack/react-query";
@@ -6,6 +8,10 @@ import { fireEvent, render, screen } from "@testing-library/react";
 
 jest.mock("@tanstack/react-query", () => ({
   useQuery: jest.fn(),
+}));
+
+jest.mock("@/components/auth/Auth", () => ({
+  useAuth: jest.fn(),
 }));
 
 jest.mock("@/services/api/common-api", () => ({
@@ -20,15 +26,89 @@ jest.mock(
     )
 );
 
+jest.mock(
+  "@/components/groups/page/list/card/vote-all/GroupCardVoteAll",
+  () =>
+    ({
+      matter,
+      onCancel,
+      viewerIdentityKey,
+    }: {
+      readonly matter: ApiRateMatter;
+      readonly onCancel: () => void;
+      readonly viewerIdentityKey: string | null;
+    }) => (
+      <div
+        data-testid="bulk-rate-form"
+        data-matter={matter}
+        data-viewer={viewerIdentityKey}
+      >
+        <button type="button" onClick={onCancel}>
+          Cancel bulk rating
+        </button>
+      </div>
+    )
+);
+
 jest.mock("@/hooks/useBrowserLocale", () => ({
   useBrowserLocale: () => "en-US",
 }));
 
 const useQueryMock = useQuery as jest.Mock;
+const useAuthMock = useAuth as jest.Mock;
 const commonApiFetchMock = commonApiFetch as jest.Mock;
 
+function createInspectableGroup({
+  hasCriteria = true,
+  isPrivate = false,
+}: {
+  readonly hasCriteria?: boolean;
+  readonly isPrivate?: boolean;
+} = {}): ApiGroupFull {
+  return {
+    id: "group-1",
+    name: "Artists and curators",
+    created_at: 1,
+    created_by: { handle: "creator" } as ApiGroupFull["created_by"],
+    visible: true,
+    is_private: isPrivate,
+    group: {
+      tdh: {
+        min: null,
+        max: null,
+        inclusion_strategy: "BOTH",
+      },
+      rep: {
+        min: null,
+        max: null,
+        direction: "RECEIVED",
+        user_identity: null,
+        category: null,
+      },
+      cic: {
+        min: null,
+        max: null,
+        direction: "RECEIVED",
+        user_identity: null,
+      },
+      level: { min: hasCriteria ? 3 : null, max: null },
+      owns_nfts: [],
+      identity_group_id: null,
+      identity_group_identities_count: 0,
+      excluded_identity_group_id: null,
+      excluded_identity_group_identities_count: 0,
+      is_beneficiary_of_grant_id: null,
+      is_beneficiary_of_grant_match_mode: "ANY_TOKEN",
+      is_beneficiary_of_grant: null,
+    } as ApiGroupFull["group"],
+  };
+}
+
 describe("CommunityMembersGroupDetails", () => {
-  afterEach(() => jest.clearAllMocks());
+  beforeEach(() => {
+    jest.clearAllMocks();
+    useAuthMock.mockReturnValue({ connectedProfile: { handle: "viewer" } });
+  });
 
   it("shows a stable loading state", () => {
     useQueryMock.mockReturnValue({
@@ -145,12 +225,7 @@ describe("CommunityMembersGroupDetails", () => {
     { label: "authorized private", isPrivate: true },
   ])("shows $label group criteria and a clear action", ({ isPrivate }) => {
     useQueryMock.mockReturnValue({
-      data: {
-        id: "group-1",
-        name: "Artists and curators",
-        is_private: isPrivate,
-        visible: true,
-      },
+      data: createInspectableGroup({ isPrivate }),
       isLoading: false,
       isError: false,
     });
@@ -169,10 +244,113 @@ describe("CommunityMembersGroupDetails", () => {
       screen.getByRole("heading", { name: "Artists and curators" })
     ).toBeInTheDocument();
     expect(screen.getByTestId("group-criteria")).toHaveTextContent("group-1");
+    expect(
+      screen.getByRole("button", {
+        name: "REP everyone matching criteria",
+      })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", {
+        name: "NIC everyone matching criteria",
+      })
+    ).toBeInTheDocument();
     fireEvent.click(
       screen.getByRole("button", { name: "Clear selected group" })
     );
     expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it("opens one bulk rating form at a time for the active criteria", () => {
+    useQueryMock.mockReturnValue({
+      data: createInspectableGroup(),
+      isLoading: false,
+      isError: false,
+    });
+
+    render(
+      <CommunityMembersGroupDetails
+        groupId="group-1"
+        onClose={jest.fn()}
+        viewerIdentityKey="profile:viewer-1"
+      />
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "REP everyone matching criteria",
+      })
+    );
+
+    expect(screen.getByTestId("bulk-rate-form")).toHaveAttribute(
+      "data-matter",
+      ApiRateMatter.Rep
+    );
+    expect(screen.getByTestId("bulk-rate-form")).toHaveAttribute(
+      "data-viewer",
+      "profile:viewer-1"
+    );
+    expect(
+      screen.queryByRole("button", {
+        name: "NIC everyone matching criteria",
+      })
+    ).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Cancel bulk rating" }));
+    expect(
+      screen.getByRole("button", {
+        name: "NIC everyone matching criteria",
+      })
+    ).toBeInTheDocument();
+  });
+
+  it("does not show bulk actions without active criteria", () => {
+    useQueryMock.mockReturnValue({
+      data: createInspectableGroup({ hasCriteria: false }),
+      isLoading: false,
+      isError: false,
+    });
+
+    render(
+      <CommunityMembersGroupDetails
+        groupId="group-1"
+        onClose={jest.fn()}
+        viewerIdentityKey="profile:viewer-1"
+      />
+    );
+
+    expect(
+      screen.queryByRole("button", {
+        name: "REP everyone matching criteria",
+      })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", {
+        name: "NIC everyone matching criteria",
+      })
+    ).not.toBeInTheDocument();
+  });
+
+  it("preserves the signed-in requirement for bulk actions", () => {
+    useAuthMock.mockReturnValue({ connectedProfile: null });
+    useQueryMock.mockReturnValue({
+      data: createInspectableGroup(),
+      isLoading: false,
+      isError: false,
+    });
+
+    render(
+      <CommunityMembersGroupDetails
+        groupId="group-1"
+        onClose={jest.fn()}
+        viewerIdentityKey={null}
+      />
+    );
+
+    expect(
+      screen.queryByRole("button", {
+        name: "REP everyone matching criteria",
+      })
+    ).not.toBeInTheDocument();
   });
 
   it("treats malformed group identity data as unavailable", () => {

@@ -6,6 +6,8 @@ import { TRANSFER_MESSAGES } from "@/i18n/messages/transfer";
 import type { MessageKey } from "@/i18n/messages/en-US";
 
 export const EN_GB_MESSAGES = {
+  "network.groupInspection.bulkRep": "REP everyone matching criteria",
+  "network.groupInspection.bulkNic": "NIC everyone matching criteria",
   "user.brain.sidebar.createdHeading": "Created Waves",
   "user.brain.sidebar.createdMobileHeading": "Created",
   "user.brain.sidebar.recentlyActiveHeading": "Recently Active In",

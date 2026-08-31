@@ -9,6 +9,10 @@ import stormComposerFrMessages from "@/i18n/messages/stormComposer.fr-FR.json";
 import type { MessageKey } from "@/i18n/messages/en-US";
 
 export const FR_FR_MESSAGES = {
+  "network.groupInspection.bulkRep":
+    "Donner du REP à tous les profils correspondant aux critères",
+  "network.groupInspection.bulkNic":
+    "Donner du NIC à tous les profils correspondant aux critères",
   "user.brain.sidebar.createdHeading": "Waves créées",
   "user.brain.sidebar.createdMobileHeading": "Créées",
   "user.brain.sidebar.recentlyActiveHeading": "Activité récente dans",

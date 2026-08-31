@@ -7,9 +7,8 @@ Parent: [Network Index](README.md)
 `/network` and `/network/activity` share one active group scope.
 `/network` owns scope controls (`Filter`).
 `/network/activity` can use active scope, but has no scope controls.
-
-`/network/groups` owns group browsing and creation.
-This page owns only the scope handoff into network routes and cross-route scope behavior.
+Saved-group search and criteria-based group creation both happen inside the
+`/network` filter. There is no standalone Network Groups page.
 
 ## Location in the Site
 
@@ -22,7 +21,6 @@ This page owns only the scope handoff into network routes and cross-route scope 
 
 ## Entry Points
 
-- Open a group card on `/network/groups`.
 - Open `/network`, build criteria in `Filter`, or select `Choose group` and
   choose a saved group.
 - Open a deep link with `group={groupId}`.
@@ -39,14 +37,18 @@ This page owns only the scope handoff into network routes and cross-route scope 
 
 ## User Journey
 
-1. Open `/network/groups`.
-2. Open a group card while it is in idle state.
-3. The app opens `/network?page=1&group={groupId}` (or `/network?group={groupId}` from chat links).
-4. `/network` applies scope. Public groups and private groups available to the
+1. Open `/network` and select `Filter`.
+2. Build and save criteria, or select `Choose group` and choose a saved group.
+3. `/network` applies the selected scope and stores its group id in the URL.
+   Group links shared from supported app surfaces can also open
+   `/network?group={groupId}` directly.
+4. Public groups and private groups available to the
    current authenticated member or creator show the selected group's name and
    criteria above its scoped member results.
 5. Inspect both how membership is determined and the current member list in the
-   same view.
+   same view. Signed-in users can also open `REP everyone matching criteria` or
+   `NIC everyone matching criteria` from the summary when the group has active
+   criteria.
 6. Use `Clear selected group` to close the group summary and return to the
    default Network member view.
 7. Open `/network/activity` to view activity under the same scope.
@@ -55,7 +57,6 @@ This page owns only the scope handoff into network routes and cross-route scope 
 
 ## Common Scenarios
 
-- Jump from a group card to a scoped identities leaderboard.
 - Keep one scope while moving between `/network` and `/network/activity`.
 - Reopen a saved deep link with `group=...` to restore a scoped view on first load.
 - Build a one-off Network audience from the same criteria controls available
@@ -70,7 +71,8 @@ This page owns only the scope handoff into network routes and cross-route scope 
 
 ## Edge Cases
 
-- Group-card open navigation is unavailable while that card is in `Rep all` or `NIC all`.
+- Bulk rating actions are not shown for an empty, loading, unavailable, or
+  signed-out group scope.
 - A stale `group` id deep link can load empty or unexpected results.
 - `/network/activity` has no inline control to clear/switch scope.
 - Signing out or switching profiles while a group is selected reloads the
@@ -88,7 +90,8 @@ This page owns only the scope handoff into network routes and cross-route scope 
 - If the selected group's criteria cannot be loaded, use `Try again` in the
   filter sheet. Network does not replace the unavailable group with an empty
   criteria draft.
-- If a group card is not openable, exit `Rep all`/`NIC all` first.
+- If a bulk rating action fails, use the error toast details, confirm the
+  required amount and REP category, then reopen the action from `/network`.
 - If `/network/activity` looks briefly unscoped, wait for scoped refetch to finish.
 
 ## Limitations / Notes
@@ -107,7 +110,4 @@ This page owns only the scope handoff into network routes and cross-route scope 
 - [Network Index](README.md)
 - [Network Activity Feed](feature-network-activity-feed.md)
 - [Network Identities Leaderboard](feature-network-identities-leaderboard.md)
-- [Groups Index](../groups/README.md)
-- [Groups List Filters](../groups/feature-groups-list-filters.md)
-- [Group Card Keyboard Navigation and Actions](../groups/feature-group-card-keyboard-navigation-and-actions.md)
 - [Sidebar Navigation](../navigation/feature-sidebar-navigation.md)

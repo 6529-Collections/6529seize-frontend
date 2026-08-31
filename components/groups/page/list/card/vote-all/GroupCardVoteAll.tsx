@@ -9,7 +9,7 @@ import {
   ReactQueryWrapperContext,
 } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { CreditDirection } from "../GroupCard";
-import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import type { Page } from "@/helpers/Types";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import type { CommunityMembersQuery } from "@/app/network/page";
@@ -29,10 +29,12 @@ export default function GroupCardVoteAll({
   matter,
   group,
   onCancel,
+  viewerIdentityKey,
 }: {
   readonly matter: GroupCardRateMatter;
   readonly group?: ApiGroupFull | undefined;
   readonly onCancel: () => void;
+  readonly viewerIdentityKey: string | null;
 }) {
   const SUCCESS_LABEL: Record<GroupCardRateMatter, string> = {
     [ApiRateMatter.Cic]: "NIC distributed.",
@@ -70,6 +72,7 @@ export default function GroupCardVoteAll({
         sort: ApiCommunityMembersSortOption.Level,
         sortDirection: SortDirection.DESC,
         groupId: group?.id ?? null,
+        viewerIdentityKey,
       },
     ],
     queryFn: async () =>
@@ -86,7 +89,6 @@ export default function GroupCardVoteAll({
           group_id: group?.id,
         },
       }),
-    placeholderData: keepPreviousData,
   });
 
   const [membersCount, setMembersCount] = useState<number | null>(null);

@@ -1887,6 +1887,8 @@ const NETWORK_GROUP_INSPECTION_MESSAGES = objectMessages(
     close: "Clear selected group",
     membersTitle: "Members",
     membersUnavailable: "Group members unavailable.",
+    bulkRep: "REP everyone matching criteria",
+    bulkNic: "NIC everyone matching criteria",
     loading: "Loading group criteria",
     unavailableTitle: "Group criteria unavailable",
     unavailableDescription:

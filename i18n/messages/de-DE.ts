@@ -11,6 +11,10 @@ import type { MessageKey } from "@/i18n/messages/en-US";
 const RETRY_LABEL = "Erneut versuchen";
 
 export const DE_DE_MESSAGES = {
+  "network.groupInspection.bulkRep":
+    "Allen Profilen, die den Kriterien entsprechen, REP geben",
+  "network.groupInspection.bulkNic":
+    "Allen Profilen, die den Kriterien entsprechen, NIC geben",
   "user.brain.sidebar.createdHeading": "Erstellte Waves",
   "user.brain.sidebar.createdMobileHeading": "Erstellt",
   "user.brain.sidebar.recentlyActiveHeading": "Kürzlich aktiv in",

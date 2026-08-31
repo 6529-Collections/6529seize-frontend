@@ -183,17 +183,18 @@
       "aliases": [
         "groups",
         "community groups",
-        "group list",
-        "network groups"
+        "saved groups"
       ],
       "facts": [
         "Groups are reusable community/member sets used across app workflows such as waves.",
-        "The groups area provides list, filter, card, and create/edit surfaces.",
-        "Group routes include Network-scoped group discovery and profile group tabs."
+        "On Network, open Filter and then Choose group to search for and apply a saved group.",
+        "Criteria-based groups are created inline from workflows such as Network filtering and Wave setup; there is no standalone Network Groups page.",
+        "A profile's Groups tab remains available at /{user}/groups."
       ],
-      "canonical_path": "/network/groups",
+      "canonical_path": "/network",
       "related_paths": [
-        "/{user}/groups"
+        "/{user}/groups",
+        "/waves/create"
       ],
       "tags": [
         "groups",

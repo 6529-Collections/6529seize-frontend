@@ -129,7 +129,6 @@ describe("useSidebarSections", () => {
     expect(aboutSection?.subsections[2]?.items).toEqual([
       { name: "Identities", href: "/network" },
       { name: "Activity", href: "/network/activity" },
-      { name: "Groups", href: "/network/groups" },
       { name: "TDH", href: "/network/tdh" },
       { name: "xTDH Overview", href: "/network/xtdh" },
       { name: "xTDH Allocations Dashboard", href: "/xtdh" },
