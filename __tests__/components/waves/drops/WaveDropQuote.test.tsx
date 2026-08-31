@@ -139,6 +139,30 @@ test("calls onQuoteClick on interaction", async () => {
   expect(onParentClick).not.toHaveBeenCalled();
 });
 
+test("opens the original post from a removed quote tombstone", async () => {
+  const drop = {
+    id: "d1",
+    serial_no: 42,
+    wave: { id: "w1", name: "wave" },
+    author: { id: "author-1", handle: "a", pfp: null },
+    moderation: {
+      status: ApiDropModerationStatus.ModeratorRemoved,
+      can_view: false,
+    },
+  } as any;
+  const onQuoteClick = jest.fn();
+
+  render(<WaveDropQuote drop={drop} partId={1} onQuoteClick={onQuoteClick} />);
+
+  await userEvent.click(
+    screen.getByRole("button", {
+      name: "Content removed by moderators. View original post",
+    })
+  );
+
+  expect(onQuoteClick).toHaveBeenCalledWith(drop);
+});
+
 test("displays quoted part content", () => {
   const drop = {
     id: "d1",

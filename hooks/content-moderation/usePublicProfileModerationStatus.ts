@@ -18,5 +18,7 @@ export const usePublicProfileModerationStatus = (
 
   return {
     isSuspended: query.data?.status === ApiModeratedProfileStatus.Suspended,
+    isLoading: query.isLoading,
+    isError: query.isError,
   };
 };

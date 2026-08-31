@@ -6,6 +6,25 @@ import {
 import { render, screen } from "@testing-library/react";
 
 describe("DropPlaceholder", () => {
+  it("renders the posting access loading placeholder", () => {
+    render(<DropPlaceholder type="profile-check" />);
+
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Checking posting access…"
+    );
+  });
+
+  it("renders the suspended profile placeholder", () => {
+    render(<DropPlaceholder type="suspended" />);
+
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "This profile is suspended and cannot post."
+    );
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Contact support if you believe this is an error."
+    );
+  });
+
   describe("chat restrictions", () => {
     it("renders not logged in message for chat", () => {
       render(

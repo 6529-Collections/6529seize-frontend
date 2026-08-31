@@ -4,6 +4,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { useContentModerationDropGateContext } from "./ContentModerationDropGateContext";
 import ContentModerationReportStatusButton from "./ContentModerationReportStatusButton";
+import ContentModerationAuthorNotice from "./ContentModerationAuthorNotice";
 
 function InlineAction({
   label,
@@ -39,13 +40,24 @@ export default function ContentModerationDropStatusControls() {
   const hasReportStatus = context !== null && context.reportStatus !== null;
   const revealedPersonalModeration =
     context?.revealedPersonalModeration ?? null;
+  const authorModerationStatus =
+    context?.canViewGlobalModeratedContent === true
+      ? context.globalModerationStatus
+      : null;
 
-  if (!hasReportStatus && revealedPersonalModeration === null) {
+  if (
+    !hasReportStatus &&
+    revealedPersonalModeration === null &&
+    authorModerationStatus === null
+  ) {
     return null;
   }
 
   return (
     <div className="tw-mb-1 tw-flex tw-flex-wrap tw-items-center tw-gap-1.5">
+      {authorModerationStatus !== null && (
+        <ContentModerationAuthorNotice status={authorModerationStatus} />
+      )}
       {hasReportStatus && <ContentModerationReportStatusButton />}
       {hasReportStatus && revealedPersonalModeration !== null && (
         <span aria-hidden="true" className="tw-text-xs tw-text-iron-500">

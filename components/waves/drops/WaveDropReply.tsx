@@ -73,7 +73,15 @@ export default function WaveDropReply({
     }
 
     return (
-      <ContentModerationDropGate drop={drop} compact>
+      <ContentModerationDropGate
+        drop={drop}
+        compact
+        onGlobalTombstoneClick={() => {
+          if (drop.serial_no > 0) {
+            onReplyClick(drop.serial_no);
+          }
+        }}
+      >
         {renderFixedReplyContent(
           <div className="tw-flex tw-w-full tw-min-w-0 tw-items-center tw-gap-x-1.5">
             <div className="tw-relative tw-z-10 tw-h-6 tw-w-6 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-md tw-bg-iron-800">

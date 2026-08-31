@@ -393,10 +393,12 @@ describe("ReportDropModal", () => {
     };
     renderModal({ drop });
 
-    expect(screen.getByText("Reported · Awaiting review")).toBeInTheDocument();
     expect(
-      screen.getByRole("checkbox", { name: "Report post" })
-    ).toBeDisabled();
+      screen.getByRole("heading", { name: "Report outcome" })
+    ).toBeInTheDocument();
+    expect(screen.getByText("Report submitted")).toBeInTheDocument();
+    expect(screen.getByText("Awaiting review")).toBeInTheDocument();
+    expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
     await userEvent.click(
       screen.getByRole("button", { name: "Withdraw report" })
     );
@@ -427,7 +429,7 @@ describe("ReportDropModal", () => {
       "Reviewed · Content removed",
     ],
   ])(
-    "keeps a %s report checked and locked while personal actions remain available",
+    "shows a dedicated outcome for a %s report",
     (reportStatus, statusLabel) => {
       const drop = createDrop("drop-1");
       drop.viewer_context = {
@@ -437,18 +439,27 @@ describe("ReportDropModal", () => {
       };
       renderModal({ drop });
 
-      const reportOption = screen.getByRole("checkbox", {
-        name: "Report post",
-      });
-      expect(reportOption).toBeChecked();
-      expect(reportOption).toBeDisabled();
-      expect(screen.getByText(statusLabel)).toBeInTheDocument();
       expect(
-        screen.getByRole("checkbox", { name: "Hide post" })
-      ).toBeEnabled();
+        screen.getByRole("heading", { name: "Report outcome" })
+      ).toBeInTheDocument();
+      expect(screen.getByText("Report reviewed")).toBeInTheDocument();
       expect(
-        screen.getByRole("checkbox", { name: "Block author" })
-      ).toBeEnabled();
+        screen.getByText(
+          reportStatus === ApiContentModerationReportStatus.ResolvedAllowed
+            ? "No action taken"
+            : "Content removed"
+        )
+      ).toBeInTheDocument();
+      expect(screen.queryByText(statusLabel)).not.toBeInTheDocument();
+      expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
+      expect(
+        screen.queryByText(
+          "Send this post to moderators for review and hide it from your view."
+        )
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("button", { name: "Withdraw report" })
+      ).not.toBeInTheDocument();
     }
   );
 });

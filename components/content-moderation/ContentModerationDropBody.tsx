@@ -15,7 +15,11 @@ export default function ContentModerationDropBody({
   const locale = useBrowserLocale();
   const context = useContentModerationDropGateContext();
   const status = context?.globalModerationStatus ?? null;
-  if (status === null || status === ApiDropModerationStatus.Visible) {
+  if (
+    status === null ||
+    status === ApiDropModerationStatus.Visible ||
+    context?.canViewGlobalModeratedContent === true
+  ) {
     return children;
   }
 

@@ -3,6 +3,7 @@
 import { useAuth } from "@/components/auth/Auth";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useContentModerationReportStatus } from "@/hooks/content-moderation/useContentModerationReportStatus";
 import { t } from "@/i18n/messages";
 import { FlagIcon } from "@heroicons/react/24/outline";
 
@@ -16,6 +17,7 @@ export default function ContentModerationDropActions({
   readonly onReport: () => void;
 }) {
   const locale = useBrowserLocale();
+  const reportStatus = useContentModerationReportStatus(drop);
   const { connectedProfile, activeProfileProxy } = useAuth();
   const isOwnDrop = connectedProfile?.id === drop.author.id;
   const isUnavailable =
@@ -42,7 +44,12 @@ export default function ContentModerationDropActions({
     >
       <FlagIcon aria-hidden="true" className={iconClassName} />
       <span className={labelClassName}>
-        {t(locale, "contentModeration.actions.report")}
+        {t(
+          locale,
+          reportStatus === null
+            ? "contentModeration.actions.report"
+            : "contentModeration.report.viewStatus"
+        )}
       </span>
     </button>
   );

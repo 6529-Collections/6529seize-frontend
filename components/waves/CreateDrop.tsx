@@ -19,8 +19,9 @@ import {
 } from "@/services/api/common-api";
 import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiContentModerationProfileStatusResponse } from "@/generated/models/ApiContentModerationProfileStatusResponse";
+import { ApiModeratedProfileStatus } from "@/generated/models/ApiModeratedProfileStatus";
 import { ApiDropType } from "@/generated/models/ApiDropType";
-import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { useAuth } from "../auth/Auth";
 import { useKeyPressEvent } from "react-use";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
@@ -45,6 +46,8 @@ import Button from "@/components/utils/button/Button";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { useModerationRejectedDropDelivery } from "./useModerationRejectedDropDelivery";
+import { PROFILE_SUSPENDED_ERROR_CODE } from "@/services/api/content-moderation-api";
+import { PUBLIC_PROFILE_MODERATION_STATUS_QUERY_KEY } from "@/services/content-moderation/content-moderation-query";
 import WaveGuidelinesAgreementDialog from "./create-drop-content/WaveGuidelinesAgreementDialog";
 import { useWaveGuidelinesAgreement } from "./create-drop-content/useWaveGuidelinesAgreement";
 import { useWaveGuidelinesSubmission } from "./create-drop-content/useWaveGuidelinesSubmission";
@@ -54,6 +57,7 @@ import type {
   SlowModeChatReservation,
   SlowModeChatWaveState,
 } from "./create-drop-content/drop-submission.types";
+import { getDropSubmissionErrorContent } from "./create-drop-content/drop-submission-error.helpers";
 
 interface CreateDropProps {
   readonly activeDrop: ActiveDropState | null;
@@ -509,6 +513,18 @@ export default function CreateDrop({
       const isContentModerationRejection =
         getStructuredApiErrorStatus(error) === 422 &&
         getStructuredApiErrorCode(error) === "CONTENT_MODERATION_REJECTED";
+      const isProfileSuspendedRejection =
+        getStructuredApiErrorStatus(error) === 403 &&
+        getStructuredApiErrorCode(error) === PROFILE_SUSPENDED_ERROR_CODE;
+      if (isProfileSuspendedRejection && connectedProfile?.id) {
+        queryClient.setQueryData<ApiContentModerationProfileStatusResponse>(
+          [...PUBLIC_PROFILE_MODERATION_STATUS_QUERY_KEY, connectedProfile.id],
+          {
+            profile_id: connectedProfile.id,
+            status: ApiModeratedProfileStatus.Suspended,
+          }
+        );
+      }
       setTimeout(() => {
         if (!body.dropId) {
           return;
@@ -528,14 +544,16 @@ export default function CreateDrop({
       }, 0);
       const isHandled = body.onError?.(error) === true;
       if (!isHandled) {
-        const errorDetails = getToastErrorDetails(error);
+        const errorContent = getDropSubmissionErrorContent({
+          error,
+          isContentModerationRejection,
+          isProfileSuspendedRejection,
+          locale,
+        });
         setToast({
           type: "error",
           title: t(locale, "contentModeration.dropSubmitErrorTitle"),
-          description: isContentModerationRejection
-            ? t(locale, "contentModeration.postRejected")
-            : t(locale, "contentModeration.error.retry"),
-          details: isContentModerationRejection ? undefined : errorDetails,
+          ...errorContent,
         });
       }
     },
