@@ -847,6 +847,62 @@ describe("host-specific Socket Firewall routing", () => {
   });
 });
 
+describe("documented private-package setup flows", () => {
+  it("requires runtime auth before staging setup can mutate the checkout", () => {
+    const setupScript = fs.readFileSync(
+      path.join(REPOSITORY_ROOT, "dev-setup", "run-staging-ec2-setup.sh"),
+      "utf8"
+    );
+    const authGuardIndex = setupScript.indexOf(
+      '[[ -z "${NODE_AUTH_TOKEN:-}" ]]'
+    );
+    const authPreflightIndex = setupScript.indexOf(
+      "require_private_package_auth\n",
+      setupScript.indexOf("main()")
+    );
+    const inputIndex = setupScript.indexOf(
+      "collect_all_inputs",
+      authPreflightIndex
+    );
+    const envWriteIndex = setupScript.indexOf(
+      "create_env_file",
+      authPreflightIndex
+    );
+    const dependencyInstallIndex = setupScript.indexOf(
+      "install_dependencies",
+      authPreflightIndex
+    );
+
+    expect(authGuardIndex).toBeGreaterThanOrEqual(0);
+    expect(authPreflightIndex).toBeGreaterThan(authGuardIndex);
+    expect(authPreflightIndex).toBeLessThan(inputIndex);
+    expect(authPreflightIndex).toBeLessThan(envWriteIndex);
+    expect(authPreflightIndex).toBeLessThan(dependencyInstallIndex);
+    expect(setupScript).toContain('rm -rf "$REPO_ROOT/node_modules"');
+    expect(setupScript).toContain("./bin/6529 install:frozen");
+    expect(setupScript).not.toContain("gh auth token");
+  });
+
+  it.each(["README.md", "CONTRIBUTING.md"])(
+    "documents runtime auth before the first install in %s",
+    (fileName) => {
+      const documentation = fs.readFileSync(
+        path.join(REPOSITORY_ROOT, fileName),
+        "utf8"
+      );
+      const authIndex = documentation.indexOf("NODE_AUTH_TOKEN");
+      const installIndex = documentation.indexOf("6529 install");
+
+      expect(authIndex).toBeGreaterThanOrEqual(0);
+      expect(authIndex).toBeLessThan(installIndex);
+      expect(documentation).toContain("read-only GitHub Packages access");
+      expect(documentation).toContain(
+        "ops/docs/developer/pnpm-and-socket-firewall.md"
+      );
+    }
+  );
+});
+
 describe("GitHub Actions package access", () => {
   it("keeps the exact private package out of unauthenticated Dependabot updates", () => {
     const dependabot = parseYaml(

@@ -39,6 +39,14 @@ color() {
   return 0
 }
 
+require_private_package_auth() {
+  if [[ -z "${NODE_AUTH_TOKEN:-}" ]]; then
+    color red "NODE_AUTH_TOKEN with read-only GitHub Packages access is required before staging setup."
+    exit 1
+  fi
+  return 0
+}
+
 # Resolve a real binary by stripping the repo's bin/ shim directory from PATH,
 # so calls like `npm -v` and `npm install --global` never hit the repo shims.
 # Usage: resolve_real_binary npm REAL_NPM
@@ -517,6 +525,9 @@ EOF
 # ---------- Main ----------
 
 main() {
+  # Package authentication must be present before prompts or filesystem changes.
+  require_private_package_auth
+
   # 0) Gather ALL user input up front (single interaction)
   collect_all_inputs
   create_env_file
