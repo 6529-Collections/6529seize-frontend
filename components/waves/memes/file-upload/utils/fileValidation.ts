@@ -16,20 +16,11 @@ const GLB_HEADER_LENGTH = 12;
 const GLB_MAGIC = 0x46546c67;
 const GLB_VERSION = 2;
 
-const readBlobAsArrayBuffer = (blob: Blob): Promise<ArrayBuffer> =>
-  new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result as ArrayBuffer);
-    reader.onerror = () =>
-      reject(reader.error ?? new Error("File read failed"));
-    reader.readAsArrayBuffer(blob);
-  });
-
 const hasValidGlbHeader = async (file: File): Promise<boolean> => {
   if (file.size < GLB_HEADER_LENGTH) return false;
   try {
     const header = new DataView(
-      await readBlobAsArrayBuffer(file.slice(0, GLB_HEADER_LENGTH))
+      await file.slice(0, GLB_HEADER_LENGTH).arrayBuffer()
     );
     return (
       header.getUint32(0, true) === GLB_MAGIC &&

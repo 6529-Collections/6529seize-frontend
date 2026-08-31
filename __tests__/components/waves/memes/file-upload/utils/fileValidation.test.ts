@@ -60,15 +60,13 @@ describe("fileValidation", () => {
       view.setUint32(0, 0x46546c67, true);
       view.setUint32(4, 2, true);
       view.setUint32(8, 12, true);
-      expect(
-        (
-          await validateFile(
-            new File([header], "scene.glb", {
-              type: "application/octet-stream",
-            })
-          )
-        ).valid
-      ).toBe(true);
+      const glbFile = new File([header], "scene.glb", {
+        type: "application/octet-stream",
+      });
+      Object.defineProperty(glbFile, "slice", {
+        value: () => ({ arrayBuffer: async () => header }),
+      });
+      expect((await validateFile(glbFile)).valid).toBe(true);
       expect(
         (
           await validateFile(
