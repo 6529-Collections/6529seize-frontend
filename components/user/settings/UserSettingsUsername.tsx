@@ -111,7 +111,7 @@ export default function UserSettingsUsername({
         } ${
           availabilityState === AVAILABILITY.NOT_AVAILABLE
             ? "tw-text-error"
-            : "tw-text-green-400"
+            : "tw-text-emerald-400"
         }`}
       >
         {usernameAvailability}

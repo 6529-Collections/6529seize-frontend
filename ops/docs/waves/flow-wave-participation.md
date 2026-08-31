@@ -64,6 +64,10 @@ same context.
    and drop eligibility. In memes-wave contexts, quick vote can also appear
    from dedicated footer triggers when unrated memes remain.
 8. Submit new content when participation is allowed.
+   - When the profile has never posted in the wave and the wave has
+     guidelines, submitting a first chat message opens the guidelines review.
+     **Agree** sends the pending message; **Decline** keeps the draft without
+     sending it.
 9. Share links so others can reopen the same wave or target drop.
 
 ## Common Scenarios
@@ -73,11 +77,13 @@ same context.
   CTA.
 - If no wave is selected on desktop list routes, the UI shows selection
   placeholders (`Select a Wave` or `Select a Conversation`).
-- `Rank` and `Approve` rules show two layers: automatic rules generated from
-  wave settings and optional creator rules. Creator rules that require
-  acceptance are enforced by the existing submit terms/signature modal.
-- `Chat` rules show automatic chat/access rules and optional display-only
-  creator rules.
+- `Rank` and `Approve` rules show generated rules from wave settings, optional
+  wave guidelines, and any rules that require acceptance. Acceptance-required
+  rules are enforced by the existing submit terms/signature modal.
+- `Chat` rules show generated chat/access rules and optional wave guidelines.
+- Wave guidelines are display-only, but a profile with no prior chat messages
+  or participation drops reviews them before its first chat message is sent.
+  Declining keeps the draft and shows the review again on the next attempt.
 - When posting is blocked, thread content stays readable and the composer area
   shows blocked states (for example
   `Connect your wallet to participate in this wave`,
@@ -124,6 +130,7 @@ same context.
 - [Wave Drop Actions Index](drop-actions/README.md)
 - [Wave Creation Index](create/README.md)
 - [Wave Creation Rules Step](create/feature-rules-step.md)
+- [First-Message Wave Guidelines](composer/feature-first-message-guidelines.md)
 - [Public Wave Preview](feature-public-wave-preview.md)
 - [Wave Winners Tab](leaderboard/feature-winners-tab.md)
 - [Wave Outcome Lists](feature-outcome-lists.md)

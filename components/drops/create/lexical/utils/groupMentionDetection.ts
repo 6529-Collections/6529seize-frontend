@@ -55,10 +55,10 @@ const getMentionTextSegments = (element: ElementNode): string[] => {
 
 export const getMentionedGroupsFromEditorState = (
   editorState: EditorState,
-  canMentionAll: boolean
+  canMentionAdminOnlyGroups: boolean
 ): ApiDropGroupMention[] => {
   return editorState.read(() => {
     const content = getMentionTextSegments($getRoot()).join("\n");
-    return getMentionedGroupsFromText(content, canMentionAll);
+    return getMentionedGroupsFromText(content, canMentionAdminOnlyGroups);
   });
 };

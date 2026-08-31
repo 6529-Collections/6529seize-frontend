@@ -40,8 +40,8 @@ jest.mock(
   "@/components/community/members-table/CommunityMembersTableSkeleton",
   () => () => <div data-testid="loading-skeleton" />
 );
-jest.mock("@/components/groups/sidebar/GroupsSidebar", () => () => (
-  <div data-testid="groups-sidebar" />
+jest.mock("@/components/community/CommunityMembersGroupFilter", () => () => (
+  <div data-testid="network-group-filter" />
 ));
 jest.mock("@/components/community/CommunityMembersGroupDetails", () => () => (
   <div data-testid="group-details" />

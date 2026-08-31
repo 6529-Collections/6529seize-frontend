@@ -83,13 +83,14 @@ jest.mock("framer-motion", () => {
       ),
     LayoutGroup: ({ children }: { children: React.ReactNode }) =>
       React.createElement(React.Fragment, null, children),
+    useReducedMotion: () => false,
   };
 });
 
 jest.mock("@/components/waves/StormButton", () => {
   return function MockStormButton({
     isStormMode,
-    canAddPart,
+    isPollActive,
     submitting,
     breakIntoStorm,
   }: any) {
@@ -97,7 +98,7 @@ jest.mock("@/components/waves/StormButton", () => {
       <button
         data-testid="storm-button"
         onClick={breakIntoStorm}
-        disabled={submitting || !canAddPart}
+        disabled={submitting || isPollActive}
       >
         {isStormMode ? "Storm Mode" : "Storm"}
       </button>
@@ -153,7 +154,6 @@ describe("CreateDropActions", () => {
   const defaultProps = {
     isStormMode: false,
     isDropMode: true,
-    canAddPart: true,
     submitting: false,
     isRequiredMetadataMissing: false,
     isRequiredMediaMissing: false,
@@ -310,7 +310,7 @@ describe("CreateDropActions", () => {
     ).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
   });
 
-  it("shows active poll action state", () => {
+  it("hides the poll action while a poll is active", () => {
     render(
       <CreateDropActions
         {...defaultProps}
@@ -319,9 +319,32 @@ describe("CreateDropActions", () => {
       />
     );
 
-    const pollButton = screen.getByLabelText("Remove poll");
-    expect(pollButton).toHaveAttribute("aria-pressed", "true");
-    expect(pollButton).toHaveClass("tw-bg-primary-500/20");
+    expect(screen.queryByLabelText("Add poll")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Remove poll")).not.toBeInTheDocument();
+  });
+
+  it("disables the storm action while a poll is active", () => {
+    render(
+      <CreateDropActions
+        {...defaultProps}
+        canCreatePoll={true}
+        isPollActive={true}
+      />
+    );
+
+    expect(screen.getByTestId("storm-button")).toBeDisabled();
+  });
+
+  it("disables the poll action while a storm is active", () => {
+    render(
+      <CreateDropActions
+        {...defaultProps}
+        canCreatePoll={true}
+        isStormMode={true}
+      />
+    );
+
+    expect(screen.getByLabelText("Add poll")).toBeDisabled();
   });
 
   it("calls onAddMetadataClick when metadata button is clicked", async () => {
@@ -469,7 +492,6 @@ describe("CreateDropActions", () => {
       <CreateDropActions
         {...defaultProps}
         isStormMode={true}
-        canAddPart={false}
         submitting={true}
       />
     );

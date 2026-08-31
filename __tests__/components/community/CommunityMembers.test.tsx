@@ -44,9 +44,20 @@ jest.mock(
   () => () => <div data-testid="mobile-sort" />
 );
 
-jest.mock("@/components/groups/sidebar/GroupsSidebar", () => () => (
-  <div data-testid="groups-sidebar" />
-));
+jest.mock(
+  "@/components/community/CommunityMembersGroupFilter",
+  () =>
+    ({ activeGroupId, onGroupChange }: any) => (
+      <div data-testid="network-group-filter" data-group-id={activeGroupId}>
+        <button
+          type="button"
+          onClick={() => onGroupChange({ id: "new-group", name: "New group" })}
+        >
+          Apply group filter
+        </button>
+      </div>
+    )
+);
 jest.mock(
   "@/components/community/CommunityMembersGroupDetails",
   () =>
@@ -306,7 +317,14 @@ describe("CommunityMembers", () => {
     );
     expect(screen.getByTestId("mobile-dialog")).toHaveAttribute(
       "data-title",
-      "Groups"
+      "Filter Network"
     );
+    expect(screen.getByTestId("network-group-filter")).toHaveAttribute(
+      "data-group-id",
+      "1"
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Apply group filter" }));
+    expect(setActiveGroupId).toHaveBeenCalledWith("new-group");
   });
 });

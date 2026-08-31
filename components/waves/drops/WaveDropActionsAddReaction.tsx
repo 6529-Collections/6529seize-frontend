@@ -15,6 +15,8 @@ const WaveDropActionsAddReaction: React.FC<{
   readonly isMobile?: boolean | undefined;
   readonly onAddReaction?: (() => void) | undefined;
   readonly dialogZIndexClassName?: string | undefined;
+  readonly onMobilePickerOpen?: (() => void) | undefined;
+  readonly mobileButtonRef?: React.Ref<HTMLButtonElement> | undefined;
   readonly size?: "default" | "compact" | undefined;
   readonly updateCurationCache?: boolean | undefined;
 }> = ({
@@ -22,6 +24,8 @@ const WaveDropActionsAddReaction: React.FC<{
   isMobile = false,
   onAddReaction,
   dialogZIndexClassName,
+  onMobilePickerOpen,
+  mobileButtonRef,
   size = "default",
   updateCurationCache = false,
 }) => {
@@ -74,11 +78,17 @@ const WaveDropActionsAddReaction: React.FC<{
 
   const onReact = () => {
     if (!canReact) return;
-    setShowPicker(!showPicker);
+    if (isMobile && onMobilePickerOpen) {
+      onMobilePickerOpen();
+      return;
+    }
+    setShowPicker((isPickerOpen) => !isPickerOpen);
   };
 
   const mobileContent = (
     <button
+      ref={mobileButtonRef}
+      type="button"
       className={`tw-flex tw-items-center tw-gap-x-4 tw-rounded-xl tw-border-0 tw-bg-iron-950 tw-p-4 ${
         canReact ? "active:tw-bg-iron-800" : "tw-cursor-default tw-opacity-50"
       } tw-transition-colors tw-duration-200`}
@@ -181,12 +191,12 @@ const WaveDropActionsAddReaction: React.FC<{
         )}
 
       {/* Mobile Picker */}
-      {isMobile && (
+      {isMobile && !onMobilePickerOpen && (
         <MobileWrapperDialog
           isOpen={showPicker}
           onClose={() => setShowPicker(false)}
           zIndexClassName={dialogZIndexClassName}
-          showHeaderCloseButton={false}
+          headerCloseButtonClassName="!tw-size-11"
         >
           <div
             className="tw-flex tw-size-full tw-items-center tw-justify-center"

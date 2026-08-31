@@ -93,7 +93,7 @@ export const WaveGalleryItem = memo<WaveGalleryItemProps>(
           />
         </div>
         {drop.author.handle && (
-          <div className="tw-absolute tw-bottom-2 tw-left-2 tw-right-2 tw-flex tw-items-center tw-gap-2 tw-opacity-100 tw-transition-opacity tw-duration-300 group-hover:tw-opacity-100 lg:tw-opacity-0">
+          <div className="tw-absolute tw-bottom-2 tw-left-2 tw-right-2 tw-flex tw-items-center tw-gap-2 tw-opacity-100 tw-transition-opacity tw-duration-300 desktop-hover:group-hover:tw-opacity-100 touch-only:!tw-opacity-100 lg:tw-opacity-0">
             <UserProfileTooltipWrapper user={drop.author.handle}>
               <Link
                 onClick={(e) => e.stopPropagation()}

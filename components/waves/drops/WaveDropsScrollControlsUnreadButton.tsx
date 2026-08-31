@@ -104,8 +104,9 @@ export function WaveDropsScrollControlsUnreadButton({
     >
       <div className="tw-group tw-relative">
         <button
+          type="button"
           onClick={handleDismiss}
-          className="tw-absolute -tw-right-2 -tw-top-2 tw-z-50 tw-hidden tw-size-6 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-indigo-500 tw-text-white tw-opacity-0 tw-transition-all tw-duration-200 group-hover:tw-opacity-50 hover:!tw-opacity-100 lg:tw-flex"
+          className="tw-absolute -tw-right-2 -tw-top-2 tw-z-50 tw-hidden tw-size-6 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-indigo-500 tw-text-white tw-opacity-0 tw-transition-all tw-duration-200 focus-visible:tw-opacity-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:group-hover:tw-opacity-50 desktop-hover:hover:!tw-opacity-100 touch-only:tw-opacity-100 lg:tw-flex"
           aria-label="Dismiss"
         >
           <svg
@@ -123,6 +124,7 @@ export function WaveDropsScrollControlsUnreadButton({
           </svg>
         </button>
         <button
+          type="button"
           onClick={handleUnreadClick}
           onTouchStart={handlers.onTouchStart}
           onTouchMove={handlers.onTouchMove}
@@ -131,7 +133,7 @@ export function WaveDropsScrollControlsUnreadButton({
           onMouseMove={handlers.onMouseMove}
           onMouseUp={handlers.onMouseUp}
           onMouseLeave={handlers.onMouseLeave}
-          className={`tw-flex tw-h-10 tw-min-w-[2.75rem] tw-items-center tw-justify-center tw-gap-2 tw-border-0 tw-bg-indigo-500 tw-px-4 tw-text-white tw-opacity-50 tw-transition-all tw-duration-300 hover:tw-opacity-100 lg:tw-h-8 ${roundedClassName} ${isCombined ? combinedWidthClassName : ""}`}
+          className={`tw-flex tw-h-10 tw-min-w-[2.75rem] tw-items-center tw-justify-center tw-gap-2 tw-border-0 tw-bg-indigo-500 tw-px-4 tw-text-white tw-opacity-50 tw-transition-all tw-duration-300 desktop-hover:hover:tw-opacity-100 touch-only:tw-opacity-100 lg:tw-h-8 ${roundedClassName} ${isCombined ? combinedWidthClassName : ""}`}
           aria-label="Scroll to first unread message"
         >
           {unreadContent}

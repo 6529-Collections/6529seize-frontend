@@ -1,12 +1,19 @@
+import type { ApiCreateNewWave } from "@/generated/models/ApiCreateNewWave";
+import type { ApiCreateWaveDropRequest } from "@/generated/models/ApiCreateWaveDropRequest";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
+import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveCuration } from "@/generated/models/ApiWaveCuration";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
+import { getCreateNewWaveBody } from "@/helpers/waves/create-wave.helpers";
 import {
   isPublicNonDirectMessageWave,
   isWaveDirectMessage,
 } from "@/helpers/waves/wave.helpers";
+import type { CreateWaveConfig } from "@/types/waves.types";
 
 type ApiErrorLike = {
   readonly status?: number | undefined;
@@ -46,6 +53,109 @@ type ProfileCurationViewState =
     };
 
 export const CREATE_WAVE_HREF = "/waves?create=wave";
+export const DEFAULT_PROFILE_CURATION_NAME = "Posts";
+
+export const getProfileCurationSourceWaveName = (handle: string): string =>
+  `${handle} Curation`;
+
+export const getProfileCurationSourceWaveRequest = ({
+  adminGroupId,
+  handle,
+  now = Date.now(),
+}: {
+  readonly adminGroupId: string;
+  readonly handle: string;
+  readonly now?: number | undefined;
+}): ApiCreateNewWave => {
+  const waveName = getProfileCurationSourceWaveName(handle);
+  const config: CreateWaveConfig = {
+    overview: {
+      type: ApiWaveType.Chat,
+      typeSelected: true,
+      name: waveName,
+      image: null,
+    },
+    groups: {
+      canView: null,
+      canDrop: null,
+      canVote: null,
+      canChat: null,
+      admin: adminGroupId,
+    },
+    chat: { enabled: true },
+    dates: {
+      submissionStartDate: now,
+      votingStartDate: now,
+      endDate: null,
+      firstDecisionTime: now,
+      subsequentDecisions: [],
+      isRolling: false,
+      ongoingRanking: false,
+    },
+    drops: {
+      noOfApplicationsAllowedPerParticipant: null,
+      requiredTypes: [],
+      requiredMetadata: [],
+      submissionStrategy: null,
+      terms: null,
+      signatureRequired: false,
+      adminCanDeleteDrops: true,
+    },
+    voting: {
+      type: ApiWaveCreditType.TdhPlusXtdh,
+      creditScope: ApiWaveCreditScope.Wave,
+      category: null,
+      profileId: null,
+      creditNfts: [],
+      creditNftMemeCount: null,
+      allowNegativeVotes: true,
+      maxVotesPerIdentityPerDrop: null,
+      winningThreshold: null,
+      timeWeighted: {
+        enabled: false,
+        averagingInterval: 24,
+        averagingIntervalUnit: "hours",
+      },
+    },
+    outcomes: [],
+    approval: {
+      threshold: null,
+      thresholdTimeMs: null,
+      maxWinners: null,
+    },
+    display: {
+      approve: { approvalsTabLabel: "", approvedTabLabel: "" },
+      proposalCards: {
+        mode: "standard",
+        excerptMaxCharacters: 0,
+        showMediaThumbnail: false,
+      },
+      customRules: null,
+      outcomesVisible: true,
+      submissionButtonLabel: null,
+    },
+  };
+  const descriptionDrop: ApiCreateWaveDropRequest = {
+    title: null,
+    parts: [
+      {
+        content: `Public posts for @${handle}'s profile Curation.`,
+        quoted_drop: null,
+        media: [],
+      },
+    ],
+    referenced_nfts: [],
+    mentioned_users: [],
+    metadata: [],
+    signature: null,
+  };
+
+  return getCreateNewWaveBody({
+    config,
+    picture: null,
+    drop: descriptionDrop,
+  });
+};
 
 const getErrorStatus = (error: unknown): number | null => {
   if (error === null || error === undefined || typeof error !== "object") {
@@ -115,11 +225,15 @@ export const getProfileCurationTitle = (
   return trimmedTitle.length > 0 ? trimmedTitle : "Curation";
 };
 
-export const getOfficialWaveMetadataLabel = (wave: ApiWave): string =>
-  [
-    `${wave.metrics.drops_count} posts`,
+export const getOfficialWaveMetadataLabel = (wave: ApiWave): string => {
+  const sourcePostLabel =
+    wave.metrics.drops_count === 1 ? "source post" : "source posts";
+
+  return [
+    `${wave.metrics.drops_count} ${sourcePostLabel}`,
     `${wave.metrics.subscribers_count} joined`,
   ].join(" • ");
+};
 
 const getMissingCurationConfig = (
   canManageOwnOfficialWave: boolean
@@ -130,8 +244,8 @@ const getMissingCurationConfig = (
         message: "Create a curation to start adding profile posts here.",
       }
     : {
-        title: "No curations yet",
-        message: "This identity hasn't curated anything here yet.",
+        title: "No Curations yet",
+        message: "This profile hasn't curated anything here yet.",
       };
 
 const getEmptyDropsConfig = (
@@ -140,10 +254,10 @@ const getEmptyDropsConfig = (
 ): EmptyStateConfig => ({
   title: canManageOwnOfficialWave
     ? `Nothing in ${curationTitle} yet`
-    : "No curated drops yet",
+    : "No curated posts yet",
   message: canManageOwnOfficialWave
     ? `Add a post to start "${curationTitle}".`
-    : "This identity hasn't added any drops to this curation yet.",
+    : "This profile hasn't added any posts to this Curation yet.",
 });
 
 export const resolveWavePickerViewState = ({

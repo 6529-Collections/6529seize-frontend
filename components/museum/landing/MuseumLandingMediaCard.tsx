@@ -19,6 +19,7 @@ export type MuseumLandingMedia =
       readonly height: number | null;
       readonly alt: string;
       readonly creditLine?: string;
+      readonly srcSet?: string;
     }
   | {
       readonly kind: "proposal";
@@ -93,6 +94,7 @@ function MediaFrame({
       loading={eager ? "eager" : "lazy"}
       fetchPriority={eager ? "high" : "auto"}
       sizes="(min-width: 1280px) 42vw, (min-width: 640px) 70vw, 100vw"
+      {...(media.srcSet === undefined ? {} : { srcSet: media.srcSet })}
       failureMessage={t(DEFAULT_LOCALE, "museum.network.media.unavailable")}
       retryLabel={t(DEFAULT_LOCALE, "museum.network.media.retry")}
       className={frameClassName}

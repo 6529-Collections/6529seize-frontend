@@ -1024,8 +1024,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           # Exact canonical-C qualification. The runtime resolves the pointer
           # and catalog at C, then assembles only the immutable reviewed B corpus.
-          MUSEUM_PUBLICATION_TEST_CATALOG_COMMIT: "a3977a8f020f58d0c9e79f23bc4f37245be65879"
-          MUSEUM_PUBLICATION_TEST_SOURCE_COMMIT: "f52fe5513423d8049bb557749a9fce1070ace64b"
+          MUSEUM_PUBLICATION_TEST_CATALOG_COMMIT: "858d3ebc049b59219d6fa639dbd325b6adc7345a"
+          MUSEUM_PUBLICATION_TEST_SOURCE_COMMIT: "92966f2836ebf2af06edfe0fe2cff25041307c92"
         run: |
           set -euo pipefail
           mapfile -t museum_refs < <(
@@ -1430,7 +1430,7 @@ jobs:
             PLAYWRIGHT_BASE_URL="$museum_base_url" \
             PLAYWRIGHT_OUTPUT_DIR="test-results/playwright/museum-remaining" \
             PLAYWRIGHT_HTML_REPORT_DIR="playwright-report/museum-remaining" \
-            timeout --signal=TERM --kill-after=30s 15m \
+            timeout --signal=TERM --kill-after=30s 20m \
             ./bin/6529 exec playwright test \
               "${selected_specs[@]}" \
               --project="$MUSEUM_PROJECT" \
@@ -1444,7 +1444,7 @@ jobs:
           set -e
           if [ "$museum_remaining_exit" -ne 0 ]; then
             if [ "$museum_remaining_exit" -eq 124 ]; then
-              echo "::error::Museum $MUSEUM_PROJECT remaining coverage exceeded its 15-minute timeout."
+              echo "::error::Museum $MUSEUM_PROJECT remaining coverage exceeded its 20-minute timeout."
             else
               echo "::error::Museum $MUSEUM_PROJECT remaining coverage failed with exit ${museum_remaining_exit}."
             fi

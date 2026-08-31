@@ -1,15 +1,23 @@
 "use client";
 
 import { AuthContext } from "@/components/auth/Auth";
-import CommonDropdownItemsMobileWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper";
+import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
-import { useCanShowDropCurationsAction } from "@/hooks/drops/useCanShowDropCurationsAction";
+import {
+  type QuickCurationAction,
+  useCanShowDropCurationsAction,
+} from "@/hooks/drops/useCanShowDropCurationsAction";
+import { useDropCurationMembershipMutation } from "@/hooks/drops/useDropCurationMembershipMutation";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
+import { getProfileWaveIdentity } from "@/hooks/useProfileWave";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import useCapacitor from "@/hooks/useCapacitor";
-import type { FC, PointerEvent } from "react";
+import { PlusIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import type { FC, PointerEvent, Ref } from "react";
 import {
   useCallback,
   useContext,
@@ -18,7 +26,6 @@ import {
   useRef,
   useState,
 } from "react";
-import { createPortal } from "react-dom";
 import WaveDropActionsAddReaction from "./WaveDropActionsAddReaction";
 import WaveDropCurationsActionIcon from "./WaveDropCurationsActionIcon";
 import WaveDropCurationsDialog from "./WaveDropCurationsDialog";
@@ -33,6 +40,7 @@ import WaveDropActionsQuickReact from "./WaveDropActionsQuickReact";
 import { useWaveDropLayers } from "./WaveDropLayerContext";
 import WaveDropMobileMenuCopyLink from "./WaveDropMobileMenuCopyLink";
 import WaveDropMobileMenuCopyText from "./WaveDropMobileMenuCopyText";
+import WaveDropMobileMenuReactionPicker from "./WaveDropMobileMenuReactionPicker";
 
 export interface WaveDropMobileMenuProps {
   readonly drop: ApiDrop;
@@ -47,11 +55,14 @@ export interface WaveDropMobileMenuProps {
   readonly showOpenOption?: boolean | undefined;
   readonly showCopyOption?: boolean | undefined;
   readonly showVoting?: boolean | undefined;
+  readonly showOnlyQuickRemove?: boolean | undefined;
 }
 
 type TimeoutRef = {
   current: ReturnType<typeof setTimeout> | null;
 };
+
+type WaveDropMobileMenuView = "actions" | "reactions";
 
 const clearCurationsDialogTimeout = (timeoutRef: TimeoutRef) => {
   if (timeoutRef.current !== null) {
@@ -83,12 +94,16 @@ function WaveDropMobileMenuAuthenticatedActions({
   showReplyAndQuote,
   isTemporaryDrop,
   onReply,
-  onAddReaction,
-  dialogZIndexClassName,
+  onOpenReactionPicker,
+  reactionButtonRef,
   onBoostAnimation,
   showOpenOption,
   showCopyOption,
-  showCurationsAction,
+  showManageCurations,
+  quickAddCuration,
+  quickRemoveCuration,
+  onQuickAdd,
+  onQuickRemove,
   onCurationsClick,
   isAuthor,
   showOptions,
@@ -97,18 +112,23 @@ function WaveDropMobileMenuAuthenticatedActions({
   canDelete,
   closeMenu,
   showVoting,
+  showOnlyQuickRemove,
 }: {
   readonly extendedDrop: ExtendedDrop;
   readonly drop: ApiDrop;
   readonly showReplyAndQuote: boolean;
   readonly isTemporaryDrop: boolean;
   readonly onReply: () => void;
-  readonly onAddReaction: () => void;
-  readonly dialogZIndexClassName?: string | undefined;
+  readonly onOpenReactionPicker: () => void;
+  readonly reactionButtonRef: Ref<HTMLButtonElement>;
   readonly onBoostAnimation?: (() => void) | undefined;
   readonly showOpenOption: boolean;
   readonly showCopyOption: boolean;
-  readonly showCurationsAction: boolean;
+  readonly showManageCurations: boolean;
+  readonly quickAddCuration: QuickCurationAction | null;
+  readonly quickRemoveCuration: QuickCurationAction | null;
+  readonly onQuickAdd: () => void;
+  readonly onQuickRemove: () => void;
   readonly onCurationsClick: () => void;
   readonly isAuthor: boolean;
   readonly showOptions: boolean;
@@ -117,7 +137,9 @@ function WaveDropMobileMenuAuthenticatedActions({
   readonly canDelete: boolean;
   readonly closeMenu: () => void;
   readonly showVoting: boolean;
+  readonly showOnlyQuickRemove: boolean;
 }) {
+  const locale = useBrowserLocale();
   const handledTouchReplyRef = useRef(false);
   const handledTouchReplyResetTimeoutRef = useRef<ReturnType<
     typeof setTimeout
@@ -158,6 +180,21 @@ function WaveDropMobileMenuAuthenticatedActions({
     onReply();
   };
 
+  if (showOnlyQuickRemove) {
+    return quickRemoveCuration ? (
+      <button
+        type="button"
+        onClick={onQuickRemove}
+        className="tw-flex tw-items-center tw-gap-x-4 tw-rounded-xl tw-border-0 tw-bg-iron-950 tw-p-4 tw-text-left tw-transition-colors tw-duration-200 active:tw-bg-rose-500/10"
+      >
+        <XMarkIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-rose-400" />
+        <span className="tw-min-w-0 tw-break-words tw-text-base tw-font-semibold tw-text-rose-400">
+          {t(locale, "profileCuration.actions.removeConfirm")}
+        </span>
+      </button>
+    ) : null;
+  }
+
   return (
     <>
       <WaveDropActionsQuickReact
@@ -168,8 +205,8 @@ function WaveDropMobileMenuAuthenticatedActions({
       <WaveDropActionsAddReaction
         drop={extendedDrop}
         isMobile={true}
-        onAddReaction={onAddReaction}
-        dialogZIndexClassName={dialogZIndexClassName}
+        onMobilePickerOpen={onOpenReactionPicker}
+        mobileButtonRef={reactionButtonRef}
       />
       {showReplyAndQuote && (
         <button
@@ -229,7 +266,22 @@ function WaveDropMobileMenuAuthenticatedActions({
         </>
       )}
 
-      {showCurationsAction && (
+      {quickAddCuration && (
+        <button
+          type="button"
+          onClick={onQuickAdd}
+          className="tw-flex tw-items-center tw-gap-x-4 tw-rounded-xl tw-border-0 tw-bg-iron-950 tw-p-4 tw-text-left tw-transition-colors tw-duration-200 active:tw-bg-iron-800"
+        >
+          <PlusIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-iron-300" />
+          <span className="tw-min-w-0 tw-break-words tw-text-base tw-font-semibold tw-text-iron-300">
+            {t(locale, "profileCuration.actions.quickAdd", {
+              curationName: quickAddCuration.name,
+            })}
+          </span>
+        </button>
+      )}
+
+      {showManageCurations && (
         <button
           type="button"
           onClick={onCurationsClick}
@@ -237,7 +289,22 @@ function WaveDropMobileMenuAuthenticatedActions({
         >
           <WaveDropCurationsActionIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-iron-300" />
           <span className="tw-text-base tw-font-semibold tw-text-iron-300">
-            Curate
+            {t(locale, "profileCuration.actions.manage")}
+          </span>
+        </button>
+      )}
+
+      {quickRemoveCuration && (
+        <button
+          type="button"
+          onClick={onQuickRemove}
+          className="tw-flex tw-items-center tw-gap-x-4 tw-rounded-xl tw-border-0 tw-bg-iron-950 tw-p-4 tw-text-left tw-transition-colors tw-duration-200 active:tw-bg-rose-500/10"
+        >
+          <XMarkIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-rose-400" />
+          <span className="tw-min-w-0 tw-break-words tw-text-base tw-font-semibold tw-text-rose-400">
+            {t(locale, "profileCuration.actions.quickRemove", {
+              curationName: quickRemoveCuration.name,
+            })}
           </span>
         </button>
       )}
@@ -272,7 +339,7 @@ function WaveDropMobileMenuAuthenticatedActions({
   );
 }
 
-const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
+const WaveDropMobileMenuContent: FC<WaveDropMobileMenuProps> = ({
   drop,
   isOpen,
   showReplyAndQuote,
@@ -285,13 +352,14 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
   showOpenOption = true,
   showCopyOption = true,
   showVoting = true,
+  showOnlyQuickRemove = false,
 }) => {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
+  const locale = useBrowserLocale();
   const { isCapacitor } = useCapacitor();
   const isTemporaryDrop = drop.id.startsWith("temp-");
   const { canDelete, canSetPinnedDrop } = useDropInteractionRules(drop);
-  const { mobileMenuZIndexClassName, mobileDialogZIndexClassName } =
-    useWaveDropLayers();
+  const { mobileMenuZIndexClassName } = useWaveDropLayers();
 
   const extendedDrop = useMemo<ExtendedDrop>(
     () => ({
@@ -303,6 +371,9 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
     [drop]
   );
   const [isCurationsDialogOpen, setIsCurationsDialogOpen] = useState(false);
+  const [activeView, setActiveView] =
+    useState<WaveDropMobileMenuView>("actions");
+  const reactionButtonRef = useRef<HTMLButtonElement>(null);
   const curationsDialogTimeoutRef = useRef<ReturnType<
     typeof setTimeout
   > | null>(null);
@@ -330,14 +401,60 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
   );
 
   const closeMenu = () => setOpen(false);
+  const resetMenuView = () => setActiveView("actions");
+  const backToActions = () => {
+    setActiveView("actions");
+    globalThis.requestAnimationFrame(() => reactionButtonRef.current?.focus());
+  };
   const showGuestCopyOnly = connectedProfileHandle === null;
-  const showCurationsAction = useCanShowDropCurationsAction({
+  const { showManageCurations, quickAddCuration, quickRemoveCuration } =
+    useCanShowDropCurationsAction({
+      dropId: drop.id,
+      waveId: drop.wave.id,
+      profileIdentity: getProfileWaveIdentity(connectedProfile),
+      isTemporaryDrop,
+      isWaveAdmin: drop.wave.authenticated_user_admin === true,
+      enabled:
+        (isOpen || isCurationsDialogOpen) && connectedProfileHandle !== null,
+    });
+  const { updateMembershipAsync } = useDropCurationMembershipMutation({
     dropId: drop.id,
-    isTemporaryDrop,
-    isWaveAdmin: drop.wave.authenticated_user_admin === true,
-    enabled:
-      (isOpen || isCurationsDialogOpen) && connectedProfileHandle !== null,
+    waveId: drop.wave.id,
   });
+
+  const handleQuickAdd = async () => {
+    if (!quickAddCuration) {
+      return;
+    }
+
+    closeMenu();
+    try {
+      await updateMembershipAsync(quickAddCuration.id, "add", {
+        successMessage: t(locale, "profileCuration.membership.addedTo", {
+          curationName: quickAddCuration.name,
+        }),
+      });
+    } catch {
+      // The mutation owns the user-facing error toast.
+    }
+  };
+
+  const handleQuickRemove = async () => {
+    if (!quickRemoveCuration) {
+      return;
+    }
+
+    closeMenu();
+    try {
+      await updateMembershipAsync(quickRemoveCuration.id, "remove", {
+        successMessage: t(locale, "profileCuration.membership.removedFrom", {
+          curationName: quickRemoveCuration.name,
+        }),
+      });
+    } catch {
+      // The mutation owns the user-facing error toast.
+    }
+  };
 
   const handleCurationsClick = () =>
     openCurationsDialogAfterMenuClose({
@@ -345,56 +462,86 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
       closeMenu,
       setIsCurationsDialogOpen,
     });
+  const dialogLabel = t(
+    locale,
+    activeView === "reactions"
+      ? "waves.drop.actions.reactionPickerLabel"
+      : "waves.drop.actions.menuLabel"
+  );
 
   return (
     <>
-      {createPortal(
-        <CommonDropdownItemsMobileWrapper
-          isOpen={isOpen}
-          setOpen={setOpen}
-          hideOnDesktopHover={!isCapacitor}
-          zIndexClassName={mobileMenuZIndexClassName}
-        >
-          <div
-            className={`tw-grid tw-grid-cols-1 ${
-              longPressTriggered && "tw-select-none"
-            }`}
-          >
-            {showGuestCopyOnly ? (
-              showCopyOption && (
-                <>
-                  <WaveDropMobileMenuCopyText drop={drop} onCopy={closeMenu} />
-                  <WaveDropMobileMenuCopyLink drop={drop} onCopy={closeMenu} />
-                </>
-              )
-            ) : (
-              <WaveDropMobileMenuAuthenticatedActions
-                extendedDrop={extendedDrop}
-                drop={drop}
-                showReplyAndQuote={showReplyAndQuote}
-                isTemporaryDrop={isTemporaryDrop}
-                onReply={onReply}
-                onAddReaction={onAddReaction}
-                dialogZIndexClassName={mobileDialogZIndexClassName}
-                onBoostAnimation={onBoostAnimation}
-                showOpenOption={showOpenOption}
-                showCopyOption={showCopyOption}
-                showCurationsAction={showCurationsAction}
-                onCurationsClick={handleCurationsClick}
-                isAuthor={isAuthor}
-                showOptions={showOptions}
-                onEdit={onEdit}
-                canSetPinnedDrop={canSetPinnedDrop}
-                canDelete={canDelete}
-                closeMenu={closeMenu}
-                showVoting={showVoting}
-              />
-            )}
+      <MobileWrapperDialog
+        ariaLabel={dialogLabel}
+        isOpen={isOpen}
+        onClose={closeMenu}
+        onBack={activeView === "reactions" ? backToActions : undefined}
+        onAfterLeave={resetMenuView}
+        zIndexClassName={mobileMenuZIndexClassName}
+        showHeaderDivider={activeView === "reactions"}
+        showScrollbar={activeView === "actions"}
+        enableDragToClose
+        hideOnDesktopHover={!isCapacitor}
+      >
+        {activeView === "actions" ? (
+          <div className="tw-px-4 sm:tw-px-6">
+            <div
+              className={`tw-grid tw-grid-cols-1 tw-gap-y-1 [&>button]:tw-min-h-12 [&>button]:tw-gap-x-3 [&>button]:tw-rounded-lg [&>button]:tw-px-3.5 [&>button]:tw-py-2.5 [&>button>span]:tw-text-base [&>button>span]:tw-font-medium ${
+                longPressTriggered && "tw-select-none"
+              }`}
+            >
+              {showGuestCopyOnly ? (
+                showCopyOption && (
+                  <>
+                    <WaveDropMobileMenuCopyText
+                      drop={drop}
+                      onCopy={closeMenu}
+                    />
+                    <WaveDropMobileMenuCopyLink
+                      drop={drop}
+                      onCopy={closeMenu}
+                    />
+                  </>
+                )
+              ) : (
+                <WaveDropMobileMenuAuthenticatedActions
+                  extendedDrop={extendedDrop}
+                  drop={drop}
+                  showReplyAndQuote={showReplyAndQuote}
+                  isTemporaryDrop={isTemporaryDrop}
+                  onReply={onReply}
+                  onOpenReactionPicker={() => setActiveView("reactions")}
+                  reactionButtonRef={reactionButtonRef}
+                  onBoostAnimation={onBoostAnimation}
+                  showOpenOption={showOpenOption}
+                  showCopyOption={showCopyOption}
+                  showManageCurations={showManageCurations}
+                  quickAddCuration={quickAddCuration}
+                  quickRemoveCuration={quickRemoveCuration}
+                  onQuickAdd={() => void handleQuickAdd()}
+                  onQuickRemove={() => void handleQuickRemove()}
+                  onCurationsClick={handleCurationsClick}
+                  isAuthor={isAuthor}
+                  showOptions={showOptions}
+                  onEdit={onEdit}
+                  canSetPinnedDrop={canSetPinnedDrop}
+                  canDelete={canDelete}
+                  closeMenu={closeMenu}
+                  showVoting={showVoting}
+                  showOnlyQuickRemove={showOnlyQuickRemove}
+                />
+              )}
+            </div>
           </div>
-        </CommonDropdownItemsMobileWrapper>,
-        document.body
-      )}
-      {showCurationsAction && (
+        ) : (
+          <WaveDropMobileMenuReactionPicker
+            drop={extendedDrop}
+            onDismiss={closeMenu}
+            onReactionSuccess={onAddReaction}
+          />
+        )}
+      </MobileWrapperDialog>
+      {showManageCurations && (
         <WaveDropCurationsDialog
           dropId={drop.id}
           wave={drop.wave}
@@ -405,5 +552,9 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
     </>
   );
 };
+
+const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = (props) => (
+  <WaveDropMobileMenuContent key={props.drop.id} {...props} />
+);
 
 export default WaveDropMobileMenu;

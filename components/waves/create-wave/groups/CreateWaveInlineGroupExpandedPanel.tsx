@@ -1,12 +1,14 @@
 import type { ReactNode } from "react";
 import Button from "@/components/utils/button/Button";
 import type { ButtonSize } from "@/components/utils/button/buttonStyles";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
 export default function CreateWaveInlineGroupExpandedPanel({
   children,
   onCancel,
   cancelClassName = "",
-  cancelLabel = "Cancel",
+  cancelLabel,
   cancelSize = "md",
   showCancel = true,
 }: {
@@ -17,6 +19,8 @@ export default function CreateWaveInlineGroupExpandedPanel({
   readonly cancelSize?: ButtonSize;
   readonly showCancel?: boolean;
 }) {
+  const locale = useBrowserLocale();
+
   return (
     <div className="tw-relative tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-pt-5">
       {showCancel ? (
@@ -28,7 +32,7 @@ export default function CreateWaveInlineGroupExpandedPanel({
             onClick={onCancel}
             className={cancelClassName}
           >
-            {cancelLabel}
+            {cancelLabel ?? t(locale, "common.close")}
           </Button>
         </div>
       ) : (

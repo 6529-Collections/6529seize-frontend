@@ -16,6 +16,7 @@ describe("UserPageIdentityAddStatementsTypeButton", () => {
       <div onTouchStart={onParentTouchStart}>
         <UserPageIdentityAddStatementsTypeButton
           statementType={STATEMENT_TYPE.X}
+          label="Other"
           isActive={false}
           isFirst
           isLast
@@ -23,9 +24,9 @@ describe("UserPageIdentityAddStatementsTypeButton", () => {
         />
       </div>
     );
-    const button = getByRole("button", { name: "X" });
+    const button = getByRole("button", { name: "Other" });
     expect(button).toHaveAttribute("aria-pressed", "false");
-    expect(button).toHaveAttribute("data-tooltip-content", "X");
+    expect(button).toHaveAttribute("data-tooltip-content", "Other");
     expect(button.className).toContain("tw-min-h-11");
     expect(button.className).toContain("tw-flex-1");
     expect(button.className).toContain("tw-rounded-l-md");
@@ -44,6 +45,7 @@ describe("UserPageIdentityAddStatementsTypeButton", () => {
       <div onTouchStart={onParentTouchStart}>
         <UserPageIdentityAddStatementsTypeButton
           statementType={STATEMENT_TYPE.X}
+          label="Other"
           isActive
           isFirst
           isLast

@@ -27,7 +27,13 @@ export function TypedArtistWorks({
       >
         {t(DEFAULT_LOCALE, "museum.network.artists.worksByArtist")}
       </h2>
-      <div className="tw-mt-6 tw-grid tw-min-w-0 tw-gap-x-6 tw-gap-y-10 sm:tw-grid-cols-2 xl:tw-grid-cols-3">
+      <div
+        className={`tw-mt-6 tw-grid tw-min-w-0 tw-gap-x-6 tw-gap-y-10 ${
+          works.length === 1
+            ? "tw-max-w-6xl tw-grid-cols-1"
+            : "sm:tw-grid-cols-2 xl:tw-grid-cols-3"
+        }`}
+      >
         {works.map((work, index) => (
           <TypedArtistWorkCard
             key={work.id}

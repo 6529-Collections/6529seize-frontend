@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MuseumArtworkViewer } from "./MuseumArtworkViewer";
+import { MuseumLiveGeneratorEncounter } from "./MuseumLiveGeneratorEncounter";
 import { MuseumBreadcrumbs } from "./MuseumBreadcrumbs";
 import { MuseumEntityContext } from "./MuseumEntityContext";
 import { MuseumJsonDisclosure, MuseumMarkdown } from "./MuseumMarkdown";
@@ -31,7 +32,6 @@ import { buildMuseumWorkContext } from "@/lib/museum/publication/ia";
 import { hasMuseumMagnumInstitutionalDisplayRights } from "@/lib/museum/publication/collectionSemantics";
 import { selectMuseumPublicWorkDocuments } from "@/lib/museum/publication/typedDocuments";
 import type {
-  MuseumMedia,
   MuseumPublication,
   MuseumPublicWork,
 } from "@/lib/museum/publication/types";
@@ -41,9 +41,16 @@ import {
   museumSlugMatches,
 } from "@/lib/museum/presentation";
 import { getGenerativeStudyByObjectId } from "@/lib/museum/generative-studies";
-import type { MuseumProgramMedia, MuseumView } from "@/lib/museum/types";
+import type { MuseumView } from "@/lib/museum/types";
 import { MuseumProgramImage } from "./MuseumProgramImage";
 import { MuseumReviewedProgramMediaFigure } from "./MuseumReviewedProgramMediaFigure";
+import {
+  creatorSeparator,
+  museumWorkCreationDate,
+  museumWorkInsideSystemHref,
+  publicWorkMedia,
+  workQualifierLabel,
+} from "./MuseumObjectPageModel";
 import { buildMuseumSignedWaveStormDropUrl } from "@/lib/museum/publication";
 import { museumWorkHrefIndex } from "@/lib/museum/publication/routes";
 
@@ -81,39 +88,6 @@ export async function getMuseumObjectMetadata(
     title: outcome?.title ?? t(DEFAULT_LOCALE, "museum.network.objects.title"),
     description,
   });
-}
-
-function publicWorkMedia(media: MuseumMedia): MuseumProgramMedia {
-  return {
-    sourceUrl: media.url,
-    sourceMimeType: media.mediaType ?? "image/*",
-    sourceSha256: media.sha256,
-    sourceByteSize: null,
-    sourceWidth: media.width,
-    sourceHeight: media.height,
-    altText: media.altText ?? "",
-    altTextStatus:
-      media.altText === null ? "unavailable" : "governed_artwork_description",
-    variants: [],
-  };
-}
-
-function workQualifierLabel(
-  work: MuseumPublicWork,
-  qualifier: MuseumPublicWork["qualifiers"][number]
-): string | null {
-  if (qualifier.kind !== "mint" || qualifier.status !== "pending") {
-    return null;
-  }
-  if (
-    work.status === "selected_through_acquisition_program_acquisition_pending"
-  ) {
-    return t(
-      DEFAULT_LOCALE,
-      "museum.network.acquisitions.selectedWorkQualifier"
-    );
-  }
-  return t(DEFAULT_LOCALE, "museum.network.works.mintPending");
 }
 
 function MuseumCanonicalWorkMedia({
@@ -241,30 +215,6 @@ function MuseumCanonicalWorkMedia({
   );
 }
 
-function museumWorkInsideSystemHref(
-  work: MuseumPublicWork,
-  publication: MuseumPublication
-): string | null {
-  const legacyStudyObjectId = [
-    ...(work.sourceRecordIds ?? []),
-    ...(publication.workAliases ?? [])
-      .filter((alias) => alias.workId === work.id)
-      .map((alias) => alias.sourceObjectId),
-  ].find(
-    (sourceObjectId) => getGenerativeStudyByObjectId(sourceObjectId) !== null
-  );
-  if (legacyStudyObjectId === undefined) return null;
-  const generativeStudy = getGenerativeStudyByObjectId(legacyStudyObjectId);
-  if (
-    generativeStudy?.heldPositions.some(
-      (position) => position.objectId === legacyStudyObjectId
-    ) !== true
-  ) {
-    return null;
-  }
-  return `/museum/network/projects/${generativeStudy.projectSlug}/system?work=${encodeURIComponent(legacyStudyObjectId)}#possibility-space`;
-}
-
 function MuseumCanonicalWorkRecordPage({
   work,
   publication,
@@ -274,7 +224,14 @@ function MuseumCanonicalWorkRecordPage({
   readonly publication: MuseumPublication;
   readonly view: MuseumView | null;
 }) {
-  const artist = publication.artists.find((item) => item.id === work.artistId);
+  const artistIds =
+    work.artistIds !== undefined && work.artistIds.length > 0
+      ? work.artistIds
+      : [work.artistId];
+  const artists = artistIds.flatMap((artistId) => {
+    const artist = publication.artists.find((item) => item.id === artistId);
+    return artist === undefined ? [] : [artist];
+  });
   const project =
     work.projectId === null
       ? null
@@ -345,6 +302,17 @@ function MuseumCanonicalWorkRecordPage({
           work.presentationMedia[0].rights.licenseLabel
         ));
   const insideSystemHref = museumWorkInsideSystemHref(work, publication);
+  const creationDate = museumWorkCreationDate(publication, work.id);
+  const stillMedia = selectMuseumStillMedia(work.media);
+  const liveMedia = work.media.find(
+    (media) => media.kind === "live" && media.role === "source"
+  );
+  const liveManifestationDimensions =
+    liveMedia !== undefined &&
+    typeof stillMedia?.width === "number" &&
+    typeof stillMedia.height === "number"
+      ? { width: stillMedia.width, height: stillMedia.height }
+      : null;
   const qualifierLabels = work.qualifiers.flatMap((qualifier) => {
     const label = workQualifierLabel(work, qualifier);
     return label === null ? [] : [{ qualifier, label }];
@@ -365,20 +333,90 @@ function MuseumCanonicalWorkRecordPage({
         <h1 className="tw-m-0 tw-mt-3 tw-text-4xl tw-font-semibold tw-leading-tight tw-text-iron-50 sm:tw-text-5xl">
           {work.title}
         </h1>
-        {artist !== undefined ? (
+        {artists.length > 0 ? (
           <p className="tw-m-0 tw-mt-4 tw-text-base tw-leading-7 tw-text-iron-300">
-            <Link
-              href={`/museum/network/artists/${encodeURIComponent(artist.slug)}`}
-              className="hover:tw-text-primary-200 tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
-            >
-              {artist.preferredName}
-            </Link>
+            {artists.map((creator, index) => (
+              <span key={creator.id}>
+                {creatorSeparator(index, artists.length)}
+                <Link
+                  href={`/museum/network/artists/${encodeURIComponent(creator.slug)}`}
+                  className="hover:tw-text-primary-200 tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+                >
+                  {creator.preferredName}
+                </Link>
+              </span>
+            ))}
             {project === undefined || project === null
               ? null
               : ` / ${project.title}`}
+            {creationDate === null ? null : ` · ${creationDate}`}
           </p>
         ) : null}
       </header>
+      <MuseumCanonicalWorkMedia
+        work={work}
+        programMediaMatch={programMediaMatch}
+        presentationSourceHref={presentationSourceHref}
+      />
+      {liveManifestationDimensions === null ? null : (
+        <p className="tw-m-0 tw-mt-4 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-300">
+          {t(DEFAULT_LOCALE, "museum.network.objects.liveManifestation", {
+            width: liveManifestationDimensions.width,
+            height: liveManifestationDimensions.height,
+          })}
+        </p>
+      )}
+      <section
+        className="tw-mt-10"
+        aria-labelledby="canonical-work-record-title"
+      >
+        <h2
+          id="canonical-work-record-title"
+          className="tw-m-0 tw-text-2xl tw-font-semibold tw-text-iron-50"
+        >
+          {t(DEFAULT_LOCALE, "museum.network.objects.reading")}
+        </h2>
+        {documents.length > 0 ? (
+          <div className="tw-mt-6 tw-space-y-8">
+            {documents.map((document) =>
+              document.kind === "source_record" ? (
+                <MuseumJsonDisclosure
+                  key={document.id}
+                  label={document.title}
+                  sourceJson={document.markdown}
+                />
+              ) : (
+                <MuseumMarkdown
+                  key={document.id}
+                  className="tw-max-w-3xl"
+                  embeddedDocument={document.kind === "object_entry"}
+                  sourceCommit={publication.identity.commit}
+                  sourcePath={document.sourcePath}
+                  workHrefs={workHrefs}
+                >
+                  {document.markdown}
+                </MuseumMarkdown>
+              )
+            )}
+          </div>
+        ) : (
+          <p className="tw-m-0 tw-mt-5 tw-text-sm tw-text-yellow-100">
+            {t(DEFAULT_LOCALE, "museum.network.objects.readingUnavailable")}
+          </p>
+        )}
+      </section>
+      <MuseumLiveGeneratorEncounter
+        media={liveMedia}
+        title={work.title}
+        creditLine={
+          stillMedia === undefined
+            ? undefined
+            : displayCreditWithoutRepeatedLicense(
+                stillMedia.credit.creditLine,
+                stillMedia.credit.licenseLabel
+              )
+        }
+      />
       <MuseumEntityContext
         context={{
           ...context,
@@ -393,11 +431,6 @@ function MuseumCanonicalWorkRecordPage({
           statusAsOf: t(DEFAULT_LOCALE, "museum.network.entity.statusAsOf"),
           source: t(DEFAULT_LOCALE, "museum.network.entity.sources"),
         }}
-      />
-      <MuseumCanonicalWorkMedia
-        work={work}
-        programMediaMatch={programMediaMatch}
-        presentationSourceHref={presentationSourceHref}
       />
       {insideSystemHref !== null ? (
         <div className="tw-mt-8">
@@ -500,45 +533,6 @@ function MuseumCanonicalWorkRecordPage({
           </div>
         </section>
       ) : null}
-      <section
-        className="tw-mt-10"
-        aria-labelledby="canonical-work-record-title"
-      >
-        <h2
-          id="canonical-work-record-title"
-          className="tw-m-0 tw-text-2xl tw-font-semibold tw-text-iron-50"
-        >
-          {t(DEFAULT_LOCALE, "museum.network.objects.reading")}
-        </h2>
-        {documents.length > 0 ? (
-          <div className="tw-mt-6 tw-space-y-8">
-            {documents.map((document) =>
-              document.kind === "source_record" ? (
-                <MuseumJsonDisclosure
-                  key={document.id}
-                  label={document.title}
-                  sourceJson={document.markdown}
-                />
-              ) : (
-                <MuseumMarkdown
-                  key={document.id}
-                  className="tw-max-w-3xl"
-                  embeddedDocument={document.kind === "object_entry"}
-                  sourceCommit={publication.identity.commit}
-                  sourcePath={document.sourcePath}
-                  workHrefs={workHrefs}
-                >
-                  {document.markdown}
-                </MuseumMarkdown>
-              )
-            )}
-          </div>
-        ) : (
-          <p className="tw-m-0 tw-mt-5 tw-text-sm tw-text-yellow-100">
-            {t(DEFAULT_LOCALE, "museum.network.objects.readingUnavailable")}
-          </p>
-        )}
-      </section>
       <dl className="tw-mt-10 tw-grid tw-gap-5 tw-border-x-0 tw-border-y tw-border-solid tw-border-iron-800 tw-py-5 sm:tw-grid-cols-2">
         <div>
           <dt className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-iron-500">

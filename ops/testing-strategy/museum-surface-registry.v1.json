@@ -535,6 +535,14 @@
       "surface_ids": ["museum.artist", "museum.work", "museum.acquisition"]
     },
     {
+      "file": "components/museum/MuseumLiveGeneratorEncounter.tsx",
+      "surface_ids": ["museum.object", "museum.work"]
+    },
+    {
+      "file": "components/museum/MuseumObjectPageModel.ts",
+      "surface_ids": ["museum.object", "museum.work"]
+    },
+    {
       "file": "components/museum/MuseumAcquisitionRecordPage.tsx",
       "surface_ids": ["museum.acquisition"]
     },

@@ -38,7 +38,7 @@ export default function UserPageIdentityDeleteStatementButton({
         className={`${
           isTouchScreen
             ? "tw-opacity-100"
-            : "tw-opacity-0 group-hover:tw-opacity-100"
+            : "tw-opacity-0 desktop-hover:group-hover:tw-opacity-100 touch-only:tw-opacity-100"
         } tw-inline-flex tw-h-9 tw-w-9 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-rose-400 tw-transition tw-duration-200 tw-ease-out focus-visible:tw-opacity-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-rose-400 active:tw-scale-95 desktop-hover:hover:tw-bg-rose-500/10 desktop-hover:hover:tw-text-rose-300 motion-reduce:tw-transform-none motion-reduce:tw-transition-none`}
       >
         <TrashIcon

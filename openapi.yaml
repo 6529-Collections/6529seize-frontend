@@ -597,6 +597,17 @@ paths:
           required: false
           schema:
             type: string
+        - name: sort
+          in: query
+          description: >-
+            Optional search-result ordering. Level ranks exact, prefix, and
+            substring handle matches before ENS and auto-wallet matches, then
+            orders by raw profile level within each match bucket.
+          required: false
+          schema:
+            type: string
+            enum:
+              - level
       responses:
         "200":
           description: successful operation
@@ -606,6 +617,8 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/ApiCommunityMemberMinimal"
+        "400":
+          description: Unsupported community-member sort
   /community-members/top:
     get:
       tags:
@@ -3163,7 +3176,7 @@ paths:
     get:
       tags:
         - Drops
-      summary: Get authenticated user's unread direct-message drop count.
+      summary: Get authenticated user's direct-message unread count.
       operationId: getDmDropsUnread
       x-6529-router:
         enabled: true
@@ -3178,6 +3191,31 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiDmDropsUnreadCount"
+        "400":
+          description: Bad request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden - profile required
+  /dm-drops/unread/snapshot:
+    get:
+      tags:
+        - Drops
+      summary: Get authenticated user's direct-message unread snapshot.
+      operationId: getDmUnreadSnapshot
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/dm-drops/dm-drops.handlers"
+          name: handleGetDmUnreadSnapshot
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDmUnreadSnapshot"
         "400":
           description: Bad request
         "401":
@@ -4329,15 +4367,21 @@ paths:
     get:
       tags:
         - Identities
-      summary: Search for identities
+      summary: Search or list identities
+      description: >-
+        When handle is supplied, exact and prefix matches are ranked before
+        other substring matches, with higher raw profile level first within each
+        match bucket. Without handle, identities are ordered by raw profile
+        level descending.
       operationId: searchIdentities
       parameters:
         - name: handle
-          description: At least 3 characters of a handle
+          description: At least 3 characters of a handle when supplied
           in: query
-          required: true
+          required: false
           schema:
             type: string
+            minLength: 3
         - name: wave_id
           description: Search only users who can view given wave
           in: query
@@ -4365,6 +4409,20 @@ paths:
           required: false
           schema:
             type: boolean
+        - name: classification
+          description: Filter by profile classification
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/ApiProfileClassification"
+        - name: subclassification
+          description: Filter by exact profile subclassification
+          in: query
+          required: false
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 255
       responses:
         "200":
           description: successful operation
@@ -4374,6 +4432,8 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/ApiIdentity"
+        "400":
+          description: Invalid handle, limit, classification, or subclassification
   /identities/{identity_key}:
     get:
       tags:
@@ -5551,9 +5611,19 @@ paths:
           required: true
           schema:
             type: string
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiMarkWaveReadRequest"
       responses:
         "200":
           description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMarkWaveReadResponse"
   /notifications/wave-subscription/{wave_id}:
     get:
       tags:
@@ -5995,6 +6065,91 @@ paths:
                   $ref: "#/components/schemas/ApiOwnerBalanceMemes"
         "404":
           description: Memes Owner Balance for consolidation key not found
+  /policies/eula-consent:
+    post:
+      tags:
+        - Policies
+      summary: Save the current EULA acceptance for a device
+      operationId: saveEulaConsent
+      security: []
+      x-6529-router:
+        enabled: true
+        auth: none
+        handler:
+          import: "@/api/policies/eula-consent.handlers"
+          name: handleSaveEulaConsent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiSaveEulaConsentRequest"
+      responses:
+        "200":
+          description: EULA acceptance saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiSaveEulaConsentResponse"
+        "400":
+          description: Invalid EULA acceptance
+    delete:
+      tags:
+        - Policies
+      summary: Delete the EULA acceptance for a device
+      operationId: deleteEulaConsent
+      security: []
+      x-6529-router:
+        enabled: true
+        auth: none
+        handler:
+          import: "@/api/policies/eula-consent.handlers"
+          name: handleDeleteEulaConsent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiDeleteEulaConsentRequest"
+      responses:
+        "200":
+          description: EULA acceptance deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDeleteEulaConsentResponse"
+        "400":
+          description: Invalid device identifier
+  /policies/eula-consent/{deviceId}:
+    get:
+      tags:
+        - Policies
+      summary: Get the current EULA acceptance for a device
+      operationId: getEulaConsent
+      security: []
+      x-6529-router:
+        enabled: true
+        auth: none
+        handler:
+          import: "@/api/policies/eula-consent.handlers"
+          name: handleGetEulaConsent
+      parameters:
+        - name: deviceId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+      responses:
+        "200":
+          description: Current EULA acceptance, or an empty object when absent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiEulaConsent"
+        "400":
+          description: Invalid device identifier
   /profile-cms/agent/schema-bundle:
     get:
       tags:
@@ -6514,6 +6669,119 @@ paths:
           description: successful operation
         "400":
           description: Invalid request
+  /profiles/{identity}/cic/statements:
+    get:
+      tags:
+        - ProfileCIC
+      summary: Get profile identity statements
+      operationId: getProfileCicStatements
+      security: []
+      parameters:
+        - name: identity
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: >-
+            Profile identity statements, or an empty list when the profile is
+            not found
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiCicStatement"
+    post:
+      tags:
+        - ProfileCIC
+      summary: Add a profile identity statement
+      description: >-
+        Requires a wallet-authenticated owner of the target profile. NFT account
+        links must use HTTPS. NINFA links use statement_type NINFA. Custom art
+        links use statement_type LINK and carry their required display label in
+        statement_comment.
+      operationId: createProfileCicStatement
+      parameters:
+        - name: identity
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiCreateProfileCicStatement"
+      responses:
+        "201":
+          description: Profile identity statement created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCicStatement"
+        "400":
+          description: Invalid or duplicate statement, or profile statement limit reached
+        "401":
+          description: Authentication required
+        "403":
+          description: Authenticated wallet does not own the profile
+        "404":
+          description: Profile not found
+  /profiles/{identity}/cic/statements/{statement_id}:
+    get:
+      tags:
+        - ProfileCIC
+      summary: Get a profile identity statement
+      operationId: getProfileCicStatement
+      security: []
+      parameters:
+        - name: identity
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: statement_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Profile identity statement
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCicStatement"
+        "404":
+          description: Profile or statement not found
+    delete:
+      tags:
+        - ProfileCIC
+      summary: Delete a profile identity statement
+      operationId: deleteProfileCicStatement
+      parameters:
+        - name: identity
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: statement_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "201":
+          description: Profile identity statement deleted
+        "401":
+          description: Authentication required
+        "403":
+          description: Authenticated wallet does not own the profile
+        "404":
+          description: Profile or statement not found
   /profiles/{identity}/cic/ratings/by-rater:
     get:
       tags:
@@ -11698,6 +11966,64 @@ paths:
                 $ref: "#/components/schemas/ApiWaveOverviewPage"
         "400":
           description: Invalid request
+  /v2/waves/profile-activity/{identity}:
+    get:
+      tags:
+        - WavesV2
+      summary: Get profile wave activity
+      description: >-
+        Returns accessible non-direct-message waves created by, or recently
+        posted to by, the resolved profile. latest_post_timestamp is the
+        profile's latest authored drop in the exact wave, including the wave
+        description drop, replies, and CHAT, PARTICIPATORY, and WINNER drop
+        types. It excludes reactions, votes, subscriptions, reads, and drops
+        authored by other identities.
+      operationId: getProfileWaveActivity
+      x-6529-router:
+        enabled: true
+        auth: optional
+        handler:
+          import: "@/api/waves/profile-wave-activity.handler"
+          name: handleGetProfileWaveActivity
+      parameters:
+        - name: identity
+          in: path
+          description: Profile id, wallet, ENS, or handle to resolve.
+          required: true
+          schema:
+            type: string
+            maxLength: 200
+        - name: activity_type
+          in: query
+          required: true
+          schema:
+            $ref: "#/components/schemas/ApiProfileWaveActivityType"
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 50
+            default: 20
+        - name: cursor
+          in: query
+          description: Opaque cursor returned by the previous page.
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiProfileWaveActivityPage"
+        "400":
+          description: Invalid request or cursor
+        "404":
+          description: Identity not found
   /v2/waves/{id}/metadata:
     get:
       tags:
@@ -12339,7 +12665,7 @@ paths:
     get:
       tags:
         - WavesV2
-      summary: Search for V2 drops in wave by content
+      summary: Search for V2 drops in a wave
       operationId: searchDropsInWaveV2
       x-6529-router:
         enabled: true
@@ -12355,9 +12681,34 @@ paths:
             type: string
         - name: term
           in: query
-          required: true
+          required: false
           schema:
             type: string
+            minLength: 3
+            maxLength: 200
+        - name: author_id
+          in: query
+          required: false
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+        - name: after
+          in: query
+          description: Inclusive lower created-at timestamp in milliseconds
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 0
+        - name: before
+          in: query
+          description: Exclusive upper created-at timestamp in milliseconds
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 0
         - name: page
           in: query
           required: false
@@ -12382,8 +12733,61 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiDropV2PageWithoutCount"
+        "400":
+          description: >-
+            Invalid search criteria: at least one of term, author_id, after, or
+            before is required; term must contain 3 to 200 characters; and when
+            both dates are provided, after must be less than before
         "404":
           description: Wave not found
+  /v2/waves/{waveId}/search-authors:
+    get:
+      tags:
+        - WavesV2
+      summary: Search profiles that authored a drop in a wave
+      operationId: searchWaveAuthorsV2
+      x-6529-router:
+        enabled: true
+        auth: optional
+        handler:
+          import: "@/api/waves/waves-v2.handlers"
+          name: handleSearchWaveAuthorsV2
+      parameters:
+        - name: waveId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: handle
+          in: query
+          description: >-
+            Case-insensitive handle prefix. Empty returns the first authors in
+            the readable wave.
+          required: false
+          schema:
+            type: string
+            maxLength: 15
+            pattern: ^\w{0,15}$
+            default: ""
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 20
+            default: 10
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiWaveSearchAuthor"
+        "404":
+          description: Wave not found or not visible to the caller
   /xtdh/stats:
     get:
       tags:
@@ -13561,6 +13965,48 @@ components:
           format: int64
         contributors:
           $ref: "#/components/schemas/ApiCicContributorsPage"
+    ApiCicStatement:
+      type: object
+      required:
+        - id
+        - profile_id
+        - statement_group
+        - statement_type
+        - statement_comment
+        - statement_value
+        - crated_at
+      properties:
+        id:
+          type: string
+        profile_id:
+          type: string
+        statement_group:
+          $ref: "#/components/schemas/ApiCicStatementGroup"
+        statement_type:
+          type: string
+          description: >-
+            Statement kind. NFT account links include NINFA for Ninfa and LINK
+            for a custom-labelled art link. Clients must tolerate unknown
+            values.
+        statement_comment:
+          type: string
+          nullable: true
+          description: >-
+            Display label for custom NFT account LINK statements; null
+            otherwise.
+        statement_value:
+          type: string
+        crated_at:
+          type: string
+          format: date-time
+    ApiCicStatementGroup:
+      type: string
+      enum:
+        - GENERAL
+        - CONTACT
+        - SOCIAL_MEDIA_ACCOUNT
+        - NFT_ACCOUNTS
+        - SOCIAL_MEDIA_VERIFICATION_POST
     ApiCmsAgentPatch:
       type: object
       required:
@@ -15902,6 +16348,30 @@ components:
         pfp_url:
           type: string
           nullable: true
+    ApiCreateProfileCicStatement:
+      type: object
+      required:
+        - statement_group
+        - statement_type
+        - statement_comment
+        - statement_value
+      properties:
+        statement_group:
+          $ref: "#/components/schemas/ApiCicStatementGroup"
+        statement_type:
+          type: string
+          minLength: 1
+          maxLength: 250
+        statement_comment:
+          type: string
+          nullable: true
+          description: >-
+            Required 1-40 character display label when statement_group is
+            NFT_ACCOUNTS and statement_type is LINK; null for NINFA.
+        statement_value:
+          type: string
+          minLength: 1
+          maxLength: 2048
     ApiCreateProfileCmsWalletGallerySnapshotRequest:
       type: object
       required:
@@ -16179,6 +16649,24 @@ components:
           type: array
           items:
             type: string
+    ApiDeleteEulaConsentRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - device_id
+      properties:
+        device_id:
+          type: string
+          minLength: 1
+          maxLength: 100
+    ApiDeleteEulaConsentResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - message
+      properties:
+        message:
+          type: string
     ApiDistributionAirdropsCsvUploadRequest:
       type: object
       required:
@@ -16208,6 +16696,53 @@ components:
         count:
           type: integer
           minimum: 0
+    ApiDmUnreadConversationState:
+      type: object
+      required:
+        - profile_id
+        - wave_id
+        - unread_count
+        - first_unread_drop_serial_no
+        - latest_drop_serial_no
+        - latest_read_serial_no
+        - version
+      properties:
+        profile_id:
+          type: string
+        wave_id:
+          type: string
+        unread_count:
+          type: integer
+          minimum: 0
+        first_unread_drop_serial_no:
+          type: integer
+          nullable: true
+          minimum: 1
+        latest_drop_serial_no:
+          type: integer
+          minimum: 0
+        latest_read_serial_no:
+          type: integer
+          minimum: 0
+        version:
+          type: integer
+          minimum: 0
+    ApiDmUnreadSnapshot:
+      type: object
+      required:
+        - profile_id
+        - count
+        - conversations
+      properties:
+        profile_id:
+          type: string
+        count:
+          type: integer
+          minimum: 0
+        conversations:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiDmUnreadConversationState"
     ApiDrop:
       type: object
       required:
@@ -17303,6 +17838,27 @@ components:
     ApiEthereumAddress:
       type: string
       pattern: ^0x[a-fA-F0-9]{40}$
+    ApiEulaConsent:
+      type: object
+      additionalProperties: false
+      properties:
+        device_id:
+          type: string
+          minLength: 1
+          maxLength: 100
+        platform:
+          type: string
+          minLength: 1
+          maxLength: 32
+        accepted_at:
+          type: integer
+          format: int64
+        eula_version:
+          $ref: "#/components/schemas/ApiEulaVersion"
+    ApiEulaVersion:
+      type: string
+      enum:
+        - "2026-08-24"
     ApiFeedItem:
       type: object
       required:
@@ -18159,6 +18715,27 @@ components:
         first_unread_drop_serial_no:
           type: integer
           nullable: true
+        dm_unread_state:
+          nullable: true
+          allOf:
+            - $ref: "#/components/schemas/ApiDmUnreadConversationState"
+    ApiMarkWaveReadRequest:
+      type: object
+      properties:
+        read_through_serial_no:
+          type: integer
+          minimum: 0
+        request_dm_unread_state:
+          type: boolean
+    ApiMarkWaveReadResponse:
+      type: object
+      required:
+        - dm_unread_state
+      properties:
+        dm_unread_state:
+          nullable: true
+          allOf:
+            - $ref: "#/components/schemas/ApiDmUnreadConversationState"
     ApiMediaResolveRequest:
       type: object
       required:
@@ -20737,6 +21314,55 @@ components:
         profile_curation_id:
           type: string
           nullable: true
+    ApiProfileWaveActivity:
+      type: object
+      required:
+        - wave_id
+        - wave_name
+        - wave_picture
+        - is_private
+        - total_drops_count
+        - latest_post_timestamp
+      properties:
+        wave_id:
+          type: string
+        wave_name:
+          type: string
+        wave_picture:
+          type: string
+          nullable: true
+        is_private:
+          type: boolean
+        total_drops_count:
+          type: integer
+          format: int64
+          description: Total retained CHAT drops in the wave, across all authors.
+        latest_post_timestamp:
+          type: integer
+          format: int64
+          nullable: true
+          description: >-
+            Latest qualifying authored drop timestamp for the resolved profile
+            in this exact wave, including the wave description drop and replies.
+            Null when a CREATED result has no qualifying authored drop.
+    ApiProfileWaveActivityPage:
+      type: object
+      required:
+        - data
+        - next_cursor
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiProfileWaveActivity"
+        next_cursor:
+          type: string
+          nullable: true
+    ApiProfileWaveActivityType:
+      type: string
+      enum:
+        - CREATED
+        - RECENT
     ApiPublishProfileCmsPackageRequest:
       type: object
       required:
@@ -21743,6 +22369,35 @@ components:
           type: string
         expected_current_package_hash:
           type: string
+    ApiSaveEulaConsentRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - device_id
+        - platform
+        - eula_version
+      properties:
+        device_id:
+          type: string
+          minLength: 1
+          maxLength: 100
+        platform:
+          type: string
+          minLength: 1
+          maxLength: 32
+        eula_version:
+          $ref: "#/components/schemas/ApiEulaVersion"
+    ApiSaveEulaConsentResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - message
+        - eula_version
+      properties:
+        message:
+          type: string
+        eula_version:
+          $ref: "#/components/schemas/ApiEulaVersion"
     ApiSaveProfileCmsPackageDraftRequest:
       type: object
       required:
@@ -24428,6 +25083,20 @@ components:
         gated_hotness_score:
           type: number
           format: double
+    ApiWaveSearchAuthor:
+      type: object
+      required:
+        - id
+        - handle
+        - pfp
+      properties:
+        id:
+          type: string
+        handle:
+          type: string
+        pfp:
+          type: string
+          nullable: true
     ApiWavesOverviewType:
       type: string
       enum:

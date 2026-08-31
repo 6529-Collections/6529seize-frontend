@@ -6,10 +6,46 @@ import { TRANSFER_MESSAGES } from "@/i18n/messages/transfer";
 import type { MessageKey } from "@/i18n/messages/en-US";
 
 export const EN_GB_MESSAGES = {
+  "user.brain.sidebar.createdHeading": "Created Waves",
+  "user.brain.sidebar.createdMobileHeading": "Created",
+  "user.brain.sidebar.recentlyActiveHeading": "Recently Active In",
+  "user.brain.sidebar.lastPost": "Last post {time}",
+  "user.brain.sidebar.noPostsByProfile": "No posts by this profile",
+  "user.brain.sidebar.totalWavePosts.one": "{count} total wave post",
+  "user.brain.sidebar.totalWavePosts.other": "{count} total wave posts",
+  "user.brain.sidebar.privateWave": "Private wave",
+  "user.brain.sidebar.loadingWaveActivity": "Loading profile wave activity",
+  "user.brain.sidebar.loadingMoreWaveActivity":
+    "Loading more profile wave activity",
+  "user.brain.sidebar.desktopScrollRegionLabel": "Brain waves",
+  "user.brain.sidebar.mobileStripLabel": "Brain waves",
+  "user.brain.sidebar.createdEmpty": "No accessible created waves.",
+  "user.brain.sidebar.recentEmpty": "No recent wave posts.",
+  "user.brain.sidebar.createdLoadError": "Created waves could not be loaded.",
+  "user.brain.sidebar.recentLoadError":
+    "Recent wave activity could not be loaded.",
+  "user.brain.sidebar.loadMoreError": "More waves could not be loaded.",
+  "user.brain.sidebar.retry": "Retry",
+  "user.brain.sidebar.retryLoadMore": "Retry loading more",
+  "user.brain.sidebar.loadMore": "Load more",
+  "user.brain.sidebar.loadingMore": "Loading…",
+  "user.brain.sidebar.allWavesLoaded": "All waves loaded.",
+  "user.brain.sidebar.more": "More",
+  "user.brain.sidebar.showLess": "Show less",
+  "user.brain.sidebar.showMore": "Show more",
+  "user.brain.sidebar.viewMoreCreatedWaves": "View more created waves",
+  "user.brain.sidebar.createdModalTitle": "Created waves by {profile}",
+  "user.brain.sidebar.loadedCreatedCount.one": "Showing {count} loaded wave",
+  "user.brain.sidebar.loadedCreatedCount.other": "Showing {count} loaded waves",
+  "user.brain.sidebar.createdCount.one": "{count} created wave",
+  "user.brain.sidebar.createdCount.other": "{count} created waves",
+  "user.brain.sidebar.closeCreatedWaves": "Close created waves",
   "linkPreview.twitter.kind.article": "Article",
   "linkPreview.twitter.kind.post": "Post",
   "linkPreview.twitter.article.provider": "Article on X",
   "linkPreview.twitter.article.read": "Read article: {title}",
+  "waves.drop.actions.menuLabel": "Drop actions",
+  "waves.drop.actions.reactionPickerLabel": "Add reaction to drop",
   "media.video.captions": "Captions",
   "media.video.download": "Download media",
   "media.video.downloading": "Downloading media",
@@ -391,6 +427,18 @@ export const EN_GB_MESSAGES = {
   ...EN_GB_QR_SCANNER_MESSAGES,
   ...EN_GB_NEW_VERSION_TOAST_MESSAGES,
   "waves.chat.fileUploadAreaAriaLabel": "Wave chat file upload area",
+  "waves.chat.guidelinesDialog.title": "Wave guidelines",
+  "waves.chat.guidelinesDialog.description":
+    "Review this wave's guidelines before sending your first message.",
+  "waves.chat.guidelinesDialog.guidelinesLabel": "Guidelines",
+  "waves.chat.guidelinesDialog.actionHint":
+    "Agree sends your message. Decline keeps it as a draft.",
+  "waves.chat.guidelinesDialog.agree": "Agree",
+  "waves.chat.guidelinesDialog.decline": "Decline",
+  "waves.chat.guidelinesDialog.loadErrorTitle":
+    "Couldn't load the wave guidelines.",
+  "waves.chat.guidelinesDialog.loadErrorDescription":
+    "Please try again before sending your message.",
   "waves.loadingStatus": "Loading waves",
   "waves.gifPicker.open": "Add GIF",
   "waves.gifPicker.dialogTitle": "GIF search",
@@ -407,6 +455,39 @@ export const EN_GB_MESSAGES = {
   "waves.poll.actions.changeVote": "Change vote",
   "waves.poll.status.voted": "Voted",
   "waves.poll.status.updated": "Updated",
+  "waves.composer.placeholder.createDrop": "Create a drop",
+  "waves.composer.placeholder.writeChatMessage": "Write a chat message",
+  "waves.composer.placeholder.dropReply": "Drop a reply",
+  "waves.composer.placeholder.postReply": "Post a reply",
+  "waves.composer.placeholder.quoteDrop": "Quote a drop",
+  "waves.composer.placeholder.postQuote": "Post a quote",
+  "waves.poll.composer.title": "Create poll",
+  "waves.poll.composer.questionPlaceholder": "Ask a poll question",
+  "waves.poll.composer.questionRequired": "Add a poll question.",
+  "waves.poll.composer.mode.groupLabel": "Poll response type",
+  "waves.poll.composer.mode.single": "Single",
+  "waves.poll.composer.mode.multiple": "Multiple",
+  "waves.poll.composer.mode.singleDescription": "Voters can select one option.",
+  "waves.poll.composer.mode.multipleDescription":
+    "Voters can select more than one option.",
+  "waves.poll.composer.optionLabel": "Poll option {number}",
+  "waves.poll.composer.optionPlaceholder": "Option {number}",
+  "waves.poll.composer.removeOption": "Remove option {number}",
+  "waves.poll.composer.add": "Add poll",
+  "waves.poll.composer.addOption": "Add option",
+  "waves.poll.composer.remove": "Remove poll",
+  "waves.poll.composer.closingTime": "Closing time",
+  "waves.poll.composer.onlyDroppersCanRespond":
+    "Only people who can chat can respond",
+  "waves.poll.composer.anonymous": "Anonymous poll",
+  "waves.poll.composer.validation.minimumOptions":
+    "Enter at least {count} options.",
+  "waves.poll.composer.validation.optionLength":
+    "Options can be up to {max} characters.",
+  "waves.poll.composer.validation.uniqueOptions":
+    "Poll options must be unique.",
+  "waves.poll.composer.validation.futureClosingTime":
+    "Choose a future closing time.",
   "common.close": "Close",
   "waves.create.dialog.subwaveTitle": "Create subwave",
   "waves.create.dialog.waveTitle": "Create Wave",
@@ -428,9 +509,126 @@ export const EN_GB_MESSAGES = {
   "waves.create.groups.title": "Access",
   "waves.create.groups.description":
     "Choose who can access, participate in, and manage this wave.",
-  "waves.create.groups.viewGroupName": "Who can view",
-  "waves.create.groups.adminGroupName": "Admin",
-  "waves.create.groups.members.currentCount": "{count} currently eligible",
+  "waves.create.groups.viewGroupName": "Visibility",
+  "waves.create.groups.adminGroupName": "Admins",
+  "waves.create.groups.currentGroupWithName": "Current group: {name}",
+  "waves.create.groups.dialog.addTitle": "Add group",
+  "waves.create.groups.dialog.changeTitle": "Change group",
+  "waves.create.groups.dialog.addDescription":
+    "Create a new group or choose an existing group.",
+  "waves.create.groups.dialog.changeDescription":
+    "Create a new group or choose a different existing group.",
+  "waves.create.groups.identities": "Identities",
+  "waves.create.groups.hideCriteriaAndMembers": "Hide criteria and members",
+  "waves.create.groups.hideCriteriaAndMembersTooltip":
+    "The criteria and member list are visible to members of this group, but hidden from everyone else.",
+  "waves.create.groups.hideCriteriaAndMembersInfoLabel":
+    "About criteria and member visibility",
+  "waves.create.groups.editAccess.title": "Edit {groupLabel} access",
+  "waves.create.groups.editAccess.triggerLabel": "Edit {groupLabel} access",
+  "waves.create.groups.editAccess.chatLabel": "Chat",
+  "waves.create.groups.editAccess.description":
+    "The current criteria are prefilled. Saving creates a new group and changes only {groupLabel} access.",
+  "waves.create.groups.editAccess.loading": "Loading current criteria…",
+  "waves.create.groups.editAccess.loadErrorTitle":
+    "Couldn't load the current criteria.",
+  "waves.create.groups.editAccess.loadErrorDescription":
+    "Nothing has been changed. Try loading the group again.",
+  "waves.create.groups.editAccess.retry": "Try again",
+  "waves.create.groups.editAccess.makePublic": "Make wave public",
+  "waves.create.groups.editAccess.makePublicDescription":
+    "Remove the Visibility restriction so everyone can access this wave.",
+  "waves.create.groups.editAccess.useVisibility": "Use visibility criteria",
+  "waves.create.groups.editAccess.useVisibilityDescription":
+    "Set {groupLabel} access to the same criteria as Visibility.",
+  "waves.create.groups.editAccess.useVisibilityPublicDescription":
+    "Visibility is public. Set {groupLabel} access to public too.",
+  "waves.create.groups.editAccess.makePublicConfirmTitle": "Make wave public?",
+  "waves.create.groups.editAccess.makePublicConfirmMessage":
+    "Everyone will be able to find and view this wave. Only Visibility access will change.",
+  "waves.create.groups.editAccess.useVisibilityConfirmTitle":
+    "Use visibility criteria?",
+  "waves.create.groups.editAccess.useVisibilityConfirmMessage":
+    "{groupLabel} access will use the same group as Visibility. Only this access setting will change.",
+  "waves.create.groups.editAccess.useVisibilityPublicConfirmMessage":
+    "Visibility is public, so {groupLabel} access will become public too. Only this access setting will change.",
+  "waves.create.groups.editAccess.confirmMakePublic": "Make public",
+  "waves.create.groups.editAccess.confirmUseVisibility":
+    "Use visibility criteria",
+  "waves.create.groups.actions.editCriteria": "Edit criteria",
+  "waves.create.groups.inlineIdentities.modeLabel": "Identity treatment",
+  "waves.create.groups.inlineIdentities.included.label": "Included",
+  "waves.create.groups.inlineIdentities.included.searchLabel":
+    "Find an identity to include",
+  "waves.create.groups.inlineIdentities.included.searchPlaceholder":
+    "Search identities to include...",
+  "waves.create.groups.inlineIdentities.included.emptyHelper":
+    "No identities are explicitly included.",
+  "waves.create.groups.inlineIdentities.excluded.label": "Excluded",
+  "waves.create.groups.inlineIdentities.excluded.searchLabel":
+    "Find an identity to exclude",
+  "waves.create.groups.inlineIdentities.excluded.searchPlaceholder":
+    "Search identities to exclude...",
+  "waves.create.groups.inlineIdentities.excluded.emptyHelper":
+    "No identities are explicitly excluded.",
+  "waves.create.groups.inlineIdentities.includeMe": "Include me",
+  "waves.create.groups.inlineIdentities.sources.emma.title": "EMMA",
+  "waves.create.groups.inlineIdentities.sources.emma.description":
+    "Add every wallet from one of your EMMA allowlists.",
+  "waves.create.groups.inlineIdentities.sources.emma.searchLabel":
+    "Search allowlists",
+  "waves.create.groups.inlineIdentities.sources.emma.searchLoading":
+    "Loading allowlists...",
+  "waves.create.groups.inlineIdentities.sources.emma.searchEmpty":
+    "No allowlists found",
+  "waves.create.groups.inlineIdentities.sources.emma.empty":
+    "No allowlist added.",
+  "waves.create.groups.inlineIdentities.sources.emma.loading":
+    "Adding allowlist identities...",
+  "waves.create.groups.inlineIdentities.sources.emma.load": "Load allowlist",
+  "waves.create.groups.inlineIdentities.sources.emma.error":
+    "Couldn't load this allowlist. Try again.",
+  "waves.create.groups.inlineIdentities.sources.emma.authenticationRequired":
+    "Connect your wallet to load this allowlist.",
+  "waves.create.groups.inlineIdentities.sources.emma.remove":
+    "Remove EMMA allowlist",
+  "waves.create.groups.inlineIdentities.sources.csv.title": "CSV file",
+  "waves.create.groups.inlineIdentities.sources.csv.description":
+    "Import Ethereum wallets from a CSV file.",
+  "waves.create.groups.inlineIdentities.sources.csv.dropLabel":
+    "Drop a CSV file here, or choose a file",
+  "waves.create.groups.inlineIdentities.sources.csv.includeInputLabel":
+    "Choose a CSV file of identities to include",
+  "waves.create.groups.inlineIdentities.sources.csv.excludeInputLabel":
+    "Choose a CSV file of identities to exclude",
+  "waves.create.groups.inlineIdentities.sources.csv.invalidFile":
+    "Choose a CSV file.",
+  "waves.create.groups.inlineIdentities.sources.csv.readError":
+    "Couldn't read this file. Try another CSV file.",
+  "waves.create.groups.inlineIdentities.sources.csv.noWallets":
+    "No valid Ethereum wallet addresses were found.",
+  "waves.create.groups.inlineIdentities.sources.csv.empty":
+    "No CSV file added.",
+  "waves.create.groups.inlineIdentities.sources.csv.remove": "Remove CSV file",
+  "waves.create.groups.inlineIdentities.sources.count.one":
+    "{count} identity added",
+  "waves.create.groups.inlineIdentities.sources.count.other":
+    "{count} identities added",
+  "waves.create.groups.inlineIdentities.sources.total.included.one":
+    "{count} unique identity included",
+  "waves.create.groups.inlineIdentities.sources.total.included.other":
+    "{count} unique identities included",
+  "waves.create.groups.inlineIdentities.sources.total.excluded.one":
+    "{count} unique identity excluded",
+  "waves.create.groups.inlineIdentities.sources.total.excluded.other":
+    "{count} unique identities excluded",
+  "waves.create.groups.inlineIdentities.sources.includeLimit":
+    "A group can include at most {limit} identities.",
+  "waves.create.groups.inlineIdentities.sources.excludeLimit":
+    "A group can exclude at most {limit} identities.",
+  "waves.create.groups.inlineIdentities.sources.retry": "Try again",
+  "waves.create.groups.members.currentCount.one": "{count} user",
+  "waves.create.groups.members.currentCount.other": "{count} users",
   "waves.create.groups.members.countLoading": "Checking current audience…",
   "waves.create.groups.members.countUnavailable":
     "Current audience unavailable",
@@ -456,6 +654,57 @@ export const EN_GB_MESSAGES = {
   "waves.create.groups.members.listLabel": "Current group members",
   "waves.create.groups.members.openProfile":
     "Open {identity}'s profile in a new tab",
+  "waves.create.groups.members.criteria.metric.tdh": "TDH",
+  "waves.create.groups.members.criteria.metric.xtdh": "xTDH",
+  "waves.create.groups.members.criteria.metric.tdhAndXtdh": "TDH + xTDH",
+  "waves.create.groups.members.criteria.metric.rep": "REP",
+  "waves.create.groups.members.criteria.metric.nic": "NIC",
+  "waves.create.groups.members.criteria.metric.level": "Level",
+  "waves.create.groups.members.criteria.range.atMost": "{metric} at most {max}",
+  "waves.create.groups.members.criteria.range.atLeast":
+    "{metric} at least {min}",
+  "waves.create.groups.members.criteria.range.between":
+    "{metric} between {min} and {max}",
+  "waves.create.groups.members.criteria.identityRange.atMost":
+    "{metric} {direction} {identity} at most {max}",
+  "waves.create.groups.members.criteria.identityRange.atLeast":
+    "{metric} {direction} {identity} at least {min}",
+  "waves.create.groups.members.criteria.identityRange.between":
+    "{metric} {direction} {identity} between {min} and {max}",
+  "waves.create.groups.members.criteria.identity":
+    "{metric} {direction} {identity}",
+  "waves.create.groups.members.criteria.categoryRange.atMost":
+    "{metric} in {category} at most {max}",
+  "waves.create.groups.members.criteria.categoryRange.atLeast":
+    "{metric} in {category} at least {min}",
+  "waves.create.groups.members.criteria.categoryRange.between":
+    "{metric} in {category} between {min} and {max}",
+  "waves.create.groups.members.criteria.category": "{metric} in {category}",
+  "waves.create.groups.members.criteria.categoryIdentityRange.atMost":
+    "{metric} in {category} {direction} {identity} at most {max}",
+  "waves.create.groups.members.criteria.categoryIdentityRange.atLeast":
+    "{metric} in {category} {direction} {identity} at least {min}",
+  "waves.create.groups.members.criteria.categoryIdentityRange.between":
+    "{metric} in {category} {direction} {identity} between {min} and {max}",
+  "waves.create.groups.members.criteria.categoryIdentity":
+    "{metric} in {category} {direction} {identity}",
+  "waves.create.groups.members.criteria.from": "from",
+  "waves.create.groups.members.criteria.to": "to",
+  "waves.create.groups.members.criteria.included.one":
+    "{count} explicitly included user",
+  "waves.create.groups.members.criteria.included.other":
+    "{count} explicitly included users",
+  "waves.create.groups.members.criteria.excluded.one":
+    "{count} explicitly excluded user",
+  "waves.create.groups.members.criteria.excluded.other":
+    "{count} explicitly excluded users",
+  "waves.create.groups.members.criteria.grant": "xTDH grant {grantId}",
+  "waves.create.groups.members.criteria.grant.collection":
+    "xTDH grant for {collectionName}",
+  "waves.create.groups.members.criteria.grant.selected": "Selected xTDH grant",
+  "waves.create.groups.xtdhGrant.change": "Change grant",
+  "waves.create.groups.xtdhGrant.cancelChange": "Cancel change",
+  "waves.create.groups.xtdhGrant.remove": "Remove grant",
   "waves.create.groups.validation.checking": "Checking group access…",
   "waves.create.groups.validation.unavailableTitle":
     "Couldn't verify group access.",
@@ -466,7 +715,7 @@ export const EN_GB_MESSAGES = {
   "waves.create.groups.validation.invalidTitle":
     "Some access groups need attention.",
   "waves.create.groups.validation.invalidDescription":
-    "Every Drop, Vote, Chat, and Admin group member must also belong to the View group.",
+    "Every Drop, Vote, Chat, and Admins group member must also belong to the Visibility group.",
   "waves.create.dates.title": "Schedule",
   "waves.create.dates.description":
     "Review when this wave opens, voting begins, and winners are announced.",
@@ -480,8 +729,19 @@ export const EN_GB_MESSAGES = {
     "Submissions start {submission}. Voting starts {voting}. First winners: {announcement}.",
   "waves.create.dates.rank.advancedSummary": "Winner schedule",
   "waves.create.drops.requirementsTitle": "Submission requirements",
-  "waves.create.rules.advancedSummary": "Creator rules and acceptance",
-  "waves.create.rules.chatAdvancedSummary": "Creator rules",
+  "waves.create.rules.advancedSummary": "Wave guidelines and acceptance",
+  "waves.create.rules.chatAdvancedSummary": "Wave guidelines",
+  "waves.create.rules.guidelinesSettingsLabel": "Guidelines",
+  "waves.create.rules.guidelinesSettingsEditLabel": "Edit guidelines",
+  "waves.create.rules.guidelinesSettingsAdded": "Added",
+  "waves.create.rules.guidelinesSettingsNone": "None",
+  "waves.create.rules.guidelinesAuthError":
+    "Couldn't authenticate. Reconnect your wallet and try again.",
+  "waves.create.rules.guidelinesSaveError":
+    "Couldn't save these guidelines. Please try again.",
+  "waves.create.rules.guidelinesSaveErrorTitle":
+    "Couldn't save these guidelines.",
+  "waves.create.rules.guidelinesSaveErrorDescription": "Please try again.",
   "waves.create.voting.rankAdvancedSummary": "Vote limits and behaviour",
   "waves.create.voting.approveAdvancedSummary":
     "Vote limits, behaviour, and timing",

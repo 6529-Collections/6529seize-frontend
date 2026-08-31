@@ -37,7 +37,7 @@ Use this area to create:
 - Step pages:
   1. [Wave Creation Overview Step](feature-overview-step.md)
   2. [Wave Creation Group Access and Permissions](feature-groups-step.md)
-  3. [Wave Creation Dates and Timeline](feature-dates-step.md) (`Rank` and
+  3. [Wave Creation Schedule](feature-dates-step.md) (`Rank` and
      `Approve`)
   4. [Wave Creation Drop Settings](feature-drops-step.md) (`Rank` and
      `Approve`)
@@ -49,9 +49,9 @@ Use this area to create:
   8. [Wave Creation Description Step](feature-description-step.md)
 - Step path by wave type:
   - `Chat`: `Overview -> Groups -> Rules -> Description`
-  - Scheduled `Rank`: `Overview -> Groups -> Dates -> Drops -> Rules -> Voting -> Outcomes -> Description`
-  - `Perpetual Ranking`: `Overview -> Groups -> Dates -> Drops -> Rules -> Voting -> Description`
-  - `Approve`: `Overview -> Groups -> Dates -> Drops -> Rules -> Voting -> Outcomes -> Description`
+  - Scheduled `Rank`: `Overview -> Groups -> Schedule -> Drops -> Rules -> Voting -> Outcomes -> Description`
+  - `Perpetual Ranking`: `Overview -> Groups -> Schedule -> Drops -> Rules -> Voting -> Description`
+  - `Approve`: `Overview -> Groups -> Schedule -> Drops -> Rules -> Voting -> Outcomes -> Description`
 
 The default path keeps the decisions most creators need visible. Less common
 customization is available from expandable sections named for their contents,
@@ -66,9 +66,10 @@ opens as `Needs attention` when a hidden field fails validation.
 
 ### Access and Availability
 
-- Create forms render only when a connected profile is available.
-- If profile context is missing, create entry points are hidden and create
-  forms do not render.
+- Create forms render only when the connected identity has a profile handle.
+- Without a profile handle, Create Wave entry points open a compact profile
+  setup dialog with `Go to Identity` and `Not now`; the multi-step form does not
+  render.
 
 ## Flows
 

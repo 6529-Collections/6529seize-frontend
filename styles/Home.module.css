@@ -64,6 +64,13 @@
   align-items: center;
   justify-content: center;
 }
+
+.loginPromptKeyboardAware {
+  bottom: calc(5px + var(--native-keyboard-inset-bottom, 0px));
+  transition: bottom
+    var(--native-keyboard-layout-transition-duration, 0ms) ease-out;
+}
+
 .loginPrompt input {
   padding-left: 10px;
   border: none;

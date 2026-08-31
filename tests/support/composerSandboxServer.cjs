@@ -56,6 +56,11 @@ const SANDBOX_SCHEDULED_WAVE_DESCRIPTION =
   "Local-only scheduled rank wave description for Playwright.";
 const SANDBOX_SCHEDULED_OUTCOME_TITLE = "Sandbox manual outcome";
 const SANDBOX_CHAT_DROP_CONTENT = "Local-only chat drop from Playwright.";
+const SANDBOX_WAVE_GUIDELINES = Array.from(
+  { length: 24 },
+  (_, index) =>
+    `${index + 1}. Keep discussions constructive and stay on topic in this local sandbox wave.`
+).join("\n");
 const SANDBOX_POLL_OPTIONS = [
   "A longer poll option that stays readable on a phone",
   "A second poll option",
@@ -86,6 +91,7 @@ const requests = [];
 // Keep created groups for the lifetime of the local sandbox process so saved
 // wave drafts remain resolvable after the request log is reset between tests.
 let sandboxDropReaction = null;
+let sandboxWaveGuidelinesEnabled = false;
 let sandboxRuleGroupSequence = 0;
 const sandboxRuleGroups = new Map();
 const MAX_REQUEST_BODY_BYTES = 16 * 1024;
@@ -1950,7 +1956,7 @@ function isExpectedCreatePerpetualRankWaveBody(body) {
 
 function isExpectedScheduledRankWaveConfig(wave) {
   // A scheduled rank wave must carry exactly one non-rolling decision point
-  // (the Dates step's default first announcement) and nothing else.
+  // (the Schedule step's default first announcement) and nothing else.
   return (
     hasOnlyKeys(wave, [
       "admin_drop_deletion_enabled",
@@ -2443,6 +2449,12 @@ function handleDiagnostics(method, pathname, res) {
   if (pathname === "/__composer-sandbox/reset" && method === "POST") {
     requests.length = 0;
     sandboxDropReaction = null;
+    sandboxWaveGuidelinesEnabled = false;
+    writeJson(res, 200, { ok: true });
+    return true;
+  }
+  if (pathname === "/__composer-sandbox/guidelines" && method === "POST") {
+    sandboxWaveGuidelinesEnabled = true;
     writeJson(res, 200, { ok: true });
     return true;
   }
@@ -2474,6 +2486,19 @@ const mockApiExactReadRoutes = new Map([
     () => ({ data: [localWaveOverview], page: 1, next: false }),
   ],
   ["/api/v2/official-waves", () => [localWaveOverview]],
+  [
+    `/api/v2/waves/${SANDBOX_WAVE_ID}/metadata`,
+    () =>
+      sandboxWaveGuidelinesEnabled
+        ? [
+            {
+              id: 1,
+              data_key: "wave_display.rules.custom",
+              data_value: SANDBOX_WAVE_GUIDELINES,
+            },
+          ]
+        : [],
+  ],
   [`/api/waves/${SANDBOX_DM_WAVE_ID}`, () => dmWave],
   [
     `/api/v2/waves/${SANDBOX_DM_WAVE_ID}/drops`,

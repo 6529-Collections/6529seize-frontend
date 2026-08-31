@@ -1,0 +1,4 @@
+.desktopScrollRegion {
+  overflow-anchor: none;
+  scrollbar-gutter: stable;
+}

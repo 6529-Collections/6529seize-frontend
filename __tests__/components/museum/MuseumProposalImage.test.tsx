@@ -1,5 +1,9 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { MuseumProposalImage } from "@/components/museum/MuseumProposalImage";
+import {
+  getMuseumMediaDeliverySrcSet,
+  getMuseumMediaDeliveryUrl,
+} from "@/lib/museum/runtime/mediaDelivery";
 
 describe("MuseumProposalImage", () => {
   const media = {
@@ -127,10 +131,15 @@ describe("MuseumProposalImage", () => {
 
     expect(screen.queryByRole("button")).not.toBeInTheDocument();
     const image = screen.getByRole("img");
-    expect(image).toHaveAttribute("src", variants[0].url);
+    expect(image).toHaveAttribute(
+      "src",
+      getMuseumMediaDeliveryUrl(variants[0].url)
+    );
     expect(image).toHaveAttribute(
       "srcset",
-      `${variants[0].url} 640w, ${variants[1].url} 1280w, ${variants[2].url} 2400w`
+      getMuseumMediaDeliverySrcSet(
+        `${variants[0].url} 640w, ${variants[1].url} 1280w, ${variants[2].url} 2400w`
+      )
     );
     expect(image).toHaveAttribute("sizes", "(min-width: 1280px) 30vw, 100vw");
     expect(image).not.toHaveAttribute("src", media.src);

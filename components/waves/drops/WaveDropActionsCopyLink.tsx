@@ -69,6 +69,10 @@ const WaveDropActionsCopyLink: React.FC<WaveDropActionsCopyLinkProps> = ({
 
   const isDisabled = isTemporaryDrop(drop);
   const iconSizeClass = size === "compact" ? "tw-h-4 tw-w-4" : "tw-h-5 tw-w-5";
+  const buttonSizeClass =
+    size === "compact"
+      ? "tw-h-full tw-w-full tw-justify-center tw-px-0 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-200"
+      : "tw-size-7 tw-justify-center tw-p-0 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-200";
 
   const getLinkText = () => {
     if (isDisabled) return "Unavailable";
@@ -109,7 +113,7 @@ const WaveDropActionsCopyLink: React.FC<WaveDropActionsCopyLinkProps> = ({
   return (
     <>
       <button
-        className={`icon tw-group tw-flex tw-h-full tw-items-center tw-gap-x-2 tw-rounded-full tw-border-0 tw-bg-transparent tw-px-2 tw-text-[0.8125rem] tw-font-medium tw-leading-5 tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out ${
+        className={`icon tw-group tw-flex tw-flex-shrink-0 tw-items-center tw-justify-center tw-gap-x-2 tw-rounded-full tw-border-0 tw-bg-transparent tw-text-[0.8125rem] tw-font-medium tw-leading-5 tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 ${buttonSizeClass} ${
           isDisabled ? "tw-cursor-default tw-opacity-50" : "tw-cursor-pointer"
         }`}
         onClick={copyToClipboard}

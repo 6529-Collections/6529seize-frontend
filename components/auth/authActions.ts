@@ -63,6 +63,7 @@ interface CreateAuthRequestActionsParams {
   readonly enableWalletAuthentication: boolean;
   readonly expireSessionUpgradeAuth: (walletAddress: string) => Promise<void>;
   readonly invalidateAll: () => void;
+  readonly isActiveChainSupported: () => boolean;
   readonly isAddressAuthorized: boolean;
   readonly seizeDisconnect: () => Promise<void>;
   readonly resetSessionUpgradeExpiryDedupe: (walletAddress: string) => void;
@@ -145,6 +146,7 @@ export function createAuthRequestActions({
   enableWalletAuthentication,
   expireSessionUpgradeAuth,
   invalidateAll,
+  isActiveChainSupported,
   isAddressAuthorized,
   seizeDisconnect,
   resetSessionUpgradeExpiryDedupe,
@@ -227,6 +229,16 @@ export function createAuthRequestActions({
     userRejected: boolean;
     failureToastShown: boolean;
   }> => {
+    if (!isActiveChainSupported()) {
+      // AppKit already explains the unsupported-network state. Suppress the
+      // generic authentication failure toast without covering its UI.
+      return {
+        signature: null,
+        userRejected: false,
+        failureToastShown: true,
+      };
+    }
+
     try {
       const result = await signMessage(message);
       let failureToastShown = false;
@@ -284,6 +296,20 @@ export function createAuthRequestActions({
     setToast,
   });
 
+  const createSigningAuthRequestGuard = (
+    authRequestGuard: AuthRequestGuard
+  ): AuthRequestGuard => ({
+    isCurrent: () => isActiveChainSupported() && authRequestGuard.isCurrent(),
+    acceptCurrentState: (walletAddress: string) => {
+      if (!isActiveChainSupported()) {
+        return false;
+      }
+
+      const accepted = authRequestGuard.acceptCurrentState(walletAddress);
+      return accepted && isActiveChainSupported();
+    },
+  });
+
   const ensureConnectedWalletAddress = (): string | null => {
     if (address) {
       return address;
@@ -300,13 +326,19 @@ export function createAuthRequestActions({
     walletAddress: string,
     authRequestGuard: AuthRequestGuard
   ): Promise<boolean> => {
+    const signingAuthRequestGuard =
+      createSigningAuthRequestGuard(authRequestGuard);
+    if (!signingAuthRequestGuard.isCurrent()) {
+      return false;
+    }
+
     const { success } = await requestSignIn({
       signerAddress: walletAddress,
       role: null,
-      authRequestGuard,
+      authRequestGuard: signingAuthRequestGuard,
     });
 
-    if (!authRequestGuard.isCurrent()) {
+    if (!signingAuthRequestGuard.isCurrent()) {
       return false;
     }
     if (!success) {
@@ -445,21 +477,27 @@ export function createAuthRequestActions({
     readonly validationResult: AuthorizedWalletValidationResult;
     readonly walletAddress: string;
   }): Promise<boolean> => {
+    const signingAuthRequestGuard =
+      createSigningAuthRequestGuard(authRequestGuard);
+    if (!signingAuthRequestGuard.isCurrent()) {
+      return false;
+    }
+
     const canReauthenticate = await prepareAuthorizedWalletReauthentication({
       serverRejected,
       walletAddress,
       validationResult,
     });
-    if (!canReauthenticate || !authRequestGuard.isCurrent()) {
+    if (!canReauthenticate || !signingAuthRequestGuard.isCurrent()) {
       return false;
     }
 
     const { success } = await requestSignIn({
       signerAddress: walletAddress,
       role,
-      authRequestGuard,
+      authRequestGuard: signingAuthRequestGuard,
     });
-    if (!authRequestGuard.isCurrent()) {
+    if (!signingAuthRequestGuard.isCurrent()) {
       return false;
     }
     if (!success) {
@@ -538,13 +576,13 @@ export function createAuthRequestActions({
   const requestAuth = async (
     options?: RequestAuthOptions
   ): Promise<{ success: boolean }> => {
-    const authRequestGuard = createAuthRequestGuard(options ?? {});
-    if (!authRequestGuard.isCurrent()) {
+    const connectedAddress = ensureConnectedWalletAddress();
+    if (!connectedAddress) {
       return { success: false };
     }
 
-    const connectedAddress = ensureConnectedWalletAddress();
-    if (!connectedAddress) {
+    const authRequestGuard = createAuthRequestGuard(options ?? {});
+    if (!authRequestGuard.isCurrent()) {
       return { success: false };
     }
 
@@ -587,6 +625,11 @@ export function createAuthRequestActions({
       return { success: true };
     }
 
+    if (canSignActiveWallet && !isActiveChainSupported()) {
+      // Leave AppKit's network-switch interface as the only active prompt.
+      return { success: false };
+    }
+
     setAuthLoadingState("signing");
     setSignModalReason("session-upgrade");
     resetSessionUpgradeExpiryDedupe(upgradeAddress);
@@ -608,13 +651,25 @@ export function createAuthRequestActions({
         return { success: false };
       }
 
+      const signingAuthRequestGuard = createSigningAuthRequestGuard(
+        createAuthRequestGuard({})
+      );
+      if (!signingAuthRequestGuard.isCurrent()) {
+        return { success: false };
+      }
+
       const role = activeProfileProxy
         ? validateRoleForAuthentication(activeProfileProxy)
         : null;
       const { success } = await requestSignIn({
         signerAddress: upgradeAddress,
         role,
+        authRequestGuard: signingAuthRequestGuard,
       });
+
+      if (!signingAuthRequestGuard.isCurrent()) {
+        return { success: false };
+      }
 
       if (!success) {
         return { success: await handleAuthorizedWalletSignInFailure(true) };
@@ -649,13 +704,30 @@ export function createAuthRequestActions({
       return;
     }
 
+    if (!isActiveChainSupported()) {
+      return;
+    }
+
+    const signingAuthRequestGuard = createSigningAuthRequestGuard(
+      createAuthRequestGuard({})
+    );
+
     await removeAuthJwt();
+    if (!signingAuthRequestGuard.isCurrent()) {
+      setToast({
+        message:
+          "Network changed. Switch to a supported network to continue signing in.",
+        type: "error",
+      });
+      return;
+    }
     try {
       const { success } = await requestSignIn({
         signerAddress: address,
         role: profileProxy ? validateRoleForAuthentication(profileProxy) : null,
+        authRequestGuard: signingAuthRequestGuard,
       });
-      if (success) {
+      if (success && signingAuthRequestGuard.isCurrent()) {
         setActiveProfileProxy(profileProxy);
         dispatchProfileSwitchedEvent(profileProxy);
       }

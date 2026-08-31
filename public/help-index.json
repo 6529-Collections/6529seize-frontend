@@ -1045,7 +1045,10 @@
       ],
       "facts": [
         "Search 6529 finds Pages, NFTs, Profiles, and Waves, with an always-visible result-type selector and a result count tied to the visible query.",
+        "Search 6529 ranks exact, prefix, and substring profile-handle matches before ENS-only matches, then orders each match group by level from highest to lowest.",
+        "Wave results in Search 6529 exclude direct-message conversations.",
         "The search control in an active Wave opens Search messages for that Wave; use Search all 6529 in the dialog to switch to site search.",
+        "In Search messages, open Filters to limit results to one author who has posted in the Wave, an After date, a Before date, or a combination of those filters.",
         "Arrow keys move through site results and Enter opens the selected result.",
         "Site search keeps the last query and recently opened queries for the current browser-tab session."
       ],
@@ -1172,15 +1175,20 @@
       ],
       "facts": [
         "Profile pages are opened from a real handle or wallet-like route target; use Network, Waves, groups, or a known handle to open the exact profile.",
-        "Profile pages organize identity, collected NFTs, waves, groups, subscriptions, proxy, Brain, and xTDH surfaces through tabs.",
-        "Editable profile surfaces require the owner or an authorized proxy."
+        "Profile pages organize Identity, Curation, Collected, Subscriptions, Proxy, Brain, and xTDH surfaces through tabs.",
+        "On their own profile, owners use direct field-level edit controls on fine-pointer desktop layouts; smaller and touch-first layouts provide an Edit profile hub for the profile cover, profile picture, name, classification, and About.",
+        "Preferences is a separate owner action in the far-right header area on desktop and an icon-only action beside Edit profile on touch-first and phone layouts; subscription coverage stays a quieter contextual surface beneath Preferences on desktop or across the header below the identity block on smaller screens.",
+        "Editable profile surfaces require the connected profile owner.",
+        "Profile editing, profile-header Preferences, and owner subscription coverage are hidden while an active profile proxy is in use."
       ],
       "canonical_path": "/network",
       "related_paths": ["/network"],
       "tags": ["profiles"],
       "source_refs": [
         "ops/docs/profiles/navigation/README.md",
-        "ops/docs/profiles/navigation/feature-tabs.md"
+        "ops/docs/profiles/navigation/feature-tabs.md",
+        "ops/docs/profiles/navigation/feature-header-summary.md",
+        "components/user/user-page-header/UserPageHeaderClient.tsx"
       ]
     },
     {
@@ -1198,27 +1206,66 @@
         "tabs",
         "identity",
         "collected",
-        "groups",
-        "waves",
+        "curation",
         "proxy",
         "subscriptions",
         "brain",
         "xtdh"
       ],
       "facts": [
-        "Profile tabs split profile content into sections such as Identity, Collected, Groups, Waves, Subscriptions, Proxy, Brain, and xTDH.",
+        "Profile tabs split profile content into sections such as Identity, Curation, Collected, Subscriptions, Proxy, Brain, and xTDH.",
         "The default Identity tab opens at /{user}; legacy /{user}/identity redirects there.",
-        "Other profile tabs can be opened directly through routes such as /{user}/groups or /{user}/collected.",
+        "Other profile tabs can be opened directly through routes such as /{user}/curations or /{user}/collected.",
         "Unavailable or gated tabs can be hidden depending on profile state and feature visibility rules."
       ],
       "canonical_path": "/{user}",
       "related_paths": [
-        "/{user}/identity",
+        "/{user}/curations",
         "/{user}/collected",
-        "/{user}/groups"
+        "/{user}/brain"
       ],
       "tags": ["profiles", "navigation"],
       "source_refs": ["ops/docs/profiles/navigation/feature-tabs.md"]
+    },
+    {
+      "id": "profiles.curation-tab",
+      "kind": "route",
+      "title": "Profile Curation tab",
+      "link_label": "Profile Curation",
+      "aliases": [
+        "profile curation",
+        "my curation",
+        "curation tab",
+        "featured posts",
+        "create profile curation",
+        "add profile post"
+      ],
+      "keywords": [
+        "profile",
+        "curation",
+        "posts",
+        "manage",
+        "source wave",
+        "create"
+      ],
+      "facts": [
+        "The Profile Curation tab lives at /{user}/curations and presents the profile's selected named Curation.",
+        "On an owner's empty Curation tab, Create Curation asks for a name and prepares the required access, public source Wave, Curation, and profile connection.",
+        "If the owner has no profile handle, Go to Identity opens /{user} so profile setup can be completed first.",
+        "After guided setup succeeds, Add post opens automatically; if post creation succeeds but Curation membership fails, Retry add reuses the created post.",
+        "Owners see Add post as the primary action. Manage separates profile display actions from Curation actions: Hide from profile keeps the Curation, source Wave, and posts, while Delete Curation deletes the Curation but keeps its source Wave and posts.",
+        "Profile post actions open the original Wave, edit an eligible author-owned post, or remove it from the Curation after confirmation.",
+        "Public viewers and proxy sessions do not receive owner management controls."
+      ],
+      "canonical_path": "/{user}/curations",
+      "related_paths": ["/{user}", "/waves"],
+      "tags": ["profiles", "curation", "waves", "posts"],
+      "source_refs": [
+        "app/[user]/curations/page.tsx",
+        "components/user/waves/UserPageProfileWave.tsx",
+        "components/user/waves/UserPageProfileCurationSetupDialog.tsx",
+        "ops/docs/profiles/tabs/feature-curation-tab.md"
+      ]
     },
     {
       "id": "profiles.subscriptions-tab",
@@ -1336,9 +1383,14 @@
       "facts": [
         "The Profile Brain tab surfaces Brain-related profile activity and wave context.",
         "Brain views include activity and wave sidebar surfaces where available.",
-        "Created Waves is labeled Wave posts, and each row's Last activity time refers to the newest post by anyone in that wave.",
-        "Most Active In is labeled All time and ranks accessible non-direct-message waves by how many posts the identity has written in them across all time.",
-        "Most Active In shows up to five ranked waves and labels each desktop row Last post with when the viewed identity last posted in that specific wave.",
+        "Created Waves lists accessible non-direct-message root waves and subwaves created by the profile, ordered by that profile's latest post in each wave; waves without a qualifying profile post appear after active waves.",
+        "Recently Active In lists accessible non-direct-message root waves and subwaves ordered by the profile's latest post, whether or not the profile created them; a wave can appear in both sections.",
+        "Each row labels the profile-specific time as Last post. Created Waves also labels its separate total wave posts count, which includes retained CHAT posts by all authors; Recently Active In does not show that wave-wide total.",
+        "Created Waves initially shows five rows on desktop, and both lists provide Load more controls so cursor pages remain reachable.",
+        "On desktop, Created Waves and Recently Active In share one independently scrollable sidebar, so scrolling it does not advance the Brain feed.",
+        "On small screens, More opens the Created waves modal with the same profile-specific ordering and Load more pagination; it does not show a partial page count as a total.",
+        "When a focused Load more control retrieves the final cursor page, focus moves to an All waves loaded status so keyboard focus is preserved.",
+        "Created Waves and Recently Active In load and recover independently, and results refresh for a connected-viewer change so private-wave access is not reused across viewers.",
         "Use /{user}/brain for profile-specific Brain context."
       ],
       "canonical_path": "/{user}/brain",
@@ -1364,7 +1416,8 @@
       "facts": [
         "Quick Tags are managed from the compact owner-only section beneath Activity on the Profile Brain tab.",
         "The section shows up to three tags and uses a +N more chip when additional tags exist; controls wrap at narrow widths.",
-        "Manage, a visible Quick Tag, and +N more open the inline Quick Tags manager inside the same Brain-tab card.",
+        "Manage and +N more open the inline Quick Tags manager inside the same Brain-tab card.",
+        "On mobile, New Quick Tag and existing-tag editing open in a bottom sheet; on wider screens, create and edit forms remain inline.",
         "The section is hidden on other profiles and while acting through a proxy.",
         "Quick Tags do not have a dedicated profile tab or route."
       ],
@@ -2236,7 +2289,8 @@
       ],
       "facts": [
         "To create a wave on web, click the + button in the Waves panel or open /waves?create=wave.",
-        "On web, Create Wave opens in a centered modal on desktop and the standard bottom sheet below 768px; both use the same multi-step form.",
+        "If the connected identity has no profile handle, Create Wave opens a Create your profile first dialog with Go to Identity and Not now instead of opening the multi-step form.",
+        "With a profile handle, Create Wave opens in a centered modal on desktop and the standard bottom sheet below 768px; both use the same multi-step form.",
         "The app full-page create route remains /waves/create where app mode uses it.",
         "Wave creation requires a connected profile and the necessary permissions for the selected groups/settings."
       ],
@@ -2272,24 +2326,28 @@
         "The wave creation flow starts with Overview and then configures groups, description, and additional steps depending on wave type.",
         "The Overview step begins with the Create Wave heading and keeps the wave name, picture, type, and Rank ranking mode visible; Appearance and labels contains display, proposal-card, and applicable tab-label customization.",
         "Optional sections are named for their contents instead of repeating Advanced settings. They show Customized for non-default values and open automatically when a hidden field needs attention.",
-        "The Groups step shows all access and moderation rows immediately, organized from Who can view through Admin without an Advanced settings disclosure.",
-        "In Groups, Who can view controls wave access; followers who can view the wave may get a notification when it is created.",
-        "Each Groups access row offers Replace criteria and Choose group; Replace criteria contains Add identity and the rule choices, Back to criteria returns from identity search, and Next stays disabled until the pending replacement is created, discarded, or replaced by a saved group.",
+        "The Groups step shows all access and moderation rows immediately, organized from Visibility through Admins without an Advanced settings disclosure.",
+        "In Groups, Visibility controls wave access; followers who can view the wave may get a notification when it is created.",
+        "Each Groups access row offers Edit criteria and Choose group; Edit criteria keeps Identities alongside the rule choices, supports explicitly included and excluded identities, and Next stays disabled until the pending replacement is created, discarded, or replaced by a saved group.",
+        "The inline criteria editor includes a Hide criteria and members switch. Its tooltip explains that the criteria and member list remain visible to group members but are hidden from everyone else. The switch starts off for a new inline group, preserves the setting copied from a selected saved group, and applies the current setting when Create and use new group is selected.",
+        "The inline Identities editor can add either included or excluded identities through profile search, an authenticated EMMA allowlist, or a dragged or selected CSV file. Source wallets are normalized and deduplicated, source choices persist while the group remains an unsaved draft, and the latest include or exclude action wins when the same wallet appears on both sides.",
+        "Inline group identity search ranks exact, prefix, and substring profile-handle matches before ENS-only matches, then orders each match group by profile level, highest first.",
+        "An empty Visibility, drop, vote, or chat scope is labeled Public without a Current group heading; after a group is selected, the heading and its current eligible identity count are shown.",
         "A selected saved access group shows its current eligible identity count; View members opens a paginated, searchable member browser without leaving wave creation.",
         "A valid unsaved inline group offers Preview matches, which evaluates current membership without saving the group or applying it to the Wave.",
         "Group membership previews use current profile, reputation, and ownership data, so the matching identities can change over time.",
         "If an older saved draft references a group whose criteria are unavailable, the member browser explains that limitation and continues showing any current members it can resolve instead of closing wave creation.",
-        "When Who can view is restricted, every active Drop, Vote, Chat, and Admin group member must also belong to the View group; incompatible rows are highlighted and block progress.",
-        "Wave creation verifies the final access groups again after authentication and before creating a personal Admin group or the Wave.",
+        "When Visibility is restricted, every active Drop, Vote, Chat, and Admins group member must also belong to the Visibility group; incompatible rows are highlighted and block progress.",
+        "Wave creation verifies the final access groups again after authentication and before creating a personal group for the Admins scope or the Wave.",
         "New inline groups include the connected creator by default, even when the group otherwise contains only rules; choosing a saved group preserves the saved group's membership instead.",
         "Inline identity groups warn when the connected creator is excluded, because excluding yourself from a view group can prevent you from opening the created wave.",
-        "All wave types include Rules; Rank and Approve also include Dates, Drops, and Voting. Scheduled Rank and Approve include Outcomes, while Perpetual Ranking skips Outcomes.",
-        "Dates keeps core start, voting, and applicable first-announcement controls visible. Winner schedule or Wave end reveals secondary controls; Perpetual Ranking has no Dates optional section.",
+        "All wave types include Rules; Rank and Approve also include Schedule, Drops, and Voting. Scheduled Rank and Approve include Outcomes, while Perpetual Ranking skips Outcomes.",
+        "Schedule keeps Submissions Open, Voting Opens, and applicable first-announcement controls visible under Opening dates. Winner schedule or Wave end reveals secondary controls; Perpetual Ranking has no Schedule optional section.",
         "Drops keeps submission type visible and puts optional controls under Submission requirements.",
-        "Rules keeps generated automatic rules visible and puts optional creator-written and applicable acceptance rules in a creator-rules section.",
+        "Rules keeps generated wave rules visible and puts optional Wave guidelines and applicable acceptance rules in a Wave guidelines section.",
         "Voting keeps the power model, scope, required Rep or Memes details, and Approve threshold visible; named Vote limits sections contain negative-vote behavior, time weighting, and Approve hold timing.",
         "Outcomes keeps outcome selection, reward configuration, and Show outcomes visible; Approve waves place the optional maximum winner count under Winner limits.",
-        "In Description, individual @ mention suggestions follow the draft wave's Who can view group; private drafts suggest only eligible profiles.",
+        "In Description, individual @ mention suggestions follow the draft wave's Visibility group; private drafts suggest only eligible profiles.",
         "The docs for wave creation live under ops/docs/waves/create; on web, use /waves?create=wave to open create-wave mode."
       ],
       "canonical_path": "/waves?create=wave",
@@ -2352,7 +2410,7 @@
       "facts": [
         "Rank waves collect drops and allow participants to vote/rank them according to configured rules.",
         "On the Overview step, rank waves choose between Announce Winners (scheduled winner announcements) and Perpetual Ranking (a continuous leaderboard with no winners and no end date).",
-        "Rank wave setup includes Overview, Groups, Dates, Drops, Rules, Voting, and Description; Announce Winners waves also configure an Outcomes step, which Perpetual Ranking waves skip.",
+        "Rank wave setup includes Overview, Groups, Schedule, Drops, Rules, Voting, and Description; Announce Winners waves also configure an Outcomes step, which Perpetual Ranking waves skip.",
         "Rank wave rules are visible in the desktop right sidebar and mobile About information path.",
         "Leaderboards, winners, and voting state are part of rank-wave participation; perpetual ranking waves keep a live leaderboard but never announce winners or award outcomes."
       ],
@@ -2381,7 +2439,7 @@
       ],
       "facts": [
         "Approve waves use approval-oriented voting rather than a plain chat flow.",
-        "Approve wave setup includes Overview, Groups, Dates, Drops, Rules, Voting, Outcomes, and Description.",
+        "Approve wave setup includes Overview, Groups, Schedule, Drops, Rules, Voting, Outcomes, and Description.",
         "Approve wave rules are visible in the desktop right sidebar and mobile About information path.",
         "Use Approve when the wave is intended to accept or reject submissions."
       ],
@@ -2414,6 +2472,7 @@
         "rules",
         "rep",
         "settings",
+        "configuration",
         "voters",
         "top voters",
         "activity",
@@ -2421,11 +2480,11 @@
         "sidebar"
       ],
       "facts": [
-        "Desktop wave information sections live in the right sidebar and begin with About, followed by Rules, REP, and Settings.",
-        "For Rank and Approve waves, the desktop right sidebar exposes Voters and Activity from More after the four base sections.",
-        "In the native app, the main About view opens compact Overview, Rules, and REP pills; More exposes the remaining sections.",
+        "Desktop wave information sections live in the right sidebar in this order: About, REP, and Configuration.",
+        "Configuration is the consolidated rules and settings surface. It includes wave type, access, chat, display, schedules and other generated rules, guidelines, acceptance-required rules, admin-only shared controls, and personal display controls. Approve waves place Approve after, Hold time, Max approved drops, and Approval window directly after Schedule. Shared edits use gears, while read-only creation-time values have no edit control.",
+        "For Rank and Approve waves, the desktop right sidebar adds Voters and Activity after the three base sections; Activity moves into More at the fixed panel width.",
+        "In the native app, the main About view opens compact Overview, REP, and Configuration pills; Rank and Approve waves expose Voters and Activity from More.",
         "While native About is active, its information pills replace the subwave pills in the same contextual row; selecting another main tab restores the subwave pills.",
-        "In the native app, More contains Settings and, for Rank and Approve waves, Voters and Activity.",
         "Selecting a section switches information for the active wave without navigating away from the thread."
       ],
       "canonical_path": "/waves",
@@ -2444,8 +2503,10 @@
       "title": "Wave rules",
       "aliases": [
         "wave rules",
-        "rules tab",
+        "configuration rules",
         "rules step",
+        "wave guidelines",
+        "guidelines",
         "creator rules",
         "custom rules",
         "participation terms",
@@ -2465,17 +2526,19 @@
       ],
       "facts": [
         "All wave creation includes a Rules step. Chat enters Rules after Groups and then goes to Description; Rank and Approve enter Rules after Drops and then go to Voting.",
-        "Automatic rules are generated from wave setup. Chat rules focus on wave type, access, and chat settings; Rank and Approve rules also include timing, submissions, voting, approval, and outcome visibility.",
-        "Creators can add display-only custom rules that are saved as wave metadata.",
+        "Generated rules summarize the wave setup. Chat rules focus on wave type, access, and chat settings; Rank and Approve rules also include timing, submissions, voting, approval, and outcome visibility.",
+        "Creators can add Wave guidelines that are saved as wave metadata and shown under Guidelines in the wave rules panel.",
+        "When a wave has guidelines, a profile with no prior chat messages or participation drops in that wave reviews them before its first chat message is sent. Agree sends the pending message; Decline keeps the draft and shows the guidelines again on the next attempt.",
         "For Rank and Approve waves, creators can add rules that require acceptance; those use the existing participation terms and wallet-signature submit flow.",
-        "Wave admins can edit display-only custom rules later from wave settings. For Rank and Approve waves, admins can also edit acceptance-required rules.",
-        "Participants can review rules in the desktop wave right sidebar or from the mobile About information path."
+        "Wave admins can edit Wave guidelines later from Configuration. For Rank and Approve waves, admins can also edit acceptance-required rules there.",
+        "Participants can review rules in Configuration in the desktop wave right sidebar or from the mobile About information path."
       ],
       "canonical_path": "/waves/create",
       "related_paths": ["/waves", "/waves/create"],
       "tags": ["waves", "rules", "chat", "rank", "approve"],
       "source_refs": [
         "ops/docs/waves/create/feature-rules-step.md",
+        "ops/docs/waves/composer/feature-first-message-guidelines.md",
         "ops/docs/waves/flow-wave-participation.md",
         "ops/docs/waves/sidebars/feature-right-sidebar-tabs.md"
       ]
@@ -2495,6 +2558,7 @@
       "facts": [
         "Direct-message waves live under /messages and individual message threads use /messages/{waveId}.",
         "A direct-message creation flow is available at /messages/create.",
+        "Direct-message recipient search ranks exact, prefix, and substring handle matches before ENS or auto-wallet matches, then orders each match group from highest to lowest profile level.",
         "Direct messages use wave mechanics but are surfaced separately from standard public wave routes.",
         "Direct-message content stays gated until wallet and profile prerequisites are resolved."
       ],
@@ -2514,7 +2578,9 @@
         "post a drop",
         "write a drop",
         "drop composer",
-        "reply in wave"
+        "reply in wave",
+        "composer actions",
+        "plus button"
       ],
       "keywords": [
         "composer",
@@ -2524,11 +2590,21 @@
         "markdown",
         "mentions",
         "attachments",
-        "images"
+        "images",
+        "upload",
+        "gif",
+        "poll",
+        "storm"
       ],
       "facts": [
         "The wave composer is where users post drops and replies inside a wave.",
+        "If a wave has guidelines and the profile has posted neither a chat message nor a participation drop there, submitting its first chat message opens a Wave guidelines dialog before the message is sent.",
+        "Agree sends the pending first message and prevents repeat prompts in that wave. Decline or dismissing the dialog does not send the message, keeps the draft, and shows the guidelines again on the next submit attempt.",
         "Composer docs cover markdown, mentions, NFT hashtag references, curation URLs, media uploads, and Enter-key behavior.",
+        "On narrow composer rows, the plus button opens a labeled action tray below the input for available Upload, GIF, Poll, Storm, and Metadata actions.",
+        "Poll posts require a question, at least two unique options, and a future closing time. The composer explains whether voters can select one option or multiple options and keeps Post unavailable until the poll is valid.",
+        "Poll and Storm are mutually exclusive on narrow composer rows: while Poll is open, the plus control and separate Poll action are hidden and the poll header close control removes the poll; while Storm is active, Poll remains visible but unavailable until the Storm is finished or discarded.",
+        "On mobile and in the app, the GIF picker uses the same drag handle and swipe-down dismissal as the emoji picker.",
         "Composer availability depends on the wave, groups, permissions, and current state.",
         "If an authenticated wallet has no profile handle yet, public wave content can stay readable while the composer prompts the user to create a profile before participating."
       ],
@@ -2537,7 +2613,42 @@
       "tags": ["waves", "composer", "drops"],
       "source_refs": [
         "ops/docs/waves/composer/README.md",
+        "ops/docs/waves/composer/feature-poll-composer.md",
+        "ops/docs/waves/composer/feature-enter-key-behavior.md",
+        "ops/docs/waves/composer/feature-first-message-guidelines.md",
         "ops/docs/waves/chat/feature-chat-composer-availability.md"
+      ]
+    },
+    {
+      "id": "waves.drop.manage-curations",
+      "kind": "workflow",
+      "title": "Manage a post's Curations",
+      "aliases": [
+        "manage curations",
+        "add post to curation",
+        "remove post from curation",
+        "curate existing post"
+      ],
+      "keywords": ["waves", "post", "curation", "add", "remove", "mobile"],
+      "facts": [
+        "Use Add to {Curation name} from a standard post's desktop action menu or mobile touch action sheet to add the post immediately when there is one clear preferred Curation.",
+        "While viewing a Curation tab, use Remove from {Curation name} in the same desktop action menu or mobile touch action sheet to remove the post from that active Curation.",
+        "Curation-tab posts expose Open drop actions on compact touch layouts, so the mobile action sheet does not require long-press discovery.",
+        "Use Manage Curations to choose from every manageable Curation in the source Wave, remove existing membership, or create another Curation.",
+        "The dialog lists named Curations in the source Wave that the current account is allowed to manage, with existing memberships first.",
+        "Add and Remove update only Curation membership and keep the dialog open; removing a post does not delete its original Wave post.",
+        "Create new Curation is separated below the list. Creating from a post adds that post and keeps the user on the current page.",
+        "If there is no manageable Curation, eligible users can create the first one and continue adding the same post.",
+        "If Curation creation succeeds but adding the post fails, the created Curation remains and the dialog reports the partial success."
+      ],
+      "canonical_path": "/waves",
+      "related_paths": ["/{user}/curations"],
+      "tags": ["waves", "posts", "curation", "mobile"],
+      "source_refs": [
+        "components/waves/drops/WaveDropCurationsDialog.tsx",
+        "components/waves/drops/WaveDropActionsMore.tsx",
+        "components/waves/drops/WaveDropMobileMenu.tsx",
+        "ops/docs/waves/drop-actions/feature-drop-curation.md"
       ]
     },
     {
@@ -2672,6 +2783,58 @@
       ]
     },
     {
+      "id": "waves.configuration-access-group-editor",
+      "kind": "ui_affordance",
+      "title": "Edit wave access groups from Configuration",
+      "aliases": [
+        "edit wave access",
+        "change visibility group",
+        "restrict fully public wave",
+        "make wave public",
+        "use visibility criteria",
+        "edit drop group",
+        "edit vote group",
+        "edit chat access",
+        "edit admin group"
+      ],
+      "keywords": [
+        "waves",
+        "configuration",
+        "access",
+        "group",
+        "criteria",
+        "visibility",
+        "public",
+        "drop",
+        "vote",
+        "chat",
+        "admins"
+      ],
+      "facts": [
+        "Selecting an access-row gear in Wave Configuration opens the group editor directly without an intermediate context menu.",
+        "The Configuration modal renders the same group assignment editor as wave creation, including Edit criteria and Choose group, the privacy row, criteria chips, expanded editors, draft summary, and save actions. It preloads the row's rules, included and excluded identities, NFT and grant requirements, and criteria/member privacy setting.",
+        "A public access row starts a new criteria draft with the editor's primary wallet explicitly included by default; Include me can be turned off from Identities.",
+        "An already restricted row keeps its saved included and excluded identities and does not add the editor automatically.",
+        "Saving edited criteria creates a separate group and normally updates only the selected access row; it does not mutate the original group or other access rows that use it.",
+        "When Visibility, Drop, Vote, and Chat access are all public, assigning a Visibility group assigns that same group to all four non-admin access rows in one save and leaves Admins unchanged.",
+        "The Visibility cascade does not run when any non-admin access row is already restricted; in that case only Visibility changes and normal containment validation applies.",
+        "Visibility offers Make wave public when it is restricted, with a confirmation explaining that everyone will be able to find and view the wave.",
+        "Drop, Vote, and Chat access offer Use visibility criteria when their effective criteria differ from Visibility; if Visibility is public, the selected access row becomes public after confirmation.",
+        "Admins never offers the Use visibility criteria shortcut.",
+        "If the existing criteria or identity lists cannot be loaded, the editor shows a retry state instead of substituting empty criteria."
+      ],
+      "canonical_path": "/waves",
+      "related_paths": ["/waves?create=wave"],
+      "tags": ["waves", "configuration", "access", "groups", "settings"],
+      "source_refs": [
+        "components/waves/specs/groups/group/edit/WaveGroupEditButtons.tsx",
+        "components/waves/specs/groups/group/edit/WaveGroupChangeDialog.tsx",
+        "components/groups/assignment/GroupAssignmentDialog.tsx",
+        "components/groups/assignment/GroupAssignmentPanel.tsx",
+        "ops/docs/waves/sidebars/feature-right-sidebar-group-management.md"
+      ]
+    },
+    {
       "id": "waves.chat-status-settings",
       "kind": "ui_affordance",
       "title": "Wave chat status settings",
@@ -2695,11 +2858,11 @@
       ],
       "facts": [
         "Wave chat has two separate settings for Rank and Approve waves: chat.enabled controls whether chat is on, and chat.scope controls who can chat when chat is enabled.",
-        "Chat waves require chat to stay enabled, so their Settings and Rules panels do not show a Chat status enable/disable row.",
-        "Rank and Approve wave Settings show Chat status as Enabled or Disabled, and wave admins can edit that row to enable or disable chat.",
+        "Chat waves require chat to stay enabled, so Configuration does not show a Chat status enable/disable row for them.",
+        "Rank and Approve wave Configuration shows Chat status as Enabled or Disabled, and wave admins can edit that row with a gear to enable or disable chat.",
         "The Access row uses Chat access wording; `Anyone` means no chat access group is attached, independently of whether chat is enabled.",
-        "The Rank and Approve Rules panels also show Chat status separately from Chat access, so disabled chat does not look like the same thing as an unrestricted chat access group.",
-        "Access groups available to the current viewer—including authorized private groups for their authenticated members or creators—link from Rules and Settings to a filtered Network view that shows both the group criteria and current members; Rules display a live eligible-member count instead of the generated group name.",
+        "Rank and Approve Configuration shows Chat status separately from Chat access, so disabled chat does not look like the same thing as an unrestricted chat access group.",
+        "Access groups available to the current viewer—including authorized private groups for their authenticated members or creators—link from Configuration to a filtered Network view that shows both the group criteria and current members; Configuration displays a live eligible-member count instead of the generated group name.",
         "Use the Clear selected group button in Network to close the group summary and return to the default member view.",
         "A scoped group hidden from the current viewer is labeled `Private group` without a link, name, id, author, criteria, or membership details.",
         "Network does not reuse a selected group's cached criteria or members after the authenticated viewer changes, or while opening a different group.",
@@ -2898,7 +3061,9 @@
         "For full-collection xTDH grants, group membership requires ownership of at least one collection token.",
         "Group creation requires the relevant connected profile permissions.",
         "Groups can be used later in workflows such as wave access or participation settings.",
-        "Publishing a replacement for a group used by a Wave is rejected if it would leave any active Drop, Vote, Chat, or Admin group member outside that Wave's View group."
+        "Include and exclude identity search ranks exact, prefix, and substring profile-handle matches before ENS-only matches, then orders each match group by profile level, highest first.",
+        "Across group cards, group details, Wave configuration, member previews, and draft criteria summaries, REP and NIC identity wallets are shown as profile handles when available; identities without a resolvable handle remain visible as wallets.",
+        "Publishing a replacement for a group used by a Wave is rejected if it would leave any active Drop, Vote, Chat, or Admins group member outside that Wave's Visibility group."
       ],
       "canonical_path": "/network/groups",
       "related_paths": ["/network/groups"],
@@ -4342,7 +4507,7 @@
         "A connected wallet without a profile sees the profile setup prompt and can open its profile setup route with Create profile.",
         "It supports a compact multi-select feed filter, row actions, read state, paging, and navigation to related app content.",
         "The notification filter defaults to All and can combine Mentions, Replies, Identity, Reactions, Invites, and Subscriptions.",
-        "The settings action beside the Notifications heading opens Profile Preferences.",
+        "An authenticated user can open Profile Preferences from the Preferences action in their own profile header.",
         "The Invites filter includes wave-created notifications: standard waves the user can access and direct-message waves started with the user.",
         "Standard wave-created rows can offer Join wave and Follow creator controls; direct-message wave-created rows offer Open DM instead of joining the wave.",
         "The Reactions filter includes voted, reacted, and boosted drop notifications; the Identity filter includes new follows and REP/NIC updates.",
@@ -4387,13 +4552,14 @@
         "All notifications includes essential notices plus enabled optional categories; Essential only pauses optional in-app notification creation, hides the individual category controls, and preserves their choices.",
         "Direct messages still arrive in Essential only mode, but their optional alerts are paused.",
         "Device push settings remain separate, and a suppressed in-app notification cannot trigger a push.",
-        "Profile Preferences is available from the app sidebar, the desktop profile menu, and the settings action beside the Notifications heading."
+        "Profile Preferences is available from the app sidebar, the desktop profile menu, and the Preferences action in the authenticated user's own profile header."
       ],
       "canonical_path": "/notifications",
       "related_paths": ["/messages", "/notifications"],
       "tags": ["profile", "privacy", "direct messages", "notifications"],
       "source_refs": [
         "components/header/ProfilePreferencesSettings.tsx",
+        "components/user/user-page-header/UserPageHeaderClient.tsx",
         "ops/docs/notifications/feature-profile-preferences.md",
         "ops/docs/waves/create/feature-direct-message-creation.md"
       ]
@@ -4608,7 +4774,9 @@
         "profile nic statements",
         "add statement",
         "profile statement",
-        "statement modal"
+        "statement modal",
+        "ninfa",
+        "custom art link"
       ],
       "keywords": [
         "identity",
@@ -4620,7 +4788,9 @@
         "modal",
         "profile",
         "add",
-        "visibility"
+        "visibility",
+        "ninfa",
+        "art link"
       ],
       "facts": [
         "Identity statements are managed from profile identity surfaces on /{user}.",
@@ -4632,6 +4802,8 @@
         "On mobile web and Capacitor, deeper add-statement forms stay above the software keyboard and keep their focused fields and Save/Cancel actions reachable by scrolling.",
         "Consolidated wallet rows expand to show the full address and ENS name when available as full-field copy controls, plus labeled mobile links to Etherscan and OpenSea.",
         "URL-capable statement rows open from the row and show a right-aligned external-link cue; Copy remains an independent inline action that does not open the destination, while eligible owners can also Delete.",
+        "NFT Accounts includes Ninfa and Other. Other asks for a display name such as AOTM and a secure HTTPS URL, then shows the display name with the destination hostname.",
+        "New NFT account links must use HTTPS, cannot contain URL credentials, reject duplicate normalized URLs, and are limited to 20 per profile; Ninfa links must use ninfa.io or a ninfa.io subdomain.",
         "Statement rows can expose Open, Copy, Delete, and Set Primary actions depending on statement type, ownership, and wallet state.",
         "If statements fail to load, the page keeps consolidated addresses visible and shows a Retry action; empty statement groups are omitted without an overall placeholder."
       ],
@@ -4747,11 +4919,16 @@
         "The expandable Details panel can show holdings totals, wallet activity, distributions, TDH history, and boost breakdown.",
         "Wide tables in Details scroll horizontally on narrow screens while their first label column stays visible.",
         "Native view covers The Memes, Gradients, NextGen, and Meme Lab holdings; Network view covers xTDH token holdings by contract.",
-        "A NextGen token opened from a profile's Collected tab can return to the same profile filters, page, and opened card; direct token visits offer the current owner's NextGen holdings when available.",
+        "In the native app, The Memes, Gradients, NextGen, and Meme Lab tokens opened from a profile's Collected tab use the app-header Back chevron to restore the same profile filters, page, and opened card while retaining the detail page's collection link; mobile web shows an in-page return action, desktop uses browser Back, and direct token visits do not show a false return action, while NextGen can separately offer the current owner's holdings when available.",
         "Use collection route records for collection-level browsing and profile collected for a user's holdings."
       ],
       "canonical_path": "/{user}/collected",
-      "related_paths": ["/the-memes", "/meme-lab", "/nextgen"],
+      "related_paths": [
+        "/the-memes",
+        "/6529-gradient",
+        "/meme-lab",
+        "/nextgen"
+      ],
       "tags": ["profiles", "collected", "nfts"],
       "source_refs": [
         "app/[user]/collected/page.tsx",
@@ -5076,11 +5253,14 @@
       ],
       "facts": [
         "Wave-name mentions are typed with # plus at least 2 characters and submit as tracked mentioned_waves metadata.",
-        "The special @all group mention can submit mentioned_groups metadata when the current wave/drop context allows mentioning all.",
-        "The case-insensitive @contributors mention targets profiles with Chat access, while @admins targets the Wave creator and profiles with Admin access.",
-        "When Wave Chat access is Anyone, Wave followers are the bounded @contributors audience because there is no finite Chat-access group; muted followers and the author are excluded.",
+        "The broadcast mentions @all and @contributors are available only to the Wave creator and profiles in the Admins scope.",
+        "The case-insensitive @contributors mention targets profiles with Chat access that joined the Wave and enabled Broadcast mentions, while @admins targets the Wave creator and profiles in the Admins scope.",
+        "When Wave Chat access is Public, joined Wave followers with Broadcast mentions enabled are the bounded @contributors audience because there is no finite Chat-access group; muted followers and the author are excluded.",
+        "The Broadcast mentions notification preference controls both @all and @contributors, while All messages continues to notify a joined profile about every message.",
         "The @devs6529 mention targets configured 6529 developer profiles that can view the Wave.",
-        "Any profile with Chat access can invoke @contributors, @admins, or @devs6529 by typing the complete token directly or selecting it from suggestions; the backend filters recipients by Wave access.",
+        "Any profile with Chat access can invoke @admins or @devs6529 by typing the complete token directly or selecting it from suggestions; the backend filters recipients by Wave access.",
+        "Broadcast suggestions are unavailable to non-admins; if a non-admin types @all or @contributors directly in a new message, the token is posted as ordinary text without broadcast metadata or notifications.",
+        "A non-admin can retain @contributors while editing an existing message that already contained it, but the edit does not rebroadcast the mention and they cannot add it as a broadcast mention to a message that did not already contain it.",
         "Global mention text inside links or inline and fenced code remains literal and does not notify a Wave audience.",
         "Editing stored global-mention tokens does not resend permission-group notifications; mentioned_groups describes tokens in the current displayed content, not historical notification delivery.",
         "Global mentions stay visible in posted content; personal Quick Tags expand into individual profile mentions before submission.",
@@ -5193,11 +5373,12 @@
         "post"
       ],
       "facts": [
-        "Write the first part and select Break into storm to open the private Storm draft workspace.",
-        "The primary action says Add part while writing a new part, Save changes while editing, and Post storm when the current editor is empty.",
-        "Saved parts have visible controls to edit, move earlier or later, and remove; Discard clears the complete draft after confirmation.",
-        "Blank or whitespace-only text is not saved as a storm part, while media-only parts are allowed.",
-        "The storm is published as one drop with multiple ordered parts."
+        "Select Storm in the compact composer or Break into storm in the expanded composer to open the private Storm draft workspace before writing the first part.",
+        "An empty Storm draft shows 0 parts and Write part 1; if valid text or media is already present, selecting Storm saves it as part 1.",
+        "The primary action says Add part until at least one valid part is saved, Save changes while editing, and Post storm when a saved Storm has an empty current editor.",
+        "Close exits an untouched empty Storm immediately; once the Storm has saved or unsaved content, Discard clears the complete draft after confirmation.",
+        "Blank or whitespace-only text is not saved as a storm part, while media-only parts are allowed. If a current unsaved part blocks editing saved parts, narrow layouts show an instruction to add or clear it.",
+        "An empty Storm draft cannot be posted, Poll and Storm cannot be started together, and the storm is published as one drop with multiple ordered parts."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/messages"],
@@ -5343,7 +5524,10 @@
         "bell button",
         "speaker muted",
         "speaker mute button",
-        "all message notifications"
+        "all message notifications",
+        "broadcast mentions",
+        "@all notifications",
+        "@contributors notifications"
       ],
       "keywords": [
         "waves",
@@ -5354,11 +5538,13 @@
         "speaker",
         "all",
         "messages",
-        "ALL"
+        "ALL",
+        "broadcast",
+        "contributors"
       ],
       "facts": [
         "The bell button opens wave notification preferences after a connected non-proxy profile has joined the wave.",
-        "The notification menu has an ALL mentions option with an @ icon for @ALL mention notifications.",
+        "The notification menu has a Broadcast mentions option with an @ icon; it controls notifications for both @all and @contributors.",
         "The notification menu has an All messages option for every-message notifications.",
         "When all-message notifications are over the follower limit, the notification menu shows an inline follower-limit note; if the option is already enabled, users can still turn it off.",
         "The speaker control mutes waves before or after joining.",
@@ -5758,14 +5944,18 @@
         "controls"
       ],
       "facts": [
-        "The Network identities leaderboard is documented under Network features.",
-        "It has controls and URL state for browsing identity rankings.",
+        "The Network filter opens the same criteria builder used for Wave group assignment, with criteria creation open by default and Choose group available for searching saved groups.",
+        "Create and use new group saves the criteria as a new group and immediately applies it to the Network member list; All Network members clears the scope.",
+        "When a group is already active, reopening the filter prefills its criteria and identity lists. Saving edits creates a new group without mutating the original.",
+        "If active group criteria cannot be loaded, the filter shows a retry state instead of an empty draft.",
+        "The leaderboard also has sorting, pagination, profile links, and URL state for browsing identity rankings.",
         "Use the Network area when users ask for global profile or identity rankings."
       ],
       "canonical_path": "/network",
       "related_paths": ["/network/tdh", "/network/levels"],
       "tags": ["network", "leaderboard"],
       "source_refs": [
+        "components/community/CommunityMembersGroupFilter.tsx",
         "ops/docs/network/feature-network-identities-leaderboard.md"
       ]
     },
@@ -6901,6 +7091,43 @@
       ],
       "tags": ["delegation", "tools"],
       "source_refs": ["app/delegation-mapping-tool/page.tsx"]
+    },
+    {
+      "id": "shared.native-ios-eula-consent",
+      "kind": "workflow",
+      "title": "Native iOS EULA consent",
+      "canonical_path": "/about/terms-of-service",
+      "aliases": [
+        "mobile EULA",
+        "iOS EULA",
+        "EULA acceptance",
+        "EULA retry",
+        "mobile agreement"
+      ],
+      "keywords": [
+        "eula",
+        "ios",
+        "mobile",
+        "consent",
+        "agreement",
+        "version",
+        "retry"
+      ],
+      "facts": [
+        "The native iOS app requires acceptance of the current EULA before application content starts.",
+        "EULA acceptance is versioned and valid for 365 days; stale, unversioned, expired, or differently versioned consent requires acceptance again.",
+        "A current unexpired device acceptance can restore consent after an iOS reinstall.",
+        "If the consent check fails, the iOS app remains blocked and offers Retry. If saving fails, the agreement stays visible so the user can try again.",
+        "Users must scroll through the agreement before Agree becomes available, and the mandatory dialog cannot be dismissed without acceptance.",
+        "Android and ordinary web sessions are not affected by the native iOS EULA gate."
+      ],
+      "related_paths": ["/about/terms-of-service"],
+      "tags": ["mobile", "ios", "eula", "consent", "legal"],
+      "source_refs": [
+        "components/eula/EULAConsentContext.tsx",
+        "components/eula/EULAModal.tsx",
+        "ops/docs/shared/feature-ios-eula-consent.md"
+      ]
     },
     {
       "id": "access.overview",

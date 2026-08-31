@@ -52,23 +52,23 @@ export default function UserPageHeaderBanner({
         />
       )}
       <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-ring-1 tw-ring-inset tw-ring-white/5 md:tw-hidden" />
-      <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-bg-gradient-to-t tw-from-black tw-via-black/60 tw-to-transparent md:tw-via-black/40" />
+      <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-bg-gradient-to-t tw-from-black/80 tw-via-black/30 tw-to-transparent md:tw-from-black md:tw-via-black/40" />
       <div className="tw-pointer-events-none tw-absolute tw-inset-x-0 tw-top-0 tw-hidden tw-h-32 tw-bg-gradient-to-b tw-from-black/20 tw-to-transparent md:tw-block" />
 
       {canEdit && (
         <button
           type="button"
           onClick={() => setIsEditOpen(true)}
-          className="tw-absolute tw-inset-0 tw-z-10 tw-hidden tw-h-full tw-w-full tw-border-none tw-bg-transparent tw-p-0 sm:tw-block"
+          className="tw-absolute tw-inset-0 tw-z-10 tw-hidden tw-h-full tw-w-full tw-border-none tw-bg-transparent tw-p-0 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-2px] focus-visible:tw-outline-primary-400 sm:tw-block"
           aria-label={getUserProfileHeaderMessage(
             "user.profileHeader.banner.edit",
             { name: profileLabel }
           )}
         >
-          <div className="tw-absolute tw-inset-0 tw-bg-black/30 tw-opacity-0 tw-transition-opacity tw-duration-300 tw-ease-out hover:tw-opacity-100">
+          <div className="tw-absolute tw-inset-0 tw-bg-black/30 tw-opacity-0 tw-transition-opacity tw-duration-300 tw-ease-out group-focus-within:tw-opacity-100 desktop-hover:group-hover:tw-opacity-100 touch-only:tw-bg-transparent touch-only:tw-opacity-100 motion-reduce:tw-transition-none">
             <div
               aria-hidden="true"
-              className="tw-absolute tw-right-4 tw-top-4"
+              className="tw-absolute tw-right-4 tw-top-4 touch-only:tw-flex touch-only:tw-size-9 touch-only:tw-items-center touch-only:tw-justify-center touch-only:tw-rounded-full touch-only:tw-border touch-only:tw-border-solid touch-only:tw-border-iron-800/60 touch-only:tw-bg-iron-950 touch-only:tw-shadow-md"
             >
               <PencilIcon />
             </div>

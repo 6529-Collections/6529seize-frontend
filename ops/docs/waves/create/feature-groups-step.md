@@ -16,9 +16,9 @@ step is user-reachable for `Chat`, `Rank`, and `Approve`.
 ## Step Paths
 
 - `Chat`: `Overview` -> `Groups` -> `Rules` -> `Description`
-- `Rank`: `Overview` -> `Groups` -> `Dates` -> `Drops` -> `Rules` ->
+- `Rank`: `Overview` -> `Groups` -> `Schedule` -> `Drops` -> `Rules` ->
   `Voting` -> `Outcomes` -> `Description`
-- `Approve`: `Overview` -> `Groups` -> `Dates` -> `Drops` -> `Rules` ->
+- `Approve`: `Overview` -> `Groups` -> `Schedule` -> `Drops` -> `Rules` ->
   `Voting` -> `Outcomes` -> `Description`
 
 ## Entry Points
@@ -31,30 +31,48 @@ step is user-reachable for `Chat`, `Rank`, and `Approve`.
 
 - All access and moderation rows are visible when the step opens. Each row
   groups its permission name, current scope, and related actions so the page can
-  be scanned from `Who can view` through `Admin` without opening a disclosure.
-- Helper copy clarifies that `Who can view` controls who can access the wave,
+  be scanned from `Visibility` through `Admins` without opening a disclosure.
+- Helper copy clarifies that `Visibility` controls who can access the wave,
   and that followers who can view the wave may get a notification when it is
   created.
-- `Chat` rows: `Who can view`, `Who can chat`, `Admin`
-- `Rank` and `Approve` rows: `Who can view`, `Who can drop`, `Who can vote`,
-  `Who can chat`, `Admin`
+- `Chat` rows: `Visibility`, `Who can chat`, `Admins`
+- `Rank` and `Approve` rows: `Visibility`, `Who can drop`, `Who can vote`,
+  `Who can chat`, `Admins`
 - `Rank` and `Approve` only:
   - `Enable chat` toggle controls whether `Who can chat` is editable
 - All wave types:
   - `Allow admins to delete posts` toggle sets admin delete permission
 - Defaults:
-  - `Anyone` for view/drop/vote/chat
+  - `Public` for view/drop/vote/chat
   - `Only me` for admin when creating a top-level wave
   - the parent wave's admin group when creating a subwave
   - `Allow admins to delete posts` is enabled by default
 
 ## Group Picker Behavior
 
-- Each access row offers `Replace criteria` and `Choose group`. `Replace
-criteria` opens the criteria editor, where `Add identity` appears alongside
-  the rule choices instead of as a separate row-level action. The identity
-  search uses `Back to criteria` to return to those choices.
-- Opening `Replace criteria` starts a pending replacement for that row. `Next`
+- Each access row offers `Edit criteria` and `Choose group`. `Edit criteria`
+  opens the criteria editor, where `Identities` remains available alongside the
+  rule choices. The identity editor supports both explicitly included and
+  explicitly excluded identities.
+- The criteria editor includes a `Hide criteria and members` switch. Its
+  tooltip explains that the criteria and member list remain visible to members
+  of the group but are hidden from everyone else. The switch is off for a new
+  inline group and keeps the saved privacy setting when criteria are copied
+  from the row's current group. `Create and use new group` saves its current
+  setting with the new group.
+- For either identity treatment, users can search for profiles, import every
+  wallet from one EMMA allowlist, or drag and drop/select a CSV file. EMMA and
+  CSV choices remain attached to the unsaved group when the identity editor is
+  closed and reopened.
+- Wallets from profile search, EMMA, and CSV are normalized and deduplicated.
+  If the same wallet is later added to the opposite treatment, the latest
+  action wins so it is not both included and excluded.
+- The identity editor shows the unique total for the active treatment. Inline
+  groups can include up to 10,000 identities and exclude up to 1,000.
+- Inline identity search shows exact, prefix, and substring profile-handle
+  matches in that order before ENS-only matches, and orders each match group by
+  profile level, highest first.
+- Opening `Edit criteria` starts a pending replacement for that row. `Next`
   remains disabled until the user applies it with `Create and use new group`,
   abandons it with `Discard draft`, or selects a saved group with `Choose
 group`. Navigating away from `Groups`, including moving backward from the
@@ -72,10 +90,12 @@ group`. Navigating away from `Groups`, including moving backward from the
 - Typing in a row that already has a selected group keeps that current group
   selected until the row is explicitly cleared or a new group is picked.
 - Clear control (`x`) resets the row to its default scope.
-- Helper text under each row shows `Current group: <group-or-scope>`.
-- A selected saved group also shows how many identities are currently eligible.
-  Use `View members` to inspect the current identities without leaving wave
-  creation.
+- A public row shows `Public` without a `Current group` heading. A selected
+  saved group shows the `Current group` heading, its current member total as
+  `1 user` or `X users`, and a readable summary of the active criteria,
+  including thresholds and explicit include or exclude counts. Its generated
+  group name is not shown in this summary. Use `View members` to inspect the
+  matches without leaving wave creation.
 - The member browser opens as a centered dialog on larger screens and a tall
   sheet on smaller screens. It shows 20 identities per page, supports search by
   handle or wallet, links each identity to its profile in a new tab, and keeps
@@ -84,7 +104,7 @@ group`. Navigating away from `Groups`, including moving backward from the
   notes that profile, reputation, and ownership changes can change who matches
   the group.
 - Inline identity groups use access-group wording and warn when the connected
-  creator is excluded, because excluding yourself from a `Who can view` group
+  creator is excluded, because excluding yourself from a `Visibility` group
   can prevent you from opening the created wave.
 - New inline groups include the connected creator by default, including groups
   composed only from rules. `Include me` can be switched off while editing
@@ -92,16 +112,17 @@ group`. Navigating away from `Groups`, including moving backward from the
   instead of adding the creator to it.
 - When an unsaved inline group has a valid identity or rule configuration, use
   `Preview matches` to evaluate and browse its current matches before creating
-  the group. Previewing does not save the group or apply it to the wave.
+  the group. The pending-group card spells out the configured criteria rather
+  than showing only a rule count. Previewing does not save the group or apply
+  it to the wave.
 
 ## Warnings and State Changes
 
-- When `Who can view` is restricted, every active `Drop`, `Vote`, `Chat`, and
-  `Admin` group must contain only people who also belong to the view group.
+- When `Visibility` is restricted, every active `Drop`, `Vote`, `Chat`, and
+  `Admins` group must contain only people who also belong to the visibility
+  group.
 - The app checks the active groups together, highlights each incompatible row,
   and keeps `Next` unavailable while the check is running.
-- `Warning: Limited Access` explains that all privilege-group members must also
-  be members of `Who can view`.
 - On `Rank` and `Approve`, turning `Enable chat` off disables editing for
   `Who can chat`.
 - `Allow admins to delete posts` does not show extra helper text when enabled.
@@ -109,14 +130,19 @@ group`. Navigating away from `Groups`, including moving backward from the
 ## Failure and Recovery
 
 - If search shows no matches, clear or change search text and retry.
+- If an EMMA allowlist cannot load, use `Try again` or remove it and select a
+  different allowlist. Authentication is required to read its results.
+- CSV import accepts `.csv` files, ignores malformed entries, and reports when
+  no valid Ethereum wallet addresses are found. A failed import does not clear
+  wallets already added from profile search or EMMA.
 - If the current member list cannot load, the member browser keeps the draft
   intact and offers `Try again`.
 - If an older saved draft references a group whose criteria are no longer
   available, the member browser stays open, explains that limitation, and
   continues showing any current members the group endpoint can resolve.
-- Public waves can leave every scope as `Anyone`. For a restricted wave,
-  `Next` stops on `Groups` if an active permission is open to `Anyone` or its
-  selected group includes somebody outside `Who can view`.
+- Public waves can leave every scope as `Public`. For a restricted wave,
+  `Next` stops on `Groups` if an active permission is `Public` or its selected
+  group includes somebody outside `Visibility`.
 - If access cannot be checked, the step stays open and offers a retry through
   `Next`; changing a group also starts a fresh check.
 - If no explicit admin group is selected, submit tries to create and publish a
@@ -140,10 +166,11 @@ group`. Navigating away from `Groups`, including moving backward from the
 - [Wave Creation Index](README.md)
 - [Waves Index](../README.md)
 - [Wave Creation Overview Step](feature-overview-step.md)
-- [Wave Creation Dates and Timeline](feature-dates-step.md)
+- [Wave Creation Schedule](feature-dates-step.md)
 - [Wave Creation Drop Settings](feature-drops-step.md)
 - [Wave Creation Rules Step](feature-rules-step.md)
 - [Wave Creation Description Step](feature-description-step.md)
 - [Wave Right Sidebar Group and Curation Management](../sidebars/feature-right-sidebar-group-management.md)
+- [Group Creation and Edit Flow](../../groups/feature-group-create-and-edit.md)
 - [Groups List Filters](../../groups/feature-groups-list-filters.md)
 - [Docs Home](../../README.md)

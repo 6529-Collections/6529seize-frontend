@@ -28,6 +28,8 @@ import profileCmsArtDisplayMessages from "@/i18n/messages/profileCmsArtDisplay.e
 import { EN_US_THE_MEMES_COLLECTORS_MESSAGES } from "@/i18n/messages/the-memes-collectors";
 import { TRANSFER_MESSAGES } from "@/i18n/messages/transfer";
 import { PUBLIC_REVIEW_MESSAGES } from "@/i18n/messages/public-review";
+import { EULA_MESSAGES } from "@/i18n/messages/eula";
+import { PROFILE_CURATION_MESSAGES } from "@/i18n/messages/profile-curation";
 
 type MessageEntry = readonly [key: string, value: string];
 
@@ -126,22 +128,36 @@ const USER_COLLECTED_STATS_MESSAGES = namespaceMessages(
 const USER_BRAIN_SIDEBAR_MESSAGES = objectMessages("user.brain.sidebar", {
   createdHeading: "Created Waves",
   createdMobileHeading: "Created",
-  createdScope: "Wave posts",
-  mostActiveHeading: "Most Active In",
-  rankingBasis: "All time",
-  waveLastActivityShort: "Last activity {time}",
-  identityLastPostShort: "Last post {time}",
-  latestWavePost: "Last wave post {time} ago",
-  lastPosted: "Last posted {time} ago",
-  loadingWaveContext: "Loading profile wave context",
+  recentlyActiveHeading: "Recently Active In",
+  lastPost: "Last post {time}",
+  noPostsByProfile: "No posts by this profile",
+  "totalWavePosts.one": "{count} total wave post",
+  "totalWavePosts.other": "{count} total wave posts",
+  privateWave: "Private wave",
+  loadingWaveActivity: "Loading profile wave activity",
+  loadingMoreWaveActivity: "Loading more profile wave activity",
+  desktopScrollRegionLabel: "Brain waves",
   mobileStripLabel: "Brain waves",
-  noDropsYet: "No drops yet",
+  createdEmpty: "No accessible created waves.",
+  recentEmpty: "No recent wave posts.",
+  createdLoadError: "Created waves could not be loaded.",
+  recentLoadError: "Recent wave activity could not be loaded.",
+  loadMoreError: "More waves could not be loaded.",
+  retry: "Retry",
+  retryLoadMore: "Retry loading more",
+  loadMore: "Load more",
+  loadingMore: "Loading…",
+  allWavesLoaded: "All waves loaded.",
+  more: "More",
   showLess: "Show less",
-  "showMore.one": "Show {count} more",
-  "showMore.other": "Show {count} more",
-  viewAllCreatedWaves: "View all created waves",
-  waveImageAlt: "Wave {waveName}",
-  wavePictureAlt: "Wave picture",
+  showMore: "Show more",
+  viewMoreCreatedWaves: "View more created waves",
+  createdModalTitle: "Created waves by {profile}",
+  "loadedCreatedCount.one": "Showing {count} loaded wave",
+  "loadedCreatedCount.other": "Showing {count} loaded waves",
+  "createdCount.one": "{count} created wave",
+  "createdCount.other": "{count} created waves",
+  closeCreatedWaves: "Close created waves",
 } as const);
 
 const USER_COLLECTED_STATS_DETAILS_MESSAGES = objectMessages(
@@ -225,7 +241,7 @@ const REP_CATEGORY_MESSAGES = objectMessages("rep.categories", {
   "grant.actions.cancel": "Cancel",
   "grant.toast.updated": "REP updated.",
   "grant.toast.updateFailed": "Couldn't update this REP rating.",
-  "grant.toast.tryAgain": "Please try again.",
+  "grant.toast.tryAgain": PLEASE_TRY_AGAIN,
   "grant.toast.loginRequired": "Log in to continue.",
   "grant.errors.generic": "Couldn't complete this request. Please try again.",
   "suggested.loading": "Loading active REP categories",
@@ -520,6 +536,8 @@ const WAVE_LEADERBOARD_MESSAGES = objectMessages("waves.leaderboard", {
 } as const);
 
 const WAVE_DROP_ACTIONS_MESSAGES = objectMessages("waves.drop.actions", {
+  menuLabel: "Drop actions",
+  reactionPickerLabel: "Add reaction to drop",
   copyText: "Copy text",
   copyLink: "Copy link",
   copied: "Copied!",
@@ -634,6 +652,28 @@ const WAVE_POLL_MESSAGES = objectMessages("waves.poll", {
   "actions.changeVote": "Change vote",
   "status.voted": "Voted",
   "status.updated": "Updated",
+  "composer.title": "Create poll",
+  "composer.questionPlaceholder": "Ask a poll question",
+  "composer.questionRequired": "Add a poll question.",
+  "composer.mode.groupLabel": "Poll response type",
+  "composer.mode.single": "Single",
+  "composer.mode.multiple": "Multiple",
+  "composer.mode.singleDescription": "Voters can select one option.",
+  "composer.mode.multipleDescription":
+    "Voters can select more than one option.",
+  "composer.optionLabel": "Poll option {number}",
+  "composer.optionPlaceholder": "Option {number}",
+  "composer.removeOption": "Remove option {number}",
+  "composer.add": "Add poll",
+  "composer.addOption": "Add option",
+  "composer.remove": "Remove poll",
+  "composer.closingTime": "Closing time",
+  "composer.onlyDroppersCanRespond": "Only people who can chat can respond",
+  "composer.anonymous": "Anonymous poll",
+  "composer.validation.minimumOptions": "Enter at least {count} options.",
+  "composer.validation.optionLength": "Options can be up to {max} characters.",
+  "composer.validation.uniqueOptions": "Poll options must be unique.",
+  "composer.validation.futureClosingTime": "Choose a future closing time.",
 } as const);
 
 const WAVE_SUBMISSION_BUTTON_LABEL_MESSAGES = objectMessages(
@@ -816,7 +856,7 @@ const USER_PROFILE_IDENTITY_STATEMENTS_MESSAGES = objectMessages(
     viewTransaction: "View transaction",
     primarySuccess: "Primary address set.",
     primaryErrorTitle: "Couldn’t set the primary address.",
-    primaryErrorDescription: "Please try again.",
+    primaryErrorDescription: PLEASE_TRY_AGAIN,
     openStatement: "Open",
     copyStatement: "Copy",
     deleteStatement: "Delete",
@@ -846,6 +886,15 @@ const USER_PROFILE_IDENTITY_STATEMENTS_MESSAGES = objectMessages(
     addVerificationDialogTitle: "Add verification post",
     backToTypes: "Back to statement types",
     selectPlatform: "Choose a platform",
+    otherPlatform: "Other",
+    customLinkLabel: "Display name",
+    customLinkLabelPlaceholder: "For example, AOTM",
+    customLinkLabelRequired: "Enter a display name that is not only spaces.",
+    customLinkUrl: "Art link URL",
+    customLinkUrlPlaceholder: "https://example.art/artist",
+    customLinkHint:
+      "Use a secure HTTPS link. The display name and link will be public.",
+    externalArtLink: "External art link",
     save: "Save",
     cancel: "Cancel",
     optional: "All statements are optional.",
@@ -855,6 +904,7 @@ const USER_PROFILE_IDENTITY_STATEMENTS_MESSAGES = objectMessages(
     communityRates: "The community will rate statement accuracy.",
     addSuccess: "ID statement added.",
     addErrorTitle: "Couldn’t add this ID statement.",
+    addErrorDescription: "Check the link or statement details and try again.",
     deleteTitle: "Delete statement?",
     deleteDescription:
       "This removes the statement from the profile. You can’t undo this action.",
@@ -1094,10 +1144,13 @@ const WAVE_HEADER_MESSAGES = objectMessages("waves.header", {
   createdLabel: "Created {relativeTime} · {date}",
   deleteCancel: "Cancel",
   deleteDescription: "Are you sure you want to delete this wave?",
-  deleteErrorDescription: "Please try again.",
+  deleteErrorDescription: PLEASE_TRY_AGAIN,
   deleteErrorTitle: "Couldn't delete this wave.",
   deleteSuccess: "Wave deleted.",
   deleteTitle: "Delete wave",
+  nameEditLabel: "Edit wave name",
+  nameEditSave: "Save",
+  nameEditTitle: "Rename wave",
   ownerOptionsDelete: "Delete",
   ownerOptionsOpenLabel: "Open options",
   ownerOptionsTitle: "Wave options",
@@ -1119,8 +1172,11 @@ const WAVE_NOTIFICATION_SETTINGS_MESSAGES = namespaceMessages(
   [
     ["trigger.tooltip", "Notification settings"],
     ["trigger.ariaLabel", "Open notification settings"],
-    ["allMentions.label", "ALL mentions"],
-    ["allMentions.ariaLabel", "Receive ALL mention notifications"],
+    ["broadcastMentions.label", "Broadcast mentions"],
+    [
+      "broadcastMentions.ariaLabel",
+      "Receive @all and @contributors notifications",
+    ],
     ["allMessages.label", "All messages"],
     ["allMessages.ariaLabel", "Receive notifications for all messages"],
     ["mute.label", "Mute"],
@@ -1137,12 +1193,12 @@ const WAVE_NOTIFICATION_SETTINGS_MESSAGES = namespaceMessages(
     ["preferences.error.updateTitle", "Couldn't update notification settings."],
     ["preferences.error.description", PLEASE_TRY_AGAIN],
     [
-      "preferences.error.enableAllMentions",
-      "Unable to enable @ALL notifications",
+      "preferences.error.enableBroadcastMentions",
+      "Unable to enable broadcast mention notifications",
     ],
     [
-      "preferences.error.disableAllMentions",
-      "Unable to disable @ALL notifications",
+      "preferences.error.disableBroadcastMentions",
+      "Unable to disable broadcast mention notifications",
     ],
     [
       "preferences.error.enableAllMessages",
@@ -1160,24 +1216,65 @@ const WAVE_NOTIFICATION_SETTINGS_MESSAGES = namespaceMessages(
 const WAVE_CREATE_GROUPS_MESSAGES = objectMessages("waves.create.groups", {
   title: "Access",
   description: "Choose who can access, participate in, and manage this wave.",
-  viewGroupName: "Who can view",
-  adminGroupName: "Admin",
+  viewGroupName: "Visibility",
+  adminGroupName: "Admins",
   accessHelper:
     "The {viewGroupName} group controls who can access this wave. Your followers who can view the wave may be notified when it is created.",
   selectedGroup: "Selected group",
   currentGroup: "Current group",
+  currentGroupWithName: "Current group: {name}",
   unsavedGroup: "Unsaved group",
   groupSource: "Group source",
   existingGroup: "Existing group",
   newGroup: "New group",
-  addIdentity: "Add identity",
+  "dialog.addTitle": "Add group",
+  "dialog.changeTitle": "Change group",
+  "dialog.addDescription": "Create a new group or choose an existing group.",
+  "dialog.changeDescription":
+    "Create a new group or choose a different existing group.",
+  identities: "Identities",
   addRule: "Add rule",
+  "xtdhGrant.change": "Change grant",
+  "xtdhGrant.cancelChange": "Cancel change",
+  "xtdhGrant.remove": "Remove grant",
   done: "Done",
   enableChat: "Enable chat",
   allowAdminsToDeletePosts: "Allow admins to delete posts",
   defaultGroupName: "Wave Group",
   notAppliedYet: "Not applied yet.",
-  "actions.replaceCriteria": "Replace criteria",
+  hideCriteriaAndMembers: "Hide criteria and members",
+  hideCriteriaAndMembersTooltip:
+    "The criteria and member list are visible to members of this group, but hidden from everyone else.",
+  hideCriteriaAndMembersInfoLabel: "About criteria and member visibility",
+  "editAccess.title": "Edit {groupLabel} access",
+  "editAccess.triggerLabel": "Edit {groupLabel} access",
+  "editAccess.chatLabel": "Chat",
+  "editAccess.description":
+    "The current criteria are prefilled. Saving creates a new group and changes only {groupLabel} access.",
+  "editAccess.loading": "Loading current criteria…",
+  "editAccess.loadErrorTitle": "Couldn't load the current criteria.",
+  "editAccess.loadErrorDescription":
+    "Nothing has been changed. Try loading the group again.",
+  "editAccess.retry": "Try again",
+  "editAccess.makePublic": "Make wave public",
+  "editAccess.makePublicDescription":
+    "Remove the Visibility restriction so everyone can access this wave.",
+  "editAccess.useVisibility": "Use visibility criteria",
+  "editAccess.useVisibilityDescription":
+    "Set {groupLabel} access to the same criteria as Visibility.",
+  "editAccess.useVisibilityPublicDescription":
+    "Visibility is public. Set {groupLabel} access to public too.",
+  "editAccess.makePublicConfirmTitle": "Make wave public?",
+  "editAccess.makePublicConfirmMessage":
+    "Everyone will be able to find and view this wave. Only Visibility access will change.",
+  "editAccess.useVisibilityConfirmTitle": "Use visibility criteria?",
+  "editAccess.useVisibilityConfirmMessage":
+    "{groupLabel} access will use the same group as Visibility. Only this access setting will change.",
+  "editAccess.useVisibilityPublicConfirmMessage":
+    "Visibility is public, so {groupLabel} access will become public too. Only this access setting will change.",
+  "editAccess.confirmMakePublic": "Make public",
+  "editAccess.confirmUseVisibility": "Use visibility criteria",
+  "actions.editCriteria": "Edit criteria",
   "actions.chooseGroup": "Choose group",
   "draft.notReadyTitle": "Not ready yet.",
   "draft.notReadyDescription":
@@ -1186,9 +1283,6 @@ const WAVE_CREATE_GROUPS_MESSAGES = objectMessages("waves.create.groups", {
   "draft.discard": "Discard draft",
   "draft.creating": "Creating group...",
   "draft.createAndUse": "Create and use new group",
-  limitedAccessTitle: "Warning: Limited Access",
-  limitedAccessDescription:
-    'This wave is restricted to the "{viewGroupName}" group. Every Drop, Vote, Chat, and "{adminGroupName}" group member must also belong to that group.',
   "validation.checking": "Checking group access…",
   "validation.unavailableTitle": "Couldn't verify group access.",
   "validation.unavailable":
@@ -1197,12 +1291,70 @@ const WAVE_CREATE_GROUPS_MESSAGES = objectMessages("waves.create.groups", {
     'The "{groupName}" group includes people who are not in "{viewGroupName}".',
   "validation.invalidTitle": "Some access groups need attention.",
   "validation.invalidDescription":
-    "Every Drop, Vote, Chat, and Admin group member must also belong to the View group.",
-  "inlineIdentities.emptyHelper":
-    "Add identities one by one to build this access group.",
+    "Every Drop, Vote, Chat, and Admins group member must also belong to the Visibility group.",
+  "inlineIdentities.modeLabel": "Identity treatment",
+  "inlineIdentities.included.label": "Included",
+  "inlineIdentities.included.searchLabel": "Find an identity to include",
+  "inlineIdentities.included.searchPlaceholder":
+    "Search identities to include...",
+  "inlineIdentities.included.emptyHelper":
+    "No identities are explicitly included.",
+  "inlineIdentities.excluded.label": "Excluded",
+  "inlineIdentities.excluded.searchLabel": "Find an identity to exclude",
+  "inlineIdentities.excluded.searchPlaceholder":
+    "Search identities to exclude...",
+  "inlineIdentities.excluded.emptyHelper":
+    "No identities are explicitly excluded.",
+  "inlineIdentities.includeMe": "Include me",
+  "inlineIdentities.sources.emma.title": "EMMA",
+  "inlineIdentities.sources.emma.description":
+    "Add every wallet from one of your EMMA allowlists.",
+  "inlineIdentities.sources.emma.searchLabel": "Search allowlists",
+  "inlineIdentities.sources.emma.searchLoading": "Loading allowlists...",
+  "inlineIdentities.sources.emma.searchEmpty": "No allowlists found",
+  "inlineIdentities.sources.emma.empty": "No allowlist added.",
+  "inlineIdentities.sources.emma.loading": "Adding allowlist identities...",
+  "inlineIdentities.sources.emma.load": "Load allowlist",
+  "inlineIdentities.sources.emma.error":
+    "Couldn't load this allowlist. Try again.",
+  "inlineIdentities.sources.emma.authenticationRequired":
+    "Connect your wallet to load this allowlist.",
+  "inlineIdentities.sources.emma.remove": "Remove EMMA allowlist",
+  "inlineIdentities.sources.csv.title": "CSV file",
+  "inlineIdentities.sources.csv.description":
+    "Import Ethereum wallets from a CSV file.",
+  "inlineIdentities.sources.csv.dropLabel":
+    "Drop a CSV file here, or choose a file",
+  "inlineIdentities.sources.csv.includeInputLabel":
+    "Choose a CSV file of identities to include",
+  "inlineIdentities.sources.csv.excludeInputLabel":
+    "Choose a CSV file of identities to exclude",
+  "inlineIdentities.sources.csv.invalidFile": "Choose a CSV file.",
+  "inlineIdentities.sources.csv.readError":
+    "Couldn't read this file. Try another CSV file.",
+  "inlineIdentities.sources.csv.noWallets":
+    "No valid Ethereum wallet addresses were found.",
+  "inlineIdentities.sources.csv.empty": "No CSV file added.",
+  "inlineIdentities.sources.csv.remove": "Remove CSV file",
+  "inlineIdentities.sources.count.one": "{count} identity added",
+  "inlineIdentities.sources.count.other": "{count} identities added",
+  "inlineIdentities.sources.total.included.one":
+    "{count} unique identity included",
+  "inlineIdentities.sources.total.included.other":
+    "{count} unique identities included",
+  "inlineIdentities.sources.total.excluded.one":
+    "{count} unique identity excluded",
+  "inlineIdentities.sources.total.excluded.other":
+    "{count} unique identities excluded",
+  "inlineIdentities.sources.includeLimit":
+    "A group can include at most {limit} identities.",
+  "inlineIdentities.sources.excludeLimit":
+    "A group can exclude at most {limit} identities.",
+  "inlineIdentities.sources.retry": "Try again",
   "inlineIdentities.creatorExcludedWarning":
     "Warning: You are not included in this group. If it controls who can view the wave, you may not be able to access the wave after creating it.",
-  "members.currentCount": "{count} currently eligible",
+  "members.currentCount.one": "{count} user",
+  "members.currentCount.other": "{count} users",
   "members.countLoading": "Checking current audience…",
   "members.countUnavailable": "Current audience unavailable",
   "members.view": "View members",
@@ -1225,6 +1377,48 @@ const WAVE_CREATE_GROUPS_MESSAGES = objectMessages("waves.create.groups", {
   "members.listLabel": "Current group members",
   "members.openProfile": "Open {identity}'s profile in a new tab",
   "members.noCriteria": "No criteria selected",
+  "members.criteria.loading": "Loading group criteria…",
+  "members.criteria.unavailable": "Group criteria unavailable",
+  "members.criteria.metric.tdh": "TDH",
+  "members.criteria.metric.xtdh": "xTDH",
+  "members.criteria.metric.tdhAndXtdh": "TDH + xTDH",
+  "members.criteria.metric.rep": "REP",
+  "members.criteria.metric.nic": "NIC",
+  "members.criteria.metric.level": "Level",
+  "members.criteria.range.atMost": "{metric} at most {max}",
+  "members.criteria.range.atLeast": "{metric} at least {min}",
+  "members.criteria.range.between": "{metric} between {min} and {max}",
+  "members.criteria.identityRange.atMost":
+    "{metric} {direction} {identity} at most {max}",
+  "members.criteria.identityRange.atLeast":
+    "{metric} {direction} {identity} at least {min}",
+  "members.criteria.identityRange.between":
+    "{metric} {direction} {identity} between {min} and {max}",
+  "members.criteria.identity": "{metric} {direction} {identity}",
+  "members.criteria.categoryRange.atMost":
+    "{metric} in {category} at most {max}",
+  "members.criteria.categoryRange.atLeast":
+    "{metric} in {category} at least {min}",
+  "members.criteria.categoryRange.between":
+    "{metric} in {category} between {min} and {max}",
+  "members.criteria.category": "{metric} in {category}",
+  "members.criteria.categoryIdentityRange.atMost":
+    "{metric} in {category} {direction} {identity} at most {max}",
+  "members.criteria.categoryIdentityRange.atLeast":
+    "{metric} in {category} {direction} {identity} at least {min}",
+  "members.criteria.categoryIdentityRange.between":
+    "{metric} in {category} {direction} {identity} between {min} and {max}",
+  "members.criteria.categoryIdentity":
+    "{metric} in {category} {direction} {identity}",
+  "members.criteria.from": "from",
+  "members.criteria.to": "to",
+  "members.criteria.included.one": "{count} explicitly included user",
+  "members.criteria.included.other": "{count} explicitly included users",
+  "members.criteria.excluded.one": "{count} explicitly excluded user",
+  "members.criteria.excluded.other": "{count} explicitly excluded users",
+  "members.criteria.grant": "xTDH grant {grantId}",
+  "members.criteria.grant.collection": "xTDH grant for {collectionName}",
+  "members.criteria.grant.selected": "Selected xTDH grant",
   "restore.loading": "Restoring the selected group…",
   "restore.error":
     "This selected group could not be loaded. Retry, replace its criteria, or choose another group before continuing.",
@@ -1273,9 +1467,9 @@ const WAVE_CREATE_DATES_MESSAGES = objectMessages("waves.create.dates", {
   "rank.scheduledSummary":
     "Submissions start {submission}. Voting starts {voting}. First winners: {announcement}.",
   "rank.advancedSummary": "Winner schedule",
-  "rank.timeline.title": "Wave Timeline",
-  "rank.timeline.submissionLabel": "Drops Submission Opens",
-  "rank.timeline.votingLabel": "Drops Voting Begins",
+  "rank.timeline.title": "Opening dates",
+  "rank.timeline.submissionLabel": "Submissions Open",
+  "rank.timeline.votingLabel": "Voting Opens",
   "rank.timeline.submissionDescription":
     "Creators begin submitting work to your wave",
   "rank.timeline.votingDescription":
@@ -1363,6 +1557,9 @@ const WAVE_CREATE_ACTIONS_MESSAGES = objectMessages("waves.create.actions", {
 } as const);
 
 const WAVE_CREATE_DIALOG_MESSAGES = objectMessages("waves.create.dialog", {
+  profileRequiredConfirm: "Go to Identity",
+  profileRequiredDescription: "Set up your profile before creating a Wave.",
+  profileRequiredTitle: "Create your profile first",
   subwaveTitle: "Create subwave",
   waveTitle: "Create Wave",
 } as const);
@@ -1388,7 +1585,7 @@ const WAVE_CREATE_RANK_MODE_MESSAGES = objectMessages(
     legend: "Ranking mode",
     "announceWinners.title": "Announce Winners",
     "announceWinners.description":
-      "Winners are announced on a schedule you'll set on the Dates step — a fixed timeline that ends the wave, or repeating cycles.",
+      "Winners are announced on a schedule you'll set on the Schedule step — a fixed timeline that ends the wave, or repeating cycles.",
     "perpetualRanking.title": "Perpetual Ranking",
     "perpetualRanking.description":
       "Rankings update continuously with no winners and no end date — a live, always-on leaderboard.",
@@ -1437,17 +1634,20 @@ const WAVE_CREATE_OUTCOMES_MESSAGES = objectMessages("waves.create.outcomes", {
 
 const WAVE_CREATE_RULES_MESSAGES = objectMessages("waves.create.rules", {
   title: "Rules",
-  description:
-    "Automatic rules are generated from the wave setup. Add creator rules only for wave-specific requirements that are not already covered.",
-  advancedSummary: "Creator rules and acceptance",
-  chatAdvancedSummary: "Creator rules",
-  automaticTitle: "Automatic rules",
-  displayOnlyTitle: "Display-only creator rules",
-  displayOnlyDescription:
-    "These rules are shown in the wave rules panel. They do not require a signature.",
-  displayOnlyPlaceholder: "Add optional display-only creator rules...",
-  displayOnlyEmptyHint:
-    "Leave blank when automatic rules already cover the wave.",
+  advancedSummary: "Wave guidelines and acceptance",
+  chatAdvancedSummary: "Wave guidelines",
+  guidelinesFieldLabel: "Wave guidelines",
+  guidelinesDescription: "These guidelines are shown in wave rules panel",
+  guidelinesPlaceholder: "Add optional wave guidelines...",
+  guidelinesSettingsLabel: "Guidelines",
+  guidelinesSettingsEditLabel: "Edit guidelines",
+  guidelinesSettingsAdded: "Added",
+  guidelinesSettingsNone: "None",
+  guidelinesAuthError:
+    "Couldn't authenticate. Reconnect your wallet and try again.",
+  guidelinesSaveError: "Couldn't save these guidelines. Please try again.",
+  guidelinesSaveErrorTitle: "Couldn't save these guidelines.",
+  guidelinesSaveErrorDescription: PLEASE_TRY_AGAIN,
   acceptanceTitle: "Rules that require acceptance",
   acceptanceToggle: "Require acceptance",
   acceptanceDescription:
@@ -1551,6 +1751,17 @@ const GROUP_NFT_OWNERSHIP_MESSAGES = objectMessages("groups.nftOwnership", {
 
 const WAVE_CHAT_MESSAGES = objectMessages("waves.chat", {
   fileUploadAreaAriaLabel: "Wave chat file upload area",
+  "guidelinesDialog.title": "Wave guidelines",
+  "guidelinesDialog.description":
+    "Review this wave's guidelines before sending your first message.",
+  "guidelinesDialog.guidelinesLabel": "Guidelines",
+  "guidelinesDialog.actionHint":
+    "Agree sends your message. Decline keeps it as a draft.",
+  "guidelinesDialog.agree": "Agree",
+  "guidelinesDialog.decline": "Decline",
+  "guidelinesDialog.loadErrorTitle": "Couldn't load the wave guidelines.",
+  "guidelinesDialog.loadErrorDescription":
+    "Please try again before sending your message.",
   "replyTargetDeletedToast.title": "Reply removed.",
   "replyTargetDeletedToast.description":
     "The message you were replying to was deleted. Your draft is still here.",
@@ -1566,8 +1777,34 @@ const WAVE_CHAT_MESSAGES = objectMessages("waves.chat", {
   "replyTargetUnavailableToast.actionReviewDraft": "Review draft",
 } as const);
 
+const WAVE_COMPOSER_ACTION_MESSAGES = objectMessages("waves.composer.actions", {
+  show: "Show composer actions",
+  hide: "Hide composer actions",
+  label: "Composer actions",
+  metadata: "Metadata",
+  upload: "Upload",
+  gif: "GIF",
+  poll: "Poll",
+  closePoll: "Close poll",
+  storm: "Storm",
+} as const);
+
+const WAVE_COMPOSER_PLACEHOLDER_MESSAGES = objectMessages(
+  "waves.composer.placeholder",
+  {
+    createDrop: "Create a drop",
+    writeChatMessage: "Write a chat message",
+    dropReply: "Drop a reply",
+    postReply: "Post a reply",
+    quoteDrop: "Quote a drop",
+    postQuote: "Post a quote",
+  } as const
+);
+
 const WAVE_STORM_COMPOSER_MESSAGES = objectMessages("waves.stormComposer", {
   draftTitle: "Storm draft",
+  emptyDraft: "Your storm parts will appear here.",
+  closeDraft: "Close",
   privateDraftHint: "Only you can see this until you post it.",
   partsCountOne: "{count} part",
   partsCountOther: "{count} parts",
@@ -1599,14 +1836,14 @@ const WAVE_STORM_COMPOSER_MESSAGES = objectMessages("waves.stormComposer", {
 } as const);
 
 const WAVE_CHAT_SETTINGS_MESSAGES = objectMessages("waves.chatSettings", {
-  "access.anyone": "Anyone",
+  "access.public": "Public",
   "access.inspectGroup": "Inspect {groupName} group criteria and members",
   "access.label": "Chat access",
   "access.privateGroup": "Private group",
   "access.unavailableGroup": "Group unavailable",
-  "groups.admin": "Admin",
+  "groups.admin": "Admins",
   "groups.drop": "Drop",
-  "groups.view": "View",
+  "groups.view": "Visibility",
   "groups.vote": "Vote",
   "status.disabled": "Disabled",
   "status.editLabel": "Edit chat status",
@@ -1631,6 +1868,16 @@ const NETWORK_GROUP_INSPECTION_MESSAGES = objectMessages(
   } as const
 );
 
+const NETWORK_GROUP_FILTER_MESSAGES = objectMessages("network.groupFilter", {
+  title: "Filter Network",
+  suggestedName: "Network filter",
+  defaultLabel: "All Network members",
+  membersRoleLabel: "Network",
+  createErrorTitle: "Couldn't create this group.",
+  createErrorDescription: "Please check the group setup and try again.",
+  createSuccess: "Group created and applied as the Network filter.",
+} as const);
+
 const WAVE_LOADING_MESSAGES = objectMessages("waves", {
   loadingStatus: "Loading waves",
 } as const);
@@ -1650,10 +1897,10 @@ const WAVE_DROPS_SEARCH_MODAL_MESSAGES = objectMessages(
     "error.retry": "Try again",
     "error.retrying": "Trying again...",
     "idle.description":
-      "Type at least {minLength} characters to search this wave.",
+      "Type at least {minLength} characters or add a filter to search this wave.",
     "idle.title": "Ready to search",
     inputDescription:
-      "Type at least {minLength} characters to search messages in {waveName}.",
+      "Type at least {minLength} characters or add a filter to search messages in {waveName}.",
     inputLabel: "Search messages in {waveName}",
     loadMore: "Load more",
     loadingMore: "Loading...",
@@ -1661,15 +1908,35 @@ const WAVE_DROPS_SEARCH_MODAL_MESSAGES = objectMessages(
     "loading.title": "Searching messages",
     placeholder: "Search messages",
     "result.open": "Open message {serialNo} by {author}",
+    "result.checked": "Checked task",
+    "result.imageFallback": "image",
     "result.mediaOnly": "Message with media or an attachment",
     "result.serial": "Message #{serialNo}",
     "result.unavailable": "Message by {author} cannot be opened",
+    "result.unchecked": "Unchecked task",
     "results.count.one": "{count} result",
     "results.count.other": "{count} results",
     "results.queryPrefix": "for",
     "results.status.one": '{count} result for "{query}"',
     "results.status.other": '{count} results for "{query}"',
     searchAll: "Search all 6529",
+    "filters.after": "After",
+    "filters.authorPlaceholder": "Search wave authors",
+    "filters.authorResults": "Wave authors",
+    "filters.before": "Before",
+    "filters.clear": "Clear filters",
+    "filters.clearAuthor": "Clear author",
+    "filters.close": "Close filters",
+    "filters.from": "From",
+    "filters.invalidRange": '"After" must be earlier than "Before".',
+    "filters.loadingAuthors": "Loading authors...",
+    "filters.noAuthors": "No matching authors in this wave.",
+    "filters.open": "Filters",
+    "filters.removeAfter": "Remove after date filter {date}",
+    "filters.removeAuthor": "Remove author filter {author}",
+    "filters.removeBefore": "Remove before date filter {date}",
+    "filters.title": "Search filters",
+    "results.filtersApplied": "Filters applied",
     title: "Search messages",
   } as const
 );
@@ -2148,8 +2415,6 @@ const HEADER_SEARCH_MESSAGES = objectMessages("headerSearch", {
   "recent.title": "Recent searches",
   scopeLabel: "Result type",
   "scope.allResults": "all results",
-  "status.keyboardHint":
-    "Use arrow keys to move through results and Enter to open.",
   viewAllCategory: "View all {category}",
 } as const);
 
@@ -2246,7 +2511,7 @@ export const EN_US_MESSAGES = {
   "profilePreferences.dm.NOBODY.label": "Nobody",
   "profilePreferences.dm.NOBODY.description":
     "No one can start a new conversation with you.",
-  "profilePreferences.dm.createRetry": "Please try again.",
+  "profilePreferences.dm.createRetry": PLEASE_TRY_AGAIN,
   "profilePreferences.notifications.heading": "Notifications",
   "profilePreferences.notifications.description":
     "Choose between All and Essential notifications.",
@@ -2287,7 +2552,6 @@ export const EN_US_MESSAGES = {
   "nextgen.navigation.about": "About",
   "nextgen.navigation.featuredAriaLabel": "NextGen featured",
   "nextgen.navigation.sectionsAriaLabel": "NextGen sections",
-  "nextgen.token.navigation.backToCollected": "Back to {profile}'s collected",
   "nextgen.token.navigation.viewOwnerCollected": "View {profile}'s collected",
   "nextgen.home.byArtist": "by {artist}",
   "nextgen.home.exploreCollection": "Explore Collection",
@@ -2699,6 +2963,10 @@ export const EN_US_MESSAGES = {
   "waveChat.boostedDrops.display.label": "Boosted drops",
   "waveChat.boostedDrops.display.menuCurrent": "Boosted drops: {mode}",
   "waveChat.boostedDrops.display.sectionTitle": "Your display",
+  "waveChat.boostedDrops.display.personalTooltip":
+    "This setting only changes how boosted drops appear to you. It does not affect what other people see.",
+  "waveChat.boostedDrops.display.personalTooltipAriaLabel":
+    "About your display preference",
   "theMemes.documentTitle": "The Memes | Collections",
   "theMemes.description.collections": "Collections",
   "theMemes.title": "The Memes",
@@ -2855,6 +3123,7 @@ export const EN_US_MESSAGES = {
   "rememes.card.tokenAriaLabel": "Token #{tokenId}",
   "rememes.card.replicaCount": "(x{count})",
   "user.collected.cards.listLabel": "Collected cards",
+  "user.collected.navigation.backToCollected": "Back to {profile}'s collected",
   "user.collected.empty.noCards": "No cards to display",
   "user.collected.empty.fullSetter": "Congratulations, full setter!",
   "user.collected.empty.memesFullSetter":
@@ -3234,9 +3503,12 @@ export const EN_US_MESSAGES = {
   ...NOTIFICATIONS_WAVE_CREATED_MESSAGES,
   ...NOTIFICATIONS_WAVE_FOLLOW_BUTTON_MESSAGES,
   ...WAVE_CHAT_MESSAGES,
+  ...WAVE_COMPOSER_ACTION_MESSAGES,
+  ...WAVE_COMPOSER_PLACEHOLDER_MESSAGES,
   ...WAVE_STORM_COMPOSER_MESSAGES,
   ...WAVE_CHAT_SETTINGS_MESSAGES,
   ...NETWORK_GROUP_INSPECTION_MESSAGES,
+  ...NETWORK_GROUP_FILTER_MESSAGES,
   ...WAVE_LOADING_MESSAGES,
   ...WAVE_DROPS_SEARCH_MODAL_MESSAGES,
   ...WAVE_GIF_PICKER_MESSAGES,
@@ -3290,9 +3562,11 @@ export const EN_US_MESSAGES = {
   ...NEW_VERSION_TOAST_MESSAGES,
   ...NAVIGATION_MESSAGES,
   ...PUBLIC_REVIEW_MESSAGES,
+  ...EULA_MESSAGES,
   ...TITLE_CONTEXT_MESSAGES,
   ...WAVE_NAVIGATION_MESSAGES,
   ...MY_STREAM_CURATION_MESSAGES,
+  ...PROFILE_CURATION_MESSAGES,
   ...WAVE_SCORE_NAVIGATION_MESSAGES,
   ...MEMES_QUICK_VOTE_MESSAGES,
   ...MEMES_WAVE_FOOTER_MESSAGES,

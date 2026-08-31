@@ -126,7 +126,23 @@ export async function expectCollectionAcceptance(page: Page) {
   const holdingCards = holdings.locator(
     '[data-testid="museum-landing-media-card"]'
   );
-  await expect(holdingCards).toHaveCount(12);
+  await expect(holdingCards).toHaveCount(13);
+  const veraCard = holdingCards.filter({
+    has: page.getByRole("link", {
+      name: "Themes and Variations #210",
+      exact: true,
+    }),
+  });
+  await expect(
+    veraCard,
+    "Missing Collection card: Themes and Variations #210"
+  ).toHaveCount(1);
+  await expect(
+    veraCard.getByRole("link", {
+      name: "Themes and Variations #210",
+      exact: true,
+    })
+  ).toHaveAttribute("href", "/museum/network/works/6529NM-W-0029");
   await expectNoUnresolvedMuseumMedia(
     page,
     'section[aria-labelledby="collection-holdings-title"]',
@@ -220,7 +236,7 @@ export async function expectAcquisitionsAcceptance(page: Page) {
   const acquisitionArticles = page.locator("main article").filter({
     has: page.locator('h2 a[href^="/museum/network/acquisitions/"]'),
   });
-  await expect(acquisitionArticles).toHaveCount(3);
+  await expect(acquisitionArticles).toHaveCount(4);
 
   const expectedStatuses = [
     [
@@ -228,6 +244,10 @@ export async function expectAcquisitionsAcceptance(page: Page) {
       /Accessioned into the permanent Collection/u,
     ],
     ["Conflict at Its Edges", /Accessioned into the permanent Collection/u],
+    [
+      "A Gift of Themes and Variations #210",
+      /Accessioned into the permanent Collection/u,
+    ],
     [
       "Keys and Gates",
       /Selected through an acquisition program; unminted|acquisition.*in progress|selection.*complete/iu,
@@ -244,7 +264,7 @@ export async function expectAcquisitionsAcceptance(page: Page) {
   const acquisitionHrefs = await acquisitionArticles
     .locator('h2 a[href^="/museum/network/acquisitions/"]')
     .evaluateAll((links) => links.map((link) => link.getAttribute("href")));
-  expect(new Set(acquisitionHrefs).size).toBe(3);
+  expect(new Set(acquisitionHrefs).size).toBe(4);
 
   const identifiers = await museumMain(page).evaluate((main) => {
     const internalIdentifierPattern = /\b6529NM-(?:AP|CA)-[A-Z0-9.-]+\b/gu;
@@ -269,7 +289,7 @@ export async function expectAcquisitionsAcceptance(page: Page) {
         image instanceof HTMLImageElement ? image.currentSrc || image.src : ""
       )
     );
-  expect(new Set(articleSources).size).toBe(3);
+  expect(new Set(articleSources).size).toBe(4);
   await expectNoUnresolvedMuseumMedia(page, "main article", "img");
 }
 
@@ -283,23 +303,29 @@ export async function expectResearchAcceptance(page: Page) {
   const contexts = section("contexts");
   const practice = section("museum-practice");
 
-  await expect(acquisitions.locator("article")).toHaveCount(3);
+  await expect(acquisitions.locator("article")).toHaveCount(4);
   await expect(acquisitions).toContainText("The System in Seven States");
   await expect(acquisitions).toContainText("Conflict at Its Edges");
+  await expect(acquisitions).toContainText(
+    "A Gift of Themes and Variations #210"
+  );
   await expect(acquisitions).toContainText("Access, Control, and Exit");
   await expect(
     acquisitions.getByText("Permanent Collection", { exact: true })
-  ).toHaveCount(2);
+  ).toHaveCount(3);
   await expect(
     acquisitions.getByText("Acquisition in progress", { exact: true })
   ).toHaveCount(1);
 
-  await expect(artists.locator("article")).toHaveCount(6);
+  await expect(artists.locator("article")).toHaveCount(8);
+  await expect(artists).toContainText("Vera Molnár");
+  await expect(artists).toContainText("Martin Grasser");
   await expect(artists).toContainText("Casey Reas");
   await expect(artists).toContainText("Larry Towell");
   await expect(artists).toContainText("Moisés Saman");
   await expect(artists).toContainText("HugoFaz");
-  await expect(works.locator("article")).toHaveCount(6);
+  await expect(works.locator("article")).toHaveCount(7);
+  await expect(works).toContainText("Themes and Variations #210");
   await expect(contexts.locator("article")).toHaveCount(2);
   await expect(contexts).toContainText("Magnum Photos");
   await expect(contexts).toContainText("Keys and Gates");
@@ -309,18 +335,50 @@ export async function expectResearchAcceptance(page: Page) {
   await expect(practice).toContainText("The Open Museum");
   await expect(practice).toContainText("From repository to chain");
 
-  const imageSources = await page
-    .locator("main article img")
-    .evaluateAll((images) =>
-      images.map((image) =>
-        image instanceof HTMLImageElement ? image.currentSrc || image.src : ""
-      )
-    );
-  const nonEmptySources = imageSources.filter((source) => source.length > 0);
+  const imageArticles = await page.locator("main article").evaluateAll(
+    (articles) =>
+      articles.flatMap((article) => {
+        const image = article.querySelector("img");
+        if (!(image instanceof HTMLImageElement)) return [];
+        const source = image.currentSrc || image.src;
+        if (source.length === 0) return [];
+        return [
+          {
+            source,
+            text: (article.textContent ?? "").replace(/\s+/gu, " ").trim(),
+          },
+        ];
+      })
+  );
+  const articlesBySource = new Map<string, string[]>();
+  for (const { source, text } of imageArticles) {
+    const articles = articlesBySource.get(source) ?? [];
+    articles.push(text);
+    articlesBySource.set(source, articles);
+  }
+  const repeatedSources = [...articlesBySource.entries()].filter(
+    ([, articles]) => articles.length > 1
+  );
   expect(
-    new Set(nonEmptySources).size,
-    "Research primary images must be unique across the landing page"
-  ).toBe(nonEmptySources.length);
+    repeatedSources,
+    "Only the accession essay and Work study may share their subject image"
+  ).toHaveLength(1);
+  const sharedImageArticles = repeatedSources[0]?.[1] ?? [];
+  expect(sharedImageArticles).toHaveLength(2);
+  expect(
+    sharedImageArticles.some(
+      (text) =>
+        text.includes("A Gift of Themes and Variations #210") &&
+        text.includes("Acquisition essay")
+    )
+  ).toBe(true);
+  expect(
+    sharedImageArticles.some(
+      (text) =>
+        text.includes("Themes and Variations #210") &&
+        text.includes("Work study")
+    )
+  ).toBe(true);
 
   const publicText = await museumMain(page).innerText();
   expect(publicText).not.toMatch(/\b6529NM-(?:RP|CA|AP|W|ART|ORG)-/u);

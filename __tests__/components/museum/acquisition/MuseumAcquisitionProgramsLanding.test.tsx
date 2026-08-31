@@ -280,7 +280,7 @@ describe("Museum acquisition programs landing", () => {
     expect(screen.getByText("Completed gifts")).toBeInTheDocument();
     expect(
       screen.getByText(
-        "Casey Reas and Magnum Photos are represented here as completed gifts. Each named acquisition has its own curatorial record and accession status."
+        "The Museum has accepted and accessioned gifts of work by Casey Reas, five Magnum photographers, and Vera Molnár, in collaboration with Martin Grasser. Each gift has its own curatorial and accession record."
       )
     ).toBeInTheDocument();
     expect(

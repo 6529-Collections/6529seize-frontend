@@ -15,8 +15,8 @@ export default function CreateSnapshotFormSearchCollectionDropdown({
   }) => void;
 }) {
   return (
-    <div className="tw-absolute tw-z-10 tw-mt-1 tw-overflow-hidden tw-max-w-lg tw-w-full tw-rounded-md tw-bg-iron-800 tw-shadow-lg tw-ring-1 tw-ring-white/10">
-      <div className="tw-py-1 tw-flow-root tw-max-h-[calc(240px+_-5vh)] tw-overflow-x-hidden tw-overflow-y-auto">
+    <div className="tw-absolute tw-z-10 tw-mt-1 tw-w-full tw-overflow-hidden tw-rounded-md tw-bg-iron-800 tw-shadow-lg tw-ring-1 tw-ring-white/10">
+      <div className="tw-flow-root tw-max-h-96 tw-overflow-y-auto tw-overflow-x-hidden tw-py-1">
         {!!collections.length && (
           <CreateSnapshotFormSearchCollectionDropdownTable
             collections={collections}

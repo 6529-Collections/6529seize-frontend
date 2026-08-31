@@ -8,6 +8,7 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveDropsFeed } from "@/generated/models/ApiWaveDropsFeed";
 import type { ApiWaveMin } from "@/generated/models/ApiWaveMin";
 import type { ApiWavePoll } from "@/generated/models/ApiWavePoll";
+import type { ApiWaveSearchAuthor } from "@/generated/models/ApiWaveSearchAuthor";
 
 export interface FetchWaveDropsV2Props {
   readonly waveId: string;
@@ -56,11 +57,16 @@ export interface FetchWaveLeaderboardV2Props {
 
 export interface FetchWaveDropsSearchV2Props {
   readonly wave: ApiWave | ApiWaveMin;
-  readonly term: string;
+  readonly term?: string | undefined;
+  readonly authorId?: string | undefined;
+  readonly after?: number | undefined;
+  readonly before?: number | undefined;
   readonly page: number;
   readonly size: number;
   readonly signal?: AbortSignal | undefined;
 }
+
+export type WaveSearchAuthor = ApiWaveSearchAuthor;
 
 export interface FetchWaveCompetitionDropsV2Props {
   readonly wave: ApiWave | ApiWaveMin;

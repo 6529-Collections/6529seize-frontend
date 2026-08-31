@@ -6,7 +6,7 @@ import { invalidateWaveApprovalStatusQueries } from "@/hooks/waves/invalidateWav
 import { parsePositiveWholeNumberInput } from "../create-wave/utils/positiveWholeNumberInput";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { useQueryClient } from "@tanstack/react-query";
-import { useCallback, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import WaveApprovalThresholdsEditorForm, {
   type ApprovalThresholdEditorField,
   type ApprovalThresholdTimeUnit,
@@ -16,6 +16,7 @@ import { useWaveSettingUpdater } from "./useWaveSettingUpdater";
 
 interface WaveApprovalThresholdsProps {
   readonly wave: ApiWave;
+  readonly display?: "configuration" | "settings" | undefined;
 }
 
 const MINUTE_IN_MS = 60 * 1000;
@@ -87,12 +88,14 @@ const formatThresholdMinDuration = (
   return `${minutes}m`;
 };
 
-const formatApprovalCount = (threshold: number | null): string =>
-  threshold === null
-    ? "Not set"
-    : `${formatNumberWithCommas(threshold)} approval${
-        threshold === 1 ? "" : "s"
-      }`;
+const formatApprovalCount = (threshold: number | null): string => {
+  if (threshold === null) {
+    return "Not set";
+  }
+
+  const approvalSuffix = threshold === 1 ? "" : "s";
+  return `${formatNumberWithCommas(threshold)} approval${approvalSuffix}`;
+};
 
 const getApprovalWindowDurationMs = (wave: ApiWave): number | null => {
   const startTime = wave.participation.period?.min;
@@ -110,8 +113,53 @@ const getApprovalWindowDurationMs = (wave: ApiWave): number | null => {
   return Math.max(0, endTime - startTime);
 };
 
+interface WaveApprovalThresholdsFieldEditorProps {
+  readonly disabled: boolean;
+  readonly field: ApprovalThresholdEditorField;
+  readonly inputRef: React.RefObject<HTMLInputElement | null>;
+  readonly minTimeValue: string;
+  readonly onMinTimeValueChange: (value: string) => void;
+  readonly onSave: () => void;
+  readonly onThresholdValueChange: (value: string) => void;
+  readonly onUnitChange: (unit: ApprovalThresholdTimeUnit) => void;
+  readonly thresholdValue: string;
+  readonly unit: ApprovalThresholdTimeUnit;
+  readonly closeEditor: () => void;
+}
+
+function WaveApprovalThresholdsFieldEditor({
+  closeEditor,
+  disabled,
+  field,
+  inputRef,
+  minTimeValue,
+  onMinTimeValueChange,
+  onSave,
+  onThresholdValueChange,
+  onUnitChange,
+  thresholdValue,
+  unit,
+}: WaveApprovalThresholdsFieldEditorProps) {
+  return (
+    <WaveApprovalThresholdsEditorForm
+      disabled={disabled}
+      field={field}
+      inputRef={inputRef}
+      minTimeValue={minTimeValue}
+      onCancel={closeEditor}
+      onMinTimeValueChange={onMinTimeValueChange}
+      onSave={onSave}
+      onThresholdValueChange={onThresholdValueChange}
+      onUnitChange={onUnitChange}
+      thresholdValue={thresholdValue}
+      unit={unit}
+    />
+  );
+}
+
 export default function WaveApprovalThresholds({
   wave,
+  display = "settings",
 }: WaveApprovalThresholdsProps) {
   const { canEdit, mutating, saveWaveConfigUpdate, setToast } =
     useWaveSettingUpdater(wave);
@@ -127,7 +175,7 @@ export default function WaveApprovalThresholds({
   );
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const resetEditor = useCallback(() => {
+  const resetEditor = () => {
     const nextThreshold = getValidThreshold(wave.wave.winning_threshold);
     const nextTimeInput = getThresholdTimeInput(
       wave.wave.winning_threshold_min_duration_ms
@@ -136,10 +184,7 @@ export default function WaveApprovalThresholds({
     setThresholdValue(nextThreshold === null ? "" : String(nextThreshold));
     setMinTimeValue(nextTimeInput.value);
     setUnit(nextTimeInput.unit);
-  }, [
-    wave.wave.winning_threshold,
-    wave.wave.winning_threshold_min_duration_ms,
-  ]);
+  };
 
   const handleSaveThreshold = (closeEditor: () => void) => {
     const parsedThreshold = parsePositiveWholeNumberInput(thresholdValue);
@@ -202,55 +247,62 @@ export default function WaveApprovalThresholds({
 
   const approvalCountLabel = formatApprovalCount(threshold);
   const minDurationLabel = formatThresholdMinDuration(minDurationMs);
+  const editIcon = display === "configuration" ? "gear" : "pencil";
 
-  const renderEditor = (field: ApprovalThresholdEditorField) => {
-    function WaveApprovalThresholdsFieldEditor({
-      closeEditor,
-    }: {
-      readonly closeEditor: () => void;
-    }) {
-      return (
-        <WaveApprovalThresholdsEditorForm
-          disabled={mutating}
-          field={field}
-          inputRef={inputRef}
-          minTimeValue={minTimeValue}
-          onCancel={closeEditor}
-          onMinTimeValueChange={setMinTimeValue}
-          onSave={() => {
-            if (field === "threshold") {
-              handleSaveThreshold(closeEditor);
-              return;
-            }
-            handleSaveHoldTime(closeEditor);
-          }}
-          onThresholdValueChange={setThresholdValue}
-          onUnitChange={setUnit}
-          thresholdValue={thresholdValue}
-          unit={unit}
-        />
-      );
-    }
+  const renderFieldEditor = (
+    field: ApprovalThresholdEditorField,
+    closeEditor: () => void
+  ) => (
+    <WaveApprovalThresholdsFieldEditor
+      closeEditor={closeEditor}
+      disabled={mutating}
+      field={field}
+      inputRef={inputRef}
+      minTimeValue={minTimeValue}
+      onMinTimeValueChange={setMinTimeValue}
+      onSave={() => {
+        if (field === "threshold") {
+          handleSaveThreshold(closeEditor);
+          return;
+        }
+        handleSaveHoldTime(closeEditor);
+      }}
+      onThresholdValueChange={setThresholdValue}
+      onUnitChange={setUnit}
+      thresholdValue={thresholdValue}
+      unit={unit}
+    />
+  );
 
-    return WaveApprovalThresholdsFieldEditor;
-  };
+  const renderThresholdEditor = ({
+    closeEditor,
+  }: {
+    readonly closeEditor: () => void;
+  }) => renderFieldEditor("threshold", closeEditor);
+  const renderHoldTimeEditor = ({
+    closeEditor,
+  }: {
+    readonly closeEditor: () => void;
+  }) => renderFieldEditor("holdTime", closeEditor);
 
   return (
     <>
       <WaveSettingRow
         canEdit={canEdit}
+        editIcon={editIcon}
         editLabel="Edit approve after"
         label="Approve after"
         onOpen={resetEditor}
-        renderEditor={renderEditor("threshold")}
+        renderEditor={renderThresholdEditor}
         valueLabel={approvalCountLabel}
       />
       <WaveSettingRow
         canEdit={canEdit}
+        editIcon={editIcon}
         editLabel="Edit hold time"
         label="Hold time"
         onOpen={resetEditor}
-        renderEditor={renderEditor("holdTime")}
+        renderEditor={renderHoldTimeEditor}
         valueLabel={minDurationLabel}
       />
     </>

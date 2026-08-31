@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import WaveDropActionsOpen from "@/components/waves/drops/WaveDropActionsOpen";
 import { ApiDropType } from "@/generated/models/ApiDropType";
+import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 // Mock ResizeObserver
@@ -51,7 +52,7 @@ test("pushes route on click", async () => {
   render(<WaveDropActionsOpen drop={drop} />);
   expect(screen.getByTestId("tooltip-open-2")).toHaveAttribute(
     "data-z-index",
-    "10000"
+    String(TOOLTIP_STYLES.zIndex)
   );
   await user.click(screen.getByRole("button"));
   expect(push).toHaveBeenCalled();

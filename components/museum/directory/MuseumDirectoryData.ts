@@ -257,9 +257,15 @@ export function buildMuseumDirectoryModel(
 
   const recordsByArtist = new Map<string, MuseumDirectoryWorkRecord[]>();
   for (const record of records) {
-    const current = recordsByArtist.get(record.work.artistId) ?? [];
-    current.push(record);
-    recordsByArtist.set(record.work.artistId, current);
+    const artistIds = new Set(
+      record.work.artistIds ?? [record.work.artistId]
+    );
+    artistIds.add(record.work.artistId);
+    for (const artistId of artistIds) {
+      const current = recordsByArtist.get(artistId) ?? [];
+      current.push(record);
+      recordsByArtist.set(artistId, current);
+    }
   }
 
   const artistRecords = publication.artists.flatMap((artist) => {

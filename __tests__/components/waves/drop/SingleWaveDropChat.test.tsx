@@ -28,6 +28,7 @@ let capturedProps: any;
 let capturedCreatorProps: any;
 const mockSetToast = jest.fn();
 const mockUseWebSocketMessage = jest.fn();
+let mockDmUnreadConversation: { readonly unread_count: number } | null = null;
 jest.mock("@/components/waves/drops/wave-drops-all", () => ({
   __esModule: true,
   default: (props: any) => {
@@ -67,6 +68,10 @@ jest.mock("@/components/auth/Auth", () => ({
 
 jest.mock("@/services/websocket/useWebSocketMessage", () => ({
   useWebSocketMessage: (...args: unknown[]) => mockUseWebSocketMessage(...args),
+}));
+
+jest.mock("@/services/dm-unread/DmUnreadStateProvider", () => ({
+  useDmUnreadConversation: () => mockDmUnreadConversation,
 }));
 
 // Mock globalThis.matchMedia for useDeviceInfo hook
@@ -111,6 +116,7 @@ describe("SingleWaveDropChat", () => {
   beforeEach(() => {
     mockKeyboardVisible = false;
     mockKeyboardPhase = "hidden";
+    mockDmUnreadConversation = null;
     capturedProps = undefined;
     capturedCreatorProps = undefined;
     mockSetToast.mockClear();
@@ -142,6 +148,48 @@ describe("SingleWaveDropChat", () => {
 
     fireEvent.click(document.querySelector('[data-testid="creator"]')!);
     expect(document.querySelector('[data-part="1"]')).toBeInTheDocument();
+  });
+
+  it("uses the canonical DM unread count", () => {
+    mockDmUnreadConversation = { unread_count: 4 };
+
+    render(
+      <SingleWaveDropChat
+        wave={createWave({
+          chat: { scope: { group: { is_direct_message: true } } },
+        })}
+        drop={createDrop()}
+      />
+    );
+
+    expect(capturedProps.unreadCount).toBe(4);
+  });
+
+  it("does not fall back to the wave API unread count before DM snapshot hydration", () => {
+    render(
+      <SingleWaveDropChat
+        wave={createWave({
+          chat: { scope: { group: { is_direct_message: true } } },
+          metrics: { muted: false, your_unread_drops_count: 7 },
+        })}
+        drop={createDrop()}
+      />
+    );
+
+    expect(capturedProps.unreadCount).toBe(0);
+  });
+
+  it("preserves the wave API unread count for ordinary waves", () => {
+    render(
+      <SingleWaveDropChat
+        wave={createWave({
+          metrics: { muted: false, your_unread_drops_count: 8 },
+        })}
+        drop={createDrop()}
+      />
+    );
+
+    expect(capturedProps.unreadCount).toBe(8);
   });
 
   it("clears the root reply when the root drop is deleted", () => {

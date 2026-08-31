@@ -87,7 +87,32 @@ describe("CreateWaveGroup", () => {
   const exampleGroup: ApiGroupFull = {
     id: "group-1",
     name: "Alpha Group",
-    description: "Example",
+    group: {
+      tdh: { min: null, max: null, inclusion_strategy: "BOTH" },
+      rep: {
+        min: null,
+        max: null,
+        direction: "RECEIVED",
+        user_identity: null,
+        category: null,
+      },
+      cic: {
+        min: null,
+        max: null,
+        direction: "RECEIVED",
+        user_identity: null,
+      },
+      level: { min: null, max: null },
+      owns_nfts: [],
+      identity_group_id: null,
+      identity_group_identities_count: 0,
+      excluded_identity_group_id: null,
+      excluded_identity_group_identities_count: 0,
+      is_beneficiary_of_grant_id: null,
+      is_beneficiary_of_grant_match_mode: "ANY_TOKEN",
+      is_beneficiary_of_grant: null,
+    },
+    is_private: false,
     created_by: {
       id: "creator-1",
       handle: "alpha",
@@ -142,6 +167,14 @@ describe("CreateWaveGroup", () => {
     expect(screen.getByText("Who can drop")).toBeInTheDocument();
   });
 
+  it.each([
+    [CreateWaveGroupConfigType.CAN_VIEW, "Visibility"],
+    [CreateWaveGroupConfigType.ADMIN, "Admins"],
+  ])("shows the updated %s scope title", (groupType, label) => {
+    renderComponent({ groupType });
+    expect(screen.getByText(label)).toBeInTheDocument();
+  });
+
   it("passes the resolved selected group to the inline panel", () => {
     renderComponent({
       groups: {
@@ -182,10 +215,62 @@ describe("CreateWaveGroup", () => {
     expect(inlinePanelProps?.selectedGroup).toEqual(exampleGroup);
   });
 
+  it("restores included and excluded identity wallets for editing", async () => {
+    const groupWithIdentityLists = {
+      ...exampleGroup,
+      group: {
+        ...exampleGroup.group,
+        identity_group_id: "included-list",
+        identity_group_identities_count: 1,
+        excluded_identity_group_id: "excluded-list",
+        excluded_identity_group_identities_count: 1,
+      },
+    };
+    mockedCommonApiFetch.mockImplementation(async ({ endpoint }) => {
+      if (endpoint.endsWith("/identity_groups/included-list")) {
+        return ["0xincluded"];
+      }
+      if (endpoint.endsWith("/identity_groups/excluded-list")) {
+        return ["0xexcluded"];
+      }
+      throw new Error(`Unexpected endpoint: ${endpoint}`);
+    });
+
+    renderComponent({
+      groups: {
+        ...defaultGroups,
+        canDrop: groupWithIdentityLists.id,
+      },
+      groupsCache: {
+        [groupWithIdentityLists.id]: groupWithIdentityLists,
+      },
+    });
+
+    await waitFor(() => {
+      expect(inlinePanelProps?.selectedGroupIncludedWallets).toEqual([
+        "0xincluded",
+      ]);
+      expect(inlinePanelProps?.selectedGroupExcludedWallets).toEqual([
+        "0xexcluded",
+      ]);
+    });
+    expect(mockedCommonApiFetch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        endpoint: "groups/group-1/identity_groups/included-list",
+      })
+    );
+    expect(mockedCommonApiFetch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        endpoint: "groups/group-1/identity_groups/excluded-list",
+      })
+    );
+  });
+
   it("passes the suggested group name and simplified callbacks to the inline panel", () => {
     renderComponent();
 
     expect(inlinePanelProps?.suggestedName).toBe("Test Wave Who can drop");
+    expect(inlinePanelProps?.defaultLabel).toBe("Public");
     inlinePanelProps?.onChange(exampleGroup);
     expect(mockOnGroupResolutionChange).toHaveBeenCalledWith(false);
     expect(mockOnGroupSelect).toHaveBeenCalledWith(exampleGroup);
@@ -237,6 +322,7 @@ describe("CreateWaveGroup", () => {
         identity_addresses: ["0xcreator"],
       },
     });
+    expect(inlinePanelProps?.defaultLabel).toBe("Only me");
   });
 
   it("passes disabled to the inline panel when chat is disabled", () => {

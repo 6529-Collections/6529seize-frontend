@@ -17,16 +17,24 @@ const getCurrentAuthStateFingerprint = (): string =>
     jwt: getAuthJwt(),
   });
 
-export const createAuthRequestGuard = ({
-  expectedAuthStateFingerprint,
-}: RequestAuthOptions): AuthRequestGuard => {
+export const createAuthRequestGuard = (
+  { expectedAuthStateFingerprint }: RequestAuthOptions,
+  isRequestContextCurrent: () => boolean = () => true
+): AuthRequestGuard => {
   let expectedFingerprint = expectedAuthStateFingerprint;
 
+  const isCurrent = (): boolean =>
+    isRequestContextCurrent() &&
+    (expectedFingerprint === undefined ||
+      getCurrentAuthStateFingerprint() === expectedFingerprint);
+
   return {
-    isCurrent: () =>
-      expectedFingerprint === undefined ||
-      getCurrentAuthStateFingerprint() === expectedFingerprint,
+    isCurrent,
     acceptCurrentState: (walletAddress: string) => {
+      if (!isCurrent()) {
+        return false;
+      }
+
       if (expectedFingerprint === undefined) {
         return true;
       }

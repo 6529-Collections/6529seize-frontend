@@ -9,12 +9,14 @@ interface WaveSettingEditorActionsProps {
     readonly variant?: "danger" | "neutral" | undefined;
   } | null;
   readonly onCancel: () => void;
+  readonly onSubmit?: (() => void) | undefined;
   readonly submitDisabled?: boolean | undefined;
 }
 
 export default function WaveSettingEditorActions({
   disabled,
   onCancel,
+  onSubmit,
   secondaryAction = null,
   submitDisabled = false,
 }: WaveSettingEditorActionsProps) {
@@ -33,9 +35,7 @@ export default function WaveSettingEditorActions({
           disabled={disabled || secondaryAction.disabled}
           onClick={secondaryAction.onClick}
           variant={
-            secondaryAction.variant === "neutral"
-              ? "secondary"
-              : "destructive"
+            secondaryAction.variant === "neutral" ? "secondary" : "destructive"
           }
           size="xs"
         >
@@ -43,8 +43,9 @@ export default function WaveSettingEditorActions({
         </Button>
       )}
       <Button
-        type="submit"
+        type={onSubmit ? "button" : "submit"}
         disabled={disabled || submitDisabled}
+        onClick={onSubmit}
         variant="action"
         size="xs"
       >

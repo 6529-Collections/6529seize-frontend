@@ -9,6 +9,7 @@ import { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ApiUpdateDropRequest } from "@/generated/models/ApiUpdateDropRequest";
 import { useDropUpdateMutation } from "@/hooks/drops/useDropUpdateMutation";
 import useDropActionInteractionMode from "@/hooks/useDropActionInteractionMode";
+import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 import useLongPressClickSuppression from "@/hooks/useLongPressClickSuppression";
 import { useEditingDrop } from "@/contexts/EditingDropContext";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
@@ -17,6 +18,7 @@ import { DropLocation, hasDropFooter } from "./drop.types";
 import type { BoostAnimationState } from "./DropBoostAnimation";
 import DropBoostAnimation from "./DropBoostAnimation";
 import WaveDropActions from "./WaveDropActions";
+import { getWaveDropActionPresentation } from "./WaveDropActionPresentation";
 import WaveDropMetadata from "./WaveDropMetadata";
 import {
   useWaveDropMobileMenu,
@@ -55,7 +57,6 @@ import {
   shouldOffsetFooterRow,
   shouldShowAuthorInfo,
   shouldShowGroupedDropTimestamp,
-  shouldShowTouchActionsButton,
 } from "./WaveDrop.helpers";
 import type { WaveDropProps } from "./WaveDrop.types";
 
@@ -77,6 +78,7 @@ const WaveDropInner = ({
   identityMode = "default",
   timestampLayout = "inline",
   showInteractions = true,
+  showStandaloneActionsButton = false,
   inlineAuthorOnDesktop = false,
   mediaImageScale,
   fullWidthMedia = false,
@@ -128,6 +130,7 @@ const WaveDropInner = ({
 
   const { canUseDesktopHoverActions, canUseTouchActionSheet } =
     useDropActionInteractionMode();
+  const isMobileLayoutViewport = useIsMobileLayoutViewport();
   const mobileMenu = useWaveDropMobileMenu();
   const allowLongPress = showInteractions && canUseTouchActionSheet;
   // Pointer-driven row hover: some browsers (capability-lying convertibles)
@@ -175,10 +178,18 @@ const WaveDropInner = ({
     isProfileView,
     location,
   });
-  const showActionsButton = shouldShowTouchActionsButton({
+  const {
+    canUseMobileActionsSheet,
+    showActionsButton,
+    showActionsButtonOnMobile,
+    desktopActions,
+  } = getWaveDropActionPresentation({
+    drop,
+    showStandaloneActionsButton,
     showInteractions,
-    hasTouch: canUseTouchActionSheet,
     showReplyAndQuote,
+    isMobileLayoutViewport,
+    canUseTouchActionSheet,
     isEditing,
     identityMode,
   });
@@ -465,6 +476,8 @@ const WaveDropInner = ({
     isStorm,
     activePartIndex,
     showActionsButton,
+    showActionsButtonOnMobile,
+    desktopActions,
     handleOpenTouchActions,
     timestampLayout,
   });
@@ -587,7 +600,7 @@ const WaveDropInner = ({
   }, []);
 
   useEffect(() => {
-    if (canUseTouchActionSheet) {
+    if (canUseMobileActionsSheet) {
       return;
     }
 
@@ -599,7 +612,7 @@ const WaveDropInner = ({
     mobileMenu?.close();
     clearSuppression();
   }, [
-    canUseTouchActionSheet,
+    canUseMobileActionsSheet,
     clearSuppression,
     mobileMenu,
     resetTimestampSwipe,
@@ -614,7 +627,8 @@ const WaveDropInner = ({
   }, [resetTimestampSwipe, showGroupedTimestamp]);
 
   // Derive effective menu state - menu can't be open while editing
-  const effectiveIsSlideUp = isSlideUp && !isEditing && canUseTouchActionSheet;
+  const effectiveIsSlideUp =
+    isSlideUp && !isEditing && canUseMobileActionsSheet;
 
   useWaveDropMobileMenuController({
     drop,
@@ -627,6 +641,7 @@ const WaveDropInner = ({
     onAddReaction: handleOnAddReaction,
     onEdit: handleOnEdit,
     onBoostAnimation: handleMobileBoostAnimation,
+    showOnlyQuickRemove: showStandaloneActionsButton,
   });
 
   const dropClasses = getDropClasses(
@@ -746,6 +761,7 @@ const WaveDropInner = ({
           {canUseDesktopHoverActions &&
             showInteractions &&
             showReplyAndQuote &&
+            !showStandaloneActionsButton &&
             !isEditing && (
               <WaveDropActions
                 drop={drop}

@@ -359,8 +359,10 @@ Surface matrix:
 - `capacitor-ios-sim`, `capacitor-android-sim`, and `electron-shell-sim` are
   browser simulations only. They may catch responsive/runtime branching issues,
   but they are not evidence that the real native or desktop shells were tested.
-- The iOS Capacitor simulation seeds the app's existing EULA consent cookie so
-  route-level smoke tests exercise the page shell instead of the legal modal.
+- The iOS Capacitor simulation seeds the app's current versioned EULA consent
+  cookie so route-level smoke tests exercise the page shell instead of the
+  legal modal. Boolean or stale-version values intentionally do not bypass the
+  native gate.
 - Capacitor simulations expose both `CapacitorCustomPlatform` and a minimal
   `globalThis.Capacitor` shim so Playwright can catch hook-based and direct
   runtime-detection drift. This still does not prove native plugin behavior.

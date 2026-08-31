@@ -1,7 +1,12 @@
 import { Fragment } from "react";
-import { ArrowRightIcon, CheckIcon } from "@heroicons/react/24/outline";
+import {
+  ArrowRightIcon,
+  CheckIcon,
+  UserIcon,
+} from "@heroicons/react/24/outline";
 import Link from "next/link";
 
+import WavesIcon from "@/components/common/icons/WavesIcon";
 import type { SupportedLocale } from "@/i18n/locales";
 
 import {
@@ -11,6 +16,7 @@ import {
   type JoinLinks,
   type Join6529MessageKey,
   type TimelineItemSpec,
+  type TimelineStepId,
 } from "./page.content";
 import type { JoinPageState, StepStatus, TimelineProgress } from "./page.types";
 import {
@@ -43,7 +49,7 @@ const STATUS_MARKER_CLASS: Readonly<Record<StepStatus, string>> = {
 };
 
 const NEUTRAL_MARKER_CLASS =
-  "tw-border-white/10 tw-text-iron-500 group-hover:tw-border-white/30 group-hover:tw-text-iron-100";
+  "tw-border-white/10 tw-text-iron-500 tw-transition-[border-color,color,box-shadow] tw-duration-200 group-focus-within:tw-border-primary-400/50 group-focus-within:tw-text-primary-300 group-focus-within:tw-shadow-[0_0_0_6px_#030303,0_0_20px_rgba(132,173,255,0.2)] desktop-hover:group-hover:tw-border-primary-400/50 desktop-hover:group-hover:tw-text-primary-300 desktop-hover:group-hover:tw-shadow-[0_0_0_6px_#030303,0_0_20px_rgba(132,173,255,0.2)] motion-reduce:tw-transition-none";
 
 const JOURNEY_HEADER_KEYS: Readonly<
   Record<
@@ -84,7 +90,7 @@ export function JourneyTimelineSection({
   return (
     <section
       className={cx(
-        "tw-mx-auto tw-w-full tw-max-w-5xl tw-px-4 tw-pb-12 md:tw-px-6 lg:tw-px-8",
+        "tw-mx-auto tw-w-full tw-max-w-5xl tw-bg-[radial-gradient(ellipse_at_50%_38%,rgba(72,117,255,0.08)_0%,rgba(49,46,129,0.025)_42%,transparent_72%)] tw-bg-no-repeat tw-px-4 tw-pb-12 md:tw-px-6 lg:tw-px-8",
         timelineProgress.visible
           ? "tw-pt-8 md:tw-pb-16 md:tw-pt-10"
           : "tw-pt-12 md:tw-py-16"
@@ -215,11 +221,13 @@ function TimelineRow({
     item.actionLabelKey === undefined
       ? undefined
       : m(locale, item.actionLabelKey);
+  const hasTimelineIcon =
+    item.id === "wallet" || item.id === "profile" || item.id === "waves";
 
   return (
     <article
       aria-current={status === "current" ? "step" : undefined}
-      className="tw-group tw-relative tw-mb-6 tw-grid tw-gap-3 last:tw-mb-0 md:tw-mb-8 md:tw-grid-cols-2 md:tw-items-center"
+      className="tw-group tw-relative tw-mb-8 tw-grid tw-gap-3 last:tw-mb-0 md:tw-mb-12 md:tw-grid-cols-2 md:tw-items-center"
       id={getTimelineStepDomId(item.id)}
     >
       <div
@@ -258,9 +266,20 @@ function TimelineRow({
         aria-hidden="true"
         className={cx(
           isRightAligned && "md:tw-order-1",
-          "tw-hidden md:tw-block"
+          "tw-hidden md:tw-flex md:tw-h-12 md:tw-items-center md:tw-self-start",
+          isLeftAligned ? "md:tw-pl-10" : "md:tw-justify-end md:tw-pr-10"
         )}
-      />
+      >
+        {hasTimelineIcon && (
+          <div className="tw-relative tw-flex tw-size-16 tw-items-center tw-justify-center">
+            <span className="tw-absolute tw-inset-0 tw-rounded-full tw-bg-[radial-gradient(circle,rgba(132,173,255,0.18)_0%,rgba(86,132,255,0.08)_40%,transparent_72%)] tw-opacity-0 tw-transition-opacity tw-duration-200 group-focus-within:tw-opacity-100 desktop-hover:group-hover:tw-opacity-100 motion-reduce:tw-transition-none" />
+            <TimelineStepIcon
+              className="tw-relative tw-z-10 tw-size-12 tw-text-iron-800 tw-transition-colors tw-duration-200 group-focus-within:tw-text-primary-300 desktop-hover:group-hover:tw-text-primary-300 motion-reduce:tw-transition-none"
+              stepId={item.id}
+            />
+          </div>
+        )}
+      </div>
       <div
         aria-hidden="true"
         className={cx(
@@ -275,6 +294,59 @@ function TimelineRow({
         )}
       </div>
     </article>
+  );
+}
+
+function TimelineStepIcon({
+  className,
+  stepId,
+}: {
+  readonly className: string;
+  readonly stepId: TimelineStepId;
+}) {
+  if (stepId === "wallet") {
+    return <WalletOutlineIcon className={className} />;
+  }
+
+  if (stepId === "profile") {
+    return <UserIcon aria-hidden="true" className={className} />;
+  }
+
+  if (stepId === "waves") {
+    return (
+      <span aria-hidden="true" className={className}>
+        <WavesIcon className="tw-size-full" />
+      </span>
+    );
+  }
+
+  return null;
+}
+
+function WalletOutlineIcon({ className }: { readonly className: string }) {
+  return (
+    <svg
+      aria-hidden="true"
+      className={className}
+      fill="none"
+      viewBox="0 0 24 24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.5"
+      />
+      <path
+        d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.5"
+      />
+    </svg>
   );
 }
 

@@ -15,7 +15,10 @@ jest.mock("@/helpers/waves/waves.helpers", () => ({
 jest.mock(
   "@/components/groups/page/create/config/identities/select/GroupCreateIdentitiesSelect",
   () => (props: any) => (
-    <button onClick={() => props.onIdentitySelect({ wallet: "0x2" })}>
+    <button
+      data-sort={props.sort}
+      onClick={() => props.onIdentitySelect({ wallet: "0x2" })}
+    >
       add
     </button>
   )
@@ -41,5 +44,11 @@ describe("CreateDirectMessage", () => {
     await user.click(screen.getByText("add"));
     await user.click(screen.getByRole("button", { name: /create/i }));
     expect(push).toHaveBeenCalledWith("/messages/1");
+  });
+
+  it("requests level-ordered identity search results", () => {
+    setup();
+
+    expect(screen.getByText("add")).toHaveAttribute("data-sort", "level");
   });
 });

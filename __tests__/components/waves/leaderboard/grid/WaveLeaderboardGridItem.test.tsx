@@ -544,7 +544,8 @@ describe("WaveLeaderboardGridItem", () => {
     ).toHaveClass(
       "tw-opacity-0",
       "group-focus-within:tw-opacity-100",
-      "desktop-hover:group-hover:tw-opacity-100"
+      "desktop-hover:group-hover:tw-opacity-100",
+      "touch-only:tw-opacity-100"
     );
     expect(screen.getByTestId("open-action")).toBeInTheDocument();
     expect(screen.getByTestId("vote-button")).toBeInTheDocument();

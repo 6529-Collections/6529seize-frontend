@@ -29,23 +29,52 @@ linked section pages.
 
 ## Tab Availability and Order
 
-- Base section order for all waves: `About`, `Rules`, `REP`, `Settings`.
-- `Rank` and `Approve` waves add `Voters` and `Activity` after `Settings`.
-- `Rules` shows automatic wave rules plus optional creator rules.
+- Base section order for all waves: `About`, `REP`, `Configuration`.
+- `Configuration` is the consolidated rules and settings experience, starting with the
+  wave type and access configuration sections. Perpetual ranking waves are
+  labeled `Perpetual Rank` instead of the generic `Rank`. Access groups show
+  their member count and criteria; viewers who can administer the wave also see
+  a gear menu for reconfiguring each applicable group. For Rank and Approve waves,
+  Configuration shows chat status even when chat is disabled; wave
+  administrators can use its row gear to enable or disable chat. When chat is
+  enabled, Configuration also summarizes link availability and slow mode, with
+  administrator-only row gears for changing either setting. Rank and Approve
+  wave administrators also see Display controls for the submission button and
+  outcome visibility; the entire Display section is hidden from
+  non-administrators. All change controls in Configuration use gear icons.
+  Competition waves then show Schedule, Submissions, and Voting summaries to
+  every viewer. Approve waves place an Approval section directly after Schedule:
+  every viewer can read Approve after, Hold time, Max approved drops, and the
+  Approval window; administrators get gears only for Approve after and Hold
+  time. The remaining summary values never show edit controls. Guidelines and
+  acceptance-required Rules follow those summaries and show the full authored
+  copy and signature note. Wave administrators see a
+  gear beside each section for editing it; other viewers see the content without
+  gears. Immediately before the personal Boosted drops preference, wave
+  administrators also get proposal-card display settings, Approvals/Approved tab
+  labels on Approve waves, and curation creation, editing, deletion, and ordering
+  controls. Those shared controls are completely hidden from non-administrators.
+  When chat is enabled, Your display lets each viewer choose how boosted-drop
+  cards appear for them. A final personal curation selector appears when the wave
+  has curations. Both personal controls include explanatory tooltips and change
+  only the current viewer's view.
+- `Rank` and `Approve` waves add `Voters` and `Activity` after `Configuration`.
+- For `Rank` and `Approve` waves, participants still review and sign
+  acceptance-required rules in the submit terms modal.
 - Desktop labels the first section `About` because it is a standalone sidebar
   tab.
 - Native app labels the same first section `Overview` because it is nested
-  inside the main `About` view. It shows compact `Overview`, `Rules`, and `REP`
-  pills followed by `More`.
-- Native `More` contains `Settings` and, for `Rank` or `Approve` waves,
-  `Voters` and `Activity`. When one is selected, the trigger displays that
-  section name and uses the selected pill treatment.
+  inside the main `About` view. It shows compact `Overview`, `REP`, and
+  `Configuration` pills. For Rank and Approve waves, `More` contains `Voters`
+  and `Activity`. When one is selected, the trigger displays that section name
+  and uses the selected pill treatment.
 
 ## Overflow and Keyboard Behavior
 
-- Desktop keeps the four base sections visible and moves competition-only
-  `Voters` and `Activity` into `More`, so the fixed-width panel never clips a
-  section label.
+- Desktop Chat waves show all three base sections in the scroll-safe tab strip.
+  Rank and Approve waves keep `About`, `REP`, `Configuration`, and `Voters`
+  visible and move `Activity` into `More`, so the fixed-width panel never clips
+  a section label.
 - Native keeps three compact pills visible and moves remaining sections into
   `More`, avoiding a compressed desktop-style tab row on narrow phones.
 - The contextual row and every section share the same panel canvas, including
@@ -87,8 +116,8 @@ linked section pages.
 ## Limitations / Notes
 
 - Tab order is fixed by wave-state rules; users cannot reorder tabs.
-- This page does not own section rendering behavior for `About`, `Rules`,
-  `REP`, `Settings`, `Voters`, or `Activity`.
+- This page does not own section rendering behavior for `About`, `REP`,
+  `Configuration`, `Voters`, or `Activity`.
 - `Trending` behavior is part of `About` content and is documented separately.
 
 ### Localization fallback debt

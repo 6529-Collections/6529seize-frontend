@@ -28,9 +28,9 @@ import {
   ChevronRightIcon,
   FunnelIcon,
 } from "@heroicons/react/24/outline";
-import GroupsSidebar from "../groups/sidebar/GroupsSidebar";
 import MobileWrapperDialog from "../mobile-wrapper-dialog/MobileWrapperDialog";
 import CommunityMembersGroupDetails from "./CommunityMembersGroupDetails";
+import CommunityMembersGroupFilter from "./CommunityMembersGroupFilter";
 
 interface QueryUpdateInput {
   name: keyof typeof SEARCH_PARAMS_FIELDS;
@@ -355,10 +355,6 @@ export default function CommunityMembers() {
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
   const [mobileSortOpen, setMobileSortOpen] = useState(false);
 
-  useEffect(() => {
-    setMobileFilterOpen(false);
-  }, [activeGroupId]);
-
   const hasCustomSort =
     params.sort !== defaultSortBy ||
     params.sort_direction !== defaultSortDirection;
@@ -464,7 +460,7 @@ export default function CommunityMembers() {
       </div>
 
       <MobileWrapperDialog
-        title="Groups"
+        title={t(locale, "network.groupFilter.title")}
         isOpen={mobileFilterOpen}
         onClose={() => setMobileFilterOpen(false)}
         tall
@@ -477,7 +473,13 @@ export default function CommunityMembers() {
         headerClassName={NETWORK_DIALOG_HEADER_CLASS_NAME}
         headerCloseButtonClassName="-tw-mt-1"
       >
-        <GroupsSidebar variant="mobile-sheet" />
+        <CommunityMembersGroupFilter
+          activeGroupId={activeGroupId}
+          onGroupChange={(group) => {
+            setActiveGroupId(group?.id ?? null);
+            setMobileFilterOpen(false);
+          }}
+        />
       </MobileWrapperDialog>
 
       <MobileWrapperDialog

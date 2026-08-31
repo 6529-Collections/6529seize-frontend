@@ -1,6 +1,8 @@
 "use client";
 
-import PencilIcon from "@/components/utils/icons/PencilIcon";
+import PencilIcon, {
+  PencilIconSize,
+} from "@/components/utils/icons/PencilIcon";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import React, { useState } from "react";
 import UserPageHeaderEditName from "./UserPageHeaderEditName";
@@ -37,10 +39,10 @@ export default function UserPageHeaderNameWrapper({
       >
         <div
           aria-hidden="true"
-          className="tw-absolute tw-inset-0 tw-hidden tw-text-iron-400 group-focus-within:tw-block group-hover:tw-block"
+          className="tw-absolute tw-inset-0 tw-hidden tw-text-iron-400 group-focus-within:tw-block desktop-hover:group-hover:tw-block touch-only:tw-block"
         >
           <div className="tw-absolute -tw-left-5 tw-top-1/2 tw-z-10 tw-flex tw-size-5 -tw-translate-y-1/2 tw-items-center tw-justify-center">
-            <PencilIcon />
+            <PencilIcon size={PencilIconSize.SMALL} />
           </div>
         </div>
       </button>
