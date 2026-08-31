@@ -134,6 +134,7 @@ export const TextTrait: React.FC<TextTraitProps> = React.memo(
         readOnly={readOnly}
         className={className}
         error={error}
+        id={`field-${field}`}
         isFieldFilled={isFieldFilled}
         showRequiredMarker={showRequiredMarker}
         size={size}
