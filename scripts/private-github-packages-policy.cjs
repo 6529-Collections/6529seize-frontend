@@ -882,6 +882,12 @@ function validateRepositoryPolicy({
 }
 
 function validateRepositoryFiles(repositoryRoot) {
+  if (fs.existsSync(path.join(repositoryRoot, "package-lock.json"))) {
+    throw policyError(
+      "package-lock.json is not allowed; use the committed pnpm-lock.yaml"
+    );
+  }
+
   for (const pnpmHookFilename of [".pnpmfile.cjs", ".pnpmfile.js"]) {
     if (fs.existsSync(path.join(repositoryRoot, pnpmHookFilename))) {
       throw policyError(

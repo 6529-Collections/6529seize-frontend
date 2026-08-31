@@ -52,10 +52,13 @@ Key repo changes
 
 package.json
 - packageManager changed from npm to pnpm@10.33.0
-- added secure install scripts:
-  - pnpm run install:secure
-  - pnpm run install:secure:frozen
-  - pnpm run install:secure:prod
+- secure installs use the repo wrapper:
+  - 6529 install
+  - 6529 install:frozen
+  - 6529 install:prod
+- the wrapper invokes the validated secure helper directly; secure package
+  scripts are intentionally absent so pnpm cannot apply unvalidated .npmrc
+  lifecycle settings before the helper runs
 - added preinstall guard to reject npm/yarn
 - added guard:no-package-lock
 - replaced internal npm run chains with pnpm run

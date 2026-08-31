@@ -18,11 +18,11 @@ Usage:
 
 Common commands:
   6529 bootstrap       -> enable the repo-scoped 6529 command for future shells
-  6529 install         -> pnpm run install:secure
-  6529 i               -> pnpm run install:secure
-  6529 install:frozen  -> pnpm run install:secure:frozen
-  6529 ci              -> pnpm run install:secure:frozen
-  6529 install:prod    -> pnpm run install:secure:prod
+  6529 install         -> validated Socket Firewall + pnpm install
+  6529 i               -> validated Socket Firewall + pnpm install
+  6529 install:frozen  -> validated Socket Firewall + frozen pnpm install
+  6529 ci              -> validated Socket Firewall + frozen pnpm install
+  6529 install:prod    -> validated Socket Firewall + production pnpm install
   6529 update          -> sfw pnpm audit --fix
   6529 update:all      -> sfw pnpm update
   6529 run dev         -> pnpm run dev
@@ -87,42 +87,41 @@ case "$command_name" in
       echo "Use \`6529 add <package>\` to add dependencies." >&2
       exit 1
     fi
-    exec "$REAL_PNPM" run install:secure "$@"
+    exec node "$REPO_ROOT/scripts/run-secure-pnpm.cjs" install
     ;;
   install)
     if [[ "$#" -gt 0 ]]; then
       echo "Use \`6529 add <package>\` to add dependencies." >&2
       exit 1
     fi
-    exec "$REAL_PNPM" run install:secure "$@"
+    exec node "$REPO_ROOT/scripts/run-secure-pnpm.cjs" install
     ;;
   ci)
     if [[ "$#" -gt 0 ]]; then
       echo "\`6529 ci\` does not accept package arguments." >&2
       exit 1
     fi
-    exec "$REAL_PNPM" run install:secure:frozen "$@"
+    exec node "$REPO_ROOT/scripts/run-secure-pnpm.cjs" install --frozen-lockfile
     ;;
   install:frozen)
     if [[ "$#" -gt 0 ]]; then
       echo "\`6529 install:frozen\` does not accept package arguments." >&2
       exit 1
     fi
-    exec "$REAL_PNPM" run install:secure:frozen "$@"
+    exec node "$REPO_ROOT/scripts/run-secure-pnpm.cjs" install --frozen-lockfile
     ;;
   install:prod)
     if [[ "$#" -gt 0 ]]; then
       echo "\`6529 install:prod\` does not accept package arguments." >&2
       exit 1
     fi
-    exec "$REAL_PNPM" run install:secure:prod "$@"
+    exec node "$REPO_ROOT/scripts/run-secure-pnpm.cjs" install --frozen-lockfile --prod
     ;;
   add)
     if [[ "$#" -eq 0 ]]; then
       echo "Usage: \`6529 add <package>\`" >&2
       exit 1
     fi
-    node "$REPO_ROOT/scripts/assert-no-package-lock.cjs"
     exec node "$REPO_ROOT/scripts/run-secure-pnpm.cjs" add "$@"
     ;;
   update)
@@ -131,11 +130,9 @@ case "$command_name" in
       echo "Use \`6529 update:all [package...]\` for intentional pnpm updates." >&2
       exit 1
     fi
-    node "$REPO_ROOT/scripts/assert-no-package-lock.cjs"
     exec node "$REPO_ROOT/scripts/run-secure-pnpm.cjs" audit --fix
     ;;
   update:all)
-    node "$REPO_ROOT/scripts/assert-no-package-lock.cjs"
     exec node "$REPO_ROOT/scripts/run-secure-pnpm.cjs" update "$@"
     ;;
   prune:prod)

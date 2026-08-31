@@ -151,6 +151,22 @@ function validWorkspace() {
   ].join("\n");
 }
 
+function writeValidRepositoryPolicyFiles(repositoryRoot: string) {
+  fs.writeFileSync(path.join(repositoryRoot, ".npmrc"), validNpmrc());
+  fs.writeFileSync(
+    path.join(repositoryRoot, "package.json"),
+    validPackageJson()
+  );
+  fs.writeFileSync(
+    path.join(repositoryRoot, "pnpm-lock.yaml"),
+    validLockfile()
+  );
+  fs.writeFileSync(
+    path.join(repositoryRoot, "pnpm-workspace.yaml"),
+    validWorkspace()
+  );
+}
+
 function socketEnvironment(caPath: string): Environment {
   const proxy = "http://127.0.0.1:43129";
   return {
@@ -269,6 +285,7 @@ describe("private GitHub Packages repository policy", () => {
     for (const setting of [
       "strict-ssl=false",
       "cafile=/tmp/untrusted-ca.pem",
+      "node-options=--require=./steal.cjs",
       "proxy=http://proxy.example.invalid",
       "@another-scope:registry=https://registry.npmjs.org",
       "//registry.npmjs.org/:_authToken=unapproved",
@@ -736,19 +753,7 @@ describe("host-specific Socket Firewall routing", () => {
   });
 
   it("rejects repository-local pnpm hook files", () => {
-    fs.writeFileSync(path.join(temporaryDirectory, ".npmrc"), validNpmrc());
-    fs.writeFileSync(
-      path.join(temporaryDirectory, "package.json"),
-      validPackageJson()
-    );
-    fs.writeFileSync(
-      path.join(temporaryDirectory, "pnpm-lock.yaml"),
-      validLockfile()
-    );
-    fs.writeFileSync(
-      path.join(temporaryDirectory, "pnpm-workspace.yaml"),
-      validWorkspace()
-    );
+    writeValidRepositoryPolicyFiles(temporaryDirectory);
     fs.writeFileSync(
       path.join(temporaryDirectory, ".pnpmfile.cjs"),
       "module.exports = {};\n"
@@ -756,6 +761,15 @@ describe("host-specific Socket Firewall routing", () => {
 
     expect(() => policy.validateRepositoryFiles(temporaryDirectory)).toThrow(
       ".pnpmfile.cjs is not allowed"
+    );
+  });
+
+  it("rejects package-lock.json in the direct secure-helper preflight", () => {
+    writeValidRepositoryPolicyFiles(temporaryDirectory);
+    fs.writeFileSync(path.join(temporaryDirectory, "package-lock.json"), "{}");
+
+    expect(() => policy.validateRepositoryFiles(temporaryDirectory)).toThrow(
+      "package-lock.json is not allowed"
     );
   });
 
@@ -862,6 +876,23 @@ describe("host-specific Socket Firewall routing", () => {
 });
 
 describe("documented private-package setup flows", () => {
+  it("dispatches package operations directly to the secure helper", () => {
+    const wrapper = fs.readFileSync(
+      path.join(REPOSITORY_ROOT, "bin", "6529"),
+      "utf8"
+    );
+    const packageJson = JSON.parse(
+      fs.readFileSync(path.join(REPOSITORY_ROOT, "package.json"), "utf8")
+    ) as { scripts?: Record<string, string> };
+
+    expect(wrapper).not.toContain('"$REAL_PNPM" run install:secure');
+    expect(wrapper).not.toContain("scripts/assert-no-package-lock.cjs");
+    expect(wrapper.match(/run-secure-pnpm\.cjs/g)).toHaveLength(8);
+    expect(packageJson.scripts).not.toHaveProperty("install:secure");
+    expect(packageJson.scripts).not.toHaveProperty("install:secure:frozen");
+    expect(packageJson.scripts).not.toHaveProperty("install:secure:prod");
+  });
+
   it("requires runtime auth before staging setup can mutate the checkout", () => {
     const setupScript = fs.readFileSync(
       path.join(REPOSITORY_ROOT, "dev-setup", "run-staging-ec2-setup.sh"),

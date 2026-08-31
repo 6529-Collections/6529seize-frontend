@@ -162,7 +162,6 @@ const PACKAGE_SCRIPT_KEYS = Object.freeze([
   "generate",
   "guard:no-package-lock",
   "help-index:sync",
-  "install:secure:frozen",
   "lint:changed",
   "lint:package-json",
   "lint:quiet",
