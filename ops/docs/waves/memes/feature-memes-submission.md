@@ -71,7 +71,11 @@ reached), select the header restriction control to see the reason, then use
 - Filled text and select fields show success styling, including a green ring and
   checkmark, until a validation error replaces that state.
 - On larger viewports, `Artwork` keeps the media source panel and the metadata
-  form side by side; on smaller viewports, the same content stacks vertically.
+  form side by side while the form scrolls independently. On smaller
+  viewports, the same content stacks and scrolls as one page.
+- On touch devices, focusing a text field scrolls it into the visible part of
+  the modal after the software keyboard opens. In the native app, the modal
+  also reduces its height so the keyboard does not cover the action bar.
 - The upload drop zone shows grouped format badges for image, video, and
   interactive model uploads before a file is selected.
 - After a file is selected, the preview surface keeps a `Change` control for
@@ -79,8 +83,10 @@ reached), select the header restriction control to see the reason, then use
 - The interactive artwork panel always shows `Media Type` as `Interactive HTML
   (text/html)` while the provider selector switches between `IPFS` and
   `Arweave`.
-- `Artwork` `Continue` stays disabled until required traits and media checks
-  pass.
+- `Artwork` `Continue` remains available before required fields are complete.
+  Selecting it validates the media and all required metadata together.
+- While an interactive artwork hash is being verified, `Continue` stays
+  disabled until that check finishes.
 - Numeric trait fields reject `0`.
 - Upload checks:
   - accepted formats include `PNG`, `JPG/JPEG`, `GIF`, `MP4/MOV`, and
@@ -111,12 +117,18 @@ reached), select the header restriction control to see the reason, then use
 
 - Unsupported type or oversized upload shows inline validation errors in
   `Artwork`.
+- Selecting `Continue` with missing or invalid values gives every affected
+  field red error styling and an inline recovery message.
+- If artwork is missing, the upload area or interactive hash input turns red.
+- Changing between `Upload File` and `Interactive HTML` clears the previous
+  generic missing-media error until `Continue` is selected again; specific
+  file or hash validation errors remain visible.
 - Invalid or unreachable interactive content shows inline errors; fix input and
   retry.
 - If a pasted gateway URL is rejected, replace it with the root CID/transaction
   ID or retry with an approved gateway URL for the same asset.
-- If `Continue` is attempted with invalid artwork metadata, the first invalid
-  field is focused so the user can correct it in place.
+- After an invalid `Continue` attempt, focus and scrolling move to the first
+  missing item in form order: media first, then title, description, and traits.
 - `Close` icon, backdrop click, `Cancel`, or `Escape` closes the modal from any
   step.
 - Closing the modal discards the draft. Reopening starts a new draft.

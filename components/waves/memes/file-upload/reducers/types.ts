@@ -75,6 +75,8 @@ export interface MemesArtSubmissionFileProps {
   readonly artworkUrl: string;
   /** Error raised while reading the selected upload */
   readonly uploadError: string | null;
+  /** Missing media error shown after the user tries to continue */
+  readonly missingMediaError?: string | null | undefined;
   /** MIME type for server-provided artwork */
   readonly artworkMimeType?: string | null | undefined;
   /** Callback to update artwork upload state */
