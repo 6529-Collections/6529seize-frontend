@@ -118,7 +118,9 @@ export default function CommunityMembersGroupDetails({
   const hasActiveCriteria =
     criteriaSummary.status === "available" && criteriaSummary.text !== null;
   const showBulkRateActions =
-    hasActiveCriteria && Boolean(connectedProfile?.handle);
+    hasActiveCriteria &&
+    Boolean(connectedProfile?.handle) &&
+    (!group.is_private || viewerIdentityKey !== null);
 
   return (
     <section

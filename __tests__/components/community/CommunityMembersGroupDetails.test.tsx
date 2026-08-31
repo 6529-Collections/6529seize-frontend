@@ -353,6 +353,29 @@ describe("CommunityMembersGroupDetails", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("waits for a viewer identity before showing private-group bulk actions", () => {
+    useQueryMock.mockReturnValue({
+      data: createInspectableGroup({ isPrivate: true }),
+      isLoading: false,
+      isError: false,
+    });
+
+    render(
+      <CommunityMembersGroupDetails
+        groupId="group-1"
+        onClose={jest.fn()}
+        viewerIdentityKey={null}
+      />
+    );
+
+    expect(
+      screen.queryByRole("button", {
+        name: "REP everyone matching criteria",
+      })
+    ).not.toBeInTheDocument();
+    expect(screen.getByTestId("group-criteria")).toBeInTheDocument();
+  });
+
   it("treats malformed group identity data as unavailable", () => {
     useQueryMock.mockReturnValue({
       data: { id: "group-1", name: null },
