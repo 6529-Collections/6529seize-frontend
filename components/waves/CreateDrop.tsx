@@ -24,16 +24,8 @@ import { ApiModeratedProfileStatus } from "@/generated/models/ApiModeratedProfil
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import { useAuth } from "../auth/Auth";
 import { useKeyPressEvent } from "react-use";
-import type { ActiveDropState } from "@/types/dropInteractionTypes";
-import type {
-  CurationComposerVariant,
-  IdentityPickerPlacement,
-} from "./dropComposer.types";
 import { DropMode } from "./dropComposer.types";
-import {
-  ChatRestriction,
-  type DropPrivileges,
-} from "@/hooks/useDropPriviledges";
+import { ChatRestriction } from "@/hooks/useDropPriviledges";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { ProcessIncomingDropType } from "@/contexts/wave/hooks/useWaveRealtimeUpdater";
 import { useUnreadDividerOptional } from "@/contexts/wave/UnreadDividerContext";
@@ -58,41 +50,7 @@ import type {
   SlowModeChatWaveState,
 } from "./create-drop-content/drop-submission.types";
 import { getDropSubmissionErrorContent } from "./create-drop-content/drop-submission-error.helpers";
-
-interface CreateDropProps {
-  readonly activeDrop: ActiveDropState | null;
-  readonly onCancelReplyQuote: () => void;
-  readonly onReplyTargetUnavailable?: (() => void) | undefined;
-  readonly onDropAddedToQueue: () => void;
-  readonly onAllDropsAdded?: (() => void) | undefined;
-  readonly onServerDropCreated?:
-    | ((drop: ApiDrop) => Promise<void> | void)
-    | undefined;
-  readonly onExitFixedDropMode?: (() => void) | undefined;
-  readonly wave: ApiWave;
-  readonly dropId: string | null;
-  readonly fixedDropMode: DropMode;
-  readonly privileges: DropPrivileges;
-  readonly curationComposerVariant?: CurationComposerVariant | undefined;
-  readonly initialCurationUrl?: string | null | undefined;
-  readonly onSubmitCurationUrl?: ((url: string) => void) | undefined;
-  readonly canSubmitCurationUrl?: boolean | undefined;
-  readonly curationUrlSubmitRestrictionMessage?: string | null | undefined;
-  readonly externalAttachmentDrop?:
-    | {
-        readonly token: number;
-        readonly files: File[];
-      }
-    | null
-    | undefined;
-  readonly onExternalAttachmentDropConsumed?: (() => void) | undefined;
-  readonly termsSignatureFlowEnabled?: boolean | undefined;
-  readonly identityPickerPlacement?: IdentityPickerPlacement | undefined;
-  readonly forceStandardDropComposer?: boolean | undefined;
-  readonly focusOnInitialActiveDrop?: boolean | undefined;
-  readonly initialMarkdown?: string | null | undefined;
-  readonly initialMarkdownKey?: string | null | undefined;
-}
+import type { CreateDropProps } from "./create-drop-content/create-drop.types";
 
 export default function CreateDrop({
   activeDrop,

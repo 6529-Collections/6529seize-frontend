@@ -286,7 +286,7 @@ describe("DropPlaceholder", () => {
       expect(
         screen.getByText(
           (_content, element) =>
-            element?.tagName.toLowerCase() === "p" &&
+            element?.tagName.toLowerCase() === "output" &&
             element.textContent ===
               "Create a profile to participate in this wave"
         )

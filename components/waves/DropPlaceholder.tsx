@@ -191,12 +191,11 @@ export default function DropPlaceholder({
   return (
     <div className="tw-flex tw-min-h-[48px] tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-iron-800/50 tw-bg-iron-900/50 tw-px-4 tw-py-3 tw-backdrop-blur">
       <div className="tw-flex tw-w-full tw-items-center tw-justify-center tw-text-center">
-        <p
-          role="status"
+        <output
           className={`tw-m-0 tw-text-sm tw-font-medium ${getPlaceholderColor({ type, chatRestriction, submissionRestriction })}`}
         >
           {getMessage()}
-        </p>
+        </output>
       </div>
     </div>
   );

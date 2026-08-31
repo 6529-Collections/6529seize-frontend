@@ -328,7 +328,9 @@ const WaveDropQuoteContent: React.FC<WaveDropQuoteProps> = ({
     <div
       className={quoteContainerClassName}
       onClick={handleQuoteContainerClick}
-      {...quoteContainerAccessibility}
+      onKeyDown={quoteContainerAccessibility.onKeyDown}
+      role={quoteContainerAccessibility.role}
+      tabIndex={quoteContainerAccessibility.tabIndex}
     >
       <WaveDropQuoteBody
         drop={drop}

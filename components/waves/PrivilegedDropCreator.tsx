@@ -59,11 +59,11 @@ function getProfileModerationPlaceholder({
   isLoading,
   isSuspended,
 }: {
-  readonly profileId: string | undefined;
+  readonly profileId: string | null | undefined;
   readonly isLoading: boolean;
   readonly isSuspended: boolean;
 }) {
-  if (profileId !== undefined && isLoading) {
+  if (profileId !== undefined && profileId !== null && isLoading) {
     return <DropPlaceholder type="profile-check" />;
   }
   if (isSuspended) {
