@@ -815,6 +815,16 @@ export const ES_ES_MESSAGES = {
   ...ES_ES_DROP_REACTION_MESSAGES,
   "waves.mobile.profileFeed.title": "Feed de Profile Waves",
   "waves.mobile.profileFeed.subtitle": "Drops destacados de profile waves",
+  "waves.profileFeed.title": "Últimas publicaciones de perfil",
+  "waves.profileFeed.description":
+    "Las más recientes primero, desde las Profile Waves de los miembros.",
+  "waves.profileFeed.errorTitle":
+    "No se pudieron cargar las publicaciones de perfil",
+  "waves.profileFeed.errorDescription":
+    "Actualiza esta vista para volver a intentarlo.",
+  "waves.profileFeed.emptyTitle": "Aún no hay publicaciones de perfil",
+  "waves.profileFeed.emptyDescription":
+    "Las nuevas publicaciones de las Profile Waves de los miembros aparecerán aquí.",
   "waves.leaderboard.listLabel": "Drops de la clasificación",
   "waves.leaderboard.loadingEarlier": "Cargando drops anteriores",
   "waves.leaderboard.previousLoadError":

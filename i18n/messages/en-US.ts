@@ -507,6 +507,16 @@ const WAVES_MOBILE_MESSAGES = objectMessages("waves.mobile", {
   "profileFeed.subtitle": "Featured drops from profile waves",
 } as const);
 
+const PROFILE_WAVE_FEED_MESSAGES = objectMessages("waves.profileFeed", {
+  title: "Latest profile posts",
+  description: "Newest first, from members’ Profile Waves.",
+  errorTitle: "Couldn’t load profile posts",
+  errorDescription: "Refresh this view to try again.",
+  emptyTitle: "No profile posts yet",
+  emptyDescription:
+    "New posts from members’ Profile Waves will appear here.",
+} as const);
+
 const WAVE_LEADERBOARD_MESSAGES = objectMessages("waves.leaderboard", {
   listLabel: "Leaderboard drops",
   loadingEarlier: "Loading earlier drops",
@@ -3600,6 +3610,7 @@ export const EN_US_MESSAGES = {
   ...MEMES_WAVE_FOOTER_MESSAGES,
   ...DROP_REACTION_MESSAGES,
   ...WAVES_MOBILE_MESSAGES,
+  ...PROFILE_WAVE_FEED_MESSAGES,
   ...WAVE_LEADERBOARD_MESSAGES,
   ...WAVE_DROP_ACTIONS_MESSAGES,
   ...WAVE_PROPOSAL_CARD_MESSAGES,

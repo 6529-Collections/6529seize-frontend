@@ -2131,6 +2131,8 @@
         "Standard wave threads live at /waves/{waveId}; direct messages live at /messages/{waveId}.",
         "Public wave content can remain readable for authenticated wallets without a profile, but posting and other participation actions require profile setup.",
         "The Waves panel includes wave lists, pinned waves, highly rated waves, a Discover Waves link, and create controls.",
+        "On desktop with no selected Wave, /waves shows the latest posts from members' effective public Profile Wave curations, newest first.",
+        "Each latest-profile-post card identifies the author, posting time, and originating Profile Wave; curated replies can also appear. On small screens, the default /waves view remains a Wave navigator.",
         "In Worth Checking Out, each avatar and its overlaid score shield form one wave navigation link; hovering or focusing the combined link shows score details.",
         "Every Worth Checking Out recommendation also appears in All at its recent-activity position; Joined includes only waves the user has joined."
       ],

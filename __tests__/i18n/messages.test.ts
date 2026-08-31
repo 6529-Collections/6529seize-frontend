@@ -540,6 +540,37 @@ describe("frontend i18n helpers", () => {
     }
   });
 
+  it("translates the chronological Profile Wave feed framing", () => {
+    expect(t("en-US", "waves.profileFeed.title")).toBe(
+      "Latest profile posts"
+    );
+    expect(t("en-US", "waves.profileFeed.description")).toBe(
+      "Newest first, from members’ Profile Waves."
+    );
+    expect(t("en-US", "waves.profileFeed.errorTitle")).toBe(
+      "Couldn’t load profile posts"
+    );
+    expect(t("en-US", "waves.profileFeed.errorDescription")).toBe(
+      "Refresh this view to try again."
+    );
+    expect(t("en-US", "waves.profileFeed.emptyTitle")).toBe(
+      "No profile posts yet"
+    );
+    expect(t("en-US", "waves.profileFeed.emptyDescription")).toBe(
+      "New posts from members’ Profile Waves will appear here."
+    );
+
+    expect(t("fr-FR", "waves.profileFeed.title")).toBe(
+      "Dernières publications de profil"
+    );
+    expect(t("es-ES", "waves.profileFeed.title")).toBe(
+      "Últimas publicaciones de perfil"
+    );
+    expect(t("de-DE", "waves.profileFeed.title")).toBe(
+      "Neueste Profilbeiträge"
+    );
+  });
+
   it("keeps shared search control copy namespaced", () => {
     expect(EN_US_MESSAGES["headerSearch.clear"]).toBe("Clear search");
     expect(EN_US_MESSAGES["headerSearch.clearShort"]).toBe("Clear");
