@@ -4,7 +4,7 @@ import type { ApiIdentityAndSubscriptionActions } from "@/generated/models/ApiId
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "@/components/user/utils/UserCICAndLevel";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useCallback, useContext, useRef, useState } from "react";
 import { AuthContext } from "@/components/auth/Auth";
 import UserFollowBtn, {
   UserFollowBtnSize,
@@ -22,7 +22,7 @@ export default function Follower({
   readonly showFollowButton?: boolean | undefined;
   readonly mutedBackground?: boolean | undefined;
 }) {
-  const rowRef = useRef<HTMLLIElement>(null);
+  const observerRef = useRef<IntersectionObserver | null>(null);
   const [shouldLoadFollowButton, setShouldLoadFollowButton] = useState(false);
   const { connectedProfile } = useContext(AuthContext);
   const followerHandle = follower.identity.handle;
@@ -47,35 +47,41 @@ export default function Follower({
     handle: followerProfileName,
   });
 
-  useEffect(() => {
-    if (!shouldShowFollowButton || shouldLoadFollowButton) {
-      return;
-    }
+  const setRowRef = useCallback(
+    (row: HTMLLIElement | null) => {
+      observerRef.current?.disconnect();
+      observerRef.current = null;
 
-    const row = rowRef.current;
-    if (!row || typeof IntersectionObserver === "undefined") {
-      setShouldLoadFollowButton(true);
-      return;
-    }
+      if (!row || !shouldShowFollowButton) {
+        return;
+      }
 
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (!entry?.isIntersecting) {
-          return;
-        }
-
+      if (typeof IntersectionObserver === "undefined") {
         setShouldLoadFollowButton(true);
-        observer.disconnect();
-      },
-      { rootMargin: FOLLOW_STATUS_PREFETCH_MARGIN }
-    );
+        return;
+      }
 
-    observer.observe(row);
-    return () => observer.disconnect();
-  }, [shouldShowFollowButton, shouldLoadFollowButton]);
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          if (!entry?.isIntersecting) {
+            return;
+          }
+
+          setShouldLoadFollowButton(true);
+          observer.disconnect();
+          observerRef.current = null;
+        },
+        { rootMargin: FOLLOW_STATUS_PREFETCH_MARGIN }
+      );
+
+      observerRef.current = observer;
+      observer.observe(row);
+    },
+    [shouldShowFollowButton]
+  );
 
   return (
-    <li ref={rowRef} className={`${backgroundClass} tw-py-3`}>
+    <li ref={setRowRef} className={`${backgroundClass} tw-py-3`}>
       <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-3 tw-px-4 sm:tw-px-6">
         <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-x-3">
           <div className="tw-relative tw-h-10 tw-w-10 tw-flex-shrink-0 tw-rounded-lg tw-bg-iron-800">
@@ -102,7 +108,7 @@ export default function Follower({
           <div className="tw-flex tw-min-w-0 tw-flex-col">
             <div className="tw-flex tw-items-center tw-gap-x-1">
               <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-x-2">
-                <p className="tw-mb-0 tw-min-w-0 tw-text-md tw-font-semibold tw-leading-none tw-text-iron-50">
+                <p className="tw-m-0 tw-min-w-0 tw-text-md tw-font-semibold tw-leading-none tw-text-iron-50">
                   <Link
                     href={`/${followerProfileRoute}`}
                     aria-label={profileLabel}
