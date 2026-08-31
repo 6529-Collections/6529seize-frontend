@@ -137,6 +137,7 @@ const FILE_PATHS = Object.freeze([
   "scripts/typecheck-changed.cjs",
   "scripts/typecheck-test-baseline.json",
   "scripts/typecheck-test-ratchet.cjs",
+  "scripts/worktree/wt-add.sh",
   "tests/packs.manifest.cjs",
   "tests/museum/about-readonly.spec.ts",
   "tests/museum/institutional-practice-readonly.spec.ts",

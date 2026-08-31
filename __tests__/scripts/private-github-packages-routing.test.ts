@@ -928,6 +928,29 @@ describe("documented private-package setup flows", () => {
     expect(setupScript).not.toContain("gh auth token");
   });
 
+  it("requires runtime auth before worktree setup can mutate repository state", () => {
+    const worktreeScript = fs.readFileSync(
+      path.join(REPOSITORY_ROOT, "scripts", "worktree", "wt-add.sh"),
+      "utf8"
+    );
+    const authGuardIndex = worktreeScript.indexOf(
+      '[[ -z "${NODE_AUTH_TOKEN:-}" ]]'
+    );
+
+    expect(authGuardIndex).toBeGreaterThanOrEqual(0);
+    for (const mutation of [
+      'mkdir -p "$worktree_parent"',
+      'git -C "$MAIN_REPO" fetch origin',
+      'git -C "$MAIN_REPO" worktree add',
+      '"$SCRIPT_DIR/wt-sync.sh" "$WORKTREE_NAME"',
+      "./bin/6529 bootstrap",
+      "6529 install",
+    ]) {
+      expect(authGuardIndex).toBeLessThan(worktreeScript.indexOf(mutation));
+    }
+    expect(worktreeScript).not.toContain("gh auth token");
+  });
+
   it.each(["README.md", "CONTRIBUTING.md"])(
     "documents runtime auth before the first install in %s",
     (fileName) => {

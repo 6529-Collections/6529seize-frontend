@@ -27,6 +27,11 @@ if [ $# -lt 1 ]; then
   exit 1
 fi
 
+if [[ -z "${NODE_AUTH_TOKEN:-}" ]]; then
+  echo "NODE_AUTH_TOKEN with read-only GitHub Packages access is required before creating a worktree." >&2
+  exit 1
+fi
+
 ARG_COUNT=$#
 WORKTREE_NAME=$1
 WORKTREE_PATH="$PARENT_DIR/$WORKTREE_NAME"
