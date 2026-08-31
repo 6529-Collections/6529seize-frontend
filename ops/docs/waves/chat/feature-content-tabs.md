@@ -73,6 +73,9 @@ restores it whenever that wave is opened again and the tab is still available.
 - On mobile, the fixed `+` control stays outside the horizontally scrolling tab
   list so both `New curation` and `New subwave` remain reachable on narrow
   screens.
+- On narrow web layouts, an edge fade and chevron appear when additional tabs
+  are available off-screen. The cue follows the current scroll position and can
+  be tapped to move through the tab row.
 
 ## Edge Cases
 
@@ -86,6 +89,8 @@ restores it whenever that wave is opened again and the tab is still available.
   only.
 - Tabs expose selected-state semantics and link to the active content panel for
   assistive technologies.
+- Mobile tab-scroll controls have direction-specific accessible names, remain
+  keyboard operable, and avoid smooth motion when reduced motion is requested.
 - For memes waves, available tabs are evaluated to prefer `Leaderboard` first; if it
   is unavailable, `Chat` becomes the fallback tab.
 - Curation waves do not expose an `Outcome` tab; `Sales` fills that dedicated

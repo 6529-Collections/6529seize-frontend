@@ -1,9 +1,11 @@
 import WavePicture from "@/components/waves/WavePicture";
+import { AnnouncementWaveIcon } from "@/components/brain/left-sidebar/waves/SidebarIconTile";
 import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
 import { faBellSlash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 interface WaveAvatarProps {
+  readonly isAnnouncement?: boolean | undefined;
   readonly isActive: boolean;
   readonly isDropWave: boolean;
   readonly dropBadgePlacement?: "bottom-left" | "bottom-right" | undefined;
@@ -73,6 +75,7 @@ const getAvatarSizeClasses = ({
 
 export const WaveAvatar = ({
   dropBadgePlacement = "bottom-right",
+  isAnnouncement = false,
   isActive,
   isDropWave,
   showNewDropsBadge,
@@ -104,17 +107,25 @@ export const WaveAvatar = ({
 
   return (
     <div
-      className={`tw-relative ${avatarSizeClasses} tw-rounded-full tw-transition tw-duration-300 desktop-hover:group-hover:tw-brightness-110 ${
-        isActive
-          ? activeRingClasses
-          : "tw-opacity-80 tw-ring-1 tw-ring-white/20 desktop-hover:group-hover:tw-opacity-100"
+      className={`tw-relative ${avatarSizeClasses} ${
+        isAnnouncement ? "tw-rounded-lg" : "tw-rounded-full"
+      } tw-transition tw-duration-300 desktop-hover:group-hover:tw-brightness-110 ${
+        isAnnouncement
+          ? "tw-opacity-100"
+          : isActive
+            ? activeRingClasses
+            : "tw-opacity-80 tw-ring-1 tw-ring-white/20 desktop-hover:group-hover:tw-opacity-100"
       }`}
     >
-      <WavePicture
-        name={wave.name}
-        picture={wave.picture}
-        contributors={wave.contributors}
-      />
+      {isAnnouncement ? (
+        <AnnouncementWaveIcon />
+      ) : (
+        <WavePicture
+          name={wave.name}
+          picture={wave.picture}
+          contributors={wave.contributors}
+        />
+      )}
       {isDropWave && (
         <div className={dropBadgeClasses}>
           <DropIcon className={dropIconClasses} />

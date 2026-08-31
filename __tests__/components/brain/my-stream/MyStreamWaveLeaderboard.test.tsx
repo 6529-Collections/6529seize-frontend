@@ -474,6 +474,8 @@ describe("MyStreamWaveLeaderboard", () => {
     expect(getLeaderboardControlsFrame()).toHaveClass(
       "tw-max-w-full",
       "!tw-flex-[1_0_15rem]",
+      "!tw-pt-2",
+      "sm:!tw-pt-4",
       "lg:!tw-flex-[1_0_27rem]"
     );
     expect(galleryProps.isVotingClosed).toBe(false);
