@@ -167,64 +167,57 @@ export default function MobileRepTabContent({
         )}
 
       <div className="tw-mt-4">
-        <div className="tw-mb-4 sm:tw-grid sm:tw-grid-cols-[minmax(0,1fr)_auto] sm:tw-items-center sm:tw-gap-x-6">
-          <div className="tw-flex tw-min-h-9 tw-items-center tw-justify-between tw-gap-3 sm:tw-justify-start sm:tw-gap-6">
-            <div className="tw-whitespace-nowrap tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
-              Rep Categories
+        <div className="tw-mb-4">
+          <div className="tw-flex tw-min-h-9 tw-items-center tw-gap-3">
+            <div className="tw-flex-shrink-0">
+              <RepContributorControl
+                overview={overview}
+                repDirection={repDirection}
+                onOpenOverviewContributors={onOpenOverviewContributors}
+              />
             </div>
-            <RepContributorControl
-              overview={overview}
-              repDirection={repDirection}
-              onOpenOverviewContributors={onOpenOverviewContributors}
-            />
-          </div>
-          {canEditRep && repDirection === "received" && (
-            <div className="tw-mt-3 tw-w-full sm:tw-col-start-2 sm:tw-row-start-1 sm:tw-mt-0 sm:tw-w-auto">
-              <UserPageRateWrapper
-                profile={profile}
-                type={RateMatter.REP}
-                hideOwnProfileMessage
-              >
-                <div className="tw-flex tw-w-full tw-flex-col tw-items-stretch tw-gap-2 sm:tw-w-auto sm:tw-flex-row sm:tw-items-center sm:tw-gap-3">
-                  {overview !== null &&
-                  overview.authenticated_user_contribution !== null &&
-                  overview.authenticated_user_contribution !== 0 ? (
-                    <span className="tw-flex tw-items-center tw-gap-1.5 tw-text-xs tw-font-medium tw-text-iron-500">
-                      You Assigned:{" "}
-                      <span className="tw-font-semibold tw-text-iron-300">
-                        {overview.authenticated_user_contribution > 0 && "+"}
-                        {formatNumberWithCommas(
-                          overview.authenticated_user_contribution
-                        )}
+            {canEditRep && repDirection === "received" && (
+              <div className="tw-ml-auto tw-flex tw-min-w-0 tw-items-center">
+                <UserPageRateWrapper
+                  profile={profile}
+                  type={RateMatter.REP}
+                  hideOwnProfileMessage
+                >
+                  <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-start tw-gap-2 sm:tw-flex-nowrap sm:tw-justify-end sm:tw-gap-3">
+                    {overview !== null &&
+                    overview.authenticated_user_contribution !== null &&
+                    overview.authenticated_user_contribution !== 0 ? (
+                      <span className="tw-flex tw-items-center tw-gap-1.5 tw-text-xs tw-font-medium tw-text-iron-500">
+                        You Assigned:{" "}
+                        <span className="tw-font-semibold tw-text-iron-300">
+                          {overview.authenticated_user_contribution > 0 && "+"}
+                          {formatNumberWithCommas(
+                            overview.authenticated_user_contribution
+                          )}
+                        </span>
                       </span>
-                    </span>
-                  ) : null}
-                  <Button
-                    variant="action"
-                    size="sm"
-                    fullWidth
-                    onClick={onGrantRep}
-                    className="sm:tw-w-auto"
-                  >
-                    <svg
-                      className="-tw-ml-1 tw-h-4 tw-w-4 tw-flex-shrink-0 sm:tw-h-5 sm:tw-w-5"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      aria-hidden="true"
-                    >
-                      <path d="M12 5v14M5 12h14" />
-                    </svg>
-                    Grant Rep
-                  </Button>
-                </div>
-              </UserPageRateWrapper>
-            </div>
-          )}
-          <div className="tw-mt-3 tw-w-full sm:tw-col-start-1 sm:tw-row-start-2 sm:tw-w-fit">
+                    ) : null}
+                    <Button variant="action" size="sm" onClick={onGrantRep}>
+                      <svg
+                        className="-tw-ml-1 tw-h-4 tw-w-4 tw-flex-shrink-0 sm:tw-h-5 sm:tw-w-5"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden="true"
+                      >
+                        <path d="M12 5v14M5 12h14" />
+                      </svg>
+                      Grant Rep
+                    </Button>
+                  </div>
+                </UserPageRateWrapper>
+              </div>
+            )}
+          </div>
+          <div className="tw-mt-3 tw-w-full sm:tw-w-fit">
             <RepDirectionToggle
               repDirection={repDirection}
               onRepDirectionChange={onRepDirectionChange}
