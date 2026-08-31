@@ -1831,7 +1831,9 @@
       "keywords": ["levels", "level", "tdh", "rep", "network", "thresholds"],
       "facts": [
         "Network Levels are an integrated signal based on TDH and REP.",
-        "The levels page explains the current thresholds and how the displayed level is derived.",
+        "The levels page presents its explanation above a full-width table of all Level 0 through 100 thresholds.",
+        "When a signed-in active profile is available, the levels page shows its current Level, combined TDH and REP, next Level, and additional amount needed; an active proxy profile takes precedence.",
+        "Signed-out users and users whose profile data is unavailable see the general reference page without a personalized empty state or calculator.",
         "Levels are shown across profile and Network surfaces where relevant."
       ],
       "canonical_path": "/network/levels",
