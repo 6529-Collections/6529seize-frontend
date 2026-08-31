@@ -32,7 +32,7 @@ describe('validateTraitsData', () => {
     expect(result.errors.pointsPower).toBe('Value cannot be zero');
     expect(result.errors.title).toBe('Title is required');
     expect(result.errors.description).toBe('Description is required');
-    expect(result.firstInvalidField).toBe('artist');
+    expect(result.firstInvalidField).toBe('title');
   });
 
   it('skips validation in dirty mode when values unchanged', () => {
