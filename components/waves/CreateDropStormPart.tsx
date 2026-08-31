@@ -4,13 +4,15 @@ import type { CreateDropPart, ReferencedNft } from "@/entities/IDrop";
 import type { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
 import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
+import { buildTooltipId, TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import { useObjectUrls } from "@/hooks/useObjectUrl";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import type React from "react";
+import { useId } from "react";
+import { Tooltip } from "react-tooltip";
 import DropPartMarkdown from "../drops/view/part/DropPartMarkdown";
-import CustomTooltip from "../utils/tooltip/CustomTooltip";
 
 interface CreateDropStormPartProps {
   readonly partIndex: number;
@@ -23,13 +25,21 @@ interface CreateDropStormPartProps {
   readonly isEditing: boolean;
   readonly controlsDisabled: boolean;
   readonly canEdit: boolean;
+  readonly editDisabledDescriptionId?: string | undefined;
   readonly onEditPart: (partIndex: number) => void;
   readonly onMovePart: (partIndex: number, direction: -1 | 1) => void;
   readonly onRemovePart: (partIndex: number) => void;
 }
 
-const StormPartMedia: React.FC<{ readonly files: File[] }> = ({ files }) => {
+const getTooltipTargetProps = (show: boolean, id: string) =>
+  show ? { "data-tooltip-id": id } : {};
+
+const StormPartMedia: React.FC<{
+  readonly files: File[];
+  readonly showDesktopTooltips: boolean;
+}> = ({ files, showDesktopTooltips }) => {
   const mediaUrls = useObjectUrls(files);
+  const tooltipScopeId = useId();
 
   if (files.length === 0) {
     return null;
@@ -40,6 +50,11 @@ const StormPartMedia: React.FC<{ readonly files: File[] }> = ({ files }) => {
       {files.map((file, index) => {
         const mediaUrl = mediaUrls[index];
         const key = `${file.name}-${file.size}-${file.lastModified}-${index}`;
+        const filenameTooltipId = buildTooltipId(
+          "storm-part-file",
+          tooltipScopeId,
+          key
+        );
         return (
           <li
             key={key}
@@ -68,11 +83,26 @@ const StormPartMedia: React.FC<{ readonly files: File[] }> = ({ files }) => {
               </svg>
             )}
             <span
-              title={file.name}
+              {...getTooltipTargetProps(
+                showDesktopTooltips,
+                filenameTooltipId
+              )}
               className="tw-min-w-0 tw-truncate tw-px-3 tw-text-xs tw-font-medium tw-text-iron-300"
             >
               {file.name}
             </span>
+            {showDesktopTooltips && (
+              <Tooltip
+                id={filenameTooltipId}
+                place="top"
+                offset={8}
+                opacity={1}
+                positionStrategy="fixed"
+                style={TOOLTIP_STYLES}
+              >
+                <span className="tw-text-xs">{file.name}</span>
+              </Tooltip>
+            )}
           </li>
         );
       })}
@@ -91,28 +121,47 @@ const CreateDropStormPart: React.FC<CreateDropStormPartProps> = ({
   isEditing,
   controlsDisabled,
   canEdit,
+  editDisabledDescriptionId,
   onEditPart,
   onMovePart,
   onRemovePart,
 }) => {
   const locale = useBrowserLocale();
   const isMobileScreen = useIsMobileScreen();
+  const tooltipScopeId = useId();
   const partNumber = partIndex + 1;
   const editDisabled = controlsDisabled || !canEdit;
-  const editTitle = canEdit
-    ? t(locale, "waves.stormComposer.editPart", { number: partNumber })
-    : t(locale, "waves.stormComposer.finishCurrentPartBeforeEditing");
+  const editTitle = t(locale, "waves.stormComposer.editPart", {
+    number: partNumber,
+  });
+  const editDisabledDescription = t(
+    locale,
+    "waves.stormComposer.finishCurrentPartBeforeEditing"
+  );
   const iconButtonBaseClass =
     "tw-inline-flex tw-size-11 tw-flex-none tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-p-1.5 tw-text-iron-500 tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-35 sm:tw-size-7";
   const moveIconButtonClass = `${iconButtonBaseClass} desktop-hover:hover:tw-bg-white/[0.04] desktop-hover:hover:tw-text-iron-200`;
   const removeIconButtonClass = `${iconButtonBaseClass} disabled:tw-text-iron-600 desktop-hover:hover:tw-bg-error/[0.08] desktop-hover:hover:tw-text-error sm:tw-ml-1`;
+  const editTooltipId = buildTooltipId("storm-part-edit", tooltipScopeId);
+  const moveEarlierTooltipId = buildTooltipId(
+    "storm-part-move-earlier",
+    tooltipScopeId
+  );
+  const moveLaterTooltipId = buildTooltipId(
+    "storm-part-move-later",
+    tooltipScopeId
+  );
+  const removeTooltipId = buildTooltipId("storm-part-remove", tooltipScopeId);
+  const moveEarlierLabel = t(locale, "waves.stormComposer.moveEarlier");
+  const moveLaterLabel = t(locale, "waves.stormComposer.moveLater");
+  const removeLabel = t(locale, "waves.stormComposer.remove");
 
   return (
     <article
-      className={`tw-group tw-relative tw-overflow-hidden tw-rounded-none tw-border-0 tw-bg-transparent tw-p-2.5 tw-transition-colors sm:tw-p-4 ${
+      className={`tw-group tw-relative tw-overflow-hidden tw-rounded-lg tw-border-0 tw-bg-iron-800/50 tw-p-2.5 tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-transition-colors sm:tw-p-4 ${
         isEditing
-          ? "tw-bg-primary-500/[0.025] tw-shadow-[inset_2px_0_0_rgba(82,139,255,0.55)]"
-          : "desktop-hover:hover:tw-bg-white/[0.018]"
+          ? "tw-bg-primary-500/[0.055] tw-shadow-[inset_2px_0_0_rgba(82,139,255,0.65)] tw-ring-primary-400/15"
+          : "desktop-hover:hover:tw-bg-iron-800/70 desktop-hover:hover:tw-ring-iron-700"
       }`}
       aria-label={t(locale, "waves.stormComposer.part", {
         number: partNumber,
@@ -120,7 +169,7 @@ const CreateDropStormPart: React.FC<CreateDropStormPartProps> = ({
     >
       <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-1.5 sm:tw-grid sm:tw-grid-cols-[minmax(0,1fr)_auto] sm:tw-items-start sm:tw-gap-4">
         <div className="tw-flex tw-w-full tw-min-w-0 tw-gap-2.5 sm:tw-gap-3">
-          <span className="tw-mt-0.5 tw-inline-flex tw-size-5 tw-flex-none tw-items-center tw-justify-center tw-rounded-md tw-bg-white/[0.065] tw-text-[10px] tw-font-medium tw-tabular-nums tw-text-iron-200 sm:tw-bg-white/[0.045] sm:tw-text-iron-300">
+          <span className="tw-mt-0.5 tw-inline-flex tw-size-5 tw-flex-none tw-items-center tw-justify-center tw-rounded-md tw-bg-iron-800 tw-text-[10px] tw-font-medium tw-tabular-nums tw-text-iron-400">
             {partNumber}
           </span>
           <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col sm:tw-gap-2">
@@ -129,7 +178,7 @@ const CreateDropStormPart: React.FC<CreateDropStormPartProps> = ({
                 {t(locale, "waves.stormComposer.editing")}
               </span>
             )}
-            <div className="tw-min-w-0 tw-overflow-hidden tw-text-sm tw-leading-5 tw-text-iron-100">
+            <div className="tw-min-w-0 tw-overflow-hidden tw-text-sm tw-leading-5 tw-text-iron-300">
               {(part.content?.trim().length ?? 0) > 0 ? (
                 <DropPartMarkdown
                   mentionedUsers={mentionedUsers}
@@ -144,118 +193,76 @@ const CreateDropStormPart: React.FC<CreateDropStormPartProps> = ({
                   {t(locale, "waves.stormComposer.mediaOnlyPart")}
                 </p>
               )}
-              <StormPartMedia files={part.media} />
+              <StormPartMedia
+                files={part.media}
+                showDesktopTooltips={!isMobileScreen}
+              />
             </div>
           </div>
         </div>
         <div className="tw-flex tw-min-h-11 tw-w-full tw-flex-none tw-items-center tw-justify-end tw-gap-1 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.045] tw-opacity-100 tw-transition-opacity focus-within:tw-opacity-100 group-hover:tw-opacity-100 sm:tw-min-h-0 sm:tw-w-auto sm:tw-justify-start sm:tw-border-0 sm:tw-opacity-[0.55]">
-          <CustomTooltip
-            content={editTitle}
-            disabled={isMobileScreen || canEdit}
+          <button
+            type="button"
+            onClick={() => {
+              if (!editDisabled) {
+                onEditPart(partIndex);
+              }
+            }}
+            aria-disabled={editDisabled}
+            aria-label={editTitle}
+            aria-describedby={
+              !canEdit ? editDisabledDescriptionId : undefined
+            }
+            {...getTooltipTargetProps(
+              !isMobileScreen && !canEdit,
+              editTooltipId
+            )}
+            className="tw-mr-auto tw-inline-flex tw-h-11 tw-flex-none tw-cursor-pointer tw-items-center tw-justify-center tw-gap-1.5 tw-rounded-md tw-border-0 tw-bg-transparent tw-px-3 tw-text-xs tw-font-medium tw-text-iron-400 tw-transition-colors aria-disabled:tw-cursor-not-allowed aria-disabled:tw-opacity-35 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-white/[0.04] sm:tw-mr-0 sm:tw-h-auto sm:tw-px-2.5 sm:tw-py-1.5"
           >
-            <button
-              type="button"
-              onClick={() => {
-                if (!editDisabled) {
-                  onEditPart(partIndex);
-                }
-              }}
-              aria-disabled={editDisabled}
-              aria-label={editTitle}
-              className="tw-mr-auto tw-inline-flex tw-h-11 tw-flex-none tw-cursor-pointer tw-items-center tw-justify-center tw-gap-1.5 tw-rounded-md tw-border-0 tw-bg-transparent tw-px-3 tw-text-xs tw-font-medium tw-text-iron-400 tw-transition-colors aria-disabled:tw-cursor-not-allowed aria-disabled:tw-opacity-35 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-white/[0.04] sm:tw-mr-0 sm:tw-h-auto sm:tw-px-2.5 sm:tw-py-1.5"
+            <svg
+              className="tw-size-4"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.75"
+              aria-hidden="true"
             >
-              <svg
-                className="tw-size-4"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.75"
-                aria-hidden="true"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931ZM19.5 7.125 16.875 4.5M18 14.25v4.125c0 .621-.504 1.125-1.125 1.125H5.625A1.125 1.125 0 0 1 4.5 18.375V7.125C4.5 6.504 5.004 6 5.625 6H9.75"
-                />
-              </svg>
-              <span>{t(locale, "waves.stormComposer.edit")}</span>
-            </button>
-          </CustomTooltip>
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931ZM19.5 7.125 16.875 4.5M18 14.25v4.125c0 .621-.504 1.125-1.125 1.125H5.625A1.125 1.125 0 0 1 4.5 18.375V7.125C4.5 6.504 5.004 6 5.625 6H9.75"
+              />
+            </svg>
+            <span>{t(locale, "waves.stormComposer.edit")}</span>
+          </button>
+          {!isMobileScreen && !canEdit && (
+            <Tooltip
+              id={editTooltipId}
+              place="top"
+              offset={8}
+              opacity={1}
+              positionStrategy="fixed"
+              style={TOOLTIP_STYLES}
+            >
+              <span className="tw-text-xs">{editDisabledDescription}</span>
+            </Tooltip>
+          )}
           <div className="tw-flex tw-items-center tw-border-x tw-border-y-0 tw-border-solid tw-border-white/[0.05] tw-px-1 sm:tw-mx-1">
-            <CustomTooltip
-              content={t(locale, "waves.stormComposer.moveEarlier")}
-              disabled={isMobileScreen}
-            >
-              <button
-                type="button"
-                onClick={() => onMovePart(partIndex, -1)}
-                disabled={controlsDisabled || partIndex === 0}
-                aria-label={t(locale, "waves.stormComposer.movePartEarlier", {
-                  number: partNumber,
-                })}
-                className={moveIconButtonClass}
-              >
-                <svg
-                  className="tw-size-[18px]"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.75"
-                  aria-hidden="true"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="m6 15 6-6 6 6"
-                  />
-                </svg>
-              </button>
-            </CustomTooltip>
-            <CustomTooltip
-              content={t(locale, "waves.stormComposer.moveLater")}
-              disabled={isMobileScreen}
-            >
-              <button
-                type="button"
-                onClick={() => onMovePart(partIndex, 1)}
-                disabled={controlsDisabled || partIndex === partsCount - 1}
-                aria-label={t(locale, "waves.stormComposer.movePartLater", {
-                  number: partNumber,
-                })}
-                className={moveIconButtonClass}
-              >
-                <svg
-                  className="tw-size-[18px]"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.75"
-                  aria-hidden="true"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="m18 9-6 6-6-6"
-                  />
-                </svg>
-              </button>
-            </CustomTooltip>
-          </div>
-          <CustomTooltip
-            content={t(locale, "waves.stormComposer.remove")}
-            disabled={isMobileScreen}
-          >
             <button
               type="button"
-              onClick={() => onRemovePart(partIndex)}
-              disabled={controlsDisabled}
-              aria-label={t(locale, "waves.stormComposer.removePart", {
+              onClick={() => onMovePart(partIndex, -1)}
+              disabled={controlsDisabled || partIndex === 0}
+              aria-label={t(locale, "waves.stormComposer.movePartEarlier", {
                 number: partNumber,
               })}
-              className={removeIconButtonClass}
+              {...getTooltipTargetProps(
+                !isMobileScreen,
+                moveEarlierTooltipId
+              )}
+              className={moveIconButtonClass}
             >
               <svg
-                className="tw-size-4"
+                className="tw-size-[18px]"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -265,11 +272,97 @@ const CreateDropStormPart: React.FC<CreateDropStormPartProps> = ({
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"
+                  d="m6 15 6-6 6 6"
                 />
               </svg>
             </button>
-          </CustomTooltip>
+            {!isMobileScreen && (
+              <Tooltip
+                id={moveEarlierTooltipId}
+                place="top"
+                offset={8}
+                opacity={1}
+                positionStrategy="fixed"
+                style={TOOLTIP_STYLES}
+              >
+                <span className="tw-text-xs">{moveEarlierLabel}</span>
+              </Tooltip>
+            )}
+            <button
+              type="button"
+              onClick={() => onMovePart(partIndex, 1)}
+              disabled={controlsDisabled || partIndex === partsCount - 1}
+              aria-label={t(locale, "waves.stormComposer.movePartLater", {
+                number: partNumber,
+              })}
+              {...getTooltipTargetProps(!isMobileScreen, moveLaterTooltipId)}
+              className={moveIconButtonClass}
+            >
+              <svg
+                className="tw-size-[18px]"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.75"
+                aria-hidden="true"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="m18 9-6 6-6-6"
+                />
+              </svg>
+            </button>
+            {!isMobileScreen && (
+              <Tooltip
+                id={moveLaterTooltipId}
+                place="top"
+                offset={8}
+                opacity={1}
+                positionStrategy="fixed"
+                style={TOOLTIP_STYLES}
+              >
+                <span className="tw-text-xs">{moveLaterLabel}</span>
+              </Tooltip>
+            )}
+          </div>
+          <button
+            type="button"
+            onClick={() => onRemovePart(partIndex)}
+            disabled={controlsDisabled}
+            aria-label={t(locale, "waves.stormComposer.removePart", {
+              number: partNumber,
+            })}
+            {...getTooltipTargetProps(!isMobileScreen, removeTooltipId)}
+            className={removeIconButtonClass}
+          >
+            <svg
+              className="tw-size-4"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.75"
+              aria-hidden="true"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"
+              />
+            </svg>
+          </button>
+          {!isMobileScreen && (
+            <Tooltip
+              id={removeTooltipId}
+              place="top"
+              offset={8}
+              opacity={1}
+              positionStrategy="fixed"
+              style={TOOLTIP_STYLES}
+            >
+              <span className="tw-text-xs">{removeLabel}</span>
+            </Tooltip>
+          )}
         </div>
       </div>
     </article>

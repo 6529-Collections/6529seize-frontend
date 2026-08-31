@@ -9,6 +9,45 @@ import stormComposerEsMessages from "@/i18n/messages/stormComposer.es-ES.json";
 import type { MessageKey } from "@/i18n/messages/en-US";
 
 export const ES_ES_MESSAGES = {
+  "user.brain.sidebar.createdHeading": "Waves creadas",
+  "user.brain.sidebar.createdMobileHeading": "Creadas",
+  "user.brain.sidebar.recentlyActiveHeading": "Actividad reciente en",
+  "user.brain.sidebar.lastPost": "Última publicación {time}",
+  "user.brain.sidebar.noPostsByProfile": "Este perfil no tiene publicaciones",
+  "user.brain.sidebar.totalWavePosts.one":
+    "{count} publicación total en la Wave",
+  "user.brain.sidebar.totalWavePosts.other":
+    "{count} publicaciones totales en la Wave",
+  "user.brain.sidebar.privateWave": "Wave privada",
+  "user.brain.sidebar.loadingWaveActivity":
+    "Cargando la actividad del perfil en Waves",
+  "user.brain.sidebar.loadingMoreWaveActivity":
+    "Cargando más actividad del perfil en Waves",
+  "user.brain.sidebar.desktopScrollRegionLabel": "Waves del Brain",
+  "user.brain.sidebar.mobileStripLabel": "Waves del Brain",
+  "user.brain.sidebar.createdEmpty": "No hay Waves creadas accesibles.",
+  "user.brain.sidebar.recentEmpty": "No hay publicaciones recientes en Waves.",
+  "user.brain.sidebar.createdLoadError":
+    "No se pudieron cargar las Waves creadas.",
+  "user.brain.sidebar.recentLoadError":
+    "No se pudo cargar la actividad reciente en Waves.",
+  "user.brain.sidebar.loadMoreError": "No se pudieron cargar más Waves.",
+  "user.brain.sidebar.retry": "Reintentar",
+  "user.brain.sidebar.retryLoadMore": "Reintentar cargar más",
+  "user.brain.sidebar.loadMore": "Cargar más",
+  "user.brain.sidebar.loadingMore": "Cargando…",
+  "user.brain.sidebar.allWavesLoaded": "Todas las Waves están cargadas.",
+  "user.brain.sidebar.more": "Más",
+  "user.brain.sidebar.showLess": "Mostrar menos",
+  "user.brain.sidebar.showMore": "Mostrar más",
+  "user.brain.sidebar.viewMoreCreatedWaves": "Ver más Waves creadas",
+  "user.brain.sidebar.createdModalTitle": "Waves creadas por {profile}",
+  "user.brain.sidebar.loadedCreatedCount.one": "Mostrando {count} Wave cargada",
+  "user.brain.sidebar.loadedCreatedCount.other":
+    "Mostrando {count} Waves cargadas",
+  "user.brain.sidebar.createdCount.one": "{count} Wave creada",
+  "user.brain.sidebar.createdCount.other": "{count} Waves creadas",
+  "user.brain.sidebar.closeCreatedWaves": "Cerrar las Waves creadas",
   "linkPreview.twitter.kind.article": "Artículo",
   "linkPreview.twitter.kind.post": "Publicación",
   "linkPreview.twitter.article.provider": "Artículo en X",
@@ -17,6 +56,8 @@ export const ES_ES_MESSAGES = {
   "waves.drop.actions.copyLink": "Copiar enlace",
   "waves.drop.actions.copied": "Copiado!",
   "waves.drop.actions.copyFailed": "No se pudo copiar",
+  "waves.drop.actions.menuLabel": "Acciones del drop",
+  "waves.drop.actions.reactionPickerLabel": "Añadir una reacción al drop",
   "media.video.captions": "Subtitulos",
   "media.video.download": "Descargar multimedia",
   "media.video.downloading": "Descargando multimedia",
@@ -408,6 +449,18 @@ export const ES_ES_MESSAGES = {
   ...ES_ES_NEW_VERSION_TOAST_MESSAGES,
   "waves.chat.fileUploadAreaAriaLabel":
     "Área de carga de archivos del chat de wave",
+  "waves.chat.guidelinesDialog.title": "Directrices de la wave",
+  "waves.chat.guidelinesDialog.description":
+    "Revisa las directrices de esta wave antes de enviar tu primer mensaje.",
+  "waves.chat.guidelinesDialog.guidelinesLabel": "Directrices",
+  "waves.chat.guidelinesDialog.actionHint":
+    "Aceptar envía tu mensaje. Rechazar lo conserva como borrador.",
+  "waves.chat.guidelinesDialog.agree": "Aceptar",
+  "waves.chat.guidelinesDialog.decline": "Rechazar",
+  "waves.chat.guidelinesDialog.loadErrorTitle":
+    "No se pudieron cargar las directrices de la wave.",
+  "waves.chat.guidelinesDialog.loadErrorDescription":
+    "Inténtalo de nuevo antes de enviar tu mensaje.",
   ...stormComposerEsMessages,
   "waves.loadingStatus": "Cargando waves",
   "waves.gifPicker.open": "Añadir GIF",
@@ -452,6 +505,120 @@ export const ES_ES_MESSAGES = {
     "Crea un grupo nuevo o elige uno existente.",
   "waves.create.groups.dialog.changeDescription":
     "Crea un grupo nuevo o elige otro grupo existente.",
+  "waves.create.groups.identities": "Identidades",
+  "waves.create.groups.hideCriteriaAndMembers": "Ocultar criterios y miembros",
+  "waves.create.groups.hideCriteriaAndMembersTooltip":
+    "Los criterios y la lista de miembros son visibles para los miembros de este grupo, pero están ocultos para los demás.",
+  "waves.create.groups.hideCriteriaAndMembersInfoLabel":
+    "Acerca de la visibilidad de los criterios y miembros",
+  "waves.create.groups.editAccess.title": "Editar acceso de {groupLabel}",
+  "waves.create.groups.editAccess.triggerLabel":
+    "Editar acceso de {groupLabel}",
+  "waves.create.groups.editAccess.chatLabel": "Chat",
+  "waves.create.groups.editAccess.description":
+    "Los criterios actuales aparecen precargados. Al guardar se crea un grupo nuevo y solo cambia el acceso de {groupLabel}.",
+  "waves.create.groups.editAccess.loading": "Cargando los criterios actuales…",
+  "waves.create.groups.editAccess.loadErrorTitle":
+    "No se pudieron cargar los criterios actuales.",
+  "waves.create.groups.editAccess.loadErrorDescription":
+    "No se ha cambiado nada. Intenta cargar el grupo de nuevo.",
+  "waves.create.groups.editAccess.retry": "Volver a intentar",
+  "waves.create.groups.editAccess.makePublic": "Hacer pública la wave",
+  "waves.create.groups.editAccess.makePublicDescription":
+    "Elimina la restricción de visibilidad para que todo el mundo pueda acceder a esta wave.",
+  "waves.create.groups.editAccess.useVisibility":
+    "Usar criterios de visibilidad",
+  "waves.create.groups.editAccess.useVisibilityDescription":
+    "Aplica al acceso de {groupLabel} los mismos criterios que a Visibilidad.",
+  "waves.create.groups.editAccess.useVisibilityPublicDescription":
+    "La visibilidad es pública. Haz público también el acceso de {groupLabel}.",
+  "waves.create.groups.editAccess.makePublicConfirmTitle":
+    "¿Hacer pública la wave?",
+  "waves.create.groups.editAccess.makePublicConfirmMessage":
+    "Todo el mundo podrá encontrar y ver esta wave. Solo cambiará el acceso de Visibilidad.",
+  "waves.create.groups.editAccess.useVisibilityConfirmTitle":
+    "¿Usar los criterios de visibilidad?",
+  "waves.create.groups.editAccess.useVisibilityConfirmMessage":
+    "El acceso de {groupLabel} usará el mismo grupo que Visibilidad. Solo cambiará este ajuste de acceso.",
+  "waves.create.groups.editAccess.useVisibilityPublicConfirmMessage":
+    "La visibilidad es pública, así que el acceso de {groupLabel} también será público. Solo cambiará este ajuste de acceso.",
+  "waves.create.groups.editAccess.confirmMakePublic": "Hacer pública",
+  "waves.create.groups.editAccess.confirmUseVisibility":
+    "Usar criterios de visibilidad",
+  "waves.create.groups.actions.editCriteria": "Editar criterios",
+  "waves.create.groups.inlineIdentities.modeLabel":
+    "Tratamiento de identidades",
+  "waves.create.groups.inlineIdentities.included.label": "Incluidas",
+  "waves.create.groups.inlineIdentities.included.searchLabel":
+    "Buscar una identidad para incluir",
+  "waves.create.groups.inlineIdentities.included.searchPlaceholder":
+    "Buscar identidades para incluir...",
+  "waves.create.groups.inlineIdentities.included.emptyHelper":
+    "No hay identidades incluidas explícitamente.",
+  "waves.create.groups.inlineIdentities.excluded.label": "Excluidas",
+  "waves.create.groups.inlineIdentities.excluded.searchLabel":
+    "Buscar una identidad para excluir",
+  "waves.create.groups.inlineIdentities.excluded.searchPlaceholder":
+    "Buscar identidades para excluir...",
+  "waves.create.groups.inlineIdentities.excluded.emptyHelper":
+    "No hay identidades excluidas explícitamente.",
+  "waves.create.groups.inlineIdentities.includeMe": "Incluirme",
+  "waves.create.groups.inlineIdentities.sources.emma.title": "EMMA",
+  "waves.create.groups.inlineIdentities.sources.emma.description":
+    "Añade todas las carteras de una de tus listas EMMA.",
+  "waves.create.groups.inlineIdentities.sources.emma.searchLabel":
+    "Buscar listas",
+  "waves.create.groups.inlineIdentities.sources.emma.searchLoading":
+    "Cargando listas...",
+  "waves.create.groups.inlineIdentities.sources.emma.searchEmpty":
+    "No se encontraron listas",
+  "waves.create.groups.inlineIdentities.sources.emma.empty":
+    "No se ha añadido ninguna lista.",
+  "waves.create.groups.inlineIdentities.sources.emma.loading":
+    "Añadiendo identidades de la lista...",
+  "waves.create.groups.inlineIdentities.sources.emma.load": "Cargar lista",
+  "waves.create.groups.inlineIdentities.sources.emma.error":
+    "No se pudo cargar esta lista. Inténtalo de nuevo.",
+  "waves.create.groups.inlineIdentities.sources.emma.authenticationRequired":
+    "Conecta tu billetera para cargar esta lista.",
+  "waves.create.groups.inlineIdentities.sources.emma.remove":
+    "Eliminar la lista EMMA",
+  "waves.create.groups.inlineIdentities.sources.csv.title": "Archivo CSV",
+  "waves.create.groups.inlineIdentities.sources.csv.description":
+    "Importa carteras de Ethereum desde un archivo CSV.",
+  "waves.create.groups.inlineIdentities.sources.csv.dropLabel":
+    "Suelta un archivo CSV aquí o elige un archivo",
+  "waves.create.groups.inlineIdentities.sources.csv.includeInputLabel":
+    "Elegir un archivo CSV de identidades para incluir",
+  "waves.create.groups.inlineIdentities.sources.csv.excludeInputLabel":
+    "Elegir un archivo CSV de identidades para excluir",
+  "waves.create.groups.inlineIdentities.sources.csv.invalidFile":
+    "Elige un archivo CSV.",
+  "waves.create.groups.inlineIdentities.sources.csv.readError":
+    "No se pudo leer el archivo. Prueba con otro archivo CSV.",
+  "waves.create.groups.inlineIdentities.sources.csv.noWallets":
+    "No se encontraron direcciones de cartera de Ethereum válidas.",
+  "waves.create.groups.inlineIdentities.sources.csv.empty":
+    "No se ha añadido ningún archivo CSV.",
+  "waves.create.groups.inlineIdentities.sources.csv.remove":
+    "Eliminar archivo CSV",
+  "waves.create.groups.inlineIdentities.sources.count.one":
+    "{count} identidad añadida",
+  "waves.create.groups.inlineIdentities.sources.count.other":
+    "{count} identidades añadidas",
+  "waves.create.groups.inlineIdentities.sources.total.included.one":
+    "{count} identidad única incluida",
+  "waves.create.groups.inlineIdentities.sources.total.included.other":
+    "{count} identidades únicas incluidas",
+  "waves.create.groups.inlineIdentities.sources.total.excluded.one":
+    "{count} identidad única excluida",
+  "waves.create.groups.inlineIdentities.sources.total.excluded.other":
+    "{count} identidades únicas excluidas",
+  "waves.create.groups.inlineIdentities.sources.includeLimit":
+    "Un grupo puede incluir como máximo {limit} identidades.",
+  "waves.create.groups.inlineIdentities.sources.excludeLimit":
+    "Un grupo puede excluir como máximo {limit} identidades.",
+  "waves.create.groups.inlineIdentities.sources.retry": "Intentar de nuevo",
   "waves.create.groups.members.currentCount.one": "{count} usuario",
   "waves.create.groups.members.currentCount.other": "{count} usuarios",
   "waves.create.groups.members.countLoading":
@@ -530,6 +697,13 @@ export const ES_ES_MESSAGES = {
   "waves.create.groups.members.criteria.excluded.other":
     "{count} usuarios excluidos explícitamente",
   "waves.create.groups.members.criteria.grant": "Subvención xTDH {grantId}",
+  "waves.create.groups.members.criteria.grant.collection":
+    "Subvención xTDH para {collectionName}",
+  "waves.create.groups.members.criteria.grant.selected":
+    "Subvención xTDH seleccionada",
+  "waves.create.groups.xtdhGrant.change": "Cambiar subvención",
+  "waves.create.groups.xtdhGrant.cancelChange": "Cancelar cambio",
+  "waves.create.groups.xtdhGrant.remove": "Eliminar subvención",
   "waves.create.groups.validation.checking": "Comprobando el acceso…",
   "waves.create.groups.validation.unavailableTitle":
     "No se pudo verificar el acceso.",
@@ -700,6 +874,42 @@ export const ES_ES_MESSAGES = {
   "waves.poll.actions.changeVote": "Cambiar voto",
   "waves.poll.status.voted": "Votado",
   "waves.poll.status.updated": "Actualizado",
+  "waves.composer.placeholder.createDrop": "Crear un drop",
+  "waves.composer.placeholder.writeChatMessage": "Escribe un mensaje de chat",
+  "waves.composer.placeholder.dropReply": "Responder con un drop",
+  "waves.composer.placeholder.postReply": "Publicar una respuesta",
+  "waves.composer.placeholder.quoteDrop": "Citar un drop",
+  "waves.composer.placeholder.postQuote": "Publicar una cita",
+  "waves.poll.composer.title": "Crear encuesta",
+  "waves.poll.composer.questionPlaceholder":
+    "Haz una pregunta para la encuesta",
+  "waves.poll.composer.questionRequired":
+    "Añade una pregunta para la encuesta.",
+  "waves.poll.composer.mode.groupLabel": "Tipo de respuesta de la encuesta",
+  "waves.poll.composer.mode.single": "Única",
+  "waves.poll.composer.mode.multiple": "Múltiple",
+  "waves.poll.composer.mode.singleDescription":
+    "Los votantes pueden seleccionar una opción.",
+  "waves.poll.composer.mode.multipleDescription":
+    "Los votantes pueden seleccionar más de una opción.",
+  "waves.poll.composer.optionLabel": "Opción de encuesta {number}",
+  "waves.poll.composer.optionPlaceholder": "Opción {number}",
+  "waves.poll.composer.removeOption": "Eliminar la opción {number}",
+  "waves.poll.composer.add": "Añadir encuesta",
+  "waves.poll.composer.addOption": "Añadir opción",
+  "waves.poll.composer.remove": "Eliminar encuesta",
+  "waves.poll.composer.closingTime": "Hora de cierre",
+  "waves.poll.composer.onlyDroppersCanRespond":
+    "Solo pueden responder quienes pueden participar en el chat",
+  "waves.poll.composer.anonymous": "Encuesta anónima",
+  "waves.poll.composer.validation.minimumOptions":
+    "Introduce al menos {count} opciones.",
+  "waves.poll.composer.validation.optionLength":
+    "Las opciones pueden tener hasta {max} caracteres.",
+  "waves.poll.composer.validation.uniqueOptions":
+    "Las opciones de la encuesta deben ser únicas.",
+  "waves.poll.composer.validation.futureClosingTime":
+    "Elige una hora de cierre futura.",
   "theMemes.documentTitle": "The Memes | Colecciones",
   "theMemes.description.collections": "Colecciones",
   "theMemes.detail.live.artwork.mintDateLabel": "Fecha de mint:",

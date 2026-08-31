@@ -18,7 +18,6 @@ export const useCreateDropFileHandlers = ({
   setFiles,
   setDrop,
   setShowOptionsState,
-  shouldAnimateOptionsRef,
   closeOnNextInputRef,
 }: {
   readonly drop: CreateDropConfig | null;
@@ -39,7 +38,6 @@ export const useCreateDropFileHandlers = ({
   readonly setShowOptionsState: Dispatch<
     SetStateAction<ScopedValueState<boolean> | null>
   >;
-  readonly shouldAnimateOptionsRef: MutableCurrentRef<boolean>;
   readonly closeOnNextInputRef: MutableCurrentRef<boolean>;
 }) => {
   const lastExternalAttachmentDropTokenRef = useRef<number | null>(null);
@@ -54,7 +52,6 @@ export const useCreateDropFileHandlers = ({
       setToast,
       setFiles,
       setShowOptionsState,
-      shouldAnimateOptionsRef,
       closeOnNextInputRef,
     });
   };

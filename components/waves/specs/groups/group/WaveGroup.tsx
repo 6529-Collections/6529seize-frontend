@@ -52,11 +52,7 @@ export default function WaveGroup({
         {scopeContent}
         {showEdit && (
           <div className="tw-flex tw-flex-shrink-0 tw-items-center">
-            <WaveGroupEditButtons
-              wave={wave}
-              type={type}
-              haveGroup={!!scope.group}
-            />
+            <WaveGroupEditButtons wave={wave} type={type} />
           </div>
         )}
       </div>

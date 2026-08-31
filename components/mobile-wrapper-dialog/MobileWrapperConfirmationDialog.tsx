@@ -13,6 +13,7 @@ interface MobileWrapperConfirmationDialogProps {
   readonly confirmText: string;
   readonly cancelText?: string | undefined;
   readonly isConfirming?: boolean | undefined;
+  readonly confirmDisabled?: boolean | undefined;
   readonly confirmVariant?: ButtonVariant | undefined;
 }
 
@@ -25,6 +26,7 @@ export default function MobileWrapperConfirmationDialog({
   confirmText,
   cancelText = "Cancel",
   isConfirming = false,
+  confirmDisabled = false,
   confirmVariant = "primary",
 }: MobileWrapperConfirmationDialogProps) {
   return (
@@ -54,6 +56,7 @@ export default function MobileWrapperConfirmationDialog({
           <Button
             variant={confirmVariant}
             size="md"
+            disabled={confirmDisabled || isConfirming}
             loading={isConfirming}
             onClick={onConfirm}
             fullWidth

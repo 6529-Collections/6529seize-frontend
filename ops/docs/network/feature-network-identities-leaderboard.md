@@ -4,8 +4,9 @@ Parent: [Network Index](README.md)
 
 ## Overview
 
-`/network` is the main Network identities leaderboard.
-It is a read-only ranking route with sorting, group scope filtering, pagination, and profile links.
+`/network` is the main Network identities leaderboard. It supports sorting,
+on-the-fly criteria-based group filtering, saved-group filtering, pagination,
+and profile links.
 
 ## Location in the Site
 
@@ -29,7 +30,11 @@ It is a read-only ranking route with sorting, group scope filtering, pagination,
 
 ## Controls and URL State
 
-- `Filter` opens the group filter panel.
+- `Filter` opens the same criteria builder used by Wave group assignment.
+  Criteria creation is open by default. `Choose group` provides the secondary
+  path for searching and applying an existing saved group.
+- Applying new criteria creates a saved group and immediately uses it as the
+  Network scope. Choosing `All Network members` clears the group scope.
 - `Sort` button is shown on small screens; desktop sorting is done by clicking table headers.
 - Clicking the same sort field toggles direction; switching to a different field starts at descending.
 - Changing sort or group scope resets `page` to `1`.
@@ -42,11 +47,14 @@ It is a read-only ranking route with sorting, group scope filtering, pagination,
 ## User Journey
 
 1. Open `/network`.
-2. (Optional) open `Filter` and pick a group scope.
-3. Sort by `Level`, `TDH`, `xTDH`, `REP`, or `NIC`.
-4. Move through pages with pagination when more than one page exists.
-5. Open a profile from a row/card.
-6. Open `Nerd view` when you need the alternate leaderboard.
+2. (Optional) open `Filter` and build a group with identities, Level, TDH,
+   NIC, REP, required NFTs, collection access, or an xTDH grant.
+3. Select `Create and use new group` to save and apply the criteria, or select
+   `Choose group` to apply an existing saved group.
+4. Sort by `Level`, `TDH`, `xTDH`, `REP`, or `NIC`.
+5. Move through pages with pagination when more than one page exists.
+6. Open a profile from a row/card.
+7. Open `Nerd view` when you need the alternate leaderboard.
 
 ## Data and Display Behavior
 
@@ -64,6 +72,10 @@ It is a read-only ranking route with sorting, group scope filtering, pagination,
 - Changing `group` in the URL after first mount does not reapply scope automatically.
 - If `page` is higher than the available page count, the UI rewrites it to the last page.
 - When total results are `0`, the UI resets to page `1`.
+- Reopening `Filter` while a group is active prefills that group's criteria,
+  included and excluded identities, and criteria/member privacy setting.
+  Applying edits creates and selects a new group; it does not mutate the
+  previously selected group.
 
 ## Loading, Empty, Error, Recovery
 
@@ -72,6 +84,11 @@ It is a read-only ranking route with sorting, group scope filtering, pagination,
 - If a fetch returns an empty result, the table/card container stays visible with no row items.
 - Pagination is hidden when only one page exists.
 - There is no route-level inline error banner or retry button on `/network`.
+- If the active group's criteria or identity lists cannot be loaded, the
+  filter sheet shows a recoverable unavailable state with `Try again` instead
+  of opening an empty draft.
+- If group creation fails, the filter sheet remains open and an error toast
+  explains that the group was not created.
 - Recovery path:
   - Refresh `/network`.
   - Clear or change `group`, `sort-by`, and `page`.
@@ -80,10 +97,10 @@ It is a read-only ranking route with sorting, group scope filtering, pagination,
 ## Constraints / Notes
 
 - The community leaderboard query size is fixed to `50` rows per page.
-- `/network` is read-only; no mutation actions are available on this route.
+- Browsing and choosing an existing group remains available without creating a
+  group. Creating a criteria-based filter requires wallet authentication.
 - Group-scope lifecycle across Network routes is documented here:
   [Network Group Scope Flow](flow-network-group-scope.md).
-- `Create A Group` in the filter panel requires a connected wallet with a profile handle.
 
 ## Related Pages
 

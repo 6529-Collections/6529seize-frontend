@@ -6,6 +6,7 @@ import {
   waitFor,
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { getAccount } from "@wagmi/core";
 import React from "react";
 import Auth, { AuthContext, useAuth } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
@@ -33,6 +34,11 @@ const TEST_SECOND_SESSION_VALUE = "session-access-token-2";
 const TEST_REJECTED_SESSION_VALUE = "rejected-session-value";
 const TEST_REPLACEMENT_SESSION_VALUE = "replacement-session-value";
 const ORIGINAL_USE_DEV_AUTH = publicEnv.USE_DEV_AUTH;
+let mockActiveChainId: number | undefined = 1;
+let mockWagmiIsConnected = true;
+const mockWagmiConfig = {
+  chains: [{ id: 1 }],
+};
 
 type ReactQueryWrapperContextValue = React.ContextType<
   typeof ReactQueryWrapperContext
@@ -141,6 +147,21 @@ jest.mock("@reown/appkit/react", () => ({
   useAppKit: jest.fn(() => ({
     open: jest.fn(),
   })),
+}));
+
+jest.mock("@wagmi/core", () => ({
+  getAccount: jest.fn(() => ({
+    chainId: mockActiveChainId,
+    isConnected: mockWagmiIsConnected,
+  })),
+}));
+
+jest.mock("wagmi", () => ({
+  useAccount: jest.fn(() => ({
+    chainId: mockActiveChainId,
+    isConnected: mockWagmiIsConnected,
+  })),
+  useConfig: jest.fn(() => mockWagmiConfig),
 }));
 
 const mockSignMessage = jest.fn();
@@ -328,6 +349,28 @@ function RequestAuthButton() {
   );
 }
 
+function RequestAuthResultButton() {
+  const { requestAuth } = useAuth();
+  const [result, setResult] = React.useState("pending");
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() =>
+          void requestAuth().then(({ success }) => {
+            setResult(String(success));
+          })
+        }
+        data-testid="request-auth-result"
+      >
+        request auth
+      </button>
+      <span data-testid="request-auth-success">{result}</span>
+    </>
+  );
+}
+
 function SessionUpgradeProbe() {
   const {
     ensureActiveSessionV2WebSession,
@@ -378,6 +421,8 @@ describe("Auth component", () => {
     walletAddress = "0x1";
     connectionState = "connected";
     canSignActiveWallet = true;
+    mockActiveChainId = 1;
+    mockWagmiIsConnected = true;
     mockIsSigningPending = false;
     connectedAccountsOverride = null;
     mockAuthSettings = {
@@ -598,6 +643,109 @@ describe("Auth component", () => {
       expect(mockValidateJwt).not.toHaveBeenCalled();
       expect(mockSignMessage).not.toHaveBeenCalled();
     });
+
+    it.each([
+      {
+        chainId: undefined,
+        chainState: "unknown",
+        canSign: false,
+        wagmiConnected: false,
+      },
+      {
+        chainId: 137,
+        chainState: "unsupported",
+        canSign: true,
+        wagmiConnected: true,
+      },
+    ])(
+      "allows an authorized session request when the active chain is $chainState",
+      async ({ chainId, canSign, wagmiConnected }) => {
+        const validAddress = "0x1111111111111111111111111111111111111111";
+        walletAddress = validAddress;
+        canSignActiveWallet = canSign;
+        mockActiveChainId = chainId;
+        mockWagmiIsConnected = wagmiConnected;
+        const authUtils = require("@/services/auth/auth.utils");
+        const sessionV2 = require("@/services/auth/session-v2.utils");
+        const mockValidateJwt =
+          require("@/services/auth/jwt-validation.utils").validateJwt;
+        authUtils.getAuthJwt.mockReturnValue("valid-jwt");
+
+        render(
+          <ReactQueryWrapperContext.Provider
+            value={{ invalidateAll: jest.fn() } as any}
+          >
+            <Auth>
+              <RequestAuthResultButton />
+            </Auth>
+          </ReactQueryWrapperContext.Provider>
+        );
+
+        await userEvent.click(screen.getByTestId("request-auth-result"));
+
+        await waitFor(() => {
+          expect(screen.getByTestId("request-auth-success")).toHaveTextContent(
+            "true"
+          );
+        });
+        expect(mockValidateJwt).toHaveBeenCalledWith(
+          expect.objectContaining({
+            jwt: "valid-jwt",
+            wallet: validAddress,
+          })
+        );
+        expect(sessionV2.getSessionNonce).not.toHaveBeenCalled();
+        expect(mockSignMessage).not.toHaveBeenCalled();
+        expect(sessionV2.loginWithSessionV2).not.toHaveBeenCalled();
+        expect(mockSeizeDisconnect).not.toHaveBeenCalled();
+        expect(mockSeizeDisconnectAndLogout).not.toHaveBeenCalled();
+      }
+    );
+
+    it.each([
+      { chainId: undefined, chainState: "unknown" },
+      { chainId: 137, chainState: "unsupported" },
+    ])(
+      "does not begin authorized-session reauthentication when the active chain is $chainState",
+      async ({ chainId }) => {
+        const validAddress = "0x1111111111111111111111111111111111111111";
+        walletAddress = validAddress;
+        mockActiveChainId = chainId;
+        mockWagmiIsConnected = chainId !== undefined;
+        const authUtils = require("@/services/auth/auth.utils");
+        const sessionV2 = require("@/services/auth/session-v2.utils");
+        const mockValidateJwt =
+          require("@/services/auth/jwt-validation.utils").validateJwt;
+        authUtils.getAuthJwt.mockReturnValue("expired-jwt");
+        mockValidateJwt.mockResolvedValue({
+          isValid: false,
+          wasCancelled: false,
+        });
+
+        render(
+          <ReactQueryWrapperContext.Provider
+            value={{ invalidateAll: jest.fn() } as any}
+          >
+            <Auth>
+              <RequestAuthResultButton />
+            </Auth>
+          </ReactQueryWrapperContext.Provider>
+        );
+
+        await userEvent.click(screen.getByTestId("request-auth-result"));
+
+        await waitFor(() => {
+          expect(screen.getByTestId("request-auth-success")).toHaveTextContent(
+            "false"
+          );
+        });
+        expect(mockValidateJwt).toHaveBeenCalled();
+        expect(authUtils.removeAuthJwt).not.toHaveBeenCalled();
+        expect(sessionV2.getSessionNonce).not.toHaveBeenCalled();
+        expect(mockSignMessage).not.toHaveBeenCalled();
+        expect(mockSeizeDisconnect).not.toHaveBeenCalled();
+      }
+    );
 
     it("force-validates an authorized session after the server rejects it", async () => {
       const validAddress = "0x1111111111111111111111111111111111111111";
@@ -2101,7 +2249,7 @@ describe("Auth component", () => {
   });
 
   describe("Modal Behavior", () => {
-    it("should show modal when sign modal state is true and connected", async () => {
+    const requireAuthenticationPrompt = () => {
       const mockValidateAuthImmediate =
         require("@/services/auth/immediate-validation.utils").validateAuthImmediate;
       mockValidateAuthImmediate.mockImplementation(async ({ callbacks }) => {
@@ -2112,16 +2260,25 @@ describe("Auth component", () => {
           shouldShowModal: true,
         };
       });
+      return mockValidateAuthImmediate;
+    };
 
-      render(
-        <ReactQueryWrapperContext.Provider
-          value={{ invalidateAll: jest.fn() } as any}
-        >
-          <Auth>
-            <div data-testid="auth-component">Auth Component</div>
-          </Auth>
-        </ReactQueryWrapperContext.Provider>
-      );
+    const getAuthModalHarnessElement = () => (
+      <ReactQueryWrapperContext.Provider
+        value={{ invalidateAll: jest.fn() } as any}
+      >
+        <Auth>
+          <div data-testid="auth-component">Auth Component</div>
+        </Auth>
+      </ReactQueryWrapperContext.Provider>
+    );
+    const renderAuthModalHarness = () => render(getAuthModalHarnessElement());
+
+    it("keeps supported-chain authentication behavior unchanged", async () => {
+      walletAddress = "0x1111111111111111111111111111111111111111";
+      connectedAccountsOverride = [];
+      requireAuthenticationPrompt();
+      renderAuthModalHarness();
 
       await waitFor(() => {
         expect(
@@ -2137,6 +2294,262 @@ describe("Auth component", () => {
       ).toBeInTheDocument();
       expect(screen.getByText("Cancel")).toBeInTheDocument();
       expect(screen.getByText("Sign")).toBeInTheDocument();
+
+      await userEvent.click(screen.getByText("Sign"));
+      await waitFor(() => {
+        expect(mockSignMessage).toHaveBeenCalledWith(
+          "sign this message exactly"
+        );
+      });
+    });
+
+    it.each([
+      { chainId: undefined, chainState: "unknown" },
+      { chainId: 137, chainState: "unsupported" },
+    ])(
+      "suppresses the authentication modal when the active chain is $chainState",
+      async ({ chainId }) => {
+        mockActiveChainId = chainId;
+        const mockValidateAuthImmediate = requireAuthenticationPrompt();
+        renderAuthModalHarness();
+
+        await waitFor(() => {
+          expect(mockValidateAuthImmediate).toHaveBeenCalled();
+        });
+        expect(
+          screen.queryByText("Sign Authentication Request")
+        ).not.toBeInTheDocument();
+        expect(mockSignMessage).not.toHaveBeenCalled();
+        expect(
+          require("@/services/auth/session-v2.utils").getSessionNonce
+        ).not.toHaveBeenCalled();
+      }
+    );
+
+    it("opens the pending authentication modal after switching to a supported chain", async () => {
+      mockActiveChainId = 137;
+      const mockValidateAuthImmediate = requireAuthenticationPrompt();
+      const view = renderAuthModalHarness();
+
+      await waitFor(() => {
+        expect(mockValidateAuthImmediate).toHaveBeenCalled();
+      });
+      expect(
+        screen.queryByText("Sign Authentication Request")
+      ).not.toBeInTheDocument();
+
+      mockActiveChainId = 1;
+      view.rerender(getAuthModalHarnessElement());
+
+      await waitFor(() => {
+        expect(
+          screen.getByText("Sign Authentication Request")
+        ).toBeInTheDocument();
+      });
+    });
+
+    it("hides the modal without disconnecting after switching away", async () => {
+      requireAuthenticationPrompt();
+      const view = renderAuthModalHarness();
+
+      await waitFor(() => {
+        expect(
+          screen.getByText("Sign Authentication Request")
+        ).toBeInTheDocument();
+      });
+
+      mockActiveChainId = 137;
+      view.rerender(getAuthModalHarnessElement());
+
+      await waitFor(() => {
+        expect(
+          screen.queryByText("Sign Authentication Request")
+        ).not.toBeInTheDocument();
+      });
+      expect(mockSeizeDisconnect).not.toHaveBeenCalled();
+      expect(mockSeizeDisconnectAndLogout).not.toHaveBeenCalled();
+    });
+
+    it("does not begin signing if the chain becomes unsupported during authentication", async () => {
+      const validAddress = "0x1111111111111111111111111111111111111111";
+      walletAddress = validAddress;
+      connectedAccountsOverride = [];
+      const sessionV2 = require("@/services/auth/session-v2.utils");
+      const nonce = createDeferredPromise<{
+        readonly signable_message: string;
+        readonly server_signature: string;
+      }>();
+      sessionV2.getSessionNonce.mockReturnValueOnce(nonce.promise);
+
+      let requestResult: Promise<{ success: boolean }> | undefined;
+      const Child = () => {
+        const { requestAuth } = React.useContext(AuthContext);
+        return (
+          <button
+            type="button"
+            onClick={() => {
+              requestResult = requestAuth();
+            }}
+          >
+            authenticate
+          </button>
+        );
+      };
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <Child />
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      fireEvent.click(screen.getByRole("button", { name: "authenticate" }));
+      await waitFor(() => {
+        expect(sessionV2.getSessionNonce).toHaveBeenCalledWith({
+          signerAddress: validAddress,
+        });
+      });
+
+      mockActiveChainId = 137;
+      nonce.resolve({
+        signable_message: "sign this message exactly",
+        server_signature: "server-signature",
+      });
+
+      await expect(requestResult).resolves.toEqual({ success: false });
+      expect(getAccount).toHaveBeenCalledWith(mockWagmiConfig);
+      expect(mockSignMessage).not.toHaveBeenCalled();
+      expect(sessionV2.loginWithSessionV2).not.toHaveBeenCalled();
+      expect(mockSeizeDisconnect).not.toHaveBeenCalled();
+    });
+
+    it("stops a profile switch with feedback if the chain becomes unsupported", async () => {
+      const validAddress = "0x1111111111111111111111111111111111111111";
+      walletAddress = validAddress;
+      const authUtils = require("@/services/auth/auth.utils");
+      const removal = createDeferredPromise<void>();
+      authUtils.removeAuthJwt.mockReturnValueOnce(removal.promise);
+      const { toast } = require("react-toastify");
+
+      const Child = () => {
+        const { setActiveProfileProxy } = React.useContext(AuthContext);
+        return (
+          <button
+            type="button"
+            onClick={() =>
+              void setActiveProfileProxy({
+                id: "proxy-1",
+                created_by: { id: "role-1" },
+              } as any)
+            }
+          >
+            switch profile
+          </button>
+        );
+      };
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <Child />
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      fireEvent.click(screen.getByRole("button", { name: "switch profile" }));
+      await waitFor(() => {
+        expect(authUtils.removeAuthJwt).toHaveBeenCalled();
+      });
+
+      mockActiveChainId = 137;
+      removal.resolve();
+
+      await waitFor(() => {
+        expect(toast).toHaveBeenCalled();
+      });
+      expect(
+        require("@/services/auth/session-v2.utils").getSessionNonce
+      ).not.toHaveBeenCalled();
+      expect(mockSignMessage).not.toHaveBeenCalled();
+      expect(mockSeizeDisconnect).not.toHaveBeenCalled();
+    });
+
+    it("does not start a signing session upgrade on an unsupported chain", async () => {
+      walletAddress = "0x1111111111111111111111111111111111111111";
+      mockActiveChainId = 137;
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <SessionUpgradeProbe />
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      fireEvent.click(screen.getByTestId("request-session-upgrade"));
+
+      await waitFor(() => {
+        expect(screen.getByTestId("session-upgrade-result")).toHaveTextContent(
+          "false"
+        );
+      });
+      expect(
+        screen.queryByText("Upgrade Authentication")
+      ).not.toBeInTheDocument();
+      expect(
+        require("@/services/auth/session-v2.utils").getSessionNonce
+      ).not.toHaveBeenCalled();
+      expect(mockSignMessage).not.toHaveBeenCalled();
+    });
+
+    it("does not continue a session upgrade if the chain becomes unsupported", async () => {
+      const validAddress = "0x1111111111111111111111111111111111111111";
+      walletAddress = validAddress;
+      const sessionV2 = require("@/services/auth/session-v2.utils");
+      const nonce = createDeferredPromise<{
+        readonly signable_message: string;
+        readonly server_signature: string;
+      }>();
+      sessionV2.getSessionNonce.mockReturnValueOnce(nonce.promise);
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <SessionUpgradeProbe />
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      fireEvent.click(screen.getByTestId("request-session-upgrade"));
+      await waitFor(() => {
+        expect(sessionV2.getSessionNonce).toHaveBeenCalledWith({
+          signerAddress: validAddress,
+        });
+      });
+
+      mockActiveChainId = 137;
+      nonce.resolve({
+        signable_message: "sign this message exactly",
+        server_signature: "server-signature",
+      });
+
+      await waitFor(() => {
+        expect(screen.getByTestId("session-upgrade-result")).toHaveTextContent(
+          "false"
+        );
+      });
+      expect(mockSignMessage).not.toHaveBeenCalled();
+      expect(sessionV2.loginWithSessionV2).not.toHaveBeenCalled();
+      expect(mockSeizeDisconnect).not.toHaveBeenCalled();
     });
 
     it("tracks a connected reauth prompt once for a visible auth incident", async () => {
@@ -2506,7 +2919,7 @@ describe("Auth component", () => {
       });
     });
 
-    it("should handle modal cancel button", async () => {
+    it("keeps supported-chain modal cancellation behavior unchanged", async () => {
       const mockValidateAuthImmediate =
         require("@/services/auth/immediate-validation.utils").validateAuthImmediate;
       const mockSeizeDisconnectAndLogout =
@@ -2802,6 +3215,8 @@ describe("Auth component", () => {
       walletAddress = null;
       connectionState = "disconnected";
       canSignActiveWallet = false;
+      mockActiveChainId = undefined;
+      mockWagmiIsConnected = false;
       const authUtils = require("@/services/auth/auth.utils");
       const sessionV2 = require("@/services/auth/session-v2.utils");
       const mockGetAuthJwt = authUtils.getAuthJwt as jest.MockedFunction<any>;

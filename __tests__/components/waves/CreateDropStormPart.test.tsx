@@ -48,30 +48,39 @@ describe("CreateDropStormPart", () => {
     expect(screen.getByTestId("markdown")).toBeInTheDocument();
   });
 
-  it("does not activate edit while the control is aria-disabled", async () => {
+  it("describes and does not activate edit while aria-disabled", async () => {
     const onEdit = jest.fn();
     render(
-      <CreateDropStormPart
-        partIndex={0}
-        partsCount={1}
-        part={part}
-        mentionedUsers={[]}
-        mentionedGroups={[]}
-        mentionedWaves={[]}
-        referencedNfts={[]}
-        isEditing={false}
-        controlsDisabled={false}
-        canEdit={false}
-        onEditPart={onEdit}
-        onMovePart={jest.fn()}
-        onRemovePart={jest.fn()}
-      />
+      <>
+        <p id="edit-blocked-hint">
+          Add or clear the current part before editing another part
+        </p>
+        <CreateDropStormPart
+          partIndex={0}
+          partsCount={1}
+          part={part}
+          mentionedUsers={[]}
+          mentionedGroups={[]}
+          mentionedWaves={[]}
+          referencedNfts={[]}
+          isEditing={false}
+          controlsDisabled={false}
+          canEdit={false}
+          editDisabledDescriptionId="edit-blocked-hint"
+          onEditPart={onEdit}
+          onMovePart={jest.fn()}
+          onRemovePart={jest.fn()}
+        />
+      </>
     );
 
     const editButton = screen.getByRole("button", {
-      name: "Add or clear the current part before editing another part",
+      name: "Edit part 1",
     });
     expect(editButton).toHaveAttribute("aria-disabled", "true");
+    expect(editButton).toHaveAccessibleDescription(
+      "Add or clear the current part before editing another part"
+    );
     await userEvent.click(editButton);
     expect(onEdit).not.toHaveBeenCalled();
   });

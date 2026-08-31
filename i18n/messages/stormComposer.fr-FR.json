@@ -1,5 +1,7 @@
 {
   "waves.stormComposer.draftTitle": "Brouillon de storm",
+  "waves.stormComposer.emptyDraft": "Les parties de votre storm apparaîtront ici.",
+  "waves.stormComposer.closeDraft": "Fermer",
   "waves.stormComposer.privateDraftHint": "Vous seul pouvez le voir avant sa publication.",
   "waves.stormComposer.partsCountOne": "{count} partie",
   "waves.stormComposer.partsCountOther": "{count} parties",

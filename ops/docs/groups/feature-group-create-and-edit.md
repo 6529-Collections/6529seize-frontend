@@ -41,6 +41,10 @@ then run `Test` or `Create`.
   - Legacy `XTDH` values still load and can be saved.
   - `NIC at least`, with optional identity and direction
   - `Rep at least`, with optional identity, direction, and category
+  - When a saved or draft group criterion refers to a REP or NIC identity by
+    wallet, criteria summaries and group detail cards show that profile's
+    handle when available. If the identity has no resolvable profile handle,
+    the wallet remains visible so the criterion is still identifiable.
 - NFT cards:
   - `Required NFTs`: creator chooses whether members must own any selected
     token or all selected tokens.
@@ -57,6 +61,11 @@ then run `Test` or `Create`.
   - `Include Identities`
   - `Exclude Identities`
   - Sources: identity search, EMMA list import, CSV upload
+  - The same three sources are available for included and excluded identities
+    in the inline group creator during Wave creation.
+  - Identity search shows exact, prefix, and substring profile-handle matches
+    in that order before ENS-only matches, and orders each match group by
+    profile level, highest first.
   - Combined wallets are deduplicated and normalized to lowercase.
 - `Include me` behavior:
   - Turning on adds the connected profile primary wallet (if present) to
@@ -108,6 +117,9 @@ then run `Test` or `Create`.
 - EMMA import requires auth; cancelled auth leaves EMMA wallets unset.
 - CSV import accepts valid `0x` wallet addresses, ignores invalid tokens, and
   deduplicates matches.
+- In the Wave inline creator, EMMA and CSV selections remain in the unsaved
+  draft when users move between criteria. Adding a wallet to the opposite
+  identity treatment removes it from the earlier treatment.
 
 ## Failure and Recovery
 

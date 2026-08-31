@@ -106,6 +106,7 @@ function UserPageHeaderAboutContent({
           onValueChange={setDraftValue}
           errorMsg={editorErrorMsg}
           onErrorMsgChange={setEditorErrorMsg}
+          autoFocus
         />
       )}
 

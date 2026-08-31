@@ -1,13 +1,13 @@
 "use client";
 
 import type { ApiCreateDropPollRequest } from "@/generated/models/ApiCreateDropPollRequest";
-import {
-  CalendarIcon,
-  PlusIcon,
-  TrashIcon,
-  XMarkIcon,
-} from "@heroicons/react/24/outline";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
+import { PlusIcon, TrashIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useId, useRef, useState } from "react";
+import CreateDropPollModeSelector from "./CreateDropPollModeSelector";
+import CreateDropPollSettings from "./CreateDropPollSettings";
 
 export interface CreateDropPollDraft {
   readonly options: readonly string[];
@@ -23,6 +23,7 @@ interface CreateDropPollProps {
   readonly validationError: string | null;
   readonly onChange: (draft: CreateDropPollDraft) => void;
   readonly onRemove: () => void;
+  readonly presentation?: "inline" | "sheet";
 }
 
 const MIN_POLL_OPTIONS = 2;
@@ -55,7 +56,8 @@ const getUniqueNormalizedOptions = (options: readonly string[]): Set<string> =>
   new Set(options.map((option) => option.trim().toLowerCase()));
 
 export const validateCreateDropPollDraft = (
-  draft: CreateDropPollDraft | null
+  draft: CreateDropPollDraft | null,
+  locale: SupportedLocale = DEFAULT_LOCALE
 ): {
   readonly request: ApiCreateDropPollRequest | null;
   readonly error: string | null;
@@ -71,21 +73,25 @@ export const validateCreateDropPollDraft = (
   if (options.length < MIN_POLL_OPTIONS) {
     return {
       request: null,
-      error: `Add at least ${MIN_POLL_OPTIONS} options.`,
+      error: t(locale, "waves.poll.composer.validation.minimumOptions", {
+        count: MIN_POLL_OPTIONS,
+      }),
     };
   }
 
   if (options.some((option) => option.length > MAX_POLL_OPTION_LENGTH)) {
     return {
       request: null,
-      error: `Options can be up to ${MAX_POLL_OPTION_LENGTH} characters.`,
+      error: t(locale, "waves.poll.composer.validation.optionLength", {
+        max: MAX_POLL_OPTION_LENGTH,
+      }),
     };
   }
 
   if (getUniqueNormalizedOptions(options).size !== options.length) {
     return {
       request: null,
-      error: "Poll options must be unique.",
+      error: t(locale, "waves.poll.composer.validation.uniqueOptions"),
     };
   }
 
@@ -93,7 +99,7 @@ export const validateCreateDropPollDraft = (
   if (!Number.isFinite(closingTime) || closingTime <= Date.now()) {
     return {
       request: null,
-      error: "Choose a future closing time.",
+      error: t(locale, "waves.poll.composer.validation.futureClosingTime"),
     };
   }
 
@@ -115,10 +121,15 @@ export default function CreateDropPoll({
   validationError,
   onChange,
   onRemove,
+  presentation = "inline",
 }: CreateDropPollProps) {
+  const locale = useBrowserLocale();
+  const isSheet = presentation === "sheet";
   const canAddOption = draft.options.length < MAX_POLL_OPTIONS;
   const canRemoveOption = draft.options.length > MIN_POLL_OPTIONS;
   const closingTimeInputId = useId();
+  const modeDescriptionId = useId();
+  const validationErrorId = useId();
   const anonymousInputId = useId();
   const responderScopeInputId = useId();
   const optionKeyBaseId = useId();
@@ -207,54 +218,65 @@ export default function CreateDropPoll({
   return (
     <div
       data-testid="create-drop-poll"
-      className="tw-mt-3 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900/80 tw-shadow-2xl tw-shadow-black/60 tw-backdrop-blur"
+      role="group"
+      aria-label={t(locale, "waves.poll.composer.title")}
+      aria-describedby={validationError ? validationErrorId : undefined}
+      className={
+        isSheet
+          ? "tw-flex-none tw-overflow-hidden tw-bg-iron-950"
+          : "-tw-mx-4 -tw-mb-2 tw-mt-3 tw-overflow-hidden tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-900"
+      }
     >
-      <div className="tw-grid tw-grid-cols-[minmax(0,1fr)_auto] tw-items-center tw-gap-x-3 tw-gap-y-2 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/10 tw-px-4 tw-pb-3 tw-pt-4 sm:tw-flex sm:tw-justify-between sm:tw-gap-3">
-        <div className="tw-contents sm:tw-flex sm:tw-min-w-0 sm:tw-items-center sm:tw-gap-3">
-          <h3 className="tw-col-start-1 tw-row-start-1 tw-mb-0 tw-text-[13.5px] tw-font-bold tw-tracking-wide tw-text-iron-50">
-            Create Poll
-          </h3>
-          <div className="tw-col-span-2 tw-col-start-1 tw-row-start-2 tw-flex tw-w-fit tw-flex-shrink-0 tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800/60 tw-p-0.5">
-            <button
-              type="button"
-              aria-pressed={!draft.multichoice}
-              disabled={disabled}
-              onClick={() => onChange({ ...draft, multichoice: false })}
-              className={`tw-rounded-md tw-border-0 tw-px-2.5 tw-py-1 tw-text-xs tw-font-semibold tw-transition-all tw-duration-200 disabled:tw-cursor-not-allowed ${
-                draft.multichoice
-                  ? "tw-bg-iron-800/60 tw-text-iron-400 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-200"
-                  : "tw-bg-iron-50 tw-text-iron-950 tw-shadow-sm"
-              }`}
-            >
-              Single
-            </button>
-            <button
-              type="button"
-              aria-pressed={draft.multichoice}
-              disabled={disabled}
-              onClick={() => onChange({ ...draft, multichoice: true })}
-              className={`tw-rounded-md tw-border-0 tw-px-2.5 tw-py-1 tw-text-xs tw-font-semibold tw-transition-all tw-duration-200 disabled:tw-cursor-not-allowed ${
-                draft.multichoice
-                  ? "tw-bg-iron-50 tw-text-iron-950 tw-shadow-sm"
-                  : "tw-bg-iron-800/60 tw-text-iron-400 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-200"
-              }`}
-            >
-              Multiple
-            </button>
-          </div>
+      {isSheet ? (
+        <div className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/10 tw-px-4 tw-pb-3 tw-pt-1">
+          <CreateDropPollModeSelector
+            draft={draft}
+            disabled={disabled}
+            descriptionId={modeDescriptionId}
+            locale={locale}
+            onChange={onChange}
+          />
         </div>
-        <button
-          type="button"
-          aria-label="Remove poll"
-          disabled={disabled}
-          onClick={onRemove}
-          className="tw-col-start-2 tw-row-start-1 tw-flex tw-size-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.035] tw-p-0 tw-text-iron-300 tw-transition-all disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-border-white/20 desktop-hover:hover:tw-bg-white/[0.06] desktop-hover:hover:tw-text-white"
-        >
-          <XMarkIcon className="tw-size-4" aria-hidden="true" />
-        </button>
-      </div>
+      ) : (
+        <div className="tw-grid tw-grid-cols-[minmax(0,1fr)_auto] tw-items-center tw-gap-x-3 tw-gap-y-2 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/10 tw-px-4 tw-py-3 sm:tw-flex sm:tw-items-center sm:tw-justify-between sm:tw-gap-3">
+          <div className="tw-contents sm:tw-flex sm:tw-min-w-0 sm:tw-items-center sm:tw-gap-3">
+            <h3 className="tw-col-start-1 tw-row-start-1 tw-m-0 tw-flex tw-h-8 tw-items-center tw-text-[13.5px] tw-font-bold tw-tracking-wide tw-text-iron-50">
+              {t(locale, "waves.poll.composer.title")}
+            </h3>
+            <div className="tw-col-span-2 tw-col-start-1 tw-row-start-2 sm:tw-flex sm:tw-items-center">
+              <CreateDropPollModeSelector
+                draft={draft}
+                disabled={disabled}
+                descriptionId={modeDescriptionId}
+                locale={locale}
+                onChange={onChange}
+              />
+            </div>
+          </div>
+          <button
+            type="button"
+            aria-label={t(locale, "waves.poll.composer.remove")}
+            disabled={disabled}
+            onClick={onRemove}
+            className="tw-col-start-2 tw-row-start-1 tw-flex tw-size-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-400 tw-transition-colors disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-bg-white/[0.04] desktop-hover:hover:tw-text-white"
+          >
+            <XMarkIcon className="tw-size-4" aria-hidden="true" />
+          </button>
+        </div>
+      )}
 
       <div className="tw-flex tw-flex-col tw-gap-3 tw-px-4 tw-py-3">
+        <p
+          id={modeDescriptionId}
+          className="tw-m-0 tw-text-xs tw-font-medium tw-leading-4 tw-text-iron-400"
+        >
+          {t(
+            locale,
+            draft.multichoice
+              ? "waves.poll.composer.mode.multipleDescription"
+              : "waves.poll.composer.mode.singleDescription"
+          )}
+        </p>
         <div className="tw-flex tw-flex-col tw-gap-2">
           {optionRows.map(({ index, key, option }) => {
             const hasOptionValue = option.trim().length > 0;
@@ -289,14 +311,22 @@ export default function CreateDropPoll({
                   value={option}
                   disabled={disabled}
                   maxLength={MAX_POLL_OPTION_LENGTH}
-                  aria-label={`Poll option ${index + 1}`}
+                  aria-label={t(locale, "waves.poll.composer.optionLabel", {
+                    number: index + 1,
+                  })}
                   onChange={(event) => updateOption(index, event.target.value)}
                   className="tw-min-w-0 tw-flex-1 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800/80 tw-px-3 tw-py-2.5 tw-text-[13px] tw-font-medium tw-text-iron-50 tw-outline-none tw-transition-all placeholder:tw-text-iron-500 hover:tw-border-iron-600 hover:tw-bg-iron-800 focus:tw-border-white/30 focus:tw-bg-iron-800 disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
-                  placeholder={`Option ${index + 1}`}
+                  placeholder={t(
+                    locale,
+                    "waves.poll.composer.optionPlaceholder",
+                    { number: index + 1 }
+                  )}
                 />
                 <button
                   type="button"
-                  aria-label={`Remove option ${index + 1}`}
+                  aria-label={t(locale, "waves.poll.composer.removeOption", {
+                    number: index + 1,
+                  })}
                   disabled={disabled || !canRemoveOption}
                   onClick={() => removeOption(index)}
                   className={`tw-flex tw-size-7 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-400 tw-transition-all disabled:tw-cursor-not-allowed desktop-hover:hover:tw-bg-white/[0.04] desktop-hover:hover:tw-text-rose-400 ${
@@ -321,97 +351,34 @@ export default function CreateDropPoll({
               <span className="tw-flex tw-size-4 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-dashed tw-border-iron-600">
                 <PlusIcon className="tw-size-2.5" aria-hidden="true" />
               </span>
-              <span className="tw-text-sm tw-font-medium">Add option</span>
+              <span className="tw-text-sm tw-font-medium">
+                {t(locale, "waves.poll.composer.addOption")}
+              </span>
             </button>
             {validationError && (
-              <p className="tw-mb-0 tw-min-w-0 tw-text-left tw-text-[11px] tw-font-medium tw-text-amber-200 sm:tw-truncate sm:tw-text-right">
+              <p
+                id={validationErrorId}
+                role="alert"
+                className="tw-mb-0 tw-min-w-0 tw-text-left tw-text-[11px] tw-font-medium tw-text-amber-200 sm:tw-truncate sm:tw-text-right"
+              >
                 {validationError}
               </p>
             )}
           </div>
         </div>
 
-        <div className="tw-flex tw-flex-col tw-gap-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-pt-3">
-          <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-1.5">
-            <label
-              htmlFor={closingTimeInputId}
-              className="tw-mb-0 tw-text-[11px] tw-font-medium tw-text-iron-400"
-            >
-              Closing time
-            </label>
-            <label
-              htmlFor={closingTimeInputId}
-              className="tw-group/closing-time tw-relative tw-mb-0 tw-flex tw-min-h-10 tw-w-full tw-cursor-pointer tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800/80 tw-px-3.5 tw-py-2 tw-transition-all focus-within:tw-border-white/30 focus-within:tw-bg-iron-800 hover:tw-border-iron-600 hover:tw-bg-iron-800"
-            >
-              <input
-                id={closingTimeInputId}
-                ref={closingTimeInputRef}
-                type="datetime-local"
-                min={minClosingTime}
-                value={draft.closingTime}
-                disabled={disabled}
-                onClick={openClosingTimePicker}
-                onChange={(event) =>
-                  onChange({ ...draft, closingTime: event.target.value })
-                }
-                className="tw-min-w-0 tw-flex-1 tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0 tw-pr-8 tw-text-[13.5px] tw-font-medium tw-text-iron-100 tw-outline-none tw-transition-all [color-scheme:dark] disabled:tw-cursor-not-allowed disabled:tw-opacity-60 [&::-webkit-calendar-picker-indicator]:tw-opacity-0"
-              />
-              <CalendarIcon
-                className="tw-pointer-events-none tw-absolute tw-right-3 tw-top-1/2 tw-size-4 -tw-translate-y-1/2 tw-text-iron-300 tw-transition-colors group-hover/closing-time:tw-text-iron-50"
-                aria-hidden="true"
-              />
-            </label>
-          </div>
-          <div className="tw-flex tw-w-full tw-flex-col tw-gap-2">
-            <label
-              htmlFor={responderScopeInputId}
-              className={`tw-mb-0 tw-flex tw-min-h-10 tw-w-full tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800/80 tw-px-3.5 tw-py-2 tw-transition-all ${
-                disabled
-                  ? "tw-cursor-not-allowed tw-opacity-60"
-                  : "tw-cursor-pointer hover:tw-border-iron-600 hover:tw-bg-iron-800"
-              }`}
-            >
-              <input
-                id={responderScopeInputId}
-                type="checkbox"
-                checked={draft.onlyDroppersCanRespond}
-                disabled={disabled}
-                onChange={(event) =>
-                  onChange({
-                    ...draft,
-                    onlyDroppersCanRespond: event.target.checked,
-                  })
-                }
-                className="tw-size-4 tw-flex-shrink-0 tw-cursor-pointer tw-rounded tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-900 tw-accent-white disabled:tw-cursor-not-allowed"
-              />
-              <span className="tw-text-[12.5px] tw-font-medium tw-leading-4 tw-text-iron-200">
-                Only people who can chat can respond
-              </span>
-            </label>
-            <label
-              htmlFor={anonymousInputId}
-              className={`tw-mb-0 tw-flex tw-min-h-10 tw-w-full tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800/80 tw-px-3.5 tw-py-2 tw-transition-all ${
-                disabled
-                  ? "tw-cursor-not-allowed tw-opacity-60"
-                  : "tw-cursor-pointer hover:tw-border-iron-600 hover:tw-bg-iron-800"
-              }`}
-            >
-              <input
-                id={anonymousInputId}
-                type="checkbox"
-                checked={draft.anonymous}
-                disabled={disabled}
-                onChange={(event) =>
-                  onChange({ ...draft, anonymous: event.target.checked })
-                }
-                className="tw-size-4 tw-flex-shrink-0 tw-cursor-pointer tw-rounded tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-900 tw-accent-white disabled:tw-cursor-not-allowed"
-              />
-              <span className="tw-text-[12.5px] tw-font-medium tw-leading-4 tw-text-iron-200">
-                Anonymous poll
-              </span>
-            </label>
-          </div>
-        </div>
+        <CreateDropPollSettings
+          draft={draft}
+          disabled={disabled}
+          locale={locale}
+          closingTimeInputId={closingTimeInputId}
+          minClosingTime={minClosingTime}
+          closingTimeInputRef={closingTimeInputRef}
+          responderScopeInputId={responderScopeInputId}
+          anonymousInputId={anonymousInputId}
+          onChange={onChange}
+          onOpenClosingTimePicker={openClosingTimePicker}
+        />
       </div>
     </div>
   );

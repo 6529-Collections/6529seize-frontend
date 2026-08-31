@@ -168,6 +168,7 @@ export default function GroupCreateWallets({
           selectedIdentities={sources.selectedIdentities}
           selectedWallets={selectedWallets}
           onRemove={onRemove}
+          sort="level"
         />
         <CreateGroupWalletsEmma
           setWallets={onEmmaWalletsChange}

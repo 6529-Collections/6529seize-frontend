@@ -147,7 +147,6 @@ describe("CreateDropContent utilities", () => {
         setToast,
         setFiles,
         setShowOptionsState,
-        shouldAnimateOptionsRef: { current: false },
         closeOnNextInputRef: { current: false },
       });
 
