@@ -46,6 +46,7 @@ type RoutingModule = {
   AUTHENTICATED_PNPM_ARGUMENTS: string[];
   ROUTED_NO_PROXY: string;
   TOKEN_FREE_REBUILD_ARGUMENTS: string[];
+  TOKEN_FREE_REBUILD_PACKAGES: string[];
   createRoutedEnvironment: (environment: Environment) => Environment;
   isLoopbackProxy: (proxyValue: unknown) => boolean;
   parseNoProxy: (value: string | undefined) => string[];
@@ -508,6 +509,21 @@ describe("host-specific Socket Firewall routing", () => {
       TEST_TOKEN
     );
     expect(JSON.stringify(consoleError.mock.calls)).not.toContain(TEST_TOKEN);
+  });
+
+  it("rebuilds exactly the workspace-approved packages without auth", () => {
+    const workspace = parseYaml(
+      fs.readFileSync(path.join(REPOSITORY_ROOT, "pnpm-workspace.yaml"), "utf8")
+    ) as { allowBuilds?: Record<string, boolean> };
+    const approvedPackages = Object.entries(workspace.allowBuilds ?? {})
+      .filter(([, allowed]) => allowed)
+      .map(([packageName]) => packageName);
+
+    expect(routing.TOKEN_FREE_REBUILD_PACKAGES).toEqual(approvedPackages);
+    expect(routing.TOKEN_FREE_REBUILD_ARGUMENTS).toEqual([
+      "rebuild",
+      ...approvedPackages,
+    ]);
   });
 
   it("does not run lifecycle scripts when the authenticated phase fails", () => {

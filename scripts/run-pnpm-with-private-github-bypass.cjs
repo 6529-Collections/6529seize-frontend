@@ -24,7 +24,23 @@ const REMOVED_ROUTED_CONFIG_NAMES = new Set([
   "npmglobalconfig",
 ]);
 const AUTHENTICATED_PNPM_ARGUMENTS = ["--ignore-scripts"];
-const TOKEN_FREE_REBUILD_ARGUMENTS = ["rebuild", "--pending"];
+const TOKEN_FREE_REBUILD_PACKAGES = [
+  "@nestjs/core",
+  "@openapitools/openapi-generator-cli",
+  "@parcel/watcher",
+  "@reown/appkit",
+  "@sentry/cli",
+  "bufferutil",
+  "esbuild",
+  "keccak",
+  "sharp",
+  "unrs-resolver",
+  "utf-8-validate",
+];
+const TOKEN_FREE_REBUILD_ARGUMENTS = [
+  "rebuild",
+  ...TOKEN_FREE_REBUILD_PACKAGES,
+];
 
 function parseNoProxy(value) {
   if (!value) {
@@ -211,6 +227,7 @@ module.exports = {
   ROUTED_NO_PROXY_ENTRIES,
   AUTHENTICATED_PNPM_ARGUMENTS,
   TOKEN_FREE_REBUILD_ARGUMENTS,
+  TOKEN_FREE_REBUILD_PACKAGES,
   createRoutedEnvironment,
   isLoopbackProxy,
   parseNoProxy,
