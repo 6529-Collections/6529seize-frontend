@@ -56,12 +56,6 @@ const SUBMISSION_MEDIA_TYPES: SubmissionMediaType[] = [
     label: "Interactive - GLB",
   },
   {
-    mimeType: "model/gltf+json",
-    format: "GLTF",
-    category: "interactive",
-    label: "Interactive - GLTF",
-  },
-  {
     mimeType: "text/html",
     format: "HTML",
     category: "interactive",
@@ -78,7 +72,7 @@ export const SUBMISSION_INTERACTIVE_MIME_TYPES = SUBMISSION_MEDIA_TYPES.filter(
 ).map((t) => t.mimeType);
 
 export const SUBMISSION_FILE_INPUT_ACCEPT =
-  "image/png,image/jpeg,image/jpg,image/gif,video/mp4,video/quicktime,.mov,model/gltf-binary,model/gltf+json,application/octet-stream,.glb,.gltf";
+  "image/png,image/jpeg,image/jpg,image/gif,video/mp4,video/quicktime,.mov,model/gltf-binary,.glb";
 
 export const SUBMISSION_UI_FORMAT_GROUPS: SubmissionUiFormatGroup[] = [
   { kind: "image", label: "PNG, JPG, GIF" },

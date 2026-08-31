@@ -10,10 +10,7 @@ import type {
   FileValidationResult,
   VideoCompatibilityResult,
 } from "../reducers/types";
-import {
-  SUBMISSION_IMAGE_MIME_TYPES,
-  SUBMISSION_INTERACTIVE_MIME_TYPES,
-} from "@/constants/submission-media.constants";
+import { SUBMISSION_IMAGE_MIME_TYPES } from "@/constants/submission-media.constants";
 
 /**
  * Comprehensive file validation with proper typing
@@ -30,13 +27,7 @@ export const validateFile = (file: File): FileValidationResult => {
 
   const isImageType = SUBMISSION_IMAGE_MIME_TYPES.includes(file.type);
   const isVideoType = file.type.startsWith("video/");
-  const isModelType =
-    SUBMISSION_INTERACTIVE_MIME_TYPES.includes(file.type) ||
-    (file.type === "application/octet-stream" &&
-      (file.name.toLowerCase().endsWith(".glb") ||
-        file.name.toLowerCase().endsWith(".gltf"))) ||
-    file.name.toLowerCase().endsWith(".glb") ||
-    file.name.toLowerCase().endsWith(".gltf");
+  const isModelType = file.name.toLowerCase().endsWith(".glb");
 
   if (!isImageType && !isVideoType && !isModelType) {
     return {
@@ -46,10 +37,10 @@ export const validateFile = (file: File): FileValidationResult => {
   }
 
   if (file.size > FILE_SIZE_LIMIT) {
-    const sizeMB = Math.round(FILE_SIZE_LIMIT / (1024 * 1024));
+    const sizeMiB = Math.round(FILE_SIZE_LIMIT / (1024 * 1024));
     return {
       valid: false,
-      error: `File size exceeds ${sizeMB}MB limit.`,
+      error: `File size exceeds ${sizeMiB} MiB limit.`,
     };
   }
 

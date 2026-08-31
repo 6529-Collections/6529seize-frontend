@@ -2192,6 +2192,9 @@
         "compact",
         "card",
         "preview",
+        "250 mib",
+        "glb",
+        "gltf",
         "approved",
         "winner",
         "museum",
@@ -2998,6 +3001,7 @@
         "Submission availability depends on login, proxy mode, participation eligibility, the submission window, and per-user submission limits.",
         "If the submit control is hidden or shows a restriction icon or label, select or focus the restriction control to read why submission is unavailable, then recover by logging in, disabling proxy mode, waiting for the submission window, or freeing submission capacity.",
         "On The Memes Main Stage, the desktop How to Submit control and native app lock both open Unlock submissions with the current 50,000 MemesNominee REP requirement, live progress, and a Get nominated action.",
+        "Main Stage file uploads accept PNG, JPG/JPEG, GIF, MP4/MOV, and binary GLB models up to 250 MiB; JSON .gltf files are not accepted, and the service verifies the stored file size when the submission is created.",
         "Use the wave composer and Memes-specific submission surfaces when participating in Memes waves."
       ],
       "canonical_path": "/waves",

@@ -5,7 +5,6 @@ import { multiPartUpload } from "@/components/waves/create-wave/services/multiPa
 import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropMedia } from "@/generated/models/ApiDropMedia";
-import { ApiDropType } from "@/generated/models/ApiDropType";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { useDropSignature } from "@/hooks/drops/useDropSignature";
 import { commonApiPost } from "@/services/api/common-api";
@@ -14,10 +13,8 @@ import { useCallback, useState } from "react";
 import type { OperationalData } from "../types/OperationalData";
 import type { TraitsData } from "../types/TraitsData";
 import type { SubmissionPhase } from "../ui/SubmissionProgress";
-import {
-  buildSubmissionMetadata,
-  getSubmissionMetadataLengthValidation,
-} from "../utils/submissionMetadata";
+import { getSubmissionMetadataLengthValidation } from "../utils/submissionMetadata";
+import { transformToApiRequest } from "../utils/artworkSubmissionRequest";
 
 /**
  * Interface for the artwork submission data
@@ -42,63 +39,6 @@ interface ArtworkSubmissionData {
   waveId: string;
   termsOfService: string | null;
 }
-
-/**
- * Function to transform form data into API request format
- */
-const transformToApiRequest = (data: {
-  waveId: string;
-  traits: TraitsData;
-  operationalData?: OperationalData | undefined;
-  isAdditionalActionPromised?: boolean | undefined;
-  mediaUrl: string;
-  mimeType: string;
-  signerAddress: string;
-  isSafeSignature: boolean;
-}): ApiCreateDropRequest => {
-  const {
-    waveId,
-    traits,
-    operationalData,
-    isAdditionalActionPromised = false,
-    mediaUrl,
-    mimeType,
-    signerAddress,
-    isSafeSignature,
-  } = data;
-
-  const metadata = buildSubmissionMetadata({
-    traits,
-    operationalData,
-  });
-
-  // Create the request object
-  const request: ApiCreateDropRequest = {
-    wave_id: waveId,
-    drop_type: ApiDropType.Participatory,
-    is_additional_action_promised: isAdditionalActionPromised,
-    title: traits.title,
-    parts: [
-      {
-        content: traits.description,
-        media: [
-          {
-            url: mediaUrl,
-            mime_type: mimeType,
-          },
-        ],
-      },
-    ],
-    referenced_nfts: [],
-    mentioned_users: [],
-    metadata,
-    signature: null,
-    is_safe_signature: isSafeSignature,
-    signer_address: signerAddress,
-  };
-
-  return request;
-};
 
 /**
  * Phase transition callback type
@@ -326,8 +266,7 @@ export function useArtworkSubmissionMutation() {
         traits: data.traits,
         operationalData: data.operationalData,
         isAdditionalActionPromised: data.isAdditionalActionPromised,
-        mediaUrl: media.url,
-        mimeType: media.mime_type,
+        media,
         signerAddress,
         isSafeSignature,
       });

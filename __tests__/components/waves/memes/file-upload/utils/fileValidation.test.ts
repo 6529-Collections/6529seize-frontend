@@ -49,6 +49,21 @@ describe('fileValidation', () => {
       expect(result.valid).toBe(true);
     });
 
+    it('should accept GLB and reject JSON GLTF', () => {
+      expect(
+        validateFile(
+          new File(['content'], 'scene.glb', {
+            type: 'application/octet-stream',
+          })
+        ).valid
+      ).toBe(true);
+      expect(
+        validateFile(
+          new File(['{}'], 'scene.gltf', { type: 'model/gltf+json' })
+        ).valid
+      ).toBe(false);
+    });
+
     it('should reject unsupported file type', () => {
       const file = new File(['content'], 'test.txt', { type: 'text/plain' });
       const result = validateFile(file);

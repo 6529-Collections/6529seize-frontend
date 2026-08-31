@@ -98,8 +98,10 @@ is blocked.
   `Submissions haven't started yet`, `Submission period has ended`, or
   `You have reached the maximum number of drops allowed`.
 - Memes submission cannot continue:
-  upload artwork, complete required fields, fix inline validation errors, then
-  submit again.
+  upload artwork in a supported format, keep uploaded files at or below
+  `250 MiB`, complete required fields, fix inline validation errors, then
+  submit again. Interactive model uploads must be binary `.glb` files; JSON
+  `.gltf` files are not accepted.
 
 ## Quick Vote Checks
 
