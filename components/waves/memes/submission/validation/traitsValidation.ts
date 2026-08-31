@@ -101,9 +101,29 @@ function validateRequiredFields(
 ): Record<string, string | null> {
   const errors: Record<string, string | null> = {};
 
+  // Title and description appear before trait fields in the form, so validate
+  // them first to preserve visual and keyboard order when focusing errors.
+  if (
+    (options.mode === "all" || options.touchedFields?.has("title")) &&
+    (!traits.title || traits.title.trim() === "")
+  ) {
+    errors["title"] = "Title is required";
+  }
+
+  if (
+    (options.mode === "all" || options.touchedFields?.has("description")) &&
+    (!traits.description || traits.description.trim() === "")
+  ) {
+    errors["description"] = "Description is required";
+  }
+
   // Check each field in the traits data
   for (const [field, fieldDef] of Object.entries(fieldDefinitions)) {
     const typedField = field as keyof TraitsData;
+
+    if (fieldDef.readOnly) {
+      continue;
+    }
 
     // Skip fields not included in the validation mode
     if (shouldSkipFieldValidation(typedField, options, traits)) {
@@ -130,26 +150,6 @@ function validateRequiredFields(
         const validationResult = validator(context);
         errors[field] = validationResult.errorMessage;
       }
-    }
-  }
-
-  // Special case for title and description which are critical fields,
-  // but still respect the validation mode
-  if (
-    options.mode === "all" ||
-    (options.touchedFields && options.touchedFields.has("title"))
-  ) {
-    if (!traits.title || traits.title.trim() === "") {
-      errors["title"] = "Title is required";
-    }
-  }
-
-  if (
-    options.mode === "all" ||
-    (options.touchedFields && options.touchedFields.has("description"))
-  ) {
-    if (!traits.description || traits.description.trim() === "") {
-      errors["description"] = "Description is required";
     }
   }
 
