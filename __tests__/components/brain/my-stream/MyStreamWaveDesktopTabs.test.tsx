@@ -413,9 +413,11 @@ describe("MyStreamWaveDesktopTabs", () => {
     });
     fireEvent(window, new Event("resize"));
 
-    expect(
-      screen.queryByRole("button", { name: "Scroll wave sections left" })
-    ).toBeNull();
+    const unavailableLeftControl = screen.getByRole("button", {
+      name: "Scroll wave sections left",
+    });
+    expect(unavailableLeftControl).toHaveClass("tw-invisible");
+    expect(unavailableLeftControl).toHaveAttribute("tabindex", "-1");
     const rightControl = screen.getByRole("button", {
       name: "Scroll wave sections right",
     });
@@ -442,9 +444,11 @@ describe("MyStreamWaveDesktopTabs", () => {
     expect(
       screen.getByRole("button", { name: "Scroll wave sections left" })
     ).toBeInTheDocument();
-    expect(
-      screen.queryByRole("button", { name: "Scroll wave sections right" })
-    ).toBeNull();
+    const unavailableRightControl = screen.getByRole("button", {
+      name: "Scroll wave sections right",
+    });
+    expect(unavailableRightControl).toHaveClass("tw-invisible");
+    expect(unavailableRightControl).toHaveAttribute("tabindex", "-1");
 
     setMobileScrollMetrics(scroller, {
       clientWidth: 520,
@@ -452,9 +456,12 @@ describe("MyStreamWaveDesktopTabs", () => {
       scrollWidth: 520,
     });
     fireEvent(window, new Event("resize"));
-    expect(
-      screen.queryByRole("button", { name: /scroll wave sections/i })
-    ).toBeNull();
+    for (const control of screen.getAllByRole("button", {
+      name: /scroll wave sections/i,
+    })) {
+      expect(control).toHaveClass("tw-invisible");
+      expect(control).toHaveAttribute("tabindex", "-1");
+    }
   });
 
   it("scrolls compact tabs and respects reduced motion", () => {

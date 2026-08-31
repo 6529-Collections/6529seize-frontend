@@ -91,7 +91,6 @@ function ScrollControl({
         ref={buttonRef}
         type="button"
         aria-label={label}
-        aria-hidden={!isAvailable}
         tabIndex={isAvailable ? 0 : -1}
         onClick={onClick}
         className={`tw-group tw-absolute tw-inset-y-0 tw-z-20 tw-flex tw-w-11 tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-300 tw-transition-opacity tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-2px] focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none ${styles.button} ${

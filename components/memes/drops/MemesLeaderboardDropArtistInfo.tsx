@@ -41,7 +41,7 @@ const MemesLeaderboardDropArtistInfo = ({
             className="tw-no-underline desktop-hover:hover:tw-underline"
           >
             <span className="tw-text-sm tw-font-bold tw-text-white">
-              {drop.author.handle}
+              {drop.author.primary_address}
             </span>
           </Link>
         )}
