@@ -137,9 +137,11 @@ For an intentional broader pnpm update, use:
 ```
 
 Dependabot intentionally ignores the exact private package because its npm
-update job has no package credential. Update that one dependency manually with
-the secure wrapper and a temporary read-only token; do not add a Dependabot
-secret or broaden the registry exception.
+update job has no package credential. `6529 update:all` cannot change this
+package: the bypass remains pinned to `0.0.1` before pnpm starts. A future
+upgrade requires a separate reviewed change that updates the policy constants,
+manifest, release-age exception, and lockfile tarball integrity together. Do
+not add a Dependabot secret or a generic authenticated update mode.
 
 After bootstrap, prefer the bare `6529` command for day-to-day work while you
 are inside this repository. Outside the repo, `6529` should remain unavailable.

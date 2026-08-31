@@ -18,8 +18,8 @@ updates:
     # runtime PRs and stop dependabot proposing the breaking 0.x jumps; the
     # upgrade needs a dedicated, hand-tested migration instead.
     ignore:
-      # This exact private dependency is intentionally updated only through
-      # `./bin/6529 update:all` with a runtime read-only NODE_AUTH_TOKEN.
+      # This exact private dependency requires a dedicated reviewed policy,
+      # manifest, and lockfile change; normal grouped updates cannot widen it.
       - dependency-name: "@6529-collections/release-request"
       - dependency-name: "lexical"
         update-types:
