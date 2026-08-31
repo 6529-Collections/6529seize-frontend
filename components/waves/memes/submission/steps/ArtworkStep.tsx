@@ -4,6 +4,8 @@ import PrimaryButton from "@/components/utils/button/PrimaryButton";
 import SecondaryButton from "@/components/utils/button/SecondaryButton";
 import MemesArtSubmissionFile from "@/components/waves/memes/MemesArtSubmissionFile";
 import MemesArtSubmissionTraits from "@/components/waves/memes/MemesArtSubmissionTraits";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import React, { useCallback, useMemo, useState } from "react";
 import type {
   InteractiveMediaMimeType,
@@ -100,14 +102,17 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
 }) => {
   // Set up validation with initial empty touched fields to prevent errors on load
   const validation = useTraitsValidation(traits, initialTraits ?? traits);
+  const locale = useBrowserLocale();
   const [mediaSubmitAttempted, setMediaSubmitAttempted] = useState(false);
   const isMediaValidationPending =
     mediaSource === "url" && externalValidationStatus === "pending";
+  const hasValidMedia =
+    mediaSource === "url" ? isExternalMediaValid : artworkUploaded;
   const missingMediaError =
-    mediaSubmitAttempted && !artworkUploaded && !isMediaValidationPending
+    mediaSubmitAttempted && !hasValidMedia && !isMediaValidationPending
       ? mediaSource === "upload"
-        ? "Select artwork or choose Interactive HTML."
-        : "Enter a valid hash or choose Upload File."
+        ? t(locale, "memes.submission.media.missingUpload")
+        : t(locale, "memes.submission.media.missingInteractive")
       : null;
 
   // Create callback handlers for title and description
@@ -164,9 +169,9 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
     const validationResult = validation.validateAll();
     setMediaSubmitAttempted(true);
 
-    if (!artworkUploaded || !validationResult.isValid) {
+    if (!hasValidMedia || !validationResult.isValid) {
       requestAnimationFrame(() => {
-        if (!artworkUploaded) {
+        if (!hasValidMedia) {
           focusMediaControl();
           return;
         }
@@ -177,7 +182,7 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
     }
 
     onSubmit();
-  }, [artworkUploaded, focusMediaControl, onSubmit, validation]);
+  }, [focusMediaControl, hasValidMedia, onSubmit, validation]);
 
   const isSubmitDisabled = useMemo(() => {
     if (isSubmitting) return true;

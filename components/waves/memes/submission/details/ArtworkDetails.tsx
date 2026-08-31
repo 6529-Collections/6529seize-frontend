@@ -1,9 +1,12 @@
 "use client";
 
-import React, { useRef, useCallback, useMemo } from "react";
+import { CheckCircleIcon } from "@heroicons/react/24/outline";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { formatInteger } from "@/i18n/format";
+import type { SupportedLocale } from "@/i18n/locales";
+import React, { useCallback, useMemo, useRef } from "react";
 import FormSection from "../ui/FormSection";
 import ValidationError from "../ui/ValidationError";
-import { CheckCircleIcon } from "@heroicons/react/24/outline";
 import {
   METADATA_VALUE_DESCRIPTION_MAX_LENGTH,
   METADATA_VALUE_TITLE_MAX_LENGTH,
@@ -64,10 +67,12 @@ const FieldCharacterCount = ({
   length,
   maxLength,
   dangerThreshold,
+  locale,
 }: {
   readonly length: number;
   readonly maxLength: number;
   readonly dangerThreshold: number;
+  readonly locale: SupportedLocale;
 }) => {
   const isAtLimit = length >= maxLength;
   const isDanger = length >= dangerThreshold;
@@ -90,7 +95,7 @@ const FieldCharacterCount = ({
     <span
       className={`tw-ml-auto tw-flex-shrink-0 tw-text-xs tw-font-medium ${colorClass}`}
     >
-      {length.toLocaleString()} / {maxLength.toLocaleString()}
+      {formatInteger(locale, length)} / {formatInteger(locale, maxLength)}
     </span>
   );
 };
@@ -141,6 +146,7 @@ const AdditionalActionPromiseCheckbox = ({
  * Extreme simplification using uncontrolled inputs with refs for maximum performance
  */
 const ArtworkDetails: React.FC<ArtworkDetailsProps> = (props) => {
+  const locale = useBrowserLocale();
   const {
     title,
     description,
@@ -323,6 +329,7 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = (props) => {
                 length={titleLength}
                 maxLength={METADATA_VALUE_TITLE_MAX_LENGTH}
                 dangerThreshold={TITLE_CHARACTER_DANGER_THRESHOLD}
+                locale={locale}
               />
             </div>
           </div>
@@ -395,6 +402,7 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = (props) => {
                 length={descriptionLength}
                 maxLength={METADATA_VALUE_DESCRIPTION_MAX_LENGTH}
                 dangerThreshold={DESCRIPTION_CHARACTER_DANGER_THRESHOLD}
+                locale={locale}
               />
             </div>
           </div>

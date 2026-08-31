@@ -5,6 +5,9 @@ import type { TraitsData } from "../types/TraitsData";
 import { validateTraitsData } from "./traitsValidation";
 import type { ValidationOptions, ValidationResult } from "./validationTypes";
 
+const FOCUSABLE_FIELD_SELECTOR =
+  'input, textarea, select, button, [tabindex]:not([tabindex="-1"])';
+
 /**
  * Custom hook for form validation
  *
@@ -75,7 +78,11 @@ export function useTraitsValidation(
       const fieldElement = document.getElementById(`field-${String(field)}`);
       if (!(fieldElement instanceof HTMLElement)) return;
 
-      fieldElement.focus();
+      const focusTarget = fieldElement.matches(FOCUSABLE_FIELD_SELECTOR)
+        ? fieldElement
+        : fieldElement.querySelector<HTMLElement>(FOCUSABLE_FIELD_SELECTOR);
+
+      focusTarget?.focus();
       fieldElement.scrollIntoView({
         behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
           ? "auto"
