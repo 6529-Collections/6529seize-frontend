@@ -11,6 +11,15 @@ import type { MessageKey } from "@/i18n/messages/en-US";
 const RETRY_LABEL = "Erneut versuchen";
 
 export const DE_DE_MESSAGES = {
+  "network.groupInspection.bulkRep":
+    "Allen Profilen, die den Kriterien entsprechen, REP geben",
+  "network.groupInspection.bulkNic":
+    "Allen Profilen, die den Kriterien entsprechen, NIC geben",
+  "network.groupInspection.bulkActionsLabel": "Massenbewertungsaktionen",
+  "network.groupInspection.bulkRepSuccess": "REP wurde verteilt.",
+  "network.groupInspection.bulkNicSuccess": "NIC wurde verteilt.",
+  "network.groupInspection.source":
+    "Quelle: Filter und optionale manuelle Liste",
   "user.brain.sidebar.createdHeading": "Erstellte Waves",
   "user.brain.sidebar.createdMobileHeading": "Erstellt",
   "user.brain.sidebar.recentlyActiveHeading": "Kürzlich aktiv in",

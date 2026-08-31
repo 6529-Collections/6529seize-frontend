@@ -1,7 +1,5 @@
-import { fireEvent, render, screen } from "@testing-library/react";
-import { AuthContext } from "@/components/auth/Auth";
+import { render, screen } from "@testing-library/react";
 import GroupCardContent from "@/components/groups/page/list/card/GroupCardContent";
-import { GroupCardState } from "@/components/groups/page/list/card/GroupCard";
 
 jest.mock("@/components/groups/page/list/card/GroupCardConfigs", () => () => (
   <div data-testid="configs" />
@@ -12,28 +10,8 @@ const group: any = {
   name: "Collectors",
 };
 
-function renderContent({
-  connected = false,
-  setState,
-}: {
-  readonly connected?: boolean;
-  readonly setState?: (state: GroupCardState) => void;
-} = {}) {
-  return render(
-    <AuthContext.Provider
-      value={
-        {
-          connectedProfile: connected ? { handle: "alice" } : null,
-        } as any
-      }
-    >
-      <GroupCardContent
-        group={group}
-        haveActiveGroupVoteAll={false}
-        setState={setState}
-      />
-    </AuthContext.Provider>
-  );
+function renderContent() {
+  return render(<GroupCardContent group={group} />);
 }
 
 describe("GroupCardContent", () => {
@@ -46,14 +24,10 @@ describe("GroupCardContent", () => {
     expect(screen.getByTestId("configs")).toBeInTheDocument();
   });
 
-  it("keeps vote-all controls independent from card navigation", () => {
-    const setState = jest.fn();
-    renderContent({ connected: true, setState });
+  it("does not render the bulk rating actions on group cards", () => {
+    renderContent();
 
-    fireEvent.click(screen.getByRole("button", { name: "Rep all" }));
-    fireEvent.click(screen.getByRole("button", { name: "NIC all" }));
-
-    expect(setState).toHaveBeenNthCalledWith(1, GroupCardState.REP);
-    expect(setState).toHaveBeenNthCalledWith(2, GroupCardState.NIC);
+    expect(screen.queryByText("Rep all")).not.toBeInTheDocument();
+    expect(screen.queryByText("NIC all")).not.toBeInTheDocument();
   });
 });

@@ -39,8 +39,8 @@ March 19, 2026.
   suspension; or review reported content: [Content Moderation](content-moderation.md)
 - Follow live NFT activity and socket behavior: [Realtime](realtime/README.md)
 - Check metrics, scores, and TDH/xTDH behavior: [Network](network/README.md)
-- Manage groups and scoped network views:
-  [Groups](groups/README.md),
+- Create groups inline and manage scoped network views:
+  [Wave Creation Groups Step](waves/create/feature-groups-step.md),
   [Network Group Scope Flow](network/flow-network-group-scope.md)
 - Run delegation actions and wallet checks: [Delegation](delegation/README.md)
 - Run EMMA plan operations: [EMMA](emma/README.md)
@@ -75,7 +75,6 @@ March 19, 2026.
   `/content-preferences`, and authorized `/content-moderation`
 - [Realtime](realtime/README.md): `/nft-activity`
 - [Network](network/README.md): `/network/*`, `/network/xtdh`, `/xtdh`
-- [Groups](groups/README.md): `/network/groups`
 - [Delegation](delegation/README.md): `/delegation` and `/delegation/{param+}`
 - [NextGen](nextgen/README.md): `/nextgen` and `/nextgen/{param*}`
 - [API Tool](api-tool/README.md): `/tools`, `/tools/api`, `/tools/block-finder`,
@@ -127,11 +126,11 @@ Route patterns use normalized placeholders: `{param}` for one segment,
 - Notifications, preferences, moderation, and realtime:
   `/notifications`, `/preferences`, `/content-preferences`,
   `/content-moderation`, `/nft-activity`
-- Network and groups:
+- Network:
   `/network`, `/network/activity`, `/network/definitions`,
-  `/network/groups`, `/network/health`, `/network/health/network-tdh`,
-  `/network/levels`, `/network/nerd/{param*}`, `/network/prenodes`,
-  `/network/tdh`, `/network/tdh/historic-boosts`, `/network/xtdh`, `/xtdh`
+  `/network/health`, `/network/health/network-tdh`, `/network/levels`,
+  `/network/nerd/{param*}`, `/network/prenodes`, `/network/tdh`,
+  `/network/tdh/historic-boosts`, `/network/xtdh`, `/xtdh`
 - Delegation:
   `/delegation` and `/delegation/{param+}`
 - NextGen:
@@ -204,7 +203,6 @@ Route patterns use normalized placeholders: `{param}` for one segment,
 - [Content Moderation](content-moderation.md)
 - [Realtime Connectivity](realtime/troubleshooting-realtime-connectivity.md)
 - [Network Routes and Health](network/troubleshooting-network-routes-and-health.md)
-- [Groups List and Create Actions](groups/troubleshooting-groups-list-and-create-actions.md)
 - [Delegation Routes and Actions](delegation/troubleshooting-delegation-routes-and-actions.md)
 - [EMMA Access and Plan Operations](emma/troubleshooting-emma-access-and-plan-operations.md)
 - [Media Routes and Minting](media/troubleshooting-media-routes-and-minting.md)

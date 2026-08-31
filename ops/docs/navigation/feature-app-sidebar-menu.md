@@ -75,7 +75,7 @@ standalone row after `About`.
 - Open `Join 6529`:
   `/join-6529`.
 - Open `About > Network & Reputation`:
-  `/network`, `/network/activity`, `/network/groups`, `/network/tdh`,
+  `/network`, `/network/activity`, `/network/tdh`,
   `/network/xtdh` (`xTDH Overview`), `/xtdh` (`xTDH Allocations Dashboard`),
   `/network/wave-score`, `/rep/categories`, `/network/health`,
   `/network/definitions`, `/network/levels`, `/network/health/network-tdh`,
