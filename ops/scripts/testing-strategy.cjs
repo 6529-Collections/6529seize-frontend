@@ -841,6 +841,7 @@ function lineNumbersForPattern(text, pattern) {
 }
 
 function findNpmAuthTokenLines(text) {
+  const runtimeTokenPlaceholder = "${NODE_AUTH_TOKEN}";
   const lineNumbers = [];
   text.split(/\r\n|\r|\n/).forEach((line, index) => {
     const trimmed = line.trimStart();
@@ -854,7 +855,10 @@ function findNpmAuthTokenLines(text) {
     if (!afterMarker.startsWith("=")) {
       return;
     }
-    const tokenValue = afterMarker.slice(1).trimStart();
+    const tokenValue = afterMarker.slice(1).trim();
+    if (tokenValue === runtimeTokenPlaceholder) {
+      return;
+    }
     if (tokenValue.length >= 8) {
       lineNumbers.push(index + 1);
     }

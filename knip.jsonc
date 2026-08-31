@@ -85,6 +85,11 @@
       // Exact policy-bundle helpers are a testable CLI API. Knip intentionally
       // excludes their focused Jest consumers from its usage graph.
       "scripts/pr-ci-policy-bundle.cjs": ["exports"],
+      // Private-package routing exposes pure policy and environment helpers to
+      // its focused Jest contract; Knip intentionally excludes test consumers.
+      "scripts/private-github-packages-policy.cjs": ["exports"],
+      "scripts/run-pnpm-with-private-github-bypass.cjs": ["exports"],
+      "scripts/run-secure-pnpm.cjs": ["exports"],
       // Pure Museum change-classifier helpers are exported for their focused
       // adversarial Jest contract; Knip intentionally excludes test consumers.
       "scripts/museum-e2e-change-set.cjs": ["exports"],
@@ -143,7 +148,9 @@
       "ts-jest",
       "ts-morph",
       "baseline-browser-mapping",
-      "react-doctor"
+      "react-doctor",
+      // Invoked as a repository CLI through `6529 exec`, not imported by app code.
+      "@6529-collections/release-request"
     ],
 
     // Disable Jest and Playwright plugins so test-only usages are reported

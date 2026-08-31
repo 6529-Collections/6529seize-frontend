@@ -958,6 +958,17 @@ describe("testing strategy CI security checks", () => {
     );
   });
 
+  it("allows the runtime NODE_AUTH_TOKEN npm placeholder", () => {
+    fs.writeFileSync(
+      path.join(tempDir, ".npmrc"),
+      "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}\n"
+    );
+
+    const result = scanFilesForSecrets([".npmrc"], tempDir);
+
+    expect(result).toMatchObject({ ok: true, findings: [] });
+  });
+
   it("reports raw JWT-shaped tokens in JSON payload files", () => {
     const fakeJwt = [
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9",

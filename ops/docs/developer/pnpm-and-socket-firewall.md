@@ -56,6 +56,32 @@ Then install dependencies:
 6529 install
 ```
 
+### Private GitHub Packages authentication
+
+The repository has one narrow private-package exception for
+`@6529-collections/release-request@0.0.1`. Supply `NODE_AUTH_TOKEN` at runtime
+with GitHub Packages `read:packages` access and no package write or delete
+access. Do not save the token in the repository, pnpm configuration, shell
+history, or command arguments. The repository can check that the token is
+present and used only for the approved host, but it cannot inspect the token's
+GitHub permissions.
+
+```bash
+NODE_AUTH_TOKEN="<read-only-token>" 6529 install
+```
+
+The existing `6529` commands remain the only supported entrypoint. The secure
+pnpm helper checks the committed `.npmrc`, package manifest, lockfile integrity,
+exact release-age exception, command arguments, and token presence before it
+starts pnpm. It fails closed if the private host, scope, package, version,
+tarball, integrity, or network routing is extended or changed.
+
+Socket Firewall Free cannot proxy this private registry correctly. For this one
+case, pnpm connects directly to `npm.pkg.github.com` with normal TLS certificate
+verification. The helper keeps Socket's loopback proxy for every other host,
+including `registry.npmjs.org`, and keeps Socket's CA as an additional trusted
+root for those proxied requests. There is no general skip-Socket option.
+
 To apply audit fixes, use the same secure wrapper path:
 
 ```bash
@@ -210,7 +236,9 @@ Socket Firewall Free is still wrapper mode. That means:
 - It only protects commands that are actually prefixed with `sfw`.
 - It blocks confirmed malware, but AI-flagged packages may only warn.
 - It does not provide true centralized enforcement by itself.
-- It does not support private/custom registries in Free mode.
+- It does not inspect private/custom registries in Free mode. This repository's
+  only exception is the fail-closed, direct-TLS rule for the exact
+  `@6529-collections/release-request@0.0.1` GitHub Package described above.
 - It cannot block already-cached artifacts when no network request is made.
 
 Because of those limits, the strongest enforcement in this repo comes from:

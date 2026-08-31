@@ -79,6 +79,7 @@ jobs:
     timeout-minutes: 25
     permissions:
       contents: read
+      packages: read
     outputs:
       frontend_commit: ${{ steps.frontend.outputs.frontend_commit }}
       publication_commit: ${{ steps.adapter.outputs.publication_commit }}
@@ -114,6 +115,8 @@ jobs:
       - name: Use cached pnpm store
         run: ./bin/6529 exec pnpm config set store-dir ~/.pnpm-store
       - name: Install frozen dependencies
+        env:
+          NODE_AUTH_TOKEN: ${{ github.token }}
         run: ./bin/6529 install:frozen
       - name: Validate exact source through the strict adapter
         id: adapter
@@ -177,6 +180,7 @@ jobs:
     timeout-minutes: 90
     permissions:
       contents: read
+      packages: read
     outputs:
       sweep_outcome: ${{ steps.sweep.outcome }}
     steps:
@@ -204,6 +208,8 @@ jobs:
       - name: Use cached pnpm store
         run: ./bin/6529 exec pnpm config set store-dir ~/.pnpm-store
       - name: Install frozen dependencies
+        env:
+          NODE_AUTH_TOKEN: ${{ github.token }}
         run: ./bin/6529 install:frozen
       - name: Run complete read-only production Museum sweep
         id: sweep
