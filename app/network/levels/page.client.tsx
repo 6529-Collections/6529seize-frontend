@@ -36,7 +36,7 @@ export default function LevelsClient() {
   const showYourLevel =
     isAuthenticated === true && !fetchingProfile && activeProfile !== null;
 
-  useSetTitle("Levels | Network");
+  useSetTitle(m(locale, "network.levels.metadata.title"));
 
   return (
     <main className={NETWORK_REFERENCE_PAGE_CLASSES}>

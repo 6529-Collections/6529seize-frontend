@@ -24,6 +24,7 @@
   "network.stats.charts.netAria": "Bar chart comparing daily net boosted, unboosted, and unweighted TDH changes.",
   "network.stats.charts.createdAria": "Bar chart comparing daily created boosted, unboosted, and unweighted TDH.",
   "network.stats.charts.destroyedAria": "Bar chart comparing daily destroyed boosted, unboosted, and unweighted TDH.",
+  "network.levels.metadata.title": "Levels | Network",
   "network.levels.hero.title": "Levels",
   "network.levels.intro": "Levels are our integrated metric of TDH and Rep.",
   "network.levels.trust": "TDH and rep are added together and the level is determined by the table below. It is our most integrated measure of trust in our ecosystem.",
