@@ -1,7 +1,7 @@
 "use client";
 
 import ContentModerationDropBody from "@/components/content-moderation/ContentModerationDropBody";
-import ContentModerationReportStatusButton from "@/components/content-moderation/ContentModerationReportStatusButton";
+import ContentModerationDropStatusControls from "@/components/content-moderation/ContentModerationDropStatusControls";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
@@ -729,7 +729,7 @@ const getContentBlock = ({
             isProfileView,
           })} ${isLocallyFailed ? "tw-opacity-75" : ""}`.trim()}
         >
-          <ContentModerationReportStatusButton />
+          <ContentModerationDropStatusControls />
           <ContentModerationDropBody>
             <WaveDropContent
               drop={drop}

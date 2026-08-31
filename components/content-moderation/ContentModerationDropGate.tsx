@@ -228,6 +228,71 @@ function BlockedProfileActivityPresentation({
   );
 }
 
+function useRevealedPersonalModeration({
+  hideAgain,
+  isRevealed,
+  locale,
+  optimisticHiddenState,
+  profileLabel,
+  unblock,
+  unblockPending,
+  unhide,
+  unhidePending,
+  visibilityKind,
+}: {
+  readonly hideAgain: () => void;
+  readonly isRevealed: boolean;
+  readonly locale: ReturnType<typeof useBrowserLocale>;
+  readonly optimisticHiddenState: boolean | undefined;
+  readonly profileLabel: string;
+  readonly unblock: () => void;
+  readonly unblockPending: boolean;
+  readonly unhide: () => void;
+  readonly unhidePending: boolean;
+  readonly visibilityKind: ReturnType<
+    typeof useContentModerationVisibility
+  >["visibility"]["kind"];
+}) {
+  return useMemo(() => {
+    if (!isRevealed) return null;
+
+    if (visibilityKind === "blocked") {
+      return {
+        hideAgain,
+        persist: unblock,
+        persistLabel: t(locale, "contentModeration.actions.unblock"),
+        persistTooltip: t(locale, "contentModeration.tooltips.unblock", {
+          profile: profileLabel,
+        }),
+        persistPending: unblockPending,
+      };
+    }
+
+    if (visibilityKind === "hidden" || optimisticHiddenState === true) {
+      return {
+        hideAgain,
+        persist: unhide,
+        persistLabel: t(locale, "contentModeration.actions.unhide"),
+        persistTooltip: t(locale, "contentModeration.tooltips.unhide"),
+        persistPending: unhidePending,
+      };
+    }
+
+    return null;
+  }, [
+    hideAgain,
+    isRevealed,
+    locale,
+    optimisticHiddenState,
+    profileLabel,
+    unblock,
+    unblockPending,
+    unhide,
+    unhidePending,
+    visibilityKind,
+  ]);
+}
+
 export default function ContentModerationDropGate({
   drop,
   children,
@@ -277,32 +342,6 @@ export default function ContentModerationDropGate({
   });
   const globalModerationStatus = getGlobalModerationStatus(effectiveVisibility);
   const openReportDetails = useCallback(() => setIsReportModalOpen(true), []);
-  const gateContext = useMemo(
-    () => ({
-      globalModerationStatus,
-      openReportDetails,
-      reportStatus,
-      setOptimisticHidden,
-    }),
-    [
-      globalModerationStatus,
-      openReportDetails,
-      reportStatus,
-      setOptimisticHidden,
-    ]
-  );
-  const withGateContext = (content: ReactNode) => (
-    <ContentModerationDropGateContext.Provider value={gateContext}>
-      {content}
-      {isReportModalOpen && (
-        <ReportDropModal
-          drop={drop}
-          isOpen
-          onClose={() => setIsReportModalOpen(false)}
-        />
-      )}
-    </ContentModerationDropGateContext.Provider>
-  );
   const unhideMutation = useMutation({
     mutationFn: async () => {
       const { success } = await requestAuth();
@@ -394,6 +433,49 @@ export default function ContentModerationDropGate({
       });
     },
   });
+  const profileLabel = drop.author.handle
+    ? `@${drop.author.handle}`
+    : "Blocked author";
+  const revealedPersonalModeration = useRevealedPersonalModeration({
+    hideAgain,
+    isRevealed,
+    locale,
+    optimisticHiddenState,
+    profileLabel,
+    unblock: unblockMutation.mutate,
+    unblockPending: unblockMutation.isPending,
+    unhide: unhideMutation.mutate,
+    unhidePending: unhideMutation.isPending,
+    visibilityKind: visibility.kind,
+  });
+  const gateContext = useMemo(
+    () => ({
+      globalModerationStatus,
+      openReportDetails,
+      reportStatus,
+      revealedPersonalModeration,
+      setOptimisticHidden,
+    }),
+    [
+      globalModerationStatus,
+      openReportDetails,
+      reportStatus,
+      revealedPersonalModeration,
+      setOptimisticHidden,
+    ]
+  );
+  const withGateContext = (content: ReactNode) => (
+    <ContentModerationDropGateContext.Provider value={gateContext}>
+      {content}
+      {isReportModalOpen && (
+        <ReportDropModal
+          drop={drop}
+          isOpen
+          onClose={() => setIsReportModalOpen(false)}
+        />
+      )}
+    </ContentModerationDropGateContext.Provider>
+  );
 
   if (visibility.kind === "blocked" && presentation === "profile-activity") {
     return withGateContext(
@@ -452,7 +534,6 @@ export default function ContentModerationDropGate({
 
   if (effectiveVisibility.kind === "blocked") {
     const handle = drop.author.handle;
-    const profileLabel = handle ? `@${handle}` : "Blocked author";
     return withGateContext(
       <PersonalModerationOverlay
         compact={compact}

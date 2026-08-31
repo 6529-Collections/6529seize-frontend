@@ -9,6 +9,13 @@ interface ContentModerationDropGateContextValue {
   readonly reportStatus: ApiContentModerationReportStatus | null;
   readonly globalModerationStatus: ApiDropModerationStatus | null;
   readonly openReportDetails: () => void;
+  readonly revealedPersonalModeration: {
+    readonly hideAgain: () => void;
+    readonly persist: () => void;
+    readonly persistLabel: string;
+    readonly persistTooltip: string;
+    readonly persistPending: boolean;
+  } | null;
 }
 
 export const ContentModerationDropGateContext =
