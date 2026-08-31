@@ -44,12 +44,15 @@ type PolicyModule = {
 };
 
 type RoutingModule = {
+  GLOBAL_CONFIG_ENVIRONMENT_VARIABLE: string;
   IGNORE_PNPMFILE_ENVIRONMENT_VARIABLE: string;
   IGNORE_SCRIPTS_ENVIRONMENT_VARIABLE: string;
+  NPM_GLOBAL_CONFIG_ENVIRONMENT_VARIABLE: string;
   ROUTED_NO_PROXY: string;
   TOKEN_FREE_REBUILD_ARGUMENTS: string[];
   TOKEN_FREE_REBUILD_PACKAGES: string[];
   TOKEN_FREE_ROOT_REBUILD_ARGUMENTS: string[];
+  USER_CONFIG_ENVIRONMENT_VARIABLE: string;
   createRoutedEnvironment: (environment: Environment) => Environment;
   isLoopbackProxy: (proxyValue: unknown) => boolean;
   parseNoProxy: (value: string | undefined) => string[];
@@ -219,6 +222,15 @@ describe("private GitHub Packages repository policy", () => {
     expect(() =>
       policy.validateAuthEnvironment({ NODE_AUTH_TOKEN: `${TEST_TOKEN}\n` })
     ).toThrow("NODE_AUTH_TOKEN has an invalid value");
+    expect(() =>
+      policy.validateAuthEnvironment({ node_auth_token: TEST_TOKEN })
+    ).not.toThrow();
+    expect(() =>
+      policy.validateAuthEnvironment({
+        NODE_AUTH_TOKEN: TEST_TOKEN,
+        node_auth_token: TEST_TOKEN,
+      })
+    ).toThrow("must use exactly one environment-variable spelling");
   });
 
   it("rejects a wrong registry host", () => {
@@ -582,6 +594,7 @@ describe("host-specific Socket Firewall routing", () => {
     const spawnCalls = spawn.mock.calls as unknown as Array<
       [string, string[], { env: Environment }]
     >;
+    const trustedNpmrcPath = path.join(REPOSITORY_ROOT, ".npmrc");
 
     expect(spawn).toHaveBeenNthCalledWith(
       1,
@@ -590,6 +603,9 @@ describe("host-specific Socket Firewall routing", () => {
       expect.objectContaining({
         env: expect.objectContaining({
           NODE_AUTH_TOKEN: TEST_TOKEN,
+          [routing.USER_CONFIG_ENVIRONMENT_VARIABLE]: trustedNpmrcPath,
+          [routing.GLOBAL_CONFIG_ENVIRONMENT_VARIABLE]: trustedNpmrcPath,
+          [routing.NPM_GLOBAL_CONFIG_ENVIRONMENT_VARIABLE]: trustedNpmrcPath,
           [routing.IGNORE_PNPMFILE_ENVIRONMENT_VARIABLE]: "true",
           [routing.IGNORE_SCRIPTS_ENVIRONMENT_VARIABLE]: "true",
         }),
@@ -628,6 +644,38 @@ describe("host-specific Socket Firewall routing", () => {
       TEST_TOKEN
     );
     expect(JSON.stringify(consoleError.mock.calls)).not.toContain(TEST_TOKEN);
+  });
+
+  it("canonicalizes package auth and removes every case variant before rebuilds", () => {
+    const spawn = jest.fn(() => ({ status: 0 }));
+    jest.spyOn(console, "error").mockImplementation();
+    const environment = socketEnvironment(socketCaPath);
+    delete environment.NODE_AUTH_TOKEN;
+    environment["node_auth_token"] = TEST_TOKEN;
+
+    expect(
+      routing.runPnpm({
+        args: ["install", "--frozen-lockfile"],
+        environment,
+        repositoryRoot: REPOSITORY_ROOT,
+        spawn,
+      })
+    ).toBe(0);
+    const spawnCalls = spawn.mock.calls as unknown as Array<
+      [string, string[], { env: Environment }]
+    >;
+    const authKeys = Object.keys(spawnCalls[0]?.[2].env ?? {}).filter(
+      (key) => key.toLowerCase() === "node_auth_token"
+    );
+
+    expect(authKeys).toEqual(["NODE_AUTH_TOKEN"]);
+    for (const rebuildCall of spawnCalls.slice(1)) {
+      expect(
+        Object.keys(rebuildCall[2].env).some(
+          (key) => key.toLowerCase() === "node_auth_token"
+        )
+      ).toBe(false);
+    }
   });
 
   it("does not pass install-only flags to audit", () => {
@@ -811,6 +859,47 @@ describe("GitHub Actions package access", () => {
     expect(npmUpdates?.ignore).toContainEqual({
       "dependency-name": policy.ALLOWED_PACKAGE_NAME,
     });
+  });
+
+  it("keeps the required debt verdict fail-closed for fork pull requests", () => {
+    const workflow = parseYaml(
+      fs.readFileSync(
+        path.join(REPOSITORY_ROOT, ".github/workflows/debt-ratchet.yml"),
+        "utf8"
+      )
+    ) as {
+      jobs?: Record<
+        string,
+        {
+          if?: string;
+          name?: string;
+          needs?: string;
+          permissions?: Record<string, string>;
+          steps?: Array<{
+            env?: Record<string, string>;
+            run?: string;
+          }>;
+        }
+      >;
+    };
+    const privateJob = workflow.jobs?.["debt-ratchet-private"];
+    const requiredJob = workflow.jobs?.["debt-ratchet"];
+
+    expect(privateJob?.if).toContain(
+      "github.event.pull_request.head.repo.full_name == github.repository"
+    );
+    expect(privateJob?.permissions?.["packages"]).toBe("read");
+    expect(requiredJob).toMatchObject({
+      name: "Debt ratchet",
+      if: "always()",
+      needs: "debt-ratchet-private",
+      permissions: { contents: "read" },
+    });
+    expect(requiredJob?.permissions?.["packages"]).toBeUndefined();
+    expect(requiredJob?.steps?.[0]?.env?.["DEBT_RATCHET_RESULT"]).toBe(
+      "${{ needs.debt-ratchet-private.result }}"
+    );
+    expect(requiredJob?.steps?.[0]?.run).toContain("exit 1");
   });
 
   it("keeps package auth, Socket routing, and fork handling narrow", () => {

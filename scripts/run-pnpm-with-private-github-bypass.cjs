@@ -26,6 +26,9 @@ const REMOVED_ROUTED_CONFIG_NAMES = new Set([
 ]);
 const IGNORE_PNPMFILE_ENVIRONMENT_VARIABLE = "npm_config_ignore_pnpmfile";
 const IGNORE_SCRIPTS_ENVIRONMENT_VARIABLE = "npm_config_ignore_scripts";
+const USER_CONFIG_ENVIRONMENT_VARIABLE = "npm_config_userconfig";
+const GLOBAL_CONFIG_ENVIRONMENT_VARIABLE = "npm_config_globalconfig";
+const NPM_GLOBAL_CONFIG_ENVIRONMENT_VARIABLE = "npm_config_npm_globalconfig";
 const TOKEN_FREE_REBUILD_PACKAGES = [
   "@nestjs/core",
   "@openapitools/openapi-generator-cli",
@@ -164,6 +167,26 @@ function pnpmSpawnArguments(args, platform) {
   };
 }
 
+function removeEnvironmentVariableCaseInsensitive(environment, variableName) {
+  for (const key of Object.keys(environment)) {
+    if (key.toLowerCase() === variableName.toLowerCase()) {
+      delete environment[key];
+    }
+  }
+}
+
+function canonicalizeEnvironmentVariable(environment, variableName) {
+  const matchingKey = Object.keys(environment).find(
+    (key) => key.toLowerCase() === variableName.toLowerCase()
+  );
+  const value =
+    matchingKey === undefined ? undefined : environment[matchingKey];
+  removeEnvironmentVariableCaseInsensitive(environment, variableName);
+  if (value !== undefined) {
+    environment[variableName] = value;
+  }
+}
+
 function runPnpm({
   args = process.argv.slice(2),
   environment = process.env,
@@ -179,8 +202,13 @@ function runPnpm({
   });
 
   const routedEnvironment = createRoutedEnvironment(environment);
+  canonicalizeEnvironmentVariable(routedEnvironment, AUTH_ENVIRONMENT_VARIABLE);
+  const trustedNpmrcPath = path.join(repositoryRoot, ".npmrc");
   const authenticatedEnvironment = {
     ...routedEnvironment,
+    [USER_CONFIG_ENVIRONMENT_VARIABLE]: trustedNpmrcPath,
+    [GLOBAL_CONFIG_ENVIRONMENT_VARIABLE]: trustedNpmrcPath,
+    [NPM_GLOBAL_CONFIG_ENVIRONMENT_VARIABLE]: trustedNpmrcPath,
     [IGNORE_PNPMFILE_ENVIRONMENT_VARIABLE]: "true",
     [IGNORE_SCRIPTS_ENVIRONMENT_VARIABLE]: "true",
   };
@@ -212,7 +240,10 @@ function runPnpm({
   validateRepositoryFiles(repositoryRoot);
 
   const tokenFreeEnvironment = { ...authenticatedEnvironment };
-  delete tokenFreeEnvironment[AUTH_ENVIRONMENT_VARIABLE];
+  removeEnvironmentVariableCaseInsensitive(
+    tokenFreeEnvironment,
+    AUTH_ENVIRONMENT_VARIABLE
+  );
   delete tokenFreeEnvironment[IGNORE_SCRIPTS_ENVIRONMENT_VARIABLE];
   console.error(
     "Secure pnpm routing: approved dependency lifecycle scripts rebuild without package credentials."
@@ -284,6 +315,9 @@ module.exports = {
   ROUTED_NO_PROXY_ENTRIES,
   IGNORE_PNPMFILE_ENVIRONMENT_VARIABLE,
   IGNORE_SCRIPTS_ENVIRONMENT_VARIABLE,
+  USER_CONFIG_ENVIRONMENT_VARIABLE,
+  GLOBAL_CONFIG_ENVIRONMENT_VARIABLE,
+  NPM_GLOBAL_CONFIG_ENVIRONMENT_VARIABLE,
   TOKEN_FREE_REBUILD_ARGUMENTS,
   TOKEN_FREE_REBUILD_PACKAGES,
   TOKEN_FREE_ROOT_REBUILD_ARGUMENTS,

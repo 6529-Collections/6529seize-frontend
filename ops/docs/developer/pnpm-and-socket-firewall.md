@@ -78,10 +78,13 @@ GitHub permissions.
 
 The authenticated fetch phase disables lifecycle scripts and pnpm hook files.
 Repository-local pnpm hooks and pnpm config dependencies are rejected before
-the command starts. After that phase succeeds and the package policy is checked
-again, the helper rebuilds the repository's explicitly approved dependencies
-without passing `NODE_AUTH_TOKEN` to pnpm or its lifecycle scripts. Pnpm hooks
-remain disabled during the token-free rebuild.
+the command starts. User and global npm config layers are pinned to the same
+validated repository `.npmrc` so they cannot add another registry, credential,
+proxy, CA, or TLS override. After that phase succeeds and the package policy is
+checked again, the helper rebuilds the repository's explicitly approved
+dependencies without passing any case variant of `NODE_AUTH_TOKEN` to pnpm or
+its lifecycle scripts. Pnpm hooks remain disabled during the token-free
+rebuild.
 
 The existing `6529` commands remain the only supported entrypoint. The secure
 pnpm helper checks the committed `.npmrc`, package manifest, lockfile integrity,

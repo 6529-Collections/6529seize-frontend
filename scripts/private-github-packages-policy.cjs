@@ -640,7 +640,16 @@ function validateWorkspace(workspaceText) {
 }
 
 function validateAuthEnvironment(environment) {
-  const token = environment[AUTH_ENVIRONMENT_VARIABLE];
+  const tokenKeys = Object.keys(environment).filter(
+    (key) => key.toLowerCase() === AUTH_ENVIRONMENT_VARIABLE.toLowerCase()
+  );
+  if (tokenKeys.length > 1) {
+    throw policyError(
+      `${AUTH_ENVIRONMENT_VARIABLE} must use exactly one environment-variable spelling`
+    );
+  }
+
+  const token = environment[tokenKeys[0]];
   if (typeof token !== "string" || token.length === 0) {
     throw policyError(
       `${AUTH_ENVIRONMENT_VARIABLE} is required and must be a read-only package token`
