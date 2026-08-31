@@ -3,6 +3,7 @@
 import { useAuth } from "@/components/auth/Auth";
 import ContentModerationNoAccess from "@/components/content-moderation/ContentModerationNoAccess";
 import type { ApiContentModerationQueueItem } from "@/generated/models/ApiContentModerationQueueItem";
+import type { ApiContentModerationProfileStatusResponse } from "@/generated/models/ApiContentModerationProfileStatusResponse";
 import { ApiContentModerationReportStatus } from "@/generated/models/ApiContentModerationReportStatus";
 import { ApiContentModerationDropDecisionRequestDecisionEnum } from "@/generated/models/ApiContentModerationDropDecisionRequest";
 import { ApiModeratedProfileStatus } from "@/generated/models/ApiModeratedProfileStatus";
@@ -28,6 +29,7 @@ import {
 import {
   invalidateContentModerationPresentation,
   MODERATION_QUEUE_QUERY_KEY,
+  PUBLIC_PROFILE_MODERATION_STATUS_QUERY_KEY,
   SUSPENDED_MODERATION_PROFILES_QUERY_KEY,
 } from "@/services/content-moderation/content-moderation-query";
 import {
@@ -118,7 +120,11 @@ function ModerationQueueCard({
         status,
         reason: reason.trim() || null,
       }),
-    onSuccess: () => {
+    onSuccess: (response) => {
+      queryClient.setQueryData<ApiContentModerationProfileStatusResponse>(
+        [...PUBLIC_PROFILE_MODERATION_STATUS_QUERY_KEY, item.author_profile_id],
+        response
+      );
       void queryClient.invalidateQueries({
         queryKey: MODERATION_QUEUE_QUERY_KEY,
       });

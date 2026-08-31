@@ -415,6 +415,70 @@ describe("CreateDrop", () => {
     consoleErrorSpy.mockRestore();
   });
 
+  it("updates posting access immediately after a suspended-profile rejection", async () => {
+    const setToast = jest.fn();
+    commonApiPostMock.mockRejectedValue({
+      status: 403,
+      response: {
+        body: {
+          code: "PROFILE_SUSPENDED",
+          message: "This profile is currently suspended from posting.",
+        },
+      },
+    });
+    const consoleErrorSpy = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+
+    render(
+      <AuthContext.Provider
+        value={
+          {
+            connectedProfile: { id: "profile-1", handle: "viewer" },
+            setToast,
+          } as any
+        }
+      >
+        <ReactQueryWrapperContext.Provider
+          value={{ waitAndInvalidateDrops: jest.fn() } as any}
+        >
+          <CreateDrop
+            activeDrop={null}
+            onCancelReplyQuote={() => {}}
+            onDropAddedToQueue={jest.fn()}
+            wave={{
+              ...wave,
+              metrics: { ...wave.metrics, your_drops_count: 1 },
+            }}
+            dropId={null}
+            fixedDropMode={"CHAT" as any}
+            privileges={{ chatRestriction: null } as any}
+          />
+        </ReactQueryWrapperContext.Provider>
+      </AuthContext.Provider>
+    );
+
+    await userEvent.click(screen.getByText("submit current mode"));
+
+    await waitFor(() =>
+      expect(mockSetQueryData).toHaveBeenCalledWith(
+        [
+          QueryKey.CONTENT_MODERATION_REPORTS,
+          "public-profile-status",
+          "profile-1",
+        ],
+        { profile_id: "profile-1", status: "SUSPENDED" }
+      )
+    );
+    expect(setToast).toHaveBeenCalledWith(
+      expect.objectContaining({
+        description: "This profile is suspended and cannot post.",
+        type: "error",
+      })
+    );
+    consoleErrorSpy.mockRestore();
+  });
+
   it("gates a first chat message on guidelines until the user agrees", async () => {
     fetchWaveMetadataMock.mockResolvedValue([
       {

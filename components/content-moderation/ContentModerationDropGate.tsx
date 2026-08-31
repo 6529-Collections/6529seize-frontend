@@ -44,6 +44,7 @@ import {
 import { ContentModerationDropGateContext } from "./ContentModerationDropGateContext";
 import ContentModerationReportStatusButton from "./ContentModerationReportStatusButton";
 import ReportDropModal from "./ReportDropModal";
+import ContentModerationAuthorNotice from "./ContentModerationAuthorNotice";
 
 interface ContentModerationDropGateProps {
   readonly drop: ApiDrop;
@@ -51,9 +52,11 @@ interface ContentModerationDropGateProps {
   readonly compact?: boolean | undefined;
   readonly presentation?: "default" | "profile-activity" | undefined;
   readonly preserveGlobalContext?: boolean | undefined;
+  readonly onGlobalTombstoneClick?: (() => void) | undefined;
 }
 
 const AUTHENTICATION_CANCELLED_MESSAGE = "Authentication was cancelled";
+const SELF_VISIBLE_TOMBSTONE_KIND = "author-global";
 
 const getEffectiveVisibility = ({
   isRevealed,
@@ -66,7 +69,10 @@ const getEffectiveVisibility = ({
     typeof useContentModerationVisibility
   >["visibility"];
 }) => {
-  if (visibility.kind === "global") {
+  if (
+    visibility.kind === "global" ||
+    visibility.kind === SELF_VISIBLE_TOMBSTONE_KIND
+  ) {
     return visibility;
   }
   if (isRevealed) {
@@ -87,7 +93,10 @@ const getEffectiveVisibility = ({
 const getGlobalModerationStatus = (
   visibility: ReturnType<typeof getEffectiveVisibility>
 ): ApiDropModerationStatus | null =>
-  visibility.kind === "global" ? visibility.status : null;
+  visibility.kind === "global" ||
+  visibility.kind === SELF_VISIBLE_TOMBSTONE_KIND
+    ? visibility.status
+    : null;
 
 function PersonalModerationAction({
   label,
@@ -293,12 +302,88 @@ function useRevealedPersonalModeration({
   ]);
 }
 
+function AuthorModeratedPresentation({
+  children,
+  compact,
+  preserveGlobalContext,
+  status,
+}: {
+  readonly children: ReactNode;
+  readonly compact: boolean;
+  readonly preserveGlobalContext: boolean;
+  readonly status: ApiDropModerationStatus;
+}) {
+  if (preserveGlobalContext) return children;
+  return (
+    <div className="tw-space-y-2">
+      <ContentModerationAuthorNotice status={status} compact={compact} />
+      {children}
+    </div>
+  );
+}
+
+function GlobalModerationTombstone({
+  compact,
+  kind,
+  message,
+  onClick,
+  viewOriginalLabel,
+}: {
+  readonly compact: boolean;
+  readonly kind: "global";
+  readonly message: string;
+  readonly onClick?: (() => void) | undefined;
+  readonly viewOriginalLabel: string;
+}) {
+  const className = `tw-flex tw-w-full tw-items-center tw-gap-3 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950/80 tw-text-left ${
+    compact ? "tw-px-3 tw-py-2" : "tw-my-1 tw-px-4 tw-py-4"
+  }`;
+  const contents = (
+    <>
+      <ShieldExclamationIcon
+        aria-hidden="true"
+        className={`${compact ? "tw-size-4" : "tw-size-5"} tw-flex-shrink-0 tw-text-iron-500`}
+      />
+      {/* A feed may mount many tombstones at once. Keep this static copy out of
+          live regions so screen readers are not flooded with announcements. */}
+      <p className="tw-m-0 tw-min-w-0 tw-flex-1 tw-text-sm tw-text-iron-400">
+        {message}
+      </p>
+    </>
+  );
+  const testId = `content-moderation-tombstone-${kind}`;
+
+  if (!onClick) {
+    return (
+      <div className={className} data-testid={testId}>
+        {contents}
+      </div>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      aria-label={`${message}. ${viewOriginalLabel}`}
+      onClick={(event) => {
+        event.stopPropagation();
+        onClick();
+      }}
+      className={`${className} tw-cursor-pointer tw-transition-colors hover:tw-border-iron-700 hover:tw-bg-iron-900 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400`}
+      data-testid={testId}
+    >
+      {contents}
+    </button>
+  );
+}
+
 export default function ContentModerationDropGate({
   drop,
   children,
   compact = false,
   presentation = "default",
   preserveGlobalContext = false,
+  onGlobalTombstoneClick,
 }: ContentModerationDropGateProps) {
   const locale = useBrowserLocale();
   const { connectedProfile, requestAuth, setToast } = useAuth();
@@ -450,6 +535,8 @@ export default function ContentModerationDropGate({
   });
   const gateContext = useMemo(
     () => ({
+      canViewGlobalModeratedContent:
+        effectiveVisibility.kind === SELF_VISIBLE_TOMBSTONE_KIND,
       globalModerationStatus,
       openReportDetails,
       reportStatus,
@@ -457,6 +544,7 @@ export default function ContentModerationDropGate({
       setOptimisticHidden,
     }),
     [
+      effectiveVisibility.kind,
       globalModerationStatus,
       openReportDetails,
       reportStatus,
@@ -492,6 +580,18 @@ export default function ContentModerationDropGate({
 
   if (effectiveVisibility.kind === "visible") {
     return withGateContext(children);
+  }
+
+  if (effectiveVisibility.kind === SELF_VISIBLE_TOMBSTONE_KIND) {
+    return withGateContext(
+      <AuthorModeratedPresentation
+        compact={compact}
+        preserveGlobalContext={preserveGlobalContext}
+        status={effectiveVisibility.status}
+      >
+        {children}
+      </AuthorModeratedPresentation>
+    );
   }
 
   if (effectiveVisibility.kind === "hidden") {
@@ -607,21 +707,12 @@ export default function ContentModerationDropGate({
       : t(locale, "contentModeration.tombstone.quarantined");
 
   return withGateContext(
-    <div
-      className={`tw-flex tw-w-full tw-items-center tw-gap-3 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950/80 ${
-        compact ? "tw-px-3 tw-py-2" : "tw-my-1 tw-px-4 tw-py-4"
-      }`}
-      data-testid={`content-moderation-tombstone-${effectiveVisibility.kind}`}
-    >
-      <ShieldExclamationIcon
-        aria-hidden="true"
-        className={`${compact ? "tw-size-4" : "tw-size-5"} tw-flex-shrink-0 tw-text-iron-500`}
-      />
-      {/* A feed may mount many tombstones at once. Keep this static copy out of
-          live regions so screen readers are not flooded with announcements. */}
-      <p className="tw-m-0 tw-min-w-0 tw-flex-1 tw-text-sm tw-text-iron-400">
-        {message}
-      </p>
-    </div>
+    <GlobalModerationTombstone
+      compact={compact}
+      kind={effectiveVisibility.kind}
+      message={message}
+      onClick={onGlobalTombstoneClick}
+      viewOriginalLabel={t(locale, "contentModeration.tombstone.viewOriginal")}
+    />
   );
 }

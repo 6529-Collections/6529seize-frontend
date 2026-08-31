@@ -2,13 +2,17 @@
 
 import { useAuth } from "@/components/auth/Auth";
 import type { ApiContentModerationProfileListItem } from "@/generated/models/ApiContentModerationProfileListItem";
+import type { ApiContentModerationProfileStatusResponse } from "@/generated/models/ApiContentModerationProfileStatusResponse";
 import { ApiModeratedProfileStatus } from "@/generated/models/ApiModeratedProfileStatus";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { CONTENT_MODERATOR_ACCESS_QUERY_KEY } from "@/hooks/content-moderation/useContentModeratorAccess";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { setModeratedProfileStatus } from "@/services/api/content-moderation-api";
-import { SUSPENDED_MODERATION_PROFILES_QUERY_KEY } from "@/services/content-moderation/content-moderation-query";
+import {
+  PUBLIC_PROFILE_MODERATION_STATUS_QUERY_KEY,
+  SUSPENDED_MODERATION_PROFILES_QUERY_KEY,
+} from "@/services/content-moderation/content-moderation-query";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";
@@ -36,7 +40,11 @@ export default function SuspendedProfileCard({
         status: ApiModeratedProfileStatus.Active,
         reason: null,
       }),
-    onSuccess: () => {
+    onSuccess: (response) => {
+      queryClient.setQueryData<ApiContentModerationProfileStatusResponse>(
+        [...PUBLIC_PROFILE_MODERATION_STATUS_QUERY_KEY, profile.profile_id],
+        response
+      );
       void queryClient.invalidateQueries({
         queryKey: SUSPENDED_MODERATION_PROFILES_QUERY_KEY,
       });

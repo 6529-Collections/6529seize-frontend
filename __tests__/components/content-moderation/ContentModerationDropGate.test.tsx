@@ -143,8 +143,10 @@ describe("ContentModerationDropGate", () => {
 
     expect(screen.getByRole("dialog")).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: "Flag Content" })
+      screen.getByRole("heading", { name: "Report outcome" })
     ).toBeInTheDocument();
+    expect(screen.getByText("Report reviewed")).toBeInTheDocument();
+    expect(screen.getByText("Content removed")).toBeInTheDocument();
   });
 
   it("fails closed when a drop has no moderation presentation", () => {
@@ -180,6 +182,37 @@ describe("ContentModerationDropGate", () => {
     );
 
     expect(screen.getByText("Author post content")).toBeInTheDocument();
+    expect(screen.getByText("This post is under review")).toBeInTheDocument();
+    expect(
+      screen.getByText("Only you and moderators can see this post.")
+    ).toBeInTheDocument();
+  });
+
+  it("keeps a removed compact tombstone actionable when navigation is available", () => {
+    const onGlobalTombstoneClick = jest.fn();
+    renderGate(
+      <ContentModerationDropGate
+        drop={createDrop({
+          moderation: {
+            status: ApiDropModerationStatus.ModeratorRemoved,
+            can_view: false,
+          },
+        })}
+        compact
+        onGlobalTombstoneClick={onGlobalTombstoneClick}
+      >
+        <p>Removed quote content</p>
+      </ContentModerationDropGate>
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Content removed by moderators. View original post",
+      })
+    );
+
+    expect(onGlobalTombstoneClick).toHaveBeenCalledTimes(1);
+    expect(screen.queryByText("Removed quote content")).not.toBeInTheDocument();
   });
 
   it("persists unhide for personally hidden content", async () => {

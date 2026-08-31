@@ -13,6 +13,11 @@ export const CONTENT_MODERATION_MESSAGES = {
   "contentModeration.profile.blocked": "Blocked",
   "contentModeration.profile.suspended": "Suspended",
   "contentModeration.profile.actionsMenu": "Profile actions",
+  "contentModeration.posting.checkingAccess": "Checking posting access…",
+  "contentModeration.posting.suspended":
+    "This profile is suspended and cannot post.",
+  "contentModeration.posting.suspendedSupport":
+    "Contact support if you believe this is an error.",
   "contentModeration.block.confirmTitle": "Block {profile}?",
   "contentModeration.unblock.confirmTitle": "Unblock {profile}?",
   "contentModeration.unblock.confirmDescription":
@@ -45,6 +50,16 @@ export const CONTENT_MODERATION_MESSAGES = {
   "contentModeration.report.underReview": "Reported · Under review",
   "contentModeration.report.noActionTaken": "Reviewed · No action taken",
   "contentModeration.report.contentRemoved": "Reviewed · Content removed",
+  "contentModeration.report.outcomeTitle": "Report outcome",
+  "contentModeration.report.outcomePendingDescription":
+    "Your report is awaiting moderator review.",
+  "contentModeration.report.outcomeReviewedDescription":
+    "Moderators reviewed your report.",
+  "contentModeration.report.outcomePendingLabel": "Report submitted",
+  "contentModeration.report.outcomeReviewedLabel": "Report reviewed",
+  "contentModeration.report.outcomePending": "Awaiting review",
+  "contentModeration.report.outcomeAllowed": "No action taken",
+  "contentModeration.report.outcomeRemoved": "Content removed",
   "contentModeration.report.withdraw": "Withdraw report",
   "contentModeration.report.withdrawConfirm":
     "Withdraw this report? The post will stay hidden.",
@@ -54,6 +69,8 @@ export const CONTENT_MODERATION_MESSAGES = {
   "contentModeration.report.withdrawError": "Couldn't withdraw this report.",
   "contentModeration.report.cancel": "Cancel",
   "contentModeration.report.close": "Close post actions dialog",
+  "contentModeration.report.closeButton": "Close",
+  "contentModeration.report.viewStatus": "View report status",
   "contentModeration.report.reason.scam": "Scam or phishing",
   "contentModeration.report.reason.privateInformation":
     "Private information or doxxing",
@@ -74,6 +91,11 @@ export const CONTENT_MODERATION_MESSAGES = {
   "contentModeration.tombstone.quarantined":
     "This post is unavailable while it is being checked.",
   "contentModeration.tombstone.removed": "Content removed by moderators",
+  "contentModeration.tombstone.viewOriginal": "View original post",
+  "contentModeration.author.removed": "Removed by moderators",
+  "contentModeration.author.quarantined": "This post is under review",
+  "contentModeration.author.visibility":
+    "Only you and moderators can see this post.",
   "contentModeration.tombstone.blockedShort": "Blocked",
   "contentModeration.tombstone.hidden": "Hidden",
   "contentModeration.tooltips.revealHidden": "Show temporarily",

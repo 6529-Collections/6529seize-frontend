@@ -18,6 +18,8 @@ import {
   commonApiPut,
 } from "@/services/api/common-api";
 
+export const PROFILE_SUSPENDED_ERROR_CODE = "PROFILE_SUSPENDED";
+
 export const fetchBlockedProfiles = (): Promise<ApiBlockedProfile[]> =>
   commonApiFetch<ApiBlockedProfile[]>({
     endpoint: "content-moderation/blocked-profiles",

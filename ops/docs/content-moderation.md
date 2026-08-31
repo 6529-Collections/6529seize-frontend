@@ -75,9 +75,14 @@ Posting suspension:
 - does not delete, hide, or change their existing posts; and
 - remains active until an authorized moderator reinstates the profile.
 
-When a suspended profile tries to publish or edit, the request is rejected and
-the user is directed to contact support if they believe the suspension is a
-mistake.
+Before rendering a post composer, the client checks the active profile's
+public moderation status. While that check is in flight it shows **Checking
+posting access…**. A suspended profile sees **This profile is suspended and
+cannot post** with the support direction instead of an input or Post button.
+The backend remains authoritative: if a stale client still submits and receives
+the structured suspension rejection, it immediately updates that profile's
+cached status and replaces the composer. A failed status lookup does not
+incorrectly block posting; the backend makes the final decision.
 
 ## Flag Content
 
@@ -121,15 +126,17 @@ review**, **Reviewed · No action taken**, and **Reviewed · Content removed**.
 Only the reporter sees this personal report state. Internal moderator notes,
 AI details, moderator identity, and other reporters are never exposed.
 
-Opening **Flag Content** again after the viewer submits a report shows the
-existing report state with the Report option checked and locked instead of
-permitting a duplicate. **Withdraw report** is available until a moderator
-resolves it and opens a separate confirmation state. A successful withdrawal
-closes the dialog and leaves the post hidden. Withdrawal is auditable, does not
-affect other reporters, and does not become available again after resolution.
-The same profile cannot report the unchanged post again after either reviewed
-outcome, while other profiles may still report it independently. Withdrawing
-an open report permits that profile to submit a later report.
+Clicking or tapping a post's reporter-only **Reported** or **Reviewed** control
+opens a dedicated report-status view rather than reopening the action form. An
+open report shows that it is awaiting review and offers **Withdraw report**.
+Resolved reports show **Report reviewed** with **No action taken** or **Content
+removed** and no stale Report, Hide, or Block checkboxes. A successful
+withdrawal closes the dialog and leaves the post hidden. Withdrawal is
+auditable, does not affect other reporters, and does not become available again
+after resolution. The same profile cannot report the unchanged post again
+after either reviewed outcome, while other profiles may still report it
+independently. Withdrawing an open report permits that profile to submit a
+later report. Blocking remains an independent profile action.
 
 The **Reports** tab at `/preferences?tab=reports` lists the current profile's
 own reports, the reported profile, a snapshot of the reported post, reason,
@@ -231,9 +238,15 @@ action remains independent of the moderator's personal Blocked state.
 In primary Wave chat views, globally quarantined or moderator-removed posts
 keep their author, time, and Wave context while only the post body is replaced
 by a stable unavailable or **Content removed by moderators** message. Compact
-secondary surfaces use a redacted tombstone. Ordinary viewers cannot Reveal
-globally moderated content. The author can still see their own globally
-moderated post and its moderation state.
+secondary surfaces use a redacted tombstone. A removed reply or quoted-post
+tombstone remains keyboard- and pointer-actionable: activating it loads the
+original Wave context, scrolls to the post, and uses the existing target
+highlight without revealing content the viewer may not access. Ordinary
+viewers cannot Reveal globally moderated content. The author can still see the
+original content of their own globally moderated post with **Removed by
+moderators** or **This post is under review** and **Only you and moderators can
+see this post**. Authors do not see the reporter, report reason, or pending
+report details.
 
 The WatchTower link is shown only to profiles whose server-provided access
 state allows it. A red indicator appears while the queue contains open reports;

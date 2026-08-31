@@ -8,6 +8,7 @@ interface ContentModerationDropGateContextValue {
   readonly setOptimisticHidden: (hidden: boolean) => () => void;
   readonly reportStatus: ApiContentModerationReportStatus | null;
   readonly globalModerationStatus: ApiDropModerationStatus | null;
+  readonly canViewGlobalModeratedContent: boolean;
   readonly openReportDetails: () => void;
   readonly revealedPersonalModeration: {
     readonly hideAgain: () => void;

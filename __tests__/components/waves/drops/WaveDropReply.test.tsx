@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import React from "react";
 import WaveDropReply from "@/components/waves/drops/WaveDropReply";
 import { ApiDropModerationStatus } from "@/generated/models/ApiDropModerationStatus";
@@ -35,6 +35,7 @@ describe("WaveDropReply", () => {
 
   beforeEach(() => {
     mockContentDisplaySpy.mockClear();
+    baseProps.onReplyClick.mockClear();
   });
 
   const expectFixedContainer = () => {
@@ -111,6 +112,13 @@ describe("WaveDropReply", () => {
     expect(
       screen.queryByTestId("wave-drop-reply-fixed-container")
     ).not.toBeInTheDocument();
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Content removed by moderators. View original post",
+      })
+    );
+    expect(baseProps.onReplyClick).toHaveBeenCalledWith(1);
   });
 
   it("keeps a personally hidden preview faded with a compact unhide action", () => {

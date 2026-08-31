@@ -17,6 +17,10 @@ type ContentModerationVisibility =
       readonly kind: "global";
       readonly status: ApiDropModerationStatus;
     }
+  | {
+      readonly kind: "author-global";
+      readonly status: ApiDropModerationStatus;
+    }
   | { readonly kind: "blocked" }
   | { readonly kind: "hidden" };
 
@@ -40,7 +44,7 @@ const getGlobalVisibility = (
     };
   }
   if (moderation.status !== ApiDropModerationStatus.Visible) {
-    return null;
+    return { kind: "author-global", status: moderation.status };
   }
   return globalOverride === undefined ||
     globalOverride === ApiDropModerationStatus.Visible
