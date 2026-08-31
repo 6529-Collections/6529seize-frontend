@@ -472,7 +472,7 @@ describe("CreateDrop", () => {
     );
     expect(setToast).toHaveBeenCalledWith(
       expect.objectContaining({
-        description: "This profile is suspended and cannot post.",
+        description: "Profile suspended",
         type: "error",
       })
     );

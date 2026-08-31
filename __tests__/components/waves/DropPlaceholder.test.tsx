@@ -17,11 +17,15 @@ describe("DropPlaceholder", () => {
   it("renders the suspended profile placeholder", () => {
     render(<DropPlaceholder type="suspended" />);
 
-    expect(screen.getByRole("status")).toHaveTextContent(
-      "This profile is suspended and cannot post."
+    const status = screen.getByRole("status");
+    expect(status).toHaveTextContent(
+      "Profile suspended· Posting disabled. Contact support if this is an error."
     );
-    expect(screen.getByRole("status")).toHaveTextContent(
-      "Contact support if you believe this is an error."
+    expect(screen.getByText("Profile suspended")).toHaveClass(
+      "tw-text-amber-300"
+    );
+    expect(screen.getByText(/Posting disabled\. Contact support/)).toHaveClass(
+      "tw-text-iron-400"
     );
   });
 
