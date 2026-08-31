@@ -37,6 +37,9 @@ describe("dependency governance workflow", () => {
     expect(stepNames).toContain("Summarize dependency policy");
     expect(workflow.permissions).toEqual({
       contents: "read",
+    });
+    expect(workflow.jobs["dependency-governance"].permissions).toEqual({
+      contents: "read",
       packages: "read",
     });
     expect(source).toContain(

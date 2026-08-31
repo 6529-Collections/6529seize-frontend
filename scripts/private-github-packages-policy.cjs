@@ -1,5 +1,6 @@
 const fs = require("node:fs");
 const path = require("node:path");
+const YAML = require("yaml");
 
 const ALLOWED_SCOPE = "@6529-collections";
 const ALLOWED_PACKAGE_NAME = `${ALLOWED_SCOPE}/release-request`;
@@ -33,6 +34,8 @@ const FORBIDDEN_PNPM_OPTION_NAMES = new Set([
   "configstrictssl",
   "configcafile",
   "configca",
+  "ignorescripts",
+  "configignorescripts",
   "userconfig",
   "globalconfig",
   "configuserconfig",
@@ -213,26 +216,105 @@ function validatePackageJson(packageJsonText) {
 }
 
 function validateLockfile(lockfileText) {
-  const scopedPackageNames =
-    lockfileText.match(/@6529-collections\/[A-Za-z0-9._-]+/g) ?? [];
-  for (const packageName of scopedPackageNames) {
-    if (packageName !== ALLOWED_PACKAGE_NAME) {
+  let lockfile;
+  try {
+    lockfile = YAML.parse(lockfileText);
+  } catch (error) {
+    throw policyError(`pnpm-lock.yaml is invalid YAML: ${error.message}`);
+  }
+
+  if (lockfile === null || typeof lockfile !== "object") {
+    throw policyError("pnpm-lock.yaml must contain an object");
+  }
+
+  const packageEntries = lockfile.packages;
+  const snapshotEntries = lockfile.snapshots;
+  if (
+    packageEntries === null ||
+    typeof packageEntries !== "object" ||
+    snapshotEntries === null ||
+    typeof snapshotEntries !== "object"
+  ) {
+    throw policyError("pnpm-lock.yaml must contain packages and snapshots");
+  }
+
+  for (const entryKey of [
+    ...Object.keys(packageEntries),
+    ...Object.keys(snapshotEntries),
+  ]) {
+    const scopedPackageName = entryKey.match(
+      /^(@6529-collections\/[A-Za-z0-9._-]+)(?:@|$)/
+    )?.[1];
+    if (scopedPackageName && scopedPackageName !== ALLOWED_PACKAGE_NAME) {
       throw policyError(
-        `${packageName} cannot extend the ${ALLOWED_SCOPE} lockfile scope`
+        `${scopedPackageName} cannot extend the ${ALLOWED_SCOPE} lockfile scope`
+      );
+    }
+    if (
+      scopedPackageName === ALLOWED_PACKAGE_NAME &&
+      entryKey !== ALLOWED_PACKAGE_SPEC
+    ) {
+      throw policyError(
+        `${entryKey} cannot extend or update the private package bypass`
       );
     }
   }
 
-  const expectedResolution =
-    `resolution: {integrity: ${ALLOWED_INTEGRITY}, ` +
-    `tarball: ${ALLOWED_TARBALL_URL}}`;
-  if (!lockfileText.includes(expectedResolution)) {
+  const packageEntry = packageEntries[ALLOWED_PACKAGE_SPEC];
+  const resolution = packageEntry?.resolution;
+  if (
+    packageEntry === null ||
+    typeof packageEntry !== "object" ||
+    resolution === null ||
+    typeof resolution !== "object" ||
+    resolution.integrity !== ALLOWED_INTEGRITY ||
+    resolution.tarball !== ALLOWED_TARBALL_URL ||
+    Object.keys(resolution).sort().join(",") !== "integrity,tarball"
+  ) {
     throw policyError(
       `${ALLOWED_PACKAGE_SPEC} must keep its exact tarball and integrity`
     );
   }
 
-  const registryUrls = lockfileText.match(/https?:\/\/[^\s,'"}\]]+/g) ?? [];
+  if (
+    snapshotEntries[ALLOWED_PACKAGE_SPEC] === null ||
+    typeof snapshotEntries[ALLOWED_PACKAGE_SPEC] !== "object"
+  ) {
+    throw policyError(
+      `pnpm-lock.yaml must contain the exact ${ALLOWED_PACKAGE_SPEC} snapshot`
+    );
+  }
+
+  const importerEntry = lockfile.importers?.["."]?.devDependencies?.[
+    ALLOWED_PACKAGE_NAME
+  ];
+  if (
+    importerEntry?.specifier !== ALLOWED_PACKAGE_VERSION ||
+    importerEntry?.version !== ALLOWED_PACKAGE_VERSION
+  ) {
+    throw policyError(
+      `pnpm-lock.yaml must pin ${ALLOWED_PACKAGE_SPEC} in the root importer`
+    );
+  }
+
+  const registryUrls = [];
+  const collectRegistryUrls = (value) => {
+    if (typeof value === "string") {
+      for (const candidate of value.match(/https?:\/\/[^\s,'"}\]]+/g) ?? []) {
+        registryUrls.push(candidate);
+      }
+      return;
+    }
+    if (Array.isArray(value)) {
+      value.forEach(collectRegistryUrls);
+      return;
+    }
+    if (value !== null && typeof value === "object") {
+      Object.values(value).forEach(collectRegistryUrls);
+    }
+  };
+  collectRegistryUrls(lockfile);
+
   const allowedRegistryUrls = [];
   for (const registryUrl of registryUrls) {
     let parsedUrl;
@@ -405,6 +487,14 @@ function validatePnpmConfigEnvironment(environment) {
       .replace(/[^a-z0-9]/g, "");
     if (
       normalizedKey.startsWith("npm_config_") &&
+      normalizedConfigName === "ignorescripts"
+    ) {
+      throw policyError(
+        `pnpm lifecycle-script override environment is not allowed: ${key}`
+      );
+    }
+    if (
+      normalizedKey.startsWith("npm_config_") &&
       [
         "auth",
         "token",
@@ -442,6 +532,10 @@ function validateRepositoryPolicy({
     validatePnpmConfigEnvironment(environment);
   }
 
+  validateRepositoryFiles(repositoryRoot);
+}
+
+function validateRepositoryFiles(repositoryRoot) {
   validateNpmrc(fs.readFileSync(path.join(repositoryRoot, ".npmrc"), "utf8"));
   validatePackageJson(
     fs.readFileSync(path.join(repositoryRoot, "package.json"), "utf8")
@@ -475,5 +569,6 @@ module.exports = {
   validatePnpmArguments,
   validatePnpmConfigEnvironment,
   validateRepositoryPolicy,
+  validateRepositoryFiles,
   validateWorkspace,
 };

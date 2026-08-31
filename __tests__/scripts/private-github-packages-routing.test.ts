@@ -43,7 +43,9 @@ type PolicyModule = {
 };
 
 type RoutingModule = {
+  AUTHENTICATED_PNPM_ARGUMENTS: string[];
   ROUTED_NO_PROXY: string;
+  TOKEN_FREE_REBUILD_ARGUMENTS: string[];
   createRoutedEnvironment: (environment: Environment) => Environment;
   isLoopbackProxy: (proxyValue: unknown) => boolean;
   parseNoProxy: (value: string | undefined) => string[];
@@ -103,6 +105,14 @@ function validPackageJson() {
 function validLockfile() {
   return [
     "lockfileVersion: '9.0'",
+    "",
+    "importers:",
+    "",
+    "  .:",
+    "    devDependencies:",
+    `      '${policy.ALLOWED_PACKAGE_NAME}':`,
+    `        specifier: ${policy.ALLOWED_PACKAGE_VERSION}`,
+    `        version: ${policy.ALLOWED_PACKAGE_VERSION}`,
     "",
     "packages:",
     "",
@@ -235,9 +245,20 @@ describe("private GitHub Packages repository policy", () => {
 
     expect(() =>
       policy.validateLockfile(
-        validLockfile().replace("release-request", "another-package")
+        validLockfile().replaceAll("release-request", "another-package")
       )
     ).toThrow("cannot extend the @6529-collections lockfile scope");
+
+    const commentSpoof = validLockfile().replace(
+      `    resolution: {integrity: ${policy.ALLOWED_INTEGRITY}, tarball: ${policy.ALLOWED_TARBALL_URL}}`,
+      [
+        `    # resolution: {integrity: ${policy.ALLOWED_INTEGRITY}, tarball: ${policy.ALLOWED_TARBALL_URL}}`,
+        "    resolution: {integrity: sha512-changed, tarball: https://registry.npmjs.org/release-request/-/release-request-0.0.1.tgz}",
+      ].join("\n")
+    );
+    expect(() => policy.validateLockfile(commentSpoof)).toThrow(
+      "must keep its exact tarball and integrity"
+    );
   });
 
   it("rejects CLI attempts to change routing or extend the package bypass", () => {
@@ -270,6 +291,9 @@ describe("private GitHub Packages repository policy", () => {
     ).toThrow("registry, credential, proxy, and TLS overrides are not allowed");
     expect(() =>
       policy.validatePnpmArguments(["install", "--no-proxy"])
+    ).toThrow("registry, credential, proxy, and TLS overrides are not allowed");
+    expect(() =>
+      policy.validatePnpmArguments(["install", "--ignore-scripts=false"])
     ).toThrow("registry, credential, proxy, and TLS overrides are not allowed");
     expect(() =>
       policy.validatePnpmArguments([
@@ -326,6 +350,11 @@ describe("private GitHub Packages repository policy", () => {
         npm_config_strict_ssl: "false",
       })
     ).toThrow("pnpm network override environment is not allowed");
+    expect(() =>
+      policy.validatePnpmConfigEnvironment({
+        npm_config_ignore_scripts: "false",
+      })
+    ).toThrow("pnpm lifecycle-script override environment is not allowed");
     expect(() =>
       policy.validatePnpmConfigEnvironment({
         npm_config__auth_token: "another-token",
@@ -424,7 +453,7 @@ describe("host-specific Socket Firewall routing", () => {
     );
   });
 
-  it("passes the token only in the child environment and never logs it", () => {
+  it("uses auth only while scripts are disabled, then rebuilds token-free", () => {
     const spawn = jest.fn(() => ({ status: 0 }));
     const consoleError = jest.spyOn(console, "error").mockImplementation();
     const environment = socketEnvironment(socketCaPath);
@@ -438,17 +467,45 @@ describe("host-specific Socket Firewall routing", () => {
       })
     ).toBe(0);
 
-    expect(spawn).toHaveBeenCalledWith(
+    expect(spawn).toHaveBeenNthCalledWith(
+      1,
       "pnpm",
-      ["install", "--frozen-lockfile"],
+      [
+        "install",
+        "--frozen-lockfile",
+        ...routing.AUTHENTICATED_PNPM_ARGUMENTS,
+      ],
       expect.objectContaining({
         env: expect.objectContaining({ NODE_AUTH_TOKEN: TEST_TOKEN }),
       })
     );
+    expect(spawn).toHaveBeenNthCalledWith(
+      2,
+      "pnpm",
+      routing.TOKEN_FREE_REBUILD_ARGUMENTS,
+      expect.objectContaining({
+        env: expect.not.objectContaining({ NODE_AUTH_TOKEN: expect.anything() }),
+      })
+    );
+    expect(spawn).toHaveBeenCalledTimes(2);
     expect(JSON.stringify(spawn.mock.calls[0]?.slice(0, 2))).not.toContain(
       TEST_TOKEN
     );
     expect(JSON.stringify(consoleError.mock.calls)).not.toContain(TEST_TOKEN);
+  });
+
+  it("does not run lifecycle scripts when the authenticated phase fails", () => {
+    const spawn = jest.fn(() => ({ status: 1 }));
+
+    expect(
+      routing.runPnpm({
+        args: ["install", "--frozen-lockfile"],
+        environment: socketEnvironment(socketCaPath),
+        repositoryRoot: REPOSITORY_ROOT,
+        spawn,
+      })
+    ).toBe(1);
+    expect(spawn).toHaveBeenCalledTimes(1);
   });
 
   it("launches the routing helper inside Socket Firewall", () => {

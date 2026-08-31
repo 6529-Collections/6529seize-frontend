@@ -5,7 +5,9 @@ const path = require("node:path");
 const { spawnSync } = require("node:child_process");
 
 const {
+  AUTH_ENVIRONMENT_VARIABLE,
   ALLOWED_REGISTRY_HOST,
+  validateRepositoryFiles,
   validateRepositoryPolicy,
 } = require("./private-github-packages-policy.cjs");
 
@@ -21,6 +23,8 @@ const REMOVED_ROUTED_CONFIG_NAMES = new Set([
   "globalconfig",
   "npmglobalconfig",
 ]);
+const AUTHENTICATED_PNPM_ARGUMENTS = ["--ignore-scripts"];
+const TOKEN_FREE_REBUILD_ARGUMENTS = ["rebuild", "--pending"];
 
 function parseNoProxy(value) {
   if (!value) {
@@ -143,7 +147,7 @@ function runPnpm({
     `Secure pnpm routing: ${ALLOWED_REGISTRY_HOST} uses direct verified HTTPS; all other hosts use Socket Firewall.`
   );
 
-  const result = spawn("pnpm", args, {
+  const result = spawn("pnpm", [...args, ...AUTHENTICATED_PNPM_ARGUMENTS], {
     cwd: repositoryRoot,
     env: routedEnvironment,
     stdio: "inherit",
@@ -155,16 +159,37 @@ function runPnpm({
   }
 
   const status = result.status ?? 1;
-  if (status === 0) {
-    validateRepositoryPolicy({
-      repositoryRoot,
-      args,
-      environment: routedEnvironment,
-      validateEnvironmentOverrides: true,
-    });
+  if (status !== 0) {
+    return status;
   }
 
-  return status;
+  validateRepositoryPolicy({
+    repositoryRoot,
+    args,
+    environment: routedEnvironment,
+    validateEnvironmentOverrides: true,
+  });
+
+  const tokenFreeEnvironment = { ...routedEnvironment };
+  delete tokenFreeEnvironment[AUTH_ENVIRONMENT_VARIABLE];
+  console.error(
+    "Secure pnpm routing: approved dependency lifecycle scripts rebuild without package credentials."
+  );
+  const rebuildResult = spawn("pnpm", TOKEN_FREE_REBUILD_ARGUMENTS, {
+    cwd: repositoryRoot,
+    env: tokenFreeEnvironment,
+    stdio: "inherit",
+    shell: process.platform === "win32",
+  });
+  if (rebuildResult.error) {
+    throw rebuildResult.error;
+  }
+
+  const rebuildStatus = rebuildResult.status ?? 1;
+  if (rebuildStatus === 0) {
+    validateRepositoryFiles(repositoryRoot);
+  }
+  return rebuildStatus;
 }
 
 function main() {
@@ -184,6 +209,8 @@ module.exports = {
   LOOPBACK_NO_PROXY_ENTRIES,
   ROUTED_NO_PROXY,
   ROUTED_NO_PROXY_ENTRIES,
+  AUTHENTICATED_PNPM_ARGUMENTS,
+  TOKEN_FREE_REBUILD_ARGUMENTS,
   createRoutedEnvironment,
   isLoopbackProxy,
   parseNoProxy,
