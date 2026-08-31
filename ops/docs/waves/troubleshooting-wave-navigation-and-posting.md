@@ -101,7 +101,8 @@ is blocked.
   upload artwork in a supported format, keep uploaded files at or below
   `250 MiB`, complete required fields, fix inline validation errors, then
   submit again. Interactive model uploads must be binary `.glb` files; JSON
-  `.gltf` files are not accepted.
+  `.gltf` files are not accepted, and renamed or malformed `.glb` files fail
+  binary-header validation before upload.
 
 ## Quick Vote Checks
 

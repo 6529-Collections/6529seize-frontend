@@ -67,10 +67,6 @@ export const SUBMISSION_IMAGE_MIME_TYPES = SUBMISSION_MEDIA_TYPES.filter(
   (t) => t.category === "image"
 ).map((t) => t.mimeType);
 
-export const SUBMISSION_INTERACTIVE_MIME_TYPES = SUBMISSION_MEDIA_TYPES.filter(
-  (t) => t.category === "interactive"
-).map((t) => t.mimeType);
-
 export const SUBMISSION_FILE_INPUT_ACCEPT =
   "image/png,image/jpeg,image/jpg,image/gif,video/mp4,video/quicktime,.mov,model/gltf-binary,.glb";
 

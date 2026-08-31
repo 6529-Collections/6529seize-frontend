@@ -102,8 +102,9 @@ The fuller guide lives at `/tools/api/authentication`.
 - `wave_id` is a placeholder in the snippet:
   `TARGET_WAVE_ID_GOES_HERE`.
 - The Memes Main Stage accepts binary `.glb` models, not JSON `.gltf` files,
-  and verifies the completed S3 object is no larger than `250 MiB` when the
-  drop is created. This applies to API clients as well as the site UI.
+  and the UI verifies the GLB v2 binary header before upload. The API verifies
+  the completed S3 object is no larger than `250 MiB` when the drop is created.
+  This applies to API clients as well as the site UI.
 - The snippet expects `token` and `wallet.address` to already exist.
 
 ## Key Terms in the Page

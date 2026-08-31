@@ -12,12 +12,43 @@ import type {
 } from "../reducers/types";
 import { SUBMISSION_IMAGE_MIME_TYPES } from "@/constants/submission-media.constants";
 
+const GLB_HEADER_LENGTH = 12;
+const GLB_MAGIC = 0x46546c67;
+const GLB_VERSION = 2;
+
+const readBlobAsArrayBuffer = (blob: Blob): Promise<ArrayBuffer> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as ArrayBuffer);
+    reader.onerror = () =>
+      reject(reader.error ?? new Error("File read failed"));
+    reader.readAsArrayBuffer(blob);
+  });
+
+const hasValidGlbHeader = async (file: File): Promise<boolean> => {
+  if (file.size < GLB_HEADER_LENGTH) return false;
+  try {
+    const header = new DataView(
+      await readBlobAsArrayBuffer(file.slice(0, GLB_HEADER_LENGTH))
+    );
+    return (
+      header.getUint32(0, true) === GLB_MAGIC &&
+      header.getUint32(4, true) === GLB_VERSION &&
+      header.getUint32(8, true) === file.size
+    );
+  } catch {
+    return false;
+  }
+};
+
 /**
  * Comprehensive file validation with proper typing
  * @param file File to validate
  * @returns Validation result with validity and optional error
  */
-export const validateFile = (file: File): FileValidationResult => {
+export const validateFile = async (
+  file: File
+): Promise<FileValidationResult> => {
   if (!file) {
     return {
       valid: false,
@@ -41,6 +72,13 @@ export const validateFile = (file: File): FileValidationResult => {
     return {
       valid: false,
       error: `File size exceeds ${sizeMiB} MiB limit.`,
+    };
+  }
+
+  if (isModelType && !(await hasValidGlbHeader(file))) {
+    return {
+      valid: false,
+      error: "Invalid GLB file. The binary GLB header could not be verified.",
     };
   }
 

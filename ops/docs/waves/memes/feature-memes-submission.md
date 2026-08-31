@@ -84,7 +84,8 @@ reached), select the header restriction control to see the reason, then use
 - Numeric trait fields reject `0`.
 - Upload checks:
   - accepted formats include `PNG`, `JPG/JPEG`, `GIF`, `MP4/MOV`, and
-    binary `GLB` models; JSON `.gltf` files are not accepted
+    binary `GLB` models; JSON `.gltf` files are not accepted, and `.glb`
+    uploads must contain a valid GLB v2 binary header
   - files above `250 MiB` are rejected
   - the service verifies the completed stored file size again when the Main
     Stage submission is created, so API submissions follow the same limit
