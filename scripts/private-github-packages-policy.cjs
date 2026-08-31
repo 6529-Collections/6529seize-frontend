@@ -17,6 +17,7 @@ const AUTH_ENVIRONMENT_VARIABLE = "NODE_AUTH_TOKEN";
 const AUTH_PLACEHOLDER = `\${${AUTH_ENVIRONMENT_VARIABLE}}`;
 const SCOPE_REGISTRY_KEY = `${ALLOWED_SCOPE}:registry`;
 const AUTH_KEY = `//${ALLOWED_REGISTRY_HOST}/:_authToken`;
+const ALLOWED_PNPM_COMMANDS = new Set(["add", "audit", "install", "update"]);
 
 const FORBIDDEN_PNPM_OPTION_NAMES = new Set([
   "registry",
@@ -35,6 +36,14 @@ const FORBIDDEN_PNPM_OPTION_NAMES = new Set([
   "configca",
   "ignorescripts",
   "configignorescripts",
+  "ignorepnpmfile",
+  "configignorepnpmfile",
+  "pnpmfile",
+  "globalpnpmfile",
+  "configpnpmfile",
+  "configglobalpnpmfile",
+  "configdependencies",
+  "configconfigdependencies",
   "userconfig",
   "globalconfig",
   "configuserconfig",
@@ -143,6 +152,16 @@ function validateNpmrc(npmrcText) {
   }
 
   for (const [key, value] of entries) {
+    const normalizedConfigName = key.toLowerCase().replace(/[^a-z0-9]/g, "");
+    if (
+      normalizedConfigName.includes("pnpmfile") ||
+      normalizedConfigName.includes("configdependencies")
+    ) {
+      throw policyError(
+        "pnpm hooks and config dependencies are not allowed during authenticated package commands"
+      );
+    }
+
     const referencesAllowedHost =
       npmrcKeyHostname(key) === ALLOWED_REGISTRY_HOST ||
       urlHostname(value) === ALLOWED_REGISTRY_HOST;
@@ -221,8 +240,7 @@ function stripYamlQuotes(value) {
   }
   const first = trimmed[0];
   const last = trimmed[trimmed.length - 1];
-  return (first === "'" && last === "'") ||
-    (first === '"' && last === '"')
+  return (first === "'" && last === "'") || (first === '"' && last === '"')
     ? trimmed.slice(1, -1)
     : trimmed;
 }
@@ -249,9 +267,7 @@ function collectSectionEntries(lines, sectionName) {
   for (const line of lines) {
     if (line === `${sectionName}:`) {
       if (foundSection) {
-        throw policyError(
-          `pnpm-lock.yaml contains duplicate ${sectionName}`
-        );
+        throw policyError(`pnpm-lock.yaml contains duplicate ${sectionName}`);
       }
       foundSection = true;
       inSection = true;
@@ -373,10 +389,7 @@ function collectPrivatePackageResolution(lines) {
       packageKey = stripYamlQuotes(entryMatch[1]);
       continue;
     }
-    if (
-      packageKey !== ALLOWED_PACKAGE_SPEC ||
-      !/^ {4}resolution:/.test(line)
-    ) {
+    if (packageKey !== ALLOWED_PACKAGE_SPEC || !/^ {4}resolution:/.test(line)) {
       continue;
     }
     const match =
@@ -416,10 +429,7 @@ function validateLockfile(lockfileText) {
     snapshotEntries,
   } = parseCanonicalLockfile(lockfileText);
 
-  for (const entryKey of [
-    ...packageEntries.keys(),
-    ...snapshotEntries,
-  ]) {
+  for (const entryKey of [...packageEntries.keys(), ...snapshotEntries]) {
     const scopedPackageName = entryKey.match(
       /^(@6529-collections\/[A-Za-z0-9._-]+)(?:@|$)/
     )?.[1];
@@ -498,23 +508,69 @@ function validateLockfile(lockfileText) {
 }
 
 function validateWorkspace(workspaceText) {
-  const scopedExceptions =
-    workspaceText.match(
-      /@6529-collections\/[A-Za-z0-9._-]+@[A-Za-z0-9._-]+/g
-    ) ?? [];
+  const lines = workspaceText.split(/\r?\n/);
+  const releaseAgeExceptions = [];
+  let foundReleaseAgeExceptions = false;
+  let inReleaseAgeExceptions = false;
 
-  if (!scopedExceptions.includes(ALLOWED_PACKAGE_SPEC)) {
+  for (const line of lines) {
+    if (line.includes("\t")) {
+      throw policyError("pnpm-workspace.yaml must not use tab indentation");
+    }
+
+    const trimmed = line.trim();
+    if (trimmed === "" || trimmed.startsWith("#")) {
+      continue;
+    }
+
+    const topLevelKey = /^([^\s:#][^:]*):/.exec(line)?.[1];
+    const normalizedTopLevelKey = topLevelKey
+      ?.toLowerCase()
+      .replace(/[^a-z0-9]/g, "");
+    if (
+      normalizedTopLevelKey?.includes("pnpmfile") ||
+      normalizedTopLevelKey === "configdependencies"
+    ) {
+      throw policyError(
+        "pnpm-workspace.yaml cannot configure pnpm hooks or config dependencies"
+      );
+    }
+
+    if (line === "minimumReleaseAgeExclude:") {
+      if (foundReleaseAgeExceptions) {
+        throw policyError(
+          "pnpm-workspace.yaml contains duplicate minimumReleaseAgeExclude"
+        );
+      }
+      foundReleaseAgeExceptions = true;
+      inReleaseAgeExceptions = true;
+      continue;
+    }
+
+    if (inReleaseAgeExceptions && /^\S/.test(line)) {
+      inReleaseAgeExceptions = false;
+    }
+    if (!inReleaseAgeExceptions) {
+      continue;
+    }
+
+    const listEntry = /^ {2}- (.+)$/.exec(line);
+    if (!listEntry) {
+      throw policyError(
+        "pnpm-workspace.yaml minimumReleaseAgeExclude must be a canonical string list"
+      );
+    }
+    releaseAgeExceptions.push(stripYamlQuotes(listEntry[1]));
+  }
+
+  if (
+    !foundReleaseAgeExceptions ||
+    releaseAgeExceptions.length !== 1 ||
+    releaseAgeExceptions[0] !== ALLOWED_PACKAGE_SPEC
+  ) {
     throw policyError(
       `pnpm-workspace.yaml must keep the ${ALLOWED_PACKAGE_SPEC} release-age exception`
     );
-  }
-
-  for (const packageSpec of scopedExceptions) {
-    if (packageSpec !== ALLOWED_PACKAGE_SPEC) {
-      throw policyError(
-        `${packageSpec} cannot extend the ${ALLOWED_SCOPE} release-age exception`
-      );
-    }
   }
 }
 
@@ -554,6 +610,12 @@ function forbiddenOptionName(argument) {
 }
 
 function validatePnpmArguments(args) {
+  if (!ALLOWED_PNPM_COMMANDS.has(args[0])) {
+    throw policyError(
+      "only install, add, update, and audit may use authenticated package routing"
+    );
+  }
+
   for (const argument of args) {
     if (argumentUrlHostname(argument) === ALLOWED_REGISTRY_HOST) {
       throw policyError(
@@ -639,10 +701,19 @@ function validatePnpmConfigEnvironment(environment) {
       .replace(/[^a-z0-9]/g, "");
     if (
       normalizedKey.startsWith("npm_config_") &&
-      normalizedConfigName === "ignorescripts"
+      ["ignorescripts", "ignorepnpmfile"].includes(normalizedConfigName)
     ) {
       throw policyError(
-        `pnpm lifecycle-script override environment is not allowed: ${key}`
+        `pnpm lifecycle or hook override environment is not allowed: ${key}`
+      );
+    }
+    if (
+      normalizedKey.startsWith("npm_config_") &&
+      (normalizedConfigName.includes("pnpmfile") ||
+        normalizedConfigName.includes("configdependencies"))
+    ) {
+      throw policyError(
+        `pnpm hook or config-dependency environment is not allowed: ${key}`
       );
     }
     if (
@@ -688,6 +759,14 @@ function validateRepositoryPolicy({
 }
 
 function validateRepositoryFiles(repositoryRoot) {
+  for (const pnpmHookFilename of [".pnpmfile.cjs", ".pnpmfile.js"]) {
+    if (fs.existsSync(path.join(repositoryRoot, pnpmHookFilename))) {
+      throw policyError(
+        `${pnpmHookFilename} is not allowed during authenticated package commands`
+      );
+    }
+  }
+
   validateNpmrc(fs.readFileSync(path.join(repositoryRoot, ".npmrc"), "utf8"));
   validatePackageJson(
     fs.readFileSync(path.join(repositoryRoot, "package.json"), "utf8")

@@ -39,11 +39,13 @@ type PolicyModule = {
   validatePackageJson: (packageJsonText: string) => void;
   validatePnpmArguments: (args: string[]) => void;
   validatePnpmConfigEnvironment: (environment: Environment) => void;
+  validateRepositoryFiles: (repositoryRoot: string) => void;
   validateWorkspace: (workspaceText: string) => void;
 };
 
 type RoutingModule = {
-  AUTHENTICATED_PNPM_ARGUMENTS: string[];
+  IGNORE_PNPMFILE_ENVIRONMENT_VARIABLE: string;
+  IGNORE_SCRIPTS_ENVIRONMENT_VARIABLE: string;
   ROUTED_NO_PROXY: string;
   TOKEN_FREE_REBUILD_ARGUMENTS: string[];
   TOKEN_FREE_REBUILD_PACKAGES: string[];
@@ -51,9 +53,18 @@ type RoutingModule = {
   createRoutedEnvironment: (environment: Environment) => Environment;
   isLoopbackProxy: (proxyValue: unknown) => boolean;
   parseNoProxy: (value: string | undefined) => string[];
+  pnpmSpawnArguments: (
+    args: string[],
+    platform: NodeJS.Platform
+  ) => {
+    command: string;
+    commandArguments: string[];
+    shell: boolean;
+  };
   runPnpm: (options: {
     args: string[];
     environment: Environment;
+    platform?: NodeJS.Platform;
     repositoryRoot: string;
     spawn: jest.Mock;
   }) => number;
@@ -182,6 +193,24 @@ describe("private GitHub Packages repository policy", () => {
     ).not.toThrow();
   });
 
+  it("parses the effective release-age exception instead of YAML comments", () => {
+    const commentSpoof = [
+      `# - "${policy.ALLOWED_PACKAGE_SPEC}"`,
+      "minimumReleaseAgeExclude:",
+      `  - "${policy.ALLOWED_SCOPE}/*"`,
+      "",
+    ].join("\n");
+
+    expect(() => policy.validateWorkspace(commentSpoof)).toThrow(
+      `must keep the ${policy.ALLOWED_PACKAGE_SPEC} release-age exception`
+    );
+    expect(() =>
+      policy.validateWorkspace(
+        `${validWorkspace()}configDependencies:\n  policy: 1.0.0\n`
+      )
+    ).toThrow("cannot configure pnpm hooks or config dependencies");
+  });
+
   it("fails closed when NODE_AUTH_TOKEN is missing or malformed", () => {
     expect(() => policy.validateAuthEnvironment({})).toThrow(
       "NODE_AUTH_TOKEN is required"
@@ -213,6 +242,14 @@ describe("private GitHub Packages repository policy", () => {
     expect(() => policy.validateNpmrc(npmrc)).toThrow(
       "NODE_AUTH_TOKEN may only authenticate npm.pkg.github.com"
     );
+  });
+
+  it("rejects pnpm hook configuration in .npmrc", () => {
+    expect(() =>
+      policy.validateNpmrc(
+        `${validNpmrc()}global-pnpmfile=/tmp/untrusted-pnpmfile.cjs\n`
+      )
+    ).toThrow("pnpm hooks and config dependencies are not allowed");
   });
 
   it("rejects another private package or a version change", () => {
@@ -281,6 +318,9 @@ describe("private GitHub Packages repository policy", () => {
 
   it("rejects CLI attempts to change routing or extend the package bypass", () => {
     expect(() =>
+      policy.validatePnpmArguments(["config", "get", policy.AUTH_KEY])
+    ).toThrow("only install, add, update, and audit");
+    expect(() =>
       policy.validatePnpmArguments([
         "add",
         `${policy.ALLOWED_SCOPE}/another-package@0.0.1`,
@@ -312,6 +352,9 @@ describe("private GitHub Packages repository policy", () => {
     ).toThrow("registry, credential, proxy, and TLS overrides are not allowed");
     expect(() =>
       policy.validatePnpmArguments(["install", "--ignore-scripts=false"])
+    ).toThrow("registry, credential, proxy, and TLS overrides are not allowed");
+    expect(() =>
+      policy.validatePnpmArguments(["install", "--ignore-pnpmfile=false"])
     ).toThrow("registry, credential, proxy, and TLS overrides are not allowed");
     expect(() =>
       policy.validatePnpmArguments([
@@ -372,7 +415,12 @@ describe("private GitHub Packages repository policy", () => {
       policy.validatePnpmConfigEnvironment({
         npm_config_ignore_scripts: "false",
       })
-    ).toThrow("pnpm lifecycle-script override environment is not allowed");
+    ).toThrow("pnpm lifecycle or hook override environment is not allowed");
+    expect(() =>
+      policy.validatePnpmConfigEnvironment({
+        npm_config_pnpmfile: "/tmp/untrusted-pnpmfile.cjs",
+      })
+    ).toThrow("pnpm hook or config-dependency environment is not allowed");
     expect(() =>
       policy.validatePnpmConfigEnvironment({
         npm_config__auth_token: "another-token",
@@ -471,7 +519,7 @@ describe("host-specific Socket Firewall routing", () => {
     );
   });
 
-  it("uses auth only while scripts are disabled, then rebuilds token-free", () => {
+  it("uses auth only while scripts and pnpm hooks are disabled, then rebuilds token-free", () => {
     const spawn = jest.fn(() => ({ status: 0 }));
     const consoleError = jest.spyOn(console, "error").mockImplementation();
     const environment = socketEnvironment(socketCaPath);
@@ -484,17 +532,20 @@ describe("host-specific Socket Firewall routing", () => {
         spawn,
       })
     ).toBe(0);
+    const spawnCalls = spawn.mock.calls as unknown as Array<
+      [string, string[], { env: Environment }]
+    >;
 
     expect(spawn).toHaveBeenNthCalledWith(
       1,
       "pnpm",
-      [
-        "install",
-        "--frozen-lockfile",
-        ...routing.AUTHENTICATED_PNPM_ARGUMENTS,
-      ],
+      ["install", "--frozen-lockfile"],
       expect.objectContaining({
-        env: expect.objectContaining({ NODE_AUTH_TOKEN: TEST_TOKEN }),
+        env: expect.objectContaining({
+          NODE_AUTH_TOKEN: TEST_TOKEN,
+          [routing.IGNORE_PNPMFILE_ENVIRONMENT_VARIABLE]: "true",
+          [routing.IGNORE_SCRIPTS_ENVIRONMENT_VARIABLE]: "true",
+        }),
       })
     );
     expect(spawn).toHaveBeenNthCalledWith(
@@ -502,22 +553,93 @@ describe("host-specific Socket Firewall routing", () => {
       "pnpm",
       routing.TOKEN_FREE_REBUILD_ARGUMENTS,
       expect.objectContaining({
-        env: expect.not.objectContaining({ NODE_AUTH_TOKEN: expect.anything() }),
+        env: expect.objectContaining({
+          [routing.IGNORE_PNPMFILE_ENVIRONMENT_VARIABLE]: "true",
+        }),
       })
+    );
+    expect(spawnCalls[1]?.[2].env).not.toHaveProperty("NODE_AUTH_TOKEN");
+    expect(spawnCalls[1]?.[2].env).not.toHaveProperty(
+      routing.IGNORE_SCRIPTS_ENVIRONMENT_VARIABLE
     );
     expect(spawn).toHaveBeenNthCalledWith(
       3,
       "pnpm",
       routing.TOKEN_FREE_ROOT_REBUILD_ARGUMENTS,
       expect.objectContaining({
-        env: expect.not.objectContaining({ NODE_AUTH_TOKEN: expect.anything() }),
+        env: expect.objectContaining({
+          [routing.IGNORE_PNPMFILE_ENVIRONMENT_VARIABLE]: "true",
+        }),
       })
+    );
+    expect(spawnCalls[2]?.[2].env).not.toHaveProperty("NODE_AUTH_TOKEN");
+    expect(spawnCalls[2]?.[2].env).not.toHaveProperty(
+      routing.IGNORE_SCRIPTS_ENVIRONMENT_VARIABLE
     );
     expect(spawn).toHaveBeenCalledTimes(3);
     expect(JSON.stringify(spawn.mock.calls[0]?.slice(0, 2))).not.toContain(
       TEST_TOKEN
     );
     expect(JSON.stringify(consoleError.mock.calls)).not.toContain(TEST_TOKEN);
+  });
+
+  it("does not pass install-only flags to audit", () => {
+    const spawn = jest.fn(() => ({ status: 0 }));
+    jest.spyOn(console, "error").mockImplementation();
+
+    expect(
+      routing.runPnpm({
+        args: ["audit", "--fix"],
+        environment: socketEnvironment(socketCaPath),
+        repositoryRoot: REPOSITORY_ROOT,
+        spawn,
+      })
+    ).toBe(0);
+    const spawnCalls = spawn.mock.calls as unknown as Array<
+      [string, string[], { env: Environment }]
+    >;
+
+    expect(spawnCalls[0]?.[1]).toEqual(["audit", "--fix"]);
+    expect(spawnCalls[0]?.[2].env).toEqual(
+      expect.objectContaining({
+        [routing.IGNORE_PNPMFILE_ENVIRONMENT_VARIABLE]: "true",
+        [routing.IGNORE_SCRIPTS_ENVIRONMENT_VARIABLE]: "true",
+      })
+    );
+  });
+
+  it("quotes every inner pnpm argument before using the Windows shell", () => {
+    expect(
+      routing.pnpmSpawnArguments(["add", "safe&package"], "win32")
+    ).toEqual({
+      command: '"pnpm"',
+      commandArguments: ['"add"', '"safe&package"'],
+      shell: true,
+    });
+  });
+
+  it("rejects repository-local pnpm hook files", () => {
+    fs.writeFileSync(path.join(temporaryDirectory, ".npmrc"), validNpmrc());
+    fs.writeFileSync(
+      path.join(temporaryDirectory, "package.json"),
+      validPackageJson()
+    );
+    fs.writeFileSync(
+      path.join(temporaryDirectory, "pnpm-lock.yaml"),
+      validLockfile()
+    );
+    fs.writeFileSync(
+      path.join(temporaryDirectory, "pnpm-workspace.yaml"),
+      validWorkspace()
+    );
+    fs.writeFileSync(
+      path.join(temporaryDirectory, ".pnpmfile.cjs"),
+      "module.exports = {};\n"
+    );
+
+    expect(() => policy.validateRepositoryFiles(temporaryDirectory)).toThrow(
+      ".pnpmfile.cjs is not allowed"
+    );
   });
 
   it("rebuilds exactly the workspace-approved packages without auth", () => {
@@ -623,6 +745,27 @@ describe("host-specific Socket Firewall routing", () => {
 });
 
 describe("GitHub Actions package access", () => {
+  it("keeps the exact private package out of unauthenticated Dependabot updates", () => {
+    const dependabot = parseYaml(
+      fs.readFileSync(
+        path.join(REPOSITORY_ROOT, ".github/dependabot.yml"),
+        "utf8"
+      )
+    ) as {
+      updates?: Array<{
+        "package-ecosystem"?: string;
+        ignore?: Array<{ "dependency-name"?: string }>;
+      }>;
+    };
+    const npmUpdates = dependabot.updates?.find(
+      (entry) => entry["package-ecosystem"] === "npm"
+    );
+
+    expect(npmUpdates?.ignore).toContainEqual({
+      "dependency-name": policy.ALLOWED_PACKAGE_NAME,
+    });
+  });
+
   it("keeps package auth, Socket routing, and fork handling narrow", () => {
     const workflowDirectory = path.join(REPOSITORY_ROOT, ".github/workflows");
     const workflowFiles = fs

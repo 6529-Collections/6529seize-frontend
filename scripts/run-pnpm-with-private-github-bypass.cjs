@@ -10,6 +10,7 @@ const {
   validateRepositoryFiles,
   validateRepositoryPolicy,
 } = require("./private-github-packages-policy.cjs");
+const { quoteWindowsShellArgument } = require("./run-secure-pnpm.cjs");
 
 const REPOSITORY_ROOT = path.resolve(__dirname, "..");
 const LOOPBACK_NO_PROXY_ENTRIES = ["localhost", "127.0.0.1", "::1"];
@@ -23,7 +24,8 @@ const REMOVED_ROUTED_CONFIG_NAMES = new Set([
   "globalconfig",
   "npmglobalconfig",
 ]);
-const AUTHENTICATED_PNPM_ARGUMENTS = ["--ignore-scripts"];
+const IGNORE_PNPMFILE_ENVIRONMENT_VARIABLE = "npm_config_ignore_pnpmfile";
+const IGNORE_SCRIPTS_ENVIRONMENT_VARIABLE = "npm_config_ignore_scripts";
 const TOKEN_FREE_REBUILD_PACKAGES = [
   "@nestjs/core",
   "@openapitools/openapi-generator-cli",
@@ -146,9 +148,26 @@ function createRoutedEnvironment(environment) {
   return routedEnvironment;
 }
 
+function pnpmSpawnArguments(args, platform) {
+  if (platform !== "win32") {
+    return {
+      command: "pnpm",
+      commandArguments: args,
+      shell: false,
+    };
+  }
+
+  return {
+    command: quoteWindowsShellArgument("pnpm"),
+    commandArguments: args.map(quoteWindowsShellArgument),
+    shell: true,
+  };
+}
+
 function runPnpm({
   args = process.argv.slice(2),
   environment = process.env,
+  platform = process.platform,
   repositoryRoot = REPOSITORY_ROOT,
   spawn = spawnSync,
 }) {
@@ -160,16 +179,26 @@ function runPnpm({
   });
 
   const routedEnvironment = createRoutedEnvironment(environment);
+  const authenticatedEnvironment = {
+    ...routedEnvironment,
+    [IGNORE_PNPMFILE_ENVIRONMENT_VARIABLE]: "true",
+    [IGNORE_SCRIPTS_ENVIRONMENT_VARIABLE]: "true",
+  };
   console.error(
     `Secure pnpm routing: ${ALLOWED_REGISTRY_HOST} uses direct verified HTTPS; all other hosts use Socket Firewall.`
   );
 
-  const result = spawn("pnpm", [...args, ...AUTHENTICATED_PNPM_ARGUMENTS], {
-    cwd: repositoryRoot,
-    env: routedEnvironment,
-    stdio: "inherit",
-    shell: process.platform === "win32",
-  });
+  const authenticatedInvocation = pnpmSpawnArguments(args, platform);
+  const result = spawn(
+    authenticatedInvocation.command,
+    authenticatedInvocation.commandArguments,
+    {
+      cwd: repositoryRoot,
+      env: authenticatedEnvironment,
+      stdio: "inherit",
+      shell: authenticatedInvocation.shell,
+    }
+  );
 
   if (result.error) {
     throw result.error;
@@ -180,24 +209,28 @@ function runPnpm({
     return status;
   }
 
-  validateRepositoryPolicy({
-    repositoryRoot,
-    args,
-    environment: routedEnvironment,
-    validateEnvironmentOverrides: true,
-  });
+  validateRepositoryFiles(repositoryRoot);
 
-  const tokenFreeEnvironment = { ...routedEnvironment };
+  const tokenFreeEnvironment = { ...authenticatedEnvironment };
   delete tokenFreeEnvironment[AUTH_ENVIRONMENT_VARIABLE];
+  delete tokenFreeEnvironment[IGNORE_SCRIPTS_ENVIRONMENT_VARIABLE];
   console.error(
     "Secure pnpm routing: approved dependency lifecycle scripts rebuild without package credentials."
   );
-  const rebuildResult = spawn("pnpm", TOKEN_FREE_REBUILD_ARGUMENTS, {
-    cwd: repositoryRoot,
-    env: tokenFreeEnvironment,
-    stdio: "inherit",
-    shell: process.platform === "win32",
-  });
+  const rebuildInvocation = pnpmSpawnArguments(
+    TOKEN_FREE_REBUILD_ARGUMENTS,
+    platform
+  );
+  const rebuildResult = spawn(
+    rebuildInvocation.command,
+    rebuildInvocation.commandArguments,
+    {
+      cwd: repositoryRoot,
+      env: tokenFreeEnvironment,
+      stdio: "inherit",
+      shell: rebuildInvocation.shell,
+    }
+  );
   if (rebuildResult.error) {
     throw rebuildResult.error;
   }
@@ -207,12 +240,20 @@ function runPnpm({
     return rebuildStatus;
   }
 
-  const rootRebuildResult = spawn("pnpm", TOKEN_FREE_ROOT_REBUILD_ARGUMENTS, {
-    cwd: repositoryRoot,
-    env: tokenFreeEnvironment,
-    stdio: "inherit",
-    shell: process.platform === "win32",
-  });
+  const rootRebuildInvocation = pnpmSpawnArguments(
+    TOKEN_FREE_ROOT_REBUILD_ARGUMENTS,
+    platform
+  );
+  const rootRebuildResult = spawn(
+    rootRebuildInvocation.command,
+    rootRebuildInvocation.commandArguments,
+    {
+      cwd: repositoryRoot,
+      env: tokenFreeEnvironment,
+      stdio: "inherit",
+      shell: rootRebuildInvocation.shell,
+    }
+  );
   if (rootRebuildResult.error) {
     throw rootRebuildResult.error;
   }
@@ -241,13 +282,15 @@ module.exports = {
   LOOPBACK_NO_PROXY_ENTRIES,
   ROUTED_NO_PROXY,
   ROUTED_NO_PROXY_ENTRIES,
-  AUTHENTICATED_PNPM_ARGUMENTS,
+  IGNORE_PNPMFILE_ENVIRONMENT_VARIABLE,
+  IGNORE_SCRIPTS_ENVIRONMENT_VARIABLE,
   TOKEN_FREE_REBUILD_ARGUMENTS,
   TOKEN_FREE_REBUILD_PACKAGES,
   TOKEN_FREE_ROOT_REBUILD_ARGUMENTS,
   createRoutedEnvironment,
   isLoopbackProxy,
   parseNoProxy,
+  pnpmSpawnArguments,
   runPnpm,
   validateSocketEnvironment,
 };

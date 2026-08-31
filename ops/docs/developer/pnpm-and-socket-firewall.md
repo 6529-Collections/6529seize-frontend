@@ -76,10 +76,12 @@ intentionally rejected before pnpm starts. The repository can check that the tok
 present and used only for the approved host, but it cannot inspect the token's
 GitHub permissions.
 
-The authenticated fetch phase disables lifecycle scripts. After that phase
-succeeds and the package policy is checked again, the helper rebuilds the
-repository's explicitly approved dependencies without passing
-`NODE_AUTH_TOKEN` to pnpm or its lifecycle scripts.
+The authenticated fetch phase disables lifecycle scripts and pnpm hook files.
+Repository-local pnpm hooks and pnpm config dependencies are rejected before
+the command starts. After that phase succeeds and the package policy is checked
+again, the helper rebuilds the repository's explicitly approved dependencies
+without passing `NODE_AUTH_TOKEN` to pnpm or its lifecycle scripts. Pnpm hooks
+remain disabled during the token-free rebuild.
 
 The existing `6529` commands remain the only supported entrypoint. The secure
 pnpm helper checks the committed `.npmrc`, package manifest, lockfile integrity,
@@ -107,8 +109,17 @@ wrapper path:
 For an intentional broader pnpm update, use:
 
 ```bash
-6529 update:all
+(
+  read -rs NODE_AUTH_TOKEN
+  export NODE_AUTH_TOKEN
+  6529 update:all
+)
 ```
+
+Dependabot intentionally ignores the exact private package because its npm
+update job has no package credential. Update that one dependency manually with
+the secure wrapper and a temporary read-only token; do not add a Dependabot
+secret or broaden the registry exception.
 
 After bootstrap, prefer the bare `6529` command for day-to-day work while you
 are inside this repository. Outside the repo, `6529` should remain unavailable.
