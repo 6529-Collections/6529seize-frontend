@@ -18,12 +18,13 @@ This page owns only the scope handoff into network routes and cross-route scope 
   - `/network?page=1&group={groupId}`
   - `/network?group={groupId}`
   - `/network/activity?group={groupId}`
-- Scope controls: `/network` -> `Filter` -> groups list
+- Scope controls: `/network` -> `Filter` -> criteria builder or `Choose group`
 
 ## Entry Points
 
 - Open a group card on `/network/groups`.
-- Open `/network` and choose a group in `Filter`.
+- Open `/network`, build criteria in `Filter`, or select `Choose group` and
+  choose a saved group.
 - Open a deep link with `group={groupId}`.
 - Open `/network/activity` after scope is already active.
 
@@ -49,13 +50,17 @@ This page owns only the scope handoff into network routes and cross-route scope 
 6. Use `Clear selected group` to close the group summary and return to the
    default Network member view.
 7. Open `/network/activity` to view activity under the same scope.
-8. Return to `/network`, open `Filter`, then switch or clear scope.
+8. Return to `/network`, open `Filter`, then create another criteria-based
+   group, choose a saved group, or select `All Network members` to clear scope.
 
 ## Common Scenarios
 
 - Jump from a group card to a scoped identities leaderboard.
 - Keep one scope while moving between `/network` and `/network/activity`.
 - Reopen a saved deep link with `group=...` to restore a scoped view on first load.
+- Build a one-off Network audience from the same criteria controls available
+  during Wave group assignment, then save and apply it without leaving the
+  leaderboard.
 
 ## Loading and Consistency
 
@@ -71,12 +76,18 @@ This page owns only the scope handoff into network routes and cross-route scope 
 - Signing out or switching profiles while a group is selected reloads the
   group and member results for the new viewer. Results from the previous viewer
   are not reused.
+- Reopening the filter with an active group starts from that group's saved
+  criteria. Saving the draft creates a new group rather than changing the
+  original group.
 
 ## Failure and Recovery
 
 - If `/network/activity` looks unexpectedly scoped, open `/network`, clear scope in `Filter`, then reopen `/network/activity`.
 - If a deep link scope is stale, open `/network` and reselect or clear scope.
 - If URL edits do not change scope, apply scope through `/network` `Filter`.
+- If the selected group's criteria cannot be loaded, use `Try again` in the
+  filter sheet. Network does not replace the unavailable group with an empty
+  criteria draft.
 - If a group card is not openable, exit `Rep all`/`NIC all` first.
 - If `/network/activity` looks briefly unscoped, wait for scoped refetch to finish.
 
