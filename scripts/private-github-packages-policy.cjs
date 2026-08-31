@@ -1,6 +1,5 @@
 const fs = require("node:fs");
 const path = require("node:path");
-const YAML = require("yaml");
 
 const ALLOWED_SCOPE = "@6529-collections";
 const ALLOWED_PACKAGE_NAME = `${ALLOWED_SCOPE}/release-request`;
@@ -215,32 +214,211 @@ function validatePackageJson(packageJsonText) {
   }
 }
 
+function stripYamlQuotes(value) {
+  const trimmed = value.trim();
+  if (trimmed.length < 2) {
+    return trimmed;
+  }
+  const first = trimmed[0];
+  const last = trimmed[trimmed.length - 1];
+  return (first === "'" && last === "'") ||
+    (first === '"' && last === '"')
+    ? trimmed.slice(1, -1)
+    : trimmed;
+}
+
+function effectiveLockfileLines(lockfileText) {
+  const lines = [];
+  for (const line of lockfileText.split(/\r?\n/)) {
+    if (line.includes("\t")) {
+      throw policyError("pnpm-lock.yaml must not use tab indentation");
+    }
+    if (line.trim() === "" || line.trimStart().startsWith("#")) {
+      continue;
+    }
+    lines.push(line);
+  }
+  return lines;
+}
+
+function collectSectionEntries(lines, sectionName) {
+  const entries = new Set();
+  let foundSection = false;
+  let inSection = false;
+
+  for (const line of lines) {
+    if (line === `${sectionName}:`) {
+      if (foundSection) {
+        throw policyError(
+          `pnpm-lock.yaml contains duplicate ${sectionName}`
+        );
+      }
+      foundSection = true;
+      inSection = true;
+      continue;
+    }
+    if (inSection && /^\S/.test(line)) {
+      inSection = false;
+    }
+    if (!inSection) {
+      continue;
+    }
+
+    const entryMatch = /^ {2}([^ ].*):(?:\s+\{\})?\s*$/.exec(line);
+    if (!entryMatch) {
+      continue;
+    }
+    const entryKey = stripYamlQuotes(entryMatch[1]);
+    if (entries.has(entryKey)) {
+      throw policyError(
+        `pnpm-lock.yaml contains duplicate ${sectionName} entry ${entryKey}`
+      );
+    }
+    entries.add(entryKey);
+  }
+
+  if (!foundSection) {
+    throw policyError(`pnpm-lock.yaml must contain ${sectionName}`);
+  }
+  return entries;
+}
+
+function collectRootDevDependencies(lines) {
+  const dependencies = new Map();
+  let foundImporters = false;
+  let inImporters = false;
+  let importer = null;
+  let dependencyGroup = null;
+  let dependencyName = null;
+
+  for (const line of lines) {
+    if (line === "importers:") {
+      if (foundImporters) {
+        throw policyError("pnpm-lock.yaml contains duplicate importers");
+      }
+      foundImporters = true;
+      inImporters = true;
+      continue;
+    }
+    if (inImporters && /^\S/.test(line)) {
+      inImporters = false;
+    }
+    if (!inImporters) {
+      continue;
+    }
+    const importerMatch = /^ {2}([^ ].*):\s*$/.exec(line);
+    if (importerMatch) {
+      importer = stripYamlQuotes(importerMatch[1]);
+      dependencyGroup = null;
+      dependencyName = null;
+      continue;
+    }
+    const dependencyGroupMatch = /^ {4}([^ ].*):\s*$/.exec(line);
+    if (dependencyGroupMatch) {
+      dependencyGroup = dependencyGroupMatch[1];
+      dependencyName = null;
+      continue;
+    }
+    const dependencyMatch = /^ {6}([^ ].*):\s*$/.exec(line);
+    if (dependencyMatch) {
+      dependencyName = stripYamlQuotes(dependencyMatch[1]);
+      if (importer === "." && dependencyGroup === "devDependencies") {
+        if (dependencies.has(dependencyName)) {
+          throw policyError(
+            `pnpm-lock.yaml contains duplicate root dependency ${dependencyName}`
+          );
+        }
+        dependencies.set(dependencyName, {});
+      }
+      continue;
+    }
+    const dependencyFieldMatch = /^ {8}(specifier|version):\s*(.+)\s*$/.exec(
+      line
+    );
+    if (
+      dependencyFieldMatch &&
+      importer === "." &&
+      dependencyGroup === "devDependencies" &&
+      dependencies.has(dependencyName)
+    ) {
+      dependencies.get(dependencyName)[dependencyFieldMatch[1]] =
+        stripYamlQuotes(dependencyFieldMatch[2]);
+    }
+  }
+
+  if (!foundImporters) {
+    throw policyError("pnpm-lock.yaml must contain importers");
+  }
+  return dependencies;
+}
+
+function collectPrivatePackageResolution(lines) {
+  let inPackages = false;
+  let packageKey = null;
+  let resolution = null;
+
+  for (const line of lines) {
+    if (line === "packages:") {
+      inPackages = true;
+      continue;
+    }
+    if (inPackages && /^\S/.test(line)) {
+      break;
+    }
+    if (!inPackages) {
+      continue;
+    }
+    const entryMatch = /^ {2}([^ ].*):(?:\s+\{\})?\s*$/.exec(line);
+    if (entryMatch) {
+      packageKey = stripYamlQuotes(entryMatch[1]);
+      continue;
+    }
+    if (
+      packageKey !== ALLOWED_PACKAGE_SPEC ||
+      !/^ {4}resolution:/.test(line)
+    ) {
+      continue;
+    }
+    const match =
+      /^ {4}resolution: \{integrity: ([^,{}\s]+), tarball: ([^,{}\s]+)\}\s*$/.exec(
+        line
+      );
+    if (!match || resolution !== null) {
+      throw policyError(
+        `pnpm-lock.yaml contains a non-canonical resolution for ${packageKey}`
+      );
+    }
+    resolution = { integrity: match[1], tarball: match[2] };
+  }
+
+  return resolution;
+}
+
+function parseCanonicalLockfile(lockfileText) {
+  const lines = effectiveLockfileLines(lockfileText);
+  const packageEntries = collectSectionEntries(lines, "packages");
+
+  return {
+    effectiveText: lines.join("\n"),
+    packageEntries,
+    resolution: collectPrivatePackageResolution(lines),
+    rootDevDependencies: collectRootDevDependencies(lines),
+    snapshotEntries: collectSectionEntries(lines, "snapshots"),
+  };
+}
+
 function validateLockfile(lockfileText) {
-  let lockfile;
-  try {
-    lockfile = YAML.parse(lockfileText);
-  } catch (error) {
-    throw policyError(`pnpm-lock.yaml is invalid YAML: ${error.message}`);
-  }
-
-  if (lockfile === null || typeof lockfile !== "object") {
-    throw policyError("pnpm-lock.yaml must contain an object");
-  }
-
-  const packageEntries = lockfile.packages;
-  const snapshotEntries = lockfile.snapshots;
-  if (
-    packageEntries === null ||
-    typeof packageEntries !== "object" ||
-    snapshotEntries === null ||
-    typeof snapshotEntries !== "object"
-  ) {
-    throw policyError("pnpm-lock.yaml must contain packages and snapshots");
-  }
+  const {
+    effectiveText,
+    packageEntries,
+    resolution,
+    rootDevDependencies,
+    snapshotEntries,
+  } = parseCanonicalLockfile(lockfileText);
 
   for (const entryKey of [
-    ...Object.keys(packageEntries),
-    ...Object.keys(snapshotEntries),
+    ...packageEntries.keys(),
+    ...snapshotEntries,
   ]) {
     const scopedPackageName = entryKey.match(
       /^(@6529-collections\/[A-Za-z0-9._-]+)(?:@|$)/
@@ -260,34 +438,24 @@ function validateLockfile(lockfileText) {
     }
   }
 
-  const packageEntry = packageEntries[ALLOWED_PACKAGE_SPEC];
-  const resolution = packageEntry?.resolution;
   if (
-    packageEntry === null ||
-    typeof packageEntry !== "object" ||
     resolution === null ||
-    typeof resolution !== "object" ||
+    resolution === undefined ||
     resolution.integrity !== ALLOWED_INTEGRITY ||
-    resolution.tarball !== ALLOWED_TARBALL_URL ||
-    Object.keys(resolution).sort().join(",") !== "integrity,tarball"
+    resolution.tarball !== ALLOWED_TARBALL_URL
   ) {
     throw policyError(
       `${ALLOWED_PACKAGE_SPEC} must keep its exact tarball and integrity`
     );
   }
 
-  if (
-    snapshotEntries[ALLOWED_PACKAGE_SPEC] === null ||
-    typeof snapshotEntries[ALLOWED_PACKAGE_SPEC] !== "object"
-  ) {
+  if (!snapshotEntries.has(ALLOWED_PACKAGE_SPEC)) {
     throw policyError(
       `pnpm-lock.yaml must contain the exact ${ALLOWED_PACKAGE_SPEC} snapshot`
     );
   }
 
-  const importerEntry = lockfile.importers?.["."]?.devDependencies?.[
-    ALLOWED_PACKAGE_NAME
-  ];
+  const importerEntry = rootDevDependencies.get(ALLOWED_PACKAGE_NAME);
   if (
     importerEntry?.specifier !== ALLOWED_PACKAGE_VERSION ||
     importerEntry?.version !== ALLOWED_PACKAGE_VERSION
@@ -297,23 +465,7 @@ function validateLockfile(lockfileText) {
     );
   }
 
-  const registryUrls = [];
-  const collectRegistryUrls = (value) => {
-    if (typeof value === "string") {
-      for (const candidate of value.match(/https?:\/\/[^\s,'"}\]]+/g) ?? []) {
-        registryUrls.push(candidate);
-      }
-      return;
-    }
-    if (Array.isArray(value)) {
-      value.forEach(collectRegistryUrls);
-      return;
-    }
-    if (value !== null && typeof value === "object") {
-      Object.values(value).forEach(collectRegistryUrls);
-    }
-  };
-  collectRegistryUrls(lockfile);
+  const registryUrls = effectiveText.match(/https?:\/\/[^\s,'"}\]]+/g) ?? [];
 
   const allowedRegistryUrls = [];
   for (const registryUrl of registryUrls) {

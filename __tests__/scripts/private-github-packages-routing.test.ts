@@ -154,6 +154,22 @@ function socketEnvironment(caPath: string): Environment {
 }
 
 describe("private GitHub Packages repository policy", () => {
+  it("loads before node_modules exists by using only Node built-ins", () => {
+    const policySource = fs.readFileSync(
+      path.join(
+        REPOSITORY_ROOT,
+        "scripts",
+        "private-github-packages-policy.cjs"
+      ),
+      "utf8"
+    );
+    const requiredModules = [
+      ...policySource.matchAll(/require\(["']([^"']+)["']\)/g),
+    ].map((match) => match[1]);
+
+    expect(requiredModules).toEqual(["node:fs", "node:path"]);
+  });
+
   it("accepts only the exact scope, host, package, version, and lock integrity", () => {
     expect(() => policy.validateNpmrc(validNpmrc())).not.toThrow();
     expect(() => policy.validatePackageJson(validPackageJson())).not.toThrow();
