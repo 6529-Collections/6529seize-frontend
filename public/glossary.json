@@ -391,6 +391,7 @@
         "The Profile Brain tab surfaces Brain-related profile activity and wave context.",
         "Brain views include activity and wave sidebar surfaces where available.",
         "Created Waves lists accessible non-direct-message root waves and subwaves created by the profile, ordered by that profile's latest post in each wave; waves without a qualifying profile post appear after active waves.",
+        "When a profile has no accessible created waves, the Created Waves section is omitted instead of showing an empty message.",
         "Recently Active In lists accessible non-direct-message root waves and subwaves ordered by the profile's latest post, whether or not the profile created them; a wave can appear in both sections.",
         "Each row labels the profile-specific time as Last post. Created Waves also labels its separate total wave posts count, which includes retained CHAT posts by all authors; Recently Active In does not show that wave-wide total.",
         "Created Waves initially shows five rows on desktop, and both lists provide Load more controls so cursor pages remain reachable.",
