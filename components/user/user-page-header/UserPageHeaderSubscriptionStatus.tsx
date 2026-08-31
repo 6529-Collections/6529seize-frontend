@@ -128,10 +128,10 @@ function SubscriptionUnknown({
     <Link
       href={href}
       className={clsx(
-        "tw-group tw-flex tw-items-center tw-gap-2 tw-text-left tw-no-underline tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400",
+        "tw-group tw-flex tw-gap-2 tw-text-left tw-no-underline tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400",
         layout === "subtle"
-          ? "tw-w-fit tw-justify-end"
-          : "tw-w-full tw-justify-between",
+          ? "tw-w-fit tw-items-start tw-justify-end"
+          : "tw-w-full tw-items-center tw-justify-between",
         isSubtle
           ? `${getSubtleLayoutClass(layout)} desktop-hover:hover:tw-bg-white/[0.025]`
           : "tw-min-h-14 tw-rounded-xl tw-p-2.5 sm:tw-w-[22rem]",
@@ -139,23 +139,32 @@ function SubscriptionUnknown({
         !isSubtle && USER_PAGE_HEADER_INTERACTIVE_SURFACE_CLASS
       )}
     >
-      <span className="tw-min-w-0">
+      <span
+        className={clsx(
+          "tw-min-w-0",
+          isSubtle && "tw-flex tw-items-baseline",
+          layout === "subtle" && "tw-gap-2 tw-whitespace-nowrap",
+          layout === "wide-row" && "tw-flex-1 tw-flex-wrap tw-gap-1"
+        )}
+      >
         <span
           className={clsx(
-            "tw-block tw-font-medium",
+            "tw-font-medium",
             isSubtle
               ? "tw-text-[11px] tw-font-semibold tw-uppercase tw-tracking-[0.06em] tw-text-iron-500"
-              : "tw-text-[13px] tw-text-iron-100"
+              : "tw-text-[13px] tw-text-iron-100",
+            isSubtle ? "tw-inline-block" : "tw-block"
           )}
         >
           {t(locale, SUBSCRIPTIONS_TITLE_KEY)}
         </span>
         <span
           className={clsx(
-            "tw-mt-0.5 tw-block tw-transition-colors",
+            "tw-block tw-transition-colors",
             isSubtle
-              ? "tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400 group-focus-visible:tw-text-white desktop-hover:group-hover:tw-text-white"
-              : `tw-text-[11px] ${MUTED_TEXT_CLASS}`
+              ? "tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-200 group-focus-visible:tw-text-white desktop-hover:group-hover:tw-text-white"
+              : `tw-text-[11px] ${MUTED_TEXT_CLASS}`,
+            isSubtle ? "tw-mt-0" : "tw-mt-0.5"
           )}
         >
           {t(locale, "subscriptions.coverage.status.unknown")}
@@ -239,27 +248,26 @@ function SubscriptionSubtle({
     <Link
       href={href}
       className={clsx(
-        "tw-group tw-flex tw-items-center tw-gap-2 tw-text-left tw-no-underline tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400",
-        isCompact ? "tw-w-max tw-justify-end" : "tw-w-full tw-justify-between",
+        "tw-group tw-flex tw-gap-2 tw-text-left tw-no-underline tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400",
+        isCompact
+          ? "tw-w-max tw-items-start tw-justify-end"
+          : "tw-w-full tw-items-center tw-justify-between",
         `${getSubtleLayoutClass(layout)} desktop-hover:hover:tw-bg-white/[0.025]`
       )}
     >
       <SubscriptionStatusIcon tone={tone} />
       <span
         className={clsx(
-          "tw-min-w-0",
-          isCompact ? "tw-whitespace-nowrap" : "tw-flex-1"
+          "tw-flex tw-min-w-0 tw-items-baseline",
+          isCompact
+            ? "tw-gap-x-2 tw-whitespace-nowrap"
+            : "tw-flex-1 tw-flex-wrap tw-gap-x-1"
         )}
       >
-        <span
-          className={clsx(
-            "tw-block tw-text-[11px] tw-font-semibold tw-uppercase tw-tracking-[0.06em] tw-text-iron-500",
-            !isCompact && "tw-truncate"
-          )}
-        >
+        <span className="tw-inline-block tw-text-[11px] tw-font-semibold tw-uppercase tw-tracking-[0.06em] tw-text-iron-500">
           {t(locale, SUBSCRIPTIONS_TITLE_KEY)}
         </span>
-        <span className="tw-mt-0.5 tw-flex tw-min-w-0 tw-items-baseline tw-gap-2 tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400">
+        <span className="tw-flex tw-min-w-0 tw-items-baseline tw-gap-2 tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-200">
           <span
             className={clsx(
               "tw-min-w-0 tw-transition-colors group-focus-visible:tw-text-white desktop-hover:group-hover:tw-text-white",
