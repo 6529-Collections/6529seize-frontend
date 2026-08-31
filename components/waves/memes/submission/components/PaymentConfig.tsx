@@ -135,6 +135,7 @@ const PaymentConfig: React.FC<PaymentConfigProps> = ({
         className="tw-pb-0"
       >
         <EnsAddressInput
+          variant="dark"
           value={address}
           placeholder="0x... or ENS"
           onAddressChange={handleAddressChange}
