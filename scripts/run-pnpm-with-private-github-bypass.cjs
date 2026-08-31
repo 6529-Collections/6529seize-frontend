@@ -132,8 +132,8 @@ function createRoutedEnvironment(environment) {
     no_proxy: ROUTED_NO_PROXY,
   };
 
-  delete routedEnvironment.SSL_CERT_FILE;
-  delete routedEnvironment.SSL_CERT_DIR;
+  removeEnvironmentVariableCaseInsensitive(routedEnvironment, "SSL_CERT_FILE");
+  removeEnvironmentVariableCaseInsensitive(routedEnvironment, "SSL_CERT_DIR");
   for (const key of Object.keys(routedEnvironment)) {
     const normalizedKey = key.toLowerCase();
     if (!normalizedKey.startsWith("npm_config_")) {

@@ -535,16 +535,24 @@ describe("host-specific Socket Firewall routing", () => {
     expect(routed.npm_config_globalconfig).toBeUndefined();
   });
 
-  it("removes mixed-case pnpm CA and global config overrides", () => {
+  it("removes mixed-case TLS and pnpm config overrides", () => {
     const environment = socketEnvironment(socketCaPath);
     environment["npm_config_GlobalConfig"] = "/tmp/alternate-globalconfig";
     environment["NpM_CoNfIg_CaFiLe"] = "/tmp/alternate-ca";
+    environment["sSl_CeRt_FiLe"] = "/tmp/alternate-cert-file";
+    environment["SsL_cErT_dIr"] = "/tmp/alternate-cert-dir";
     environment["npm_config_store_dir"] = "/tmp/pnpm-store";
 
     const routed = routing.createRoutedEnvironment(environment);
 
     expect(routed["npm_config_GlobalConfig"]).toBeUndefined();
     expect(routed["NpM_CoNfIg_CaFiLe"]).toBeUndefined();
+    expect(
+      Object.keys(routed).some((key) => key.toLowerCase() === "ssl_cert_file")
+    ).toBe(false);
+    expect(
+      Object.keys(routed).some((key) => key.toLowerCase() === "ssl_cert_dir")
+    ).toBe(false);
     expect(routed["npm_config_store_dir"]).toBe("/tmp/pnpm-store");
   });
 
