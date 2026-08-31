@@ -238,6 +238,22 @@ describe("private GitHub Packages repository policy", () => {
     ).toThrow("cannot configure pnpm hooks or config dependencies");
   });
 
+  it("rejects workspace registry, credential, proxy, CA, and TLS settings", () => {
+    for (const setting of [
+      "strict-ssl: false",
+      'cafile: "/tmp/untrusted-ca.pem"',
+      'https-proxy: "https://proxy.example"',
+      '"@other:registry": "https://registry.example"',
+      '"//registry.example/:_authToken": "not-allowed"',
+    ]) {
+      expect(() =>
+        policy.validateWorkspace(`${validWorkspace()}${setting}\n`)
+      ).toThrow(
+        "cannot configure registry, credential, proxy, CA, or TLS overrides"
+      );
+    }
+  });
+
   it("fails closed when NODE_AUTH_TOKEN is missing or malformed", () => {
     expect(() => policy.validateAuthEnvironment({})).toThrow(
       "NODE_AUTH_TOKEN is required"

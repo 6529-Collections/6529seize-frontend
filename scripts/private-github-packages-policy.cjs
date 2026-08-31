@@ -35,6 +35,14 @@ const FORBIDDEN_NPMRC_CONFIG_NAMES = new Set([
   "strictssl",
   "userconfig",
 ]);
+const FORBIDDEN_WORKSPACE_CONFIG_NAMES = new Set([
+  ...FORBIDDEN_NPMRC_CONFIG_NAMES,
+  "auth",
+  "authtoken",
+  "password",
+  "token",
+  "username",
+]);
 const FORBIDDEN_PROJECT_LOCATION_OPTION_NAMES = new Set([
   "c",
   "configdir",
@@ -764,7 +772,7 @@ function validateWorkspace(workspaceText) {
     const semanticLine = semanticYamlLine(line);
     effectiveLines.push(semanticLine);
 
-    const topLevelKey = /^([^\s:#][^:]*):/.exec(semanticLine)?.[1];
+    const topLevelKey = /^([^\s#].*?):(?:\s|$)/.exec(semanticLine)?.[1];
     const normalizedTopLevelKey = topLevelKey
       ?.toLowerCase()
       .replace(/[^a-z0-9]/g, "");
@@ -774,6 +782,18 @@ function validateWorkspace(workspaceText) {
     ) {
       throw policyError(
         "pnpm-workspace.yaml cannot configure pnpm hooks or config dependencies"
+      );
+    }
+    if (
+      normalizedTopLevelKey !== undefined &&
+      [...FORBIDDEN_WORKSPACE_CONFIG_NAMES].some(
+        (configName) =>
+          normalizedTopLevelKey === configName ||
+          normalizedTopLevelKey.endsWith(configName)
+      )
+    ) {
+      throw policyError(
+        "pnpm-workspace.yaml cannot configure registry, credential, proxy, CA, or TLS overrides"
       );
     }
     if (normalizedTopLevelKey === "packages") {
