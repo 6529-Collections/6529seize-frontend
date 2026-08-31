@@ -39,7 +39,11 @@ const UploadArea: React.FC<UploadAreaProps> = ({
       </div>
     </div>
 
-    <div className="tw-relative tw-z-10 tw-flex tw-min-h-0 tw-flex-col tw-items-center tw-justify-center tw-py-3">
+    <div
+      className={`tw-relative tw-z-10 tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-items-center tw-py-3 ${
+        error ? "tw-justify-end" : "tw-justify-center"
+      }`}
+    >
       {/* Abstract art-themed upload indicator */}
       <div className="tw-relative tw-mb-2">
         <div className="tw-w-32 tw-h-32 tw-relative">
