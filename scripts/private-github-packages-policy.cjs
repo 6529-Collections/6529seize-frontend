@@ -466,6 +466,20 @@ function semanticYamlLine(rawLine) {
   return semanticLine;
 }
 
+function workspaceUrlHostnames(semanticLines) {
+  const hostnames = [];
+  for (const line of semanticLines) {
+    const urls = line.match(/(?:https?:)?\/\/[^\s,}\]]+/gi) ?? [];
+    for (const url of urls) {
+      const hostname = urlHostname(url.startsWith("//") ? `https:${url}` : url);
+      if (hostname !== null) {
+        hostnames.push(hostname);
+      }
+    }
+  }
+  return hostnames;
+}
+
 function effectiveLockfileLines(lockfileText) {
   const lines = [];
   for (const line of lockfileText.split(/\r?\n/)) {
@@ -805,11 +819,7 @@ function validateWorkspace(workspaceText) {
       `pnpm-workspace.yaml cannot indirectly resolve another ${ALLOWED_SCOPE} package`
     );
   }
-  if (
-    effectiveLines.some((line) =>
-      line.toLowerCase().includes(ALLOWED_REGISTRY_HOST)
-    )
-  ) {
+  if (workspaceUrlHostnames(effectiveLines).includes(ALLOWED_REGISTRY_HOST)) {
     throw policyError(
       `pnpm-workspace.yaml cannot contain ${ALLOWED_REGISTRY_HOST} resolver URLs`
     );

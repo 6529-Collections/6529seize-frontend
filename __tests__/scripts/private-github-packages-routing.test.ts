@@ -364,6 +364,11 @@ describe("private GitHub Packages repository policy", () => {
         `${validWorkspace()}overrides:\n  innocent: "https://npm.pkg.github.com/download/another-package"\n`
       )
     ).toThrow("cannot contain npm.pkg.github.com resolver URLs");
+    expect(() =>
+      policy.validateWorkspace(
+        `${validWorkspace()}overrides:\n  innocent: "https://packages.example.invalid/npm.pkg.github.com/download/package"\n`
+      )
+    ).not.toThrow();
   });
 
   it("checks dependency fields without rejecting unrelated package text", () => {
