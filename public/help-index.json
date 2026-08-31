@@ -1330,7 +1330,7 @@
         "Profile pages are opened from a real handle or wallet-like route target; use Network, Waves, groups, or a known handle to open the exact profile.",
         "Profile pages organize Identity, Curation, Collected, Subscriptions, Proxy, Brain, and xTDH surfaces through tabs.",
         "On their own profile, owners use direct field-level edit controls on fine-pointer desktop layouts; smaller and touch-first layouts provide an Edit profile hub for the profile cover, profile picture, name, classification, and About.",
-        "Preferences is a separate owner action in the far-right header area on desktop and an icon-only action beside Edit profile on touch-first and phone layouts; subscription coverage stays a quieter contextual surface beneath Preferences on desktop or across the header below the identity block on smaller screens.",
+        "Preferences is a separate owner action in the right-side area below the banner on desktop and an icon-only action beside Edit profile in the banner's top-right corner on touch-first and phone layouts; subscription coverage stays a quieter contextual surface beneath Preferences on desktop or across the header below the identity block on smaller screens.",
         "Editable profile surfaces require the connected profile owner.",
         "Profile editing, profile-header Preferences, and owner subscription coverage are hidden while an active profile proxy is in use."
       ],
@@ -1537,6 +1537,7 @@
         "The Profile Brain tab surfaces Brain-related profile activity and wave context.",
         "Brain views include activity and wave sidebar surfaces where available.",
         "Created Waves lists accessible non-direct-message root waves and subwaves created by the profile, ordered by that profile's latest post in each wave; waves without a qualifying profile post appear after active waves.",
+        "When a profile has no accessible created waves, the Created Waves section is omitted instead of showing an empty message.",
         "Recently Active In lists accessible non-direct-message root waves and subwaves ordered by the profile's latest post, whether or not the profile created them; a wave can appear in both sections.",
         "Each row labels the profile-specific time as Last post. Created Waves also labels its separate total wave posts count, which includes retained CHAT posts by all authors; Recently Active In does not show that wave-wide total.",
         "Created Waves initially shows five rows on desktop, and both lists provide Load more controls so cursor pages remain reachable.",
@@ -3146,6 +3147,8 @@
         "The Memes - Main Stage is a Memes wave context, not the /the-memes collection browse or mint route.",
         "Submission availability depends on login, proxy mode, participation eligibility, the submission window, and per-user submission limits.",
         "If the submit control is hidden or shows a restriction icon or label, select or focus the restriction control to read why submission is unavailable, then recover by logging in, disabling proxy mode, waiting for the submission window, or freeing submission capacity.",
+        "In the Artwork step, Continue remains available before required fields are complete, except while an interactive artwork hash is being verified; selecting Continue turns every missing or invalid field and the missing media control red, shows inline recovery messages, and focuses the first missing item in form order.",
+        "On larger viewports the artwork remains visible while the metadata form scrolls independently. On smaller viewports the complete form scrolls as one page, focused text fields move into view when the software keyboard opens, and the native modal shrinks to keep its action bar above the keyboard.",
         "On The Memes Main Stage, the desktop How to Submit control and native app lock both open Unlock submissions with the current 50,000 MemesNominee REP requirement, live progress, and a Get nominated action.",
         "Use the wave composer and Memes-specific submission surfaces when participating in Memes waves."
       ],

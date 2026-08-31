@@ -289,6 +289,27 @@ const REP_CATEGORY_MESSAGES = objectMessages("rep.categories", {
   "wave.loadingMore": "Loading...",
 } as const);
 
+const USER_PROFILE_REP_MESSAGES = objectMessages("user.profile.rep", {
+  "contributors.raters.one": "{count} rater",
+  "contributors.raters.other": "{count} raters",
+  "contributors.receivers.one": "{count} receiver",
+  "contributors.receivers.other": "{count} receivers",
+  "contributors.viewRaters.one": "View {count} rater",
+  "contributors.viewRaters.other": "View {count} raters",
+  "contributors.viewReceivers.one": "View {count} receiver",
+  "contributors.viewReceivers.other": "View {count} receivers",
+  "nic.yourRating": "Your rating: {value}",
+  "nic.rateAction": "Rate NIC",
+  "rep.assignedToYou": "Assigned to you: {value}",
+  "rep.youAssigned": "You assigned: {value}",
+  "rep.grantAction": "Grant Rep",
+  "categories.loadMore": "Load more",
+  "categories.loadingMore": "Loading...",
+  "categories.more": "+{count} more",
+  "empty.given": "No rep given yet.",
+  "empty.received": "No rep received yet.",
+} as const);
+
 // Rep-category validation copy. Kept as its own group with unquoted keys
 // (not merged into the big REP block above) so its lines don't extend that
 // block's quoted-key run — which the duplication detector matches against
@@ -448,6 +469,11 @@ const MEMES_QUICK_VOTE_MESSAGES = objectMessages("memes.quickVote", {
   unrated: "{count} unrated",
   summary: "{leftThisRound}, {unrated}",
   inMemesWave: "{leftThisRound}, {unrated} in the memes wave",
+} as const);
+
+const MEMES_SUBMISSION_MESSAGES = objectMessages("memes.submission", {
+  "media.missingUpload": "Select artwork or choose Interactive HTML.",
+  "media.missingInteractive": "Enter a valid hash or choose Upload File.",
 } as const);
 
 const MEMES_WAVE_FOOTER_MESSAGES = objectMessages("memes.waveFooter", {
@@ -3550,6 +3576,7 @@ export const EN_US_MESSAGES = {
   ...REVIEWBOT_USAGE_MESSAGES,
   ...REMEMES_DETAIL_MESSAGES,
   ...REP_CATEGORY_MESSAGES,
+  ...USER_PROFILE_REP_MESSAGES,
   ...REP_CATEGORY_VALIDATION_MESSAGES,
   ...CREATE_WAVE_DRAFTS_MESSAGES,
   ...MEDIA_VIDEO_MESSAGES,
@@ -3570,6 +3597,7 @@ export const EN_US_MESSAGES = {
   ...PROFILE_CURATION_MESSAGES,
   ...WAVE_SCORE_NAVIGATION_MESSAGES,
   ...MEMES_QUICK_VOTE_MESSAGES,
+  ...MEMES_SUBMISSION_MESSAGES,
   ...MEMES_WAVE_FOOTER_MESSAGES,
   ...DROP_REACTION_MESSAGES,
   ...WAVES_MOBILE_MESSAGES,

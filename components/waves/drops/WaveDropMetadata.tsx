@@ -20,13 +20,13 @@ const MetadataItem: React.FC<{ label: string; value: string }> = ({
   const tooltipId = buildTooltipId("metadata", label, value);
 
   return (
-    <div className="tw-flex tw-flex-col tw-gap-y-1.5 tw-rounded-md tw-bg-iron-800 tw-px-2 tw-py-1">
-      <span className="tw-mr-1.5 tw-text-xs tw-font-normal tw-uppercase tw-text-iron-400">
+    <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-y-1.5 tw-overflow-hidden tw-rounded-md tw-bg-iron-800 tw-px-2 tw-py-1">
+      <span className="tw-mr-1.5 tw-min-w-0 tw-max-w-full tw-break-words tw-text-xs tw-font-normal tw-uppercase tw-text-iron-400">
         {label}:
       </span>
       <>
         <span
-          className="tw-truncate tw-text-xs tw-font-medium tw-text-iron-50"
+          className="tw-min-w-0 tw-truncate tw-text-xs tw-font-medium tw-text-iron-50"
           data-tooltip-id={tooltipId}
         >
           {value}

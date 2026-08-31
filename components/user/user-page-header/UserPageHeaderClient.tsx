@@ -68,6 +68,7 @@ type Props = {
 };
 
 const PROFILE_PREFERENCES_BUTTON_KEY = "profilePreferences.button";
+const ABOUT_STATEMENT_TYPE: CicStatement["statement_type"] = STATEMENT_TYPE.BIO;
 
 export default function UserPageHeaderClient({
   profile: initialProfile,
@@ -157,7 +158,7 @@ export default function UserPageHeaderClient({
   ): CicStatement | null =>
     statementsList?.find(
       (statement) =>
-        statement.statement_type === STATEMENT_TYPE.BIO &&
+        statement.statement_type === ABOUT_STATEMENT_TYPE &&
         statement.statement_group === STATEMENT_GROUP.GENERAL
     ) ?? null;
 
