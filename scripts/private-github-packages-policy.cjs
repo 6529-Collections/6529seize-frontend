@@ -819,7 +819,11 @@ function validateWorkspace(workspaceText) {
       `pnpm-workspace.yaml cannot indirectly resolve another ${ALLOWED_SCOPE} package`
     );
   }
-  if (workspaceUrlHostnames(effectiveLines).includes(ALLOWED_REGISTRY_HOST)) {
+  if (
+    workspaceUrlHostnames(effectiveLines).some(
+      (hostname) => hostname === ALLOWED_REGISTRY_HOST
+    )
+  ) {
     throw policyError(
       `pnpm-workspace.yaml cannot contain ${ALLOWED_REGISTRY_HOST} resolver URLs`
     );
