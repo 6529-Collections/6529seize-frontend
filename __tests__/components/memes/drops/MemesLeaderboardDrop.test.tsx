@@ -193,7 +193,7 @@ test("passes the drop to vote summary and opens vote details without opening the
 
   expect(onClick).not.toHaveBeenCalled();
   expect(mockVoteDetailsTrigger).toHaveBeenCalledWith(
-    expect.objectContaining({ drop, density: "compact" })
+    expect.objectContaining({ drop, visualVariant: "memes" })
   );
 });
 
