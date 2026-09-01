@@ -316,7 +316,8 @@ export default function NotificationsCauseFilter({
           showHeaderDivider
         >
           <div className="tw-px-4 sm:tw-px-6">
-            <div role="group" aria-label={filterSheetTitle}>
+            <fieldset className="tw-m-0 tw-min-w-0 tw-border-0 tw-p-0">
+              <legend className="tw-sr-only">{filterSheetTitle}</legend>
               <ul className="tw-m-0 tw-flex tw-list-none tw-flex-col tw-gap-1 tw-p-0">
                 <FilterSheetItem
                   title={t(
@@ -335,7 +336,7 @@ export default function NotificationsCauseFilter({
                   />
                 ))}
               </ul>
-            </div>
+            </fieldset>
           </div>
         </MobileWrapperDialog>
       </div>
