@@ -1,9 +1,6 @@
-import React from "react";
 import { render, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import GroupCard, {
-  GroupCardState,
-} from "@/components/groups/page/list/card/GroupCard";
+import GroupCard from "@/components/groups/page/list/card/GroupCard";
 import { AuthContext } from "@/components/auth/Auth";
 import { useRouter } from "next/navigation";
 
@@ -13,28 +10,9 @@ jest.mock("next/navigation", () => ({
   usePathname: () => "/",
 }));
 
-jest.mock(
-  "@/components/groups/page/list/card/GroupCardView",
-  () => (props: any) => (
-    <div data-testid="view">
-      {props.setState && (
-        <button
-          type="button"
-          onClick={(event) => {
-            event.stopPropagation();
-            props.setState(GroupCardState.REP);
-          }}
-        >
-          Rep all
-        </button>
-      )}
-    </div>
-  )
-);
-jest.mock(
-  "@/components/groups/page/list/card/vote-all/GroupCardVoteAll",
-  () => (props: any) => <div data-testid={`vote-${props.matter}`} />
-);
+jest.mock("@/components/groups/page/list/card/GroupCardView", () => () => (
+  <div data-testid="view" />
+));
 
 const push = jest.fn();
 (useRouter as jest.Mock).mockReturnValue({ push });
@@ -102,36 +80,6 @@ describe("GroupCard", () => {
     await user.keyboard(" ");
 
     expect(push).toHaveBeenCalledWith(`/network?page=1&group=${group.id}`);
-  });
-
-  it("does not navigate when a nested action is clicked", () => {
-    const setActive = jest.fn();
-    function CardHarness() {
-      const [activeGroupId, setActiveGroupId] = React.useState<string | null>(
-        null
-      );
-      return (
-        <AuthContext.Provider
-          value={{ connectedProfile: { handle: "me" } } as any}
-        >
-          <GroupCard
-            group={group}
-            activeGroupIdVoteAll={activeGroupId}
-            setActiveGroupIdVoteAll={(value) => {
-              setActive(value);
-              setActiveGroupId(value);
-            }}
-          />
-        </AuthContext.Provider>
-      );
-    }
-    const { getByRole, queryByRole } = render(<CardHarness />);
-
-    fireEvent.click(getByRole("button", { name: "Rep all" }));
-
-    expect(setActive).toHaveBeenCalledWith(group.id);
-    expect(push).not.toHaveBeenCalled();
-    expect(queryByRole("link", { name: "Open g" })).not.toBeInTheDocument();
   });
 
   it("does not activate whole-card navigation for placeholders", () => {

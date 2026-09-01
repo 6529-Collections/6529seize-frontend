@@ -161,5 +161,4 @@ unavailable` without exposing the group id or treating the scope as public.
 - [Wave Right Sidebar Trending Drops](feature-right-sidebar-trending-drops.md)
 - [Wave Creation Group Access and Permissions](../create/feature-groups-step.md)
 - [Group to Network Scope Flow](../../network/flow-network-group-scope.md)
-- [Group Create and Edit](../../groups/feature-group-create-and-edit.md)
 - [Docs Home](../../README.md)
