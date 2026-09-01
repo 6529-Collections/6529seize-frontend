@@ -98,6 +98,9 @@ Users can:
   not depend on wave edit permission. An authenticated private-group member or
   creator can inspect that group's criteria and members. Configuration shows
   the current `1 user` or `X users` count instead of the generated group name.
+- Eligible direct-message participants get the same member count and criteria
+  summary for their DM access groups. The generated direct-message group name
+  is not used as the visible value.
 - Scope stubs hidden from the current viewer never render a link, group
   identity, or group metadata.
 - If multiple access rows currently share a group, changing identities or
