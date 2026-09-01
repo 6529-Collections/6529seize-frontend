@@ -84,6 +84,30 @@ operations use the dedicated immutable-artifact workflows and their normal
 operation authorization; a valid operation identity never converts a legacy
 rebuilding workflow into a train deploy path.
 
+## Local release-request preflight
+
+When a new staging release or a new direct production release starts, the
+`deploy-6529` flow first runs the live lane-status check above. It then sends
+the known requester, target, exact PR heads, frontend/backend parts,
+dependencies, backend deploy units, and database-change state using the
+installed CLI's read-only `template` shape. It sends the completed JSON on
+standard input to:
+
+```bash
+./bin/6529 exec 6529-release-request create --input -
+```
+
+The command validates the request and saves its run and accepted request under
+`.release-coordinator/`; no separate input file is created. A failed validation
+stops before candidate registration, merge, deployment, or environment
+mutation, while its failed run record remains available.
+
+This step is skipped for merge-only work, status or monitoring, retry or
+resume, recovery, production continuation or promotion of an existing release,
+and lane toggles. Its output is only a local audit shadow: it is not sent to an
+API or Release Bus, grants no deployment authority, and changes none of the
+release checks or ordering described below.
+
 ## Dashboard read model
 
 `/deploy/ui/bus` presents Staging and Production as the two developer-facing
