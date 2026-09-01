@@ -18,13 +18,6 @@ jest.mock("@/hooks/useDeviceInfo", () => ({
   default: () => mockUseDeviceInfo(),
 }));
 
-jest.mock("@/components/brain/content/BrainContent", () => ({
-  __esModule: true,
-  default: ({ children }: { readonly children: React.ReactNode }) => (
-    <div data-testid="brain-content">{children}</div>
-  ),
-}));
-
 jest.mock("@/components/brain/my-stream/MyStreamWave", () => ({
   __esModule: true,
   default: ({ waveId }: { readonly waveId: string }) => (

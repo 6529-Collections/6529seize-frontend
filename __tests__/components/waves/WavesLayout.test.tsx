@@ -70,6 +70,13 @@ jest.mock("@/components/common/ConnectWallet", () => ({
   default: () => <div data-testid="connect-wallet">Connect Wallet</div>,
 }));
 
+jest.mock("@/components/brain/content/BrainContent", () => ({
+  __esModule: true,
+  default: ({ children }: { readonly children: React.ReactNode }) => (
+    <div data-testid="brain-content">{children}</div>
+  ),
+}));
+
 describe("WavesLayout", () => {
   beforeEach(() => {
     mockMarkMobileLaunchStep.mockClear();
@@ -154,6 +161,35 @@ describe("WavesLayout", () => {
     ).toBeInTheDocument();
     expect(screen.getByTestId("posting-access-skeleton")).toBeInTheDocument();
     expect(screen.queryByTestId("wave-content")).not.toBeInTheDocument();
+  });
+
+  it("keeps the wave content frame mounted when auth loading resolves", () => {
+    mockUseAuthenticatedContent.mockReturnValue({
+      contentState: "loading",
+    });
+    mockUsePathname.mockReturnValue("/waves/wave-123");
+
+    const { rerender } = render(
+      <WavesLayout>
+        <div data-testid="wave-content">Real wave content</div>
+      </WavesLayout>
+    );
+    const contentFrame = screen.getByTestId("brain-content");
+
+    mockUseAuthenticatedContent.mockReturnValue({
+      contentState: "ready",
+    });
+    rerender(
+      <WavesLayout>
+        <div data-testid="wave-content">Real wave content</div>
+      </WavesLayout>
+    );
+
+    expect(screen.getByTestId("brain-content")).toBe(contentFrame);
+    expect(screen.getByTestId("wave-content")).toBeInTheDocument();
+    expect(
+      screen.queryByTestId("wave-view-loading-placeholder")
+    ).not.toBeInTheDocument();
   });
 
   it("renders Waves content while layout measurement is settling", () => {

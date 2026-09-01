@@ -313,12 +313,12 @@ export async function renderWavesPageContent({
               />
             </Suspense>
             <Suspense fallback={null}>
-              <WavesPageClient />
+              <WavesPageClient withLayout={false} />
             </Suspense>
           </WaveServerFeedSeedGate>
         ) : (
           <Suspense fallback={null}>
-            <WavesPageClient />
+            <WavesPageClient withLayout={false} />
           </Suspense>
         )}
       </HydrationBoundary>

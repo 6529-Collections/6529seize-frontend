@@ -15,6 +15,7 @@ import { t } from "@/i18n/messages";
 import { getWaveIdFromPathname } from "@/helpers/navigation.helpers";
 import { usePathname } from "next/navigation";
 import WaveViewLoadingPlaceholder from "../WaveViewLoadingPlaceholder";
+import BrainContent from "@/components/brain/content/BrainContent";
 
 type WavesBranchProps = {
   readonly children: ReactNode;
@@ -139,6 +140,7 @@ function WavesLayoutContent({ children }: { readonly children: ReactNode }) {
   const { isApp } = useDeviceInfo();
   const pathname = usePathname();
   const isWaveRoute = getWaveIdFromPathname(pathname) !== null;
+  const isWavesViewRoute = pathname === "/waves" || isWaveRoute;
 
   // The chat/feed views manage their own internal scroll, so WavesLayout locks
   // document scroll and clips its content. The create-wave route owns its
@@ -176,6 +178,14 @@ function WavesLayoutContent({ children }: { readonly children: ReactNode }) {
       <WaveViewLoadingPlaceholder />
     ) : (
       <WavesContentLoadingFallback />
+    );
+  }
+
+  if (isWavesViewRoute) {
+    wavesContent = (
+      <BrainContent activeDrop={null} onCancelReplyQuote={() => {}}>
+        {wavesContent}
+      </BrainContent>
     );
   }
 
