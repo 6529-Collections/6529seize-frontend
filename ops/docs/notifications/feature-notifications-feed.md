@@ -47,9 +47,21 @@ with a multi-select cause filter, grouped reactions, and inline drop previews.
 
 ## Feed Filters
 
-- A compact dropdown supports selecting multiple notification categories at
-  once. Its default label is `All`; one selected category shows its name, and
-  multiple selected categories show the selected count.
+- The filter presentation follows the app layout boundary:
+  - mobile-layout viewports open `Filter notifications` in a bottom sheet;
+  - wider viewports keep the compact anchored dropdown.
+- Both presentations support selecting multiple notification categories at
+  once and apply changes immediately. The mobile sheet stays open while users
+  combine categories and provides a visible close action.
+- The trigger defaults to `All`; one selected category shows its name, and
+  multiple selected categories show the selected count. Closing and reopening
+  the filter preserves the current selection. `All` clears category filters
+  and returns to the complete feed.
+- The mobile sheet traps focus, blocks background feed interaction and
+  scrolling, supports Escape/backdrop/close-button dismissal, restores focus
+  to the trigger, scrolls internally on short viewports, and includes bottom
+  safe-area padding. Resizing across the layout boundary closes the active
+  presentation instead of opening a second filter surface.
 - Filter mapping:
   - `All`: all notification causes, including priority alerts, all-drops rows,
     and unknown causes.

@@ -46,6 +46,7 @@ jobs:
       actions: read
       contents: read
       issues: read
+      packages: read
     steps:
       - name: Reject mixed automatic dispatch identity
         if: inputs.automatic_deploy_run_id != ''
@@ -349,6 +350,7 @@ jobs:
         if: steps.socket-firewall.outcome == 'success'
         continue-on-error: true
         env:
+          NODE_AUTH_TOKEN: ${{ github.token }}
           SFW_BIN: ${{ steps.socket-firewall.outputs.firewall-path-binary }}
         run: ./bin/6529 install:frozen
       - name: Resolve immutable Museum publication provenance

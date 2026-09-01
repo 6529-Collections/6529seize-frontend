@@ -35,7 +35,13 @@ describe("dependency governance workflow", () => {
     expect(stepNames).not.toContain("Build app");
     expect(stepNames).not.toContain("Sync dependency labels");
     expect(stepNames).toContain("Summarize dependency policy");
-    expect(workflow.permissions).toEqual({ contents: "read" });
+    expect(workflow.permissions).toEqual({
+      contents: "read",
+    });
+    expect(workflow.jobs["dependency-governance"].permissions).toEqual({
+      contents: "read",
+      packages: "read",
+    });
     expect(source).toContain(
       "Required App PR CI owns the complete application typecheck"
     );

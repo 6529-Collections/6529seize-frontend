@@ -214,6 +214,10 @@ jobs:
       )
     runs-on: ubuntu-latest
     timeout-minutes: 90
+    permissions:
+      contents: read
+      issues: read
+      packages: read
     env:
       PLAYWRIGHT_STAGING_ACCESS_CODE: ${{ secrets.PLAYWRIGHT_STAGING_ACCESS_CODE }}
       SELECTED_PACK: ${{ github.event.inputs.pack || 'all' }}
@@ -381,6 +385,7 @@ jobs:
         id: dependencies
         continue-on-error: true
         env:
+          NODE_AUTH_TOKEN: ${{ github.token }}
           RELEASE_BUS_SOCKET_FIREWALL_OUTCOME: ${{ steps.socket-firewall.outcome }}
           SFW_BIN: ${{ steps.socket-firewall.outputs.firewall-path-binary }}
         run: node "$RELEASE_BUS_INSTALL_TOOL"
