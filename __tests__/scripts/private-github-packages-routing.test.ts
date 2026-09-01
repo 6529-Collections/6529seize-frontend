@@ -469,6 +469,19 @@ describe("private GitHub Packages repository policy", () => {
       `unexpected ${policy.ALLOWED_REGISTRY_HOST} lockfile URL`
     );
 
+    const uppercaseSchemeUnexpectedTarball = validLockfile().replace(
+      "snapshots:",
+      [
+        "  'public-package@1.0.0':",
+        "    resolution: {tarball: HTTPS://npm.pkg.github.com/download/@6529-collections/other/1.0.0/not-allowed}",
+        "",
+        "snapshots:",
+      ].join("\n")
+    );
+    expect(() =>
+      policy.validateLockfile(uppercaseSchemeUnexpectedTarball)
+    ).toThrow(`unexpected ${policy.ALLOWED_REGISTRY_HOST} lockfile URL`);
+
     const controlEscapedTarball = validLockfile().replace(
       "snapshots:",
       [

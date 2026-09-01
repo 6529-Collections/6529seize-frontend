@@ -738,7 +738,7 @@ function validateLockfile(lockfileText) {
     );
   }
 
-  const registryUrls = effectiveText.match(/https?:\/\/[^\s,'"}\]]+/g) ?? [];
+  const registryUrls = effectiveText.match(/https?:\/\/[^\s,'"}\]]+/gi) ?? [];
 
   const allowedRegistryUrls = [];
   for (const registryUrl of registryUrls) {
