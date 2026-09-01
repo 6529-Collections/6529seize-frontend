@@ -816,6 +816,8 @@ export const ES_ES_MESSAGES = {
   "waves.mobile.profileFeed.title": "Feed de Profile Waves",
   "waves.mobile.profileFeed.subtitle": "Drops destacados de profile waves",
   "waves.profileFeed.title": "Últimas publicaciones de Profile Waves",
+  "waves.profileFeed.description":
+    "Descubre lo que comparte la comunidad en Profile Waves.",
   "waves.profileFeed.errorTitle":
     "No se pudieron cargar las publicaciones de perfil",
   "waves.profileFeed.errorDescription":

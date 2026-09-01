@@ -180,6 +180,9 @@ export default function CommunityCurations({
             <h1 className="tw-mb-0 tw-text-lg tw-font-bold tw-text-white md:tw-text-xl">
               {t(locale, "waves.profileFeed.title")}
             </h1>
+            <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-text-iron-400">
+              {t(locale, "waves.profileFeed.description")}
+            </p>
           </div>
         </div>
 

@@ -810,6 +810,8 @@ export const EN_GB_MESSAGES = {
   "waves.mobile.profileFeed.title": "Profile Waves Feed",
   "waves.mobile.profileFeed.subtitle": "Featured drops from profile waves",
   "waves.profileFeed.title": "Latest Profile Wave posts",
+  "waves.profileFeed.description":
+    "See what the community is sharing in Profile Waves.",
   "waves.profileFeed.errorTitle": "Couldn’t load profile posts",
   "waves.profileFeed.errorDescription": "Refresh this view to try again.",
   "waves.profileFeed.emptyTitle": "No profile posts yet",

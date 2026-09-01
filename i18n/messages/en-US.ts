@@ -509,6 +509,7 @@ const WAVES_MOBILE_MESSAGES = objectMessages("waves.mobile", {
 
 const PROFILE_WAVE_FEED_MESSAGES = objectMessages("waves.profileFeed", {
   title: "Latest Profile Wave posts",
+  description: "See what the community is sharing in Profile Waves.",
   errorTitle: "Couldn’t load profile posts",
   errorDescription: "Refresh this view to try again.",
   emptyTitle: "No profile posts yet",

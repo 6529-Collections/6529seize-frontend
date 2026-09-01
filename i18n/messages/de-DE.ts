@@ -818,6 +818,8 @@ export const DE_DE_MESSAGES = {
   "waves.mobile.profileFeed.title": "Profile-Waves-Feed",
   "waves.mobile.profileFeed.subtitle": "Ausgewählte Drops aus Profile-Waves",
   "waves.profileFeed.title": "Neueste Beiträge aus Profile Waves",
+  "waves.profileFeed.description":
+    "Entdecke, was die Community in Profile Waves teilt.",
   "waves.profileFeed.errorTitle":
     "Profilbeiträge konnten nicht geladen werden",
   "waves.profileFeed.errorDescription":

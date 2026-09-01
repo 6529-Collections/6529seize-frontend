@@ -544,6 +544,9 @@ describe("frontend i18n helpers", () => {
     expect(t("en-US", "waves.profileFeed.title")).toBe(
       "Latest Profile Wave posts"
     );
+    expect(t("en-US", "waves.profileFeed.description")).toBe(
+      "See what the community is sharing in Profile Waves."
+    );
     expect(t("en-US", "waves.profileFeed.errorTitle")).toBe(
       "Couldn’t load profile posts"
     );
