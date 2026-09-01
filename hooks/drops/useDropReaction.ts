@@ -495,15 +495,17 @@ export function useDropReaction(
   const isEligibleToChat =
     waveEligibility?.authenticated_user_eligible_to_chat ??
     drop.wave.authenticated_user_eligible_to_chat;
-  const isSlowModeOnlyBlock =
+  const isChatOnlyRestriction =
     isEligibleToChat === false &&
-    waveEligibility?.authenticated_user_chat_restriction ===
-      ChatRestriction.SLOW_MODE;
+    (waveEligibility?.authenticated_user_chat_restriction ===
+      ChatRestriction.SLOW_MODE ||
+      waveEligibility?.authenticated_user_chat_restriction ===
+        ChatRestriction.NO_PERMISSION);
   const canReact =
     !isRecoveryPending &&
     !activeProfileProxy &&
     !drop.id.startsWith("temp-") &&
-    (isEligibleToChat !== false || isSlowModeOnlyBlock);
+    (isEligibleToChat !== false || isChatOnlyRestriction);
   const contextProfileContext = drop.context_profile_context;
   const applyOptimisticReaction = useOptimisticStreamDropReaction({
     applyOptimisticDropUpdate,
@@ -616,6 +618,7 @@ export function useDropReaction(
         ) {
           updateEligibility(waveId, {
             authenticated_user_eligible_to_chat: false,
+            authenticated_user_chat_restriction: ChatRestriction.DISABLED,
           });
         }
 
