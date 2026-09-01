@@ -62,6 +62,20 @@ describe("WaveGroupMembersScope", () => {
     expect(screen.queryByTestId("fallback-scope")).not.toBeInTheDocument();
   });
 
+  it("preserves the private fallback for a hidden direct-message group", () => {
+    render(
+      <WaveGroupMembersScope
+        group={{
+          is_hidden: true,
+          is_direct_message: true,
+        }}
+      />
+    );
+
+    expect(screen.getByTestId("fallback-scope")).toBeInTheDocument();
+    expect(screen.queryByTestId("members-summary")).not.toBeInTheDocument();
+  });
+
   it("preserves the private and unavailable scope fallbacks", () => {
     render(<WaveGroupMembersScope group={{ is_hidden: true }} />);
 
