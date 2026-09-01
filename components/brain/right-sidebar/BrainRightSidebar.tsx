@@ -196,23 +196,18 @@ const BrainRightSidebar: React.FC<BrainRightSidebarProps> = ({
 
     const focusCloseButton = () => {
       const closeButton = overlayCloseButtonRef.current;
-      const panel = closeButton?.closest(`#${BRAIN_RIGHT_SIDEBAR_ID}`);
+      const panel = document.getElementById(BRAIN_RIGHT_SIDEBAR_ID);
       if (closeButton && !panel?.contains(document.activeElement)) {
         closeButton.focus();
       }
     };
-    const keepFocusInPanel = (event: FocusEvent) => {
-      const closeButton = overlayCloseButtonRef.current;
-      const panel = closeButton?.closest(`#${BRAIN_RIGHT_SIDEBAR_ID}`);
-      if (panel && !panel.contains(event.target as Node)) {
-        globalThis.requestAnimationFrame(focusCloseButton);
-      }
-    };
     const focusFrame = globalThis.requestAnimationFrame(focusCloseButton);
-    document.addEventListener("focusin", keepFocusInPanel, true);
+    // CompactWaveActions restores its trigger after a 300ms leave transition.
+    // Re-check once after it settles; Headless UI owns the ongoing focus trap.
+    const compactMenuFocusFrame = globalThis.setTimeout(focusCloseButton, 400);
     return () => {
       globalThis.cancelAnimationFrame(focusFrame);
-      document.removeEventListener("focusin", keepFocusInPanel, true);
+      globalThis.clearTimeout(compactMenuFocusFrame);
     };
   }, [isOpen, isOverlay]);
 
