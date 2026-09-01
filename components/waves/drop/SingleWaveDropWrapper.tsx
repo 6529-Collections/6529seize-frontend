@@ -3,7 +3,7 @@
 import { CompactModeProvider } from "@/contexts/CompactModeContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import { useMediaQuery } from "@/hooks/useMediaQuery";
+import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 import { Transition } from "@headlessui/react";
 import { markDropOpenReady } from "@/utils/monitoring/dropOpenTiming";
 import {
@@ -47,7 +47,7 @@ export const SingleWaveDropWrapper: React.FC<SingleWaveDropWrapperProps> = ({
   isVotingControlsLocked = false,
 }) => {
   const [isChatOpen, setIsChatOpen] = useState(false);
-  const isSmallScreen = useMediaQuery("(max-width: 1023px)");
+  const isCompactLayout = useIsMobileLayoutViewport();
   const readyKeyRef = useRef<string | null>(null);
 
   const toggleChat = useCallback(() => {
@@ -64,13 +64,13 @@ export const SingleWaveDropWrapper: React.FC<SingleWaveDropWrapperProps> = ({
   }, []);
 
   useEffect(() => {
-    if (!isChatOpen || !isSmallScreen) return;
+    if (!isChatOpen || !isCompactLayout) return;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
       document.body.style.overflow = previousOverflow;
     };
-  }, [isChatOpen, isSmallScreen]);
+  }, [isChatOpen, isCompactLayout]);
 
   useEffect(() => {
     const readyKey = `${drop.id}:${wave.id}`;
@@ -82,7 +82,7 @@ export const SingleWaveDropWrapper: React.FC<SingleWaveDropWrapperProps> = ({
   return (
     <div className="tw-flex tw-h-full tw-w-full tw-flex-col tw-overflow-hidden tw-overscroll-none tw-bg-iron-950 lg:tw-flex-row">
       <div className="@container tw-relative tw-h-full tw-flex-1 tw-overflow-hidden">
-        <header className="tw-absolute tw-left-0 tw-right-3 tw-top-0 tw-z-20 tw-bg-iron-950/55 tw-bg-gradient-to-b tw-from-iron-950/75 tw-via-iron-950/55 tw-to-iron-950/10 tw-px-2 tw-pb-2 tw-pt-[calc(env(safe-area-inset-top,0px)+0.5rem)] tw-backdrop-blur-sm @[640px]:tw-px-8 lg:tw-px-8">
+        <header className="tw-absolute tw-inset-x-0 tw-top-0 tw-z-20 tw-bg-iron-950/55 tw-bg-gradient-to-b tw-from-iron-950/75 tw-via-iron-950/55 tw-to-iron-950/10 tw-px-4 tw-pb-2 tw-pt-[calc(env(safe-area-inset-top,0px)+0.5rem)] tw-backdrop-blur-sm sm:tw-px-6 lg:tw-px-8">
           <div className="tw-flex tw-w-full tw-items-center tw-justify-between">
             <div className="tw-flex tw-items-center tw-gap-6">
               <button
@@ -181,13 +181,15 @@ export const SingleWaveDropWrapper: React.FC<SingleWaveDropWrapperProps> = ({
               leaveTo="tw-translate-x-full"
             >
               <div className="@container tw-absolute tw-inset-0 tw-z-[100] tw-flex tw-h-full tw-min-h-0 tw-transform-gpu tw-flex-col tw-overflow-hidden tw-overscroll-none tw-bg-iron-950 tw-will-change-transform lg:tw-hidden">
-                <div className="tw-relative tw-z-10 tw-flex tw-flex-none tw-items-center tw-px-2 tw-pb-2 tw-pt-[calc(env(safe-area-inset-top,0px)+0.75rem)] lg:tw-px-8">
+                <div className="tw-relative tw-z-10 tw-flex tw-flex-none tw-items-center tw-px-4 tw-pb-2 tw-pt-[calc(env(safe-area-inset-top,0px)+0.5rem)] sm:tw-px-6 lg:tw-px-8">
                   <button
+                    type="button"
                     onClick={toggleChat}
-                    className="tw-flex tw-items-center tw-gap-2 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-3 tw-py-2 tw-text-white/70 tw-transition-colors desktop-hover:hover:tw-text-white"
+                    aria-label="Close"
+                    className="tw-flex tw-size-11 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-text-iron-300 tw-transition-colors desktop-hover:hover:tw-text-white"
                   >
                     <ArrowLeftIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
-                    <span className="tw-text-sm tw-font-semibold">Close</span>
+                    <span className="tw-sr-only">Close</span>
                   </button>
                 </div>
 

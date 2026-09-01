@@ -180,13 +180,13 @@ export const WaveDropAdditionalInfo = ({
           <h3 className="tw-text-base tw-font-semibold tw-text-iron-100">
             Additional Media
           </h3>
-          <div className="tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-2 md:tw-gap-4">
+          <div className="tw-grid tw-grid-cols-2 tw-gap-3 md:tw-gap-4">
             {displayedMedia.map((item, index) => (
               <div
                 key={`${item.url}-${index}`}
                 className={`tw-relative tw-overflow-hidden tw-bg-white/[0.02] ${
                   item.isVideo
-                    ? "tw-aspect-video sm:tw-col-span-2"
+                    ? "tw-col-span-2 tw-aspect-video"
                     : "tw-aspect-[4/3]"
                 }`}
               >

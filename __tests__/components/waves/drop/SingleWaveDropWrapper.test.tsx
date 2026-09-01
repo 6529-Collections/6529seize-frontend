@@ -12,8 +12,9 @@ jest.mock("@/components/waves/drop/SingleWaveDropChat", () => ({
   },
 }));
 
-jest.mock("@/hooks/useMediaQuery", () => ({
-  useMediaQuery: () => false,
+jest.mock("@/hooks/useIsMobileLayoutViewport", () => ({
+  __esModule: true,
+  default: () => false,
 }));
 
 jest.mock("@/utils/monitoring/dropOpenTiming", () => ({

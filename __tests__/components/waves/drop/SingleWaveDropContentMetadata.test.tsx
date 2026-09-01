@@ -2,7 +2,7 @@ import React from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { SingleWaveDropContentMetadata } from "@/components/waves/drop/SingleWaveDropContentMetadata";
 
-jest.mock("@/hooks/isMobileDevice", () => ({
+jest.mock("@/hooks/useIsMobileLayoutViewport", () => ({
   __esModule: true,
   default: jest.fn(() => false),
 }));

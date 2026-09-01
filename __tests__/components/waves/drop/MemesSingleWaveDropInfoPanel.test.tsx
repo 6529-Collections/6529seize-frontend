@@ -96,7 +96,7 @@ jest.mock(
 jest.mock("@/hooks/drops/useDropInteractionRules", () => ({
   useDropInteractionRules: (drop: any) => mockUseDropInteractionRules(drop),
 }));
-jest.mock("@/hooks/isMobileScreen", () => ({
+jest.mock("@/hooks/useIsMobileLayoutViewport", () => ({
   __esModule: true,
   default: () => mockIsMobileScreen,
 }));
@@ -171,7 +171,8 @@ describe("MemesSingleWaveDropInfoPanel", () => {
     const heroWrapper = mediaFrame?.parentElement?.parentElement?.parentElement;
 
     expect(mediaFrame).toHaveClass(
-      "tw-h-[clamp(18rem,75vw,calc(100dvh-8rem))]"
+      "tw-h-[clamp(24rem,calc(100dvh-10rem),42rem)]",
+      "sm:tw-h-[clamp(18rem,75vw,calc(100dvh-8rem))]"
     );
     expect(mediaFrame).toHaveClass("lg:tw-h-[95vh]");
     expect(heroWrapper).toHaveClass("lg:tw-min-h-screen");
