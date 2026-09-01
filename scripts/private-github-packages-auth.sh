@@ -3,6 +3,11 @@
 # Shared authentication UX for the one approved private GitHub Package.
 # The low-level package policy remains the source of truth for token validation.
 
+if [[ "${PRIVATE_GITHUB_PACKAGES_AUTH_SH_LOADED:-}" == "1" ]] &&
+  declare -F ensure_private_package_auth >/dev/null 2>&1; then
+  return 0
+fi
+readonly PRIVATE_GITHUB_PACKAGES_AUTH_SH_LOADED="1"
 readonly PRIVATE_GITHUB_PACKAGES_KEYCHAIN_SERVICE="6529seize-frontend-github-packages"
 
 private_package_auth_is_present() {
@@ -38,9 +43,12 @@ ensure_private_package_auth() {
   esac
 
   printf "GitHub Packages read token (input hidden): " >&2
-  if ! IFS= read -r -s NODE_AUTH_TOKEN; then
+  local read_status=0
+  IFS= read -r -s NODE_AUTH_TOKEN || read_status=$?
+  if [[ "$read_status" -ne 0 && -z "${NODE_AUTH_TOKEN:-}" ]]; then
     printf "\n" >&2
     echo "Unable to read NODE_AUTH_TOKEN." >&2
+    unset NODE_AUTH_TOKEN
     private_package_auth_restore_xtrace "$restore_xtrace"
     return 1
   fi

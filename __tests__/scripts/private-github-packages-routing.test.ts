@@ -1311,6 +1311,21 @@ describe("documented private-package setup flows", () => {
       expect(`${result.stdout}${result.stderr}`).not.toContain(TEST_TOKEN);
     });
 
+    it("accepts non-empty interactive input ending at EOF", () => {
+      const result = runAuthHarness({
+        input: TEST_TOKEN,
+        statements: [
+          "private_package_auth_is_interactive() { return 0; }",
+          "ensure_private_package_auth",
+          'printf "auth-present=%s\\n" "${NODE_AUTH_TOKEN:+yes}"',
+        ],
+      });
+
+      expect(result.status).toBe(0);
+      expect(result.stdout).toBe("auth-present=yes\n");
+      expect(`${result.stdout}${result.stderr}`).not.toContain(TEST_TOKEN);
+    });
+
     it("rejects empty interactive input", () => {
       const result = runAuthHarness({
         input: "\n",
@@ -1364,6 +1379,29 @@ describe("documented private-package setup flows", () => {
       expect(result.stderr).toContain(
         "No GitHub Packages token was found in the macOS Keychain"
       );
+    });
+
+    it("can source the authentication helper more than once", () => {
+      const result = runAuthHarness({
+        statements: ['source "$1"', 'printf "resource=ok\\n"'],
+      });
+
+      expect(result.status).toBe(0);
+      expect(result.stdout).toBe("resource=ok\n");
+    });
+
+    it("does not trust an inherited include-guard marker", () => {
+      const environment = environmentWithoutPackageAuth();
+      environment["PRIVATE_GITHUB_PACKAGES_AUTH_SH_LOADED"] = "1";
+      const result = runAuthHarness({
+        environment,
+        statements: [
+          'printf "helper=%s\\n" "$(type -t ensure_private_package_auth)"',
+        ],
+      });
+
+      expect(result.status).toBe(0);
+      expect(result.stdout).toBe("helper=function\n");
     });
   });
 
