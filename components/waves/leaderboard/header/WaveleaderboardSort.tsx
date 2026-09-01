@@ -184,7 +184,7 @@ export const WaveleaderboardSort: React.FC<WaveleaderboardSortProps> = ({
       <div
         role="tablist"
         aria-label="Sort options"
-        className="tw-box-border tw-flex tw-h-10 tw-flex-shrink-0 tw-items-center tw-gap-x-1 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-iron-900/75 tw-p-1 tw-shadow-sm tw-shadow-black/30 tw-backdrop-blur"
+        className="tw-box-border tw-flex tw-h-10 tw-flex-shrink-0 tw-items-center tw-gap-x-1 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-900/75 tw-p-1 tw-shadow-sm tw-shadow-black/30 tw-backdrop-blur"
       >
         {items.map((item) => (
           <button
