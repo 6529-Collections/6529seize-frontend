@@ -97,7 +97,7 @@ const getViewModeTabClass = (
     "tw-flex tw-h-7 tw-w-7 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-transparent tw-transition-[color,background-color,border-color,box-shadow] tw-duration-200 tw-ease-out focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70 focus-visible:tw-ring-offset-1 focus-visible:tw-ring-offset-iron-900 motion-reduce:tw-transition-none";
 
   if (activeMode === mode) {
-    return `${baseClassName} tw-border-primary-500/25 tw-bg-primary-500/10 tw-text-primary-300 tw-shadow-sm tw-shadow-black/30`;
+    return `${baseClassName} tw-border-primary-500/40 tw-bg-primary-500/10 tw-text-primary-300 tw-shadow-sm tw-shadow-black/30`;
   }
 
   return `${baseClassName} tw-bg-transparent tw-text-iron-500 desktop-hover:hover:tw-bg-iron-800/50 desktop-hover:hover:tw-text-iron-200`;
