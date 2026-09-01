@@ -28,8 +28,10 @@ const WaveDropDeleteButton: React.FC<WaveDropDeleteButtonProps> = ({
   return (
     <>
       <button
+        type="button"
         className={className || defaultButtonClasses}
-        onClick={onDeleteClick}>
+        onClick={onDeleteClick}
+      >
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
@@ -37,7 +39,8 @@ const WaveDropDeleteButton: React.FC<WaveDropDeleteButtonProps> = ({
           strokeWidth="1.5"
           aria-hidden="true"
           stroke="currentColor"
-          className="tw-flex-shrink-0 tw-w-4 tw-h-4">
+          className="tw-h-4 tw-w-4 tw-flex-shrink-0"
+        >
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -53,7 +56,8 @@ const WaveDropDeleteButton: React.FC<WaveDropDeleteButtonProps> = ({
             key="modal"
             elementClasses="tw-absolute tw-z-50"
             elementRole="dialog"
-            onClicked={(e) => e.stopPropagation()}>
+            onClicked={(e) => e.stopPropagation()}
+          >
             <DropsListItemDeleteDropModal
               drop={drop}
               closeModal={() => setIsDeleteModalOpen(false)}

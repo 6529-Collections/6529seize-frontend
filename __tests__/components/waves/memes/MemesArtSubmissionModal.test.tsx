@@ -1,4 +1,5 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import React from "react";
 import MemesArtSubmissionModal from "@/components/waves/memes/MemesArtSubmissionModal";
 
@@ -31,7 +32,7 @@ describe("MemesArtSubmissionModal", () => {
     expect(onClose).not.toHaveBeenCalled();
   });
 
-  it("calls onClose on Escape when open", () => {
+  it("calls onClose on Escape when open", async () => {
     const onClose = jest.fn();
     render(
       <MemesArtSubmissionModal isOpen={true} wave={wave} onClose={onClose} />
@@ -39,17 +40,27 @@ describe("MemesArtSubmissionModal", () => {
 
     fireEvent.keyDown(document, { key: "Escape" });
 
-    expect(onClose).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
   });
 
-  it("calls onClose when backdrop clicked", () => {
+  it("calls onClose when backdrop clicked", async () => {
     const onClose = jest.fn();
+    const user = userEvent.setup();
     render(
       <MemesArtSubmissionModal isOpen={true} wave={wave} onClose={onClose} />
     );
-    const overlay = document.querySelector(".tailwind-scope") as HTMLElement;
-    fireEvent.click(overlay);
+    await user.click(screen.getByTestId("memes-art-submission-modal-backdrop"));
     expect(onClose).toHaveBeenCalled();
+  });
+
+  it("renders above the mobile drop detail layer with an accessible name", () => {
+    render(
+      <MemesArtSubmissionModal isOpen={true} wave={wave} onClose={jest.fn()} />
+    );
+
+    expect(
+      screen.getByRole("dialog", { name: "Submit Work to The Memes" })
+    ).toHaveClass("tw-z-[1020]");
   });
 
   it("uses keyboard-aware mobile viewport height constraints", () => {
