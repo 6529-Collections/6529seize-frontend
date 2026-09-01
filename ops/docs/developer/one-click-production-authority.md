@@ -19,6 +19,28 @@ The parent workflow run is the authority owner. The helper derives
 frontend production identity fields. All SHA and run identifiers are bounded
 and validated before a body is emitted.
 
+## Recovery access and automatic completion
+
+Manual dispatch of `production-authority-complete.yml` is restricted to
+`main` and to active members of the GitHub team
+`6529-Collections/6529seize-maintainers`. The workflow resolves membership at
+run time rather than maintaining a second list of GitHub usernames. The
+Release Bus GitHub App installation must therefore grant organization
+**Members: read** permission; the workflow requests only that permission for
+the short-lived membership token. The existing app ID and private-key settings
+are `RELEASE_BUS_GITHUB_APP_ID` and
+`RELEASE_BUS_GITHUB_PRIVATE_KEY`.
+
+Automatic completion is dispatched by `github-actions[bot]` after the exact
+Production E2E run becomes terminal. Its trusted path is independently limited
+to an exact `production-e2e.yml` run, so it does not use the human team gate.
+The E2E workflow itself runs from protected `main`, whose workflow-source SHA
+can legitimately advance after the production deployment. Completion is bound
+to the deployment through the deploy run ID, exact run titles, immutable
+selection and qualification artifacts, and the deployed SHA recorded in that
+evidence; it must not require the E2E workflow-source SHA to equal the deployed
+SHA.
+
 ## Build request bodies
 
 Each command writes one compact, recursively key-sorted JSON object to stdout.
