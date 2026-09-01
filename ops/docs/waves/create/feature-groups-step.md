@@ -171,6 +171,5 @@ group`. Navigating away from `Groups`, including moving backward from the
 - [Wave Creation Rules Step](feature-rules-step.md)
 - [Wave Creation Description Step](feature-description-step.md)
 - [Wave Right Sidebar Group and Curation Management](../sidebars/feature-right-sidebar-group-management.md)
-- [Group Creation and Edit Flow](../../groups/feature-group-create-and-edit.md)
-- [Groups List Filters](../../groups/feature-groups-list-filters.md)
+- [Network Group Scope Flow](../../network/flow-network-group-scope.md)
 - [Docs Home](../../README.md)

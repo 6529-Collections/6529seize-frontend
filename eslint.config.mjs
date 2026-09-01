@@ -3,6 +3,7 @@ import nextCoreWebVitals from "eslint-config-next/core-web-vitals";
 import eslintConfigPrettier from "eslint-config-prettier";
 import unusedImports from "eslint-plugin-unused-imports";
 import reactHooks from "eslint-plugin-react-hooks";
+import reactYouMightNotNeedAnEffect from "eslint-plugin-react-you-might-not-need-an-effect";
 import tseslint from "typescript-eslint";
 import importPlugin from "eslint-plugin-import";
 import sonarjs from "eslint-plugin-sonarjs";
@@ -75,6 +76,7 @@ const deepFreezeRuleConfig = (value, seen = new WeakSet()) => {
 export const basePlugins = Object.freeze({
   "unused-imports": unusedImports,
   "react-hooks": reactHooks,
+  "react-you-might-not-need-an-effect": reactYouMightNotNeedAnEffect,
   "@typescript-eslint": tseslint.plugin,
   react: nextReactPlugin,
   import: importPlugin,

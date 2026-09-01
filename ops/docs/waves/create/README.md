@@ -89,4 +89,3 @@ opens as `Needs attention` when a hidden field fails validation.
 
 - [Waves Index](../README.md)
 - [Navigation Index](../../navigation/README.md)
-- [Groups Index](../../groups/README.md)

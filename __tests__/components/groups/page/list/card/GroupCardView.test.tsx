@@ -21,13 +21,7 @@ jest.mock(
 describe("GroupCardView", () => {
   it("renders title, details, then the creator footer", () => {
     const group: any = { id: "g" };
-    render(
-      <GroupCardView
-        group={group}
-        haveActiveGroupVoteAll={false}
-        titlePlaceholder="Loading group"
-      />
-    );
+    render(<GroupCardView group={group} titlePlaceholder="Loading group" />);
     expect(HeaderMock).toHaveBeenCalledWith(
       expect.objectContaining({ group, titlePlaceholder: "Loading group" })
     );
