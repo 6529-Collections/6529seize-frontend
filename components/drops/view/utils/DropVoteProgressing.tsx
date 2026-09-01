@@ -24,6 +24,8 @@ interface DropVoteProgressingVisualClasses {
   readonly valueClasses: string;
 }
 
+const MUTED_TEXT_CLASS_NAME = "tw-text-iron-600";
+
 const getBaseVisualClasses = (
   subtle: boolean,
   compact: boolean,
@@ -33,8 +35,8 @@ const getBaseVisualClasses = (
     return {
       color: isPositiveProgressing
         ? "tw-text-iron-400"
-        : "tw-text-iron-600",
-      arrowColor: "tw-text-iron-600",
+        : MUTED_TEXT_CLASS_NAME,
+      arrowColor: MUTED_TEXT_CLASS_NAME,
       wrapperClasses: "tw-flex tw-items-center tw-gap-2",
       valueClasses: "tw-tracking-tight",
     };
@@ -55,7 +57,7 @@ const getBaseVisualClasses = (
     color: isPositiveProgressing
       ? "tw-text-emerald-500 tw-bg-emerald-500/10 tw-px-2 tw-py-0.5 tw-rounded tw-border tw-border-solid tw-border-emerald-500/20"
       : "tw-text-rose-500 tw-bg-rose-500/10 tw-px-2 tw-py-0.5 tw-rounded tw-border tw-border-solid tw-border-rose-500/20",
-    arrowColor: "tw-text-iron-600",
+    arrowColor: MUTED_TEXT_CLASS_NAME,
     wrapperClasses: "tw-ml-0.5 tw-flex tw-items-center tw-gap-2",
     valueClasses: "tw-tracking-tight",
   };
@@ -82,7 +84,7 @@ const getVisualClasses = (
     color: isPositiveProgressing
       ? "tw-text-emerald-300"
       : "tw-text-rose-400",
-    arrowColor: "tw-text-iron-600",
+    arrowColor: MUTED_TEXT_CLASS_NAME,
     valueClasses: "tw-leading-5 tw-tracking-identity",
   };
 };
