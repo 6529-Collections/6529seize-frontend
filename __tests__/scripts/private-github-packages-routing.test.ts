@@ -1291,6 +1291,20 @@ describe("documented private-package setup flows", () => {
       expect(`${result.stdout}${result.stderr}`).not.toContain(TEST_TOKEN);
     });
 
+    it("rejects an empty pre-supplied token in a non-interactive shell", () => {
+      const environment = environmentWithoutPackageAuth();
+      environment["NODE_AUTH_TOKEN"] = "";
+      const result = runAuthHarness({
+        environment,
+        statements: ["ensure_private_package_auth"],
+      });
+
+      expect(result.error).toBeUndefined();
+      expect(result.status).toBe(1);
+      expect(result.stderr).toContain("non-interactive shells");
+      expect(result.stderr).not.toContain("input hidden");
+    });
+
     it("prompts silently in an interactive terminal", () => {
       const result = runAuthHarness({
         input: `${TEST_TOKEN}\n`,

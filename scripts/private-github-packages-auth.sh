@@ -11,7 +11,7 @@ readonly PRIVATE_GITHUB_PACKAGES_AUTH_SH_LOADED="1"
 readonly PRIVATE_GITHUB_PACKAGES_KEYCHAIN_SERVICE="6529seize-frontend-github-packages"
 
 private_package_auth_is_present() {
-  [[ "${NODE_AUTH_TOKEN+x}" == "x" ]]
+  [[ -n "${NODE_AUTH_TOKEN:-}" ]]
 }
 
 private_package_auth_is_interactive() {
