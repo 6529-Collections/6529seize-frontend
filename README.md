@@ -64,11 +64,21 @@ Open a new shell, or activate the wrapper in the current shell:
 source <(./bin/6529 bootstrap --print-export)
 ```
 
-Install dependencies through the secure project path:
+The dependency set includes one private GitHub Package. Supply a runtime
+`NODE_AUTH_TOKEN` with read-only GitHub Packages access, install through the
+secure project path, and let the subshell discard the token afterward:
 
 ```bash
-6529 install
+(
+  read -rs NODE_AUTH_TOKEN
+  export NODE_AUTH_TOKEN
+  6529 install
+)
 ```
+
+Do not store the token in the repository or package-manager configuration. See
+[pnpm and Socket Firewall](ops/docs/developer/pnpm-and-socket-firewall.md) for
+the exact package-routing boundary and other authenticated package commands.
 
 Create a local `.env` file from [.env.sample](.env.sample), then start the app:
 
