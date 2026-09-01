@@ -22,7 +22,7 @@ export function ResubmitAcknowledgement({
           <h4 className="tw-mb-0 tw-mt-0 tw-text-2xl tw-font-semibold tw-leading-8 tw-text-iron-100">
             This creates a new submission
           </h4>
-          <p className="tw-mb-0 tw-mt-0 tw-text-sm tw-leading-6 tw-text-iron-400">
+          <p className="tw-mb-0 tw-mt-0 tw-text-pretty tw-text-sm tw-leading-6 tw-text-iron-400">
             This is not editing your current submission. We copy the previous
             version&apos;s data so the new submission is easier to prepare.
           </p>
