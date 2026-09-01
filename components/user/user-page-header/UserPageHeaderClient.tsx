@@ -253,7 +253,7 @@ export default function UserPageHeaderClient({
         <div className="tw-relative tw-z-20 tw-bg-black md:tw-pointer-events-none md:-tw-mt-[164px] md:tw-bg-transparent">
           <div className="tw-relative tw-z-10 tw-px-4 sm:tw-px-6 md:tw-px-8">
             <div className="tw-mb-6 tw-flex tw-flex-col tw-items-start tw-gap-5 md:tw-flex-row md:tw-items-end lg:tw-mb-8 lg:tw-mt-8">
-              <div className="tw-relative -tw-mt-10 tw-flex-shrink-0 sm:-tw-mb-2 sm:-tw-mt-[58px] md:tw-pointer-events-auto md:tw-mb-0 md:tw-mt-0">
+              <div className="tw-relative -tw-mt-10 tw-flex-shrink-0 sm:tw-mb-0 sm:-tw-mt-[58px] md:tw-pointer-events-auto md:tw-mt-0">
                 <UserPageHeaderPfpWrapper
                   profile={profile}
                   canEdit={canInlineEdit}
