@@ -27,6 +27,14 @@ if [ $# -lt 1 ]; then
   exit 1
 fi
 
+if [[ -z "${NODE_AUTH_TOKEN:-}" ]]; then
+  echo "NODE_AUTH_TOKEN with read-only GitHub Packages access is required before creating a worktree." >&2
+  exit 1
+fi
+PACKAGE_AUTH_TOKEN="$NODE_AUTH_TOKEN"
+unset NODE_AUTH_TOKEN
+NODE_BINARY="$(command -v node)"
+
 ARG_COUNT=$#
 WORKTREE_NAME=$1
 WORKTREE_PATH="$PARENT_DIR/$WORKTREE_NAME"
@@ -239,15 +247,16 @@ echo "✓ Branch '$TARGET_BRANCH' ready in worktree '$WORKTREE_NAME'."
 echo "Syncing files..."
 "$SCRIPT_DIR/wt-sync.sh" "$WORKTREE_NAME"
 
-# 3. Bootstrap the repo-scoped 6529 command for this worktree
-echo "Bootstrapping 6529 command in $WORKTREE_NAME..."
+# 3. Install with the current checkout's trusted package tooling. Do not run
+# branch-controlled scripts or wrappers while the package token is available.
+echo "Running secure install in $WORKTREE_NAME..."
 (
-  cd "$WORKTREE_PATH"
+  cd "$MAIN_REPO"
   export PATH
   PATH="$(strip_repo_bin_wrappers_from_path)"
   ./bin/6529 bootstrap
 
-  # Refresh this script's shell state so bare `6529` resolves immediately.
+  # Refresh this shell from the trusted current checkout only.
   BOOTSTRAP_EXPORTS_FILE="$(mktemp)"
   trap 'rm -f "$BOOTSTRAP_EXPORTS_FILE"' EXIT
   ./bin/6529 bootstrap --print-export > "$BOOTSTRAP_EXPORTS_FILE"
@@ -256,8 +265,26 @@ echo "Bootstrapping 6529 command in $WORKTREE_NAME..."
   rm -f "$BOOTSTRAP_EXPORTS_FILE"
   trap - EXIT
 
-  echo "Running secure install in $WORKTREE_NAME..."
-  6529 install
+  TRUSTED_PNPM_BINARY="$(command -v pnpm || true)"
+  if [[ "$TRUSTED_PNPM_BINARY" != /* ]] || [[ ! -x "$TRUSTED_PNPM_BINARY" ]]; then
+    echo "pnpm must resolve to an absolute executable outside repository wrapper paths." >&2
+    exit 1
+  fi
+
+  NODE_AUTH_TOKEN="$PACKAGE_AUTH_TOKEN" \
+    "$NODE_BINARY" "$MAIN_REPO/scripts/run-secure-pnpm.cjs" \
+    --seize-secure-repository-root "$WORKTREE_PATH" \
+    --seize-secure-pnpm-binary "$TRUSTED_PNPM_BINARY" -- install
+)
+unset PACKAGE_AUTH_TOKEN
+
+# 4. Bootstrap the target worktree only after the token is gone.
+echo "Bootstrapping 6529 command in $WORKTREE_NAME..."
+(
+  cd "$WORKTREE_PATH"
+  export PATH
+  PATH="$(strip_repo_bin_wrappers_from_path)"
+  ./bin/6529 bootstrap
 )
 
 echo "✅ Worktree '$WORKTREE_NAME' is ready."

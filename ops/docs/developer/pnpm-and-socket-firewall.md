@@ -50,23 +50,98 @@ shell after running it, or activate it immediately in the current shell:
 source <(./bin/6529 bootstrap --print-export)
 ```
 
-Then install dependencies:
+Then supply the private-package authentication described below before
+installing dependencies.
+
+### Private GitHub Packages authentication
+
+The repository has one narrow private-package exception for
+`@6529-collections/release-request@0.0.1`. Supply `NODE_AUTH_TOKEN` at runtime
+with GitHub Packages `read:packages` access and no package write or delete
+access. Do not save the token in the repository, pnpm configuration, shell
+history, or command arguments. Read it silently into the current shell, run
+the package command, and remove it when finished:
 
 ```bash
-6529 install
+(
+  read -rs NODE_AUTH_TOKEN
+  export NODE_AUTH_TOKEN
+  6529 install
+)
 ```
 
-To apply audit fixes, use the same secure wrapper path:
+The token must be present for every `6529` command that can resolve or install
+dependencies, including frozen installs and updates. A token-free install is
+intentionally rejected before pnpm starts. The repository can check that the token is
+present and used only for the approved host, but it cannot inspect the token's
+GitHub permissions.
+
+Commands that may change dependency resolution first update the manifest and
+lockfile without package credentials. The helper validates the resulting
+policy before it runs a fixed authenticated `install --frozen-lockfile`, so
+new public package metadata cannot use the private token to resolve another
+GitHub Package.
+
+The authenticated fetch phase disables lifecycle scripts and pnpm hook files.
+Repository-local pnpm hooks and pnpm config dependencies are rejected before
+the command starts. User and global npm config layers are pinned to the same
+validated repository `.npmrc` so they cannot add another registry, credential,
+proxy, CA, or TLS override. After that phase succeeds and the package policy is
+checked again, the helper rebuilds the repository's explicitly approved
+dependencies without passing any case variant of `NODE_AUTH_TOKEN` to pnpm or
+its lifecycle scripts. It uses one pending rebuild so each approved dependency
+and the root lifecycle run at most once. Pnpm hooks remain disabled during the
+token-free rebuild.
+
+The existing `6529` commands remain the only supported entrypoint. The secure
+pnpm helper checks the committed `.npmrc`, package manifest, lockfile integrity,
+exact release-age exception, command arguments, and token presence before it
+starts pnpm. It fails closed if the private host, scope, package, version,
+tarball, integrity, or network routing is extended or changed. Project-level
+registry, credential, proxy, TLS, CA, and pnpm project/workspace relocation
+overrides are rejected rather than forwarded to an authenticated command.
+Dependency aliases, overrides, resolutions, and catalogs also cannot point an
+otherwise innocent package name at the private scope. Workspace policy checks
+decode quoted YAML escapes and reject private-host resolver URLs before pnpm
+starts.
+
+The worktree and staging setup helpers keep the token out of bootstrap, build,
+and long-running application processes. They attach it only to the secure
+install command and remove it again before continuing.
+
+Socket Firewall Free cannot proxy this private registry correctly. For this one
+case, pnpm connects directly to `npm.pkg.github.com` with normal TLS certificate
+verification. The helper keeps Socket's loopback proxy for every other host,
+including `registry.npmjs.org`, and keeps Socket's CA as an additional trusted
+root for those proxied requests. There is no general skip-Socket option.
+
+To apply audit fixes, use the same temporary-token pattern with the secure
+wrapper path:
 
 ```bash
-6529 update
+(
+  read -rs NODE_AUTH_TOKEN
+  export NODE_AUTH_TOKEN
+  6529 update
+)
 ```
 
 For an intentional broader pnpm update, use:
 
 ```bash
-6529 update:all
+(
+  read -rs NODE_AUTH_TOKEN
+  export NODE_AUTH_TOKEN
+  6529 update:all
+)
 ```
+
+Dependabot intentionally ignores the exact private package because its npm
+update job has no package credential. `6529 update:all` cannot change this
+package: the bypass remains pinned to `0.0.1` before pnpm starts. A future
+upgrade requires a separate reviewed change that updates the policy constants,
+manifest, release-age exception, and lockfile tarball integrity together. Do
+not add a Dependabot secret or a generic authenticated update mode.
 
 After bootstrap, prefer the bare `6529` command for day-to-day work while you
 are inside this repository. Outside the repo, `6529` should remain unavailable.
@@ -210,7 +285,9 @@ Socket Firewall Free is still wrapper mode. That means:
 - It only protects commands that are actually prefixed with `sfw`.
 - It blocks confirmed malware, but AI-flagged packages may only warn.
 - It does not provide true centralized enforcement by itself.
-- It does not support private/custom registries in Free mode.
+- It does not inspect private/custom registries in Free mode. This repository's
+  only exception is the fail-closed, direct-TLS rule for the exact
+  `@6529-collections/release-request@0.0.1` GitHub Package described above.
 - It cannot block already-cached artifacts when no network request is made.
 
 Because of those limits, the strongest enforcement in this repo comes from:

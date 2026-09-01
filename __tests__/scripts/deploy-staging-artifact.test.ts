@@ -142,6 +142,9 @@ describe("manual staging immutable artifact deployment", () => {
       (step: { name?: string }) =>
         step.name === "Build and package exact staging bytes"
     );
+    const installStep = build.steps.find(
+      (step: { name?: string }) => step.name === "Install frozen dependencies"
+    );
     const verifyStep = deploy.steps.find(
       (step: { name?: string }) => step.name === "Verify exact staging artifact"
     );
@@ -150,7 +153,11 @@ describe("manual staging immutable artifact deployment", () => {
     );
 
     expect(build.needs).toBe("manual-deployment-guard");
-    expect(build.permissions).toEqual({ contents: "read" });
+    expect(build.permissions).toEqual({
+      contents: "read",
+      packages: "read",
+    });
+    expect(installStep.env.NODE_AUTH_TOKEN).toBe("${{ github.token }}");
     expect(build.env.NEXTGEN_CHAIN_ID).toBe(
       "${{ vars.STAGING_NEXTGEN_CHAIN_ID || '1' }}"
     );
