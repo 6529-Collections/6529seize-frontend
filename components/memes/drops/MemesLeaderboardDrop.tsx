@@ -16,7 +16,7 @@ import MemesArtSubmissionModal from "@/components/waves/memes/MemesArtSubmission
 import { MemesArtResubmitAction } from "@/components/waves/memes/submission/MemesArtResubmitAction";
 import ParticipationDropVoteDetailsTrigger from "@/components/waves/drops/participation/ratings/ParticipationDropVoteDetailsTrigger";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import { ImageScale } from "@/helpers/image.helpers";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
@@ -24,6 +24,7 @@ import useDeviceInfo from "@/hooks/useDeviceInfo";
 import useLongPressInteraction from "@/hooks/useLongPressInteraction";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { startDropOpen } from "@/utils/monitoring/dropOpenTiming";
+import Image from "next/image";
 import Link from "next/link";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -224,10 +225,15 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
                               onClick={(e) => e.stopPropagation()}
                             >
                               {voter.profile.pfp ? (
-                                <img
+                                <Image
                                   className="tw-h-6 tw-w-6 tw-rounded-md tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800 tw-object-contain"
-                                  src={voter.profile.pfp}
+                                  src={getScaledImageUri(
+                                    voter.profile.pfp,
+                                    ImageScale.W_AUTO_H_50
+                                  )}
                                   alt="Recent voter"
+                                  width={24}
+                                  height={24}
                                 />
                               ) : (
                                 <div className="tw-h-6 tw-w-6 tw-rounded-lg tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800" />
