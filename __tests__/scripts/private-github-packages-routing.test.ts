@@ -1280,21 +1280,41 @@ describe("documented private-package setup flows", () => {
       '[[ -z "${NODE_AUTH_TOKEN:-}" ]]'
     );
     const authUnsetIndex = stagingScript.indexOf("unset NODE_AUTH_TOKEN");
+    const trustedToolingCaptureIndex = stagingScript.indexOf(
+      'cp -- "$SCRIPT_DIR/run-secure-pnpm.cjs"'
+    );
     const pullIndex = stagingScript.indexOf("git pull --ff-only");
     const scopedInstallIndex = stagingScript.indexOf(
-      'NODE_AUTH_TOKEN="$package_auth_token" ./bin/6529 install:frozen'
+      'NODE_AUTH_TOKEN="$package_auth_token" \\'
     );
     const localTokenUnsetIndex = stagingScript.indexOf(
       "unset package_auth_token"
+    );
+    const trustedToolingCleanupIndex = stagingScript.lastIndexOf(
+      "cleanup_trusted_package_tooling"
     );
     const buildIndex = stagingScript.indexOf("./bin/6529 run build");
     const pm2Index = stagingScript.indexOf("pm2 start bash");
 
     expect(authGuardIndex).toBeGreaterThanOrEqual(0);
     expect(authUnsetIndex).toBeGreaterThan(authGuardIndex);
+    expect(trustedToolingCaptureIndex).toBeGreaterThan(authUnsetIndex);
+    expect(trustedToolingCaptureIndex).toBeLessThan(pullIndex);
     expect(authUnsetIndex).toBeLessThan(pullIndex);
     expect(scopedInstallIndex).toBeGreaterThan(pullIndex);
+    expect(stagingScript).toContain(
+      '"$trusted_node_binary" "$trusted_secure_pnpm"'
+    );
+    expect(stagingScript).toContain(
+      '--seize-secure-repository-root "$REPO_ROOT" -- install --frozen-lockfile'
+    );
+    expect(stagingScript).toContain('SFW_BIN="$trusted_sfw_binary"');
+    expect(stagingScript).not.toContain(
+      'NODE_AUTH_TOKEN="$package_auth_token" ./bin/6529'
+    );
     expect(localTokenUnsetIndex).toBeGreaterThan(scopedInstallIndex);
+    expect(trustedToolingCleanupIndex).toBeGreaterThan(localTokenUnsetIndex);
+    expect(trustedToolingCleanupIndex).toBeLessThan(buildIndex);
     expect(localTokenUnsetIndex).toBeLessThan(buildIndex);
     expect(localTokenUnsetIndex).toBeLessThan(pm2Index);
     expect(stagingScript).not.toContain("export package_auth_token");
