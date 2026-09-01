@@ -3,6 +3,9 @@ import MyStreamWaveTabsHeader from "@/components/brain/my-stream/tabs/MyStreamWa
 import { MyStreamWaveTab } from "@/types/waves.types";
 import type { ReactNode } from "react";
 
+let mockIsRightSidebarOpen = false;
+const mockToggleRightSidebar = jest.fn();
+
 jest.mock("next/navigation", () => ({
   usePathname: () => "/waves/wave-1",
   useRouter: () => ({ push: jest.fn(), replace: jest.fn() }),
@@ -29,8 +32,8 @@ jest.mock("@/hooks/useDeviceInfo", () => ({
 
 jest.mock("@/hooks/useSidebarState", () => ({
   useSidebarState: () => ({
-    isRightSidebarOpen: false,
-    toggleRightSidebar: jest.fn(),
+    isRightSidebarOpen: mockIsRightSidebarOpen,
+    toggleRightSidebar: mockToggleRightSidebar,
   }),
 }));
 
@@ -94,6 +97,11 @@ const wave = {
 } as any;
 
 describe("MyStreamWaveTabsHeader", () => {
+  beforeEach(() => {
+    mockIsRightSidebarOpen = false;
+    mockToggleRightSidebar.mockClear();
+  });
+
   it("can expand Wave search into the site-wide search", () => {
     render(
       <MyStreamWaveTabsHeader
@@ -157,5 +165,39 @@ describe("MyStreamWaveTabsHeader", () => {
 
     expect(screen.queryByTestId("wave-score")).toBeNull();
     expect(screen.queryByText("Add REP")).toBeNull();
+  });
+
+  it("exposes the right-sidebar toggle state and controlled panel", () => {
+    const header = () => (
+      <MyStreamWaveTabsHeader
+        wave={wave}
+        activeContentTab={MyStreamWaveTab.CHAT}
+        setActiveContentTab={jest.fn()}
+        onSelectCuration={jest.fn()}
+        isCompact={false}
+        showBackButton={false}
+        headerActionsTooltipId="header-actions"
+        headerClassName="tw-flex"
+        actionsClassName="tw-flex"
+      />
+    );
+    const { rerender } = render(header());
+
+    const closedToggle = screen.getByRole("button", {
+      name: "Show right sidebar",
+    });
+    expect(closedToggle).toHaveAttribute("aria-expanded", "false");
+    expect(closedToggle).toHaveAttribute("aria-pressed", "false");
+    expect(closedToggle).not.toHaveAttribute("aria-controls");
+
+    mockIsRightSidebarOpen = true;
+    rerender(header());
+
+    const openToggle = screen.getByRole("button", {
+      name: "Hide right sidebar",
+    });
+    expect(openToggle).toHaveAttribute("aria-expanded", "true");
+    expect(openToggle).toHaveAttribute("aria-pressed", "true");
+    expect(openToggle).toHaveAttribute("aria-controls", "brain-right-sidebar");
   });
 });

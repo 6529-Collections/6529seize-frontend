@@ -32,6 +32,8 @@ import MyStreamActionTooltip from "../MyStreamActionTooltip";
 import { useSidebarState } from "../../../../hooks/useSidebarState";
 import WaveRepButton from "@/components/waves/header/rep/WaveRepButton";
 import CompactWaveActions from "./CompactWaveActions";
+import { waveRightPanelText } from "@/helpers/waves/wave-right-panel.helpers";
+import { BRAIN_RIGHT_SIDEBAR_ID } from "@/components/brain/right-sidebar/BrainRightSidebarTypes";
 
 const TRUNCATION_EPSILON_PX = 1;
 const WAVE_SCORE_LEARN_MORE_HREF = "/network/wave-score";
@@ -331,11 +333,11 @@ export default function MyStreamWaveTabsHeader({
       : "tw-text-emerald-300";
   const searchMessagesLabel = "Search messages in this wave";
   const rightSidebarActionLabel = isRightSidebarOpen
-    ? "Hide right sidebar"
-    : "Show right sidebar";
+    ? waveRightPanelText("waves.sidebar.rightPanel.controls.hide")
+    : waveRightPanelText("waves.sidebar.rightPanel.controls.show");
   const rightSidebarCompactLabel = isRightSidebarOpen
-    ? "Hide details"
-    : "Wave details";
+    ? waveRightPanelText("waves.sidebar.rightPanel.controls.hideDetails")
+    : waveRightPanelText("waves.sidebar.rightPanel.controls.openDetails");
   const renderWaveLinkActionIcon = () => {
     if (waveLinkActionFeedbackState !== "idle") {
       return <CheckIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />;
@@ -492,6 +494,11 @@ export default function MyStreamWaveTabsHeader({
               data-tooltip-content={rightSidebarActionLabel}
               className="tw-group tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-white/[0.05] tw-transition-colors tw-duration-150 desktop-hover:hover:tw-border-white/10 desktop-hover:hover:tw-bg-white/[0.08]"
               aria-label={rightSidebarActionLabel}
+              aria-controls={
+                isRightSidebarOpen ? BRAIN_RIGHT_SIDEBAR_ID : undefined
+              }
+              aria-expanded={isRightSidebarOpen}
+              aria-pressed={isRightSidebarOpen}
             >
               <ChevronDoubleLeftIcon
                 strokeWidth={2}
