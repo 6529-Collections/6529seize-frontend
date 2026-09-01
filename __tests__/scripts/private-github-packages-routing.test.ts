@@ -115,18 +115,19 @@ const TEST_TOKEN = "read-only-test-token";
 const AUTH_HELPER_RELATIVE_PATH = "scripts/private-github-packages-auth.sh";
 const AUTH_HELPER_PATH = path.join(REPOSITORY_ROOT, AUTH_HELPER_RELATIVE_PATH);
 
-function environmentWithoutPackageAuth(): NodeJS.ProcessEnv {
+function isolatedAuthTestEnvironment(): NodeJS.ProcessEnv {
   const environment = { ...process.env };
   for (const key of Object.keys(environment)) {
     if (key.toLowerCase() === "node_auth_token") {
       delete environment[key];
     }
   }
+  delete environment["CI"];
   return environment;
 }
 
 function runAuthHarness({
-  environment = environmentWithoutPackageAuth(),
+  environment = isolatedAuthTestEnvironment(),
   input,
   statements,
 }: {
@@ -1275,7 +1276,7 @@ describe("host-specific Socket Firewall routing", () => {
 describe("documented private-package setup flows", () => {
   describe("private-package authentication UX", () => {
     it("uses a pre-supplied token without prompting", () => {
-      const environment = environmentWithoutPackageAuth();
+      const environment = isolatedAuthTestEnvironment();
       environment["NODE_AUTH_TOKEN"] = TEST_TOKEN;
       const result = runAuthHarness({
         environment,
@@ -1292,7 +1293,7 @@ describe("documented private-package setup flows", () => {
     });
 
     it("rejects an empty pre-supplied token in a non-interactive shell", () => {
-      const environment = environmentWithoutPackageAuth();
+      const environment = isolatedAuthTestEnvironment();
       environment["NODE_AUTH_TOKEN"] = "";
       const result = runAuthHarness({
         environment,
@@ -1362,7 +1363,7 @@ describe("documented private-package setup flows", () => {
     });
 
     it("never prompts in CI even when a terminal is available", () => {
-      const environment = environmentWithoutPackageAuth();
+      const environment = isolatedAuthTestEnvironment();
       environment["CI"] = "true";
       const result = runAuthHarness({
         environment,
@@ -1421,7 +1422,7 @@ describe("documented private-package setup flows", () => {
     });
 
     it("does not trust an inherited include-guard marker", () => {
-      const environment = environmentWithoutPackageAuth();
+      const environment = isolatedAuthTestEnvironment();
       environment["PRIVATE_GITHUB_PACKAGES_AUTH_SH_LOADED"] = "1";
       const result = runAuthHarness({
         environment,
