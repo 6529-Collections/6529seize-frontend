@@ -57,7 +57,7 @@ async function expectSubscriptionsSettled(page: Page) {
   });
 }
 
-test.describe("Public groups, tools, and calendar read-only coverage @surface @medium @large @readonly", () => {
+test.describe("Public tools, calendar, and removed Groups route coverage @surface @medium @large @readonly", () => {
   test("renders the Tools index with grouped utility links", async ({
     page,
   }) => {
@@ -86,35 +86,24 @@ test.describe("Public groups, tools, and calendar read-only coverage @surface @m
     await expectNoHorizontalOverflow(page);
   });
 
-  test("renders the public Groups browse surface without write controls", async ({
-    page,
-  }) => {
-    await gotoReady(page, "/network/groups");
+  for (const path of [
+    "/network/groups",
+    "/network/groups?edit=new",
+    "/network/groups?edit=example-group",
+  ]) {
+    test(`keeps the removed Groups route unavailable at ${path}`, async ({
+      page,
+    }) => {
+      await gotoDocumentWithTransientRetry(page, path);
 
-    await expect(page).toHaveURL((url) => url.pathname === "/network/groups");
-    await expect(page).toHaveTitle(/Groups/i);
-    await expect(
-      page.getByRole("heading", { level: 1, name: "Groups" })
-    ).toBeVisible();
-    await expect(page.getByLabel("By Identity")).toBeVisible();
-    await expect(page.getByLabel("By Group Name")).toBeVisible();
-    await expect(page.getByRole("button", { name: "Create New" })).toHaveCount(
-      0
-    );
-    await expect(page.getByRole("button", { name: "My groups" })).toHaveCount(
-      0
-    );
-
-    const groupNameInput = page.getByLabel("By Group Name");
-    await groupNameInput.fill("6529");
-    await expect(page).toHaveURL((url) => {
-      return (
-        url.pathname === "/network/groups" &&
-        url.searchParams.get("group") === "6529"
-      );
+      await expect(page).toHaveURL((url) => url.href.endsWith(path));
+      await expect(page).toHaveTitle(/404/i);
+      await expect(
+        page.getByRole("heading", { name: /404.*PAGE NOT FOUND/i })
+      ).toBeVisible();
+      await expectNoHorizontalOverflow(page);
     });
-    await expectNoHorizontalOverflow(page);
-  });
+  }
 
   test("activates and clears a network group filter through the active-group state", async ({
     page,

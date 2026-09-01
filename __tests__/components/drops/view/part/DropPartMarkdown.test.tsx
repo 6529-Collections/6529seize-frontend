@@ -1242,6 +1242,32 @@ describe("DropPartMarkdown", () => {
     expect(preview.closest("p")).toBeNull();
   });
 
+  it("lifts bare URL previews through inline formatting", () => {
+    const { container } = render(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        mentionedWaves={[]}
+        referencedNfts={[]}
+        partContent="field test: **before https://neal.fun/deep-sea/ after**"
+        onQuoteClick={jest.fn()}
+        hideLinkPreviews={false}
+      />
+    );
+
+    const paragraphs = Array.from(container.querySelectorAll("p.word-break"));
+    const preview = screen.getByTestId("link-preview");
+    const strongText = Array.from(container.querySelectorAll("strong")).map(
+      (element) => element.textContent?.trim()
+    );
+
+    expect(paragraphs).toHaveLength(2);
+    expect(paragraphs[0]).toHaveTextContent("field test: before");
+    expect(paragraphs[1]).toHaveTextContent("after");
+    expect(strongText).toEqual(["before", "after"]);
+    expect(preview.closest("p")).toBeNull();
+    expect(preview.closest("strong")).toBeNull();
+  });
+
   it("renders specialized markdown links with anchor text as plain links", () => {
     const href = "https://warpcast.com/alice/0x123";
 
