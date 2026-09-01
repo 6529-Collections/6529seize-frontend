@@ -24,8 +24,14 @@ import {
   isRateLimitError,
   type SessionRefreshFailureCooldownType,
 } from "./session-refresh-rate-limit.utils";
+import {
+  createAbortError,
+  getSessionRefreshKey,
+  isAbortError,
+  withCrossTabWebSessionRefreshLock,
+  type AuthSessionClientType,
+} from "./session-refresh-coordination.utils";
 
-type AuthSessionClientType = "web" | "native" | "desktop";
 type RefreshTokenSessionClientType = Exclude<AuthSessionClientType, "web">;
 
 interface SessionLoginRequest {
@@ -100,62 +106,10 @@ const sessionRefreshFailureCooldowns = new Map<
   string,
   SessionRefreshFailureCooldown
 >();
-const WEB_SESSION_REFRESH_LOCK_PREFIX = "6529:auth-session-refresh:web:";
-
-type NavigatorWithOptionalLocks = {
-  readonly locks?: LockManager | undefined;
-};
 
 export function getSessionClientType(): AuthSessionClientType {
   return Capacitor.isNativePlatform() ? "native" : "web";
 }
-
-function getSessionRefreshKey({
-  address,
-  clientType,
-}: {
-  readonly address: string;
-  readonly clientType: AuthSessionClientType;
-}): string {
-  return `${clientType}:${address.trim().toLowerCase()}`;
-}
-
-async function withCrossTabWebSessionRefreshLock<T>({
-  address,
-  abortSignal,
-  task,
-}: {
-  readonly address: string;
-  readonly abortSignal?: AbortSignal | undefined;
-  readonly task: () => Promise<T>;
-}): Promise<T> {
-  const runtimeNavigator = Reflect.get(
-    globalThis,
-    "navigator"
-  ) as NavigatorWithOptionalLocks | undefined;
-  const lockManager = runtimeNavigator?.locks;
-  if (!lockManager) {
-    return await task();
-  }
-
-  const lockName = `${WEB_SESSION_REFRESH_LOCK_PREFIX}${address
-    .trim()
-    .toLowerCase()}`;
-  const options: LockOptions = abortSignal
-    ? { mode: "exclusive", signal: abortSignal }
-    : { mode: "exclusive" };
-  return await lockManager.request(lockName, options, async () => await task());
-}
-
-function createAbortError(): DOMException {
-  return new DOMException("Session refresh aborted", "AbortError");
-}
-
-const isAbortError = (error: unknown): boolean =>
-  typeof error === "object" &&
-  error !== null &&
-  "name" in error &&
-  error.name === "AbortError";
 
 function getActiveFailureCooldown(
   key: string
@@ -382,10 +336,12 @@ async function executeSessionRefreshV2({
   address,
   abortSignal,
   clientType,
+  refreshKey,
 }: {
   readonly address: string;
   readonly abortSignal?: AbortSignal | undefined;
   readonly clientType: AuthSessionClientType;
+  readonly refreshKey: string;
 }): Promise<SessionRefreshResponse | null> {
   if (clientType !== "web") {
     const nativeRefreshToken = await getNativeRefreshToken(address);
@@ -423,7 +379,7 @@ async function executeSessionRefreshV2({
   }
 
   return await withCrossTabWebSessionRefreshLock({
-    address,
+    refreshKey,
     abortSignal,
     task: async () =>
       await executeSessionRefreshRequest({
@@ -560,6 +516,7 @@ export async function refreshSessionV2({
       address,
       abortSignal: abortSignal ? controller.signal : undefined,
       clientType,
+      refreshKey: key,
     }),
   };
   sessionRefreshInFlight.set(key, entry);
