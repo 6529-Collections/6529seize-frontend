@@ -361,7 +361,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
                 <div
                   className={`tw-inline-flex tw-min-w-0 tw-items-center tw-whitespace-nowrap ${timestampTextClasses} tw-font-normal tw-leading-tight tw-transition-colors tw-duration-200 ${
                     isActive
-                      ? "tw-text-iron-500 desktop-hover:group-hover:tw-text-iron-400"
+                      ? "tw-text-iron-400 desktop-hover:group-hover:tw-text-iron-400"
                       : "tw-text-iron-500 desktop-hover:group-hover:tw-text-iron-500"
                   }`}
                 >
