@@ -33,7 +33,7 @@ Generated from `tests/packs.manifest.cjs` by
 | `test:e2e:delegation-readonly`                      | —                             | readonly | local       | pr-ci, manual             | 15m     | Delegation surfaces read-only coverage.                                             |
 | `test:e2e:network-open-data-readonly`               | —                             | readonly | local       | pr-ci, manual             | 15m     | Network and open-data read-only coverage.                                           |
 | `test:e2e:collections-readonly`                     | —                             | readonly | local       | pr-ci, manual             | 15m     | NextGen and collection read-only coverage.                                          |
-| `test:e2e:public-groups-tools-readonly`             | —                             | readonly | local       | pr-ci, manual             | 15m     | Public groups and tools read-only coverage.                                         |
+| `test:e2e:public-groups-tools-readonly`             | —                             | readonly | local       | pr-ci, manual             | 15m     | Public tools and removed Groups route read-only coverage.                           |
 | `test:e2e:admin-guards-readonly`                    | —                             | readonly | local       | pr-ci, manual             | 15m     | Admin destructive-action fail-closed guards.                                        |
 | `test:e2e:public-content-readonly`                  | —                             | readonly | local       | pr-ci, manual             | 15m     | Public content pages read-only coverage.                                            |
 | `test:e2e:authenticated-shells-readonly`            | —                             | readonly | local       | pr-ci, manual             | 15m     | Authenticated route shells with read-only dev auth.                                 |
@@ -62,7 +62,7 @@ Generated from `tests/packs.manifest.cjs` by
 | `test:e2e:staging`                                  | core                          | readonly | staging     | post-deploy, manual       | 15m     | Staging core surfaces on both web shells.                                           |
 | `test:e2e:staging:social-readonly`                  | social-readonly               | readonly | staging     | post-deploy, manual       | 15m     | Staging waves and profile read-only pack.                                           |
 | `test:e2e:staging:input-detection-readonly`         | input-detection-readonly      | readonly | staging     | post-deploy, manual       | 15m     | Staging Windows touch-input detection contract.                                     |
-| `test:e2e:staging:public-groups-tools-readonly`     | public-groups-tools-readonly  | readonly | staging     | post-deploy, manual       | 15m     | Staging public groups and tools read-only pack.                                     |
+| `test:e2e:staging:public-groups-tools-readonly`     | public-groups-tools-readonly  | readonly | staging     | post-deploy, manual       | 15m     | Staging public tools and removed Groups route read-only pack.                       |
 | `test:e2e:staging:delegation-readonly`              | delegation-readonly           | readonly | staging     | post-deploy, manual       | 15m     | Staging delegation read-only pack.                                                  |
 | `test:e2e:staging:collections-readonly`             | collections-readonly          | readonly | staging     | post-deploy, manual       | 15m     | Staging collection read-only pack.                                                  |
 | `test:e2e:staging:admin-guards-readonly`            | admin-guards-readonly         | readonly | staging     | post-deploy, manual       | 15m     | Staging admin fail-closed guard pack.                                               |
@@ -82,7 +82,7 @@ Generated from `tests/packs.manifest.cjs` by
 | `test:e2e:production:delegation-readonly`           | delegation-readonly           | readonly | production  | cron, manual, post-deploy | 15m     | Production delegation read-only canary.                                             |
 | `test:e2e:production:network-open-data-readonly`    | network-open-data-readonly    | readonly | production  | cron, manual, post-deploy | 15m     | Production network and open-data read-only canary.                                  |
 | `test:e2e:production:collections-readonly`          | collections-readonly          | readonly | production  | cron, manual, post-deploy | 15m     | Production collection read-only canary.                                             |
-| `test:e2e:production:public-groups-tools-readonly`  | public-groups-tools-readonly  | readonly | production  | cron, manual, post-deploy | 15m     | Production public groups and tools read-only canary.                                |
+| `test:e2e:production:public-groups-tools-readonly`  | public-groups-tools-readonly  | readonly | production  | cron, manual, post-deploy | 15m     | Production public tools and removed Groups route read-only canary.                  |
 | `test:e2e:production:admin-guards-readonly`         | admin-guards-readonly         | readonly | production  | cron, manual, post-deploy | 15m     | Production admin fail-closed guard canary.                                          |
 | `test:e2e:production:public-content-readonly`       | public-content-readonly       | readonly | production  | cron, manual, post-deploy | 15m     | Production public-content read-only canary.                                         |
 | `test:e2e:production:profile-deep-links-readonly`   | profile-deep-links-readonly   | readonly | production  | cron, manual, post-deploy | 15m     | Production profile deep-link canary.                                                |
@@ -212,11 +212,11 @@ Surface matrix:
 - `test:e2e:collections-readonly` runs the public NextGen, The Memes, Meme
   Lab, 6529 Gradient, and ReMemes browse/read-only pack on both baseline web
   projects.
-- `test:e2e:public-groups-tools-readonly` runs the public Groups, Subscriptions
-  Report, and Meme Calendar read-only pack on both baseline web projects.
+- `test:e2e:public-groups-tools-readonly` verifies the removed Network Groups
+  route plus Subscriptions Report and Meme Calendar on both baseline web projects.
 - `test:e2e:admin-guards-readonly` runs unauthenticated fail-closed coverage for
-  the NextGen manager boundary, Drop Forge gated route boundaries, and public
-  Groups owner/vote-all control absence on both baseline web projects, with the
+  the NextGen manager boundary and Drop Forge gated route boundaries on both
+  baseline web projects, with the
   mutation guard enabled even locally.
 - `test:e2e:public-content-readonly` runs the public legacy content pack on
   both baseline web projects, with the mutation guard enabled even locally.
@@ -323,11 +323,11 @@ Surface matrix:
   against staging with the remote mutation guard and staging access unlock.
 - `test:e2e:production:collections-readonly` runs the collections read-only
   pack against production desktop web only as a public, read-only smoke.
-- `test:e2e:staging:public-groups-tools-readonly` runs the public Groups,
-  Subscriptions Report, and Meme Calendar read-only pack against staging with
+- `test:e2e:staging:public-groups-tools-readonly` verifies the removed Network
+  Groups route plus Subscriptions Report and Meme Calendar against staging with
   the remote mutation guard and staging access unlock.
-- `test:e2e:production:public-groups-tools-readonly` runs the same public
-  Groups/Tools/Calendar pack against production desktop web only as a public,
+- `test:e2e:production:public-groups-tools-readonly` runs the same removed-route,
+  tools, and calendar pack against production desktop web only as a public,
   read-only smoke.
 - `test:e2e:staging:admin-guards-readonly` runs the admin/destructive guard
   pack against staging with the remote mutation guard and staging access
@@ -402,7 +402,7 @@ Large-pack ownership:
   NextGen public collection/token routes, The Memes, Meme Lab, 6529 Gradient,
   ReMemes, collection sorting/filter shells, or collection browse cards.
 - `test:e2e:public-groups-tools-readonly` is owned by PR or train owners
-  changing public Groups, profile Groups redirects, Subscriptions Report, Meme
+  changing the removed Network Groups path, profile Groups redirects, Subscriptions Report, Meme
   Calendar, subscription download affordances, calendar locale/timezone controls,
   or read-only mutation guard behavior.
 - `test:e2e:admin-guards-readonly` is owned by PR or train owners changing

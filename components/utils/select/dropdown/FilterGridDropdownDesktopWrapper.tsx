@@ -56,7 +56,10 @@ export default function FilterGridDropdownDesktopWrapper({
 
     let left = buttonRect.left + scrollX;
 
-    if (buttonRect.left + width > window.innerWidth - 16) {
+    if (
+      buttonRef.current.closest('[data-dropdown-menu-align="end"]') ||
+      buttonRect.left + width > window.innerWidth - 16
+    ) {
       left = buttonRect.right + scrollX - width;
     }
 

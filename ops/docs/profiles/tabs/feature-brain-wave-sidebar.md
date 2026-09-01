@@ -26,9 +26,11 @@ The same wave can appear in both lists. Direct-message waves are excluded.
 
 1. Open `/{user}/brain`.
 2. `Created Waves` and `Recently Active In` load independently.
-3. Desktop initially shows up to five created waves. Select `Show more` to
-   reveal every loaded created wave; select `Load more` to request the next
-   page when one is available. `Show less` restores the compact view.
+3. If no accessible created waves are found, the `Created Waves` section is
+   omitted. Otherwise, desktop initially shows up to five created waves. Select
+   `Show more` to reveal every loaded created wave; select `Load more` to
+   request the next page when one is available. `Show less` restores the
+   compact view.
 4. Desktop shows the first page of recent activity. Select `Load more` to
    append the next page.
 5. On desktop, scroll anywhere inside the right sidebar to move through both
@@ -65,8 +67,10 @@ the document.
 
 ## Edge Cases
 
-- Each section has its own loading, empty, and error state. One failed or empty
-  section does not hide a successful section.
+- Each list has its own loading and error state. A successfully empty
+  `Created Waves` result omits that section on desktop and small screens;
+  `Recently Active In` keeps its own empty message. One failed or empty list
+  does not hide a successful list.
 - Created and recent lists intentionally allow overlap.
 - Results include accessible root waves and subwaves, including private waves
   the current viewer may access. Inaccessible and direct-message waves are

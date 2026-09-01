@@ -80,6 +80,10 @@ describe("MemeSeasonGridDropdown", () => {
     jest.clearAllMocks();
   });
 
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   it("renders with 'All Seasons' label when nothing is selected", async () => {
     const setSelected = jest.fn();
 
@@ -122,6 +126,32 @@ describe("MemeSeasonGridDropdown", () => {
     fireEvent.click(button);
 
     expect(screen.getByRole("menu")).toBeInTheDocument();
+  });
+
+  it("right-aligns the desktop menu without changing its size or grid", async () => {
+    const setSelected = jest.fn();
+
+    render(
+      <div data-dropdown-menu-align="end">
+        <MemeSeasonGridDropdown selected={null} setSelected={setSelected} />
+      </div>
+    );
+    await flushPromises();
+
+    const button = screen.getByRole("button", { name: /Season: All Seasons/i });
+    jest.spyOn(button, "getBoundingClientRect").mockReturnValue(
+      DOMRect.fromRect({ x: 200, y: 52, width: 240, height: 48 })
+    );
+    jest
+      .spyOn(HTMLElement.prototype, "offsetWidth", "get")
+      .mockReturnValue(288);
+
+    fireEvent.click(button);
+
+    const menu = screen.getByRole("menu");
+    expect(menu).toHaveClass("tw-w-72");
+    expect(menu.querySelector(".tw-grid")).toHaveClass("tw-grid-cols-2");
+    expect(menu.parentElement?.style.left).toBe("152px");
   });
 
   it("fetches and displays seasons from API", async () => {

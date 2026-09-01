@@ -50,8 +50,13 @@ describe("production artifact builder and promotion contract", () => {
     const installIndex = job.steps.findIndex(
       (step: { name?: string }) => step.name === "Install frozen dependencies"
     );
+    const installStep = job.steps[installIndex];
 
-    expect(job.permissions).toEqual({ contents: "read" });
+    expect(job.permissions).toEqual({
+      contents: "read",
+      packages: "read",
+    });
+    expect(installStep.env.NODE_AUTH_TOKEN).toBe("${{ github.token }}");
     expect(serialized).not.toContain("AWS_ACCESS_KEY_ID");
     expect(serialized).not.toContain("configure-aws-credentials");
     expect(buildSource).toContain("ref: main");

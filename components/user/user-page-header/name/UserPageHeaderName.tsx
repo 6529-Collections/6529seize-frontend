@@ -85,10 +85,10 @@ export default function UserPageHeaderName({
             <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-2">
               <span
                 aria-hidden="true"
-                className="tw-size-1 tw-flex-none tw-rounded-full tw-bg-iron-500"
+                className="tw-size-1 tw-flex-none tw-rounded-full tw-bg-iron-400"
               />
               <p
-                className="tw-m-0 tw-whitespace-nowrap tw-text-[13px] tw-font-normal tw-leading-4 tw-text-white/50"
+                className="tw-m-0 tw-whitespace-nowrap tw-text-[13px] tw-font-normal tw-leading-4 tw-text-iron-400"
                 suppressHydrationWarning
               >
                 {getUserProfileHeaderMessage(

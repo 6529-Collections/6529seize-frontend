@@ -203,6 +203,7 @@ export const NumberTrait: React.FC<NumberTraitProps> = React.memo(
         readOnly={readOnly}
         className={className}
         error={error}
+        id={`field-${field}`}
         isFieldFilled={isFieldFilled}
         showRequiredMarker={showRequiredMarker}
         size={size}

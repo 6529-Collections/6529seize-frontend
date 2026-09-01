@@ -26,6 +26,7 @@ on:
 
 permissions:
   contents: read
+  packages: read
 
 jobs:
   publish:
@@ -66,6 +67,7 @@ jobs:
 
       - name: Install dependencies
         env:
+          NODE_AUTH_TOKEN: ${{ github.token }}
           SFW_BIN: ${{ steps.socket_firewall.outputs.firewall-path-binary }}
         run: ./bin/6529 install:frozen
 

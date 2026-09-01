@@ -58,6 +58,7 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
   artworkUploaded,
   artworkUrl,
   uploadError,
+  missingMediaError,
   artworkMimeType,
   setArtworkUploaded,
   handleFileSelect,
@@ -221,8 +222,13 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
     videoCompatibility,
     isCheckingCompatibility,
   } = state;
-  const displayUploadError = uploadError ?? error;
-  const uploadVisualState = uploadError ? "invalid" : visualState;
+  const displayUploadError =
+    uploadError ??
+    error ??
+    (visualState === "processing" ? null : missingMediaError) ??
+    null;
+  const displayExternalError = externalError ?? missingMediaError ?? null;
+  const uploadVisualState = displayUploadError ? "invalid" : visualState;
 
   useEffect(() => {
     if (uploadError) {
@@ -295,7 +301,7 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
         />
       </div>
       <div
-        className={`tw-min-h-0 tw-flex-1 tw-overflow-hidden ${
+        className={`tw-min-h-0 lg:tw-flex-1 lg:tw-overflow-hidden ${
           showUploadUi
             ? ""
             : "tw-pb-4 desktop-hover:hover:tw-scrollbar-thumb-iron-300 lg:tw-overflow-y-auto lg:tw-scrollbar-thin lg:tw-scrollbar-track-iron-800 lg:tw-scrollbar-thumb-iron-500"
@@ -308,7 +314,11 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
             {...(!artworkUploaded && !prefersReducedMotion
               ? { whileHover: { scale: 1.002 } }
               : {})}
-            className={`tw-group tw-relative tw-min-h-[280px] tw-w-full tw-overflow-hidden tw-rounded-xl tw-bg-gradient-to-br tw-from-iron-900 tw-to-iron-950 sm:tw-min-h-[340px] lg:tw-h-full lg:tw-min-h-0 ${
+            className={`tw-group tw-relative tw-w-full tw-overflow-hidden tw-rounded-xl tw-bg-gradient-to-br tw-from-iron-900 tw-to-iron-950 lg:tw-h-full lg:tw-min-h-0 ${
+              displayUploadError
+                ? "tw-min-h-96"
+                : "tw-min-h-[280px] sm:tw-min-h-[340px]"
+            } ${
               visualState === "dragging"
                 ? "tw-border-2 tw-border-primary-500/60"
                 : ""
@@ -329,6 +339,7 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
             aria-describedby={
               displayUploadError ? "file-upload-error" : undefined
             }
+            aria-invalid={Boolean(displayUploadError)}
             data-testid="artwork-upload-area"
           >
             <input
@@ -349,7 +360,9 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
                 visualState={uploadVisualState}
                 error={displayUploadError}
                 hasRecoveryOption={
-                  uploadError ? false : state.hasRecoveryOption
+                  uploadError || missingMediaError
+                    ? false
+                    : state.hasRecoveryOption
                 }
                 onRetry={handleRetry}
               />
@@ -388,7 +401,9 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
             <div className="tw-flex tw-flex-col tw-gap-2">
               <label
                 htmlFor="memes-interactive-media-hash"
-                className="tw-text-sm tw-font-medium tw-text-iron-200"
+                className={`tw-text-sm tw-font-medium ${
+                  displayExternalError ? "tw-text-red" : "tw-text-iron-200"
+                }`}
               >
                 Content Hash or Path
               </label>
@@ -396,15 +411,29 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
                 id="memes-interactive-media-hash"
                 type="text"
                 autoComplete="off"
-                className="tw-form-input tw-w-full tw-cursor-text tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-3 tw-py-2.5 tw-text-base tw-font-normal tw-text-iron-100 tw-outline-none tw-ring-1 tw-ring-iron-700 tw-transition-all tw-duration-500 tw-ease-in-out placeholder:tw-text-iron-500 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:hover:tw-ring-primary-400 desktop-hover:hover:tw-ring-iron-650 sm:tw-text-sm"
+                className={`tw-form-input tw-w-full tw-cursor-text tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-3 tw-py-2.5 tw-text-base tw-font-normal tw-text-iron-100 tw-outline-none tw-ring-1 tw-transition-all tw-duration-500 tw-ease-in-out placeholder:tw-text-iron-500 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:hover:tw-ring-primary-400 sm:tw-text-sm ${
+                  displayExternalError
+                    ? "tw-ring-red"
+                    : "tw-ring-iron-700 desktop-hover:hover:tw-ring-iron-650"
+                }`}
                 placeholder="bafy.../index.html"
                 value={externalHash}
                 onChange={(event) => onExternalHashChange(event.target.value)}
-                aria-invalid={Boolean(externalError)}
+                aria-required={true}
+                aria-invalid={Boolean(displayExternalError)}
+                aria-describedby={
+                  displayExternalError
+                    ? "interactive-media-hash-error"
+                    : undefined
+                }
               />
-              {externalError && (
-                <p className="tw-mb-0 tw-text-xs tw-font-medium tw-text-iron-400">
-                  {externalError}
+              {displayExternalError && (
+                <p
+                  id="interactive-media-hash-error"
+                  className="tw-mb-0 tw-text-xs tw-font-medium tw-text-red"
+                  role="alert"
+                >
+                  {displayExternalError}
                 </p>
               )}
               {externalConstructedUrl && !externalError && (
