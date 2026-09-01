@@ -398,7 +398,7 @@ describe("MemesWaveWinnersDrop", () => {
     ).toHaveClass(
       "tw-rounded-md",
       "tw-border",
-      "tw-border-white/[0.06]",
+      "tw-border-iron-700",
       "tw-bg-white/[0.05]"
     );
   });

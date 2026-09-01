@@ -23,6 +23,9 @@ linked section pages.
 ## Entry Points
 
 - Desktop: open a wave thread, open the right sidebar, and select a tab.
+- Compact web layouts: select the `Wave details` button beside the wave-search
+  action. It opens the same information sidebar as the desktop control without
+  requiring the `More wave actions` menu.
 - Native app: open an active wave, select the main `About` tab, and select an
   information pill. The information pills replace the subwave pills while
   `About` is active; selecting another main tab restores the subwave pills.
@@ -94,7 +97,8 @@ linked section pages.
 ## User Journey
 
 1. Open a wave thread on `/waves/{waveId}` or `/messages/{waveId}`.
-2. Open the right sidebar.
+2. Open the right sidebar from the desktop sidebar control or the compact
+   `Wave details` header button.
 3. Select a desktop tab or native information pill. Use `More` for the
    remaining sections.
 4. Sidebar content switches in place without route navigation. On native,
