@@ -9,8 +9,17 @@ describe("DropPlaceholder", () => {
   it("renders the posting access loading placeholder", () => {
     render(<DropPlaceholder type="profile-check" />);
 
-    expect(screen.getByRole("status")).toHaveTextContent(
-      "Checking posting access…"
+    const status = screen.getByRole("status");
+    expect(status).toHaveTextContent("Checking posting access…");
+    expect(status).toHaveAttribute("aria-busy", "true");
+    expect(status).toHaveClass(
+      "tw-min-h-11",
+      "tw-grid-cols-[auto_minmax(0,1fr)_auto]"
+    );
+    expect(screen.getByTestId("posting-access-skeleton")).toBe(status);
+    expect(status.querySelectorAll(".tw-animate-pulse")).toHaveLength(3);
+    expect(screen.getByText("Checking posting access…")).toHaveClass(
+      "tw-sr-only"
     );
   });
 

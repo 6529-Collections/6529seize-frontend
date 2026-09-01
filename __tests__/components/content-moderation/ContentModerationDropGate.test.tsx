@@ -184,6 +184,13 @@ describe("ContentModerationDropGate", () => {
     expect(screen.getByText("Author post content")).toBeInTheDocument();
     expect(screen.getByText("This post is under review")).toBeInTheDocument();
     expect(screen.getByText("Only you can see this post.")).toBeInTheDocument();
+    const notice = screen.getByTestId("content-moderation-author-notice");
+    expect(notice).toHaveClass("tw-gap-1.5");
+    expect(notice.querySelector("span")).toHaveClass(
+      "tw-text-xs",
+      "tw-leading-4"
+    );
+    expect(notice.querySelector("svg")).toHaveClass("tw-size-3.5");
   });
 
   it("fails closed when stale author-only moderation data reaches another viewer", () => {
