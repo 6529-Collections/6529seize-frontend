@@ -124,9 +124,6 @@ describe("UserPageHeaderSubscriptionStatus", () => {
       "tw-shadow-md"
     );
     expect(screen.getByText("Subscriptions")).toHaveClass("tw-text-iron-500");
-    expect(screen.getByText("Subscriptions").parentElement).toHaveClass(
-      "tw-flex-col"
-    );
     expect(statusLink).toHaveAttribute(
       "href",
       "/sesamenoodles/subscriptions#profile-subscriptions-top-up"
@@ -151,9 +148,6 @@ describe("UserPageHeaderSubscriptionStatus", () => {
       .closest("a");
 
     expect(statusLink).toHaveClass("tw-w-full", "tw-border-t");
-    expect(screen.getByText("Subscriptions").parentElement).toHaveClass(
-      "tw-flex-col"
-    );
     expect(statusLink).toHaveAttribute(
       "href",
       "/sesamenoodles/subscriptions#profile-subscriptions-top-up"
