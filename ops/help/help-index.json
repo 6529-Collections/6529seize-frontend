@@ -2658,6 +2658,43 @@
       ]
     },
     {
+      "id": "waves.delete-own-chat-history",
+      "kind": "workflow",
+      "title": "Delete your chat history from a wave",
+      "aliases": [
+        "delete all my wave messages",
+        "delete my wave chat history",
+        "remove all my wave chat posts",
+        "clear my wave messages"
+      ],
+      "keywords": [
+        "waves",
+        "chat",
+        "messages",
+        "delete",
+        "history",
+        "configuration",
+        "pinned",
+        "submissions"
+      ],
+      "facts": [
+        "Authenticated profiles can use Delete all my messages from this wave in About -> Configuration.",
+        "The destructive button appears between Curations and Your display for connected profiles that are not acting through a proxy.",
+        "The action permanently deletes only CHAT drops authored by the current profile in the selected wave.",
+        "Submission and winner drops are never deleted by this action.",
+        "If the current profile authored the wave's pinned drop, that pinned drop is preserved.",
+        "The control remains available if chat was later disabled, so existing history can still be removed.",
+        "A confirmation dialog explains the scope and warns that the deletion is irreversible before the API is called."
+      ],
+      "canonical_path": "/waves",
+      "related_paths": ["/waves", "/messages"],
+      "tags": ["waves", "chat", "messages", "configuration", "delete"],
+      "source_refs": [
+        "components/waves/groups/WaveConfigurationDeleteChatHistory.tsx",
+        "ops/docs/waves/chat/feature-delete-own-chat-history.md"
+      ]
+    },
+    {
       "id": "waves.rules",
       "kind": "workflow",
       "title": "Wave rules",
