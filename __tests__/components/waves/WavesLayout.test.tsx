@@ -1,4 +1,6 @@
-import WavesLayout from "@/components/waves/layout/WavesLayout";
+import WavesLayout, {
+  WavesBranchLoadingFallback,
+} from "@/components/waves/layout/WavesLayout";
 import { render, screen } from "@testing-library/react";
 import React from "react";
 
@@ -161,6 +163,28 @@ describe("WavesLayout", () => {
     ).toBeInTheDocument();
     expect(screen.getByTestId("posting-access-skeleton")).toBeInTheDocument();
     expect(screen.queryByTestId("wave-content")).not.toBeInTheDocument();
+  });
+
+  it("keeps wave boundaries and shimmer visible while desktop code loads", () => {
+    mockUsePathname.mockReturnValue("/waves/wave-123");
+
+    render(<WavesBranchLoadingFallback />);
+
+    expect(
+      screen.getByTestId("waves-desktop-loading-shell")
+    ).toBeInTheDocument();
+    expect(screen.getByTestId("waves-loading-sidebar-boundary")).toHaveClass(
+      "tw-border-r"
+    );
+    expect(screen.getByTestId("waves-loading-main-boundary")).toHaveClass(
+      "tw-border-r"
+    );
+    expect(
+      screen.getByTestId("wave-view-loading-placeholder")
+    ).toBeInTheDocument();
+
+    const composer = screen.getByTestId("posting-access-skeleton");
+    expect(composer.parentElement).toHaveClass("tw-border-t");
   });
 
   it("keeps the wave content frame mounted when auth loading resolves", () => {

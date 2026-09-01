@@ -16,6 +16,7 @@ import { getWaveIdFromPathname } from "@/helpers/navigation.helpers";
 import { usePathname } from "next/navigation";
 import WaveViewLoadingPlaceholder from "../WaveViewLoadingPlaceholder";
 import BrainContent from "@/components/brain/content/BrainContent";
+import { useLayout } from "@/components/brain/my-stream/layout/LayoutContext";
 
 type WavesBranchProps = {
   readonly children: ReactNode;
@@ -32,8 +33,42 @@ const WAVES_CONTENT_STATE_MEASURING = "measuring";
 const WAVES_CONTENT_STATE_NEEDS_PROFILE = "needs-profile";
 const WAVES_CONTENT_STATE_NOT_AVAILABLE = "not-available";
 
-function WavesBranchLoadingFallback() {
-  return <div className="tw-flex tw-min-h-screen tw-flex-1 tw-bg-black" />;
+export function WavesBranchLoadingFallback() {
+  const pathname = usePathname();
+  const { contentContainerStyle } = useLayout();
+  const isWaveRoute = getWaveIdFromPathname(pathname) !== null;
+
+  return (
+    <div
+      className="tw-relative tw-flex tw-min-h-0 tw-flex-col tw-bg-black"
+      data-testid="waves-desktop-loading-shell"
+    >
+      <div className="tw-relative tw-flex tw-min-h-0 tw-flex-grow">
+        <div className="tw-relative tw-mx-auto tw-flex tw-min-h-0 tw-w-full tw-max-w-full tw-flex-grow">
+          <div
+            className="tw-relative tw-flex tw-min-h-0 tw-w-full tw-overflow-hidden"
+            style={contentContainerStyle}
+          >
+            <div
+              aria-hidden="true"
+              className="tw-hidden tw-h-full tw-w-80 tw-shrink-0 tw-border-b-0 tw-border-l-0 tw-border-r tw-border-t-0 tw-border-solid tw-border-iron-700/95 lg:tw-flex"
+              data-testid="waves-loading-sidebar-boundary"
+            />
+            <div
+              className="tw-flex tw-h-full tw-min-h-0 tw-min-w-0 tw-flex-grow tw-flex-col tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-800"
+              data-testid="waves-loading-main-boundary"
+            >
+              {isWaveRoute ? (
+                <WaveViewLoadingPlaceholder />
+              ) : (
+                <WavesContentLoadingFallback />
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 const WavesDesktop = dynamic<WavesBranchProps>(
