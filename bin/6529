@@ -47,9 +47,6 @@ case "$command_name" in
   bootstrap)
     exec bash "$REPO_ROOT/scripts/bootstrap-6529-command.sh" "$@"
     ;;
-  staging)
-    exec bash "$REPO_ROOT/scripts/staging.sh" "$@"
-    ;;
   env)
     exec node "$REPO_ROOT/scripts/env-target.cjs" "$@"
     ;;
@@ -74,6 +71,15 @@ if [[ -z "$REAL_PNPM" ]]; then
   echo "pnpm is not available. Activate the repo-pinned pnpm with Corepack first." >&2
   exit 1
 fi
+if [[ "$REAL_PNPM" != /* ]] || [[ ! -x "$REAL_PNPM" ]]; then
+  echo "pnpm must resolve to an absolute executable outside the repository wrapper path." >&2
+  exit 1
+fi
+
+if [[ "$command_name" == "staging" ]]; then
+  exec env SEIZE_STAGING_TRUSTED_PNPM_BINARY="$REAL_PNPM" \
+    bash "$REPO_ROOT/scripts/staging.sh" "$@"
+fi
 
 cd "$REPO_ROOT"
 
@@ -87,42 +93,48 @@ case "$command_name" in
       echo "Use \`6529 add <package>\` to add dependencies." >&2
       exit 1
     fi
-    exec node "$REPO_ROOT/scripts/run-secure-pnpm.cjs" install
+    exec node "$REPO_ROOT/scripts/run-secure-pnpm.cjs" \
+      --seize-secure-pnpm-binary "$REAL_PNPM" -- install
     ;;
   install)
     if [[ "$#" -gt 0 ]]; then
       echo "Use \`6529 add <package>\` to add dependencies." >&2
       exit 1
     fi
-    exec node "$REPO_ROOT/scripts/run-secure-pnpm.cjs" install
+    exec node "$REPO_ROOT/scripts/run-secure-pnpm.cjs" \
+      --seize-secure-pnpm-binary "$REAL_PNPM" -- install
     ;;
   ci)
     if [[ "$#" -gt 0 ]]; then
       echo "\`6529 ci\` does not accept package arguments." >&2
       exit 1
     fi
-    exec node "$REPO_ROOT/scripts/run-secure-pnpm.cjs" install --frozen-lockfile
+    exec node "$REPO_ROOT/scripts/run-secure-pnpm.cjs" \
+      --seize-secure-pnpm-binary "$REAL_PNPM" -- install --frozen-lockfile
     ;;
   install:frozen)
     if [[ "$#" -gt 0 ]]; then
       echo "\`6529 install:frozen\` does not accept package arguments." >&2
       exit 1
     fi
-    exec node "$REPO_ROOT/scripts/run-secure-pnpm.cjs" install --frozen-lockfile
+    exec node "$REPO_ROOT/scripts/run-secure-pnpm.cjs" \
+      --seize-secure-pnpm-binary "$REAL_PNPM" -- install --frozen-lockfile
     ;;
   install:prod)
     if [[ "$#" -gt 0 ]]; then
       echo "\`6529 install:prod\` does not accept package arguments." >&2
       exit 1
     fi
-    exec node "$REPO_ROOT/scripts/run-secure-pnpm.cjs" install --frozen-lockfile --prod
+    exec node "$REPO_ROOT/scripts/run-secure-pnpm.cjs" \
+      --seize-secure-pnpm-binary "$REAL_PNPM" -- install --frozen-lockfile --prod
     ;;
   add)
     if [[ "$#" -eq 0 ]]; then
       echo "Usage: \`6529 add <package>\`" >&2
       exit 1
     fi
-    exec node "$REPO_ROOT/scripts/run-secure-pnpm.cjs" add "$@"
+    exec node "$REPO_ROOT/scripts/run-secure-pnpm.cjs" \
+      --seize-secure-pnpm-binary "$REAL_PNPM" -- add "$@"
     ;;
   update)
     if [[ "$#" -gt 0 ]]; then
@@ -130,10 +142,12 @@ case "$command_name" in
       echo "Use \`6529 update:all [package...]\` for intentional pnpm updates." >&2
       exit 1
     fi
-    exec node "$REPO_ROOT/scripts/run-secure-pnpm.cjs" audit --fix
+    exec node "$REPO_ROOT/scripts/run-secure-pnpm.cjs" \
+      --seize-secure-pnpm-binary "$REAL_PNPM" -- audit --fix
     ;;
   update:all)
-    exec node "$REPO_ROOT/scripts/run-secure-pnpm.cjs" update "$@"
+    exec node "$REPO_ROOT/scripts/run-secure-pnpm.cjs" \
+      --seize-secure-pnpm-binary "$REAL_PNPM" -- update "$@"
     ;;
   prune:prod)
     exec "$REAL_PNPM" run prune:prod "$@"

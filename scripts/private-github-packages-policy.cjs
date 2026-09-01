@@ -18,6 +18,7 @@ const AUTH_PLACEHOLDER = `\${${AUTH_ENVIRONMENT_VARIABLE}}`;
 const SCOPE_REGISTRY_KEY = `${ALLOWED_SCOPE}:registry`;
 const AUTH_KEY = `//${ALLOWED_REGISTRY_HOST}/:_authToken`;
 const SECURE_REPOSITORY_ROOT_ARGUMENT = "--seize-secure-repository-root";
+const SECURE_PNPM_BINARY_ARGUMENT = "--seize-secure-pnpm-binary";
 const REQUIRED_LOCKFILE_PRIVATE_SCOPE_REFERENCE_COUNT = 4;
 const ALLOWED_PNPM_COMMANDS = new Set(["add", "audit", "install", "update"]);
 const FORBIDDEN_NPMRC_CONFIG_NAMES = new Set([
@@ -982,9 +983,17 @@ function validatePnpmArguments(args) {
   }
 
   for (const argument of args) {
-    if (argument === SECURE_REPOSITORY_ROOT_ARGUMENT) {
+    const reservedPackageToolingArgument = [
+      SECURE_REPOSITORY_ROOT_ARGUMENT,
+      SECURE_PNPM_BINARY_ARGUMENT,
+    ].find(
+      (reservedArgument) =>
+        argument === reservedArgument ||
+        argument.startsWith(`${reservedArgument}=`)
+    );
+    if (reservedPackageToolingArgument !== undefined) {
       throw policyError(
-        `${SECURE_REPOSITORY_ROOT_ARGUMENT} is reserved for trusted package tooling`
+        `${reservedPackageToolingArgument} is reserved for trusted package tooling`
       );
     }
 
@@ -1187,6 +1196,7 @@ module.exports = {
   AUTH_PLACEHOLDER,
   SCOPE_REGISTRY_KEY,
   PUBLIC_REGISTRY_ORIGIN,
+  SECURE_PNPM_BINARY_ARGUMENT,
   SECURE_REPOSITORY_ROOT_ARGUMENT,
   validateAuthEnvironment,
   validateLockfile,

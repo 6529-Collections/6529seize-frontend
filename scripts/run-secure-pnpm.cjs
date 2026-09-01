@@ -5,6 +5,7 @@ const path = require("node:path");
 const { spawnSync } = require("node:child_process");
 
 const {
+  SECURE_PNPM_BINARY_ARGUMENT,
   SECURE_REPOSITORY_ROOT_ARGUMENT,
   validateRepositoryPolicy,
 } = require("./private-github-packages-policy.cjs");
@@ -49,6 +50,7 @@ function quoteWindowsShellArgument(value) {
 function runSecurePnpm({
   args = process.argv.slice(2),
   environment = process.env,
+  pnpmBinary,
   repositoryRoot = REPOSITORY_ROOT,
   spawn = spawnSync,
   platform = process.platform,
@@ -64,6 +66,14 @@ function runSecurePnpm({
     validateEnvironmentOverrides: true,
   });
 
+  if (typeof pnpmBinary !== "string" || !path.isAbsolute(pnpmBinary)) {
+    throw new Error(
+      `${SECURE_PNPM_BINARY_ARGUMENT} requires an absolute pnpm path`
+    );
+  }
+  const trustedPnpmBinary = fs.realpathSync(pnpmBinary);
+  fs.accessSync(trustedPnpmBinary, fs.constants.X_OK);
+
   const sfwCommand = resolveSfwCommand(environment);
   const useWindowsShell = platform === "win32";
   const command = useWindowsShell
@@ -74,6 +84,8 @@ function runSecurePnpm({
     ROUTING_HELPER_PATH,
     SECURE_REPOSITORY_ROOT_ARGUMENT,
     repositoryRoot,
+    SECURE_PNPM_BINARY_ARGUMENT,
+    trustedPnpmBinary,
     "--",
     ...args,
   ];
@@ -106,18 +118,33 @@ function runSecurePnpm({
 }
 
 function parseSecureInvocationArguments(args) {
-  if (args[0] !== SECURE_REPOSITORY_ROOT_ARGUMENT) {
-    return { args, repositoryRoot: REPOSITORY_ROOT };
+  let argumentIndex = 0;
+  let repositoryRoot = REPOSITORY_ROOT;
+
+  if (args[argumentIndex] === SECURE_REPOSITORY_ROOT_ARGUMENT) {
+    if (!path.isAbsolute(args[argumentIndex + 1])) {
+      throw new Error(
+        `${SECURE_REPOSITORY_ROOT_ARGUMENT} requires an absolute path`
+      );
+    }
+    repositoryRoot = fs.realpathSync(args[argumentIndex + 1]);
+    argumentIndex += 2;
   }
-  if (args[2] !== "--" || !path.isAbsolute(args[1])) {
+
+  if (args[argumentIndex] !== SECURE_PNPM_BINARY_ARGUMENT) {
+    throw new Error(`${SECURE_PNPM_BINARY_ARGUMENT} is required before --`);
+  }
+  const pnpmBinary = args[argumentIndex + 1];
+  if (!path.isAbsolute(pnpmBinary) || args[argumentIndex + 2] !== "--") {
     throw new Error(
-      `${SECURE_REPOSITORY_ROOT_ARGUMENT} requires an absolute path followed by --`
+      `${SECURE_PNPM_BINARY_ARGUMENT} requires an absolute path followed by --`
     );
   }
 
   return {
-    args: args.slice(3),
-    repositoryRoot: fs.realpathSync(args[1]),
+    args: args.slice(argumentIndex + 3),
+    pnpmBinary: fs.realpathSync(pnpmBinary),
+    repositoryRoot,
   };
 }
 
@@ -137,6 +164,7 @@ if (require.main === module) {
 
 module.exports = {
   REPOSITORY_ROOT,
+  SECURE_PNPM_BINARY_ARGUMENT,
   SECURE_REPOSITORY_ROOT_ARGUMENT,
   ROUTING_HELPER_PATH,
   parseSecureInvocationArguments,

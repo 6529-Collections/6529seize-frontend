@@ -7,6 +7,7 @@ const { spawnSync } = require("node:child_process");
 const {
   AUTH_ENVIRONMENT_VARIABLE,
   ALLOWED_REGISTRY_HOST,
+  SECURE_PNPM_BINARY_ARGUMENT,
   SECURE_REPOSITORY_ROOT_ARGUMENT,
   validateRepositoryFiles,
   validateRepositoryPolicy,
@@ -138,17 +139,17 @@ function createRoutedEnvironment(environment) {
   return routedEnvironment;
 }
 
-function pnpmSpawnArguments(args, platform) {
+function pnpmSpawnArguments(args, platform, pnpmBinary = "pnpm") {
   if (platform !== "win32") {
     return {
-      command: "pnpm",
+      command: pnpmBinary,
       commandArguments: args,
       shell: false,
     };
   }
 
   return {
-    command: quoteWindowsShellArgument("pnpm"),
+    command: quoteWindowsShellArgument(pnpmBinary),
     commandArguments: args.map(quoteWindowsShellArgument),
     shell: true,
   };
@@ -194,8 +195,15 @@ function tokenFreeResolutionArguments(args) {
     : args;
 }
 
-function spawnPnpm({ args, environment, platform, repositoryRoot, spawn }) {
-  const invocation = pnpmSpawnArguments(args, platform);
+function spawnPnpm({
+  args,
+  environment,
+  platform,
+  pnpmBinary,
+  repositoryRoot,
+  spawn,
+}) {
+  const invocation = pnpmSpawnArguments(args, platform, pnpmBinary);
   const result = spawn(invocation.command, invocation.commandArguments, {
     cwd: repositoryRoot,
     env: environment,
@@ -214,6 +222,7 @@ function runPnpm({
   args = process.argv.slice(2),
   environment = process.env,
   platform = process.platform,
+  pnpmBinary = "pnpm",
   repositoryRoot = REPOSITORY_ROOT,
   spawn = spawnSync,
 }) {
@@ -251,6 +260,7 @@ function runPnpm({
       args: resolutionArguments,
       environment: tokenFreeResolutionEnvironment,
       platform,
+      pnpmBinary,
       repositoryRoot,
       spawn,
     });
@@ -264,6 +274,7 @@ function runPnpm({
         args: TOKEN_FREE_LOCKFILE_ARGUMENTS,
         environment: tokenFreeResolutionEnvironment,
         platform,
+        pnpmBinary,
         repositoryRoot,
         spawn,
       });
@@ -283,6 +294,7 @@ function runPnpm({
     args: authenticatedArguments,
     environment: authenticatedEnvironment,
     platform,
+    pnpmBinary,
     repositoryRoot,
     spawn,
   });
@@ -301,6 +313,7 @@ function runPnpm({
     args: TOKEN_FREE_REBUILD_ARGUMENTS,
     environment: tokenFreeEnvironment,
     platform,
+    pnpmBinary,
     repositoryRoot,
     spawn,
   });
@@ -317,19 +330,26 @@ function main() {
     const invocationArguments = process.argv.slice(2);
     if (
       invocationArguments[0] !== SECURE_REPOSITORY_ROOT_ARGUMENT ||
-      invocationArguments[2] !== "--"
+      invocationArguments[2] !== SECURE_PNPM_BINARY_ARGUMENT ||
+      invocationArguments[4] !== "--"
     ) {
       throw new Error(
         "Private GitHub Packages routing must be invoked by the trusted secure package helper."
       );
     }
     const repositoryRoot = invocationArguments[1];
-    if (!path.isAbsolute(repositoryRoot)) {
-      throw new Error("Secure package repository root must be absolute.");
+    const pnpmBinary = invocationArguments[3];
+    if (!path.isAbsolute(repositoryRoot) || !path.isAbsolute(pnpmBinary)) {
+      throw new Error(
+        "Secure package repository root and pnpm binary must be absolute."
+      );
     }
+    const trustedPnpmBinary = fs.realpathSync(pnpmBinary);
+    fs.accessSync(trustedPnpmBinary, fs.constants.X_OK);
 
     process.exitCode = runPnpm({
-      args: invocationArguments.slice(3),
+      args: invocationArguments.slice(5),
+      pnpmBinary: trustedPnpmBinary,
       repositoryRoot: fs.realpathSync(repositoryRoot),
     });
   } catch (error) {

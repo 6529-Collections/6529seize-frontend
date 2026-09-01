@@ -265,9 +265,16 @@ echo "Running secure install in $WORKTREE_NAME..."
   rm -f "$BOOTSTRAP_EXPORTS_FILE"
   trap - EXIT
 
+  TRUSTED_PNPM_BINARY="$(command -v pnpm || true)"
+  if [[ "$TRUSTED_PNPM_BINARY" != /* ]] || [[ ! -x "$TRUSTED_PNPM_BINARY" ]]; then
+    echo "pnpm must resolve to an absolute executable outside repository wrapper paths." >&2
+    exit 1
+  fi
+
   NODE_AUTH_TOKEN="$PACKAGE_AUTH_TOKEN" \
     "$NODE_BINARY" "$MAIN_REPO/scripts/run-secure-pnpm.cjs" \
-    --seize-secure-repository-root "$WORKTREE_PATH" -- install
+    --seize-secure-repository-root "$WORKTREE_PATH" \
+    --seize-secure-pnpm-binary "$TRUSTED_PNPM_BINARY" -- install
 )
 unset PACKAGE_AUTH_TOKEN
 

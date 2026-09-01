@@ -32,6 +32,7 @@ type PolicyModule = {
   AUTH_KEY: string;
   AUTH_PLACEHOLDER: string;
   PUBLIC_REGISTRY_ORIGIN: string;
+  SECURE_PNPM_BINARY_ARGUMENT: string;
   SECURE_REPOSITORY_ROOT_ARGUMENT: string;
   SCOPE_REGISTRY_KEY: string;
   validateAuthEnvironment: (environment: Environment) => void;
@@ -60,7 +61,8 @@ type RoutingModule = {
   parseNoProxy: (value: string | undefined) => string[];
   pnpmSpawnArguments: (
     args: string[],
-    platform: NodeJS.Platform
+    platform: NodeJS.Platform,
+    pnpmBinary?: string
   ) => {
     command: string;
     commandArguments: string[];
@@ -70,6 +72,7 @@ type RoutingModule = {
     args: string[];
     environment: Environment;
     platform?: NodeJS.Platform;
+    pnpmBinary?: string;
     repositoryRoot: string;
     spawn: jest.Mock;
   }) => number;
@@ -78,15 +81,18 @@ type RoutingModule = {
 
 type SecureRunnerModule = {
   ROUTING_HELPER_PATH: string;
+  SECURE_PNPM_BINARY_ARGUMENT: string;
   SECURE_REPOSITORY_ROOT_ARGUMENT: string;
   parseSecureInvocationArguments: (args: string[]) => {
     args: string[];
+    pnpmBinary: string;
     repositoryRoot: string;
   };
   runSecurePnpm: (options: {
     args: string[];
     environment: Environment;
     platform?: NodeJS.Platform;
+    pnpmBinary: string;
     repositoryRoot: string;
     spawn: jest.Mock;
   }) => number;
@@ -573,6 +579,12 @@ describe("private GitHub Packages repository policy", () => {
         policy.SECURE_REPOSITORY_ROOT_ARGUMENT,
       ])
     ).toThrow("reserved for trusted package tooling");
+    expect(() =>
+      policy.validatePnpmArguments([
+        "install",
+        `${policy.SECURE_PNPM_BINARY_ARGUMENT}=/tmp/untrusted-pnpm`,
+      ])
+    ).toThrow("reserved for trusted package tooling");
     for (const compoundConfigOverride of [
       "--config.@evil:registry=https://evil.example",
       `--config.//evil.example/:_authToken=${policy.AUTH_PLACEHOLDER}`,
@@ -989,6 +1001,17 @@ describe("host-specific Socket Firewall routing", () => {
       commandArguments: ['"add"', '"safe&package"'],
       shell: true,
     });
+    expect(
+      routing.pnpmSpawnArguments(
+        ["install", "--frozen-lockfile"],
+        "linux",
+        "/trusted/bin/pnpm"
+      )
+    ).toEqual({
+      command: "/trusted/bin/pnpm",
+      commandArguments: ["install", "--frozen-lockfile"],
+      shell: false,
+    });
   });
 
   it("rejects repository-local pnpm hook files", () => {
@@ -1117,6 +1140,7 @@ describe("host-specific Socket Firewall routing", () => {
       secureRunner.runSecurePnpm({
         args: ["install", "--frozen-lockfile"],
         environment,
+        pnpmBinary: process.execPath,
         repositoryRoot: REPOSITORY_ROOT,
         spawn,
       })
@@ -1129,6 +1153,8 @@ describe("host-specific Socket Firewall routing", () => {
         secureRunner.ROUTING_HELPER_PATH,
         secureRunner.SECURE_REPOSITORY_ROOT_ARGUMENT,
         REPOSITORY_ROOT,
+        secureRunner.SECURE_PNPM_BINARY_ARGUMENT,
+        process.execPath,
         "--",
         "install",
         "--frozen-lockfile",
@@ -1147,10 +1173,16 @@ describe("host-specific Socket Firewall routing", () => {
       secureRunner.parseSecureInvocationArguments([
         secureRunner.SECURE_REPOSITORY_ROOT_ARGUMENT,
         REPOSITORY_ROOT,
+        secureRunner.SECURE_PNPM_BINARY_ARGUMENT,
+        process.execPath,
         "--",
         "install",
       ])
-    ).toEqual({ args: ["install"], repositoryRoot: REPOSITORY_ROOT });
+    ).toEqual({
+      args: ["install"],
+      pnpmBinary: process.execPath,
+      repositoryRoot: REPOSITORY_ROOT,
+    });
     expect(() =>
       secureRunner.parseSecureInvocationArguments([
         secureRunner.SECURE_REPOSITORY_ROOT_ARGUMENT,
@@ -1173,6 +1205,7 @@ describe("host-specific Socket Firewall routing", () => {
         args: ["install", "--frozen-lockfile"],
         environment,
         platform: "win32",
+        pnpmBinary: process.execPath,
         repositoryRoot: REPOSITORY_ROOT,
         spawn,
       })
@@ -1185,6 +1218,8 @@ describe("host-specific Socket Firewall routing", () => {
         secureRunner.ROUTING_HELPER_PATH,
         secureRunner.SECURE_REPOSITORY_ROOT_ARGUMENT,
         REPOSITORY_ROOT,
+        secureRunner.SECURE_PNPM_BINARY_ARGUMENT,
+        process.execPath,
         "--",
         "install",
         "--frozen-lockfile",
@@ -1210,6 +1245,8 @@ describe("documented private-package setup flows", () => {
     expect(wrapper).not.toContain('"$REAL_PNPM" run install:secure');
     expect(wrapper).not.toContain("scripts/assert-no-package-lock.cjs");
     expect(wrapper.match(/run-secure-pnpm\.cjs/g)).toHaveLength(8);
+    expect(wrapper.match(/--seize-secure-pnpm-binary/g)).toHaveLength(8);
+    expect(wrapper).toContain('SEIZE_STAGING_TRUSTED_PNPM_BINARY="$REAL_PNPM"');
     expect(packageJson.scripts).not.toHaveProperty("install:secure");
     expect(packageJson.scripts).not.toHaveProperty("install:secure:frozen");
     expect(packageJson.scripts).not.toHaveProperty("install:secure:prod");
@@ -1280,6 +1317,9 @@ describe("documented private-package setup flows", () => {
       '[[ -z "${NODE_AUTH_TOKEN:-}" ]]'
     );
     const authUnsetIndex = stagingScript.indexOf("unset NODE_AUTH_TOKEN");
+    const trustedPnpmCaptureIndex = stagingScript.indexOf(
+      'trusted_pnpm_binary="${SEIZE_STAGING_TRUSTED_PNPM_BINARY:-}"'
+    );
     const trustedToolingCaptureIndex = stagingScript.indexOf(
       'cp -- "$SCRIPT_DIR/run-secure-pnpm.cjs"'
     );
@@ -1298,6 +1338,8 @@ describe("documented private-package setup flows", () => {
 
     expect(authGuardIndex).toBeGreaterThanOrEqual(0);
     expect(authUnsetIndex).toBeGreaterThan(authGuardIndex);
+    expect(trustedPnpmCaptureIndex).toBeGreaterThan(authUnsetIndex);
+    expect(trustedPnpmCaptureIndex).toBeLessThan(pullIndex);
     expect(trustedToolingCaptureIndex).toBeGreaterThan(authUnsetIndex);
     expect(trustedToolingCaptureIndex).toBeLessThan(pullIndex);
     expect(authUnsetIndex).toBeLessThan(pullIndex);
@@ -1306,7 +1348,10 @@ describe("documented private-package setup flows", () => {
       '"$trusted_node_binary" "$trusted_secure_pnpm"'
     );
     expect(stagingScript).toContain(
-      '--seize-secure-repository-root "$REPO_ROOT" -- install --frozen-lockfile'
+      '--seize-secure-repository-root "$REPO_ROOT" \\'
+    );
+    expect(stagingScript).toContain(
+      '--seize-secure-pnpm-binary "$trusted_pnpm_binary"'
     );
     expect(stagingScript).toContain('SFW_BIN="$trusted_sfw_binary"');
     expect(stagingScript).not.toContain(
@@ -1361,7 +1406,10 @@ describe("documented private-package setup flows", () => {
       '"$NODE_BINARY" "$MAIN_REPO/scripts/run-secure-pnpm.cjs"'
     );
     expect(worktreeScript).toContain(
-      '--seize-secure-repository-root "$WORKTREE_PATH" -- install'
+      '--seize-secure-repository-root "$WORKTREE_PATH" \\'
+    );
+    expect(worktreeScript).toContain(
+      '--seize-secure-pnpm-binary "$TRUSTED_PNPM_BINARY" -- install'
     );
     expect(worktreeScript).not.toContain(
       'NODE_AUTH_TOKEN="$PACKAGE_AUTH_TOKEN" 6529'

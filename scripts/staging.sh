@@ -14,8 +14,14 @@ fi
 package_auth_token="$NODE_AUTH_TOKEN"
 unset NODE_AUTH_TOKEN
 
+trusted_pnpm_binary="${SEIZE_STAGING_TRUSTED_PNPM_BINARY:-}"
+unset SEIZE_STAGING_TRUSTED_PNPM_BINARY
 trusted_node_binary="$(command -v node || true)"
 trusted_sfw_binary="${SFW_BIN:-$(command -v sfw || true)}"
+if [[ "$trusted_pnpm_binary" != /* ]] || [[ ! -x "$trusted_pnpm_binary" ]]; then
+  echo "The 6529 wrapper must supply an absolute trusted pnpm binary." >&2
+  exit 1
+fi
 if [[ "$trusted_node_binary" != /* ]] || [[ ! -x "$trusted_node_binary" ]]; then
   echo "An absolute executable Node.js binary is required for the secure install." >&2
   exit 1
@@ -84,7 +90,9 @@ print_message "Reinstalling dependencies..."
 NODE_AUTH_TOKEN="$package_auth_token" \
 SFW_BIN="$trusted_sfw_binary" \
   "$trusted_node_binary" "$trusted_secure_pnpm" \
-  --seize-secure-repository-root "$REPO_ROOT" -- install --frozen-lockfile
+  --seize-secure-repository-root "$REPO_ROOT" \
+  --seize-secure-pnpm-binary "$trusted_pnpm_binary" \
+  -- install --frozen-lockfile
 unset package_auth_token
 cleanup_trusted_package_tooling
 trap - EXIT
