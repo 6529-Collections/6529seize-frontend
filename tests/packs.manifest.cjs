@@ -251,7 +251,7 @@ const PACKS = [
   ),
   localReadonlyPack(
     "test:e2e:public-groups-tools-readonly",
-    "Public groups and tools read-only coverage.",
+    "Public tools and removed Groups route read-only coverage.",
     READONLY_SPECS.publicGroupsTools
   ),
   localReadonlyPack(
@@ -458,7 +458,7 @@ const PACKS = [
   stagingPack(
     "public-groups-tools-readonly",
     "public-groups-tools-readonly",
-    "Staging public groups and tools read-only pack.",
+    "Staging public tools and removed Groups route read-only pack.",
     READONLY_SPECS.publicGroupsTools
   ),
   stagingPack(
@@ -586,7 +586,7 @@ const PACKS = [
   ),
   productionPack(
     "public-groups-tools-readonly",
-    "Production public groups and tools read-only canary.",
+    "Production public tools and removed Groups route read-only canary.",
     READONLY_SPECS.publicGroupsTools
   ),
   productionPack(

@@ -9,6 +9,14 @@ import stormComposerEsMessages from "@/i18n/messages/stormComposer.es-ES.json";
 import type { MessageKey } from "@/i18n/messages/en-US";
 
 export const ES_ES_MESSAGES = {
+  "network.groupInspection.bulkRep":
+    "Dar REP a todos los perfiles que cumplen los criterios",
+  "network.groupInspection.bulkNic":
+    "Dar NIC a todos los perfiles que cumplen los criterios",
+  "network.groupInspection.bulkActionsLabel": "Acciones de valoración masiva",
+  "network.groupInspection.bulkRepSuccess": "REP distribuido.",
+  "network.groupInspection.bulkNicSuccess": "NIC distribuido.",
+  "network.groupInspection.source": "Fuente: filtros y lista manual opcional",
   "user.brain.sidebar.createdHeading": "Waves creadas",
   "user.brain.sidebar.createdMobileHeading": "Creadas",
   "user.brain.sidebar.recentlyActiveHeading": "Actividad reciente en",
