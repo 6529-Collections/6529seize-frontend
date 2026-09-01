@@ -509,7 +509,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
       <div
         className={`tw-flex tw-min-w-0 tw-flex-grow ${
           isMemesWave
-            ? "tw-flex-row-reverse tw-flex-wrap tw-items-start tw-gap-x-6 tw-@container/leaderboard-toolbar"
+            ? "tw-flex-row-reverse tw-flex-wrap tw-content-start tw-items-start tw-gap-x-6 tw-@container/leaderboard-toolbar"
             : "tw-flex-col"
         }`}
       >
