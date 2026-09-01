@@ -46,7 +46,7 @@ const MemesLeaderboardDropVoteSummary: React.FC<
             numberWeight="semibold"
             visualVariant="memes"
           />
-          <span className="tw-whitespace-nowrap tw-text-label tw-font-medium tw-uppercase tw-leading-5 tw-tracking-ordinal tw-text-iron-600">
+          <span className="tw-whitespace-nowrap tw-text-label tw-font-semibold tw-uppercase tw-leading-5 tw-tracking-ordinal tw-text-iron-600">
             {creditType} total
           </span>
         </div>
