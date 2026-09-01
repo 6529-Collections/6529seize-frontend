@@ -6,11 +6,6 @@ const mockUseAuthenticatedContent = jest.fn();
 const mockUseDeviceInfo = jest.fn();
 const mockMarkMobileLaunchStep = jest.fn();
 const mockScheduleMobileLaunchFlush = jest.fn();
-const mockUsePathname = jest.fn();
-
-jest.mock("next/navigation", () => ({
-  usePathname: () => mockUsePathname(),
-}));
 
 jest.mock("@/utils/monitoring/mobileLaunchTiming", () => ({
   markMobileLaunchStep: (...args: unknown[]) =>
@@ -78,7 +73,6 @@ describe("WavesLayout", () => {
       contentState: "not-authenticated",
     });
     mockUseDeviceInfo.mockReturnValue({ isApp: false, isMobileDevice: false });
-    mockUsePathname.mockReturnValue("/waves");
   });
 
   it("renders WavesDesktop and children for logged-out web users", () => {
@@ -135,25 +129,6 @@ describe("WavesLayout", () => {
     ).toBeInTheDocument();
     expect(screen.queryByTestId("wave-content")).not.toBeInTheDocument();
     expect(screen.queryByTestId("connect-wallet")).not.toBeInTheDocument();
-  });
-
-  it("keeps a wave-shaped shell while a direct wave route authenticates", () => {
-    mockUseAuthenticatedContent.mockReturnValue({
-      contentState: "loading",
-    });
-    mockUsePathname.mockReturnValue("/waves/wave-123");
-
-    render(
-      <WavesLayout>
-        <div data-testid="wave-content">Real wave content</div>
-      </WavesLayout>
-    );
-
-    expect(
-      screen.getByTestId("wave-view-loading-placeholder")
-    ).toBeInTheDocument();
-    expect(screen.getByTestId("posting-access-skeleton")).toBeInTheDocument();
-    expect(screen.queryByTestId("wave-content")).not.toBeInTheDocument();
   });
 
   it("renders Waves content while layout measurement is settling", () => {

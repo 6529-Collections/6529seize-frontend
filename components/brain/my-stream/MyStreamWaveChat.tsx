@@ -38,7 +38,6 @@ import {
 import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
 import { useDmUnreadConversation } from "@/services/dm-unread/DmUnreadStateProvider";
 import dynamic from "next/dynamic";
-import DropPlaceholder from "@/components/waves/DropPlaceholder";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React, {
   useCallback,
@@ -141,7 +140,7 @@ const WaveGallery = dynamic<WaveGalleryProps>(
 
 const PrivilegedDropCreator = dynamic<PrivilegedDropCreatorProps>(
   () => import("@/components/waves/PrivilegedDropCreator"),
-  { loading: () => <DropPlaceholder type="profile-check" /> }
+  { loading: () => null }
 );
 
 const WaveChatSubmitDropModal = dynamic<WaveChatSubmitDropModalProps>(

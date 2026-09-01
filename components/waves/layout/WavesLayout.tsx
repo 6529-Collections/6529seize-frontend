@@ -12,9 +12,6 @@ import WavesMobile from "../WavesMobile";
 import useBodyScrollLock from "@/hooks/useBodyScrollLock";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
-import { getWaveIdFromPathname } from "@/helpers/navigation.helpers";
-import { usePathname } from "next/navigation";
-import WaveViewLoadingPlaceholder from "../WaveViewLoadingPlaceholder";
 
 type WavesBranchProps = {
   readonly children: ReactNode;
@@ -137,8 +134,6 @@ function getWavesContent({
 function WavesLayoutContent({ children }: { readonly children: ReactNode }) {
   const { contentState } = useAuthenticatedContent();
   const { isApp } = useDeviceInfo();
-  const pathname = usePathname();
-  const isWaveRoute = getWaveIdFromPathname(pathname) !== null;
 
   // The chat/feed views manage their own internal scroll, so WavesLayout locks
   // document scroll and clips its content. The create-wave route owns its
@@ -169,19 +164,15 @@ function WavesLayoutContent({ children }: { readonly children: ReactNode }) {
     hasUsefulWavesContent || connectPrompt !== null;
 
   let content: ReactNode = null;
-  let wavesContent = children;
-
-  if (contentState === WAVES_CONTENT_STATE_LOADING) {
-    wavesContent = isWaveRoute ? (
-      <WaveViewLoadingPlaceholder />
-    ) : (
-      <WavesContentLoadingFallback />
-    );
-  }
 
   if (shouldRenderWavesContent) {
     content = getWavesContent({
-      children: wavesContent,
+      children:
+        contentState === WAVES_CONTENT_STATE_LOADING ? (
+          <WavesContentLoadingFallback />
+        ) : (
+          children
+        ),
       containerClassName,
       isApp,
     });
