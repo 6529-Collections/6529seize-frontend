@@ -42,21 +42,22 @@ Open a new shell, or activate the wrapper in the current shell:
 source <(./bin/6529 bootstrap --print-export)
 ```
 
-The dependency set includes one private GitHub Package. Supply a runtime
-`NODE_AUTH_TOKEN` with read-only GitHub Packages access, install through the
-secure wrapper, and let the subshell discard the token afterward:
+The dependency set includes one private GitHub Package. Create a GitHub PAT
+classic with `read:packages` only and authorize organization SSO when required.
+The runtime `NODE_AUTH_TOKEN` needs read-only GitHub Packages access. For a
+normal interactive install, run:
 
 ```bash
-(
-  read -rs NODE_AUTH_TOKEN
-  export NODE_AUTH_TOKEN
-  6529 install
-)
+6529 install
 ```
 
-Do not store the token in the repository or package-manager configuration. See
+If `NODE_AUTH_TOKEN` is not already set, the wrapper asks for it silently and
+keeps it only for that command. CI and other non-interactive shells must supply
+`NODE_AUTH_TOKEN` at runtime. Do not store it in the repository or
+package-manager configuration. See
 [pnpm and Socket Firewall](ops/docs/developer/pnpm-and-socket-firewall.md) for
-the exact package-routing boundary and other authenticated package commands.
+the one-time Codex Keychain setup, the exact package-routing boundary, and other
+authenticated package commands.
 
 Create a local `.env` file from [.env.sample](.env.sample), then start the app:
 
