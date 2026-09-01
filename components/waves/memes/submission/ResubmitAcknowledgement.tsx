@@ -16,10 +16,10 @@ export function ResubmitAcknowledgement({
     <div className="tw-h-full tw-overflow-y-auto tw-px-4 tw-pb-8 tw-pt-6 md:tw-px-8 md:tw-pt-8">
       <div className="tw-mx-auto tw-w-full tw-max-w-2xl">
         <div className="tw-flex tw-flex-col tw-gap-y-2">
-          <span className="tw-text-sm tw-font-semibold tw-uppercase tw-tracking-wide tw-text-primary-300">
+          <span className="tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-wide tw-text-primary-300">
             Resubmission
           </span>
-          <h4 className="tw-mb-0 tw-mt-0 tw-text-2xl tw-font-semibold tw-leading-8 tw-text-iron-100">
+          <h4 className="tw-mb-0 tw-mt-0 tw-text-pretty tw-text-2xl tw-font-semibold tw-leading-8 tw-text-iron-100">
             This creates a new submission
           </h4>
           <p className="tw-mb-0 tw-mt-0 tw-text-pretty tw-text-sm tw-leading-6 tw-text-iron-400">
@@ -47,12 +47,7 @@ export function ResubmitAcknowledgement({
 
         <div className="tw-mt-6 tw-flex tw-flex-col-reverse tw-gap-3 sm:tw-flex-row sm:tw-justify-end">
           <SecondaryButton onClicked={onCancel}>Cancel</SecondaryButton>
-          <PrimaryButton
-            onClicked={onAccept}
-            disabled={false}
-            loading={false}
-            size="lg"
-          >
+          <PrimaryButton onClicked={onAccept} disabled={false} loading={false}>
             I Understand, Start Resubmission
           </PrimaryButton>
         </div>

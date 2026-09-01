@@ -72,6 +72,18 @@ describe("DropsListItemDeleteDropModal", () => {
     expect(dialog).toHaveAccessibleDescription(
       "Are you sure you want to delete this drop?"
     );
+    expect(screen.getByRole("heading", { name: "Delete Drop" })).toHaveClass(
+      "tw-m-0",
+      "tw-leading-6"
+    );
+    expect(screen.getByRole("button", { name: "Delete" })).toHaveClass(
+      "tw-h-10",
+      "tw-text-sm"
+    );
+    expect(screen.getByRole("button", { name: "Cancel" })).toHaveClass(
+      "tw-h-10",
+      "tw-text-sm"
+    );
     await waitFor(() =>
       expect(screen.getByRole("button", { name: "Cancel" })).toHaveFocus()
     );

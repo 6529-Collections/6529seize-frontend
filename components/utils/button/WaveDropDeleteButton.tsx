@@ -5,6 +5,7 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import CommonAnimationWrapper from "../animation/CommonAnimationWrapper";
 import CommonAnimationOpacity from "../animation/CommonAnimationOpacity";
 import DropsListItemDeleteDropModal from "@/components/drops/view/item/options/delete/DropsListItemDeleteDropModal";
+import Button from "./Button";
 
 interface WaveDropDeleteButtonProps {
   readonly drop: ApiDrop;
@@ -17,19 +18,18 @@ const WaveDropDeleteButton: React.FC<WaveDropDeleteButtonProps> = ({
 }) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
-  const onDeleteClick = (e: React.MouseEvent) => {
+  const onDeleteClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
     setIsDeleteModalOpen(true);
   };
 
-  const defaultButtonClasses =
-    "tw-py-3 tw-px-4 tw-bg-red/5 hover:tw-bg-red/10 tw-border tw-border-solid tw-border-red/20 hover:tw-border-red/30 tw-rounded-lg tw-text-red/70 hover:tw-text-red tw-transition-all tw-duration-300 tw-ease-out tw-flex tw-items-center tw-justify-center tw-gap-2 tw-text-xs";
-
   return (
     <>
-      <button
+      <Button
         type="button"
-        className={className || defaultButtonClasses}
+        variant="destructiveOutline"
+        size="md"
+        className={className}
         onClick={onDeleteClick}
       >
         <svg
@@ -39,7 +39,7 @@ const WaveDropDeleteButton: React.FC<WaveDropDeleteButtonProps> = ({
           strokeWidth="1.5"
           aria-hidden="true"
           stroke="currentColor"
-          className="tw-h-4 tw-w-4 tw-flex-shrink-0"
+          className="-tw-ml-1 tw-size-4 tw-flex-shrink-0"
         >
           <path
             strokeLinecap="round"
@@ -48,7 +48,7 @@ const WaveDropDeleteButton: React.FC<WaveDropDeleteButtonProps> = ({
           />
         </svg>
         <span>Delete Drop</span>
-      </button>
+      </Button>
 
       <CommonAnimationWrapper mode="sync" initial={true}>
         {isDeleteModalOpen && (

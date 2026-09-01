@@ -36,7 +36,9 @@ describe("WaveDropDeleteButton", () => {
   it("opens modal and navigates back after deletion", () => {
     const back = jest.spyOn(window.history, "back").mockImplementation();
     render(<WaveDropDeleteButton drop={{ id: "1" } as any} />);
-    fireEvent.click(screen.getByRole("button"));
+    const trigger = screen.getByRole("button", { name: "Delete Drop" });
+    expect(trigger).toHaveClass("tw-h-10", "tw-border-red/20", "tw-bg-red/5");
+    fireEvent.click(trigger);
     expect(screen.getByTestId("modal")).toBeInTheDocument();
     expect(mockOpacityProps.elementRole).toBeUndefined();
     fireEvent.click(screen.getByTestId("confirm"));
