@@ -16,6 +16,7 @@ describe("stream route loading fallbacks", () => {
       screen.getByRole("status", { name: "Loading waves" })
     ).toBeInTheDocument();
     expect(shell).toBeInTheDocument();
+    expect(screen.getByTestId("posting-access-skeleton")).toBeInTheDocument();
   });
 
   it("renders an accessible messages loading state", () => {
@@ -27,6 +28,9 @@ describe("stream route loading fallbacks", () => {
       screen.getByRole("status", { name: "Loading messages" })
     ).toBeInTheDocument();
     expect(shell).toBeInTheDocument();
+    expect(
+      screen.queryByTestId("posting-access-skeleton")
+    ).not.toBeInTheDocument();
   });
 
   it("uses layout-owned header and bottom reserves for route loading height", () => {

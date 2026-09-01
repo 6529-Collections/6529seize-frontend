@@ -17,7 +17,14 @@ describe("DropPlaceholder", () => {
       "tw-grid-cols-[auto_minmax(0,1fr)_auto]"
     );
     expect(screen.getByTestId("posting-access-skeleton")).toBe(status);
-    expect(status.querySelectorAll(".tw-animate-pulse")).toHaveLength(3);
+    const skeletonParts = status.querySelectorAll(
+      '[data-wave-composer-skeleton-part="true"]'
+    );
+    expect(skeletonParts).toHaveLength(3);
+    skeletonParts.forEach((part) => {
+      expect(part.className).toContain("shimmer");
+      expect(part).toHaveClass("motion-reduce:tw-animate-none");
+    });
     expect(screen.getByText("Checking posting access…")).toHaveClass(
       "tw-sr-only"
     );

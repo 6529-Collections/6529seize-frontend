@@ -6,6 +6,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import PostingAccessLoadingPlaceholder from "./PostingAccessLoadingPlaceholder";
 
 const MUTED_TEXT_CLASS = "tw-text-iron-400";
 type DropPlaceholderType =
@@ -141,29 +142,9 @@ export default function DropPlaceholder({
 
   if (type === "profile-check") {
     return (
-      <div
-        role="status"
-        aria-live="polite"
-        aria-busy="true"
-        data-testid="posting-access-skeleton"
-        className="tw-grid tw-min-h-11 tw-w-full tw-grid-cols-[auto_minmax(0,1fr)_auto] tw-items-center tw-gap-x-2 lg:tw-gap-x-3"
-      >
-        <span className="tw-sr-only">
-          {t(locale, "contentModeration.posting.checkingAccess")}
-        </span>
-        <span
-          aria-hidden="true"
-          className="tw-size-8 tw-animate-pulse tw-rounded-full tw-bg-iron-800/70 motion-reduce:tw-animate-none lg:tw-size-7"
-        />
-        <span
-          aria-hidden="true"
-          className="tw-h-11 tw-min-w-0 tw-animate-pulse tw-rounded-lg tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-iron-800 motion-reduce:tw-animate-none"
-        />
-        <span
-          aria-hidden="true"
-          className="tw-h-11 tw-w-10 tw-animate-pulse tw-rounded-lg tw-bg-iron-800/70 motion-reduce:tw-animate-none lg:tw-w-[3.875rem]"
-        />
-      </div>
+      <PostingAccessLoadingPlaceholder
+        statusLabel={t(locale, "contentModeration.posting.checkingAccess")}
+      />
     );
   }
 
