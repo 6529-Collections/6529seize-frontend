@@ -26,6 +26,17 @@ import {
   fetchDropByIdBatched,
   getDropQueryKey,
 } from "@/services/api/drop-api";
+import {
+  domAnimation,
+  LazyMotion,
+  m,
+  type Transition,
+  useReducedMotion,
+} from "framer-motion";
+import {
+  BRAIN_RIGHT_SIDEBAR_ENTER_TRANSITION,
+  BRAIN_RIGHT_SIDEBAR_EXIT_TRANSITION,
+} from "@/components/brain/right-sidebar/BrainRightSidebarTypes";
 
 const useBreakpoint = createBreakpoint({ XL: 1400, LG: 1024, S: 0 });
 
@@ -44,6 +55,7 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
   const pathname = usePathname();
   const router = useRouter();
   const breakpoint = useBreakpoint();
+  const prefersReducedMotion = useReducedMotion();
 
   // Access layout context for pre-calculated styles
   const { contentContainerStyle } = useLayout();
@@ -128,9 +140,13 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
     isRightSidebarOpen && waveId && !isDropOpen
   );
   const canInlineRight = !isMobile && (isLargeDesktop || breakpoint === "LG");
-  let rightVariant: "inline" | "overlay" | null = null;
-  if (shouldShowRightSidebar) {
-    rightVariant = canInlineRight ? "inline" : "overlay";
+  const rightVariant = canInlineRight ? "inline" : "overlay";
+  const isInlineRightOpen = shouldShowRightSidebar && rightVariant === "inline";
+  let chatLayoutTransition: Transition = { duration: 0 };
+  if (!prefersReducedMotion) {
+    chatLayoutTransition = isInlineRightOpen
+      ? BRAIN_RIGHT_SIDEBAR_ENTER_TRANSITION
+      : BRAIN_RIGHT_SIDEBAR_EXIT_TRANSITION;
   }
 
   // Handle error state for drop loading
@@ -143,58 +159,52 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
       <div className="tw-relative tw-flex tw-min-h-0 tw-flex-col">
         <div className="tw-relative tw-flex tw-min-h-0 tw-flex-grow">
           <div className="tw-relative tw-mx-auto tw-flex tw-min-h-0 tw-w-full tw-max-w-full tw-flex-grow">
-            <div
-              className="tw-relative tw-flex tw-min-h-0 tw-w-full tw-overflow-hidden"
-              style={contentContainerStyle}
-            >
-              {shouldShowLeftSidebar && (
-                <WebBrainLeftSidebar
-                  isCollapsed={rightVariant === "inline"}
-                  showProfileFeedShortcut={showProfileFeedShortcut}
-                />
-              )}
-              {shouldShowMainContent && (
-                <div className="tw-flex tw-h-full tw-min-h-0 tw-min-w-0 tw-flex-grow tw-flex-col tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-800">
-                  {children}
-                  {shouldShowDropOverlay && (
-                    <div className="tw-fixed tw-inset-y-0 tw-left-[var(--left-rail,0px)] tw-right-0 tw-z-[1010] lg:tw-absolute lg:tw-inset-0 lg:tw-z-[1010]">
-                      <BrainDesktopDrop
-                        drop={{
-                          type: DropSize.FULL,
-                          ...drop,
-                          stableKey: drop.id,
-                          stableHash: drop.id,
-                        }}
-                        onClose={onDropClose}
-                      />
-                    </div>
-                  )}
-                </div>
-              )}
-              {rightVariant === "inline" && (
-                <div className="tw-hidden tw-flex-shrink-0 tw-pl-6 tw-pt-2 lg:tw-block">
-                  <BrainRightSidebar
-                    variant="inline"
-                    waveId={waveId}
-                    activeTab={sidebarTab}
-                    setActiveTab={setSidebarTab}
+            <LazyMotion features={domAnimation}>
+              <div
+                className="tw-relative tw-flex tw-min-h-0 tw-w-full tw-overflow-hidden"
+                style={contentContainerStyle}
+              >
+                {shouldShowLeftSidebar && (
+                  <WebBrainLeftSidebar
+                    isCollapsed={isInlineRightOpen}
+                    showProfileFeedShortcut={showProfileFeedShortcut}
                   />
-                </div>
-              )}
-            </div>
+                )}
+                {shouldShowMainContent && (
+                  <m.div
+                    layout={!prefersReducedMotion}
+                    layoutDependency={isInlineRightOpen}
+                    transition={{ layout: chatLayoutTransition }}
+                    className="tw-flex tw-h-full tw-min-h-0 tw-min-w-0 tw-flex-grow tw-flex-col tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-800 tw-will-change-transform"
+                  >
+                    {children}
+                  </m.div>
+                )}
+                {shouldShowDropOverlay && (
+                  <div className="tw-fixed tw-inset-y-0 tw-left-[var(--left-rail,0px)] tw-right-0 tw-z-[1010] lg:tw-absolute lg:tw-inset-0 lg:tw-z-[1010]">
+                    <BrainDesktopDrop
+                      drop={{
+                        type: DropSize.FULL,
+                        ...drop,
+                        stableKey: drop.id,
+                        stableHash: drop.id,
+                      }}
+                      onClose={onDropClose}
+                    />
+                  </div>
+                )}
+                <BrainRightSidebar
+                  isOpen={shouldShowRightSidebar}
+                  variant={rightVariant}
+                  waveId={waveId}
+                  activeTab={sidebarTab}
+                  setActiveTab={setSidebarTab}
+                />
+              </div>
+            </LazyMotion>
           </div>
         </div>
       </div>
-
-      {rightVariant === "overlay" && (
-        <BrainRightSidebar
-          variant="overlay"
-          waveId={waveId}
-          activeTab={sidebarTab}
-          setActiveTab={setSidebarTab}
-        />
-      )}
-
       {connectedProfile && (
         <CreateWaveModal
           isOpen={isWaveModalOpen}
