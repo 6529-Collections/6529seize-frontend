@@ -38,6 +38,55 @@ emergency fence blocks fallback. If Release Bus cannot safely self-deploy while
 `ON`, stop for explicit owner direction; never infer an exception from the
 component or GitHub actor.
 
+## Local release-request preflight
+
+The initial `release-bus-status.mjs` check above remains the first action. After
+it succeeds, classify the requested work before any candidate registration,
+merge, deployment, or environment mutation.
+
+Run this preflight only when introducing a new staging release intent or a new
+direct production release intent. Do not run it for merge-only work, status or
+monitoring, retry or resume, recovery, production continuation, promotion of an
+existing release, or lane toggles.
+
+For a new intent, print the installed CLI's current input template. This command
+is read-only and creates no run or request record:
+
+```bash
+./bin/6529 exec 6529-release-request template
+```
+
+Fill that canonical shape with the exact known release data:
+
+- `requested_by`, `target` (`staging` or `production`), and `database_change`
+  (`yes`, `no`, or `unknown`);
+- `release_parts[]`, with one frontend and/or backend part. Each part has `id`,
+  `repository`, `pull_requests[]`, and `depends_on[]` part IDs;
+- each `pull_requests[]` item has `number`, `branch`, and `commit`, where
+  `commit` is the exact 40-character lowercase head SHA;
+- a backend part also has `deploy_units[]` and `deploy_dependencies[]`, whose
+  items are `{ "before": "unit", "after": "unit" }` edges.
+
+Remove any frontend or backend template part that is not in this release. Do
+not add `schema_version`, `request_id`, or `created_at`; the CLI creates them.
+
+Pass the completed JSON directly on standard input from the repository root.
+Do not create a separate input file:
+
+```bash
+./bin/6529 exec 6529-release-request create --input -
+```
+
+Continue only when the command exits successfully and its JSON result reports
+`status: succeeded` plus non-empty `run_path`, `request_id`, and
+`request_path`. If validation or any output check fails, stop before candidate
+registration, merges, deployment, or other environment mutation. Keep the
+CLI's failed run record; do not delete or rewrite it.
+
+This JSON is only a local shadow/audit record. Do not send it to an API, pass it
+to Release Bus, treat it as deployment authority, or change any existing
+release ordering or readiness check because it exists.
+
 ## V2 readiness
 
 1. Require an open PR whose exact head and green merge-tree checks are current.
@@ -159,7 +208,8 @@ manifest-bound E2E. V2 never publishes release notes.
 
 ## Closeout
 
-Report exact candidate SHAs/dependencies, train and operation states, deployed
-versions, manifest/E2E evidence, failures or holds, and both effective lane
-states. Do
-not expose credentials, signed URLs, raw production data, or hidden prompts.
+For a release with a local request preflight, report its `request_id`,
+`request_path`, and `run_path`. Also report exact candidate SHAs/dependencies,
+train and operation states, deployed versions, manifest/E2E evidence, failures
+or holds, and both effective lane states. Do not expose credentials, signed
+URLs, raw production data, or hidden prompts.
