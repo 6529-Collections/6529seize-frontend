@@ -112,11 +112,8 @@ const secureRunner =
 
 const REPOSITORY_ROOT = path.resolve(__dirname, "../..");
 const TEST_TOKEN = "read-only-test-token";
-const AUTH_HELPER_PATH = path.join(
-  REPOSITORY_ROOT,
-  "scripts",
-  "private-github-packages-auth.sh"
-);
+const AUTH_HELPER_RELATIVE_PATH = "scripts/private-github-packages-auth.sh";
+const AUTH_HELPER_PATH = path.join(REPOSITORY_ROOT, AUTH_HELPER_RELATIVE_PATH);
 
 function environmentWithoutPackageAuth(): NodeJS.ProcessEnv {
   const environment = { ...process.env };
@@ -143,7 +140,7 @@ function runAuthHarness({
       "-c",
       ["set -euo pipefail", 'source "$1"', ...statements].join("\n"),
       "private-package-auth-test",
-      AUTH_HELPER_PATH,
+      AUTH_HELPER_RELATIVE_PATH,
     ],
     {
       cwd: REPOSITORY_ROOT,
