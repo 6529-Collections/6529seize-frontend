@@ -1,0 +1,27 @@
+# Shared Codex local-environment setup for this repository.
+version = 1
+name = "6529seize-frontend"
+
+[setup]
+script = '''
+set -eu
+
+cd "$CODEX_WORKTREE_PATH"
+
+PRIMARY_WORKTREE="$(
+  git worktree list --porcelain |
+    awk '/^worktree / && !found { sub(/^worktree /, ""); print; found=1 }'
+)"
+
+for file in .env.development .env.production; do
+  if [ -f "$PRIMARY_WORKTREE/$file" ]; then
+    cp "$PRIMARY_WORKTREE/$file" .
+    chmod 600 "$file"
+  fi
+done
+
+bash ./scripts/setup-codex-worktree.sh
+
+# Codex captures the successful setup environment. Remove an inherited runtime
+# credential so it is never persisted in that capture.
+unset NODE_AUTH_TOKEN'''
