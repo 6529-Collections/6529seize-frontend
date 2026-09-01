@@ -1,6 +1,7 @@
 import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
 import type { ApiDropMedia } from "@/generated/models/ApiDropMedia";
 import { ApiDropType } from "@/generated/models/ApiDropType";
+import { toApiCreateDropMedia } from "@/components/waves/utils/createDropRequestPart";
 import type { OperationalData } from "../types/OperationalData";
 import type { TraitsData } from "../types/TraitsData";
 import { buildSubmissionMetadata } from "./submissionMetadata";
@@ -32,7 +33,7 @@ export const transformToApiRequest = (data: {
     parts: [
       {
         content: traits.description,
-        media: [media],
+        media: [toApiCreateDropMedia(media)],
       },
     ],
     referenced_nfts: [],
