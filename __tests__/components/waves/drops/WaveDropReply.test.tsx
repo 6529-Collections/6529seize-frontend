@@ -36,6 +36,9 @@ describe("WaveDropReply", () => {
   beforeEach(() => {
     mockContentDisplaySpy.mockClear();
     baseProps.onReplyClick.mockClear();
+    hookData.drop = null;
+    hookData.content = { segments: [], apiMedia: [] };
+    hookData.isLoading = false;
   });
 
   const expectFixedContainer = () => {
@@ -119,6 +122,26 @@ describe("WaveDropReply", () => {
       })
     );
     expect(baseProps.onReplyClick).toHaveBeenCalledWith(1);
+  });
+
+  it("renders a moderated tombstone when a redacted reply has no author", () => {
+    hookData.drop = {
+      id: "d",
+      author: { id: "", handle: null, pfp: null },
+      serial_no: 1,
+      moderation: {
+        status: ApiDropModerationStatus.ModeratorRemoved,
+        can_view: false,
+      },
+    } as any;
+
+    render(<WaveDropReply {...baseProps} />);
+
+    expect(
+      screen.getByText("Content removed by moderators")
+    ).toBeInTheDocument();
+    expect(screen.queryByTestId("not-found")).not.toBeInTheDocument();
+    expect(mockContentDisplaySpy).not.toHaveBeenCalled();
   });
 
   it("redacts a stale author-only removed reply for a non-author", () => {

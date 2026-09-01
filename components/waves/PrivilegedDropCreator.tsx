@@ -155,7 +155,7 @@ export default function PrivilegedDropCreator({
   }, [chatRestriction, updateEligibility, wave.id]);
 
   if (isProfileLoadingForWallet) {
-    return null;
+    return <DropPlaceholder type="profile-check" />;
   }
 
   const profileModerationPlaceholder = getProfileModerationPlaceholder({

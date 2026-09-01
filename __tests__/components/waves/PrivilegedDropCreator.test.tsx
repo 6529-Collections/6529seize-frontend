@@ -333,7 +333,10 @@ describe("PrivilegedDropCreator", () => {
         needsProfile: false,
       })
     );
-    expect(screen.queryByTestId("placeholder")).not.toBeInTheDocument();
+    expect(screen.getByTestId("placeholder")).toHaveAttribute(
+      "data-type",
+      "profile-check"
+    );
     expect(screen.queryByTestId("create")).not.toBeInTheDocument();
   });
 

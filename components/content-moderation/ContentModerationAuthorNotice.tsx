@@ -23,16 +23,16 @@ export default function ContentModerationAuthorNotice({
   return (
     <div
       data-testid="content-moderation-author-notice"
-      className="tw-flex tw-min-w-0 tw-items-start tw-gap-2 tw-text-amber-300"
+      className="tw-flex tw-min-w-0 tw-items-start tw-gap-1.5 tw-text-amber-300"
     >
       <ShieldExclamationIcon
         aria-hidden="true"
-        className="tw-mt-0.5 tw-size-4 tw-flex-none"
+        className="tw-mt-px tw-size-3.5 tw-flex-none"
       />
-      <span className="tw-min-w-0 tw-text-sm tw-leading-5">
+      <span className="tw-min-w-0 tw-text-xs tw-leading-4">
         <span className="tw-font-semibold">{statusLabel}</span>
         {!compact && (
-          <span className="tw-ml-1.5 tw-text-iron-400">
+          <span className="tw-ml-1 tw-text-iron-400">
             {t(locale, "contentModeration.author.visibility")}
           </span>
         )}
