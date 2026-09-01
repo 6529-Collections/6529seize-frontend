@@ -382,6 +382,9 @@ function semanticYamlLine(
     }
     const previousCharacter = rawLine[index - 1];
     const startsYamlToken = index === 0 || /[\s,[{:-]/.test(previousCharacter);
+    if (rejectYamlReferences && startsYamlToken && character === "?") {
+      throw policyError(`${filename} cannot use YAML explicit mapping keys`);
+    }
     if (
       rejectYamlReferences &&
       startsYamlToken &&

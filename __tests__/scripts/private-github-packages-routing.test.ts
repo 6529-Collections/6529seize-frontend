@@ -271,6 +271,21 @@ describe("private GitHub Packages repository policy", () => {
     ).toThrow("cannot use YAML anchors, aliases, or merge keys");
   });
 
+  it("rejects explicit YAML mapping keys in package policy files", () => {
+    expect(() =>
+      policy.validateWorkspace(`${validWorkspace()}? strict-ssl\n: false\n`)
+    ).toThrow("cannot use YAML explicit mapping keys");
+
+    expect(() =>
+      policy.validateLockfile(
+        validLockfile().replace(
+          "packages:",
+          "packages:\n\n  ? '@6529-collections/other@1.0.0'\n  : {}"
+        )
+      )
+    ).toThrow("cannot use YAML explicit mapping keys");
+  });
+
   it("fails closed when NODE_AUTH_TOKEN is missing or malformed", () => {
     expect(() => policy.validateAuthEnvironment({})).toThrow(
       "NODE_AUTH_TOKEN is required"
