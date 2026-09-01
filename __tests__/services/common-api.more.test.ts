@@ -140,6 +140,32 @@ describe("commonApi utility methods", () => {
     );
   });
 
+  it("commonApiDeleteWithResponse includes wallet authentication", async () => {
+    (global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({ deleted: true }),
+      headers: new Headers({ "content-type": "application/json" }),
+    });
+
+    const result = await commonApiDeleteWithResponse<{ deleted: boolean }>({
+      endpoint: "x",
+    });
+
+    expect(result).toEqual({ deleted: true });
+    expect(globalThis.fetch).toHaveBeenCalledWith(
+      "https://api.test.6529.io/api/x",
+      {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          "x-6529-auth": "stage",
+          Authorization: "Bearer jwt",
+        },
+      }
+    );
+  });
+
   it("commonApiDelete forwards an abort signal", async () => {
     (global.fetch as jest.Mock).mockResolvedValue({
       ok: true,
