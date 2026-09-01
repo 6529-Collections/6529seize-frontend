@@ -139,7 +139,7 @@ function SubscriptionUnknown({
         !isSubtle && USER_PAGE_HEADER_INTERACTIVE_SURFACE_CLASS
       )}
     >
-      <span className="tw-min-w-0">
+      <span className="tw-flex tw-min-w-0 tw-flex-col">
         <span
           className={clsx(
             "tw-block tw-font-medium",
@@ -247,7 +247,7 @@ function SubscriptionSubtle({
       <SubscriptionStatusIcon tone={tone} />
       <span
         className={clsx(
-          "tw-min-w-0",
+          "tw-flex tw-min-w-0 tw-flex-col",
           isCompact ? "tw-whitespace-nowrap" : "tw-flex-1"
         )}
       >
