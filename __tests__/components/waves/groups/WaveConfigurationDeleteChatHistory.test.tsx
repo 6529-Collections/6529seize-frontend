@@ -28,6 +28,7 @@ type MutationOptions = {
 };
 
 let mockMutationOptions: MutationOptions | null = null;
+let mockIsPending = false;
 
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: () => mockAuthState,
@@ -54,7 +55,7 @@ jest.mock("@/services/api/common-api", () => ({
 jest.mock("@tanstack/react-query", () => ({
   useMutation: (options: MutationOptions) => {
     mockMutationOptions = options;
-    return { isPending: false, mutate: mockMutate };
+    return { isPending: mockIsPending, mutate: mockMutate };
   },
 }));
 
@@ -98,6 +99,8 @@ jest.mock(
 describe("WaveConfigurationDeleteChatHistory", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockMutationOptions = null;
+    mockIsPending = false;
     mockAuthState.activeProfileProxy = null;
     mockAuthState.connectedProfile = { id: "profile-1" };
     mockRequestAuth.mockResolvedValue({ success: true });
@@ -185,5 +188,99 @@ describe("WaveConfigurationDeleteChatHistory", () => {
         name: "Delete all my messages from this wave",
       })
     ).not.toBeInTheDocument();
+  });
+
+  it("reports an empty deletion response without removing local drops", async () => {
+    mockCommonApiDeleteWithResponse.mockResolvedValue({
+      deleted_drop_ids: [],
+      preserved_pinned_drop_id: null,
+    });
+    render(
+      <WaveConfigurationDeleteChatHistory wave={{ id: "wave-1" } as never} />
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Delete all my messages from this wave",
+      })
+    );
+    fireEvent.click(
+      screen.getByRole("button", { name: "Yes, delete my messages" })
+    );
+
+    await waitFor(() =>
+      expect(mockSetToast).toHaveBeenCalledWith({
+        message: "No chat messages were deleted.",
+        type: "warning",
+      })
+    );
+    expect(mockProcessDropRemoved).not.toHaveBeenCalled();
+    expect(mockInvalidateDrops).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps the dialog open and reports API failures", async () => {
+    mockCommonApiDeleteWithResponse.mockRejectedValue(
+      new Error("delete failed")
+    );
+    render(
+      <WaveConfigurationDeleteChatHistory wave={{ id: "wave-1" } as never} />
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Delete all my messages from this wave",
+      })
+    );
+    fireEvent.click(
+      screen.getByRole("button", { name: "Yes, delete my messages" })
+    );
+
+    await waitFor(() =>
+      expect(mockSetToast).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: "error",
+          title: "Couldn't delete your chat history.",
+        })
+      )
+    );
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+  });
+
+  it("does not call the API when authentication is cancelled", async () => {
+    mockRequestAuth.mockResolvedValue({ success: false });
+    render(
+      <WaveConfigurationDeleteChatHistory wave={{ id: "wave-1" } as never} />
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Delete all my messages from this wave",
+      })
+    );
+    fireEvent.click(
+      screen.getByRole("button", { name: "Yes, delete my messages" })
+    );
+
+    await waitFor(() => expect(mockRequestAuth).toHaveBeenCalledTimes(1));
+    expect(mockMutate).not.toHaveBeenCalled();
+  });
+
+  it("ignores duplicate confirmation while deletion is pending", () => {
+    mockIsPending = true;
+    render(
+      <WaveConfigurationDeleteChatHistory wave={{ id: "wave-1" } as never} />
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Delete all my messages from this wave",
+      })
+    );
+    fireEvent.click(
+      screen.getByRole("button", { name: "Yes, delete my messages" })
+    );
+
+    expect(mockRequestAuth).not.toHaveBeenCalled();
+    expect(mockMutate).not.toHaveBeenCalled();
   });
 });

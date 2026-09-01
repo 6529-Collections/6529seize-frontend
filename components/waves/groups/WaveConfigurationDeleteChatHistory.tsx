@@ -30,13 +30,15 @@ export default function WaveConfigurationDeleteChatHistory({
         endpoint: `waves/${wave.id}/my-chat-history`,
       }),
     onSuccess: (response) => {
-      for (const dropId of response.deleted_drop_ids) {
+      const { deleted_drop_ids: deletedDropIds = [] } =
+        response as Partial<ApiDeleteMyWaveChatHistoryResponse>;
+      for (const dropId of deletedDropIds) {
         processDropRemoved(wave.id, dropId);
       }
       invalidateDrops();
       setToast({
         message: waveRightPanelText(
-          response.deleted_drop_ids.length
+          deletedDropIds.length
             ? "waves.sidebar.rightPanel.configuration.deleteChatHistory.success"
             : "waves.sidebar.rightPanel.configuration.deleteChatHistory.empty"
         ),
