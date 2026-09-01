@@ -11201,6 +11201,39 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiWaveDropsFeed"
+  /waves/{id}/my-chat-history:
+    delete:
+      tags:
+        - Waves
+      summary: Delete the authenticated user's chat history from a wave
+      description: >-
+        Permanently deletes every CHAT drop authored by the authenticated user
+        in the wave, except for the wave's pinned drop. Participatory and winner
+        drops are never deleted.
+      operationId: deleteMyWaveChatHistory
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/waves/delete-my-wave-chat-history.handler"
+          name: handleDeleteMyWaveChatHistory
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Chat history deletion result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDeleteMyWaveChatHistoryResponse"
+        "403":
+          description: A profile is required and proxies cannot delete chat history
+        "404":
+          description: Wave not found
   /waves/{id}/undiscovered-drop:
     get:
       tags:
@@ -16667,6 +16700,20 @@ components:
       properties:
         message:
           type: string
+    ApiDeleteMyWaveChatHistoryResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - deleted_drop_ids
+        - preserved_pinned_drop_id
+      properties:
+        deleted_drop_ids:
+          type: array
+          items:
+            type: string
+        preserved_pinned_drop_id:
+          type: string
+          nullable: true
     ApiDistributionAirdropsCsvUploadRequest:
       type: object
       required:
