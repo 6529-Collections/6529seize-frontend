@@ -49,6 +49,7 @@ rolls back if the request fails.
 - Touch move inside the mobile emoji picker stays inside the picker dialog.
 - Reactions added or removed by other people appear live while the wave or
   direct-message thread is open.
+- Viewers can react even when a wave's chat group does not permit them to post.
 - Repeated clap taps in a short burst are merged into one rating request.
 - Rating values are clamped to each drop's allowed min/max range.
 
@@ -56,8 +57,9 @@ rolls back if the request fails.
 
 - Temporary drops (`temp-*`) cannot be reacted to and do not show rating actions.
 - Reaction controls are disabled while a proxy profile is active.
-- Reaction controls are disabled when the current wave does not allow chatting
-  and reactions.
+- Reaction controls are disabled only when chatting and reacting are disabled
+  for the entire wave. A chat-group restriction alone does not disable
+  reactions for viewers.
 - Light placeholder drops do not render reaction or rating controls.
 - Chat drops do not show clap rating controls.
 - Memes-wave participatory drops hide clap rating controls.
