@@ -214,6 +214,9 @@ describe("WaveLeaderboardDrops", () => {
     expect(screen.getByText("d1")).toBeInTheDocument();
     screen.getByRole("button", { name: "Trigger next page" }).click();
     expect(fetchNextPage).toHaveBeenCalled();
+    expect(mockVirtualizedRowsProps?.measureLoadedRowsAtNaturalHeight).toBe(
+      true
+    );
   });
 
   it("uses compact virtual rows for proposal-card presentation", () => {

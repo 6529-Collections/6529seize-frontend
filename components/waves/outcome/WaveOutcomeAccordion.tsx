@@ -30,6 +30,8 @@ interface WaveOutcomeAccordionProps {
 }
 
 const DEFAULT_AMOUNTS_TO_SHOW = 3;
+const OUTCOME_EYEBROW_CLASSES =
+  "tw-text-[10px] tw-font-semibold tw-uppercase tw-leading-none tw-tracking-wide tw-text-iron-500";
 
 export const WaveOutcomeAccordion: FC<WaveOutcomeAccordionProps> = ({
   title,
@@ -98,7 +100,7 @@ export const WaveOutcomeAccordion: FC<WaveOutcomeAccordionProps> = ({
             <div className="tw-text-base tw-font-semibold tw-leading-5 tw-tracking-[-0.015em] tw-text-iron-50 sm:tw-text-lg sm:tw-leading-6">
               {title}
             </div>
-            <div className="tw-mt-[5px] tw-text-[10px] tw-font-medium tw-uppercase tw-leading-[13px] tw-tracking-[0.16em] tw-text-iron-500">
+            <div className={`tw-mt-[5px] ${OUTCOME_EYEBROW_CLASSES}`}>
               {isLoading ? (
                 <span className="tw-inline-block tw-h-[13px] tw-w-[55px] tw-animate-pulse tw-rounded tw-bg-iron-800" />
               ) : (
@@ -117,7 +119,7 @@ export const WaveOutcomeAccordion: FC<WaveOutcomeAccordionProps> = ({
                 >
                   {formatNumberWithCommas(pool.amount)}
                 </div>
-                <div className="tw-mt-[3px] tw-text-[10px] tw-font-medium tw-uppercase tw-leading-[13px] tw-tracking-[0.14em] tw-text-iron-500">
+                <div className={`tw-mt-[3px] ${OUTCOME_EYEBROW_CLASSES}`}>
                   total pool
                 </div>
               </div>
@@ -137,7 +139,7 @@ export const WaveOutcomeAccordion: FC<WaveOutcomeAccordionProps> = ({
       </button>
       {metadata && (
         <div className="tw-mx-[13px] tw-grid tw-gap-[8px] tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pb-[21px] tw-pt-[13px] sm:tw-mx-[21px] sm:tw-grid-cols-[minmax(0,0.35fr)_minmax(0,1fr)] sm:tw-items-baseline sm:tw-gap-[21px]">
-          <span className="tw-text-[10px] tw-font-medium tw-uppercase tw-leading-[13px] tw-tracking-[0.16em] tw-text-iron-500">
+          <span className={OUTCOME_EYEBROW_CLASSES}>
             {metadata.label}
           </span>
           <span className="tw-text-sm tw-leading-5 tw-text-iron-200 sm:tw-text-right">

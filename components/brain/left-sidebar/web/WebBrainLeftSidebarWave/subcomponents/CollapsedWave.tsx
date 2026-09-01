@@ -9,6 +9,7 @@ interface CollapsedWaveProps {
   readonly haveNewDrops: boolean;
   readonly href: string;
   readonly isActive: boolean;
+  readonly isAnnouncement?: boolean | undefined;
   readonly isDropWave: boolean;
   readonly onMouseEnter?: (() => void) | undefined;
   readonly onClick: (e: React.MouseEvent<HTMLAnchorElement>) => void;
@@ -60,6 +61,7 @@ export const CollapsedWave = ({
   haveNewDrops,
   href,
   isActive,
+  isAnnouncement = false,
   isDropWave,
   onMouseEnter,
   onClick,
@@ -82,7 +84,7 @@ export const CollapsedWave = ({
       className={`tw-group tw-flex tw-items-center tw-justify-center tw-py-2 tw-transition-colors tw-duration-200 tw-ease-out ${
         isActive
           ? "tw-bg-iron-700/60 desktop-hover:hover:tw-bg-iron-700/70"
-          : "desktop-hover:hover:tw-bg-iron-800/70"
+          : "desktop-hover:hover:tw-bg-iron-900/70"
       }`}
     >
       <Link
@@ -97,6 +99,7 @@ export const CollapsedWave = ({
         <div className="tw-relative">
           <WaveAvatar
             isActive={isActive}
+            isAnnouncement={isAnnouncement}
             isDropWave={isDropWave}
             showNewDropsBadge={!isActive && haveNewDrops}
             wave={wave}
