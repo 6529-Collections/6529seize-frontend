@@ -1,4 +1,10 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
 import MemesArtSubmissionModal from "@/components/waves/memes/MemesArtSubmissionModal";
@@ -61,6 +67,11 @@ describe("MemesArtSubmissionModal", () => {
     expect(
       screen.getByRole("dialog", { name: "Submit Work to The Memes" })
     ).toHaveClass("tw-z-[1020]");
+    expect(
+      within(screen.getByTestId("memes-art-submission-modal-panel")).getByText(
+        "Submit Work to The Memes"
+      )
+    ).toBeInTheDocument();
   });
 
   it("uses keyboard-aware mobile viewport height constraints", () => {

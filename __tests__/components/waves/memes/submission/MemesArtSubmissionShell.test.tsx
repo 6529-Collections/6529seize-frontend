@@ -37,6 +37,7 @@ describe("MemesArtSubmissionShell", () => {
 
     const closeButton = screen.getByRole("button", { name: "Close modal" });
     expect(closeButton).toHaveClass("tw-self-start");
+    expect(closeButton).toHaveAttribute("data-autofocus");
     fireEvent.click(closeButton);
     expect(onClose).toHaveBeenCalledTimes(1);
   });

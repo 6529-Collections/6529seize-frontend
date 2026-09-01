@@ -32,19 +32,18 @@ const MemesArtSubmissionModal: React.FC<MemesArtSubmissionModalProps> = ({
   sourceDrop,
   onSourceDropDeleted,
 }) => {
-  if (!isOpen) return null;
-
   const dialogTitle = sourceDrop
     ? "Resubmit Work to The Memes"
     : "Submit Work to The Memes";
 
+  if (typeof document === "undefined") return null;
+
   return createPortal(
-    <Transition appear show as={Fragment}>
+    <Transition appear show={isOpen} as={Fragment}>
       <Dialog
         className="tailwind-scope tw-fixed tw-inset-0 tw-z-[1020] tw-overflow-hidden"
         onClose={onClose}
       >
-        <DialogTitle className="tw-sr-only">{dialogTitle}</DialogTitle>
         <TransitionChild
           as={Fragment}
           enter="tw-transition-opacity tw-duration-200 tw-ease-out motion-reduce:tw-transition-none"
@@ -77,6 +76,7 @@ const MemesArtSubmissionModal: React.FC<MemesArtSubmissionModalProps> = ({
                 transitionDuration: NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION,
               }}
             >
+              <DialogTitle className="tw-sr-only">{dialogTitle}</DialogTitle>
               <div className="tw-flex tw-h-full tw-flex-col tw-overflow-hidden">
                 <MemesArtSubmissionContainer
                   onClose={onClose}

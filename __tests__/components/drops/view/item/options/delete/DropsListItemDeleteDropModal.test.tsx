@@ -83,6 +83,7 @@ describe("DropsListItemDeleteDropModal", () => {
     renderModal({ onDropDeleted });
 
     await user.click(screen.getByRole("button", { name: "Delete" }));
+    await waitFor(() => expect(onDropDeleted).toHaveBeenCalled());
     expect(auth.requestAuth).toHaveBeenCalled();
     expect(mutateAsync).toHaveBeenCalled();
     expect(auth.setToast).toHaveBeenCalledWith({
@@ -90,7 +91,6 @@ describe("DropsListItemDeleteDropModal", () => {
       type: "warning",
     });
     expect(rq.invalidateDrops).toHaveBeenCalled();
-    expect(onDropDeleted).toHaveBeenCalled();
   });
 
   it("shows a recoverable error when deletion fails", async () => {
@@ -107,12 +107,15 @@ describe("DropsListItemDeleteDropModal", () => {
 
     await user.click(screen.getByRole("button", { name: "Delete" }));
 
-    expect(auth.setToast).toHaveBeenCalledWith(
-      expect.objectContaining({
-        type: "error",
-        title: "Couldn't delete this drop.",
-        description: "Please try again.",
-      })
+    await waitFor(() =>
+      expect(auth.setToast).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: "error",
+          title: "Couldn't delete this drop.",
+          description: "Please try again.",
+        })
+      )
     );
+    expect(screen.getByRole("button", { name: "Delete" })).toBeEnabled();
   });
 });

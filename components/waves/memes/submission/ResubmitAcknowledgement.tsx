@@ -29,7 +29,7 @@ export function ResubmitAcknowledgement({
         </div>
 
         <div className="tw-mt-6 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900/60 tw-p-4">
-          <ul className="tw-mb-0 tw-flex tw-list-disc tw-flex-col tw-gap-y-3 tw-pl-5 tw-text-sm tw-leading-6 tw-text-iron-300">
+          <ul className="tw-mb-0 tw-mt-0 tw-flex tw-list-disc tw-flex-col tw-gap-y-3 tw-pl-5 tw-text-sm tw-leading-6 tw-text-iron-300">
             <li>
               The new submission starts with zero votes. Votes on the original
               do not transfer.

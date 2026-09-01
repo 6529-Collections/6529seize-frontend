@@ -55,7 +55,6 @@ const WaveDropDeleteButton: React.FC<WaveDropDeleteButtonProps> = ({
           <CommonAnimationOpacity
             key="modal"
             elementClasses="tw-absolute tw-z-50"
-            elementRole="dialog"
             onClicked={(e) => e.stopPropagation()}
           >
             <DropsListItemDeleteDropModal
