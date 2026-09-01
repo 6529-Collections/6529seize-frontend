@@ -28,7 +28,7 @@ describe('MemesLeaderboardDropVoteSummary', () => {
 
     render(<MemesLeaderboardDropVoteSummary drop={drop} />);
     expect(screen.getByText("5")).toHaveClass(
-      "tw-text-emerald-300",
+      "tw-text-iron-100",
       "tw-font-semibold"
     );
     expect(
