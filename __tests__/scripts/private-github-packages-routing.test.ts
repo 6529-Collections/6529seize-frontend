@@ -1361,6 +1361,25 @@ describe("documented private-package setup flows", () => {
       expect(result.stderr).not.toContain("input hidden");
     });
 
+    it("never prompts in CI even when a terminal is available", () => {
+      const environment = environmentWithoutPackageAuth();
+      environment["CI"] = "true";
+      const result = runAuthHarness({
+        environment,
+        input: `${TEST_TOKEN}\n`,
+        statements: [
+          "private_package_auth_is_interactive() { return 0; }",
+          "ensure_private_package_auth",
+        ],
+      });
+
+      expect(result.error).toBeUndefined();
+      expect(result.status).toBe(1);
+      expect(result.stderr).toContain("package commands in CI");
+      expect(result.stderr).not.toContain("input hidden");
+      expect(`${result.stdout}${result.stderr}`).not.toContain(TEST_TOKEN);
+    });
+
     it("loads the Codex token without printing it", () => {
       const result = runAuthHarness({
         statements: [
@@ -1501,6 +1520,9 @@ describe("documented private-package setup flows", () => {
     expect(authRemovalIndex).toBeGreaterThan(installIndex);
     expect(environmentSetup).toContain("unset NODE_AUTH_TOKEN");
     expect(environmentSetup).not.toContain("env | awk");
+    expect(environmentSetup).not.toContain(".env.development");
+    expect(environmentSetup).not.toContain(".env.production");
+    expect(environmentSetup).not.toMatch(/\bcp\b/);
   });
 
   it("requires runtime auth before staging setup can mutate the checkout", () => {

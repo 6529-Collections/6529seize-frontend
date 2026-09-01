@@ -14,6 +14,10 @@ private_package_auth_is_present() {
   [[ -n "${NODE_AUTH_TOKEN:-}" ]]
 }
 
+private_package_auth_is_ci() {
+  [[ -n "${CI:-}" ]]
+}
+
 private_package_auth_is_interactive() {
   [[ -t 0 && -t 2 ]]
 }
@@ -29,7 +33,7 @@ ensure_private_package_auth() {
     return 0
   fi
 
-  if ! private_package_auth_is_interactive; then
+  if private_package_auth_is_ci || ! private_package_auth_is_interactive; then
     echo "NODE_AUTH_TOKEN is required for package commands in CI and other non-interactive shells." >&2
     return 1
   fi
