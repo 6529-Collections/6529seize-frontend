@@ -9,6 +9,9 @@ export SEIZE_6529_COMMAND="1"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
+# shellcheck source=../scripts/private-github-packages-auth.sh
+source "$REPO_ROOT/scripts/private-github-packages-auth.sh"
+
 command_name="${1:-}"
 
 if [[ -z "$command_name" ]]; then
@@ -93,6 +96,7 @@ case "$command_name" in
       echo "Use \`6529 add <package>\` to add dependencies." >&2
       exit 1
     fi
+    ensure_private_package_auth
     exec node "$REPO_ROOT/scripts/run-secure-pnpm.cjs" \
       --seize-secure-pnpm-binary "$REAL_PNPM" -- install
     ;;
@@ -101,6 +105,7 @@ case "$command_name" in
       echo "Use \`6529 add <package>\` to add dependencies." >&2
       exit 1
     fi
+    ensure_private_package_auth
     exec node "$REPO_ROOT/scripts/run-secure-pnpm.cjs" \
       --seize-secure-pnpm-binary "$REAL_PNPM" -- install
     ;;
@@ -109,6 +114,7 @@ case "$command_name" in
       echo "\`6529 ci\` does not accept package arguments." >&2
       exit 1
     fi
+    ensure_private_package_auth
     exec node "$REPO_ROOT/scripts/run-secure-pnpm.cjs" \
       --seize-secure-pnpm-binary "$REAL_PNPM" -- install --frozen-lockfile
     ;;
@@ -117,6 +123,7 @@ case "$command_name" in
       echo "\`6529 install:frozen\` does not accept package arguments." >&2
       exit 1
     fi
+    ensure_private_package_auth
     exec node "$REPO_ROOT/scripts/run-secure-pnpm.cjs" \
       --seize-secure-pnpm-binary "$REAL_PNPM" -- install --frozen-lockfile
     ;;
@@ -125,6 +132,7 @@ case "$command_name" in
       echo "\`6529 install:prod\` does not accept package arguments." >&2
       exit 1
     fi
+    ensure_private_package_auth
     exec node "$REPO_ROOT/scripts/run-secure-pnpm.cjs" \
       --seize-secure-pnpm-binary "$REAL_PNPM" -- install --frozen-lockfile --prod
     ;;
@@ -133,6 +141,7 @@ case "$command_name" in
       echo "Usage: \`6529 add <package>\`" >&2
       exit 1
     fi
+    ensure_private_package_auth
     exec node "$REPO_ROOT/scripts/run-secure-pnpm.cjs" \
       --seize-secure-pnpm-binary "$REAL_PNPM" -- add "$@"
     ;;
@@ -142,10 +151,12 @@ case "$command_name" in
       echo "Use \`6529 update:all [package...]\` for intentional pnpm updates." >&2
       exit 1
     fi
+    ensure_private_package_auth
     exec node "$REPO_ROOT/scripts/run-secure-pnpm.cjs" \
       --seize-secure-pnpm-binary "$REAL_PNPM" -- audit --fix
     ;;
   update:all)
+    ensure_private_package_auth
     exec node "$REPO_ROOT/scripts/run-secure-pnpm.cjs" \
       --seize-secure-pnpm-binary "$REAL_PNPM" -- update "$@"
     ;;

@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { spawnSync } from "node:child_process";
 import { parse as parseYaml } from "yaml";
 
 type Environment = {
@@ -109,8 +110,48 @@ const routing =
 const secureRunner =
   require("../../scripts/run-secure-pnpm.cjs") as SecureRunnerModule;
 
-const REPOSITORY_ROOT = process.cwd();
+const REPOSITORY_ROOT = path.resolve(__dirname, "../..");
 const TEST_TOKEN = "read-only-test-token";
+const AUTH_HELPER_RELATIVE_PATH = "scripts/private-github-packages-auth.sh";
+const AUTH_HELPER_PATH = path.join(REPOSITORY_ROOT, AUTH_HELPER_RELATIVE_PATH);
+
+function isolatedAuthTestEnvironment(): NodeJS.ProcessEnv {
+  const environment = { ...process.env };
+  for (const key of Object.keys(environment)) {
+    if (key.toLowerCase() === "node_auth_token") {
+      delete environment[key];
+    }
+  }
+  delete environment["CI"];
+  return environment;
+}
+
+function runAuthHarness({
+  environment = isolatedAuthTestEnvironment(),
+  input,
+  statements,
+}: {
+  environment?: NodeJS.ProcessEnv;
+  input?: string;
+  statements: string[];
+}) {
+  return spawnSync(
+    "/bin/bash",
+    [
+      "-c",
+      ["set -euo pipefail", 'source "$1"', ...statements].join("\n"),
+      "private-package-auth-test",
+      AUTH_HELPER_RELATIVE_PATH,
+    ],
+    {
+      cwd: REPOSITORY_ROOT,
+      encoding: "utf8",
+      env: environment,
+      input,
+      timeout: 1_000,
+    }
+  );
+}
 
 function validNpmrc() {
   return [
@@ -1233,6 +1274,168 @@ describe("host-specific Socket Firewall routing", () => {
 });
 
 describe("documented private-package setup flows", () => {
+  describe("private-package authentication UX", () => {
+    it("uses a pre-supplied token without prompting", () => {
+      const environment = isolatedAuthTestEnvironment();
+      environment["NODE_AUTH_TOKEN"] = TEST_TOKEN;
+      const result = runAuthHarness({
+        environment,
+        statements: [
+          "ensure_private_package_auth",
+          'printf "auth-present=%s\\n" "${NODE_AUTH_TOKEN:+yes}"',
+        ],
+      });
+
+      expect(result.status).toBe(0);
+      expect(result.stdout).toBe("auth-present=yes\n");
+      expect(result.stderr).not.toContain("input hidden");
+      expect(`${result.stdout}${result.stderr}`).not.toContain(TEST_TOKEN);
+    });
+
+    it("rejects an empty pre-supplied token in a non-interactive shell", () => {
+      const environment = isolatedAuthTestEnvironment();
+      environment["NODE_AUTH_TOKEN"] = "";
+      const result = runAuthHarness({
+        environment,
+        statements: ["ensure_private_package_auth"],
+      });
+
+      expect(result.error).toBeUndefined();
+      expect(result.status).toBe(1);
+      expect(result.stderr).toContain("non-interactive shells");
+      expect(result.stderr).not.toContain("input hidden");
+    });
+
+    it("prompts silently in an interactive terminal", () => {
+      const result = runAuthHarness({
+        input: `${TEST_TOKEN}\n`,
+        statements: [
+          "private_package_auth_is_interactive() { return 0; }",
+          "set -x",
+          "ensure_private_package_auth",
+          'printf "auth-present=%s\\n" "${NODE_AUTH_TOKEN:+yes}"',
+        ],
+      });
+
+      expect(result.status).toBe(0);
+      expect(result.stdout).toBe("auth-present=yes\n");
+      expect(result.stderr).toContain("input hidden");
+      expect(`${result.stdout}${result.stderr}`).not.toContain(TEST_TOKEN);
+    });
+
+    it("accepts non-empty interactive input ending at EOF", () => {
+      const result = runAuthHarness({
+        input: TEST_TOKEN,
+        statements: [
+          "private_package_auth_is_interactive() { return 0; }",
+          "ensure_private_package_auth",
+          'printf "auth-present=%s\\n" "${NODE_AUTH_TOKEN:+yes}"',
+        ],
+      });
+
+      expect(result.status).toBe(0);
+      expect(result.stdout).toBe("auth-present=yes\n");
+      expect(`${result.stdout}${result.stderr}`).not.toContain(TEST_TOKEN);
+    });
+
+    it("rejects empty interactive input", () => {
+      const result = runAuthHarness({
+        input: "\n",
+        statements: [
+          "private_package_auth_is_interactive() { return 0; }",
+          "ensure_private_package_auth",
+        ],
+      });
+
+      expect(result.status).toBe(1);
+      expect(result.stderr).toContain("NODE_AUTH_TOKEN cannot be empty");
+    });
+
+    it("fails immediately without auth in a non-interactive shell", () => {
+      const result = runAuthHarness({
+        statements: ["ensure_private_package_auth"],
+      });
+
+      expect(result.error).toBeUndefined();
+      expect(result.status).toBe(1);
+      expect(result.stderr).toContain("non-interactive shells");
+      expect(result.stderr).not.toContain("input hidden");
+    });
+
+    it("never prompts in CI even when a terminal is available", () => {
+      const environment = isolatedAuthTestEnvironment();
+      environment["CI"] = "true";
+      const result = runAuthHarness({
+        environment,
+        input: `${TEST_TOKEN}\n`,
+        statements: [
+          "private_package_auth_is_interactive() { return 0; }",
+          "ensure_private_package_auth",
+        ],
+      });
+
+      expect(result.error).toBeUndefined();
+      expect(result.status).toBe(1);
+      expect(result.stderr).toContain("package commands in CI");
+      expect(result.stderr).not.toContain("input hidden");
+      expect(`${result.stdout}${result.stderr}`).not.toContain(TEST_TOKEN);
+    });
+
+    it("loads the Codex token without printing it", () => {
+      const result = runAuthHarness({
+        statements: [
+          "private_package_auth_keychain_is_available() { return 0; }",
+          `private_package_auth_read_keychain() { printf '%s' '${TEST_TOKEN}'; }`,
+          "set -x",
+          "load_private_package_auth_for_codex",
+          'printf "auth-present=%s\\n" "${NODE_AUTH_TOKEN:+yes}"',
+        ],
+      });
+
+      expect(result.status).toBe(0);
+      expect(result.stdout).toBe("auth-present=yes\n");
+      expect(`${result.stdout}${result.stderr}`).not.toContain(TEST_TOKEN);
+    });
+
+    it("fails closed when the Codex Keychain item is missing", () => {
+      const result = runAuthHarness({
+        statements: [
+          "private_package_auth_keychain_is_available() { return 0; }",
+          "private_package_auth_read_keychain() { return 1; }",
+          "load_private_package_auth_for_codex",
+        ],
+      });
+
+      expect(result.status).toBe(1);
+      expect(result.stderr).toContain(
+        "No GitHub Packages token was found in the macOS Keychain"
+      );
+    });
+
+    it("can source the authentication helper more than once", () => {
+      const result = runAuthHarness({
+        statements: ['source "$1"', 'printf "resource=ok\\n"'],
+      });
+
+      expect(result.status).toBe(0);
+      expect(result.stdout).toBe("resource=ok\n");
+    });
+
+    it("does not trust an inherited include-guard marker", () => {
+      const environment = isolatedAuthTestEnvironment();
+      environment["PRIVATE_GITHUB_PACKAGES_AUTH_SH_LOADED"] = "1";
+      const result = runAuthHarness({
+        environment,
+        statements: [
+          'printf "helper=%s\\n" "$(type -t ensure_private_package_auth)"',
+        ],
+      });
+
+      expect(result.status).toBe(0);
+      expect(result.stdout).toBe("helper=function\n");
+    });
+  });
+
   it("dispatches package operations directly to the secure helper", () => {
     const wrapper = fs.readFileSync(
       path.join(REPOSITORY_ROOT, "bin", "6529"),
@@ -1246,10 +1449,83 @@ describe("documented private-package setup flows", () => {
     expect(wrapper).not.toContain("scripts/assert-no-package-lock.cjs");
     expect(wrapper.match(/run-secure-pnpm\.cjs/g)).toHaveLength(8);
     expect(wrapper.match(/--seize-secure-pnpm-binary/g)).toHaveLength(8);
+    expect(wrapper.match(/ensure_private_package_auth/g)).toHaveLength(8);
     expect(wrapper).toContain('SEIZE_STAGING_TRUSTED_PNPM_BINARY="$REAL_PNPM"');
     expect(packageJson.scripts).not.toHaveProperty("install:secure");
     expect(packageJson.scripts).not.toHaveProperty("install:secure:frozen");
     expect(packageJson.scripts).not.toHaveProperty("install:secure:prod");
+  });
+
+  it("prompts only after validating the eight package commands", () => {
+    const wrapper = fs.readFileSync(
+      path.join(REPOSITORY_ROOT, "bin", "6529"),
+      "utf8"
+    );
+    const commandBranches = [
+      ...wrapper.matchAll(
+        /^  ([^)\n]+)\)\n([\s\S]*?)(?=^  [^)\n]+\)\n|^esac$)/gm
+      ),
+    ];
+    const promptedCommands = commandBranches
+      .filter((match) => match[2]?.includes("ensure_private_package_auth"))
+      .map((match) => match[1]);
+
+    expect(promptedCommands).toEqual([
+      "i",
+      "install",
+      "ci",
+      "install:frozen",
+      "install:prod",
+      "add",
+      "update",
+      "update:all",
+    ]);
+
+    for (const command of promptedCommands.filter(
+      (entry) => entry !== "update:all"
+    )) {
+      const branch = commandBranches.find((match) => match[1] === command)?.[2];
+      expect(branch).toBeDefined();
+      expect(branch?.indexOf("ensure_private_package_auth")).toBeGreaterThan(
+        branch?.indexOf("fi") ?? -1
+      );
+    }
+  });
+
+  it("keeps Codex setup non-interactive and removes captured auth", () => {
+    const authHelper = fs.readFileSync(AUTH_HELPER_PATH, "utf8");
+    const setupHelper = fs.readFileSync(
+      path.join(REPOSITORY_ROOT, "scripts", "setup-codex-worktree.sh"),
+      "utf8"
+    );
+    const environmentSetup = fs.readFileSync(
+      path.join(REPOSITORY_ROOT, ".codex", "environments", "environment.toml"),
+      "utf8"
+    );
+    const installIndex = environmentSetup.indexOf(
+      "bash ./scripts/setup-codex-worktree.sh"
+    );
+    const authRemovalIndex = environmentSetup.indexOf("unset NODE_AUTH_TOKEN");
+
+    expect(setupHelper.indexOf("set +x")).toBeLessThan(
+      setupHelper.indexOf("load_private_package_auth_for_codex")
+    );
+    expect(setupHelper).toContain('exec "$REPO_ROOT/bin/6529" install');
+    expect(setupHelper).not.toContain("add-generic-password");
+    expect(authHelper).toContain(
+      'PRIVATE_GITHUB_PACKAGES_KEYCHAIN_SERVICE="6529seize-frontend-github-packages"'
+    );
+    expect(authHelper).toContain("/usr/bin/security find-generic-password");
+    expect(authHelper).not.toContain("gh auth token");
+    expect(installIndex).toBeGreaterThanOrEqual(0);
+    expect(authRemovalIndex).toBeGreaterThan(installIndex);
+    expect(environmentSetup).toContain("unset NODE_AUTH_TOKEN");
+    expect(environmentSetup).not.toContain("env | awk");
+    expect(environmentSetup).toContain(
+      "for file in .env.development .env.production; do"
+    );
+    expect(environmentSetup).toContain('cp "$PRIMARY_WORKTREE/$file" .');
+    expect(environmentSetup).toContain('chmod 600 "$file"');
   });
 
   it("requires runtime auth before staging setup can mutate the checkout", () => {
