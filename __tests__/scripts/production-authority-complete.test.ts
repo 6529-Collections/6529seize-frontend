@@ -117,7 +117,9 @@ describe("one-click production authority completion", () => {
       repositories: "6529seize-frontend",
       "permission-members": "read",
     });
-    expect(authorizeMaintainer.if).toBe(membershipToken.if);
+    expect(authorizeMaintainer.if).toBe(
+      "github.event_name == 'workflow_dispatch'"
+    );
     expect(authorizeMaintainer.env).toEqual({
       DISPATCH_ACTOR: "${{ github.actor }}",
       GH_TOKEN: "${{ steps.maintainer-token.outputs.token }}",
@@ -134,6 +136,13 @@ describe("one-click production authority completion", () => {
     expect(authorizeMaintainer.run).toContain(
       "Actor is not an active member of the production recovery team."
     );
+    expect(authorizeMaintainer.run).toContain(
+      'if [ "$DISPATCH_ACTOR" = \'github-actions[bot]\' ]; then'
+    );
+    expect(authorizeMaintainer.run).toContain(
+      "Automatic recovery dispatcher admitted for exact Production E2E proof."
+    );
+    expect(authorizeMaintainer.run).toContain('test -n "$GH_TOKEN"');
     expect(
       completionJob.steps.findIndex(
         (step: { readonly name?: string }) =>
@@ -161,6 +170,9 @@ describe("one-click production authority completion", () => {
     );
     expect(proof.run).toContain(
       "Automatic authority completion accepts only an exact Production E2E run."
+    );
+    expect(proof.run).toContain(
+      "[ \"$DISPATCH_ACTOR\" = 'github-actions[bot]' ] && [ \"$workflow_path\" != '.github/workflows/production-e2e.yml' ]"
     );
     expect(proof.run).not.toContain("workflow_name=");
   });

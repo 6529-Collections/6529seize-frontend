@@ -39,7 +39,7 @@ jobs:
           repositories: 6529seize-frontend
           permission-members: read
       - name: Authorize maintainer recovery actor
-        if: github.event_name == 'workflow_dispatch' && github.actor != 'github-actions[bot]'
+        if: github.event_name == 'workflow_dispatch'
         env:
           DISPATCH_ACTOR: ${{ github.actor }}
           GH_TOKEN: ${{ steps.maintainer-token.outputs.token }}
@@ -47,7 +47,13 @@ jobs:
           MAINTAINER_TEAM_SLUG: 6529seize-maintainers
         run: |
           set -euo pipefail
+          if [ "$DISPATCH_ACTOR" = 'github-actions[bot]' ]; then
+            echo "Automatic recovery dispatcher admitted for exact Production E2E proof."
+            exit 0
+          fi
+
           [[ "$DISPATCH_ACTOR" =~ ^[A-Za-z0-9][A-Za-z0-9-]{0,38}$ ]]
+          test -n "$GH_TOKEN"
 
           membership_file="$(mktemp)"
           trap 'rm -f "$membership_file"' EXIT
