@@ -12,7 +12,7 @@ export default function WaveGroupMembersScope({
   const groupId = group.id?.trim();
   const groupName = group.name?.trim();
 
-  if (group.is_hidden || group.is_direct_message || !groupId || !groupName) {
+  if (group.is_hidden || !groupId || !groupName) {
     return <WaveGroupScope group={group} />;
   }
 

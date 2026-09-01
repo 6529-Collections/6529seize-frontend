@@ -44,6 +44,24 @@ describe("WaveGroupMembersScope", () => {
     );
   });
 
+  it("renders the member count and criteria for an available direct-message group", () => {
+    render(
+      <WaveGroupMembersScope
+        group={{
+          id: "dm-1",
+          name: "Direct message group",
+          is_hidden: false,
+          is_direct_message: true,
+        }}
+      />
+    );
+
+    const summary = screen.getByTestId("members-summary");
+    expect(summary).toHaveAttribute("href", "/network?page=1&group=dm-1");
+    expect(summary).toHaveAttribute("data-group-id", "dm-1");
+    expect(screen.queryByTestId("fallback-scope")).not.toBeInTheDocument();
+  });
+
   it("preserves the private and unavailable scope fallbacks", () => {
     render(<WaveGroupMembersScope group={{ is_hidden: true }} />);
 
