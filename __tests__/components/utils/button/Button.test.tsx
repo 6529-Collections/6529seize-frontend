@@ -71,6 +71,17 @@ describe("Button", () => {
       "focus-visible:tw-outline-red"
     );
   });
+
+  it("supports a subtle outlined destructive action", () => {
+    render(<Button variant="destructiveOutline">Delete drop</Button>);
+
+    expect(screen.getByRole("button", { name: "Delete drop" })).toHaveClass(
+      "tw-border-red/20",
+      "tw-bg-red/5",
+      "tw-text-red/70",
+      "focus-visible:tw-outline-red"
+    );
+  });
 });
 
 describe("ButtonLink", () => {
