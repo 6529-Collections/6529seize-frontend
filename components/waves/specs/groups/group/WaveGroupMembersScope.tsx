@@ -12,6 +12,8 @@ export default function WaveGroupMembersScope({
   const groupId = group.id?.trim();
   const groupName = group.name?.trim();
 
+  // The waves API viewer-scopes private groups: unauthorized viewers receive
+  // only an is_hidden stub, while eligible DM participants receive the group.
   if (group.is_hidden || !groupId || !groupName) {
     return <WaveGroupScope group={group} />;
   }
