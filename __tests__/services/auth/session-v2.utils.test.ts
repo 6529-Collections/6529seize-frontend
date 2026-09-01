@@ -146,6 +146,13 @@ const expectNoSensitiveRefreshTelemetry = (
   }
 };
 
+const setNavigatorLocks = (lockManager: LockManager | undefined): void => {
+  Object.defineProperty(globalThis.navigator, "locks", {
+    configurable: true,
+    value: lockManager,
+  });
+};
+
 describe("session-v2.utils", () => {
   beforeEach(() => {
     __resetSessionRefreshStateForTests();
@@ -157,6 +164,7 @@ describe("session-v2.utils", () => {
     (isNativeSecureStorageAvailable as jest.Mock).mockReturnValue(true);
     (getWalletAddress as jest.Mock).mockReturnValue(null);
     (setAuthJwt as jest.Mock).mockReturnValue(true);
+    setNavigatorLocks(undefined);
   });
 
   it("requests web session nonce with only session-v2 query params", async () => {
@@ -456,6 +464,44 @@ describe("session-v2.utils", () => {
     ]);
     expect(getSessionRefreshWarnTelemetry()).toEqual([]);
     expectNoSensitiveRefreshTelemetry(getSessionRefreshInfoTelemetry());
+  });
+
+  it("serializes web refreshes through an address-scoped cross-tab lock", async () => {
+    const sessionResponse = {
+      client_type: "web",
+      address: "0xabc",
+      role: null,
+      access_token: "access-token",
+      access_token_expires_at: "2026-06-10T00:00:00.000Z",
+    };
+    const requestLock = jest.fn(
+      async <T>(
+        _name: string,
+        _options: LockOptions,
+        callback: (lock: Lock | null) => Promise<T>
+      ): Promise<T> => await callback(null)
+    );
+    setNavigatorLocks({ request: requestLock } as unknown as LockManager);
+    (commonApiPost as jest.Mock).mockResolvedValueOnce(sessionResponse);
+
+    await expect(refreshSessionV2({ address: "0xAbC" })).resolves.toBe(
+      sessionResponse
+    );
+
+    expect(requestLock).toHaveBeenCalledWith(
+      "6529:auth-session-refresh:web:0xabc",
+      { mode: "exclusive" },
+      expect.any(Function)
+    );
+    expect(commonApiPost).toHaveBeenCalledWith(
+      expect.objectContaining({
+        endpoint: "auth/session-refresh",
+        body: {
+          client_type: "web",
+          client_address: "0xAbC",
+        },
+      })
+    );
   });
 
   it("treats unauthorized web refresh as an invalid session", async () => {

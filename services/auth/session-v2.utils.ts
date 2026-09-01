@@ -100,6 +100,11 @@ const sessionRefreshFailureCooldowns = new Map<
   string,
   SessionRefreshFailureCooldown
 >();
+const WEB_SESSION_REFRESH_LOCK_PREFIX = "6529:auth-session-refresh:web:";
+
+type NavigatorWithOptionalLocks = {
+  readonly locks?: LockManager | undefined;
+};
 
 export function getSessionClientType(): AuthSessionClientType {
   return Capacitor.isNativePlatform() ? "native" : "web";
@@ -113,6 +118,33 @@ function getSessionRefreshKey({
   readonly clientType: AuthSessionClientType;
 }): string {
   return `${clientType}:${address.trim().toLowerCase()}`;
+}
+
+async function withCrossTabWebSessionRefreshLock<T>({
+  address,
+  abortSignal,
+  task,
+}: {
+  readonly address: string;
+  readonly abortSignal?: AbortSignal | undefined;
+  readonly task: () => Promise<T>;
+}): Promise<T> {
+  const runtimeNavigator = Reflect.get(
+    globalThis,
+    "navigator"
+  ) as NavigatorWithOptionalLocks | undefined;
+  const lockManager = runtimeNavigator?.locks;
+  if (!lockManager) {
+    return await task();
+  }
+
+  const lockName = `${WEB_SESSION_REFRESH_LOCK_PREFIX}${address
+    .trim()
+    .toLowerCase()}`;
+  const options: LockOptions = abortSignal
+    ? { mode: "exclusive", signal: abortSignal }
+    : { mode: "exclusive" };
+  return await lockManager.request(lockName, options, async () => await task());
 }
 
 function createAbortError(): DOMException {
@@ -390,25 +422,30 @@ async function executeSessionRefreshV2({
     });
   }
 
-  return await executeSessionRefreshRequest({
-    clientType,
-    request: () =>
-      commonApiPost<
-        {
-          readonly client_type: "web";
-          readonly client_address: string;
-        },
-        SessionWebResponse
-      >({
-        endpoint: "auth/session-refresh",
-        body: {
-          client_type: "web",
-          client_address: address,
-        },
-        signal: abortSignal,
-        credentials: getSessionCredentialsMode(),
-        errorMode: "structured",
-        includeWalletAuth: false,
+  return await withCrossTabWebSessionRefreshLock({
+    address,
+    abortSignal,
+    task: async () =>
+      await executeSessionRefreshRequest({
+        clientType,
+        request: () =>
+          commonApiPost<
+            {
+              readonly client_type: "web";
+              readonly client_address: string;
+            },
+            SessionWebResponse
+          >({
+            endpoint: "auth/session-refresh",
+            body: {
+              client_type: "web",
+              client_address: address,
+            },
+            signal: abortSignal,
+            credentials: getSessionCredentialsMode(),
+            errorMode: "structured",
+            includeWalletAuth: false,
+          }),
       }),
   });
 }
