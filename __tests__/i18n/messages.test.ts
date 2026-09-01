@@ -542,7 +542,7 @@ describe("frontend i18n helpers", () => {
 
   it("translates the chronological Profile Wave feed framing", () => {
     expect(t("en-US", "waves.profileFeed.title")).toBe(
-      "Latest Profile Wave posts"
+      "Latest From Profile Waves"
     );
     expect(t("en-US", "waves.profileFeed.description")).toBe(
       "See what the community is sharing in Profile Waves."
