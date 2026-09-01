@@ -1,4 +1,13 @@
 {
+  "waves.sidebar.rightPanel.ariaLabel": "Wave details",
+  "waves.sidebar.rightPanel.loading": "Loading wave details…",
+  "waves.sidebar.rightPanel.error": "Wave details couldn't be loaded.",
+  "waves.sidebar.rightPanel.retry": "Retry",
+  "waves.sidebar.rightPanel.close": "Close wave details",
+  "waves.sidebar.rightPanel.controls.show": "Show right sidebar",
+  "waves.sidebar.rightPanel.controls.hide": "Hide right sidebar",
+  "waves.sidebar.rightPanel.controls.openDetails": "Wave details",
+  "waves.sidebar.rightPanel.controls.hideDetails": "Hide details",
   "waves.sidebar.rightPanel.tabs.about": "About",
   "waves.sidebar.rightPanel.tabs.overview": "Overview",
   "waves.sidebar.rightPanel.tabs.rep": "REP",
