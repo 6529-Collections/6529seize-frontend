@@ -15,6 +15,9 @@ import { HttpFile } from '../http/http';
 
 export class ApiDeleteMyWaveChatHistoryResponse {
     'deleted_drop_ids': Array<string>;
+    /**
+    * ID of the caller-authored pinned CHAT drop that was preserved, or null when the pinned drop was not authored by the caller.
+    */
     'preserved_pinned_drop_id': string | null;
 
     static readonly discriminator: string | undefined = undefined;

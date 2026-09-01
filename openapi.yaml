@@ -11209,7 +11209,8 @@ paths:
       description: >-
         Permanently deletes every CHAT drop authored by the authenticated user
         in the wave, except for the wave's pinned drop. Participatory and winner
-        drops are never deleted.
+        drops are never deleted. This self-service cleanup remains available if
+        the caller is no longer eligible to view or participate in the wave.
       operationId: deleteMyWaveChatHistory
       x-6529-router:
         enabled: true
@@ -16712,6 +16713,9 @@ components:
           items:
             type: string
         preserved_pinned_drop_id:
+          description: >-
+            ID of the caller-authored pinned CHAT drop that was preserved, or
+            null when the pinned drop was not authored by the caller.
           type: string
           nullable: true
     ApiDistributionAirdropsCsvUploadRequest:
