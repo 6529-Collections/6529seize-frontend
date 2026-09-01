@@ -1521,9 +1521,11 @@ describe("documented private-package setup flows", () => {
     expect(authRemovalIndex).toBeGreaterThan(installIndex);
     expect(environmentSetup).toContain("unset NODE_AUTH_TOKEN");
     expect(environmentSetup).not.toContain("env | awk");
-    expect(environmentSetup).not.toContain(".env.development");
-    expect(environmentSetup).not.toContain(".env.production");
-    expect(environmentSetup).not.toMatch(/\bcp\b/);
+    expect(environmentSetup).toContain(
+      "for file in .env.development .env.production; do"
+    );
+    expect(environmentSetup).toContain('cp "$PRIMARY_WORKTREE/$file" .');
+    expect(environmentSetup).toContain('chmod 600 "$file"');
   });
 
   it("requires runtime auth before staging setup can mutate the checkout", () => {

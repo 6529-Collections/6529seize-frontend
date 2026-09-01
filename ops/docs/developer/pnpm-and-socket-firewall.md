@@ -103,9 +103,10 @@ The checked-in Codex environment setup reads this one exact Keychain item only
 for `./bin/6529 install`. It passes the token into the existing secure package
 helper, then the helper process exits. The setup also removes any inherited
 `NODE_AUTH_TOKEN` before Codex captures the successful setup environment. It
-does not copy local `.env` files from another checkout or write the token into
-the worktree, an `.env` file, or a shell profile. If the Keychain item is
-missing, Codex setup fails immediately with a clear message.
+copies existing `.env.development` and `.env.production` files from the primary
+worktree for local development and restricts the copies to the current user.
+It does not write the package token into those files or a shell profile. If the
+Keychain item is missing, Codex setup fails immediately with a clear message.
 
 On non-macOS Codex hosts, supply `NODE_AUTH_TOKEN` to the setup process at
 runtime. The setup removes it before Codex captures the resulting environment.
