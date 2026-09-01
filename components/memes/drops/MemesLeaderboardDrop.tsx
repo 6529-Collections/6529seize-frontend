@@ -212,31 +212,32 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
                   >
                     {/* Voters - only on small containers */}
                     <div className="tw-flex tw-items-center tw-gap-2 @[700px]:tw-hidden">
-                      <div className="tw-flex tw-items-center -tw-space-x-2">
-                        {firstThreeVoters.map((voter) => (
-                          <Link
-                            key={
-                              voter.profile.handle ??
-                              voter.profile.primary_address
-                            }
-                            href={`/${voter.profile.handle ?? voter.profile.primary_address}`}
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            {voter.profile.pfp ? (
-                              <img
-                                className="tw-h-6 tw-w-6 tw-rounded-md tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800 tw-object-contain"
-                                src={voter.profile.pfp}
-                                alt="Recent voter"
-                              />
-                            ) : (
-                              <div className="tw-h-6 tw-w-6 tw-rounded-lg tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800" />
-                            )}
-                          </Link>
-                        ))}
-                      </div>
+                      {firstThreeVoters.length > 0 && (
+                        <div className="tw-flex tw-items-center -tw-space-x-2">
+                          {firstThreeVoters.map((voter) => (
+                            <Link
+                              key={
+                                voter.profile.handle ??
+                                voter.profile.primary_address
+                              }
+                              href={`/${voter.profile.handle ?? voter.profile.primary_address}`}
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              {voter.profile.pfp ? (
+                                <img
+                                  className="tw-h-6 tw-w-6 tw-rounded-md tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800 tw-object-contain"
+                                  src={voter.profile.pfp}
+                                  alt="Recent voter"
+                                />
+                              ) : (
+                                <div className="tw-h-6 tw-w-6 tw-rounded-lg tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800" />
+                              )}
+                            </Link>
+                          ))}
+                        </div>
+                      )}
                       <ParticipationDropVoteDetailsTrigger
                         drop={drop}
-                        density="compact"
                         visualVariant="memes"
                       />
                     </div>
