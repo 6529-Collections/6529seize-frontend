@@ -857,5 +857,16 @@ export const EN_GB_MESSAGES = {
   "home.mintAllowlist.pill.allowlist": "{phase} · {allowlist}x Allowlist",
   "home.mintAllowlist.pill.mixed":
     "{phase} · {airdrop}x Airdrop · {allowlist}x Allowlist",
+  "profilePreferences.notifications.heading": "Notifications",
+  "profilePreferences.notifications.ALL.label": "All",
+  "notifications.filter.ariaLabel": "Filter notifications: {selection}",
+  "notifications.filter.selected": "{count} selected",
+  "notifications.filter.sheetTitle": "Filter notifications",
+  "notifications.filter.option.mentions": "Mentions",
+  "notifications.filter.option.replies": "Replies",
+  "notifications.filter.option.identity": "Identity",
+  "notifications.filter.option.reactions": "Reactions",
+  "notifications.filter.option.invites": "Invites",
+  "notifications.filter.option.subscriptions": "Subscriptions",
   ...TRANSFER_MESSAGES,
 } satisfies Partial<Record<MessageKey, string>>;
