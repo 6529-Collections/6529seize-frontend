@@ -6,6 +6,7 @@ import { AuthContext } from "@/components/auth/Auth";
 import { useQuery } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useIdentity } from "@/hooks/useIdentity";
 
 jest.mock("next/dynamic", () => () => () => <div />);
@@ -18,7 +19,10 @@ jest.mock("@/components/header/ProfilePreferencesSettings", () => ({
 }));
 jest.mock(
   "@/components/user/user-page-header/banner/UserPageHeaderBanner",
-  () => () => <div data-testid="banner" />
+  () =>
+    ({ canEdit }: { readonly canEdit: boolean }) => (
+      <div data-testid="banner" data-can-edit={canEdit} />
+    )
 );
 jest.mock(
   "@/components/user/user-page-header/pfp/UserPageHeaderPfp",
@@ -44,11 +48,9 @@ jest.mock(
 jest.mock(
   "@/components/user/user-page-header/UserPageHeaderSubscriptionStatus",
   () =>
-    ({
-      layout = "card",
-    }: {
-      readonly layout?: "card" | "subtle" | "wide-row";
-    }) => <div data-testid="subscription-status" data-layout={layout} />
+    ({ layout = "card" }: { readonly layout?: "card" | "header" }) => (
+      <div data-testid="subscription-status" data-layout={layout} />
+    )
 );
 jest.mock("@/components/user/utils/UserFollowBtn", () => ({
   __esModule: true,
@@ -61,6 +63,10 @@ jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: jest.fn(),
 }));
 jest.mock("@tanstack/react-query", () => ({ useQuery: jest.fn() }));
+jest.mock("@/hooks/useDeviceInfo", () => ({
+  __esModule: true,
+  default: jest.fn(),
+}));
 jest.mock("@/hooks/useIdentity", () => ({ useIdentity: jest.fn() }));
 jest.mock("next/navigation", () => ({
   useParams: jest.fn(),
@@ -92,6 +98,10 @@ const proxiedOwnProfileAuth = {
 
 describe("UserPageHeader", () => {
   beforeEach(() => {
+    (useDeviceInfo as jest.Mock).mockReturnValue({
+      hasTouchScreen: false,
+      isApp: false,
+    });
     (useQuery as jest.Mock).mockReturnValue({
       isFetched: true,
       data: [{ statement_type: "BIO", statement_group: "GENERAL" }],
@@ -147,37 +157,60 @@ describe("UserPageHeader", () => {
     );
 
     expect(screen.queryByTestId("follow")).not.toBeInTheDocument();
-    const subscriptionStatuses = screen.getAllByTestId("subscription-status");
-    expect(subscriptionStatuses).toHaveLength(2);
-    expect(
-      subscriptionStatuses.filter(
-        (subscriptionStatus) =>
-          subscriptionStatus.dataset["layout"] === "subtle"
-      )
-    ).toHaveLength(1);
-    expect(
-      subscriptionStatuses.filter(
-        (subscriptionStatus) =>
-          subscriptionStatus.dataset["layout"] === "wide-row"
-      )
-    ).toHaveLength(1);
+    expect(screen.getAllByTestId("subscription-status")).toHaveLength(1);
+    expect(screen.getByTestId("subscription-status")).toHaveAttribute(
+      "data-layout",
+      "header"
+    );
     const preferencesButtons = screen.getAllByRole("button", {
       name: "Preferences",
     });
-    expect(preferencesButtons).toHaveLength(3);
+    expect(preferencesButtons).toHaveLength(1);
     expect(preferencesButtons[0]).toHaveClass(
       "tw-size-11",
-      "!tw-bg-transparent",
-      "min-[840px]:tw-hidden"
+      "!tw-border-white/10",
+      "!tw-bg-iron-950",
+      "tw-shadow-md",
+      "tw-shadow-black/40"
     );
-    preferencesButtons.slice(1).forEach((preferencesButton) => {
-      expect(preferencesButton).toHaveClass(
-        "!tw-border-white/10",
-        "!tw-bg-iron-950",
-        "tw-shadow-md",
-        "tw-shadow-black/40"
-      );
+    expect(
+      screen.getAllByRole("button", { name: "Edit profile" })
+    ).toHaveLength(1);
+  });
+
+  it("keeps the single owner action cluster available on touch screens", () => {
+    (useDeviceInfo as jest.Mock).mockReturnValue({
+      hasTouchScreen: true,
+      isApp: false,
     });
+
+    render(
+      <AuthContext.Provider value={ownProfileAuth}>
+        <UserPageHeaderClient
+          profile={profile}
+          handleOrWallet="bob"
+          fallbackMainAddress="0x1"
+          defaultBanner1="#000000"
+          defaultBanner2="#111111"
+          initialStatements={[]}
+          profileEnabledAt="2024-01-01T00:00:00Z"
+          followersCount={5}
+          cmsWebsiteHref={null}
+        />
+      </AuthContext.Provider>
+    );
+
+    expect(screen.getByTestId("banner")).toHaveAttribute(
+      "data-can-edit",
+      "false"
+    );
+    expect(
+      screen.getAllByRole("button", { name: "Edit profile" })
+    ).toHaveLength(1);
+    expect(screen.getAllByRole("button", { name: "Preferences" })).toHaveLength(
+      1
+    );
+    expect(screen.getAllByTestId("subscription-status")).toHaveLength(1);
   });
 
   it("opens preferences from your own profile", async () => {
@@ -198,9 +231,7 @@ describe("UserPageHeader", () => {
       </AuthContext.Provider>
     );
 
-    await user.click(
-      screen.getAllByRole("button", { name: "Preferences" })[0]!
-    );
+    await user.click(screen.getByRole("button", { name: "Preferences" }));
 
     expect(
       screen.getByRole("dialog", { name: "Profile Preferences modal" })

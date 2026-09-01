@@ -81,90 +81,22 @@ function ProfilePreferencesButton({
   return (
     <Button
       variant="tertiary"
-      size="sm"
+      size={null}
       onClick={onClick}
       aria-label={t(DEFAULT_LOCALE, PROFILE_PREFERENCES_BUTTON_KEY)}
-      className={`${USER_PAGE_HEADER_SURFACE_CLASS} ${USER_PAGE_HEADER_INTERACTIVE_SURFACE_CLASS}`}
+      title={t(DEFAULT_LOCALE, PROFILE_PREFERENCES_BUTTON_KEY)}
+      className={`tw-size-11 !tw-rounded-full !tw-p-0 ${USER_PAGE_HEADER_SURFACE_CLASS} ${USER_PAGE_HEADER_INTERACTIVE_SURFACE_CLASS}`}
     >
-      <Cog6ToothIcon className="tw-size-4" aria-hidden="true" />
-      <span>{t(DEFAULT_LOCALE, PROFILE_PREFERENCES_BUTTON_KEY)}</span>
+      <Cog6ToothIcon className="tw-size-5" aria-hidden="true" />
     </Button>
   );
 }
 
-type MobileHeaderControlsProps = Readonly<{
+type ProfileHeaderActionColumnProps = Readonly<{
   aboutStatement: CicStatement | null;
   banner1Color: string;
   banner2Color: string;
   canEdit: boolean;
-  canManageProfilePreferences: boolean;
-  hasTouchScreen: boolean;
-  onOpenPreferences: () => void;
-  profile: ApiIdentity;
-}>;
-
-function MobileHeaderControls({
-  aboutStatement,
-  banner1Color,
-  banner2Color,
-  canEdit,
-  canManageProfilePreferences,
-  hasTouchScreen,
-  onOpenPreferences,
-  profile,
-}: MobileHeaderControlsProps) {
-  if (!canEdit && !canManageProfilePreferences) {
-    return null;
-  }
-
-  return (
-    <div
-      className={`tw-absolute tw-right-4 tw-top-3 tw-z-20 tw-flex tw-items-center tw-gap-1 sm:tw-right-6 sm:tw-top-4 md:tw-right-8 ${
-        hasTouchScreen ? "" : "sm:tw-hidden"
-      }`}
-    >
-      {canEdit ? (
-        <UserPageHeaderEditProfile
-          profile={profile}
-          statement={aboutStatement}
-          defaultBanner1={banner1Color}
-          defaultBanner2={banner2Color}
-        />
-      ) : null}
-      {canManageProfilePreferences ? (
-        <Button
-          variant="tertiary"
-          size={null}
-          onClick={onOpenPreferences}
-          aria-label={t(DEFAULT_LOCALE, PROFILE_PREFERENCES_BUTTON_KEY)}
-          title={t(DEFAULT_LOCALE, PROFILE_PREFERENCES_BUTTON_KEY)}
-          className="tw-group tw-size-11 !tw-rounded-full !tw-border-transparent !tw-bg-transparent !tw-p-1 !tw-shadow-none focus-visible:!tw-outline-none active:!tw-bg-transparent desktop-hover:hover:!tw-border-transparent desktop-hover:hover:!tw-bg-transparent sm:tw-size-10 sm:!tw-p-0.5 min-[840px]:tw-hidden"
-        >
-          <span className="tw-box-border tw-inline-flex tw-size-9 tw-flex-none tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/15 tw-bg-black/75 tw-text-iron-100 tw-shadow-[0_8px_24px_rgba(0,0,0,0.32)] tw-transition-[background-color,border-color,color,transform] tw-duration-200 tw-ease-out group-focus-visible:tw-ring-2 group-focus-visible:tw-ring-primary-400 group-focus-visible:tw-ring-offset-2 group-focus-visible:tw-ring-offset-black group-active:tw-scale-95 group-active:tw-bg-black desktop-hover:group-hover:tw-border-white/25 desktop-hover:group-hover:tw-bg-black/90 desktop-hover:group-hover:tw-text-white motion-reduce:tw-transform-none motion-reduce:tw-transition-none">
-            <Cog6ToothIcon className="tw-size-[1.125rem]" aria-hidden="true" />
-          </span>
-        </Button>
-      ) : null}
-    </div>
-  );
-}
-
-function SmallScreenPreferencesButton({
-  onClick,
-  show,
-}: Readonly<{ onClick: () => void; show: boolean }>) {
-  if (!show) {
-    return null;
-  }
-
-  return (
-    <div className="tw-hidden tw-flex-none sm:tw-absolute sm:tw-right-0 sm:tw-top-6 sm:tw-block min-[840px]:tw-hidden">
-      <ProfilePreferencesButton onClick={onClick} />
-    </div>
-  );
-}
-
-type ProfileHeaderActionColumnProps = Readonly<{
   canManageProfilePreferences: boolean;
   directMessageLoading: boolean;
   followHandle: string | null;
@@ -176,6 +108,10 @@ type ProfileHeaderActionColumnProps = Readonly<{
 }>;
 
 function ProfileHeaderActionColumn({
+  aboutStatement,
+  banner1Color,
+  banner2Color,
+  canEdit,
   canManageProfilePreferences,
   directMessageLoading,
   followHandle,
@@ -185,28 +121,32 @@ function ProfileHeaderActionColumn({
   showSubscriptionStatus,
   websiteAction,
 }: ProfileHeaderActionColumnProps) {
-  if (!canManageProfilePreferences && !websiteAction && !followHandle) {
+  if (
+    !canEdit &&
+    !canManageProfilePreferences &&
+    !websiteAction &&
+    !followHandle
+  ) {
     return null;
   }
 
-  const topPaddingClass = canManageProfilePreferences
-    ? "md:tw-pt-0"
-    : "md:tw-pt-5";
-  const visibilityClass =
-    websiteAction || followHandle ? "tw-flex" : "tw-hidden min-[840px]:tw-flex";
   const directMessageAction = profile.primary_wallet
     ? () => onCreateDirectMessage(profile.primary_wallet)
     : undefined;
 
   return (
-    <div
-      className={`tw-w-full tw-flex-col tw-items-start tw-gap-3 md:tw-w-auto md:tw-flex-none md:tw-items-end md:tw-pb-2 lg:tw-col-start-2 lg:tw-row-span-2 lg:tw-row-start-1 lg:tw-self-start lg:tw-pt-0 ${topPaddingClass} ${visibilityClass}`}
-    >
-      <div className="tw-flex tw-w-full tw-flex-wrap tw-items-end tw-gap-2 md:tw-w-auto md:tw-justify-end">
+    <div className="tw-flex tw-w-full tw-min-w-0 tw-flex-col tw-gap-2 sm:tw-flex-row sm:tw-items-start lg:tw-w-auto lg:tw-max-w-[36rem] lg:tw-justify-self-end">
+      <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2 lg:tw-flex-none">
+        {canEdit ? (
+          <UserPageHeaderEditProfile
+            profile={profile}
+            statement={aboutStatement}
+            defaultBanner1={banner1Color}
+            defaultBanner2={banner2Color}
+          />
+        ) : null}
         {canManageProfilePreferences ? (
-          <div className="tw-hidden min-[840px]:tw-block">
-            <ProfilePreferencesButton onClick={onOpenPreferences} />
-          </div>
+          <ProfilePreferencesButton onClick={onOpenPreferences} />
         ) : null}
         {websiteAction ? (
           <ButtonLink
@@ -229,8 +169,8 @@ function ProfileHeaderActionColumn({
         ) : null}
       </div>
       {showSubscriptionStatus ? (
-        <div className="tw-hidden min-[840px]:tw-block">
-          <UserPageHeaderSubscriptionStatus profile={profile} layout="subtle" />
+        <div className="tw-min-w-0 tw-flex-1 lg:tw-flex-none lg:tw-pt-3">
+          <UserPageHeaderSubscriptionStatus profile={profile} layout="header" />
         </div>
       ) : null}
     </div>
@@ -241,12 +181,12 @@ type ProfileHeaderContentProps = Readonly<{
   aboutStatement: CicStatement | null;
   banner1Color: string;
   banner2Color: string;
+  canEdit: boolean;
   canInlineEdit: boolean;
   canManageProfilePreferences: boolean;
   directMessageLoading: boolean;
   followHandle: string | null;
   followersCount: number | null;
-  hasTouchScreen: boolean;
   mainAddress: string;
   normalizedHandleOrWallet: string;
   onCreateDirectMessage: (primaryWallet: string | undefined) => void;
@@ -263,12 +203,12 @@ function ProfileHeaderContent({
   aboutStatement,
   banner1Color,
   banner2Color,
+  canEdit,
   canInlineEdit,
   canManageProfilePreferences,
   directMessageLoading,
   followHandle,
   followersCount,
-  hasTouchScreen,
   mainAddress,
   normalizedHandleOrWallet,
   onCreateDirectMessage,
@@ -280,34 +220,27 @@ function ProfileHeaderContent({
   showSubscriptionStatus,
   websiteAction,
 }: ProfileHeaderContentProps) {
-  const identityPaddingClass =
-    canManageProfilePreferences && !hasTouchScreen
-      ? "sm:tw-pr-36 min-[840px]:tw-pr-0"
-      : "";
-
   return (
     <div className="tw-relative tw-z-20 tw-bg-black">
-      <div className="tw-relative tw-z-10 tw-px-4 sm:tw-px-6 md:tw-px-8 lg:tw-grid lg:tw-grid-cols-[minmax(0,1fr)_auto] lg:tw-gap-x-6">
-        <div className="tw-relative tw-mb-6 tw-flex tw-flex-col tw-items-start tw-gap-4 sm:tw-mb-4 md:tw-flex-row md:tw-justify-between md:tw-gap-6 lg:tw-contents">
-          <div
-            className={`tw-flex tw-w-full tw-min-w-0 tw-flex-col tw-items-start tw-gap-3 sm:tw-relative sm:tw-min-h-16 sm:tw-flex-row sm:tw-items-end sm:tw-gap-4 sm:tw-pt-16 md:tw-flex-1 md:tw-gap-5 lg:tw-col-start-1 lg:tw-row-start-1 lg:tw-pl-[132px] lg:tw-pt-0 ${identityPaddingClass}`}
-          >
-            <div className="tw-relative -tw-mt-10 tw-flex-shrink-0 sm:tw-absolute sm:-tw-top-14 sm:tw-left-0 sm:tw-mt-0">
-              <UserPageHeaderPfpWrapper
+      <div className="tw-relative tw-z-10 tw-px-4 sm:tw-px-6 md:tw-px-8">
+        <div className="tw-relative tw-mb-6 tw-flex tw-flex-col tw-gap-3 sm:tw-mb-4 sm:tw-block sm:tw-pt-16 lg:tw-pl-[132px] lg:tw-pt-0">
+          <div className="tw-relative -tw-mt-10 tw-flex-shrink-0 sm:tw-absolute sm:-tw-top-14 sm:tw-left-0 sm:tw-mt-0">
+            <UserPageHeaderPfpWrapper
+              profile={profile}
+              canEdit={canInlineEdit}
+              profileLabel={profileLabel}
+            >
+              <UserPageHeaderPfp
                 profile={profile}
-                canEdit={canInlineEdit}
                 profileLabel={profileLabel}
-              >
-                <UserPageHeaderPfp
-                  profile={profile}
-                  profileLabel={profileLabel}
-                  defaultBanner1={banner1Color}
-                  defaultBanner2={banner2Color}
-                />
-              </UserPageHeaderPfpWrapper>
-            </div>
+                defaultBanner1={banner1Color}
+                defaultBanner2={banner2Color}
+              />
+            </UserPageHeaderPfpWrapper>
+          </div>
 
-            <div className="tw-min-w-0 tw-flex-1 tw-pb-1 sm:tw-pb-2 sm:tw-pt-2 lg:tw-pt-1">
+          <div className="tw-grid tw-min-w-0 tw-gap-4 sm:tw-pt-2 lg:tw-grid-cols-[minmax(0,1fr)_auto] lg:tw-gap-x-6 lg:tw-pt-1">
+            <div className="tw-min-w-0 tw-pb-1 sm:tw-pb-2">
               <UserPageHeaderName
                 profile={profile}
                 canEdit={canInlineEdit}
@@ -317,36 +250,26 @@ function ProfileHeaderContent({
                 variant="full"
               />
             </div>
-          </div>
 
-          <SmallScreenPreferencesButton
-            onClick={onOpenPreferences}
-            show={canManageProfilePreferences && !hasTouchScreen}
-          />
-
-          <ProfileHeaderActionColumn
-            canManageProfilePreferences={canManageProfilePreferences}
-            directMessageLoading={directMessageLoading}
-            followHandle={followHandle}
-            onCreateDirectMessage={onCreateDirectMessage}
-            onOpenPreferences={onOpenPreferences}
-            profile={profile}
-            showSubscriptionStatus={showSubscriptionStatus}
-            websiteAction={websiteAction}
-          />
-        </div>
-
-        {showSubscriptionStatus ? (
-          <div className="min-[840px]:tw-hidden">
-            <UserPageHeaderSubscriptionStatus
+            <ProfileHeaderActionColumn
+              aboutStatement={aboutStatement}
+              banner1Color={banner1Color}
+              banner2Color={banner2Color}
+              canEdit={canEdit}
+              canManageProfilePreferences={canManageProfilePreferences}
+              directMessageLoading={directMessageLoading}
+              followHandle={followHandle}
+              onCreateDirectMessage={onCreateDirectMessage}
+              onOpenPreferences={onOpenPreferences}
               profile={profile}
-              layout="wide-row"
+              showSubscriptionStatus={showSubscriptionStatus}
+              websiteAction={websiteAction}
             />
           </div>
-        ) : null}
+        </div>
 
         {showAbout ? (
-          <div className="lg:tw-col-start-1 lg:tw-row-start-2 lg:tw-self-start lg:tw-pt-4">
+          <div className="lg:tw-pt-4">
             <UserPageHeaderAbout
               profile={profile}
               statement={aboutStatement}
@@ -355,7 +278,7 @@ function ProfileHeaderContent({
           </div>
         ) : null}
 
-        <div className="tw-mt-4 tw-flex tw-items-center sm:tw-mt-6 lg:tw-col-span-2 lg:tw-col-start-1 lg:tw-row-start-3 lg:tw-mt-4">
+        <div className="tw-mt-4 tw-flex tw-items-center sm:tw-mt-6 lg:tw-mt-4">
           <UserPageHeaderStats
             profile={profile}
             handleOrWallet={normalizedHandleOrWallet}
@@ -506,36 +429,24 @@ export default function UserPageHeaderClient({
         aria-labelledby="profile-heading"
         className="tw-relative tw-bg-black tw-pb-4 md:tw-pb-8"
       >
-        <div className="tw-relative tw-w-full">
-          <UserPageHeaderBanner
-            profile={profile}
-            defaultBanner1={banner1Color}
-            defaultBanner2={banner2Color}
-            canEdit={canInlineEdit}
-            profileLabel={profileLabel}
-          />
-          <MobileHeaderControls
-            aboutStatement={aboutStatement}
-            banner1Color={banner1Color}
-            banner2Color={banner2Color}
-            canEdit={canEdit}
-            canManageProfilePreferences={canManageProfilePreferences}
-            hasTouchScreen={hasTouchScreen}
-            onOpenPreferences={() => setIsProfilePreferencesOpen(true)}
-            profile={profile}
-          />
-        </div>
+        <UserPageHeaderBanner
+          profile={profile}
+          defaultBanner1={banner1Color}
+          defaultBanner2={banner2Color}
+          canEdit={canInlineEdit}
+          profileLabel={profileLabel}
+        />
 
         <ProfileHeaderContent
           aboutStatement={aboutStatement}
           banner1Color={banner1Color}
           banner2Color={banner2Color}
+          canEdit={canEdit}
           canInlineEdit={canInlineEdit}
           canManageProfilePreferences={canManageProfilePreferences}
           directMessageLoading={directMessageLoading}
           followHandle={followHandle}
           followersCount={followersCount}
-          hasTouchScreen={hasTouchScreen}
           mainAddress={mainAddress}
           normalizedHandleOrWallet={normalizedHandleOrWallet}
           onCreateDirectMessage={handleCreateDirectMessage}

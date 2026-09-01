@@ -23,15 +23,15 @@ This flow is separate from banner editing.
   - the profile has a handle
   - you are viewing your own profile
   - no active profile proxy context
-- On smaller and touch-first layouts, use `Edit profile` and choose
-  `Profile picture`.
+- On any layout, use `Edit profile` in the owner action cluster below the
+  banner and choose `Profile picture`.
 - On fine-pointer desktop layouts, use the avatar edit control
   (`Edit profile picture`).
 
 ## User Journey
 
-1. Open your own profile and use the desktop avatar edit control, or choose
-   `Edit profile` -> `Profile picture` on a smaller layout.
+1. Open your own profile and choose `Edit profile` -> `Profile picture`, or use
+   the fine-pointer desktop avatar edit control.
 2. The modal opens. If you already have a profile picture, the upload panel shows its preview.
 3. Choose one source:
    - `Select Meme`: search and click a meme row.

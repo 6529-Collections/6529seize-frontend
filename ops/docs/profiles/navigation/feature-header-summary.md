@@ -53,19 +53,20 @@ The profile header appears on profile routes under `/{user}` and shows:
    - winners-only: opens `Winning Artworks`
    - both: opens `Active Submissions` first
 7. Actions depend on viewer context:
-   - own profile with handle and no active proxy: fine-pointer desktop layouts
-     expose direct edit controls on the banner, profile picture, name,
-     classification, and About
-   - smaller and touch-first layouts show an `Edit profile` action that opens
-     an editing hub for those same identity fields
+   - own profile with handle and no active proxy: one owner action cluster below
+     the banner contains `Edit profile`, `Preferences`, and subscription
+     coverage
+   - `Edit profile` opens an editing hub for the profile cover, profile picture,
+     name, classification, and About on every layout
+   - fine-pointer layouts also expose direct edit controls on those individual
+     fields
    - `Preferences` remains a distinct owner action for privacy, direct-message,
-     and notification settings; it sits in the right-side action area below the
-     banner on desktop, remains an icon-only action beside `Edit profile` in the
-     banner's top-right corner on touch-first and phone layouts, and sits to the
-     right of the identity on smaller fine-pointer layouts
-   - subscription coverage remains a separate status and navigation surface:
-     a subtle row beneath Preferences on desktop layouts, and a full-width
-     subtle row below the identity block on smaller layouts
+     and notification settings
+   - subscription coverage remains a separate navigation surface in the same
+     cluster, with its label on the first line and current state plus contextual
+     action on the second
+   - the owner action cluster follows the identity block on smaller layouts and
+     aligns to its right on larger layouts
    - other profile, signed-in viewer with handle, and target profile with
      handle: follow/unfollow button
    - if that target also has a primary wallet: direct-message button appears
@@ -81,15 +82,15 @@ The profile header appears on profile routes under `/{user}` and shows:
   value.
 - Long About text (`>240` chars) is clamped on mobile with `See more` /
   `See less`; desktop stays expanded.
-- Mobile profile banners retain their existing full-strength artwork and
-  top-right owner controls. Desktop banners fade into the content surface at
-  the bottom; only the profile picture crosses that boundary.
+- Mobile profile banners retain their existing full-strength artwork. Desktop
+  banners fade into the content surface at the bottom. Owner actions remain on
+  the content surface below the banner, and only the profile picture crosses
+  the banner boundary.
 - The subscription status can link directly to the relevant settings,
-  upcoming-drops, or top-up section. The complete status row is the link, with
-  its label, current state, and contextual action kept inline when space allows.
-  It remains a full-width contextual row on smaller layouts and can wrap when
+  upcoming-drops, or top-up section. The complete status surface is the link,
+  with its label above the current state and contextual action. It can wrap when
   translated or dynamic content cannot fit.
-- Touch-first layouts use the profile editing hub; fine-pointer desktop layouts
+- Touch-first layouts use the profile editing hub; fine-pointer layouts also
   retain the field-level editing controls.
 - `Followers` opens a modal list; it does not navigate to a followers tab.
 - On non-touch desktop devices, the artist badge shows a tooltip with activity

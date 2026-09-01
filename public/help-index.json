@@ -1176,8 +1176,8 @@
       "facts": [
         "Profile pages are opened from a real handle or wallet-like route target; use Network, Waves, groups, or a known handle to open the exact profile.",
         "Profile pages organize Identity, Curation, Collected, Subscriptions, Proxy, Brain, and xTDH surfaces through tabs.",
-        "On their own profile, owners use direct field-level edit controls on fine-pointer desktop layouts; smaller and touch-first layouts provide an Edit profile hub for the profile cover, profile picture, name, classification, and About.",
-        "Preferences is a separate owner action in the right-side area below the banner on desktop and an icon-only action beside Edit profile in the banner's top-right corner on touch-first and phone layouts; subscription coverage stays a quieter contextual surface beneath Preferences on desktop or across the header below the identity block on smaller screens.",
+        "On their own profile, owners can use the Edit profile hub for the profile cover, profile picture, name, classification, and About on every layout; fine-pointer layouts also provide direct field-level edit controls.",
+        "Edit profile, Preferences, and subscription coverage share one owner action cluster on the content surface below the banner. It follows the identity on smaller layouts and aligns to its right on larger layouts; subscription coverage places its label above the current state and contextual action.",
         "Editable profile surfaces require the connected profile owner.",
         "Profile editing, profile-header Preferences, and owner subscription coverage are hidden while an active profile proxy is in use."
       ],

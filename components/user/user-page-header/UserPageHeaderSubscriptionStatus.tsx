@@ -58,15 +58,16 @@ const STATUS_ICON_CLASSES: Record<SubscriptionCoverageTone, string> = {
   neutral: "tw-bg-iron-800 tw-text-iron-300 tw-ring-iron-700",
 };
 
+const HEADER_STATUS_CLASSES: Record<SubscriptionCoverageTone, string> = {
+  positive: "tw-text-emerald-200",
+  caution: "tw-text-amber-200",
+  danger: "tw-text-red-200",
+  neutral: "tw-text-iron-200",
+};
+
 const SUBSCRIPTIONS_TITLE_KEY = "subscriptions.coverage.header.title";
 const MUTED_TEXT_CLASS = "tw-text-iron-400";
-type SubscriptionStatusLayout = "card" | "subtle" | "wide-row";
-
-function getSubtleLayoutClass(layout: SubscriptionStatusLayout) {
-  return layout === "wide-row"
-    ? "tw-min-h-14 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-py-2"
-    : "tw-min-h-10 tw-rounded-lg";
-}
+type SubscriptionStatusLayout = "card" | "header";
 
 function SubscriptionStatusIcon({
   tone,
@@ -93,22 +94,21 @@ function SubscriptionLoading({
   layout: SubscriptionStatusLayout;
   locale: SupportedLocale;
 }>) {
-  const isSubtle = layout !== "card";
+  const isHeader = layout === "header";
 
   return (
     <div
       aria-label={t(locale, "subscriptions.coverage.loading")}
       className={clsx(
         "tw-w-full tw-animate-pulse",
-        isSubtle
-          ? getSubtleLayoutClass(layout)
+        isHeader
+          ? "tw-flex tw-min-h-11 tw-min-w-0 tw-flex-col tw-justify-center tw-rounded-lg"
           : "tw-min-h-14 tw-rounded-xl tw-p-2.5 sm:tw-w-[22rem]",
-        layout === "subtle" && "tw-flex tw-flex-col tw-justify-center",
-        !isSubtle && USER_PAGE_HEADER_SURFACE_CLASS
+        !isHeader && USER_PAGE_HEADER_SURFACE_CLASS
       )}
     >
-      <div className="tw-h-3.5 tw-w-40 tw-rounded tw-bg-iron-700/80" />
-      <div className="tw-mt-1.5 tw-h-3 tw-w-48 tw-rounded tw-bg-iron-800/90" />
+      <div className="tw-h-3 tw-w-24 tw-max-w-full tw-rounded tw-bg-iron-700/80" />
+      <div className="tw-mt-1 tw-h-4 tw-w-48 tw-max-w-full tw-rounded tw-bg-iron-800/90" />
     </div>
   );
 }
@@ -122,61 +122,49 @@ function SubscriptionUnknown({
   layout: SubscriptionStatusLayout;
   locale: SupportedLocale;
 }>) {
-  const isSubtle = layout !== "card";
+  if (layout === "header") {
+    return (
+      <Link
+        href={href}
+        className="tw-group tw-flex tw-min-h-11 tw-w-full tw-min-w-0 tw-flex-col tw-justify-center tw-rounded-lg tw-text-left tw-no-underline tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-white/[0.025]"
+      >
+        <span className="tw-block tw-text-[11px] tw-font-semibold tw-uppercase tw-leading-3 tw-tracking-[0.06em] tw-text-iron-500">
+          {t(locale, SUBSCRIPTIONS_TITLE_KEY)}
+        </span>
+        <span className="tw-mt-1 tw-flex tw-min-w-0 tw-flex-wrap tw-items-baseline tw-gap-x-1.5 tw-gap-y-0.5 tw-text-[13px] tw-font-medium tw-leading-4 tw-text-iron-200">
+          <span className="tw-transition-colors group-focus-visible:tw-text-white desktop-hover:group-hover:tw-text-white">
+            {t(locale, "subscriptions.coverage.status.unknown")}
+          </span>
+          <ArrowRightIcon
+            className="tw-size-3 tw-flex-none tw-text-iron-500 tw-transition-colors group-focus-visible:tw-text-white desktop-hover:group-hover:tw-text-white"
+            aria-hidden="true"
+          />
+        </span>
+      </Link>
+    );
+  }
 
   return (
     <Link
       href={href}
       className={clsx(
-        "tw-group tw-flex tw-gap-2 tw-text-left tw-no-underline tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400",
-        layout === "subtle"
-          ? "tw-w-fit tw-items-start tw-justify-end"
-          : "tw-w-full tw-items-center tw-justify-between",
-        isSubtle
-          ? `${getSubtleLayoutClass(layout)} desktop-hover:hover:tw-bg-white/[0.025]`
-          : "tw-min-h-14 tw-rounded-xl tw-p-2.5 sm:tw-w-[22rem]",
-        !isSubtle && USER_PAGE_HEADER_SURFACE_CLASS,
-        !isSubtle && USER_PAGE_HEADER_INTERACTIVE_SURFACE_CLASS
+        "tw-group tw-flex tw-min-h-14 tw-w-full tw-items-center tw-justify-between tw-gap-2 tw-rounded-xl tw-p-2.5 tw-text-left tw-no-underline tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 sm:tw-w-[22rem]",
+        USER_PAGE_HEADER_SURFACE_CLASS,
+        USER_PAGE_HEADER_INTERACTIVE_SURFACE_CLASS
       )}
     >
-      <span
-        className={clsx(
-          "tw-min-w-0",
-          isSubtle && "tw-flex tw-items-baseline",
-          layout === "subtle" && "tw-gap-2 tw-whitespace-nowrap",
-          layout === "wide-row" && "tw-flex-1 tw-flex-wrap tw-gap-1"
-        )}
-      >
-        <span
-          className={clsx(
-            "tw-font-medium",
-            isSubtle
-              ? "tw-text-[11px] tw-font-semibold tw-uppercase tw-tracking-[0.06em] tw-text-iron-500"
-              : "tw-text-[13px] tw-text-iron-100",
-            isSubtle ? "tw-inline-block" : "tw-block"
-          )}
-        >
+      <span className="tw-min-w-0">
+        <span className="tw-block tw-text-[13px] tw-font-medium tw-text-iron-100">
           {t(locale, SUBSCRIPTIONS_TITLE_KEY)}
         </span>
         <span
-          className={clsx(
-            "tw-block tw-transition-colors",
-            isSubtle
-              ? "tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-200 group-focus-visible:tw-text-white desktop-hover:group-hover:tw-text-white"
-              : `tw-text-[11px] ${MUTED_TEXT_CLASS}`,
-            isSubtle ? "tw-mt-0" : "tw-mt-0.5"
-          )}
+          className={`tw-mt-0.5 tw-block tw-text-[11px] ${MUTED_TEXT_CLASS}`}
         >
           {t(locale, "subscriptions.coverage.status.unknown")}
         </span>
       </span>
       <ArrowRightIcon
-        className={clsx(
-          "tw-size-4 tw-flex-none tw-transition-colors",
-          isSubtle
-            ? "tw-text-iron-500 group-focus-visible:tw-text-white desktop-hover:group-hover:tw-text-white"
-            : MUTED_TEXT_CLASS
-        )}
+        className={`tw-size-4 tw-flex-none tw-transition-colors ${MUTED_TEXT_CLASS}`}
         aria-hidden="true"
       />
     </Link>
@@ -232,61 +220,41 @@ function SubscriptionCard({
   );
 }
 
-function SubscriptionSubtle({
+function SubscriptionHeader({
   actionLabel,
   href,
   isUrgentTopUp,
-  layout,
   locale,
   secondaryLine,
   tone,
-}: SubscriptionCoveragePresentationProps &
-  Readonly<{ layout: Exclude<SubscriptionStatusLayout, "card"> }>) {
-  const isCompact = layout === "subtle";
-
+}: SubscriptionCoveragePresentationProps) {
   return (
     <Link
       href={href}
-      className={clsx(
-        "tw-group tw-flex tw-gap-2 tw-text-left tw-no-underline tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400",
-        isCompact
-          ? "tw-w-max tw-items-start tw-justify-end"
-          : "tw-w-full tw-items-center tw-justify-between",
-        `${getSubtleLayoutClass(layout)} desktop-hover:hover:tw-bg-white/[0.025]`
-      )}
+      className="tw-group tw-flex tw-min-h-11 tw-w-full tw-min-w-0 tw-flex-col tw-justify-center tw-rounded-lg tw-text-left tw-no-underline tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-white/[0.025]"
     >
-      <SubscriptionStatusIcon tone={tone} />
-      <span
-        className={clsx(
-          "tw-flex tw-min-w-0 tw-items-baseline",
-          isCompact
-            ? "tw-gap-x-2 tw-whitespace-nowrap"
-            : "tw-flex-1 tw-flex-wrap tw-gap-x-1"
-        )}
-      >
-        <span className="tw-inline-block tw-text-[11px] tw-font-semibold tw-uppercase tw-tracking-[0.06em] tw-text-iron-500">
-          {t(locale, SUBSCRIPTIONS_TITLE_KEY)}
+      <span className="tw-block tw-text-[11px] tw-font-semibold tw-uppercase tw-leading-3 tw-tracking-[0.06em] tw-text-iron-500">
+        {t(locale, SUBSCRIPTIONS_TITLE_KEY)}
+      </span>
+      <span className="tw-mt-1 tw-flex tw-min-w-0 tw-flex-wrap tw-items-baseline tw-gap-x-2 tw-gap-y-0.5 tw-text-[13px] tw-font-medium tw-leading-4">
+        <span
+          className={clsx(
+            "tw-min-w-0 tw-transition-colors group-focus-visible:tw-text-white desktop-hover:group-hover:tw-text-white",
+            HEADER_STATUS_CLASSES[tone]
+          )}
+        >
+          {secondaryLine}
         </span>
-        <span className="tw-flex tw-min-w-0 tw-items-baseline tw-gap-2 tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-200">
-          <span
-            className={clsx(
-              "tw-min-w-0 tw-transition-colors group-focus-visible:tw-text-white desktop-hover:group-hover:tw-text-white",
-              !isCompact && "tw-truncate"
-            )}
-          >
-            {secondaryLine}
-          </span>
-          <span
-            className={clsx(
-              "tw-inline-flex tw-flex-none tw-items-center tw-gap-1 tw-text-xs tw-font-medium tw-transition-colors",
-              isUrgentTopUp
-                ? "group-focus-visible:tw-text-primary-200 desktop-hover:group-hover:tw-text-primary-200 tw-text-primary-300"
-                : "tw-text-iron-500 group-focus-visible:tw-text-white desktop-hover:group-hover:tw-text-white"
-            )}
-          >
-            {actionLabel}
-            <ArrowRightIcon className="tw-size-3" aria-hidden="true" />
-          </span>
+        <span
+          className={clsx(
+            "tw-inline-flex tw-flex-none tw-items-center tw-gap-1 tw-text-xs tw-font-medium tw-transition-colors",
+            isUrgentTopUp
+              ? "group-focus-visible:tw-text-primary-200 desktop-hover:group-hover:tw-text-primary-200 tw-text-primary-300"
+              : "tw-text-iron-500 group-focus-visible:tw-text-white desktop-hover:group-hover:tw-text-white"
+          )}
+        >
+          {actionLabel}
+          <ArrowRightIcon className="tw-size-3" aria-hidden="true" />
         </span>
       </span>
     </Link>
@@ -369,5 +337,5 @@ export default function UserPageHeaderSubscriptionStatus({
     return <SubscriptionCard {...presentationProps} />;
   }
 
-  return <SubscriptionSubtle {...presentationProps} layout={layout} />;
+  return <SubscriptionHeader {...presentationProps} />;
 }

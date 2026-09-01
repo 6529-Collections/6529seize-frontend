@@ -100,7 +100,7 @@ describe("UserPageHeaderSubscriptionStatus", () => {
     );
   });
 
-  it("renders the subtle presentation without card chrome", () => {
+  it("renders the header presentation as a compact stacked block", () => {
     render(
       <UserPageHeaderSubscriptionStatus
         profile={
@@ -109,7 +109,7 @@ describe("UserPageHeaderSubscriptionStatus", () => {
             normalised_handle: "sesamenoodles",
           } as ApiIdentity
         }
-        layout="subtle"
+        layout="header"
       />
     );
 
@@ -123,14 +123,29 @@ describe("UserPageHeaderSubscriptionStatus", () => {
       "!tw-bg-iron-950",
       "tw-shadow-md"
     );
-    expect(screen.getByText("Subscriptions")).toHaveClass("tw-text-iron-500");
+    expect(screen.getByText("Subscriptions")).toHaveClass(
+      "tw-block",
+      "tw-leading-3",
+      "tw-text-iron-500"
+    );
+    expect(status.parentElement).toHaveClass(
+      "tw-mt-1",
+      "tw-flex",
+      "tw-flex-wrap"
+    );
+    expect(statusLink).toHaveClass("tw-min-h-11", "tw-flex-col");
     expect(statusLink).toHaveAttribute(
       "href",
       "/sesamenoodles/subscriptions#profile-subscriptions-top-up"
     );
   });
 
-  it("renders the wide-row presentation at full width with a divider", () => {
+  it("keeps the header loading state in the same two-line footprint", () => {
+    useSubscriptionCoverageMock.mockReturnValue({
+      data: undefined,
+      isLoading: true,
+    } as ReturnType<typeof useSubscriptionCoverage>);
+
     render(
       <UserPageHeaderSubscriptionStatus
         profile={
@@ -139,18 +154,36 @@ describe("UserPageHeaderSubscriptionStatus", () => {
             normalised_handle: "sesamenoodles",
           } as ApiIdentity
         }
-        layout="wide-row"
+        layout="header"
       />
     );
 
-    const statusLink = screen
-      .getByText("Running low · through The Memes #560, Oct 12, 2026")
-      .closest("a");
-
-    expect(statusLink).toHaveClass("tw-w-full", "tw-border-t");
-    expect(statusLink).toHaveAttribute(
-      "href",
-      "/sesamenoodles/subscriptions#profile-subscriptions-top-up"
+    expect(screen.getByLabelText("Loading subscription coverage")).toHaveClass(
+      "tw-min-h-11",
+      "tw-flex-col"
     );
+  });
+
+  it("keeps unavailable coverage actionable in the stacked header layout", () => {
+    useSubscriptionCoverageMock.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+    } as ReturnType<typeof useSubscriptionCoverage>);
+
+    render(
+      <UserPageHeaderSubscriptionStatus
+        profile={
+          {
+            consolidation_key: "profile-key",
+            normalised_handle: "sesamenoodles",
+          } as ApiIdentity
+        }
+        layout="header"
+      />
+    );
+
+    const statusLink = screen.getByText("Coverage unavailable").closest("a");
+    expect(statusLink).toHaveClass("tw-min-h-11", "tw-flex-col");
+    expect(statusLink).toHaveAttribute("href", "/sesamenoodles/subscriptions");
   });
 });
