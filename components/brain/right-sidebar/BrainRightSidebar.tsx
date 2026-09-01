@@ -247,12 +247,22 @@ const OverlaySidebar = ({
       }
     };
     const focusFrame = globalThis.requestAnimationFrame(focusCloseButton);
-    // CompactWaveActions restores its trigger after a 300ms leave transition.
-    // Re-check once after it settles; Headless UI owns the ongoing focus trap.
-    const compactMenuFocusFrame = globalThis.setTimeout(focusCloseButton, 400);
+
+    // CompactWaveActions restores its trigger after its leave transition.
+    // Redirect only that trigger; Headless UI owns every other focus path,
+    // including focus in nested portalled dialogs.
+    const redirectCompactTriggerFocus = (event: FocusEvent) => {
+      if (
+        event.target instanceof HTMLElement &&
+        event.target.dataset["compactWaveActionsTrigger"] === "true"
+      ) {
+        closeButtonRef.current?.focus();
+      }
+    };
+    document.addEventListener("focusin", redirectCompactTriggerFocus);
     return () => {
       globalThis.cancelAnimationFrame(focusFrame);
-      globalThis.clearTimeout(compactMenuFocusFrame);
+      document.removeEventListener("focusin", redirectCompactTriggerFocus);
     };
   }, [isOpen]);
 

@@ -276,9 +276,9 @@ describe("WavesMessagesWrapper", () => {
 
     const dropOverlay = screen.getByTestId("drop-overlay");
     expect(dropOverlay).toBeInTheDocument();
-    expect(
-      screen.getByTestId("main-content").parentElement
-    ).not.toContainElement(dropOverlay);
+    expect(screen.getByTestId("main-content")).not.toContainElement(
+      dropOverlay
+    );
     expect(screen.getByTestId("right-sidebar")).toHaveAttribute(
       "data-open",
       "false"

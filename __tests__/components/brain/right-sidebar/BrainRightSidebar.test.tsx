@@ -203,6 +203,58 @@ describe("BrainRightSidebar", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("does not steal focus from a nested portalled dialog", async () => {
+    renderSidebar(
+      <BrainRightSidebar
+        isOpen={true}
+        variant="overlay"
+        waveId="1"
+        activeTab={SidebarTab.ABOUT}
+        setActiveTab={setActiveTab}
+      />
+    );
+
+    const closeButton = screen.getByRole("button", {
+      name: /close wave details/i,
+    });
+    await waitFor(() => expect(closeButton).toHaveFocus());
+
+    const nestedDialog = document.createElement("div");
+    nestedDialog.setAttribute("role", "dialog");
+    const nestedDialogButton = document.createElement("button");
+    nestedDialog.appendChild(nestedDialogButton);
+    document.body.appendChild(nestedDialog);
+    nestedDialogButton.focus();
+
+    expect(nestedDialogButton).toHaveFocus();
+    nestedDialog.remove();
+  });
+
+  it("redirects compact-menu focus restoration to the overlay", async () => {
+    renderSidebar(
+      <BrainRightSidebar
+        isOpen={true}
+        variant="overlay"
+        waveId="1"
+        activeTab={SidebarTab.ABOUT}
+        setActiveTab={setActiveTab}
+      />
+    );
+
+    const closeButton = screen.getByRole("button", {
+      name: /close wave details/i,
+    });
+    await waitFor(() => expect(closeButton).toHaveFocus());
+
+    const compactTrigger = document.createElement("button");
+    compactTrigger.dataset["compactWaveActionsTrigger"] = "true";
+    document.body.appendChild(compactTrigger);
+    compactTrigger.focus();
+
+    expect(closeButton).toHaveFocus();
+    compactTrigger.remove();
+  });
+
   it("removes the panel without movement when reduced motion is preferred", async () => {
     mockPrefersReducedMotion = true;
     const sidebar = (isOpen: boolean) => (
