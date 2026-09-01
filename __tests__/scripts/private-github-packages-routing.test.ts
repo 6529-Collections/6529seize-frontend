@@ -1812,7 +1812,9 @@ describe("GitHub Actions package access", () => {
         for (const [stepIndex, step] of (job.steps ?? []).entries()) {
           if (
             step.uses?.startsWith("actions/checkout@") &&
-            (step.with?.path === undefined || step.with.path === ".")
+            (step.with?.path === undefined ||
+              step.with.path === "" ||
+              step.with.path === ".")
           ) {
             sparseCheckoutPaths = step.with?.["sparse-checkout"]
               ?.split(/\r?\n/)
