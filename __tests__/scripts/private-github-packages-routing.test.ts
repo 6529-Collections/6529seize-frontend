@@ -1779,6 +1779,71 @@ describe("GitHub Actions package access", () => {
     expect(requiredJob?.steps?.[0]?.run).toContain("exit 1");
   });
 
+  it("includes wrapper dependencies in sparse workflow checkouts", () => {
+    const workflowDirectory = path.join(REPOSITORY_ROOT, ".github/workflows");
+    const workflowFiles = fs
+      .readdirSync(workflowDirectory)
+      .filter((file) => /\.ya?ml$/.test(file));
+    const missingDependencies: string[] = [];
+
+    for (const workflowFile of workflowFiles) {
+      const workflow = parseYaml(
+        fs.readFileSync(path.join(workflowDirectory, workflowFile), "utf8")
+      ) as {
+        jobs?: Record<
+          string,
+          {
+            steps?: Array<{
+              name?: string;
+              run?: string;
+              uses?: string;
+              with?: {
+                path?: string;
+                "sparse-checkout"?: string;
+              };
+            }>;
+          }
+        >;
+      };
+
+      for (const [jobName, job] of Object.entries(workflow.jobs ?? {})) {
+        let sparseCheckoutPaths: string[] | undefined;
+
+        for (const [stepIndex, step] of (job.steps ?? []).entries()) {
+          if (
+            step.uses?.startsWith("actions/checkout@") &&
+            (step.with?.path === undefined || step.with.path === ".")
+          ) {
+            sparseCheckoutPaths = step.with?.["sparse-checkout"]
+              ?.split(/\r?\n/)
+              .map((checkoutPath) => checkoutPath.trim())
+              .filter(Boolean);
+          }
+
+          if (
+            sparseCheckoutPaths !== undefined &&
+            step.run?.includes("./bin/6529")
+          ) {
+            for (const requiredPath of [
+              "bin/6529",
+              AUTH_HELPER_RELATIVE_PATH,
+            ]) {
+              if (!sparseCheckoutPaths.includes(requiredPath)) {
+                missingDependencies.push(
+                  `${workflowFile} job ${jobName} step ${
+                    step.name ?? stepIndex + 1
+                  } is missing ${requiredPath}`
+                );
+              }
+            }
+          }
+        }
+      }
+    }
+
+    expect(missingDependencies).toEqual([]);
+  });
+
   it("keeps package auth, Socket routing, and fork handling narrow", () => {
     const workflowDirectory = path.join(REPOSITORY_ROOT, ".github/workflows");
     const workflowFiles = fs
