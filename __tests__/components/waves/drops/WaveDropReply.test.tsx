@@ -121,6 +121,25 @@ describe("WaveDropReply", () => {
     expect(baseProps.onReplyClick).toHaveBeenCalledWith(1);
   });
 
+  it("redacts a stale author-only removed reply for a non-author", () => {
+    hookData.drop = {
+      id: "d",
+      author: { id: "author", handle: "alice", pfp: null },
+      serial_no: 1,
+      moderation: {
+        status: ApiDropModerationStatus.ModeratorRemoved,
+        can_view: true,
+      },
+    } as any;
+
+    render(<WaveDropReply {...baseProps} />);
+
+    expect(
+      screen.getByText("Content removed by moderators")
+    ).toBeInTheDocument();
+    expect(mockContentDisplaySpy).not.toHaveBeenCalled();
+  });
+
   it("keeps a personally hidden preview faded with a compact unhide action", () => {
     hookData.drop = {
       id: "d",

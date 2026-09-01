@@ -77,8 +77,9 @@ Posting suspension:
 
 Before rendering a post composer, the client checks the active profile's
 public moderation status. While that check is in flight it shows **Checking
-posting access…**. A suspended profile sees **This profile is suspended and
-cannot post** with the support direction instead of an input or Post button.
+posting access…**. A suspended profile sees **Profile suspended · Posting
+disabled. Contact support if this is an error.** instead of an input or Post
+button.
 The backend remains authoritative: if a stale client still submits and receives
 the structured suspension rejection, it immediately updates that profile's
 cached status and replaces the composer. A failed status lookup does not
@@ -244,9 +245,10 @@ original Wave context, scrolls to the post, and uses the existing target
 highlight without revealing content the viewer may not access. Ordinary
 viewers cannot Reveal globally moderated content. The author can still see the
 original content of their own globally moderated post with **Removed by
-moderators** or **This post is under review** and **Only you and moderators can
-see this post**. Authors do not see the reporter, report reason, or pending
-report details.
+moderators** or **This post is under review** and **Only you can see this
+post**. Moderators inspect the preserved report snapshot in WatchTower rather
+than through the ordinary Wave post. Authors do not see the reporter, report
+reason, or pending report details.
 
 The WatchTower link is shown only to profiles whose server-provided access
 state allows it. A red indicator appears while the queue contains open reports;

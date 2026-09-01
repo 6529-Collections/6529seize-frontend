@@ -30,7 +30,7 @@ let mockConnectedProfileId: string | null = "viewer-1";
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: () => ({
     connectedProfile: mockConnectedProfileId
-      ? { id: mockConnectedProfileId }
+      ? { id: mockConnectedProfileId, handle: "viewer" }
       : null,
     requestAuth: jest.fn().mockResolvedValue({ success: true }),
     setToast: jest.fn(),
@@ -183,8 +183,59 @@ describe("ContentModerationDropGate", () => {
 
     expect(screen.getByText("Author post content")).toBeInTheDocument();
     expect(screen.getByText("This post is under review")).toBeInTheDocument();
+    expect(screen.getByText("Only you can see this post.")).toBeInTheDocument();
+  });
+
+  it("fails closed when stale author-only moderation data reaches another viewer", () => {
+    renderGate(
+      <ContentModerationDropGate
+        drop={createDrop({
+          moderation: {
+            status: ApiDropModerationStatus.ModeratorRemoved,
+            can_view: true,
+          },
+        })}
+      >
+        <p>Stale author-only content</p>
+      </ContentModerationDropGate>
+    );
+
     expect(
-      screen.getByText("Only you and moderators can see this post.")
+      screen.queryByText("Stale author-only content")
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByText("Content removed by moderators")
+    ).toBeInTheDocument();
+  });
+
+  it("redacts author-only moderated content after the active profile changes", () => {
+    mockConnectedProfileId = "author-1";
+    const drop = createDrop({
+      moderation: {
+        status: ApiDropModerationStatus.ModeratorRemoved,
+        can_view: true,
+      },
+    });
+    const { rerender } = renderGate(
+      <ContentModerationDropGate drop={drop}>
+        <p>Author-only removed content</p>
+      </ContentModerationDropGate>
+    );
+
+    expect(screen.getByText("Author-only removed content")).toBeInTheDocument();
+
+    mockConnectedProfileId = "viewer-1";
+    rerender(
+      <ContentModerationDropGate drop={drop}>
+        <p>Author-only removed content</p>
+      </ContentModerationDropGate>
+    );
+
+    expect(
+      screen.queryByText("Author-only removed content")
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByText("Content removed by moderators")
     ).toBeInTheDocument();
   });
 

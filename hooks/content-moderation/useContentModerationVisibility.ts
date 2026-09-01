@@ -2,6 +2,7 @@
 
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropModerationStatus } from "@/generated/models/ApiDropModerationStatus";
+import { areSameProfileIdentity } from "@/helpers/ProfileHelpers";
 import {
   getDropHiddenOverride,
   getGlobalDropModerationOverride,
@@ -26,7 +27,8 @@ type ContentModerationVisibility =
 
 const getGlobalVisibility = (
   moderation: Pick<ApiDrop, "moderation">["moderation"],
-  globalOverride: ApiDropModerationStatus | undefined
+  globalOverride: ApiDropModerationStatus | undefined,
+  isAuthor: boolean
 ): ContentModerationVisibility | null => {
   if (moderation === undefined) {
     return {
@@ -44,7 +46,12 @@ const getGlobalVisibility = (
     };
   }
   if (moderation.status !== ApiDropModerationStatus.Visible) {
-    return { kind: "author-global", status: moderation.status };
+    // can_view is viewer-scoped and may briefly outlive a profile switch.
+    // Reconfirm the active identity before exposing any moderated body.
+    return {
+      kind: isAuthor ? "author-global" : "global",
+      status: moderation.status,
+    };
   }
   return globalOverride === undefined ||
     globalOverride === ApiDropModerationStatus.Visible
@@ -99,12 +106,20 @@ export const useContentModerationVisibility = (
     authorBlockedOverride ?? drop.viewer_context?.author_blocked ?? false;
   const dropHidden =
     dropHiddenOverride ?? drop.viewer_context?.drop_hidden ?? false;
+  const isAuthor = areSameProfileIdentity({
+    left: connectedProfile,
+    right: drop.author,
+  });
   // A personal reveal belongs to the current hidden/block state and resets
   // when that authoritative viewer state changes.
   const revealKey = `${viewerProfileId ?? "anonymous"}:${drop.id}:${authorBlocked}:${dropHidden}`;
   const [revealedKey, setRevealedKey] = useState<string | null>(null);
   const isRevealed = revealedKey === revealKey;
-  const globalVisibility = getGlobalVisibility(drop.moderation, globalOverride);
+  const globalVisibility = getGlobalVisibility(
+    drop.moderation,
+    globalOverride,
+    isAuthor
+  );
   if (globalVisibility !== null) {
     return {
       visibility: globalVisibility,

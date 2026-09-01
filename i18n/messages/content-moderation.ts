@@ -14,10 +14,9 @@ export const CONTENT_MODERATION_MESSAGES = {
   "contentModeration.profile.suspended": "Suspended",
   "contentModeration.profile.actionsMenu": "Profile actions",
   "contentModeration.posting.checkingAccess": "Checking posting access…",
-  "contentModeration.posting.suspended":
-    "This profile is suspended and cannot post.",
+  "contentModeration.posting.suspended": "Profile suspended",
   "contentModeration.posting.suspendedSupport":
-    "Contact support if you believe this is an error.",
+    "Posting disabled. Contact support if this is an error.",
   "contentModeration.block.confirmTitle": "Block {profile}?",
   "contentModeration.unblock.confirmTitle": "Unblock {profile}?",
   "contentModeration.unblock.confirmDescription":
@@ -94,8 +93,7 @@ export const CONTENT_MODERATION_MESSAGES = {
   "contentModeration.tombstone.viewOriginal": "View original post",
   "contentModeration.author.removed": "Removed by moderators",
   "contentModeration.author.quarantined": "This post is under review",
-  "contentModeration.author.visibility":
-    "Only you and moderators can see this post.",
+  "contentModeration.author.visibility": "Only you can see this post.",
   "contentModeration.tombstone.blockedShort": "Blocked",
   "contentModeration.tombstone.hidden": "Hidden",
   "contentModeration.tooltips.revealHidden": "Show temporarily",

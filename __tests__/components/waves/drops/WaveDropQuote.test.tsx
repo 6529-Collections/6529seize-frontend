@@ -163,6 +163,26 @@ test("opens the original post from a removed quote tombstone", async () => {
   expect(onQuoteClick).toHaveBeenCalledWith(drop);
 });
 
+test("redacts a stale author-only removed quote for a non-author", () => {
+  const drop = {
+    id: "d1",
+    serial_no: 42,
+    wave: { id: "w1", name: "wave" },
+    author: { id: "author-1", handle: "a", pfp: null },
+    parts: [{ part_id: 1, content: "Removed quote content" }],
+    moderation: {
+      status: ApiDropModerationStatus.ModeratorRemoved,
+      can_view: true,
+    },
+  } as any;
+
+  render(<WaveDropQuote drop={drop} partId={1} onQuoteClick={jest.fn()} />);
+
+  expect(screen.getByText("Content removed by moderators")).toBeInTheDocument();
+  expect(screen.queryByText("Removed quote content")).not.toBeInTheDocument();
+  expect(screen.queryByTestId("markdown")).not.toBeInTheDocument();
+});
+
 test("displays quoted part content", () => {
   const drop = {
     id: "d1",

@@ -145,14 +145,15 @@ export default function DropPlaceholder({
 
     if (type === "suspended") {
       return (
-        <>
-          <span className="tw-block tw-text-amber-300">
+        <span className="tw-flex tw-max-w-full tw-flex-wrap tw-items-center tw-justify-center tw-gap-x-2 tw-gap-y-0.5">
+          <span className="tw-whitespace-nowrap tw-text-amber-300">
             {t(locale, "contentModeration.posting.suspended")}
           </span>
-          <span className="tw-mt-1 tw-block tw-font-normal tw-text-iron-400">
+          <span className="tw-min-w-0 tw-font-normal tw-text-iron-400">
+            <span>· </span>
             {t(locale, "contentModeration.posting.suspendedSupport")}
           </span>
-        </>
+        </span>
       );
     }
 
@@ -190,9 +191,9 @@ export default function DropPlaceholder({
 
   return (
     <div className="tw-flex tw-min-h-[48px] tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-iron-800/50 tw-bg-iron-900/50 tw-px-4 tw-py-3 tw-backdrop-blur">
-      <div className="tw-flex tw-w-full tw-items-center tw-justify-center tw-text-center">
+      <div className="tw-flex tw-w-full tw-min-w-0 tw-items-center tw-justify-center tw-text-center">
         <output
-          className={`tw-m-0 tw-text-sm tw-font-medium ${getPlaceholderColor({ type, chatRestriction, submissionRestriction })}`}
+          className={`tw-m-0 tw-max-w-full tw-text-sm tw-font-medium ${getPlaceholderColor({ type, chatRestriction, submissionRestriction })}`}
         >
           {getMessage()}
         </output>
