@@ -100,12 +100,12 @@ describe("one-click production authority completion", () => {
     );
   });
 
-  it("authorizes human recovery once through live maintainer-team membership", () => {
+  it("authorizes the current recovery initiator once through live maintainer-team membership", () => {
     expect(completion["run-name"]).toBe(
       "Production authority completion [${{ github.event.workflow_run.id || inputs.terminal_workflow_run_id }}]"
     );
     expect(membershipToken.if).toBe(
-      "github.event_name == 'workflow_dispatch' && github.actor != 'github-actions[bot]'"
+      "github.event_name == 'workflow_dispatch' && github.triggering_actor != 'github-actions[bot]'"
     );
     expect(membershipToken.uses).toBe(
       "actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1"
@@ -121,7 +121,7 @@ describe("one-click production authority completion", () => {
       "github.event_name == 'workflow_dispatch'"
     );
     expect(authorizeMaintainer.env).toEqual({
-      DISPATCH_ACTOR: "${{ github.actor }}",
+      DISPATCH_ACTOR: "${{ github.triggering_actor }}",
       GH_TOKEN: "${{ steps.maintainer-token.outputs.token }}",
       MAINTAINER_ORGANIZATION: "${{ github.repository_owner }}",
       MAINTAINER_TEAM_SLUG: "6529seize-maintainers",
@@ -175,6 +175,18 @@ describe("one-click production authority completion", () => {
       "[ \"$DISPATCH_ACTOR\" = 'github-actions[bot]' ] && [ \"$workflow_path\" != '.github/workflows/production-e2e.yml' ]"
     );
     expect(proof.run).not.toContain("workflow_name=");
+  });
+
+  it("checks the rerun initiator instead of reusing the original actor's authorization", () => {
+    expect(membershipToken.if).toContain("github.triggering_actor");
+    expect(membershipToken.if).not.toContain("github.actor !=");
+    expect(authorizeMaintainer.env.DISPATCH_ACTOR).toBe(
+      "${{ github.triggering_actor }}"
+    );
+    expect(proof.env.DISPATCH_ACTOR).toBe("${{ github.actor }}");
+    expect(authorizeMaintainer.env.DISPATCH_ACTOR).not.toBe(
+      proof.env.DISPATCH_ACTOR
+    );
   });
 
   it("derives the deploy run only from the exact automatic title and re-reads both identities", () => {

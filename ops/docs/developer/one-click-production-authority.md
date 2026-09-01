@@ -24,7 +24,8 @@ and validated before a body is emitted.
 Manual dispatch of `production-authority-complete.yml` is restricted to
 `main` and to active members of the GitHub team
 `6529-Collections/6529seize-maintainers`. The workflow resolves membership at
-run time rather than maintaining a second list of GitHub usernames. The
+run time for the user who started the current attempt, including a rerun,
+rather than maintaining a second list of GitHub usernames. The
 Release Bus GitHub App installation must therefore grant organization
 **Members: read** permission; the workflow requests only that permission for
 the short-lived membership token. The existing app ID and private-key settings
