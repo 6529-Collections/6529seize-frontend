@@ -7,6 +7,9 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import MemesArtSubmissionContainer from "./submission/MemesArtSubmissionContainer";
 
+const NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION =
+  "var(--native-keyboard-layout-transition-duration, 0ms)";
+
 interface MemesArtSubmissionModalProps {
   readonly isOpen: boolean;
   readonly wave: ApiWave;
@@ -55,14 +58,17 @@ const MemesArtSubmissionModal: React.FC<MemesArtSubmissionModalProps> = ({
           className="tailwind-scope tw-fixed tw-inset-0 tw-z-[1000] tw-overflow-hidden tw-bg-gray-600/80 tw-backdrop-blur-sm"
           onClick={onClose}
         >
-          <div className="tw-fixed tw-inset-0 tw-flex tw-items-center tw-justify-center md:tw-inset-4">
+          <div className="tw-fixed tw-inset-0 tw-flex tw-items-start tw-justify-center md:tw-inset-4 md:tw-items-center">
             <m.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.25, ease: "easeOut" }}
               data-testid="memes-art-submission-modal-panel"
-              className="tw-flex tw-h-[100dvh] tw-max-h-[100dvh] tw-w-full tw-max-w-screen-xl tw-flex-col md:tw-h-full md:tw-max-h-none"
+              className="tw-flex tw-h-[calc(100dvh-var(--native-keyboard-inset-bottom,0px))] tw-max-h-[calc(100dvh-var(--native-keyboard-inset-bottom,0px))] tw-w-full tw-max-w-screen-xl tw-flex-col tw-transition-[height,max-height] tw-ease-out motion-reduce:tw-transition-none md:tw-h-full md:tw-max-h-none"
+              style={{
+                transitionDuration: NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION,
+              }}
               ref={modalRef}
               onClick={(e) => {
                 e.stopPropagation();

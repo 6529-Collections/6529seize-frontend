@@ -572,7 +572,10 @@ export default function TheMemesComponent({
                   </h1>
                   <LFGButton contract={MEMES_CONTRACT} />
                 </div>
-                <div className="tw-grid tw-w-full tw-shrink-0 tw-grid-cols-1 tw-gap-2 sm:tw-w-auto sm:tw-grid-cols-[9rem_13rem]">
+                <div
+                  className="tw-grid tw-w-full tw-shrink-0 tw-grid-cols-1 tw-gap-2 sm:tw-w-auto sm:tw-grid-cols-[9rem_13rem]"
+                  data-dropdown-menu-align="end"
+                >
                   <FilterGridDropdown
                     filterLabel={yearFilterLabel}
                     items={yearOptions.map((year) => ({
