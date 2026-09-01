@@ -286,6 +286,34 @@ describe("private GitHub Packages repository policy", () => {
     ).toThrow("cannot use YAML explicit mapping keys");
   });
 
+  it("rejects YAML tags, directives, and hidden private-scope references", () => {
+    expect(() =>
+      policy.validateLockfile(
+        validLockfile().replace(
+          "packages:",
+          "packages:\n\n  !!str '@6529-collections/other@1.0.0':\n    resolution: {integrity: sha512-not-approved}"
+        )
+      )
+    ).toThrow("cannot use YAML tags or directives");
+
+    expect(() =>
+      policy.validateLockfile(
+        validLockfile().replace(
+          `  '${policy.ALLOWED_PACKAGE_SPEC}': {}`,
+          [
+            `  '${policy.ALLOWED_PACKAGE_SPEC}':`,
+            "    dependencies:",
+            `      hidden: '${policy.ALLOWED_SCOPE}/other@1.0.0'`,
+          ].join("\n")
+        )
+      )
+    ).toThrow(`cannot contain hidden or additional ${policy.ALLOWED_SCOPE}`);
+
+    expect(() =>
+      policy.validateWorkspace(`%YAML 1.2\n---\n${validWorkspace()}`)
+    ).toThrow("cannot use YAML tags or directives");
+  });
+
   it("fails closed when NODE_AUTH_TOKEN is missing or malformed", () => {
     expect(() => policy.validateAuthEnvironment({})).toThrow(
       "NODE_AUTH_TOKEN is required"

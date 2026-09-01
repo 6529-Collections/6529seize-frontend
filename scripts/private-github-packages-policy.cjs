@@ -18,6 +18,7 @@ const AUTH_PLACEHOLDER = `\${${AUTH_ENVIRONMENT_VARIABLE}}`;
 const SCOPE_REGISTRY_KEY = `${ALLOWED_SCOPE}:registry`;
 const AUTH_KEY = `//${ALLOWED_REGISTRY_HOST}/:_authToken`;
 const SECURE_REPOSITORY_ROOT_ARGUMENT = "--seize-secure-repository-root";
+const REQUIRED_LOCKFILE_PRIVATE_SCOPE_REFERENCE_COUNT = 4;
 const ALLOWED_PNPM_COMMANDS = new Set(["add", "audit", "install", "update"]);
 const FORBIDDEN_NPMRC_CONFIG_NAMES = new Set([
   "alwaysauth",
@@ -384,6 +385,13 @@ function semanticYamlLine(
     const startsYamlToken = index === 0 || /[\s,[{:-]/.test(previousCharacter);
     if (rejectYamlReferences && startsYamlToken && character === "?") {
       throw policyError(`${filename} cannot use YAML explicit mapping keys`);
+    }
+    if (
+      rejectYamlReferences &&
+      startsYamlToken &&
+      ["!", "%"].includes(character)
+    ) {
+      throw policyError(`${filename} cannot use YAML tags or directives`);
     }
     if (
       rejectYamlReferences &&
@@ -769,6 +777,17 @@ function validateLockfile(lockfileText) {
   if (allowedRegistryUrls.length !== 1) {
     throw policyError(
       `pnpm-lock.yaml must contain exactly one ${ALLOWED_REGISTRY_HOST} tarball`
+    );
+  }
+
+  const privateScopeReferenceCount =
+    effectiveText.split(`${ALLOWED_SCOPE}/`).length - 1;
+  if (
+    privateScopeReferenceCount !==
+    REQUIRED_LOCKFILE_PRIVATE_SCOPE_REFERENCE_COUNT
+  ) {
+    throw policyError(
+      `pnpm-lock.yaml cannot contain hidden or additional ${ALLOWED_SCOPE} references`
     );
   }
 }
