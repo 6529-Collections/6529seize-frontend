@@ -60,6 +60,10 @@ private_package_auth_is_macos() {
   [[ "$(uname -s)" == "Darwin" ]]
 }
 
+private_package_auth_keychain_is_available() {
+  private_package_auth_is_macos && [[ -x /usr/bin/security ]]
+}
+
 private_package_auth_read_keychain() {
   /usr/bin/security find-generic-password \
     -a "$(id -un)" \
@@ -80,7 +84,7 @@ load_private_package_auth_for_codex() {
       ;;
   esac
 
-  if ! private_package_auth_is_macos || [[ ! -x /usr/bin/security ]]; then
+  if ! private_package_auth_keychain_is_available; then
     echo "NODE_AUTH_TOKEN is required because secure Codex Keychain lookup is available only on macOS." >&2
     private_package_auth_restore_xtrace "$restore_xtrace"
     return 1

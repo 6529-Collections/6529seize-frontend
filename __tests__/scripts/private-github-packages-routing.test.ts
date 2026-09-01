@@ -1338,7 +1338,7 @@ describe("documented private-package setup flows", () => {
     it("loads the Codex token without printing it", () => {
       const result = runAuthHarness({
         statements: [
-          "private_package_auth_is_macos() { return 0; }",
+          "private_package_auth_keychain_is_available() { return 0; }",
           `private_package_auth_read_keychain() { printf '%s' '${TEST_TOKEN}'; }`,
           "set -x",
           "load_private_package_auth_for_codex",
@@ -1354,7 +1354,7 @@ describe("documented private-package setup flows", () => {
     it("fails closed when the Codex Keychain item is missing", () => {
       const result = runAuthHarness({
         statements: [
-          "private_package_auth_is_macos() { return 0; }",
+          "private_package_auth_keychain_is_available() { return 0; }",
           "private_package_auth_read_keychain() { return 1; }",
           "load_private_package_auth_for_codex",
         ],
