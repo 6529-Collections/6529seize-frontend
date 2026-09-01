@@ -314,10 +314,11 @@ const extractTraitsFromMetadata = (
   return traits;
 };
 
-export const SingleWaveDropTraits: React.FC<SingleWaveDropTraitsProps> = ({
-  drop,
-}) => {
-  const isCompactLayout = useIsMobileLayoutViewport();
+const SingleWaveDropTraitsContent: React.FC<
+  SingleWaveDropTraitsProps & {
+    readonly isCompactLayout: boolean;
+  }
+> = ({ drop, isCompactLayout }) => {
   const [showAllTraits, setShowAllTraits] = useState(false);
   const [selectedTrait, setSelectedTrait] = useState<SelectedTrait | null>(
     null
@@ -530,14 +531,13 @@ export const SingleWaveDropTraits: React.FC<SingleWaveDropTraitsProps> = ({
             onCompactSelect={setSelectedTrait}
           />
         ))}
-      </div>
-      {traitItems.length > 3 && (
-        <div className="tw-mt-3 tw-flex">
+        {traitItems.length > 3 && (
           <Button
             type="button"
             onClick={handleToggleTraits}
             variant="tertiary"
             size="xs"
+            fullWidth
             className={`tw-min-w-[100px] ${
               isCompactLayout ? "tw-min-h-11" : ""
             }`}
@@ -545,8 +545,8 @@ export const SingleWaveDropTraits: React.FC<SingleWaveDropTraitsProps> = ({
           >
             {showAllTraits ? "Show less" : "Show all"}
           </Button>
-        </div>
-      )}
+        )}
+      </div>
       {selectedTrait && isCompactLayout && (
         <MobileWrapperDialog
           title={selectedTrait.label}
@@ -561,5 +561,19 @@ export const SingleWaveDropTraits: React.FC<SingleWaveDropTraitsProps> = ({
         </MobileWrapperDialog>
       )}
     </div>
+  );
+};
+
+export const SingleWaveDropTraits: React.FC<SingleWaveDropTraitsProps> = ({
+  drop,
+}) => {
+  const isCompactLayout = useIsMobileLayoutViewport();
+
+  return (
+    <SingleWaveDropTraitsContent
+      key={isCompactLayout ? "compact" : "regular"}
+      drop={drop}
+      isCompactLayout={isCompactLayout}
+    />
   );
 };

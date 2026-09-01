@@ -79,6 +79,7 @@ jest.mock(
       <div
         data-testid="media"
         data-disable-modal={String(Boolean(props.disableModal))}
+        data-load-strategy={props.loadStrategy}
         data-media-mime-type={mediaMimeType}
         data-media-url={props.media_url}
       >
@@ -154,6 +155,10 @@ describe("MemesSingleWaveDropInfoPanel", () => {
     expect(screen.getByTestId("media")).toHaveAttribute(
       "data-disable-modal",
       "false"
+    );
+    expect(screen.getByTestId("media")).toHaveAttribute(
+      "data-load-strategy",
+      "eager"
     );
     expect(screen.getByTestId("traits")).toBeInTheDocument();
     expect(screen.getByTestId("process")).toBeInTheDocument();

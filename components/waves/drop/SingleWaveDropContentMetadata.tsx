@@ -75,17 +75,14 @@ const MetadataItem: React.FC<{
     );
   }
 
-  return (
-    <div className={className}>
-      {content}
-    </div>
-  );
+  return <div className={className}>{content}</div>;
 };
 
-export const SingleWaveDropContentMetadata: React.FC<
-  SingleWaveDropContentMetadataProps
-> = ({ metadata }) => {
-  const isCompactLayout = useIsMobileLayoutViewport();
+const SingleWaveDropContentMetadataContent: React.FC<
+  SingleWaveDropContentMetadataProps & {
+    readonly isCompactLayout: boolean;
+  }
+> = ({ metadata, isCompactLayout }) => {
   const [showAllMetadata, setShowAllMetadata] = useState(false);
   const [selectedMetadata, setSelectedMetadata] =
     useState<SelectedMetadata | null>(null);
@@ -120,9 +117,7 @@ export const SingleWaveDropContentMetadata: React.FC<
           onClick={handleToggleMetadata}
           variant="tertiary"
           size="xs"
-          className={`tw-min-w-[100px] ${
-            isCompactLayout ? "tw-min-h-11" : ""
-          }`}
+          className={`tw-min-w-[100px] ${isCompactLayout ? "tw-min-h-11" : ""}`}
           aria-expanded={showAllMetadata}
         >
           {showAllMetadata ? "Show less" : "Show all"}
@@ -142,5 +137,19 @@ export const SingleWaveDropContentMetadata: React.FC<
         </MobileWrapperDialog>
       )}
     </div>
+  );
+};
+
+export const SingleWaveDropContentMetadata: React.FC<
+  SingleWaveDropContentMetadataProps
+> = ({ metadata }) => {
+  const isCompactLayout = useIsMobileLayoutViewport();
+
+  return (
+    <SingleWaveDropContentMetadataContent
+      key={isCompactLayout ? "compact" : "regular"}
+      metadata={metadata}
+      isCompactLayout={isCompactLayout}
+    />
   );
 };

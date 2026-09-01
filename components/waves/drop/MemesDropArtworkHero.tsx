@@ -20,6 +20,7 @@ export function MemesDropArtworkHero({
                 media_url={artworkMedia.url}
                 isCompetitionDrop={true}
                 imageScale={ImageScale.AUTOx1080}
+                loadStrategy="eager"
                 fillVideoContainer={true}
               />
             </div>

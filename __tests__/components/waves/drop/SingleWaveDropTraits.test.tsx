@@ -168,13 +168,37 @@ describe("SingleWaveDropTraits", () => {
         "tw-break-words"
       );
 
-      fireEvent.click(
-        within(dialog).getByRole("button", { name: "Close" })
-      );
+      fireEvent.click(within(dialog).getByRole("button", { name: "Close" }));
 
       expect(
         screen.queryByRole("dialog", { name: "Parent" })
       ).not.toBeInTheDocument();
+    });
+
+    it("does not reopen a trait dialog after leaving compact layout", () => {
+      mockedUseIsMobileLayoutViewport.mockReturnValue(true);
+      const value = "Detailed parent value";
+      const drop = createMockDrop([createMetadata("parent", value)], "");
+      drop.parts = [];
+      const { rerender } = render(<SingleWaveDropTraits drop={drop} />);
+
+      fireEvent.click(screen.getByText("Show all"));
+      fireEvent.click(
+        screen.getByRole("button", {
+          name: `View full Parent trait: ${value}`,
+        })
+      );
+      expect(
+        screen.getByRole("dialog", { name: "Parent" })
+      ).toBeInTheDocument();
+
+      mockedUseIsMobileLayoutViewport.mockReturnValue(false);
+      rerender(<SingleWaveDropTraits drop={drop} />);
+      expect(screen.queryByRole("dialog", { name: "Parent" })).toBeNull();
+
+      mockedUseIsMobileLayoutViewport.mockReturnValue(true);
+      rerender(<SingleWaveDropTraits drop={drop} />);
+      expect(screen.queryByRole("dialog", { name: "Parent" })).toBeNull();
     });
   });
 
