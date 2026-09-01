@@ -809,9 +809,7 @@ export const EN_GB_MESSAGES = {
   "memes.waveFooter.uncastPower.votesVisible": "votes",
   "waves.mobile.profileFeed.title": "Profile Waves Feed",
   "waves.mobile.profileFeed.subtitle": "Featured drops from profile waves",
-  "waves.profileFeed.title": "Latest profile posts",
-  "waves.profileFeed.description":
-    "Newest first, from members’ Profile Waves.",
+  "waves.profileFeed.title": "Latest Profile Wave posts",
   "waves.profileFeed.errorTitle": "Couldn’t load profile posts",
   "waves.profileFeed.errorDescription": "Refresh this view to try again.",
   "waves.profileFeed.emptyTitle": "No profile posts yet",

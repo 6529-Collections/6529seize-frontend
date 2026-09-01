@@ -822,9 +822,7 @@ export const FR_FR_MESSAGES = {
   ...FR_FR_DROP_REACTION_MESSAGES,
   "waves.mobile.profileFeed.title": "Flux Profile Waves",
   "waves.mobile.profileFeed.subtitle": "Drops en vedette des profile waves",
-  "waves.profileFeed.title": "Dernières publications de profil",
-  "waves.profileFeed.description":
-    "Les plus récentes d’abord, depuis les Profile Waves des membres.",
+  "waves.profileFeed.title": "Dernières publications des Profile Waves",
   "waves.profileFeed.errorTitle":
     "Impossible de charger les publications de profil",
   "waves.profileFeed.errorDescription":

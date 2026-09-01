@@ -817,9 +817,7 @@ export const DE_DE_MESSAGES = {
   ...DE_DE_DROP_REACTION_MESSAGES,
   "waves.mobile.profileFeed.title": "Profile-Waves-Feed",
   "waves.mobile.profileFeed.subtitle": "Ausgewählte Drops aus Profile-Waves",
-  "waves.profileFeed.title": "Neueste Profilbeiträge",
-  "waves.profileFeed.description":
-    "Neueste zuerst, aus den Profile Waves der Mitglieder.",
+  "waves.profileFeed.title": "Neueste Beiträge aus Profile Waves",
   "waves.profileFeed.errorTitle":
     "Profilbeiträge konnten nicht geladen werden",
   "waves.profileFeed.errorDescription":

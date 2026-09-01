@@ -542,10 +542,7 @@ describe("frontend i18n helpers", () => {
 
   it("translates the chronological Profile Wave feed framing", () => {
     expect(t("en-US", "waves.profileFeed.title")).toBe(
-      "Latest profile posts"
-    );
-    expect(t("en-US", "waves.profileFeed.description")).toBe(
-      "Newest first, from members’ Profile Waves."
+      "Latest Profile Wave posts"
     );
     expect(t("en-US", "waves.profileFeed.errorTitle")).toBe(
       "Couldn’t load profile posts"
@@ -561,13 +558,13 @@ describe("frontend i18n helpers", () => {
     );
 
     expect(t("fr-FR", "waves.profileFeed.title")).toBe(
-      "Dernières publications de profil"
+      "Dernières publications des Profile Waves"
     );
     expect(t("es-ES", "waves.profileFeed.title")).toBe(
-      "Últimas publicaciones de perfil"
+      "Últimas publicaciones de Profile Waves"
     );
     expect(t("de-DE", "waves.profileFeed.title")).toBe(
-      "Neueste Profilbeiträge"
+      "Neueste Beiträge aus Profile Waves"
     );
   });
 
