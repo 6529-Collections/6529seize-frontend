@@ -38,7 +38,7 @@ test.describe("Notifications local sandbox @auth @medium @local-only", () => {
     await waitForRouteReady(page);
 
     await expect(
-      page.getByRole("button", { name: "All", exact: true })
+      page.getByRole("button", { name: "Filter notifications: All" })
     ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
     await expect(page.getByText("mentioned you")).toBeVisible({
       timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
@@ -112,7 +112,9 @@ test.describe("Notifications local sandbox @auth @medium @local-only", () => {
     const dialog = page.getByRole("dialog", {
       name: "Filter notifications",
     });
-    await expect(dialog).toBeVisible();
+    await expect(
+      dialog.getByRole("heading", { name: "Filter notifications" })
+    ).toBeVisible();
     await expect(page.getByRole("menu")).toHaveCount(0);
     await expect
       .poll(() =>
@@ -122,18 +124,20 @@ test.describe("Notifications local sandbox @auth @medium @local-only", () => {
       )
       .toBe("hidden");
 
-    await dialog.getByRole("checkbox", { name: "Mentions" }).click();
-    await dialog.getByRole("checkbox", { name: "Reactions" }).click();
-    await expect(dialog).toBeVisible();
+    await dialog.getByText("Mentions", { exact: true }).click();
+    await dialog.getByText("Reactions", { exact: true }).click();
+    await expect(
+      dialog.getByRole("heading", { name: "Filter notifications" })
+    ).toBeVisible();
     await expect(trigger).toHaveAccessibleName(
       "Filter notifications: 2 selected"
     );
     await expect(
       dialog.getByRole("checkbox", { name: "Mentions" })
-    ).toHaveAttribute("aria-checked", "true");
+    ).toBeChecked();
     await expect(
       dialog.getByRole("checkbox", { name: "Reactions" })
-    ).toHaveAttribute("aria-checked", "true");
+    ).toBeChecked();
     await expectNoHorizontalOverflow(page);
     await captureSafeScreenshot(
       page,
@@ -151,12 +155,14 @@ test.describe("Notifications local sandbox @auth @medium @local-only", () => {
     });
     await expect(
       reopenedDialog.getByRole("checkbox", { name: "Mentions" })
-    ).toHaveAttribute("aria-checked", "true");
-    await reopenedDialog.getByRole("checkbox", { name: /^All/ }).click();
+    ).toBeChecked();
+    await reopenedDialog.getByText("All", { exact: true }).click();
     await expect(trigger).toHaveAccessibleName("Filter notifications: All");
 
     await page.setViewportSize({ width: 1023, height: 768 });
-    await expect(reopenedDialog).toBeVisible();
+    await expect(
+      reopenedDialog.getByRole("heading", { name: "Filter notifications" })
+    ).toBeVisible();
     await page.setViewportSize({ width: 1024, height: 768 });
     await expect(reopenedDialog).toHaveCount(0);
     await expect(trigger).toBeFocused();

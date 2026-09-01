@@ -142,6 +142,9 @@ describe("NotificationsCauseFilter", () => {
     const dialog = screen.getByRole("dialog", {
       name: "Filter notifications",
     });
+    expect(
+      within(dialog).getByRole("group", { name: "Filter notifications" })
+    ).toBeInTheDocument();
     expect(screen.queryByRole("menu")).not.toBeInTheDocument();
 
     await user.click(
@@ -157,10 +160,10 @@ describe("NotificationsCauseFilter", () => {
     expect(trigger).toHaveAccessibleName("Filter notifications: 2 selected");
     expect(
       within(dialog).getByRole("checkbox", { name: "Mentions" })
-    ).toHaveAttribute("aria-checked", "true");
+    ).toBeChecked();
     expect(
       within(dialog).getByRole("checkbox", { name: "Reactions" })
-    ).toHaveAttribute("aria-checked", "true");
+    ).toBeChecked();
 
     await user.click(within(dialog).getByRole("button", { name: "Close" }));
     await waitFor(() => {
@@ -174,7 +177,7 @@ describe("NotificationsCauseFilter", () => {
     });
     expect(
       within(reopenedDialog).getByRole("checkbox", { name: "Mentions" })
-    ).toHaveAttribute("aria-checked", "true");
+    ).toBeChecked();
 
     await user.click(
       within(reopenedDialog).getByRole("checkbox", { name: /^All/ })

@@ -149,15 +149,17 @@ function FilterSheetItem({
 }) {
   return (
     <li className="tw-list-none">
-      <button
-        type="button"
-        role="checkbox"
-        aria-checked={selected}
-        onClick={onSelect}
-        className={`tw-flex tw-min-h-12 tw-w-full tw-items-center tw-gap-3 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-3.5 tw-py-3 tw-text-left tw-transition-colors tw-duration-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 active:tw-bg-iron-800 motion-reduce:tw-transition-none ${
+      <label
+        className={`tw-flex tw-min-h-12 tw-w-full tw-cursor-pointer tw-items-center tw-gap-3 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-3.5 tw-py-3 tw-text-left tw-transition-colors tw-duration-200 focus-within:tw-outline-none focus-within:tw-ring-2 focus-within:tw-ring-primary-400 focus-within:tw-ring-offset-2 focus-within:tw-ring-offset-iron-950 active:tw-bg-iron-800 motion-reduce:tw-transition-none ${
           selected ? "tw-text-primary-400" : "tw-text-iron-200"
         }`}
       >
+        <input
+          type="checkbox"
+          checked={selected}
+          onChange={onSelect}
+          className="tw-sr-only"
+        />
         <span className="tw-min-w-0 tw-flex-1 tw-break-words tw-text-base tw-font-medium tw-leading-6">
           {title}
         </span>
@@ -169,7 +171,7 @@ function FilterSheetItem({
         ) : (
           <span className="tw-size-5 tw-flex-shrink-0" aria-hidden="true" />
         )}
-      </button>
+      </label>
     </li>
   );
 }
@@ -204,6 +206,7 @@ export default function NotificationsCauseFilter({
     [activeCauses]
   );
   const triggerLabel = getTriggerLabel(selectedFilters, locale);
+  const filterSheetTitle = t(locale, "notifications.filter.sheetTitle");
   const presentation: FilterPresentation = isMobileLayoutViewport
     ? "mobile"
     : "desktop";
@@ -304,7 +307,7 @@ export default function NotificationsCauseFilter({
           ))}
         </CommonDropdownItemsDefaultWrapper>
         <MobileWrapperDialog
-          title={t(locale, "notifications.filter.sheetTitle")}
+          title={filterSheetTitle}
           isOpen={isMobileOpen}
           onClose={() => setOpenPresentation(null)}
           onAfterLeave={() => buttonRef.current?.focus({ preventScroll: true })}
@@ -313,21 +316,26 @@ export default function NotificationsCauseFilter({
           showHeaderDivider
         >
           <div className="tw-px-4 sm:tw-px-6">
-            <ul className="tw-m-0 tw-flex tw-list-none tw-flex-col tw-gap-1 tw-p-0">
-              <FilterSheetItem
-                title={t(locale, "profilePreferences.notifications.ALL.label")}
-                selected={selectedFilters.length === 0}
-                onSelect={() => updateSelectedFilters([])}
-              />
-              {NOTIFICATION_FILTERS.map((filter) => (
+            <div role="group" aria-label={filterSheetTitle}>
+              <ul className="tw-m-0 tw-flex tw-list-none tw-flex-col tw-gap-1 tw-p-0">
                 <FilterSheetItem
-                  key={filter.id}
-                  title={t(locale, filter.labelKey)}
-                  selected={isFilterSelected(filter, activeCauses)}
-                  onSelect={() => toggleFilter(filter)}
+                  title={t(
+                    locale,
+                    "profilePreferences.notifications.ALL.label"
+                  )}
+                  selected={selectedFilters.length === 0}
+                  onSelect={() => updateSelectedFilters([])}
                 />
-              ))}
-            </ul>
+                {NOTIFICATION_FILTERS.map((filter) => (
+                  <FilterSheetItem
+                    key={filter.id}
+                    title={t(locale, filter.labelKey)}
+                    selected={isFilterSelected(filter, activeCauses)}
+                    onSelect={() => toggleFilter(filter)}
+                  />
+                ))}
+              </ul>
+            </div>
           </div>
         </MobileWrapperDialog>
       </div>
