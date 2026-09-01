@@ -2902,7 +2902,7 @@
         "Rank and Approve wave Configuration shows Chat status as Enabled or Disabled, and wave admins can edit that row with a gear to enable or disable chat.",
         "The Access row uses Chat access wording; `Anyone` means no chat access group is attached, independently of whether chat is enabled.",
         "Rank and Approve Configuration shows Chat status separately from Chat access, so disabled chat does not look like the same thing as an unrestricted chat access group.",
-        "Access groups available to the current viewer—including authorized private groups for their authenticated members or creators—link from Configuration to a filtered Network view that shows both the group criteria and current members; Configuration displays a live eligible-member count instead of the generated group name.",
+        "Access groups available to the current viewer—including authorized private groups and direct-message groups for their eligible authenticated members or creators—link from Configuration to a filtered Network view that shows both the group criteria and current members; Configuration displays a live eligible-member count instead of the generated group name.",
         "Use the Clear selected group button in Network to close the group summary and return to the default member view.",
         "A scoped group hidden from the current viewer is labeled `Private group` without a link, name, id, author, criteria, or membership details.",
         "Network does not reuse a selected group's cached criteria or members after the authenticated viewer changes, or while opening a different group.",
