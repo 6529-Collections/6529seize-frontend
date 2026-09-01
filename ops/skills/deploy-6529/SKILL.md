@@ -49,15 +49,26 @@ direct production release intent. Do not run it for merge-only work, status or
 monitoring, retry or resume, recovery, production continuation, promotion of an
 existing release, or lane toggles.
 
-For a new intent, collect the exact known release data:
+For a new intent, print the installed CLI's current input template. This command
+is read-only and creates no run or request record:
 
-- requester and target (`staging` or `production`);
-- database-change state (`yes`, `no`, or `unknown`);
-- one frontend and/or backend release part, each with its repository, PR
-  number, branch, exact 40-character lowercase head SHA, and release-part
-  dependencies;
-- backend deploy units and their release-specific dependency edges when a
-  backend part is present.
+```bash
+./bin/6529 exec 6529-release-request template
+```
+
+Fill that canonical shape with the exact known release data:
+
+- `requested_by`, `target` (`staging` or `production`), and `database_change`
+  (`yes`, `no`, or `unknown`);
+- `release_parts[]`, with one frontend and/or backend part. Each part has `id`,
+  `repository`, `pull_requests[]`, and `depends_on[]` part IDs;
+- each `pull_requests[]` item has `number`, `branch`, and `commit`, where
+  `commit` is the exact 40-character lowercase head SHA;
+- a backend part also has `deploy_units[]` and `deploy_dependencies[]`, whose
+  items are `{ "before": "unit", "after": "unit" }` edges.
+
+Remove any frontend or backend template part that is not in this release. Do
+not add `schema_version`, `request_id`, or `created_at`; the CLI creates them.
 
 Pass the completed JSON directly on standard input from the repository root.
 Do not create a separate input file:

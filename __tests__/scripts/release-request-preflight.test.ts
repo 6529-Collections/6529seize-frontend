@@ -2,12 +2,25 @@ import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { parse } from "yaml";
 
 type CliSummary = {
   status: string;
   run_path: string;
   request_id: string | null;
   request_path: string | null;
+};
+
+type Workflow = {
+  jobs?: Record<
+    string,
+    {
+      steps?: Array<{
+        name?: string;
+        run?: string;
+      }>;
+    }
+  >;
 };
 
 const repoRoot = path.resolve(__dirname, "../..");
@@ -24,6 +37,12 @@ const deploySkillPath = path.join(
   "skills",
   "deploy-6529",
   "SKILL.md"
+);
+const appPrCiWorkflowPath = path.join(
+  repoRoot,
+  ".github",
+  "workflows",
+  "app-pr-ci.yml"
 );
 
 /** Runs the repository-installed release-request CLI in an isolated project. */
@@ -106,7 +125,14 @@ describe("local release-request preflight", () => {
 
     const result = runInstalledCli(projectDirectory, input);
 
-    expect(result.status).toBe(0);
+    if (result.status !== 0) {
+      throw new Error(
+        `The installed release-request CLI failed: ${result.stderr.trim() || "no stderr output"}`
+      );
+    }
+    if (!result.stdout.trim()) {
+      throw new Error("The installed release-request CLI returned no JSON.");
+    }
     const summary = JSON.parse(result.stdout) as CliSummary;
     expect(summary).toMatchObject({
       status: "succeeded",
@@ -234,6 +260,41 @@ describe("local release-request preflight", () => {
     ]) {
       expect(normalizedSkill).toContain(boundary);
     }
+  });
+
+  it("uses the canonical CLI template and exact release field names", () => {
+    const skill = fs.readFileSync(deploySkillPath, "utf8");
+
+    expect(skill).toContain("./bin/6529 exec 6529-release-request template");
+    for (const field of [
+      "`requested_by`",
+      "`target`",
+      "`database_change`",
+      "`release_parts[]`",
+      "`pull_requests[]`",
+      "`depends_on[]`",
+      "`number`",
+      "`branch`",
+      "`commit`",
+      "`deploy_units[]`",
+      "`deploy_dependencies[]`",
+    ]) {
+      expect(skill).toContain(field);
+    }
+    expect(skill).toContain('{ "before": "unit", "after": "unit" }');
+  });
+
+  it("runs this contract when the deploy skill changes in PR CI", () => {
+    const workflow = parse(
+      fs.readFileSync(appPrCiWorkflowPath, "utf8")
+    ) as Workflow;
+    const releaseBusContractStep = Object.values(workflow.jobs ?? {})
+      .flatMap((job) => job.steps ?? [])
+      .find((step) => step.name === "Verify Release Bus v2 workflow contract");
+
+    expect(releaseBusContractStep?.run).toContain(
+      "__tests__/scripts/release-request-preflight.test.ts"
+    );
   });
 
   it("gitignores every local Release Coordinator record", () => {

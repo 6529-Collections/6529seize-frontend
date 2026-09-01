@@ -89,7 +89,8 @@ rebuilding workflow into a train deploy path.
 When a new staging release or a new direct production release starts, the
 `deploy-6529` flow first runs the live lane-status check above. It then sends
 the known requester, target, exact PR heads, frontend/backend parts,
-dependencies, backend deploy units, and database-change state as JSON on
+dependencies, backend deploy units, and database-change state using the
+installed CLI's read-only `template` shape. It sends the completed JSON on
 standard input to:
 
 ```bash

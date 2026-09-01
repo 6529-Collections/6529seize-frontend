@@ -37,7 +37,8 @@ const RELEASE_BUS_CONTRACT_PATTERNS = [
   /^tests\/packs\.manifest\.cjs$/u,
   /^components\/museum\/MuseumNetworkProposition\.tsx$/u,
   /^__tests__\/components\/museum\/MuseumNetworkProposition\.test\.tsx$/u,
-  /^__tests__\/scripts\/(?:app-pr-ci-effective-plan|deployment-bus|e2e-packs|manual-deploy-routing-guard|museum-|pr-ci-policy-bundle|release-bus-|sync-e2e-manifest)/u,
+  /^ops\/skills\/deploy-6529\/SKILL\.md$/u,
+  /^__tests__\/scripts\/(?:app-pr-ci-effective-plan|deployment-bus|e2e-packs|manual-deploy-routing-guard|museum-|pr-ci-policy-bundle|release-bus-|release-request-preflight|sync-e2e-manifest)/u,
   /^(?:package\.json|pnpm-lock\.yaml|pnpm-workspace\.yaml)$/u,
 ];
 function check(required, reason) {

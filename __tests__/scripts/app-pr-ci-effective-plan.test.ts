@@ -97,6 +97,8 @@ describe("effective App PR CI plan", () => {
     "tests/packs.manifest.cjs",
     "components/museum/MuseumNetworkProposition.tsx",
     "__tests__/components/museum/MuseumNetworkProposition.test.tsx",
+    "ops/skills/deploy-6529/SKILL.md",
+    "__tests__/scripts/release-request-preflight.test.ts",
   ])("requires Release Bus contracts for %s", (file) => {
     expect(executePlan([file]).checks.release_bus_contract.required).toBe(true);
   });
