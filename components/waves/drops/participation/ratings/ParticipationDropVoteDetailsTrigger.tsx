@@ -31,6 +31,76 @@ const VIEWPORT_PADDING_PX = 16;
 const POPOVER_GAP_PX = 8;
 const POPOVER_WIDTH_PX = 360;
 
+const DENSITY_CLASS_NAMES: Record<VoteDetailsTriggerDensity, string> = {
+  default: "tw-gap-1.5 tw-px-2 tw-py-1 tw-leading-5",
+  compact: "tw-gap-1 tw-px-1.5 tw-py-0.5 tw-leading-4",
+  gallery: "tw-box-border tw-h-8 tw-gap-1 tw-px-2.5 tw-py-0 tw-leading-4",
+  tight: "tw-gap-1 tw-px-2 tw-py-1 tw-leading-5",
+};
+
+const isSmallDensity = (density: VoteDetailsTriggerDensity): boolean =>
+  density === "compact" || density === "gallery";
+
+const getTriggerTextSizeClassName = (
+  density: VoteDetailsTriggerDensity,
+  isMemesVariant: boolean
+): string => {
+  if (isSmallDensity(density)) {
+    return "tw-text-xs";
+  }
+
+  return isMemesVariant ? "tw-text-meta" : "tw-text-sm";
+};
+
+const getTriggerAppearanceClassName = (isMemesVariant: boolean): string =>
+  isMemesVariant
+    ? "tw-rounded-md tw-border-iron-700 tw-bg-white/[0.05] tw-shadow-none desktop-hover:hover:tw-border-iron-600 desktop-hover:hover:tw-bg-white/[0.08]"
+    : "tw-rounded-md tw-border-white/[0.06] tw-bg-white/[0.05] tw-shadow-none desktop-hover:hover:tw-border-white/[0.09] desktop-hover:hover:tw-bg-white/[0.08] desktop-hover:hover:tw-text-iron-100";
+
+interface TriggerClassNames {
+  readonly triggerTextClassName: string;
+  readonly countTextColorClassName: string;
+  readonly labelTextColorClassName: string;
+  readonly triggerClassName: string;
+  readonly chevronClassName: string;
+}
+
+const getTriggerClassNames = (
+  density: VoteDetailsTriggerDensity,
+  visualVariant: NonNullable<
+    ParticipationDropVoteDetailsTriggerProps["visualVariant"]
+  >,
+  isOpen: boolean
+): TriggerClassNames => {
+  const isMemesVariant = visualVariant === "memes";
+  const triggerTextClassName = `${getTriggerTextSizeClassName(
+    density,
+    isMemesVariant
+  )} tw-font-semibold`;
+  const appearanceClassName = getTriggerAppearanceClassName(isMemesVariant);
+  const triggerClassName = `tw-inline-flex tw-cursor-pointer tw-items-center tw-border tw-border-solid tw-transition-colors tw-duration-200 tw-ease-out focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/60 ${appearanceClassName} ${DENSITY_CLASS_NAMES[density]}`;
+  const chevronSizeClassName = isSmallDensity(density)
+    ? "tw-size-3"
+    : "tw-size-3.5";
+
+  return {
+    triggerTextClassName,
+    countTextColorClassName: isMemesVariant
+      ? "tw-text-iron-300"
+      : "tw-text-iron-200",
+    labelTextColorClassName: isMemesVariant
+      ? "tw-text-iron-300"
+      : "tw-text-iron-400",
+    triggerClassName,
+    chevronClassName: `tw-flex-shrink-0 tw-text-iron-500 tw-transition-transform tw-duration-200 ${chevronSizeClassName} ${
+      isOpen ? "tw-rotate-180" : ""
+    }`,
+  };
+};
+
+const getVoterLabel = (voterCount: number): string =>
+  voterCount === 1 ? "voter" : "voters";
+
 const isInsideElement = (
   element: HTMLElement | null,
   target: EventTarget | null
@@ -294,37 +364,14 @@ export default function ParticipationDropVoteDetailsTrigger({
           globalThis.document.body
         )
       : null;
-  const isCompact = density === "compact";
-  const isGallery = density === "gallery";
-  const isTight = density === "tight";
-  const isSmallDensity = isCompact || isGallery;
-  let densityClassName: string;
-  if (isGallery) {
-    densityClassName =
-      "tw-box-border tw-h-8 tw-gap-1 tw-px-2.5 tw-py-0 tw-leading-4";
-  } else if (isCompact) {
-    densityClassName = "tw-gap-1 tw-px-1.5 tw-py-0.5 tw-leading-4";
-  } else if (isTight) {
-    densityClassName = "tw-gap-1 tw-px-2 tw-py-1 tw-leading-5";
-  } else {
-    densityClassName = "tw-gap-1.5 tw-px-2 tw-py-1 tw-leading-5";
-  }
-  const triggerTextSizeClassName = isSmallDensity ? "tw-text-xs" : "tw-text-sm";
-  const isMemesVariant = visualVariant === "memes";
-  const memesTriggerTextSizeClassName = isSmallDensity
-    ? "tw-text-xs"
-    : "tw-text-meta";
-  const triggerTextClassName = `${
-    isMemesVariant ? memesTriggerTextSizeClassName : triggerTextSizeClassName
-  } tw-font-semibold`;
-  const appearanceClassName =
-    isMemesVariant
-      ? "tw-rounded-md tw-border-iron-700 tw-bg-white/[0.05] tw-shadow-none desktop-hover:hover:tw-border-iron-600 desktop-hover:hover:tw-bg-white/[0.08]"
-      : "tw-rounded-md tw-border-white/[0.06] tw-bg-white/[0.05] tw-shadow-none desktop-hover:hover:tw-border-white/[0.09] desktop-hover:hover:tw-bg-white/[0.08] desktop-hover:hover:tw-text-iron-100";
-  const triggerClassName = `tw-inline-flex tw-cursor-pointer tw-items-center tw-border tw-border-solid tw-transition-colors tw-duration-200 tw-ease-out focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/60 ${appearanceClassName} ${densityClassName}`;
-  const chevronClassName = `tw-flex-shrink-0 tw-text-iron-500 tw-transition-transform tw-duration-200 ${
-    isSmallDensity ? "tw-size-3" : "tw-size-3.5"
-  } ${isOpen ? "tw-rotate-180" : ""}`;
+  const {
+    triggerTextClassName,
+    countTextColorClassName,
+    labelTextColorClassName,
+    triggerClassName,
+    chevronClassName,
+  } = getTriggerClassNames(density, visualVariant, isOpen);
+  const voterLabel = getVoterLabel(drop.raters_count);
 
   return (
     <>
@@ -335,23 +382,15 @@ export default function ParticipationDropVoteDetailsTrigger({
         aria-expanded={isOpen}
         aria-label={`View voters and vote log for ${formatNumberWithCommas(
           drop.raters_count
-        )} ${drop.raters_count === 1 ? "voter" : "voters"}`}
+        )} ${voterLabel}`}
         onClick={toggleDetails}
         className={triggerClassName}
       >
-        <span
-          className={`${triggerTextClassName} ${
-            isMemesVariant ? "tw-text-iron-300" : "tw-text-iron-200"
-          }`}
-        >
+        <span className={`${triggerTextClassName} ${countTextColorClassName}`}>
           {formatNumberWithCommas(drop.raters_count)}
         </span>
-        <span
-          className={`${triggerTextClassName} ${
-            isMemesVariant ? "tw-text-iron-300" : "tw-text-iron-400"
-          }`}
-        >
-          {drop.raters_count === 1 ? "voter" : "voters"}
+        <span className={`${triggerTextClassName} ${labelTextColorClassName}`}>
+          {voterLabel}
         </span>
         <ChevronDownIcon aria-hidden="true" className={chevronClassName} />
       </button>

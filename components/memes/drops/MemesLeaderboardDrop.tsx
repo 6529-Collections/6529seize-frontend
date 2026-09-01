@@ -141,7 +141,7 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
     >
       <div className="tw-group tw-w-full">
         <div {...touchHandlers}>
-          <MemesLeaderboardDropCard drop={drop}>
+          <MemesLeaderboardDropCard>
             <div>
               {/* Artist info section */}
               <div className="tw-p-4 tw-pb-3">

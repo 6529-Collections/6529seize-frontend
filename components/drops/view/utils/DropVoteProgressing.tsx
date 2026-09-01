@@ -17,6 +17,76 @@ interface DropVoteProgressingProps {
   readonly visualVariant?: "default" | "memes" | undefined;
 }
 
+interface DropVoteProgressingVisualClasses {
+  readonly color: string;
+  readonly arrowColor: string;
+  readonly wrapperClasses: string;
+  readonly valueClasses: string;
+}
+
+const getBaseVisualClasses = (
+  subtle: boolean,
+  compact: boolean,
+  isPositiveProgressing: boolean
+): DropVoteProgressingVisualClasses => {
+  if (subtle) {
+    return {
+      color: isPositiveProgressing
+        ? "tw-text-iron-400"
+        : "tw-text-iron-600",
+      arrowColor: "tw-text-iron-600",
+      wrapperClasses: "tw-flex tw-items-center tw-gap-2",
+      valueClasses: "tw-tracking-tight",
+    };
+  }
+
+  if (compact) {
+    return {
+      color: isPositiveProgressing
+        ? "tw-text-emerald-400 tw-bg-emerald-500/10 tw-px-1.5 tw-py-0.5 tw-rounded-md tw-border tw-border-solid tw-border-emerald-500/15"
+        : "tw-text-rose-400 tw-bg-rose-500/10 tw-px-1.5 tw-py-0.5 tw-rounded-md tw-border tw-border-solid tw-border-rose-500/15",
+      arrowColor: "tw-text-iron-500",
+      wrapperClasses: "tw-ml-0.5 tw-flex tw-items-center tw-gap-1.5",
+      valueClasses: "tw-leading-5",
+    };
+  }
+
+  return {
+    color: isPositiveProgressing
+      ? "tw-text-emerald-500 tw-bg-emerald-500/10 tw-px-2 tw-py-0.5 tw-rounded tw-border tw-border-solid tw-border-emerald-500/20"
+      : "tw-text-rose-500 tw-bg-rose-500/10 tw-px-2 tw-py-0.5 tw-rounded tw-border tw-border-solid tw-border-rose-500/20",
+    arrowColor: "tw-text-iron-600",
+    wrapperClasses: "tw-ml-0.5 tw-flex tw-items-center tw-gap-2",
+    valueClasses: "tw-tracking-tight",
+  };
+};
+
+const getVisualClasses = (
+  subtle: boolean,
+  compact: boolean,
+  isPositiveProgressing: boolean,
+  visualVariant: NonNullable<DropVoteProgressingProps["visualVariant"]>
+): DropVoteProgressingVisualClasses => {
+  const baseClasses = getBaseVisualClasses(
+    subtle,
+    compact,
+    isPositiveProgressing
+  );
+
+  if (visualVariant !== "memes") {
+    return baseClasses;
+  }
+
+  return {
+    ...baseClasses,
+    color: isPositiveProgressing
+      ? "tw-text-emerald-300"
+      : "tw-text-rose-400",
+    arrowColor: "tw-text-iron-600",
+    valueClasses: "tw-leading-5 tw-tracking-identity",
+  };
+};
+
 export default function DropVoteProgressing({
   current,
   projected,
@@ -40,42 +110,12 @@ export default function DropVoteProgressing({
   }
 
   const isPositiveProgressing = current < projected;
-
-  let color: string;
-  let arrowColor: string;
-  let wrapperClasses: string;
-  let valueClasses: string;
-
-  if (subtle) {
-    color = isPositiveProgressing
-      ? "tw-text-iron-400"
-      : "tw-text-iron-600";
-    arrowColor = "tw-text-iron-600";
-    wrapperClasses = "tw-flex tw-items-center tw-gap-2";
-    valueClasses = "tw-tracking-tight";
-  } else if (compact) {
-    color = isPositiveProgressing
-      ? "tw-text-emerald-400 tw-bg-emerald-500/10 tw-px-1.5 tw-py-0.5 tw-rounded-md tw-border tw-border-solid tw-border-emerald-500/15"
-      : "tw-text-rose-400 tw-bg-rose-500/10 tw-px-1.5 tw-py-0.5 tw-rounded-md tw-border tw-border-solid tw-border-rose-500/15";
-    arrowColor = "tw-text-iron-500";
-    wrapperClasses = "tw-ml-0.5 tw-flex tw-items-center tw-gap-1.5";
-    valueClasses = "tw-leading-5";
-  } else {
-    color = isPositiveProgressing
-      ? "tw-text-emerald-500 tw-bg-emerald-500/10 tw-px-2 tw-py-0.5 tw-rounded tw-border tw-border-solid tw-border-emerald-500/20"
-      : "tw-text-rose-500 tw-bg-rose-500/10 tw-px-2 tw-py-0.5 tw-rounded tw-border tw-border-solid tw-border-rose-500/20";
-    arrowColor = "tw-text-iron-600";
-    wrapperClasses = "tw-ml-0.5 tw-flex tw-items-center tw-gap-2";
-    valueClasses = "tw-tracking-tight";
-  }
-
-  if (visualVariant === "memes") {
-    color = isPositiveProgressing
-      ? "tw-text-emerald-300"
-      : "tw-text-rose-400";
-    arrowColor = "tw-text-iron-600";
-    valueClasses = "tw-leading-5 tw-tracking-identity";
-  }
+  const { color, arrowColor, wrapperClasses, valueClasses } = getVisualClasses(
+    subtle,
+    compact,
+    isPositiveProgressing,
+    visualVariant
+  );
 
   const numberSizeClass =
     numberSize === "body"
