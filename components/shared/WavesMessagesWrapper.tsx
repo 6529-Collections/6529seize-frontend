@@ -33,6 +33,10 @@ import {
   type Transition,
   useReducedMotion,
 } from "framer-motion";
+import {
+  BRAIN_RIGHT_SIDEBAR_ENTER_TRANSITION,
+  BRAIN_RIGHT_SIDEBAR_EXIT_TRANSITION,
+} from "@/components/brain/right-sidebar/BrainRightSidebarTypes";
 
 const useBreakpoint = createBreakpoint({ XL: 1400, LG: 1024, S: 0 });
 
@@ -141,8 +145,8 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
   let chatLayoutTransition: Transition = { duration: 0 };
   if (!prefersReducedMotion) {
     chatLayoutTransition = isInlineRightOpen
-      ? { duration: 0.22, ease: [0, 0, 0.2, 1] }
-      : { duration: 0.14, ease: [0.4, 0, 1, 1] };
+      ? BRAIN_RIGHT_SIDEBAR_ENTER_TRANSITION
+      : BRAIN_RIGHT_SIDEBAR_EXIT_TRANSITION;
   }
 
   // Handle error state for drop loading
@@ -174,20 +178,20 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
                     className="tw-flex tw-h-full tw-min-h-0 tw-min-w-0 tw-flex-grow tw-flex-col tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-800 tw-will-change-transform"
                   >
                     {children}
-                    {shouldShowDropOverlay && (
-                      <div className="tw-fixed tw-inset-y-0 tw-left-[var(--left-rail,0px)] tw-right-0 tw-z-[1010] lg:tw-absolute lg:tw-inset-0 lg:tw-z-[1010]">
-                        <BrainDesktopDrop
-                          drop={{
-                            type: DropSize.FULL,
-                            ...drop,
-                            stableKey: drop.id,
-                            stableHash: drop.id,
-                          }}
-                          onClose={onDropClose}
-                        />
-                      </div>
-                    )}
                   </m.div>
+                )}
+                {shouldShowDropOverlay && (
+                  <div className="tw-fixed tw-inset-y-0 tw-left-[var(--left-rail,0px)] tw-right-0 tw-z-[1010] lg:tw-absolute lg:tw-inset-0 lg:tw-z-[1010]">
+                    <BrainDesktopDrop
+                      drop={{
+                        type: DropSize.FULL,
+                        ...drop,
+                        stableKey: drop.id,
+                        stableHash: drop.id,
+                      }}
+                      onClose={onDropClose}
+                    />
+                  </div>
                 )}
                 <BrainRightSidebar
                   isOpen={shouldShowRightSidebar}

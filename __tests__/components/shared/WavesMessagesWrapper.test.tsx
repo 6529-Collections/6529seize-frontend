@@ -274,7 +274,11 @@ describe("WavesMessagesWrapper", () => {
 
     renderWrapper();
 
-    expect(screen.getByTestId("drop-overlay")).toBeInTheDocument();
+    const dropOverlay = screen.getByTestId("drop-overlay");
+    expect(dropOverlay).toBeInTheDocument();
+    expect(
+      screen.getByTestId("main-content").parentElement
+    ).not.toContainElement(dropOverlay);
     expect(screen.getByTestId("right-sidebar")).toHaveAttribute(
       "data-open",
       "false"

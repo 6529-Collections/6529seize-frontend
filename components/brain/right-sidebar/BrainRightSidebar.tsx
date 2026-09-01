@@ -10,6 +10,7 @@ import {
   domAnimation,
   LazyMotion,
   m,
+  type Transition,
   useReducedMotion,
 } from "framer-motion";
 
@@ -18,7 +19,10 @@ import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useSidebarState } from "../../../hooks/useSidebarState";
 import { ChevronDoubleRightIcon } from "@heroicons/react/24/outline";
 import {
+  BRAIN_RIGHT_SIDEBAR_ENTER_TRANSITION,
+  BRAIN_RIGHT_SIDEBAR_EXIT_TRANSITION,
   BRAIN_RIGHT_SIDEBAR_ID,
+  BRAIN_RIGHT_SIDEBAR_REDUCED_TRANSITION,
   Mode,
   type SidebarTab,
 } from "./BrainRightSidebarTypes";
@@ -163,39 +167,80 @@ const SidebarContent = ({
   );
 };
 
-const BrainRightSidebar: React.FC<BrainRightSidebarProps> = ({
+interface SidebarPresentationProps {
+  readonly isOpen: boolean;
+  readonly panelLabel: string;
+  readonly prefersReducedMotion: boolean;
+  readonly panelTransition: Transition;
+  readonly panelExitTransition: Transition;
+  readonly children: React.ReactNode;
+}
+
+const InlineSidebar = ({
   isOpen,
-  waveId,
-  activeTab,
-  setActiveTab,
-  variant = "overlay",
-}) => {
-  const { wave, hasError, mode, setMode, close, retry } =
-    useBrainRightSidebarState(waveId, isOpen);
-  const prefersReducedMotion = useReducedMotion();
-  const isOverlay = variant === "overlay";
-  const overlayCloseButtonRef = useRef<HTMLButtonElement>(null);
-  const panelLabel = waveRightPanelText("waves.sidebar.rightPanel.ariaLabel");
-  const panelTransition = prefersReducedMotion
-    ? { duration: 0 }
-    : {
-        duration: 0.22,
-        ease: [0, 0, 0.2, 1] as const,
-      };
-  const panelExitTransition = prefersReducedMotion
-    ? { duration: 0 }
-    : {
-        duration: 0.14,
-        ease: [0.4, 0, 1, 1] as const,
-      };
+  panelLabel,
+  prefersReducedMotion,
+  panelTransition,
+  panelExitTransition,
+  children,
+}: SidebarPresentationProps) => (
+  <div
+    data-testid="brain-right-sidebar-slot"
+    data-state={isOpen ? "open" : "closed"}
+    className={`tw-relative tw-h-full tw-flex-shrink-0 ${
+      isOpen ? "tw-w-[22rem]" : "tw-w-0"
+    }`}
+  >
+    <LazyMotion features={domAnimation}>
+      <AnimatePresence initial={false}>
+        {isOpen && (
+          <m.div
+            key="inline-sidebar"
+            className="tw-absolute tw-inset-y-0 tw-right-0 tw-w-[22rem] tw-pl-6 tw-pt-2 tw-will-change-transform"
+            initial={prefersReducedMotion ? false : { x: "100%" }}
+            animate={{ x: 0 }}
+            exit={{
+              x: prefersReducedMotion ? 0 : "100%",
+              transition: panelExitTransition,
+            }}
+            transition={panelTransition}
+          >
+            <aside
+              id={BRAIN_RIGHT_SIDEBAR_ID}
+              aria-label={panelLabel}
+              className="tw-flex tw-h-full tw-w-[20.5rem] tw-min-w-0 tw-max-w-full tw-flex-col tw-overflow-hidden tw-rounded-lg tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950"
+            >
+              {children}
+            </aside>
+          </m.div>
+        )}
+      </AnimatePresence>
+    </LazyMotion>
+  </div>
+);
+
+interface OverlaySidebarProps extends SidebarPresentationProps {
+  readonly close: () => void;
+}
+
+const OverlaySidebar = ({
+  isOpen,
+  close,
+  panelLabel,
+  prefersReducedMotion,
+  panelTransition,
+  panelExitTransition,
+  children,
+}: OverlaySidebarProps) => {
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    if (!isOpen || !isOverlay) {
+    if (!isOpen) {
       return;
     }
 
     const focusCloseButton = () => {
-      const closeButton = overlayCloseButtonRef.current;
+      const closeButton = closeButtonRef.current;
       const panel = document.getElementById(BRAIN_RIGHT_SIDEBAR_ID);
       if (closeButton && !panel?.contains(document.activeElement)) {
         closeButton.focus();
@@ -209,80 +254,7 @@ const BrainRightSidebar: React.FC<BrainRightSidebarProps> = ({
       globalThis.cancelAnimationFrame(focusFrame);
       globalThis.clearTimeout(compactMenuFocusFrame);
     };
-  }, [isOpen, isOverlay]);
-
-  const panelContents = (
-    <>
-      {isOverlay && (
-        <div className="tw-absolute -tw-left-5 tw-top-2 tw-z-[110]">
-          <button
-            type="button"
-            onClick={close}
-            ref={overlayCloseButtonRef}
-            data-autofocus
-            className="tw-group tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-r-0 tw-border-solid tw-border-iron-650 tw-bg-iron-700 tw-shadow-[0_8px_20px_rgba(0,0,0,0.35)] tw-transition-all tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-border-iron-500 desktop-hover:hover:tw-bg-iron-600 desktop-hover:hover:tw-shadow-[0_12px_26px_rgba(0,0,0,0.45)] motion-reduce:tw-transition-none"
-            aria-label={waveRightPanelText("waves.sidebar.rightPanel.close")}
-          >
-            <ChevronDoubleRightIcon
-              aria-hidden="true"
-              strokeWidth={2}
-              className="tw-size-4 tw-text-iron-200 tw-transition-all tw-duration-200 motion-reduce:tw-transition-none"
-            />
-          </button>
-        </div>
-      )}
-
-      <div className="tw-h-full tw-min-h-0 tw-min-w-0 tw-overflow-hidden tw-text-sm tw-text-iron-500">
-        <SidebarContent
-          wave={wave}
-          mode={mode}
-          setMode={setMode}
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          hasError={hasError}
-          retry={retry}
-        />
-      </div>
-    </>
-  );
-
-  if (!isOverlay) {
-    return (
-      <div
-        data-testid="brain-right-sidebar-slot"
-        data-state={isOpen ? "open" : "closed"}
-        className={`tw-relative tw-h-full tw-flex-shrink-0 ${
-          isOpen ? "tw-w-[22rem]" : "tw-w-0"
-        }`}
-      >
-        <LazyMotion features={domAnimation}>
-          <AnimatePresence initial={false}>
-            {isOpen && (
-              <m.div
-                key="inline-sidebar"
-                className="tw-absolute tw-inset-y-0 tw-right-0 tw-w-[22rem] tw-pl-6 tw-pt-2 tw-will-change-transform"
-                initial={prefersReducedMotion ? false : { x: "100%" }}
-                animate={{ x: 0 }}
-                exit={{
-                  x: prefersReducedMotion ? 0 : "100%",
-                  transition: panelExitTransition,
-                }}
-                transition={panelTransition}
-              >
-                <aside
-                  id={BRAIN_RIGHT_SIDEBAR_ID}
-                  aria-label={panelLabel}
-                  className="tw-flex tw-h-full tw-w-[20.5rem] tw-min-w-0 tw-max-w-full tw-flex-col tw-overflow-hidden tw-rounded-lg tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950"
-                >
-                  {panelContents}
-                </aside>
-              </m.div>
-            )}
-          </AnimatePresence>
-        </LazyMotion>
-      </div>
-    );
-  }
+  }, [isOpen]);
 
   return (
     <LazyMotion features={domAnimation}>
@@ -297,7 +269,7 @@ const BrainRightSidebar: React.FC<BrainRightSidebarProps> = ({
             className="tailwind-scope tw-relative tw-z-[100]"
             initial={false}
             animate={{ opacity: 1 }}
-            exit={{ opacity: 1 }}
+            exit={{ opacity: 1, transition: panelExitTransition }}
           >
             <m.div
               data-testid="brain-right-sidebar-backdrop"
@@ -309,11 +281,13 @@ const BrainRightSidebar: React.FC<BrainRightSidebarProps> = ({
               exit={{
                 opacity: prefersReducedMotion ? 1 : 0,
                 transition: prefersReducedMotion
-                  ? { duration: 0 }
+                  ? BRAIN_RIGHT_SIDEBAR_REDUCED_TRANSITION
                   : { duration: 0.1 },
               }}
               transition={
-                prefersReducedMotion ? { duration: 0 } : { duration: 0.18 }
+                prefersReducedMotion
+                  ? BRAIN_RIGHT_SIDEBAR_REDUCED_TRANSITION
+                  : { duration: 0.18 }
               }
             />
             <m.div
@@ -331,7 +305,25 @@ const BrainRightSidebar: React.FC<BrainRightSidebarProps> = ({
                 aria-label={panelLabel}
                 className="tw-relative tw-flex tw-h-full tw-w-full tw-min-w-0 tw-flex-col tw-overflow-visible tw-border-y-0 tw-border-l tw-border-r-0 tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-shadow-2xl"
               >
-                {panelContents}
+                <div className="tw-absolute -tw-left-5 tw-top-2 tw-z-[110]">
+                  <button
+                    type="button"
+                    onClick={close}
+                    ref={closeButtonRef}
+                    data-autofocus
+                    className="tw-group tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-r-0 tw-border-solid tw-border-iron-650 tw-bg-iron-700 tw-shadow-[0_8px_20px_rgba(0,0,0,0.35)] tw-transition-all tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-border-iron-500 desktop-hover:hover:tw-bg-iron-600 desktop-hover:hover:tw-shadow-[0_12px_26px_rgba(0,0,0,0.45)] motion-reduce:tw-transition-none"
+                    aria-label={waveRightPanelText(
+                      "waves.sidebar.rightPanel.close"
+                    )}
+                  >
+                    <ChevronDoubleRightIcon
+                      aria-hidden="true"
+                      strokeWidth={2}
+                      className="tw-size-4 tw-text-iron-200 tw-transition-all tw-duration-200 motion-reduce:tw-transition-none"
+                    />
+                  </button>
+                </div>
+                {children}
               </DialogPanel>
             </m.div>
           </Dialog>
@@ -339,6 +331,52 @@ const BrainRightSidebar: React.FC<BrainRightSidebarProps> = ({
       </AnimatePresence>
     </LazyMotion>
   );
+};
+
+const BrainRightSidebar: React.FC<BrainRightSidebarProps> = ({
+  isOpen,
+  waveId,
+  activeTab,
+  setActiveTab,
+  variant = "overlay",
+}) => {
+  const { wave, hasError, mode, setMode, close, retry } =
+    useBrainRightSidebarState(waveId, isOpen);
+  const prefersReducedMotion = useReducedMotion() ?? false;
+  const panelLabel = waveRightPanelText("waves.sidebar.rightPanel.ariaLabel");
+  const panelTransition = prefersReducedMotion
+    ? BRAIN_RIGHT_SIDEBAR_REDUCED_TRANSITION
+    : BRAIN_RIGHT_SIDEBAR_ENTER_TRANSITION;
+  const panelExitTransition = prefersReducedMotion
+    ? BRAIN_RIGHT_SIDEBAR_REDUCED_TRANSITION
+    : BRAIN_RIGHT_SIDEBAR_EXIT_TRANSITION;
+  const panelContent = (
+    <div className="tw-h-full tw-min-h-0 tw-min-w-0 tw-overflow-hidden tw-text-sm tw-text-iron-500">
+      <SidebarContent
+        wave={wave}
+        mode={mode}
+        setMode={setMode}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        hasError={hasError}
+        retry={retry}
+      />
+    </div>
+  );
+  const presentationProps: SidebarPresentationProps = {
+    isOpen,
+    panelLabel,
+    prefersReducedMotion,
+    panelTransition,
+    panelExitTransition,
+    children: panelContent,
+  };
+
+  if (variant === "inline") {
+    return <InlineSidebar {...presentationProps} />;
+  }
+
+  return <OverlaySidebar {...presentationProps} close={close} />;
 };
 
 export default BrainRightSidebar;
