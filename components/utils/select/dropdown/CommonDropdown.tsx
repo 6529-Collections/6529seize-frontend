@@ -37,7 +37,7 @@ function getToolbarButtonStateClass(disabled: boolean) {
     return "tw-cursor-not-allowed tw-text-iron-500 tw-opacity-50";
   }
 
-  return "tw-text-iron-300 desktop-hover:hover:tw-border-white/15 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-iron-100";
+  return "tw-text-iron-300 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-iron-100 desktop-hover:hover:tw-ring-white/15";
 }
 
 function getDefaultThemeClass(theme: string) {

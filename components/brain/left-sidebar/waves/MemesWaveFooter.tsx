@@ -233,7 +233,7 @@ export const MemesWaveFooterView: React.FC<MemesWaveFooterViewProps> = ({
                     onFocus={handlePrefetchQuickVote}
                     onMouseEnter={handlePrefetchQuickVote}
                     onPointerDown={handlePrefetchQuickVote}
-                    className="tw-group tw-min-w-0 tw-flex-1 tw-cursor-pointer tw-rounded-xl tw-border-0 tw-bg-transparent tw-p-0 tw-text-left focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400/70"
+                    className="tw-group tw-min-w-0 tw-flex-1 tw-cursor-pointer tw-rounded-xl tw-border-0 tw-bg-transparent tw-p-0 tw-text-left focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400/70"
                   >
                     <div className="tw-flex tw-h-full tw-items-center tw-justify-between tw-gap-3 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.08] tw-bg-[#0c1018] tw-px-3 tw-py-2.5 tw-shadow-sm tw-shadow-black/30 tw-transition-[background-color,border-color] tw-duration-200 desktop-hover:group-hover:tw-border-white/[0.14] desktop-hover:group-hover:tw-bg-[#0f1420]">
                       <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-1">

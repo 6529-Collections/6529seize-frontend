@@ -36,7 +36,7 @@ export default function MemeDropArtistInfo({ drop }: MemeDropArtistInfoProps) {
               </UserProfileTooltipWrapper>
             ) : (
               <span className="tw-mb-0 tw-text-sm tw-font-semibold tw-leading-none tw-tracking-identity tw-text-white">
-                {drop.author.handle}
+                {drop.author.primary_address}
               </span>
             )}
           </Link>
