@@ -58,7 +58,6 @@ import type {
   ChatSubmitDropState,
 } from "./chatSubmitDrop.types";
 import { getChatSubmitDropLabels } from "./chatSubmitDrop.types";
-import WaveViewLoadingPlaceholder from "@/components/waves/WaveViewLoadingPlaceholder";
 
 export interface MyStreamWaveProps {
   readonly waveId: string;
@@ -625,7 +624,7 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({ waveId }) => {
 
   // Early return if no wave data - all hooks must be called before this
   if (!wave) {
-    return <WaveViewLoadingPlaceholder />;
+    return null;
   }
 
   const activeChatSubmitDropState: ChatSubmitDropState | null =
