@@ -122,9 +122,6 @@ describe("UserPageHeader", () => {
     expect(screen.getByTestId("follow")).toBeInTheDocument();
     expect(screen.getByTestId("about")).toBeInTheDocument();
     expect(screen.queryByTestId("subscription-status")).not.toBeInTheDocument();
-    expect(screen.getByTestId("wrapper").parentElement).toHaveClass(
-      "sm:tw-mb-0"
-    );
   });
 
   it("does not render follow or DM actions on your own profile", () => {

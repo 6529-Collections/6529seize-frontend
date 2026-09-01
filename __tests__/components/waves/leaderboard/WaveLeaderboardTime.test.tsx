@@ -57,8 +57,8 @@ describe("WaveLeaderboardTime", () => {
     expect(header).toBeInTheDocument();
     expect(header.parentElement).toHaveClass(
       "tw-box-border",
-      "tw-h-10",
-      "tw-border-white/[0.08]"
+      "tw-h-[38px]",
+      "tw-border-white/[0.06]"
     );
     expect(screen.queryByTestId("drop")).toBeNull();
   });

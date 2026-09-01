@@ -117,7 +117,7 @@ const getExpandedFrameClassName = (floating: boolean): string => {
     return `tw-pointer-events-auto ${MEMES_WAVE_FLOATING_FOOTER_WIDTH_CLASS_NAME} tw-origin-bottom tw-scale-[var(--memes-wave-floating-footer-scale)] tw-flex-shrink-0 tw-transform-gpu tw-transition-transform tw-duration-300 tw-ease-[cubic-bezier(0.22,1,0.36,1)] tw-will-change-transform motion-reduce:tw-transition-none`;
   }
 
-  return "tw-mt-auto tw-w-full tw-flex-shrink-0 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800/60 tw-bg-black tw-p-4";
+  return "tw-mt-auto tw-w-full tw-flex-shrink-0 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800/60 tw-bg-black tw-p-3";
 };
 
 const getContainerStyle = ({
@@ -233,32 +233,28 @@ export const MemesWaveFooterView: React.FC<MemesWaveFooterViewProps> = ({
                     onFocus={handlePrefetchQuickVote}
                     onMouseEnter={handlePrefetchQuickVote}
                     onPointerDown={handlePrefetchQuickVote}
-                    className="tw-group tw-min-w-0 tw-flex-1 tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0 tw-text-left"
+                    className="tw-group tw-min-w-0 tw-flex-1 tw-cursor-pointer tw-rounded-xl tw-border-0 tw-bg-transparent tw-p-0 tw-text-left focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400/70"
                   >
-                    <div className="tw-relative tw-flex tw-h-full tw-items-center tw-justify-between tw-gap-4 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-[#2d3753] tw-bg-[#0c1018] tw-px-4 tw-py-2.5 tw-shadow-lg tw-transition-all tw-duration-200 desktop-hover:group-hover:tw-border-[#3a4670] desktop-hover:group-hover:tw-bg-[#0f1420]">
-                      <span
-                        aria-hidden="true"
-                        className="tw-pointer-events-none tw-absolute tw-inset-0 -tw-translate-x-full tw-bg-gradient-to-r tw-from-white/0 tw-via-white/[0.08] tw-to-white/0 tw-opacity-50 tw-transition-transform tw-duration-1000 tw-ease-out desktop-hover:group-hover:tw-translate-x-full"
-                      />
-                      <div className="tw-relative tw-z-10 tw-flex tw-min-w-0 tw-flex-col tw-gap-1.5">
-                        <span className="tw-whitespace-nowrap tw-text-[10px] tw-font-bold tw-uppercase tw-tracking-widest tw-text-iron-400">
+                    <div className="tw-flex tw-h-full tw-items-center tw-justify-between tw-gap-3 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.08] tw-bg-[#0c1018] tw-px-3 tw-py-2.5 tw-shadow-sm tw-shadow-black/30 tw-transition-[background-color,border-color] tw-duration-200 desktop-hover:group-hover:tw-border-white/[0.14] desktop-hover:group-hover:tw-bg-[#0f1420]">
+                      <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-1">
+                        <span className="tw-whitespace-nowrap tw-text-[10px] tw-font-semibold tw-uppercase tw-tracking-[0.1em] tw-text-iron-500">
                           {buttonTitle}
                         </span>
 
-                        <div className="tw-flex tw-items-center tw-gap-2">
-                          <MemesWaveZapIcon className="tw-size-4 tw-flex-shrink-0 tw-fill-primary-400/20 tw-text-primary-400" />
-                          <span className="tw-truncate tw-text-sm tw-font-semibold tw-tracking-tight tw-text-white">
+                        <div className="tw-flex tw-items-center tw-gap-1.5">
+                          <MemesWaveZapIcon className="tw-size-3.5 tw-flex-shrink-0 tw-fill-none tw-text-primary-400" />
+                          <span className="tw-truncate tw-text-sm tw-font-semibold tw-tracking-tight tw-text-iron-100">
                             {buttonValue}
                           </span>
                         </div>
                       </div>
 
                       {isReady && (
-                        <div className="tw-relative tw-z-10 tw-flex tw-flex-col tw-items-end tw-gap-0.5 tw-text-right">
-                          <span className="tw-text-xs tw-font-semibold tw-text-[#8199ea] tw-shadow-sm">
+                        <div className="tw-flex tw-flex-shrink-0 tw-flex-col tw-items-end tw-gap-0.5 tw-text-right">
+                          <span className="tw-text-xs tw-font-medium tw-text-primary-300">
                             {leftThisRoundText}
                           </span>
-                          <span className="tw-text-[11px] tw-font-medium tw-text-iron-400">
+                          <span className="tw-text-[11px] tw-font-normal tw-text-iron-500">
                             {unratedText}
                           </span>
                         </div>

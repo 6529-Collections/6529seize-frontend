@@ -24,6 +24,7 @@ type VoteDetailsTriggerDensity = "default" | "compact" | "gallery" | "tight";
 interface ParticipationDropVoteDetailsTriggerProps {
   readonly drop: ApiDrop;
   readonly density?: VoteDetailsTriggerDensity | undefined;
+  readonly visualVariant?: "default" | "memes" | undefined;
 }
 
 const VIEWPORT_PADDING_PX = 16;
@@ -44,6 +45,7 @@ const isInsideElement = (
 export default function ParticipationDropVoteDetailsTrigger({
   drop,
   density = "default",
+  visualVariant = "default",
 }: ParticipationDropVoteDetailsTriggerProps) {
   const isMobileScreen = useIsMobileScreen();
   const isTouchDevice = useIsTouchDevice();
@@ -308,8 +310,17 @@ export default function ParticipationDropVoteDetailsTrigger({
     densityClassName = "tw-gap-1.5 tw-px-2 tw-py-1 tw-leading-5";
   }
   const triggerTextSizeClassName = isSmallDensity ? "tw-text-xs" : "tw-text-sm";
+  const isMemesVariant = visualVariant === "memes";
+  const memesTriggerTextSizeClassName = isSmallDensity
+    ? "tw-text-xs"
+    : "tw-text-meta";
+  const triggerTextClassName = `${
+    isMemesVariant ? memesTriggerTextSizeClassName : triggerTextSizeClassName
+  } tw-font-semibold`;
   const appearanceClassName =
-    "tw-rounded-md tw-border-white/[0.06] tw-bg-white/[0.05] tw-shadow-none desktop-hover:hover:tw-border-white/[0.09] desktop-hover:hover:tw-bg-white/[0.08] desktop-hover:hover:tw-text-iron-100";
+    isMemesVariant
+      ? "tw-rounded-md tw-border-iron-700 tw-bg-white/[0.05] tw-shadow-none desktop-hover:hover:tw-border-iron-600 desktop-hover:hover:tw-bg-white/[0.08]"
+      : "tw-rounded-md tw-border-white/[0.06] tw-bg-white/[0.05] tw-shadow-none desktop-hover:hover:tw-border-white/[0.09] desktop-hover:hover:tw-bg-white/[0.08] desktop-hover:hover:tw-text-iron-100";
   const triggerClassName = `tw-inline-flex tw-cursor-pointer tw-items-center tw-border tw-border-solid tw-transition-colors tw-duration-200 tw-ease-out focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/60 ${appearanceClassName} ${densityClassName}`;
   const chevronClassName = `tw-flex-shrink-0 tw-text-iron-500 tw-transition-transform tw-duration-200 ${
     isSmallDensity ? "tw-size-3" : "tw-size-3.5"
@@ -329,12 +340,16 @@ export default function ParticipationDropVoteDetailsTrigger({
         className={triggerClassName}
       >
         <span
-          className={`${triggerTextSizeClassName} tw-font-normal tw-text-iron-200`}
+          className={`${triggerTextClassName} ${
+            isMemesVariant ? "tw-text-iron-300" : "tw-text-iron-200"
+          }`}
         >
           {formatNumberWithCommas(drop.raters_count)}
         </span>
         <span
-          className={`${triggerTextSizeClassName} tw-font-normal tw-text-iron-400`}
+          className={`${triggerTextClassName} ${
+            isMemesVariant ? "tw-text-iron-300" : "tw-text-iron-400"
+          }`}
         >
           {drop.raters_count === 1 ? "voter" : "voters"}
         </span>

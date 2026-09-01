@@ -6,10 +6,10 @@ import UserCICAndLevel, {
 } from "@/components/user/utils/UserCICAndLevel";
 import WaveDropAuthorPfp from "@/components/waves/drops/WaveDropAuthorPfp";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import WinnerDropBadge from "@/components/waves/drops/winner/WinnerDropBadge";
 import WaveDropTime from "@/components/waves/drops/time/WaveDropTime";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import { DropAuthorBadges } from "@/components/waves/drops/DropAuthorBadges";
+import MemesLeaderboardDropRank from "./MemesLeaderboardDropRank";
 
 interface MemesLeaderboardDropArtistInfoProps {
   readonly drop: ExtendedDrop;
@@ -19,9 +19,10 @@ const MemesLeaderboardDropArtistInfo = ({
   drop,
 }: MemesLeaderboardDropArtistInfoProps) => {
   return (
-    <div className="tw-flex tw-min-w-0 tw-gap-x-3">
+    <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-x-3">
+      <MemesLeaderboardDropRank rank={drop.rank} />
       <WaveDropAuthorPfp drop={drop} />
-      <div className="-tw-mt-0.5 tw-flex tw-min-w-0 tw-flex-1 tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1">
+      <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
         {drop.author.handle ? (
           <UserProfileTooltipWrapper user={drop.author.handle}>
             <Link
@@ -29,7 +30,7 @@ const MemesLeaderboardDropArtistInfo = ({
               onClick={(e) => e.stopPropagation()}
               className="tw-no-underline desktop-hover:hover:tw-underline"
             >
-              <span className="tw-text-sm tw-font-bold tw-text-white">
+              <span className="tw-text-sm tw-font-bold tw-leading-none tw-tracking-identity tw-text-white">
                 {drop.author.handle}
               </span>
             </Link>
@@ -40,7 +41,7 @@ const MemesLeaderboardDropArtistInfo = ({
             onClick={(e) => e.stopPropagation()}
             className="tw-no-underline desktop-hover:hover:tw-underline"
           >
-            <span className="tw-text-sm tw-font-bold tw-text-white">
+            <span className="tw-text-sm tw-font-bold tw-leading-none tw-tracking-identity tw-text-white">
               {drop.author.primary_address}
             </span>
           </Link>
@@ -56,11 +57,6 @@ const MemesLeaderboardDropArtistInfo = ({
         <DropAuthorBadges
           profile={drop.author}
           tooltipIdPrefix={`leaderboard-author-badges-${drop.id}`}
-        />
-
-        <WinnerDropBadge
-          rank={drop.rank}
-          decisionTime={drop.winning_context?.decision_time ?? null}
         />
 
         <span className="tw-inline-flex tw-items-center tw-gap-x-1.5 tw-whitespace-nowrap">

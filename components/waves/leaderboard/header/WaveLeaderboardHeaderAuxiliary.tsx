@@ -94,13 +94,13 @@ const getViewModeTabClass = (
   activeMode: LeaderboardViewMode
 ): string => {
   const baseClassName =
-    "tw-flex tw-h-7 tw-w-7 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-transparent tw-transition-[color,background-color,border-color,box-shadow] tw-duration-200 tw-ease-out focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70 focus-visible:tw-ring-offset-1 focus-visible:tw-ring-offset-iron-900 motion-reduce:tw-transition-none";
+    "tw-flex tw-h-[30px] tw-w-[30px] tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-transition-[color,background-color,border-color,box-shadow] tw-duration-200 tw-ease-out focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70 focus-visible:tw-ring-offset-1 focus-visible:tw-ring-offset-iron-900 motion-reduce:tw-transition-none";
 
   if (activeMode === mode) {
-    return `${baseClassName} tw-border-primary-500/40 tw-bg-primary-500/10 tw-text-primary-300 tw-shadow-sm tw-shadow-black/30`;
+    return `${baseClassName} tw-border-primary-500/25 tw-bg-primary-500/10 tw-text-primary-300 tw-shadow-sm tw-shadow-black/30`;
   }
 
-  return `${baseClassName} tw-bg-transparent tw-text-iron-500 desktop-hover:hover:tw-bg-iron-800/50 desktop-hover:hover:tw-text-iron-200`;
+  return `${baseClassName} tw-border-transparent tw-bg-transparent tw-text-iron-500 desktop-hover:hover:tw-bg-iron-800/50 desktop-hover:hover:tw-text-iron-200`;
 };
 
 const getViewModeIcon = (mode: LeaderboardViewMode): React.ReactNode => {
@@ -132,7 +132,7 @@ export const HeaderViewModeTabs: React.FC<HeaderViewModeTabsProps> = ({
     ref={refObject}
     role="tablist"
     aria-label="Leaderboard view modes"
-    className="tw-box-border tw-flex tw-h-10 tw-flex-shrink-0 tw-items-center tw-gap-0.5 tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-900/75 tw-p-1 tw-shadow-sm tw-shadow-black/30 tw-backdrop-blur"
+    className="tw-box-border tw-flex tw-h-[38px] tw-flex-shrink-0 tw-items-center tw-gap-0.5 tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-900/75 tw-p-1 tw-shadow-sm tw-shadow-black/30 tw-backdrop-blur"
   >
     {viewModes.map((mode) => {
       const label = getViewModeLabel(mode);

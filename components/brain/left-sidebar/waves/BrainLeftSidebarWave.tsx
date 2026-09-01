@@ -359,7 +359,11 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
               </div>
               {shouldShowDropTime && (
                 <div
-                  className={`tw-inline-flex tw-min-w-0 tw-items-center tw-whitespace-nowrap ${timestampTextClasses} tw-leading-tight tw-text-iron-500 tw-transition-colors tw-duration-200 desktop-hover:group-hover:tw-text-iron-400`}
+                  className={`tw-inline-flex tw-min-w-0 tw-items-center tw-whitespace-nowrap ${timestampTextClasses} tw-leading-tight tw-transition-colors tw-duration-200 ${
+                    isActive
+                      ? "tw-text-iron-500 desktop-hover:group-hover:tw-text-iron-400"
+                      : "tw-text-iron-600 desktop-hover:group-hover:tw-text-iron-500"
+                  }`}
                 >
                   <BrainLeftSidebarWaveDropTime time={latestDropTimestamp} />
                 </div>

@@ -143,11 +143,11 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
         <div {...touchHandlers}>
           <MemesLeaderboardDropCard drop={drop}>
             <div>
-              {/* Artist info section with border */}
-              <div className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/5 tw-bg-iron-900/30 tw-p-4 tw-pb-3">
-                <div className="tw-flex tw-items-start tw-justify-between tw-gap-4">
+              {/* Artist info section */}
+              <div className="tw-p-4 tw-pb-3">
+                <div className="tw-flex tw-items-center tw-justify-between tw-gap-4">
                   <MemesLeaderboardDropArtistInfo drop={drop} />
-                  <div className="tw-flex tw-gap-2 tw-text-iron-400">
+                  <div className="tw-flex tw-h-10 tw-items-center tw-gap-2 tw-text-iron-400 [&>button]:tw-flex [&>button]:tw-h-8 [&>button]:tw-items-center [&>button]:tw-justify-center [&>button]:tw-py-0">
                     {!hasTouchScreen && (
                       <>
                         <WaveDropActionsOpen drop={drop} />
@@ -165,12 +165,12 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
 
               {/* Title and Description */}
               <div className="tw-px-4 tw-pb-4 tw-pt-4">
-                <div className="tw-space-y-1">
+                <div className="tw-max-w-screen-sm tw-space-y-1">
                   <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
                     <MediaTypeBadge
                       mimeType={artworkMedia?.mime_type}
                       dropId={drop.id}
-                      size="sm"
+                      size="xs"
                     />
                     <MemesLeaderboardDropHeader title={title} />
                     {drop.is_additional_action_promised === true && (
@@ -185,7 +185,7 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
                 <div
                   className={`tw-flex tw-h-96 tw-justify-center tw-overflow-hidden ${
                     location === DropLocation.WAVE
-                      ? "tw-bg-iron-950"
+                      ? "tw-bg-iron-900/30"
                       : "tw-bg-iron-900/40"
                   }`}
                 >
@@ -237,10 +237,12 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
                       <ParticipationDropVoteDetailsTrigger
                         drop={drop}
                         density="compact"
+                        visualVariant="memes"
                       />
                     </div>
                     <VotingModalButton
                       drop={drop}
+                      className="!tw-text-meta"
                       onClick={() => {
                         if (onVoteClick) {
                           onVoteClick(drop);
