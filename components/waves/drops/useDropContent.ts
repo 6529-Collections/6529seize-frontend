@@ -49,9 +49,11 @@ export const useDropContent = (
     queryKey: getDropQueryKey(dropId),
     queryFn: () => fetchDropByIdBatched(dropId),
     placeholderData: (previousDrop) => maybeDrop ?? previousDrop,
-    initialData: shouldFetchDrop ? undefined : maybeDrop,
     enabled: shouldFetchDrop,
     staleTime: DROP_DETAIL_STALE_TIME_MS,
+    ...(!shouldFetchDrop && maybeDrop !== null
+      ? { initialData: maybeDrop }
+      : {}),
   });
   const resolvedDrop: ApiDrop | null =
     authoritativeModeratedDrop ?? drop ?? null;
