@@ -5,7 +5,6 @@ import path from "node:path";
 
 type CliSummary = {
   status: string;
-  run_id: string;
   run_path: string;
   request_id: string | null;
   request_path: string | null;
@@ -13,6 +12,12 @@ type CliSummary = {
 
 const repoRoot = path.resolve(__dirname, "../..");
 const wrapperPath = path.join(repoRoot, "bin", "6529");
+const installedCliPath = path.join(
+  repoRoot,
+  "node_modules",
+  ".bin",
+  "6529-release-request"
+);
 const deploySkillPath = path.join(
   repoRoot,
   "ops",
@@ -21,8 +26,12 @@ const deploySkillPath = path.join(
   "SKILL.md"
 );
 
+/** Runs the repository-installed release-request CLI in an isolated project. */
 function runInstalledCli(projectDirectory: string, input: unknown) {
-  return spawnSync(
+  fs.accessSync(wrapperPath, fs.constants.X_OK);
+  fs.accessSync(installedCliPath, fs.constants.X_OK);
+
+  const result = spawnSync(
     wrapperPath,
     [
       "exec",
@@ -39,22 +48,28 @@ function runInstalledCli(projectDirectory: string, input: unknown) {
       input: JSON.stringify(input),
     }
   );
+
+  if (result.error) {
+    throw result.error;
+  }
+
+  return result;
 }
 
 describe("local release-request preflight", () => {
-  let projectDirectory: string;
-
-  beforeEach(() => {
-    projectDirectory = fs.mkdtempSync(
-      path.join(os.tmpdir(), "frontend-release-request-")
-    );
-  });
+  let projectDirectory: string | undefined;
 
   afterEach(() => {
-    fs.rmSync(projectDirectory, { force: true, recursive: true });
+    if (projectDirectory) {
+      fs.rmSync(projectDirectory, { force: true, recursive: true });
+      projectDirectory = undefined;
+    }
   });
 
   it("uses the installed CLI through the repository wrapper to accept a valid request", () => {
+    projectDirectory = fs.mkdtempSync(
+      path.join(os.tmpdir(), "frontend-release-request-")
+    );
     const input = {
       requested_by: "release-agent",
       target: "staging",
@@ -95,7 +110,6 @@ describe("local release-request preflight", () => {
     const summary = JSON.parse(result.stdout) as CliSummary;
     expect(summary).toMatchObject({
       status: "succeeded",
-      run_id: expect.any(String),
       run_path: expect.stringMatching(
         /^\.release-coordinator\/runs\/.+\.json$/
       ),
@@ -126,6 +140,9 @@ describe("local release-request preflight", () => {
   });
 
   it("keeps a failed run and creates no accepted request for invalid input", () => {
+    projectDirectory = fs.mkdtempSync(
+      path.join(os.tmpdir(), "frontend-release-request-")
+    );
     const result = runInstalledCli(projectDirectory, {
       requested_by: "release-agent",
       target: "staging",
@@ -166,7 +183,13 @@ describe("local release-request preflight", () => {
       status: "failed",
       request: null,
     });
-    expect(failedRun.errors).not.toHaveLength(0);
+    expect(failedRun.errors).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          location: expect.stringContaining("/commit"),
+        }),
+      ])
+    );
     expect(
       fs.existsSync(
         path.join(projectDirectory, ".release-coordinator", "outbox")
