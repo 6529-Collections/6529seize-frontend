@@ -50,6 +50,13 @@ jest.mock("@/components/waves/groups/WaveConfigurationAdminSettings", () => ({
   __esModule: true,
   default: () => <div data-testid="admin-settings" />,
 }));
+jest.mock(
+  "@/components/waves/groups/WaveConfigurationDeleteChatHistory",
+  () => ({
+    __esModule: true,
+    default: () => <div data-testid="delete-chat-history" />,
+  })
+);
 jest.mock("@/components/waves/groups/WaveConfigurationPersonalDisplay", () => ({
   __esModule: true,
   default: () => <div data-testid="personal-display" />,
@@ -138,14 +145,20 @@ describe("WaveConfigurationSections", () => {
     expect(screen.getByTestId("read-only-configuration")).toBeInTheDocument();
     expect(screen.getByTestId("configuration-rules")).toBeInTheDocument();
     expect(screen.getByTestId("admin-settings")).toBeInTheDocument();
+    expect(screen.getByTestId("delete-chat-history")).toBeInTheDocument();
     expect(screen.getByTestId("personal-display")).toBeInTheDocument();
     expect(screen.getByTestId("personal-curation")).toBeInTheDocument();
 
     const adminSettings = screen.getByTestId("admin-settings");
+    const deleteChatHistory = screen.getByTestId("delete-chat-history");
     const personalDisplay = screen.getByTestId("personal-display");
     const personalCuration = screen.getByTestId("personal-curation");
     expect(
-      adminSettings.compareDocumentPosition(personalDisplay) &
+      adminSettings.compareDocumentPosition(deleteChatHistory) &
+        Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+    expect(
+      deleteChatHistory.compareDocumentPosition(personalDisplay) &
         Node.DOCUMENT_POSITION_FOLLOWING
     ).toBeTruthy();
     expect(

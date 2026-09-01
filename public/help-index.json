@@ -2501,6 +2501,43 @@
       ]
     },
     {
+      "id": "waves.delete-own-chat-history",
+      "kind": "workflow",
+      "title": "Delete your chat history from a wave",
+      "aliases": [
+        "delete all my wave messages",
+        "delete my wave chat history",
+        "remove all my wave chat posts",
+        "clear my wave messages"
+      ],
+      "keywords": [
+        "waves",
+        "chat",
+        "messages",
+        "delete",
+        "history",
+        "configuration",
+        "pinned",
+        "submissions"
+      ],
+      "facts": [
+        "Authenticated profiles can use Delete all my messages from this wave in About -> Configuration.",
+        "The destructive button appears between Curations and Your display for connected profiles that are not acting through a proxy.",
+        "The action permanently deletes only CHAT drops authored by the current profile in the selected wave.",
+        "Submission and winner drops are never deleted by this action.",
+        "If the current profile authored the wave's pinned drop, that pinned drop is preserved.",
+        "The control remains available if chat was later disabled, so existing history can still be removed.",
+        "A confirmation dialog explains the scope and warns that the deletion is irreversible before the API is called."
+      ],
+      "canonical_path": "/waves",
+      "related_paths": ["/waves", "/messages"],
+      "tags": ["waves", "chat", "messages", "configuration", "delete"],
+      "source_refs": [
+        "components/waves/groups/WaveConfigurationDeleteChatHistory.tsx",
+        "ops/docs/waves/chat/feature-delete-own-chat-history.md"
+      ]
+    },
+    {
       "id": "waves.rules",
       "kind": "workflow",
       "title": "Wave rules",
@@ -2688,7 +2725,7 @@
         "Drop actions include reactions, ratings, voting, boosting, curation, replies, link copy, and pinning where allowed.",
         "Posted full drops can support emoji reactions and clap rating with optimistic UI and rollback on failure.",
         "Reaction controls are disabled while a proxy profile is active.",
-        "Reaction controls are disabled when the current wave does not allow chatting and reactions.",
+        "Reaction controls are disabled only when chatting and reacting are disabled for the entire wave. A viewer who can see the wave may still react when the wave's chat group does not permit them to post.",
         "If the API rejects the current session, the app starts one authentication recovery attempt for that session and temporarily disables reaction actions. The failed reaction is not automatically replayed.",
         "If a reaction request times out, the app rolls back the optimistic state, refreshes the canonical drop state, and does not automatically retry the write.",
         "Rating controls clamp values to the drop's allowed min/max range and can be disabled when the viewer has no available credit.",
