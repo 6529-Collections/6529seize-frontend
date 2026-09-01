@@ -155,6 +155,7 @@ jobs:
           sparse-checkout: |
             bin/6529
             package.json
+            scripts/private-github-packages-auth.sh
             scripts/release-bus-baseline-adoption-decision.cjs
           sparse-checkout-cone-mode: false
 
