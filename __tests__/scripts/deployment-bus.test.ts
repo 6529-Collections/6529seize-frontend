@@ -688,7 +688,7 @@ describe("release bus v2 combined preflight", () => {
     }
   });
 
-  it("authorizes before both secretless candidate checkouts", () => {
+  it("authorizes before both candidate checkouts and withholds deployment secrets", () => {
     const evidenceJob = workflow.jobs.evidence;
     const buildJob = workflow.jobs.build;
     expect(evidenceJob.needs).toBe("authorize");
@@ -698,7 +698,16 @@ describe("release bus v2 combined preflight", () => {
       issues: "read",
     });
     expect(buildJob.needs).toBe("evidence");
-    expect(buildJob.permissions).toEqual({ contents: "read" });
+    expect(buildJob.permissions).toEqual({
+      contents: "read",
+      packages: "read",
+    });
+    expect(
+      buildJob.steps.find(
+        (step: { name?: string }) =>
+          step.name === "Install and verify frozen dependencies once"
+      ).env.NODE_AUTH_TOKEN
+    ).toBe("${{ github.token }}");
     expect(JSON.stringify(evidenceJob.env ?? {})).not.toContain("secrets.");
     expect(JSON.stringify(buildJob.env ?? {})).not.toContain("secrets.");
     expect(

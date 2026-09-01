@@ -303,6 +303,7 @@ describe("runner benchmark workflow boundary", () => {
     expect(candidate["jobs"].benchmark["permissions"]).toEqual({
       contents: "read",
       actions: "none",
+      packages: "read",
     });
     expect(candidate["jobs"].verify["runs-on"]).toBe("ubuntu-latest");
     expect(candidate["jobs"].verify["permissions"]).toEqual({
