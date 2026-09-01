@@ -115,7 +115,10 @@ CLAUDE.md
 # absolute path when the checkout itself lives under .claude/worktrees/<wt>
 # (agent worktrees) — producing ~23 false unused-file/export findings.
 /.claude/
-.codex
+/.codex/*
+!/.codex/environments/
+/.codex/environments/*
+!/.codex/environments/environment.toml
 .gemini
 .windsurfrules
 .agent
