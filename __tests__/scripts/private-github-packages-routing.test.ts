@@ -110,7 +110,7 @@ const routing =
 const secureRunner =
   require("../../scripts/run-secure-pnpm.cjs") as SecureRunnerModule;
 
-const REPOSITORY_ROOT = process.cwd();
+const REPOSITORY_ROOT = path.resolve(__dirname, "../..");
 const TEST_TOKEN = "read-only-test-token";
 const AUTH_HELPER_PATH = path.join(
   REPOSITORY_ROOT,
