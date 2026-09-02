@@ -123,6 +123,12 @@ function SubscriptionUnknown({
   locale: SupportedLocale;
 }>) {
   const isSubtle = layout !== "card";
+  const arrowClassName = clsx(
+    "tw-size-4 tw-flex-none tw-transition-colors",
+    isSubtle
+      ? "tw-text-iron-500 group-focus-visible:tw-text-white desktop-hover:group-hover:tw-text-white"
+      : MUTED_TEXT_CLASS
+  );
 
   return (
     <Link
@@ -130,7 +136,7 @@ function SubscriptionUnknown({
       className={clsx(
         "tw-group tw-flex tw-gap-2 tw-text-left tw-no-underline tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400",
         layout === "subtle"
-          ? "tw-w-fit tw-items-start tw-justify-end"
+          ? "tw-w-fit tw-items-center tw-justify-end"
           : "tw-w-full tw-items-center tw-justify-between",
         isSubtle
           ? `${getSubtleLayoutClass(layout)} desktop-hover:hover:tw-bg-white/[0.025]`
@@ -142,9 +148,9 @@ function SubscriptionUnknown({
       <span
         className={clsx(
           "tw-min-w-0",
-          isSubtle && "tw-flex tw-items-baseline",
-          layout === "subtle" && "tw-gap-2 tw-whitespace-nowrap",
-          layout === "wide-row" && "tw-flex-1 tw-flex-wrap tw-gap-1"
+          isSubtle && "tw-flex tw-flex-col",
+          layout === "subtle" && "tw-items-start tw-whitespace-nowrap",
+          layout === "wide-row" && "tw-flex-1"
         )}
       >
         <span
@@ -162,23 +168,20 @@ function SubscriptionUnknown({
           className={clsx(
             "tw-block tw-transition-colors",
             isSubtle
-              ? "tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-200 group-focus-visible:tw-text-white desktop-hover:group-hover:tw-text-white"
+              ? "tw-flex tw-items-center tw-gap-1 tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-200 group-focus-visible:tw-text-white desktop-hover:group-hover:tw-text-white"
               : `tw-text-[11px] ${MUTED_TEXT_CLASS}`,
             isSubtle ? "tw-mt-0" : "tw-mt-0.5"
           )}
         >
           {t(locale, "subscriptions.coverage.status.unknown")}
+          {isSubtle && (
+            <ArrowRightIcon className={arrowClassName} aria-hidden="true" />
+          )}
         </span>
       </span>
-      <ArrowRightIcon
-        className={clsx(
-          "tw-size-4 tw-flex-none tw-transition-colors",
-          isSubtle
-            ? "tw-text-iron-500 group-focus-visible:tw-text-white desktop-hover:group-hover:tw-text-white"
-            : MUTED_TEXT_CLASS
-        )}
-        aria-hidden="true"
-      />
+      {!isSubtle && (
+        <ArrowRightIcon className={arrowClassName} aria-hidden="true" />
+      )}
     </Link>
   );
 }
@@ -250,7 +253,7 @@ function SubscriptionSubtle({
       className={clsx(
         "tw-group tw-flex tw-gap-2 tw-text-left tw-no-underline tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400",
         isCompact
-          ? "tw-w-max tw-items-start tw-justify-end"
+          ? "tw-w-max tw-items-center tw-justify-end"
           : "tw-w-full tw-items-center tw-justify-between",
         `${getSubtleLayoutClass(layout)} desktop-hover:hover:tw-bg-white/[0.025]`
       )}
@@ -258,10 +261,8 @@ function SubscriptionSubtle({
       <SubscriptionStatusIcon tone={tone} />
       <span
         className={clsx(
-          "tw-flex tw-min-w-0 tw-items-baseline",
-          isCompact
-            ? "tw-gap-x-2 tw-whitespace-nowrap"
-            : "tw-flex-1 tw-flex-wrap tw-gap-x-1"
+          "tw-flex tw-min-w-0 tw-flex-col",
+          isCompact ? "tw-items-start tw-whitespace-nowrap" : "tw-flex-1"
         )}
       >
         <span className="tw-inline-block tw-text-[11px] tw-font-semibold tw-uppercase tw-tracking-[0.06em] tw-text-iron-500">
