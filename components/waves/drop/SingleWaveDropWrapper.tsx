@@ -181,7 +181,7 @@ export const SingleWaveDropWrapper: React.FC<SingleWaveDropWrapperProps> = ({
                 enter="tw-transition-opacity tw-duration-150 tw-ease-out motion-reduce:tw-transition-none"
                 enterFrom="tw-opacity-0"
                 enterTo="tw-opacity-100"
-                leave="tw-duration-120 tw-transition-opacity tw-ease-in motion-reduce:tw-transition-none"
+                leave="tw-duration-[120ms] tw-transition-opacity tw-ease-in motion-reduce:tw-transition-none"
                 leaveFrom="tw-opacity-100"
                 leaveTo="tw-opacity-0"
               >
@@ -189,10 +189,10 @@ export const SingleWaveDropWrapper: React.FC<SingleWaveDropWrapperProps> = ({
               </TransitionChild>
               <TransitionChild
                 as={Fragment}
-                enter="tw-duration-220 tw-transform tw-transition-transform tw-ease-out motion-reduce:tw-transform-none motion-reduce:tw-transition-none"
+                enter="tw-duration-[220ms] tw-transform tw-transition-transform tw-ease-out motion-reduce:tw-transform-none motion-reduce:tw-transition-none"
                 enterFrom="tw-translate-x-full motion-reduce:tw-translate-x-0"
                 enterTo="tw-translate-x-0"
-                leave="tw-duration-180 tw-transform tw-transition-transform tw-ease-in motion-reduce:tw-transform-none motion-reduce:tw-transition-none"
+                leave="tw-duration-[180ms] tw-transform tw-transition-transform tw-ease-in motion-reduce:tw-transform-none motion-reduce:tw-transition-none"
                 leaveFrom="tw-translate-x-0"
                 leaveTo="tw-translate-x-full motion-reduce:tw-translate-x-0"
               >
