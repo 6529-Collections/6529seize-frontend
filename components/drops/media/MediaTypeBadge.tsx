@@ -22,7 +22,7 @@ const FORMAT_ICONS: Record<MediaCategory, { viewBox: string; path: string }> = {
 interface MediaTypeBadgeProps {
   readonly mimeType: string | undefined;
   readonly dropId?: string;
-  readonly size?: "sm" | "md" | "lg";
+  readonly size?: "xs" | "sm" | "md" | "lg";
   readonly showTooltip?: boolean;
   readonly showLabel?: boolean;
   readonly tone?: "muted" | "color";
@@ -32,12 +32,14 @@ interface MediaTypeBadgeProps {
 }
 
 const SIZE_CLASSES = {
+  xs: "tw-size-5",
   sm: "tw-size-6",
   md: "tw-size-8",
   lg: "tw-size-10",
 };
 
 const ICON_SIZE_CLASSES = {
+  xs: "tw-size-2.5",
   sm: "tw-size-3",
   md: "tw-size-4",
   lg: "tw-size-5",

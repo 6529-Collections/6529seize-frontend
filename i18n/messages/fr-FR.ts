@@ -9,6 +9,15 @@ import stormComposerFrMessages from "@/i18n/messages/stormComposer.fr-FR.json";
 import type { MessageKey } from "@/i18n/messages/en-US";
 
 export const FR_FR_MESSAGES = {
+  "network.groupInspection.bulkRep":
+    "Donner du REP à tous les profils correspondant aux critères",
+  "network.groupInspection.bulkNic":
+    "Donner du NIC à tous les profils correspondant aux critères",
+  "network.groupInspection.bulkActionsLabel": "Actions de notation groupée",
+  "network.groupInspection.bulkRepSuccess": "REP distribué.",
+  "network.groupInspection.bulkNicSuccess": "NIC distribué.",
+  "network.groupInspection.source":
+    "Source : filtres et liste manuelle facultative",
   "user.brain.sidebar.createdHeading": "Waves créées",
   "user.brain.sidebar.createdMobileHeading": "Créées",
   "user.brain.sidebar.recentlyActiveHeading": "Activité récente dans",
@@ -991,5 +1000,16 @@ export const FR_FR_MESSAGES = {
   "home.mintAllowlist.pill.allowlist": "{phase} · {allowlist}x Allowlist",
   "home.mintAllowlist.pill.mixed":
     "{phase} · {airdrop}x Airdrop · {allowlist}x Allowlist",
+  "profilePreferences.notifications.heading": "Notifications",
+  "profilePreferences.notifications.ALL.label": "Toutes",
+  "notifications.filter.ariaLabel": "Filtrer les notifications : {selection}",
+  "notifications.filter.selected": "{count} sélectionnées",
+  "notifications.filter.sheetTitle": "Filtrer les notifications",
+  "notifications.filter.option.mentions": "Mentions",
+  "notifications.filter.option.replies": "Réponses",
+  "notifications.filter.option.identity": "Identité",
+  "notifications.filter.option.reactions": "Réactions",
+  "notifications.filter.option.invites": "Invitations",
+  "notifications.filter.option.subscriptions": "Abonnements",
   ...FR_FR_TRANSFER_MESSAGES,
 } satisfies Partial<Record<MessageKey, string>>;

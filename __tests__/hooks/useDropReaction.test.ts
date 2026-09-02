@@ -291,9 +291,10 @@ describe("useDropReaction", () => {
     expect(commonApi.commonApiDelete).not.toHaveBeenCalled();
   });
 
-  it("disables reactions when the current wave capability is disabled", async () => {
+  it("disables reactions when chat and reactions are disabled for the wave", async () => {
     mockGetEligibility.mockReturnValue({
       authenticated_user_eligible_to_chat: false,
+      authenticated_user_chat_restriction: ChatRestriction.DISABLED,
     });
 
     const { result } = renderHook(() =>
@@ -356,6 +357,26 @@ describe("useDropReaction", () => {
     expect(commonApi.commonApiPost).toHaveBeenCalledTimes(1);
   });
 
+  it("allows reactions when the viewer lacks chat-group permission", async () => {
+    mockGetEligibility.mockReturnValue({
+      authenticated_user_eligible_to_chat: false,
+      authenticated_user_chat_restriction: ChatRestriction.NO_PERMISSION,
+    });
+    (commonApi.commonApiPost as jest.Mock).mockResolvedValueOnce({});
+
+    const { result } = renderHook(() =>
+      useDropReaction(mockDrop, { source: "quick-react" })
+    );
+
+    expect(result.current.canReact).toBe(true);
+
+    await act(async () => {
+      await result.current.react(":smile:");
+    });
+
+    expect(commonApi.commonApiPost).toHaveBeenCalledTimes(1);
+  });
+
   it("handles an exact stale capability 403 and disables later reactions", async () => {
     (commonApi.commonApiPost as jest.Mock).mockRejectedValueOnce(
       createStructuredReactionError({
@@ -377,6 +398,7 @@ describe("useDropReaction", () => {
 
     expect(mockUpdateEligibility).toHaveBeenCalledWith("wave-1", {
       authenticated_user_eligible_to_chat: false,
+      authenticated_user_chat_restriction: ChatRestriction.DISABLED,
     });
     expect(setToastMock).toHaveBeenCalledWith({
       message: "Reactions are disabled for this wave.",

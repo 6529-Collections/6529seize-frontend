@@ -427,7 +427,7 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
         <div
           ref={controlsRowRef}
           data-testid="leaderboard-header-controls-row"
-          className={`tw-flex tw-min-w-0 tw-flex-1 tw-flex-nowrap tw-items-center tw-gap-2 ${
+          className={`tw-flex tw-min-w-0 tw-flex-1 tw-flex-nowrap tw-items-start tw-gap-2 ${
             controlsRowBasisClass
           } ${
             layout.enableControlsScroll

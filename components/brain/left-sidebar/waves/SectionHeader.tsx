@@ -5,6 +5,7 @@ import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 interface SectionHeaderProps {
   readonly label: string;
   readonly icon?: IconDefinition | undefined;
+  readonly labelTrailingContent?: React.ReactNode | undefined;
   readonly rightContent?: React.ReactNode | undefined;
   readonly paddingClassName?: string | undefined;
 }
@@ -12,6 +13,7 @@ interface SectionHeaderProps {
 const SectionHeader: React.FC<SectionHeaderProps> = ({
   label,
   icon,
+  labelTrailingContent,
   rightContent,
   paddingClassName = "tw-px-4",
 }) => {
@@ -26,6 +28,7 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({
         <span className="tw-text-xl tw-font-semibold tw-tracking-tight tw-text-iron-50">
           {label}
         </span>
+        {labelTrailingContent}
       </div>
       {rightContent !== undefined && rightContent !== null && (
         <div className="tw-flex tw-items-center">{rightContent}</div>

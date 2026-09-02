@@ -19,12 +19,14 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  debt-ratchet:
-    name: Debt ratchet
+  debt-ratchet-private:
+    name: Dependency-backed debt checks
+    if: github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
       contents: read
+      packages: read
 
     steps:
       - name: Checkout code
@@ -56,6 +58,7 @@ jobs:
       # so this standalone required check installs dependencies before running.
       - name: Install dependencies
         env:
+          NODE_AUTH_TOKEN: ${{ github.token }}
           SFW_BIN: ${{ steps.socket_firewall.outputs.firewall-path-binary }}
         run: ./bin/6529 install:frozen
 
@@ -64,3 +67,22 @@ jobs:
 
       - name: Check E2E pack manifest consumers
         run: ./bin/6529 run e2e-manifest:check
+
+  debt-ratchet:
+    name: Debt ratchet
+    if: always()
+    needs: debt-ratchet-private
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    permissions:
+      contents: read
+
+    steps:
+      - name: Require the trusted debt result
+        env:
+          DEBT_RATCHET_RESULT: ${{ needs.debt-ratchet-private.result }}
+        run: |
+          if [ "$DEBT_RATCHET_RESULT" != "success" ]; then
+            echo "Debt checks require a trusted repository PR and a successful dependency-backed run." >&2
+            exit 1
+          fi

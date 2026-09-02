@@ -252,6 +252,7 @@ jobs:
     permissions:
       contents: read
       actions: none
+      packages: read
     steps:
       - name: Require authenticated controller dispatch before source checkout
         env:
@@ -405,6 +406,7 @@ jobs:
         id: install_frozen
         working-directory: source
         env:
+          NODE_AUTH_TOKEN: ${{ github.token }}
           SFW_BIN: ${{ steps.socket_firewall.outputs.firewall-path-binary }}
         run: |
           set -euo pipefail

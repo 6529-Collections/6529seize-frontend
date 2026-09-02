@@ -408,6 +408,7 @@ jobs:
     timeout-minutes: 60
     permissions:
       contents: read
+      packages: read
     outputs:
       failure_class: ${{ steps.classify.outputs.failure_class }}
       failure_phase: ${{ steps.classify.outputs.failure_phase }}
@@ -420,8 +421,9 @@ jobs:
       IPFS_GATEWAY_ENDPOINT: https://ipfs.6529.io
       GIPHY_API_KEY: ${{ vars.GIPHY_API_KEY }}
     steps:
-      # Candidate code is built without workflow credentials or Release Bus
-      # secrets. Exact-head quality gates already ran in merge-tree PR CI.
+      # Candidate code is built without deployment credentials or Release Bus
+      # secrets. The read-only package token exists only during the frozen
+      # install. Exact-head quality gates already ran in merge-tree PR CI.
       # codeql[actions/untrusted-checkout/medium]
       - name: Check out exact composed SHA
         id: checkout
@@ -475,6 +477,7 @@ jobs:
         if: always() && steps.package-manager.outcome == 'success'
         continue-on-error: true
         env:
+          NODE_AUTH_TOKEN: ${{ github.token }}
           RELEASE_BUS_INSTALL_EVIDENCE: ${{ runner.temp }}/release-bus-evidence/dependency-install.json
           RELEASE_BUS_SOCKET_FIREWALL_OUTCOME: ${{ steps.socket-firewall.outcome }}
           SFW_BIN: ${{ steps.socket-firewall.outputs.firewall-path-binary }}

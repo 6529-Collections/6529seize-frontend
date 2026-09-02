@@ -11,7 +11,7 @@ import {
 } from "@/services/groups/groupMutations";
 import type { ValidationResult as GroupValidationResult } from "@/services/groups/groupMutations";
 
-export interface SubmitArgs {
+interface SubmitArgs {
   readonly payload: ApiCreateGroup;
   readonly previousGroup?: ApiGroupFull | null | undefined;
   readonly currentHandle?: string | null | undefined;

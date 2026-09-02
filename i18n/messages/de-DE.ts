@@ -11,6 +11,15 @@ import type { MessageKey } from "@/i18n/messages/en-US";
 const RETRY_LABEL = "Erneut versuchen";
 
 export const DE_DE_MESSAGES = {
+  "network.groupInspection.bulkRep":
+    "Allen Profilen, die den Kriterien entsprechen, REP geben",
+  "network.groupInspection.bulkNic":
+    "Allen Profilen, die den Kriterien entsprechen, NIC geben",
+  "network.groupInspection.bulkActionsLabel": "Massenbewertungsaktionen",
+  "network.groupInspection.bulkRepSuccess": "REP wurde verteilt.",
+  "network.groupInspection.bulkNicSuccess": "NIC wurde verteilt.",
+  "network.groupInspection.source":
+    "Quelle: Filter und optionale manuelle Liste",
   "user.brain.sidebar.createdHeading": "Erstellte Waves",
   "user.brain.sidebar.createdMobileHeading": "Erstellt",
   "user.brain.sidebar.recentlyActiveHeading": "Kürzlich aktiv in",
@@ -986,5 +995,16 @@ export const DE_DE_MESSAGES = {
   "home.mintAllowlist.pill.allowlist": "{phase} · {allowlist}x Allowlist",
   "home.mintAllowlist.pill.mixed":
     "{phase} · {airdrop}x Airdrop · {allowlist}x Allowlist",
+  "profilePreferences.notifications.heading": "Benachrichtigungen",
+  "profilePreferences.notifications.ALL.label": "Alle",
+  "notifications.filter.ariaLabel": "Benachrichtigungen filtern: {selection}",
+  "notifications.filter.selected": "{count} ausgewählt",
+  "notifications.filter.sheetTitle": "Benachrichtigungen filtern",
+  "notifications.filter.option.mentions": "Erwähnungen",
+  "notifications.filter.option.replies": "Antworten",
+  "notifications.filter.option.identity": "Identität",
+  "notifications.filter.option.reactions": "Reaktionen",
+  "notifications.filter.option.invites": "Einladungen",
+  "notifications.filter.option.subscriptions": "Abonnements",
   ...DE_DE_TRANSFER_MESSAGES,
 } satisfies Partial<Record<MessageKey, string>>;
