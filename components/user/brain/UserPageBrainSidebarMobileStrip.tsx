@@ -134,7 +134,7 @@ export default function UserPageBrainSidebarMobileStrip({
         locale,
         "user.brain.sidebar.mobileStripLabel"
       )}
-      className="tw-mb-4 lg:tw-hidden"
+      className="lg:tw-hidden"
       data-testid="brain-sidebar-mobile-strip"
     >
       <div className="tw-flex tw-items-end tw-gap-4 tw-overflow-x-auto tw-overflow-y-hidden tw-pb-1.5 tw-pr-4 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/60 desktop-hover:hover:tw-scrollbar-thumb-iron-500">
