@@ -347,8 +347,8 @@ importers:
         version: 3.25.76
     devDependencies:
       '@6529-collections/release-request':
-        specifier: 0.0.2
-        version: 0.0.2
+        specifier: 0.0.3
+        version: 0.0.3
       '@axe-core/playwright':
         specifier: 4.12.1
         version: 4.12.1(playwright-core@1.61.1)
@@ -520,8 +520,8 @@ importers:
 
 packages:
 
-  '@6529-collections/release-request@0.0.2':
-    resolution: {integrity: sha512-8lx1FCS9NSXQ3QJR+PbtptAhh16MHC3aATYfbxHQWs/ICpNa+N/h9Jl4C85dhSbMJGaifl2LP02eJFJcFVaTlw==, tarball: https://npm.pkg.github.com/download/@6529-collections/release-request/0.0.2/1df8b6fbc1324733fbd5f24be86dce52693390f6}
+  '@6529-collections/release-request@0.0.3':
+    resolution: {integrity: sha512-hOBpv7kbJihS51uzysMQxTgq4lZshKFr3HaPT0haoppiPYquSL7HrLKLIPrx9jf1VEIgqRxmMYw2+515dw/TlQ==, tarball: https://npm.pkg.github.com/download/@6529-collections/release-request/0.0.3/7cafe723b35db8ccf76eba6b856f3840412796b4}
     engines: {node: '>=20'}
     hasBin: true
 
@@ -8958,7 +8958,7 @@ packages:
 
 snapshots:
 
-  '@6529-collections/release-request@0.0.2':
+  '@6529-collections/release-request@0.0.3':
     dependencies:
       ajv: 8.20.0
       ajv-formats: 3.0.1(ajv@8.20.0)
