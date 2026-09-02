@@ -65,7 +65,7 @@ describe("automatic production E2E dispatch", () => {
     );
   });
 
-  it("waits for the exact E2E terminal state and dispatches exact authority completion", () => {
+  it("accepts a newer main workflow SHA while dispatching exact authority completion", () => {
     const job = dispatch.jobs["dispatch-successful-deploy"];
     const step = job.steps.find(
       (candidate: { name?: string }) =>
@@ -75,11 +75,11 @@ describe("automatic production E2E dispatch", () => {
 
     expect(step.env).toEqual(
       expect.objectContaining({
-        DEPLOY_HEAD_SHA: "${{ github.event.workflow_run.head_sha }}",
         DEPLOY_WORKFLOW_RUN_ID: "${{ github.event.workflow_run.id }}",
         E2E_RUN_ID: "${{ steps.e2e.outputs.run_id }}",
       })
     );
+    expect(step.env).not.toHaveProperty("DEPLOY_HEAD_SHA");
     expect(step.run).toContain("for _ in $(seq 1 400); do");
     expect(step.run).toContain(
       '.name == ("Production E2E automatic " + $deploy_run_id)'
@@ -88,7 +88,12 @@ describe("automatic production E2E dispatch", () => {
     expect(step.run).toContain(
       '.path == ".github/workflows/production-e2e.yml"'
     );
-    expect(step.run).toContain(".head_sha == $head_sha");
+    expect(step.run).toContain(
+      '(.head_sha | test("^[a-f0-9]{40}$"))'
+    );
+    expect(step.run).not.toContain(".head_sha == $head_sha");
+    expect(step.run).not.toContain("--arg head_sha");
+    expect(step.run).not.toContain("DEPLOY_HEAD_SHA");
     expect(step.run).toContain('.actor.login == "github-actions[bot]"');
     expect(step.run).toContain('if [ "$status" = completed ]; then');
     expect(step.run).toContain(
