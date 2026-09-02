@@ -76,8 +76,19 @@ jest.mock(
   "@/components/drops/view/item/content/media/DropListItemContentMedia",
   () => () => <div data-testid="media" />
 );
-jest.mock("@/components/waves/drops/WaveDropActionsMore", () => () => (
-  <div data-testid="more-actions" />
+jest.mock("@/components/waves/drops/WaveDropActionsOpen", () => () => (
+  <button
+    type="button"
+    data-testid="desktop-open-action"
+    onClick={(event) => event.stopPropagation()}
+  />
+));
+jest.mock("@/components/waves/drops/WaveDropActionsOptions", () => () => (
+  <button
+    type="button"
+    data-testid="desktop-delete-action"
+    onClick={(event) => event.stopPropagation()}
+  />
 ));
 jest.mock("@/components/content-moderation/ContentModerationDropActions", () =>
   jest.fn(() => null)
@@ -218,6 +229,42 @@ test("opens voting modal on desktop", async () => {
   expect(screen.getByTestId("modal")).toHaveTextContent("closed");
   await userEvent.click(screen.getByTestId("vote-btn"));
   expect(screen.getByTestId("modal")).toHaveTextContent("open");
+});
+
+test("shows direct open and delete actions on desktop", () => {
+  useDeviceInfo.mockReturnValue({ hasTouchScreen: false });
+  useIsMobileScreen.mockReturnValue(false);
+
+  render(<MemesLeaderboardDrop drop={drop} onDropClick={jest.fn()} />);
+
+  expect(screen.getByTestId("desktop-open-action")).toBeInTheDocument();
+  expect(screen.getByTestId("desktop-delete-action")).toBeInTheDocument();
+  expect(screen.queryByTestId("more-actions")).not.toBeInTheDocument();
+});
+
+test("keeps direct desktop actions from triggering the leaderboard card", async () => {
+  const user = userEvent.setup();
+  const onDropClick = jest.fn();
+  useDeviceInfo.mockReturnValue({ hasTouchScreen: false });
+  useIsMobileScreen.mockReturnValue(false);
+
+  render(<MemesLeaderboardDrop drop={drop} onDropClick={onDropClick} />);
+
+  await user.click(screen.getByTestId("desktop-open-action"));
+  await user.click(screen.getByTestId("desktop-delete-action"));
+
+  expect(onDropClick).not.toHaveBeenCalled();
+});
+
+test("keeps open and hides delete when desktop deletion is unavailable", () => {
+  useDropInteractionRules.mockReturnValue({ canDelete: false });
+  useDeviceInfo.mockReturnValue({ hasTouchScreen: false });
+  useIsMobileScreen.mockReturnValue(false);
+
+  render(<MemesLeaderboardDrop drop={drop} onDropClick={jest.fn()} />);
+
+  expect(screen.getByTestId("desktop-open-action")).toBeInTheDocument();
+  expect(screen.queryByTestId("desktop-delete-action")).not.toBeInTheDocument();
 });
 
 test("uses mobile modal on small screens", async () => {
