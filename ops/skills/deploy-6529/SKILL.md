@@ -44,7 +44,7 @@ The initial `release-bus-status.mjs` check above remains the first action. After
 it succeeds, classify the requested work before any candidate registration,
 merge, deployment, or environment mutation.
 
-Run this preflight only when introducing a new staging release intent or a new
+Run this observation only when introducing a new staging release intent or a new
 direct production release intent. Do not run it for merge-only work, status or
 monitoring, retry or resume, recovery, production continuation, promotion of an
 existing release, or lane toggles.
@@ -97,10 +97,11 @@ waits for the central GitHub workflow, so it can delay the release while
 GitHub queues or runs that workflow. The conditional only makes a returned
 failure non-gating; it does not put the call in the background or bound its
 wait. Do not retry, background, detach, wrap in a shell timeout, or replace it
-with a direct GitHub call during the release. A true no-wait path requires a
-separate future change to the Coordinator CLI/package. The CLI owns its central
-GitHub dispatch and wait; do not dispatch, name, or poll a GitHub workflow
-separately.
+with a direct GitHub call during the release. If the wait never returns, stop
+and escalate to the Coordinator owner; do not invent a time limit or an
+interrupt-to-continue bypass. A true no-wait path requires a separate future
+change to the Coordinator CLI/package. The CLI owns its central GitHub dispatch
+and wait; do not dispatch, name, or poll a GitHub workflow separately.
 
 Treat the result as observation only:
 

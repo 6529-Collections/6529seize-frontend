@@ -118,8 +118,10 @@ itself. The command runs in the foreground and can delay the release while it
 waits for GitHub to queue and run the workflow. The conditional only keeps a
 returned failure from gating the existing flow; it does not make submission
 background or no-wait. Do not retry, background, detach, add a shell timeout,
-or replace it with a direct GitHub call during the release. A true no-wait path
-requires a separate future Coordinator CLI/package change.
+or replace it with a direct GitHub call during the release. If the wait never
+returns, stop and escalate to the Coordinator owner; do not invent a time limit
+or an interrupt-to-continue bypass. A true no-wait path requires a separate
+future Coordinator CLI/package change.
 
 This step is skipped for merge-only work, status or monitoring, retry or
 resume, recovery, production continuation or promotion of an existing release,

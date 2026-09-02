@@ -443,6 +443,10 @@ describe("release-request observation", () => {
       "The initial `release-bus-status.mjs` check above remains the first action."
     );
     expect(normalizedSkill).toContain(
+      "Run this observation only when introducing a new staging release intent"
+    );
+    expect(normalizedSkill).not.toContain("Run this preflight");
+    expect(normalizedSkill).toContain(
       "A returned success or failure never gates, replaces, reorders, or weakens"
     );
   });
@@ -492,6 +496,12 @@ describe("release-request observation", () => {
       "A true no-wait path requires a separate future change to the Coordinator CLI/package"
     );
     expect(normalizedSkill).toContain(
+      "If the wait never returns, stop and escalate to the Coordinator owner"
+    );
+    expect(normalizedSkill).toContain(
+      "do not invent a time limit or an interrupt-to-continue bypass"
+    );
+    expect(normalizedSkill).toContain(
       "Keep the JSON limited to release metadata"
     );
     expect(normalizedSkill).toContain(
@@ -519,6 +529,12 @@ describe("release-request observation", () => {
     );
     expect(normalizedDocumentation).toContain(
       "The command runs in the foreground and can delay the release"
+    );
+    expect(normalizedDocumentation).toContain(
+      "If the wait never returns, stop and escalate to the Coordinator owner"
+    );
+    expect(normalizedDocumentation).toContain(
+      "do not invent a time limit or an interrupt-to-continue bypass"
     );
     expect(normalizedDocumentation).toContain(
       "`requested_by` is descriptive context, not authentication or approval"
