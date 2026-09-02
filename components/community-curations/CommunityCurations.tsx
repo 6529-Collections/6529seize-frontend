@@ -3,8 +3,8 @@
 import { COMMUNITY_CURATIONS_LIMIT } from "@/components/community-curations/communityCurations.constants";
 import CommunityCurationsMasonry from "@/components/community-curations/CommunityCurationsMasonry";
 import { useLayout } from "@/components/brain/my-stream/layout/LayoutContext";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useCommunityCurationsDrops } from "@/hooks/useCommunityCurationsDrops";
-import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { useCallback, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
@@ -132,15 +132,14 @@ function CommunityCurationsEmptyState({
 
 interface CommunityCurationsProps {
   readonly heightStyle?: CSSProperties | undefined;
-  readonly locale?: SupportedLocale | undefined;
   readonly topContent?: ReactNode | undefined;
 }
 
 export default function CommunityCurations({
   heightStyle,
-  locale = DEFAULT_LOCALE,
   topContent,
 }: CommunityCurationsProps = {}) {
+  const locale = useBrowserLocale();
   const { waveViewStyle } = useLayout();
   const [scrollContainer, setScrollContainer] = useState<HTMLElement | null>(
     null
