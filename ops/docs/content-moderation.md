@@ -216,8 +216,12 @@ the post's global visibility.
 
 Authorized moderators can review open reports in **WatchTower** at
 `/content-moderation`. The full-width queue fills the available page height.
-WatchTower separates **Open reports**, **Resolved reports**, and **Suspended
-profiles**, each with a current count. Each report identifies both the author
+WatchTower separates **Open reports**, **Resolved reports**, **Suspended
+profiles**, and **Block activity**. Block activity is a newest-first,
+continuously loaded trail showing who blocked whom, with both profiles linked
+and each event dated. It records only actual unblocked-to-blocked transitions;
+blocking remains independent from reporting, AI assessment, content decisions,
+and profile suspension. Each report identifies both the author
 and the profile that submitted it, makes the content primary, shows a compact
 AI summary with expandable detail, and keeps audit history available. A neutral
 AI category is omitted; a substantive category is labelled **Potential

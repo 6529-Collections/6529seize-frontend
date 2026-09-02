@@ -1,16 +1,22 @@
 import ContentModerationPageClient from "@/app/content-moderation/page.client";
+import type { ApiContentModerationBlockActivityItem } from "@/generated/models/ApiContentModerationBlockActivityItem";
 import type { ApiContentModerationQueueItem } from "@/generated/models/ApiContentModerationQueueItem";
 import { ApiContentModerationRecommendation } from "@/generated/models/ApiContentModerationRecommendation";
 import { ApiContentModerationReportReason } from "@/generated/models/ApiContentModerationReportReason";
 import { ApiContentModerationReportStatus } from "@/generated/models/ApiContentModerationReportStatus";
 import { ApiDropModerationStatus } from "@/generated/models/ApiDropModerationStatus";
 import { ApiModeratedProfileStatus } from "@/generated/models/ApiModeratedProfileStatus";
-import { fetchContentModerationQueue } from "@/services/api/content-moderation-api";
+import {
+  fetchContentModerationBlockActivity,
+  fetchContentModerationQueue,
+} from "@/services/api/content-moderation-api";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 let mockFetchingProfile = false;
+let mockBlockActivityIntersection: ((isIntersecting: boolean) => void) | null =
+  null;
 
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: () => ({
@@ -40,8 +46,16 @@ jest.mock("@/hooks/useBrowserLocale", () => ({
   useBrowserLocale: () => "en-US",
 }));
 
+jest.mock("@/hooks/useIntersectionObserver", () => ({
+  useIntersectionObserver: (callback: (isIntersecting: boolean) => void) => {
+    mockBlockActivityIntersection = callback;
+    return { current: null };
+  },
+}));
+
 jest.mock("@/services/api/content-moderation-api", () => ({
   decideModeratedDrop: jest.fn(),
+  fetchContentModerationBlockActivity: jest.fn(),
   fetchContentModerationQueue: jest.fn(),
   fetchSuspendedModerationProfiles: jest.fn(),
   setModeratedProfileStatus: jest.fn(),
@@ -58,6 +72,10 @@ jest.mock("next/image", () => ({
 const mockFetchContentModerationQueue =
   fetchContentModerationQueue as jest.MockedFunction<
     typeof fetchContentModerationQueue
+  >;
+const mockFetchContentModerationBlockActivity =
+  fetchContentModerationBlockActivity as jest.MockedFunction<
+    typeof fetchContentModerationBlockActivity
   >;
 
 const createQueueItem = (index: number): ApiContentModerationQueueItem => ({
@@ -80,10 +98,25 @@ const createQueueItem = (index: number): ApiContentModerationQueueItem => ({
   history: [],
 });
 
+const createBlockActivityItem = (
+  index: number
+): ApiContentModerationBlockActivityItem => ({
+  id: `block-${index}`,
+  blocker_profile_id: `blocker-${index}`,
+  blocker_handle: `blocker${index}`,
+  blocker_pfp: null,
+  blocked_profile_id: `blocked-${index}`,
+  blocked_handle: `blocked${index}`,
+  blocked_pfp: null,
+  created_at: Date.UTC(2026, 8, 2, 10, index % 60),
+  cursor: `block-cursor-${index}`,
+});
+
 describe("ContentModerationPageClient pagination", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockFetchingProfile = false;
+    mockBlockActivityIntersection = null;
   });
 
   it("identifies the profile that submitted each report", async () => {
@@ -311,5 +344,64 @@ describe("ContentModerationPageClient pagination", () => {
     expect(
       screen.queryByText("Choose a content decision")
     ).not.toBeInTheDocument();
+  });
+
+  it("lazy-loads the newest-first block activity trail", async () => {
+    mockFetchContentModerationQueue.mockResolvedValue([]);
+    const firstPage = Array.from({ length: 50 }, (_, index) =>
+      createBlockActivityItem(index + 1)
+    );
+    mockFetchContentModerationBlockActivity
+      .mockResolvedValueOnce(firstPage)
+      .mockResolvedValueOnce(
+        Array.from({ length: 50 }, (_, index) =>
+          createBlockActivityItem(index + 51)
+        )
+      )
+      .mockResolvedValueOnce([createBlockActivityItem(101)]);
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <ContentModerationPageClient />
+      </QueryClientProvider>
+    );
+
+    await userEvent.click(screen.getByRole("tab", { name: "Block activity" }));
+
+    expect(
+      await screen.findByRole("link", { name: "@blocker1" })
+    ).toHaveAttribute("href", "/blocker1");
+    expect(screen.getByRole("link", { name: "@blocked1" })).toHaveAttribute(
+      "href",
+      "/blocked1"
+    );
+    expect(screen.getAllByText("blocked")[0]).toBeVisible();
+    expect(mockFetchContentModerationBlockActivity).toHaveBeenNthCalledWith(1, {
+      limit: 50,
+    });
+    expect(screen.getByRole("button", { name: "Load more" })).toBeVisible();
+
+    act(() => mockBlockActivityIntersection?.(true));
+
+    expect(
+      await screen.findByRole("link", { name: "@blocker51" })
+    ).toBeVisible();
+    expect(mockFetchContentModerationBlockActivity).toHaveBeenNthCalledWith(2, {
+      before: "block-cursor-50",
+      limit: 50,
+    });
+
+    await userEvent.click(screen.getByRole("button", { name: "Load more" }));
+
+    expect(
+      await screen.findByRole("link", { name: "@blocker101" })
+    ).toBeVisible();
+    expect(mockFetchContentModerationBlockActivity).toHaveBeenNthCalledWith(3, {
+      before: "block-cursor-100",
+      limit: 50,
+    });
   });
 });
