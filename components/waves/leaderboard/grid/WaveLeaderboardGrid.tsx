@@ -19,6 +19,7 @@ import {
   WaveLeaderboardVotingModal,
 } from "../WaveLeaderboardVotingModal";
 import { WaveLeaderboardGridItem } from "./WaveLeaderboardGridItem";
+import ContentModerationDropGate from "@/components/content-moderation/ContentModerationDropGate";
 
 export type WaveLeaderboardGridMode = "compact" | "content_only";
 
@@ -142,17 +143,19 @@ export const WaveLeaderboardGrid: React.FC<WaveLeaderboardGridProps> = ({
         isFetchNextPageError={isFetchNextPageError}
         isFetchPreviousPageError={isFetchPreviousPageError}
         renderItem={(drop) => (
-          <WaveLeaderboardGridItem
-            drop={drop}
-            mode={mode}
-            isVotingClosed={isVotingClosed}
-            isVotingControlsLocked={isVotingControlsLocked}
-            winningThreshold={winningThreshold}
-            winningThresholdMinDurationMs={winningThresholdMinDurationMs}
-            emphasizeCurrent={isProposalCard}
-            onDropClick={onDropClick}
-            onVoteClick={openVotingModal}
-          />
+          <ContentModerationDropGate drop={drop} compact>
+            <WaveLeaderboardGridItem
+              drop={drop}
+              mode={mode}
+              isVotingClosed={isVotingClosed}
+              isVotingControlsLocked={isVotingControlsLocked}
+              winningThreshold={winningThreshold}
+              winningThresholdMinDurationMs={winningThresholdMinDurationMs}
+              emphasizeCurrent={isProposalCard}
+              onDropClick={onDropClick}
+              onVoteClick={openVotingModal}
+            />
+          </ContentModerationDropGate>
         )}
       />
       <WaveLeaderboardVotingModal

@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useRef, useState } from "react";
 import {
   QueryKey,
   ReactQueryWrapperContext,
@@ -25,6 +25,7 @@ import { Tooltip } from "react-tooltip";
 import Button from "@/components/utils/button/Button";
 import type { ButtonSize } from "@/components/utils/button/buttonStyles";
 import UserMuteButton from "./UserMuteButton";
+import { NoSymbolIcon } from "@heroicons/react/24/outline";
 
 export enum UserFollowBtnSize {
   SMALL = "SMALL",
@@ -56,18 +57,89 @@ const DIRECT_MESSAGE_ICON_CLASSES: Record<UserFollowBtnSize, string> = {
   [UserFollowBtnSize.MEDIUM]: "tw-size-3.5 md:tw-size-4",
 };
 
+function FollowStateIcon({
+  loading,
+  blocked,
+  following,
+  size,
+}: {
+  readonly loading: boolean;
+  readonly blocked: boolean;
+  readonly following: boolean;
+  readonly size: UserFollowBtnSize;
+}) {
+  if (loading) {
+    return <CircleLoader size={FOLLOW_BTN_LOADER_SIZES[size]} />;
+  }
+  if (blocked) {
+    return (
+      <NoSymbolIcon
+        className={FOLLOW_BTN_SVG_CLASSES[size]}
+        aria-hidden="true"
+      />
+    );
+  }
+  if (following) {
+    return (
+      <svg
+        className="tw-h-3 tw-w-3"
+        width="17"
+        height="15"
+        viewBox="0 0 17 15"
+        fill="none"
+        aria-hidden="true"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          fillRule="evenodd"
+          clipRule="evenodd"
+          d="M14.7953 0.853403L5.24867 10.0667L2.71534 7.36007C2.24867 6.92007 1.51534 6.8934 0.982005 7.26674C0.462005 7.6534 0.315338 8.3334 0.635338 8.88007L3.63534 13.7601C3.92867 14.2134 4.43534 14.4934 5.00867 14.4934C5.55534 14.4934 6.07534 14.2134 6.36867 13.7601C6.84867 13.1334 16.0087 2.2134 16.0087 2.2134C17.2087 0.986737 15.7553 -0.093263 14.7953 0.84007V0.853403Z"
+          fill="currentColor"
+        />
+      </svg>
+    );
+  }
+  return (
+    <svg
+      className={FOLLOW_BTN_SVG_CLASSES[size]}
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden="true"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M12 5V19M5 12H19"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 export default function UserFollowBtn({
   handle,
   size = UserFollowBtnSize.MEDIUM,
   onDirectMessage,
   directMessageLoading,
   showMuteButton = true,
+  showFollowButton = true,
+  blocked = false,
+  blockStateLoading = false,
+  unblockPending = false,
+  onUnblock,
 }: {
   readonly handle: string;
   readonly size?: UserFollowBtnSize | undefined;
   readonly onDirectMessage?: (() => void | Promise<void>) | undefined;
   readonly directMessageLoading?: boolean | undefined;
   readonly showMuteButton?: boolean | undefined;
+  readonly showFollowButton?: boolean | undefined;
+  readonly blocked?: boolean | undefined;
+  readonly blockStateLoading?: boolean | undefined;
+  readonly unblockPending?: boolean | undefined;
+  readonly onUnblock?: (() => void) | undefined;
 }) {
   const { onIdentityFollowChange } = useContext(ReactQueryWrapperContext);
   const { setToast, requestAuth } = useContext(AuthContext);
@@ -83,19 +155,23 @@ export default function UserFollowBtn({
         await commonApiFetch<ApiIdentitySubscriptionActions>({
           endpoint: `/identities/${handle}/subscriptions`,
         }),
+      enabled: !blocked && !blockStateLoading && !unblockPending,
     });
-  const isInitialStatusLoading = isFetching && subscriptions === undefined;
+  const isInitialStatusLoading =
+    blockStateLoading ||
+    unblockPending ||
+    (!blocked && isFetching && subscriptions === undefined);
 
-  const getFollowing = () => !!subscriptions?.actions.length;
-  const getLabel = () => (getFollowing() ? "Following" : "Follow");
-
-  const [following, setFollowing] = useState<boolean>(() => getFollowing());
-  const [label, setLabel] = useState<string>(() => getLabel());
-
-  useEffect(() => {
-    setFollowing(getFollowing());
-    setLabel(getLabel());
-  }, [subscriptions]);
+  const following = !blocked && (subscriptions?.actions.length ?? 0) > 0;
+  let label = "Follow";
+  let actionAriaLabel = "Follow";
+  if (blocked) {
+    label = "Unblock";
+    actionAriaLabel = `Unblock ${handle}`;
+  } else if (following) {
+    label = "Following";
+    actionAriaLabel = "Unfollow";
+  }
 
   const followMutation = useMutation({
     mutationFn: async () => {
@@ -158,6 +234,10 @@ export default function UserFollowBtn({
   });
 
   const onFollow = async (): Promise<void> => {
+    if (blocked) {
+      onUnblock?.();
+      return;
+    }
     setMutating(true);
     const { success } = await requestAuth();
     if (!success) {
@@ -195,6 +275,7 @@ export default function UserFollowBtn({
   };
 
   const directMessageTooltipId = `dm-${handle}`;
+  const actionLoading = mutating || isInitialStatusLoading;
 
   return (
     <div className="tw-flex tw-items-center tw-gap-x-2">
@@ -237,52 +318,28 @@ export default function UserFollowBtn({
           iconClassName={DIRECT_MESSAGE_ICON_CLASSES[size]}
         />
       )}
-      <Button
-        onClick={onFollow}
-        disabled={mutating || isInitialStatusLoading}
-        aria-busy={mutating || isInitialStatusLoading || undefined}
-        aria-label={following ? "Unfollow" : "Follow"}
-        variant={following || isInitialStatusLoading ? "secondary" : "primary"}
-        size={FOLLOW_BUTTON_SIZES[size]}
-      >
-        {mutating || isInitialStatusLoading ? (
-          <CircleLoader size={FOLLOW_BTN_LOADER_SIZES[size]} />
-        ) : following ? (
-          <svg
-            className="tw-h-3 tw-w-3"
-            width="17"
-            height="15"
-            viewBox="0 0 17 15"
-            fill="none"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              fillRule="evenodd"
-              clipRule="evenodd"
-              d="M14.7953 0.853403L5.24867 10.0667L2.71534 7.36007C2.24867 6.92007 1.51534 6.8934 0.982005 7.26674C0.462005 7.6534 0.315338 8.3334 0.635338 8.88007L3.63534 13.7601C3.92867 14.2134 4.43534 14.4934 5.00867 14.4934C5.55534 14.4934 6.07534 14.2134 6.36867 13.7601C6.84867 13.1334 16.0087 2.2134 16.0087 2.2134C17.2087 0.986737 15.7553 -0.093263 14.7953 0.84007V0.853403Z"
-              fill="currentColor"
-            />
-          </svg>
-        ) : (
-          <svg
-            className={FOLLOW_BTN_SVG_CLASSES[size]}
-            viewBox="0 0 24 24"
-            fill="none"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M12 5V19M5 12H19"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        )}
-        <span>{label}</span>
-      </Button>
+      {showFollowButton ? (
+        <Button
+          onClick={onFollow}
+          disabled={actionLoading || (blocked && !onUnblock)}
+          aria-busy={actionLoading || undefined}
+          aria-label={actionAriaLabel}
+          variant={
+            blocked || following || isInitialStatusLoading
+              ? "secondary"
+              : "primary"
+          }
+          size={FOLLOW_BUTTON_SIZES[size]}
+        >
+          <FollowStateIcon
+            loading={actionLoading}
+            blocked={blocked}
+            following={following}
+            size={size}
+          />
+          <span>{label}</span>
+        </Button>
+      ) : null}
     </div>
   );
 }

@@ -5,6 +5,159 @@
   "base_url": "https://6529.io",
   "records": [
     {
+      "id": "content-moderation.controls",
+      "kind": "workflow",
+      "title": "Content moderation and personal visibility controls",
+      "aliases": [
+        "report a post",
+        "hide a post",
+        "block an author",
+        "unblock a profile",
+        "content preferences",
+        "moderation queue",
+        "WatchTower",
+        "WatchTower - Content Moderation"
+      ],
+      "keywords": [
+        "content moderation",
+        "report",
+        "hide",
+        "block",
+        "unblock",
+        "safety",
+        "quarantine",
+        "removed",
+        "moderator"
+      ],
+      "facts": [
+        "Authenticated users can use the final Flag Content entry in a Wave post's More menu on desktop or action sheet on mobile to report, hide, block, or combine those actions.",
+        "No action is selected by default. Reporting automatically hides the post for the reporter; hide-only and block-only actions remain available, and blocking is still optional when reporting.",
+        "Only the reporter sees the compact Reported or Reviewed control inside the post. It opens report details and keeps the submitted Report option checked and locked; Reveal is temporary, Unhide removes only the personal hide, and neither withdraws the report.",
+        "An open report can be withdrawn from a separate confirmation state until a moderator resolves it. A successful withdrawal closes the dialog, leaves the post hidden, does not affect other reporters, and permits that profile to report the post later. After either reviewed outcome, the same profile cannot report the unchanged post again, while other profiles may still report it independently.",
+        "Reporters see only Awaiting review, No action taken, or Content removed outcomes; moderator identity, internal notes, AI details, and other reporters remain private.",
+        "Personally hidden posts and posts from blocked authors keep their original layout under a non-interactive blur. Reveal is temporary; Unhide and Unblock persist through the API and update mounted posts immediately.",
+        "Notification, messaging, blocked-profile, and report-history settings are combined at /preferences. Blocked Profiles is available at /preferences?tab=blocked-profiles, Reports is available at /preferences?tab=reports, and the older content-preferences paths resolve to Blocked Profiles.",
+        "The Reports tab lists reports submitted by the current profile, a snapshot of each reported post, its Wave name and picture, and its public review status. The Wave remains linked after removal; visible posts also link to their exact Wave or direct-message context, while media and files stay collapsed by default. Open reports can be withdrawn there; AI assessments, parent evidence, internal notes or reasons, moderator identity, and other reporters are not exposed.",
+        "Preferences are profile-scoped. An authenticated wallet without a profile sees a Create profile action instead of a connection prompt, and the controls become available after profile creation.",
+        "A blocked profile's avatar and handle in Preferences link to its public profile. Its profile header shows a red-tinted Blocked status beside the handle, keeps Direct Message available, and puts a separate confirmation-backed Unblock action where Follow normally appears.",
+        "Blocking hides the profile's content, treats its activity as muted, automatically unfollows it, and prevents following again until it is unblocked. It does not notify the blocked profile or remove that profile's subscription to the blocker.",
+        "Unblocked profile headers place icon-labelled Mute notifications or Unmute notifications and Block profile in one responsive profile-actions menu instead of showing a standalone mute button. Desktop uses an overflow menu, while mobile browsers and the mobile app use a bottom sheet. Blocking still requires confirmation.",
+        "Blocked public profiles remain reachable. Public profile and Brain summary metadata stays visible, while each Brain activity post keeps its normal height under a blur with visible Wave information. Reveal is temporary and changes to Hide again without resizing the card.",
+        "Blocking does not prevent one-to-one direct-message creation or delivery. The blocker's existing and future conversation is instead treated as muted and deprioritized, blocked-author messages stay hidden until individually revealed, and the other profile receives no block disclosure.",
+        "Group direct messages and shared Waves remain usable and are not muted as a whole. Blocked-author posts stay hidden and do not create ordinary notifications, push notifications, or direct-message unread counts for the blocker; other members behave normally.",
+        "Globally quarantined or moderator-removed posts cannot be revealed. Primary Wave chat keeps author, time, and Wave context while replacing only the body; compact secondary surfaces use a redacted tombstone.",
+        "The author can still see their own globally moderated post and its moderation state; other viewers receive redacted content.",
+        "Only server-authorized moderators see and can use the WatchTower side-navigation item at /content-moderation on desktop, mobile browser, and mobile app. It is not in the profile menu. The page heading is WatchTower - Content Moderation.",
+        "WatchTower identifies both the author and reporter, separates Open reports, Resolved reports, and Suspended profiles, and lets moderators select one explained content decision, optionally add an internal note, and apply it once.",
+        "Allow keeps or restores a post to visible and closes its reports; Quarantine hides it globally while reports remain open; Remove hides it globally and closes its reports as removed.",
+        "Profile suspension is separate from the post decision, prevents future creates and edits without changing existing posts, and can be reversed from the central Suspended profiles view or a moderator-only profile action. A moderator's personal Blocked state remains independent.",
+        "WatchTower omits the neutral AI category NONE and labels a substantive AI result as a Potential category because the moderator decision remains authoritative.",
+        "A still-valid saved session can authorize posting and other authenticated actions without an active wallet connection or supported signing network. If the session expires, the app preserves the connection and profile selection, checks that signing is available before invalidating the expired session, and requests a new signature only when it can safely continue.",
+        "WatchTower shows a red navigation indicator while open reports need review and refreshes that lightweight state periodically while the app is active.",
+        "Someone who opens /content-moderation without moderator access sees a countdown and is redirected home; a failed access check shows an error instead of being treated as a denial."
+      ],
+      "canonical_path": "/preferences",
+      "link_label": "Preferences",
+      "related_paths": [
+        "/preferences?tab=blocked-profiles",
+        "/preferences?tab=reports",
+        "/content-moderation",
+        "/waves"
+      ],
+      "tags": ["waves", "safety", "moderation", "privacy"],
+      "source_refs": [
+        "ops/docs/content-moderation.md",
+        "app/preferences/page.client.tsx",
+        "app/content-moderation/page.client.tsx",
+        "components/content-moderation/ContentModerationDropActions.tsx",
+        "components/content-moderation/ContentModerationDropGate.tsx",
+        "components/preferences/ReportsPreferencesSettings.tsx",
+        "components/user/user-page-header/BlockedProfileHeaderIndicator.tsx",
+        "components/user/user-page-header/ProfileBlockActionMenu.tsx",
+        "services/content-moderation/content-moderation-query.ts"
+      ]
+    },
+    {
+      "id": "content-moderation.posting-safety",
+      "kind": "workflow",
+      "title": "Pre-publication safety check",
+      "aliases": [
+        "post rejected by safety check",
+        "why was my post rejected",
+        "content check before posting",
+        "AI moderation before posting",
+        "can I swear in a post",
+        "unsafe link rejection",
+        "post is being checked"
+      ],
+      "keywords": [
+        "posting",
+        "safety check",
+        "pre-publication",
+        "AI",
+        "profanity",
+        "unsafe link",
+        "rejected",
+        "not sent",
+        "attachments"
+      ],
+      "facts": [
+        "New and edited Wave posts receive a narrow server-side safety check before the backend writes them; this includes chat messages, replies, and direct messages because they are stored as drops.",
+        "Most posts pass a lightweight deterministic screen without an AI call. Only a specific risk signal is escalated to a permissive AI check, and rejection requires a high-confidence prohibited-content result.",
+        "Profanity, unpopular opinions, and ordinary offensive speech are not rejected merely for being objectionable.",
+        "Configured known unsafe destinations can be rejected directly. Uncertain AI results and evaluator failures follow the permissive policy and allow the post.",
+        "Structured private-data patterns, including US Social Security number patterns and Luhn-valid payment-card candidates, are sent to the AI check. Clearly labelled fictitious, sandbox, test, example, redacted, or documentation data is allowed, while a genuine usable private identifier can be rejected whether it belongs to the author or another person; ownership claims and known test status are context rather than automatic allow rules.",
+        "A locally created post stays visible in its normal layout while submission is pending; it is not replaced by a prominent checking message.",
+        "When the backend rejects a post, the unsent optimistic post remains temporarily in the current Wave with a subtle red treatment and a 'Not sent · Blocked by safety check' status; it is never persisted and disappears after leaving or refreshing the Wave.",
+        "A moderation-rejected local row does not offer edit, retry, reaction, reply, or post-action controls.",
+        "File attachments such as PDF and CSV files use a separate asynchronous validation pipeline rather than the synchronous text check."
+      ],
+      "canonical_path": "/waves",
+      "link_label": "Waves",
+      "related_paths": ["/discover", "/messages"],
+      "tags": ["waves", "posting", "safety", "moderation"],
+      "source_refs": [
+        "ops/docs/content-moderation.md",
+        "components/waves/CreateDrop.tsx"
+      ]
+    },
+    {
+      "id": "content-moderation.posting-suspension",
+      "kind": "workflow",
+      "title": "Posting suspension",
+      "aliases": [
+        "suspended from posting",
+        "profile suspended",
+        "why can't I post",
+        "why can't I edit my post",
+        "reinstate posting",
+        "posting ban"
+      ],
+      "keywords": [
+        "suspended",
+        "posting",
+        "editing",
+        "moderator",
+        "reinstate",
+        "support"
+      ],
+      "facts": [
+        "Posting suspension is applied manually by an authorized moderator; a report or AI result does not suspend a profile automatically.",
+        "A suspended profile cannot publish new or edited drop content, including chat messages, replies, and direct messages.",
+        "Posting suspension does not sign the user out, stop them reading the site, delete existing posts, or hide existing posts.",
+        "A posting suspension has no automatic expiry and remains in place until an authorized moderator reinstates the profile.",
+        "A rejected posting attempt directs the user to contact support if they believe the suspension is a mistake."
+      ],
+      "canonical_path": "/waves",
+      "link_label": "Waves",
+      "related_paths": ["/messages", "/content-moderation"],
+      "tags": ["waves", "posting", "suspension", "moderation"],
+      "source_refs": [
+        "ops/docs/content-moderation.md",
+        "components/waves/CreateDrop.tsx"
+      ]
+    },
+    {
       "id": "home.overview",
       "kind": "route",
       "title": "6529.io home",
@@ -2729,7 +2882,7 @@
         "Drop actions include reactions, ratings, voting, boosting, curation, replies, link copy, and pinning where allowed.",
         "Posted full drops can support emoji reactions and clap rating with optimistic UI and rollback on failure.",
         "Reaction controls are disabled while a proxy profile is active.",
-        "Reaction controls are disabled when the current wave does not allow chatting and reactions.",
+        "Reaction controls are disabled only when chatting and reacting are disabled for the entire wave. A viewer who can see the wave may still react when the wave's chat group does not permit them to post.",
         "If the API rejects the current session, the app starts one authentication recovery attempt for that session and temporarily disables reaction actions. The failed reaction is not automatically replayed.",
         "If a reaction request times out, the app rolls back the optimistic state, refreshes the canonical drop state, and does not automatically retry the write.",
         "Rating controls clamp values to the drop's allowed min/max range and can be disabled when the viewer has no available credit.",
@@ -2906,7 +3059,7 @@
         "Rank and Approve wave Configuration shows Chat status as Enabled or Disabled, and wave admins can edit that row with a gear to enable or disable chat.",
         "The Access row uses Chat access wording; `Anyone` means no chat access group is attached, independently of whether chat is enabled.",
         "Rank and Approve Configuration shows Chat status separately from Chat access, so disabled chat does not look like the same thing as an unrestricted chat access group.",
-        "Access groups available to the current viewer—including authorized private groups for their authenticated members or creators—link from Configuration to a filtered Network view that shows both the group criteria and current members; Configuration displays a live eligible-member count instead of the generated group name.",
+        "Access groups available to the current viewer—including authorized private groups and direct-message groups for their eligible authenticated members or creators—link from Configuration to a filtered Network view that shows both the group criteria and current members; Configuration displays a live eligible-member count instead of the generated group name.",
         "Use the Clear selected group button in Network to close the group summary and return to the default member view.",
         "A scoped group hidden from the current viewer is labeled `Private group` without a link, name, id, author, criteria, or membership details.",
         "Network does not reuse a selected group's cached criteria or members after the authenticated viewer changes, or while opening a different group.",
@@ -4596,6 +4749,7 @@
       ],
       "facts": [
         "Profile Preferences lets an authenticated profile choose whether Everyone, People I follow, or Nobody can start a new direct-message conversation.",
+        "An authenticated wallet without a profile is directed to Create profile from /preferences; profile-scoped controls become available after setup.",
         "Direct-message admission preferences apply only to new exact participant sets; existing one-to-one and group conversations remain available.",
         "Every recipient must allow the creator before a new group direct message can be created.",
         "All notifications includes essential notices plus enabled optional categories; Essential only pauses optional in-app notification creation, hides the individual category controls, and preserves their choices.",

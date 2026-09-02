@@ -15,6 +15,7 @@ import { ApiDropContextProfileContext } from '../models/ApiDropContextProfileCon
 import { ApiDropGroupMention } from '../models/ApiDropGroupMention';
 import { ApiDropMentionedUser } from '../models/ApiDropMentionedUser';
 import { ApiDropMetadataResponse } from '../models/ApiDropMetadataResponse';
+import { ApiDropModeration } from '../models/ApiDropModeration';
 import { ApiDropNftLink } from '../models/ApiDropNftLink';
 import { ApiDropPart } from '../models/ApiDropPart';
 import { ApiDropPoll } from '../models/ApiDropPoll';
@@ -23,6 +24,7 @@ import { ApiDropReaction } from '../models/ApiDropReaction';
 import { ApiDropReferencedNFT } from '../models/ApiDropReferencedNFT';
 import { ApiDropSubscriptionTargetAction } from '../models/ApiDropSubscriptionTargetAction';
 import { ApiDropType } from '../models/ApiDropType';
+import { ApiDropViewerModerationContext } from '../models/ApiDropViewerModerationContext';
 import { ApiDropWinningContext } from '../models/ApiDropWinningContext';
 import { ApiMentionedWave } from '../models/ApiMentionedWave';
 import { ApiProfileMin } from '../models/ApiProfileMin';
@@ -50,6 +52,8 @@ export class ApiCurationDrop {
     */
     'updated_at': number | null;
     'title': string | null;
+    'viewer_context'?: ApiDropViewerModerationContext;
+    'moderation'?: ApiDropModeration;
     'parts': Array<ApiDropPart>;
     /**
     * Number of drops in the storm
@@ -144,6 +148,18 @@ export class ApiCurationDrop {
             "name": "title",
             "baseName": "title",
             "type": "string",
+            "format": ""
+        },
+        {
+            "name": "viewer_context",
+            "baseName": "viewer_context",
+            "type": "ApiDropViewerModerationContext",
+            "format": ""
+        },
+        {
+            "name": "moderation",
+            "baseName": "moderation",
+            "type": "ApiDropModeration",
             "format": ""
         },
         {

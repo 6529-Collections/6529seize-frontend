@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef } from "react";
 import type { AuthImpactReason } from "@/services/analytics/mixpanel";
-import { removeAuthJwt } from "@/services/auth/auth.utils";
+import { invalidateAuthSessionForAddress } from "@/services/auth/auth.utils";
 import { logErrorSecurely } from "@/utils/error-sanitizer";
 import {
   clearSessionUpgradeReminder,
@@ -66,7 +66,7 @@ export function useSessionUpgradeExpiry({
         wasConnectedWallet: hasActiveWalletAddress,
       });
       try {
-        await removeAuthJwt();
+        await invalidateAuthSessionForAddress(walletAddress);
         invalidateAll();
       } catch (error) {
         expiredSessionUpgradeAddressRef.current = null;
