@@ -205,7 +205,7 @@ export const WaveDropAdditionalInfo = ({
                     fallbackSrc={item.url}
                     alt={`Additional media ${index + 1}`}
                     fill
-                    sizes="(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw"
+                    sizes="(min-width: 816px) 376px, calc(50vw - 1.5rem)"
                     className="tw-object-contain"
                   />
                 )}

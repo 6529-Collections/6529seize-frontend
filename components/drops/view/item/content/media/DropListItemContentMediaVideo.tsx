@@ -8,6 +8,7 @@ import clsx from "clsx";
 import React, { useEffect, useRef } from "react";
 import SeizeVideoPlayer from "./SeizeVideoPlayer";
 import { useMediaActions } from "./useMediaActions";
+import type { MediaLoadStrategy } from "./mediaLoadStrategy";
 
 interface Props {
   readonly src: string;
@@ -16,6 +17,7 @@ interface Props {
   readonly fillContainer?: boolean | undefined;
   readonly align?: "left" | "center" | undefined;
   readonly showFullscreen?: boolean | undefined;
+  readonly loadStrategy?: MediaLoadStrategy | undefined;
 }
 
 function DropListItemContentMediaVideo({
@@ -25,6 +27,7 @@ function DropListItemContentMediaVideo({
   fillContainer = false,
   align = "left",
   showFullscreen = true,
+  loadStrategy = "in-view",
 }: Props) {
   const [wrapperRef, inView] = useInView<HTMLDivElement>({
     freezeOnceVisible: false,
@@ -33,6 +36,7 @@ function DropListItemContentMediaVideo({
   });
   const wasFullscreenRef = useRef(false);
   const { isApp } = useDeviceInfo();
+  const shouldLoadVideo = loadStrategy === "eager" || inView;
   const { downloadMedia, isDownloading, openLabel, openMedia } =
     useMediaActions({
       url: src,
@@ -43,7 +47,7 @@ function DropListItemContentMediaVideo({
 
   // 1) Pick up the best URL (HLS or MP4)
   const { playableUrl, isHls } = useOptimizedVideo(src, {
-    enabled: inView,
+    enabled: shouldLoadVideo,
     pollInterval: 10000,
     maxRetries: 8,
     preferHls: true,
@@ -52,7 +56,7 @@ function DropListItemContentMediaVideo({
 
   // 2) Setup HLS (or native) once and get back the videoRef + loading state
   const { videoRef, isLoading } = useHlsPlayer({
-    enabled: inView,
+    enabled: shouldLoadVideo,
     src: playableUrl,
     isHls,
     fallbackSrc: src,
