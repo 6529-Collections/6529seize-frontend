@@ -1,86 +1,58 @@
 #!/usr/bin/env node
 
+const { execFileSync } = require("node:child_process");
+
 const EXPECTED_REPOSITORY = "6529-Collections/6529seize-frontend";
+const STAGING_REF = "1a-staging";
 const MAX_REQUESTS = 20;
-const OPERATION_ID_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._-]{0,79}$/;
 const SHA_PATTERN = /^[a-f0-9]{40}$/;
-const REQUESTER_PATTERN = /^[A-Za-z0-9-]{1,39}$/;
+const OPERATION_ID_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._-]{0,79}$/;
+const ACTOR_PATTERN = /^[A-Za-z0-9-]{1,39}$/;
 const TARGETS = new Set(["staging", "production"]);
-const SCENARIOS = new Set([
-  "success",
-  "product-failure",
-  "infrastructure-failure",
-  "cancelled",
-  "stale",
-]);
-const DELAYS = new Set([0, 5]);
+const WRITE_PERMISSIONS = new Set(["admin", "maintain", "write"]);
+const PRODUCTION_PERMISSIONS = new Set(["admin", "maintain"]);
+const ALLOWED_CHECK_CONCLUSIONS = new Set(["neutral", "skipped", "success"]);
+const COMPOSITION_TRAILER = "Deploy-Hub-Composition:";
 
 function assert(condition, message) {
-  if (!condition) {
-    throw new Error(message);
-  }
+  if (!condition) throw new Error(message);
+}
+
+function validSha(sha) {
+  assert(SHA_PATTERN.test(sha), "Git SHA is invalid.");
+  return sha;
 }
 
 function normalizeManifest(manifestJson, actor, repository) {
   assert(repository === EXPECTED_REPOSITORY, "Repository is not supported.");
-  assert(
-    REQUESTER_PATTERN.test(actor) &&
-      !actor.startsWith("-") &&
-      !actor.endsWith("-"),
-    "Dispatching GitHub actor has an invalid format."
-  );
-
+  assert(ACTOR_PATTERN.test(actor), "GitHub actor has an invalid format.");
   let parsed;
   try {
     parsed = JSON.parse(manifestJson);
   } catch {
     throw new Error("Manifest must be valid JSON.");
   }
-
   assert(Array.isArray(parsed), "Manifest must be a JSON array.");
   assert(parsed.length > 0, "Manifest must contain at least one request.");
-  assert(
-    parsed.length <= MAX_REQUESTS,
-    `Manifest cannot contain more than ${MAX_REQUESTS} requests.`
-  );
-
-  const seenPrs = new Set();
+  assert(parsed.length <= MAX_REQUESTS, "Manifest contains too many requests.");
+  const seen = new Set();
   return parsed.map((request, index) => {
     const label = `Manifest request ${index + 1}`;
+    assert(request?.repository === repository, `${label} repository is invalid.`);
+    assert(Number.isInteger(request.pr) && request.pr > 0, `${label} PR is invalid.`);
+    assert(!seen.has(request.pr), `${label} repeats PR #${request.pr}.`);
+    seen.add(request.pr);
+    assert(SHA_PATTERN.test(request.sha ?? ""), `${label} SHA is invalid.`);
+    assert(TARGETS.has(request.target), `${label} target is invalid.`);
     assert(
-      request && typeof request === "object" && !Array.isArray(request),
-      `${label} must be an object.`
-    );
-    assert(
-      request.repository === repository,
-      `${label} has an invalid repository.`
-    );
-    assert(
-      Number.isInteger(request.pr) && request.pr > 0,
-      `${label} has an invalid PR number.`
-    );
-    assert(!seenPrs.has(request.pr), `${label} repeats PR ${request.pr}.`);
-    seenPrs.add(request.pr);
-    assert(
-      typeof request.sha === "string" && SHA_PATTERN.test(request.sha),
-      `${label} has an invalid exact SHA.`
-    );
-    assert(TARGETS.has(request.target), `${label} has an invalid target.`);
-    assert(
-      typeof request.requester === "string" &&
-        REQUESTER_PATTERN.test(request.requester) &&
-        !request.requester.startsWith("-") &&
-        !request.requester.endsWith("-") &&
-        request.requester.toLowerCase() === actor.toLowerCase(),
-      `${label} requester must match the dispatching GitHub actor.`
+      String(request.requester).toLowerCase() === actor.toLowerCase(),
+      `${label} requester must match the dispatching actor.`
     );
     assert(
       typeof request.requested_at === "string" &&
-        Number.isFinite(Date.parse(request.requested_at)) &&
-        new Date(request.requested_at).toISOString() === request.requested_at,
-      `${label} has an invalid request time.`
+        Number.isFinite(Date.parse(request.requested_at)),
+      `${label} request time is invalid.`
     );
-
     return Object.freeze({
       repository: request.repository,
       pr: request.pr,
@@ -109,88 +81,23 @@ function targetLabel(target) {
 }
 
 function statusContext(target) {
-  return `Deploy Hub Shadow — Target: ${targetLabel(target)}`;
-}
-
-function statusPlan(target, scenario) {
-  const label = targetLabel(target);
-  const queued = {
-    phase: "queued",
-    state: "pending",
-    description: `SHADOW: ${label} request queued; no deployment`,
-  };
-  const staging = {
-    phase: "running",
-    state: "pending",
-    description: "SHADOW: simulating staging; no deployment",
-  };
-
-  if (scenario === "stale") {
-    return [
-      {
-        phase: "stale",
-        state: "error",
-        description: "SHADOW: stale exact PR head; no deployment",
-      },
-    ];
-  }
-  if (scenario === "cancelled") {
-    return [
-      queued,
-      {
-        phase: "cancelled",
-        state: "error",
-        description: "SHADOW: simulated cancellation; no deployment",
-      },
-    ];
-  }
-  if (scenario === "infrastructure-failure") {
-    return [
-      queued,
-      staging,
-      {
-        phase: "infrastructure-failure",
-        state: "error",
-        description: "SHADOW: simulated infrastructure failure; no deployment",
-      },
-    ];
-  }
-  if (scenario === "product-failure") {
-    return [
-      queued,
-      staging,
-      {
-        phase: "reconciling",
-        state: "pending",
-        description: "SHADOW: simulating bounded reconciliation",
-      },
-      {
-        phase: "product-failure",
-        state: "failure",
-        description: "SHADOW: simulated product failure; not deployed",
-      },
-    ];
-  }
-
-  const plan = [queued, staging];
-  if (target === "production") {
-    plan.push({
-      phase: "staging-succeeded",
-      state: "pending",
-      description: "SHADOW: staging passed; simulating production",
-    });
-  }
-  plan.push({
-    phase: "succeeded",
-    state: "success",
-    description: `SHADOW: ${label} simulation complete; not deployed`,
-  });
-  return plan;
+  return `Deploy Hub Dry Run — Target: ${targetLabel(target)}`;
 }
 
 function createGithubClient({ apiUrl, repository, token, fetchImpl = fetch }) {
-  async function request(path, options = {}) {
-    const response = await fetchImpl(`${apiUrl}/repos/${repository}${path}`, {
+  assert(apiUrl === "https://api.github.com", "GitHub API URL is invalid.");
+
+  async function request(segments, options = {}) {
+    const url = new URL(
+      ["repos", ...repository.split("/"), ...segments]
+        .map(encodeURIComponent)
+        .join("/"),
+      `${apiUrl}/`
+    );
+    for (const [key, value] of Object.entries(options.query ?? {})) {
+      url.searchParams.set(key, value);
+    }
+    const response = await fetchImpl(url, {
       method: options.method ?? "GET",
       headers: {
         Accept: "application/vnd.github+json",
@@ -203,258 +110,302 @@ function createGithubClient({ apiUrl, repository, token, fetchImpl = fetch }) {
     if (!response.ok) {
       throw new Error(`GitHub request failed with HTTP ${response.status}.`);
     }
-    if (response.status === 204) {
-      return null;
+    return response.status === 204 ? null : response.json();
+  }
+
+  async function requestAll(segments, selectItems, options = {}) {
+    const items = [];
+    for (let page = 1; page <= 10; page += 1) {
+      const payload = await request(segments, {
+        ...options,
+        query: {
+          ...options.query,
+          per_page: "100",
+          page: String(page),
+        },
+      });
+      const pageItems = selectItems(payload);
+      assert(Array.isArray(pageItems), "GitHub pagination response is invalid.");
+      items.push(...pageItems);
+      if (pageItems.length < 100) return items;
     }
-    return response.json();
+    throw new Error("GitHub result set exceeds the validation limit.");
   }
 
   return {
-    getPullRequest(pr) {
-      return request(`/pulls/${pr}`);
+    createCommitStatus: (sha, status) =>
+      request(["statuses", sha], { method: "POST", body: status }),
+    getCheckRuns: async (sha) => ({
+      check_runs: await requestAll(
+        ["commits", sha, "check-runs"],
+        (payload) => payload?.check_runs,
+        { query: { filter: "latest" } }
+      ),
+    }),
+    getCollaboratorPermission: (actor) =>
+      request(["collaborators", actor, "permission"]),
+    getCombinedStatus: async (sha) => ({
+      statuses: await requestAll(["commits", sha, "statuses"], (payload) =>
+        payload
+      ),
+    }),
+    getPullRequest: (pr) => request(["pulls", String(pr)]),
+    getRef: (ref) => request(["git", "refs", "heads", ...ref.split("/")]),
+  };
+}
+
+function createGitPlanner({ exec = execFileSync } = {}) {
+  function run(args, options = {}) {
+    return exec("git", args, {
+      encoding: "utf8",
+      input: options.input,
+      stdio: [options.input === undefined ? "ignore" : "pipe", "pipe", "pipe"],
+      timeout: 60_000,
+      maxBuffer: 10 * 1024 * 1024,
+    }).trim();
+  }
+
+  function remoteSha(ref) {
+    assert(ref === STAGING_REF || ref === "main", "Git ref is unsupported.");
+    const output = run(["ls-remote", "--heads", "origin", `refs/heads/${ref}`]);
+    const sha = output.split(/\s+/)[0] ?? "";
+    assert(SHA_PATTERN.test(sha), `Unable to resolve origin/${ref}.`);
+    return sha;
+  }
+
+  return {
+    remoteSha,
+    fetchExact(requests) {
+      run(["fetch", "--no-tags", "origin", STAGING_REF, "main"]);
+      for (const request of requests) {
+        assert(
+          Number.isInteger(request.pr) && request.pr > 0,
+          "Pull request number is invalid."
+        );
+        run([
+          "fetch",
+          "--no-tags",
+          "origin",
+          `refs/pull/${request.pr}/head`,
+        ]);
+        assert(
+          run(["rev-parse", "FETCH_HEAD"]) === validSha(request.sha),
+          `PR #${request.pr} head moved while fetching.`
+        );
+      }
     },
-    createCommitStatus(sha, status) {
-      return request(`/statuses/${sha}`, {
-        method: "POST",
-        body: status,
-      });
+    readCommitMessage(sha) {
+      return run(["show", "-s", "--format=%B", validSha(sha)]);
+    },
+    sameTree(left, right) {
+      return (
+        run(["rev-parse", `${validSha(left)}^{tree}`]) ===
+        run(["rev-parse", `${validSha(right)}^{tree}`])
+      );
+    },
+    mergeContent(baseSha, requests, operationId) {
+      let current = validSha(baseSha);
+      for (const request of requests) {
+        let tree;
+        try {
+          tree = run(["merge-tree", "--write-tree", current, validSha(request.sha)]);
+        } catch (error) {
+          if (error?.status === 1) {
+            throw new Error(`Frontend PR #${request.pr} conflicts with the plan.`);
+          }
+          throw error;
+        }
+        current = run(["commit-tree", tree, "-p", current, "-p", request.sha], {
+          input: `Deploy Hub dry run ${operationId}: include PR #${request.pr}\n`,
+        });
+        assert(SHA_PATTERN.test(current), "Planned commit SHA is invalid.");
+      }
+      return current;
     },
   };
 }
 
-async function writeStatus(github, request, runUrl, phase) {
-  await github.createCommitStatus(request.sha, {
-    state: phase.state,
-    target_url: runUrl,
-    description: phase.description,
-    context: statusContext(request.target),
-  });
+function parseComposition(message) {
+  const line = String(message)
+    .split(/\r?\n/)
+    .find((candidate) => candidate.startsWith(COMPOSITION_TRAILER));
+  if (!line) return null;
+  try {
+    const value = JSON.parse(
+      Buffer.from(line.slice(COMPOSITION_TRAILER.length).trim(), "base64url").toString("utf8")
+    );
+    assert(value.version === 1 && SHA_PATTERN.test(value.base_sha), "invalid");
+    assert(Array.isArray(value.prs) && value.prs.length <= 100, "invalid");
+    const requests = value.prs.map((request) => {
+      assert(Number.isInteger(request.pr) && request.pr > 0, "invalid");
+      assert(SHA_PATTERN.test(request.sha ?? ""), "invalid");
+      return { pr: request.pr, sha: request.sha };
+    });
+    assert(new Set(requests.map(({ pr }) => pr)).size === requests.length, "invalid");
+    return { baseSha: value.base_sha, requests };
+  } catch {
+    throw new Error("Staging composition metadata is invalid.");
+  }
 }
 
-async function resolveStaleRequests(github, requests, baseRef) {
-  const stale = new Set();
+async function publishStatus(github, requests, runUrl, state, description) {
+  for (const request of requests) {
+    await github.createCommitStatus(request.sha, {
+      state,
+      target_url: runUrl,
+      description: description.slice(0, 140),
+      context: statusContext(request.target),
+    });
+  }
+}
+
+async function validateRequests(github, requests, actor, baseRef) {
+  const access = await github.getCollaboratorPermission(actor);
+  const permission = access.permission;
+  assert(WRITE_PERMISSIONS.has(permission), "Requester lacks frontend write access.");
+  if (requests.some(({ target }) => target === "production")) {
+    assert(PRODUCTION_PERMISSIONS.has(permission), "Production requires maintain access.");
+  }
   for (const request of requests) {
     const pull = await github.getPullRequest(request.pr);
-    if (
-      pull.state !== "open" ||
-      pull.base?.ref !== baseRef ||
-      pull.head?.sha !== request.sha
-    ) {
-      stale.add(request.pr);
+    assert(pull.state === "open", `PR #${request.pr} is not open.`);
+    assert(pull.base?.ref === baseRef, `PR #${request.pr} does not target ${baseRef}.`);
+    assert(pull.head?.sha === request.sha, `PR #${request.pr} head moved.`);
+    assert(pull.mergeable !== false, `PR #${request.pr} is not mergeable.`);
+  }
+}
+
+async function validateProductionChecks(github, requests) {
+  for (const request of requests.filter(({ target }) => target === "production")) {
+    const [checks, combined] = await Promise.all([
+      github.getCheckRuns(request.sha),
+      github.getCombinedStatus(request.sha),
+    ]);
+    const runs = checks.check_runs ?? [];
+    assert(
+      runs.some(
+        ({ name, status, conclusion }) =>
+          name === "Installed app checks" && status === "completed" && conclusion === "success"
+      ),
+      `PR #${request.pr} did not pass Installed app checks.`
+    );
+    for (const check of runs) {
+      assert(
+        check.status === "completed" && ALLOWED_CHECK_CONCLUSIONS.has(check.conclusion),
+        `PR #${request.pr} check ${check.name ?? "unknown"} is not successful.`
+      );
     }
-  }
-  return stale;
-}
-
-async function publishStaleResult({
-  github,
-  requests,
-  runUrl,
-  forceStale,
-  staleRequests,
-}) {
-  const stalePhase = statusPlan("staging", "stale")[0];
-  for (const request of requests) {
-    const description =
-      forceStale || staleRequests.has(request.pr)
-        ? stalePhase.description
-        : "SHADOW: blocked by stale cohort input; no deployment";
-    await writeStatus(github, request, runUrl, {
-      ...stalePhase,
-      description,
-    });
-  }
-}
-
-async function publishCohorts({
-  github,
-  cohorts,
-  runUrl,
-  scenario,
-  delaySeconds,
-  sleep,
-}) {
-  for (const cohort of cohorts) {
-    const plan = statusPlan(cohort.target, scenario);
-    for (const [phaseIndex, phase] of plan.entries()) {
-      for (const request of cohort.requests) {
-        await writeStatus(github, request, runUrl, phase);
-      }
-      if (delaySeconds > 0 && phaseIndex < plan.length - 1) {
-        await sleep(delaySeconds * 1000);
+    const latestStatuses = new Map();
+    for (const status of combined.statuses ?? []) {
+      const context = String(status.context ?? "");
+      if (!context.startsWith("Deploy Hub") && !latestStatuses.has(context)) {
+        latestStatuses.set(context, status);
       }
     }
-  }
-}
-
-async function publishTerminalProjectionError(github, requests, runUrl) {
-  for (const request of requests) {
-    try {
-      await writeStatus(github, request, runUrl, {
-        state: "error",
-        description: "SHADOW: status projection interrupted; no deployment",
-      });
-    } catch {
-      // The original GitHub API failure remains authoritative when even the
-      // best-effort terminal status cannot be published.
-      console.error("Deploy Hub shadow could not publish a terminal status.");
+    for (const status of latestStatuses.values()) {
+      assert(status.state === "success", `PR #${request.pr} has a failing status.`);
     }
   }
 }
 
-function validateOperation({ operationId, scenario, delaySeconds, runUrl }) {
-  assert(
-    OPERATION_ID_PATTERN.test(operationId),
-    "Operation ID has an invalid format."
-  );
-  assert(SCENARIOS.has(scenario), "Scenario is not supported.");
-  assert(DELAYS.has(delaySeconds), "Phase delay is not supported.");
-  assert(
-    /^https:\/\/github\.com\/6529-Collections\/6529seize-frontend\/actions\/runs\/[1-9]\d*$/.test(
-      runUrl
-    ),
-    "Run URL has an invalid format."
-  );
-}
-
-async function executeShadow({
-  operationId,
-  manifestJson,
-  scenario,
-  delaySeconds,
-  repository,
-  baseRef,
-  actor,
-  runUrl,
-  github,
-  sleep = (milliseconds) =>
-    new Promise((resolve) => setTimeout(resolve, milliseconds)),
-}) {
-  validateOperation({ operationId, scenario, delaySeconds, runUrl });
-  assert(
-    typeof baseRef === "string" && baseRef.length > 0 && baseRef.length <= 255,
-    "Base ref has an invalid format."
-  );
-  const requests = normalizeManifest(manifestJson, actor, repository);
-  const cohorts = partitionCohorts(requests);
-  const staleRequests = await resolveStaleRequests(github, requests, baseRef);
-  const forceStale = scenario === "stale";
-
-  if (forceStale || staleRequests.size > 0) {
-    try {
-      await publishStaleResult({
-        github,
-        requests,
-        runUrl,
-        forceStale,
-        staleRequests,
-      });
-    } catch (error) {
-      await publishTerminalProjectionError(github, requests, runUrl);
-      throw error;
-    }
+function planStagingContent({ git, requests, operationId, baseRef }) {
+  const stagingSha = git.remoteSha(STAGING_REF);
+  const mainSha = git.remoteSha(baseRef);
+  git.fetchExact(requests);
+  const tracked = parseComposition(git.readCommitMessage(stagingSha));
+  // This read-only planner trusts composition metadata on the protected
+  // 1a-staging ref. A live mutation path must validate retained PRs again.
+  const baselineRequired = !tracked && !git.sameTree(stagingSha, mainSha);
+  let active = tracked?.requests ?? [];
+  const cohorts = partitionCohorts(requests).map((cohort) => {
+    const replacements = new Set(cohort.requests.map(({ pr }) => pr));
+    active = [
+      ...active.filter(({ pr }) => !replacements.has(pr)),
+      ...cohort.requests.map(({ pr, sha }) => ({ pr, sha })),
+    ];
     return {
-      operationId,
-      scenario: "stale",
-      conclusion: "failure",
-      requests,
-      cohorts,
+      target: cohort.target,
+      requests: cohort.requests,
+      localContentSha: git.mergeContent(mainSha, active, operationId),
     };
-  }
+  });
+  return { stagingSha, mainSha, baselineRequired, cohorts };
+}
 
+async function executeShadow(options) {
+  const { operationId, manifestJson, repository, baseRef, actor, runUrl, github, git } = options;
+  assert(OPERATION_ID_PATTERN.test(operationId), "Operation ID has an invalid format.");
+  assert(baseRef === "main", "Default branch is unsupported.");
+  assert(runUrl.startsWith(`https://github.com/${EXPECTED_REPOSITORY}/actions/runs/`), "Run URL is invalid.");
+  const requests = normalizeManifest(manifestJson, actor, repository);
   try {
-    await publishCohorts({
-      github,
-      cohorts,
-      runUrl,
-      scenario,
-      delaySeconds,
-      sleep,
-    });
+    await publishStatus(github, requests, runUrl, "pending", "DRY RUN: validating exact deployment plan; nothing will deploy");
+    await validateRequests(github, requests, actor, baseRef);
+    const plan = planStagingContent({ git, requests, operationId, baseRef });
+    await validateProductionChecks(github, requests);
+    const githubMainSha = validSha(
+      (await github.getRef(baseRef)).object?.sha ?? ""
+    );
+    assert(githubMainSha === plan.mainSha, "Main moved while the dry run was executing.");
+    await publishStatus(github, requests, runUrl, "success", "DRY RUN passed: exact deployment plan is valid; nothing deployed");
+    return { operationId, conclusion: "success", requests, ...plan };
   } catch (error) {
-    await publishTerminalProjectionError(github, requests, runUrl);
+    const reason = error instanceof Error ? error.message : "Unexpected error";
+    await publishStatus(github, requests, runUrl, "error", `DRY RUN failed: ${reason}; nothing deployed`).catch(() => {});
     throw error;
   }
-
-  return {
-    operationId,
-    scenario,
-    conclusion: scenario === "success" ? "success" : "failure",
-    requests,
-    cohorts,
-  };
 }
 
 function createSummary(result, runUrl) {
   const lines = [
-    "# Deploy Hub FE Shadow",
+    "# Deploy Hub FE dry run",
     "",
-    "> SHADOW ONLY — no branch or environment was changed.",
+    "> READ ONLY — no branch, workflow, or environment was changed.",
     "",
     `- Operation: \`${result.operationId}\``,
-    `- Scenario: \`${result.scenario}\``,
     `- Conclusion: \`${result.conclusion}\``,
-    `- Authoritative run: ${runUrl}`,
+    `- Current main: \`${result.mainSha}\``,
+    `- Current staging: \`${result.stagingSha}\``,
+    `- Initial baseline needed: \`${result.baselineRequired ? "yes" : "no"}\``,
+    `- Run: ${runUrl}`,
     "",
-    "## Frozen requests",
+    "## Planned cohorts",
     "",
-    "| PR | Exact SHA | Target | Requester | Requested at |",
-    "| ---: | --- | --- | --- | --- |",
-    ...result.requests.map(
-      (request) =>
-        `| #${request.pr} | \`${request.sha}\` | ${targetLabel(request.target)} | @${request.requester} | ${request.requested_at} |`
-    ),
-    "",
-    "## Adjacent target cohorts",
-    "",
-    ...result.cohorts.map(
-      (cohort, index) =>
-        `${index + 1}. ${targetLabel(cohort.target)}: ${cohort.requests
-          .map((request) => `#${request.pr}`)
-          .join(", ")}`
-    ),
+    ...result.cohorts.map((cohort, index) => {
+      const pullRequests = cohort.requests
+        .map(({ pr }) => `#${pr}`)
+        .join(", ");
+      return `${index + 1}. ${targetLabel(cohort.target)} — ${pullRequests} — local proof \`${cohort.localContentSha}\``;
+    }),
     "",
   ];
   return `${lines.join("\n")}\n`;
 }
 
 function createFailureSummary(reason) {
-  return [
-    "# Deploy Hub FE Shadow",
-    "",
-    "> SHADOW ONLY — no branch or environment was changed.",
-    "",
-    "- Conclusion: `failure`",
-    `- Reason: ${reason}`,
-    "",
-  ].join("\n");
+  return `# Deploy Hub FE dry run\n\n> READ ONLY — nothing was deployed.\n\n- Conclusion: \`failure\`\n- Reason: ${reason}\n`;
 }
 
 async function main() {
   const repository = process.env.DEPLOY_HUB_REPOSITORY ?? "";
   const token = process.env.GITHUB_TOKEN ?? "";
+  const runUrl = process.env.DEPLOY_HUB_RUN_URL ?? "";
   assert(token.length > 0, "GitHub token is unavailable.");
-
   const result = await executeShadow({
     operationId: process.env.DEPLOY_HUB_OPERATION_ID ?? "",
     manifestJson: process.env.DEPLOY_HUB_MANIFEST ?? "",
-    scenario: process.env.DEPLOY_HUB_SCENARIO ?? "",
-    delaySeconds: Number(process.env.DEPLOY_HUB_PHASE_DELAY_SECONDS),
     repository,
     baseRef: process.env.DEPLOY_HUB_BASE_REF ?? "",
     actor: process.env.DEPLOY_HUB_ACTOR ?? "",
-    runUrl: process.env.DEPLOY_HUB_RUN_URL ?? "",
+    runUrl,
     github: createGithubClient({
-      apiUrl: process.env.DEPLOY_HUB_API_URL ?? "https://api.github.com",
+      apiUrl: process.env.DEPLOY_HUB_API_URL ?? "",
       repository,
       token,
     }),
+    git: createGitPlanner(),
   });
-
-  process.stdout.write(createSummary(result, process.env.DEPLOY_HUB_RUN_URL));
-  if (result.conclusion !== "success") {
-    process.exitCode = 1;
-  }
+  process.stdout.write(createSummary(result, runUrl));
 }
 
 if (require.main === module) {
@@ -463,9 +414,9 @@ if (require.main === module) {
       await main();
     } catch (error) {
       const reason =
-        error instanceof Error ? error.message : "Unexpected shadow failure.";
+        error instanceof Error ? error.message : "Unexpected dry-run failure.";
       process.stdout.write(createFailureSummary(reason));
-      console.error(`Deploy Hub shadow failed: ${reason}`);
+      console.error(`Deploy Hub dry run failed: ${reason}`);
       process.exitCode = 1;
     }
   })();
@@ -474,12 +425,13 @@ if (require.main === module) {
 module.exports = {
   EXPECTED_REPOSITORY,
   createFailureSummary,
-  createSummary,
+  createGitPlanner,
   createGithubClient,
+  createSummary,
   executeShadow,
   normalizeManifest,
+  parseComposition,
   partitionCohorts,
+  planStagingContent,
   statusContext,
-  statusPlan,
-  validateOperation,
 };
