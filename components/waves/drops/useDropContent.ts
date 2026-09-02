@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import { ApiDropModerationStatus } from "@/generated/models/ApiDropModerationStatus";
 import { sanitizeErrorForUser } from "@/utils/error-sanitizer";
 import type { ProcessedContent } from "./media-utils";
 import { buildProcessedContent } from "./media-utils";
@@ -28,9 +29,16 @@ export const useDropContent = (
   maybeDrop: ApiDrop | null
 ): UseDropContentResult => {
   const previewPart = maybeDrop?.parts.find((p) => p.part_id === dropPartId);
+  const authoritativeModeratedDrop =
+    maybeDrop?.moderation?.status !== undefined &&
+    maybeDrop.moderation.status !== ApiDropModerationStatus.Visible
+      ? maybeDrop
+      : null;
   const shouldFetchDrop =
-    !maybeDrop ||
-    (!previewPart?.content?.trim() && (previewPart?.media.length ?? 0) === 0);
+    authoritativeModeratedDrop === null &&
+    (!maybeDrop ||
+      (!previewPart?.content?.trim() &&
+        (previewPart?.media.length ?? 0) === 0));
 
   // Fetch drop data
   const {
@@ -40,21 +48,25 @@ export const useDropContent = (
   } = useQuery<ApiDrop | undefined>({
     queryKey: getDropQueryKey(dropId),
     queryFn: () => fetchDropByIdBatched(dropId),
-    placeholderData: (previousDrop) => previousDrop ?? maybeDrop ?? undefined,
-    initialData: shouldFetchDrop ? undefined : maybeDrop,
+    placeholderData: (previousDrop) => maybeDrop ?? previousDrop,
     enabled: shouldFetchDrop,
     staleTime: DROP_DETAIL_STALE_TIME_MS,
+    ...(!shouldFetchDrop && maybeDrop !== null
+      ? { initialData: maybeDrop }
+      : {}),
   });
+  const resolvedDrop: ApiDrop | null =
+    authoritativeModeratedDrop ?? drop ?? null;
 
   const content = useMemo<ProcessedContent>(() => {
-    if (isFetching && !drop) {
+    if (isFetching && resolvedDrop === null) {
       return {
         segments: [{ type: "text", content: "Loading..." }],
         apiMedia: [],
       };
     }
 
-    if (error) {
+    if (error !== null) {
       const regex =
         /Drop [0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12} not found/;
 
@@ -66,22 +78,22 @@ export const useDropContent = (
       return { segments: [{ type: "text", content: errorMsg }], apiMedia: [] };
     }
 
-    if (!drop) {
+    if (resolvedDrop === null) {
       return { segments: [], apiMedia: [] };
     }
 
-    const part = drop.parts.find((p) => p.part_id === dropPartId);
-    if (!part) {
+    const part = resolvedDrop.parts.find((p) => p.part_id === dropPartId);
+    if (part === undefined) {
       return { segments: [], apiMedia: [] };
     }
 
     return buildProcessedContent(part.content, part.media);
-  }, [drop, dropPartId, isFetching, error]);
+  }, [resolvedDrop, dropPartId, isFetching, error]);
 
   return {
-    drop: drop ?? null,
+    drop: resolvedDrop,
     content,
-    isLoading: isFetching && !drop,
+    isLoading: isFetching && resolvedDrop === null,
     error,
   };
 };

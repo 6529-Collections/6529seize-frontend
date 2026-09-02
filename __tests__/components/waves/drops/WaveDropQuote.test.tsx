@@ -2,9 +2,14 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import WaveDropQuote from "@/components/waves/drops/WaveDropQuote";
 import { LinkPreviewProvider } from "@/components/waves/LinkPreviewContext";
+import { ApiDropModerationStatus } from "@/generated/models/ApiDropModerationStatus";
 
 let markdownProps: any;
 let mockProposalCardPresentation = "default";
+const visibleModeration = {
+  status: ApiDropModerationStatus.Visible,
+  can_view: true,
+};
 
 jest.mock("@/hooks/waves/useWaveProposalCardPresentation", () => ({
   useWaveProposalCardPresentation: () => mockProposalCardPresentation,
@@ -120,6 +125,7 @@ test("calls onQuoteClick on interaction", async () => {
     created_at: "2020-01-01",
     mentioned_users: [],
     referenced_nfts: [],
+    moderation: visibleModeration,
   } as any;
   const onQuoteClick = jest.fn();
   const onParentClick = jest.fn();
@@ -133,6 +139,50 @@ test("calls onQuoteClick on interaction", async () => {
   expect(onParentClick).not.toHaveBeenCalled();
 });
 
+test("opens the original post from a removed quote tombstone", async () => {
+  const drop = {
+    id: "d1",
+    serial_no: 42,
+    wave: { id: "w1", name: "wave" },
+    author: { id: "author-1", handle: "a", pfp: null },
+    moderation: {
+      status: ApiDropModerationStatus.ModeratorRemoved,
+      can_view: false,
+    },
+  } as any;
+  const onQuoteClick = jest.fn();
+
+  render(<WaveDropQuote drop={drop} partId={1} onQuoteClick={onQuoteClick} />);
+
+  await userEvent.click(
+    screen.getByRole("button", {
+      name: "Content removed by moderators. View original post",
+    })
+  );
+
+  expect(onQuoteClick).toHaveBeenCalledWith(drop);
+});
+
+test("redacts a stale author-only removed quote for a non-author", () => {
+  const drop = {
+    id: "d1",
+    serial_no: 42,
+    wave: { id: "w1", name: "wave" },
+    author: { id: "author-1", handle: "a", pfp: null },
+    parts: [{ part_id: 1, content: "Removed quote content" }],
+    moderation: {
+      status: ApiDropModerationStatus.ModeratorRemoved,
+      can_view: true,
+    },
+  } as any;
+
+  render(<WaveDropQuote drop={drop} partId={1} onQuoteClick={jest.fn()} />);
+
+  expect(screen.getByText("Content removed by moderators")).toBeInTheDocument();
+  expect(screen.queryByText("Removed quote content")).not.toBeInTheDocument();
+  expect(screen.queryByTestId("markdown")).not.toBeInTheDocument();
+});
+
 test("displays quoted part content", () => {
   const drop = {
     id: "d1",
@@ -143,6 +193,7 @@ test("displays quoted part content", () => {
     created_at: "2020-01-01",
     mentioned_users: [],
     referenced_nfts: [],
+    moderation: visibleModeration,
   } as any;
   render(<WaveDropQuote drop={drop} partId={5} onQuoteClick={jest.fn()} />);
   expect(screen.getByTestId("markdown")).toHaveTextContent("text");
@@ -161,6 +212,7 @@ test("uses the reusable compact card for a quoted proposal in an opted-in wave",
     created_at: "2020-01-01",
     mentioned_users: [],
     referenced_nfts: [],
+    moderation: visibleModeration,
   } as any;
 
   render(<WaveDropQuote drop={drop} partId={1} onQuoteClick={jest.fn()} />);
@@ -183,6 +235,7 @@ test("keeps quoted chat messages normal in an opted-in proposal wave", () => {
     created_at: "2020-01-01",
     mentioned_users: [],
     referenced_nfts: [],
+    moderation: visibleModeration,
   } as any;
 
   render(<WaveDropQuote drop={drop} partId={1} onQuoteClick={jest.fn()} />);
@@ -206,6 +259,7 @@ test("updates quoted part when partId changes on rerender", () => {
     created_at: "2020-01-01",
     mentioned_users: [],
     referenced_nfts: [],
+    moderation: visibleModeration,
   } as any;
 
   const { rerender } = render(
@@ -227,6 +281,7 @@ test("clears quoted part content when drop becomes null", () => {
     created_at: "2020-01-01",
     mentioned_users: [],
     referenced_nfts: [],
+    moderation: visibleModeration,
   } as any;
 
   const { rerender } = render(
@@ -248,6 +303,7 @@ test("passes explicit link-card suppression callback into nested markdown", () =
     created_at: "2020-01-01",
     mentioned_users: [],
     referenced_nfts: [],
+    moderation: visibleModeration,
   } as any;
   const onLinkCardActionsActiveChange = jest.fn();
 
@@ -275,6 +331,7 @@ test("passes hidden link preview setting into nested markdown", () => {
     created_at: "2020-01-01",
     mentioned_users: [],
     referenced_nfts: [],
+    moderation: visibleModeration,
   } as any;
 
   render(
@@ -299,6 +356,7 @@ test("falls back to link preview context for nested markdown suppression", () =>
     created_at: "2020-01-01",
     mentioned_users: [],
     referenced_nfts: [],
+    moderation: visibleModeration,
   } as any;
   const onCardActionsActiveChange = jest.fn();
 

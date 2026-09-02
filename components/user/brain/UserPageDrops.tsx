@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import UserPageMentionShortcuts from "../mention-shortcuts/UserPageMentionShortcuts";
 import UserPageBrainActivity from "./UserPageBrainActivity";
 import UserPageBrainSidebar from "./UserPageBrainSidebar";
+import { useProfileBlockState } from "@/hooks/content-moderation/useProfileBlockState";
 
 export default function UserPageDrops({
   profile,
@@ -11,6 +12,10 @@ export default function UserPageDrops({
   readonly profile: ApiIdentity | null;
 }) {
   let content: ReactNode = null;
+  const profileBlockState = useProfileBlockState({
+    profileId: profile?.id ?? null,
+    profileHandle: profile?.handle,
+  });
 
   if (profile) {
     const haveProfile = Boolean(profile.handle);
@@ -21,7 +26,9 @@ export default function UserPageDrops({
           <div className="tw-order-2 tw-min-w-0 tw-space-y-6 lg:tw-order-1">
             <UserPageBrainActivity profile={profile} />
             <UserPageMentionShortcuts profile={profile} />
-            {haveProfile && <Drops />}
+            {haveProfile && (
+              <Drops blockedProfileActivity={profileBlockState.isBlocked} />
+            )}
           </div>
           <UserPageBrainSidebar profile={profile} />
         </div>

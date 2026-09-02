@@ -13,6 +13,7 @@ import useHasTouchInput from "@/hooks/useHasTouchInput";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
 import { DropLocation } from "@/components/waves/drops/drop.types";
+import { DropClientDeliveryState } from "@/helpers/waves/drop.helpers";
 
 const mockWaveDropActions = jest.fn();
 const mockWaveDropContent = jest.fn();
@@ -247,6 +248,45 @@ describe("WaveDrop", () => {
       />
     );
     expect(getByTestId("actions")).toBeInTheDocument();
+  });
+
+  it("renders a moderation-rejected optimistic drop as a local failed delivery", () => {
+    setHoverSupport(true);
+
+    renderWithEditingDropProvider(
+      <WaveDrop
+        drop={{
+          ...drop,
+          clientDeliveryState: DropClientDeliveryState.MODERATION_REJECTED,
+        }}
+        previousDrop={null}
+        nextDrop={null}
+        showWaveInfo={false}
+        activeDrop={null}
+        showReplyAndQuote={true}
+        location={DropLocation.WAVE}
+        dropViewDropId={null}
+        onReply={jest.fn()}
+        onReplyClick={jest.fn()}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    expect(
+      screen.getByTestId("moderation-rejected-delivery-status")
+    ).toHaveTextContent("Not sent · Blocked by safety check");
+    expect(screen.queryByTestId("actions")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("reactions")).not.toBeInTheDocument();
+    expect(getLastMockProps(mockWaveDropContent)).toEqual(
+      expect.objectContaining({ hasTouch: false })
+    );
+
+    const content = screen.getByTestId("content");
+    const dropRoot = content.closest("[data-wave-drop-id]");
+    expect(dropRoot).toHaveClass("tw-bg-red-500/5");
+    expect(dropRoot).not.toHaveClass("desktop-hover:hover:tw-bg-iron-800/50");
+    expect(content.closest(".tw-opacity-75")).not.toBeNull();
+    expect(screen.getByTestId("pfp").closest(".tw-opacity-75")).toBeNull();
   });
 
   it("keeps hybrid touchscreen laptops on desktop drop interactions", () => {
@@ -826,9 +866,9 @@ describe("WaveDrop", () => {
       expect.objectContaining({ forceVisible: false })
     );
 
-    const dropRoot = screen.getByTestId("content").closest(
-      "[data-wave-drop-id]"
-    )!;
+    const dropRoot = screen
+      .getByTestId("content")
+      .closest("[data-wave-drop-id]")!;
     // React synthesizes onPointerEnter/Leave from pointerover/pointerout.
     fireEvent.pointerOver(dropRoot, { pointerType: "mouse" });
     expect(getLastMockProps(mockWaveDropActions)).toEqual(

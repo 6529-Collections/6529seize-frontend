@@ -43,12 +43,16 @@ describe("UserFollowBtn", () => {
     onDirectMessage,
     directMessageLoading,
     size,
+    blocked,
+    onUnblock,
   }: {
     readonly following: boolean;
     readonly requestSuccess?: boolean | undefined;
     readonly onDirectMessage?: jest.Mock | undefined;
     readonly directMessageLoading?: boolean | undefined;
     readonly size?: UserFollowBtnSize | undefined;
+    readonly blocked?: boolean | undefined;
+    readonly onUnblock?: jest.Mock | undefined;
   }) {
     useQueryMock.mockReturnValue({
       data: following ? { actions: [1] } : { actions: [] },
@@ -76,6 +80,8 @@ describe("UserFollowBtn", () => {
               onDirectMessage={onDirectMessage}
               directMessageLoading={directMessageLoading}
               showMuteButton={false}
+              blocked={blocked}
+              onUnblock={onUnblock}
             />
           </ReactQueryWrapperContext.Provider>
         </AuthContext.Provider>
@@ -114,6 +120,27 @@ describe("UserFollowBtn", () => {
       );
     });
     expect(commonApiPostMock).not.toHaveBeenCalled();
+  });
+
+  it("replaces Follow with Unblock for a blocked profile", async () => {
+    const user = userEvent.setup();
+    const onUnblock = jest.fn();
+    const { requestAuth } = setup({
+      following: true,
+      blocked: true,
+      onUnblock,
+      onDirectMessage: jest.fn(),
+    });
+
+    await user.click(screen.getByRole("button", { name: "Unblock bob" }));
+
+    expect(onUnblock).toHaveBeenCalledTimes(1);
+    expect(requestAuth).not.toHaveBeenCalled();
+    expect(commonApiPostMock).not.toHaveBeenCalled();
+    expect(commonApiDeleteWithBodyMock).not.toHaveBeenCalled();
+    expect(
+      screen.getByRole("button", { name: "Send direct message" })
+    ).toBeInTheDocument();
   });
 
   it("does not mutate when authentication fails", async () => {

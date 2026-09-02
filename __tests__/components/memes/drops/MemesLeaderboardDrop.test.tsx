@@ -76,12 +76,15 @@ jest.mock(
   "@/components/drops/view/item/content/media/DropListItemContentMedia",
   () => () => <div data-testid="media" />
 );
-jest.mock("@/components/waves/drops/WaveDropActionsOptions", () => () => (
-  <div data-testid="options" />
+jest.mock("@/components/waves/drops/WaveDropActionsMore", () => () => (
+  <div data-testid="more-actions" />
 ));
-jest.mock("@/components/waves/drops/WaveDropActionsOpen", () => () => (
-  <div data-testid="open" />
-));
+jest.mock("@/components/content-moderation/ContentModerationDropActions", () =>
+  jest.fn(() => null)
+);
+jest.mock("@/components/content-moderation/ReportDropModal", () =>
+  jest.fn(() => null)
+);
 jest.mock("@/components/voting", () => ({
   VotingModal: (p: any) => (
     <div data-testid="modal">{p.isOpen ? "open" : "closed"}</div>

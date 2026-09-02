@@ -1,7 +1,7 @@
 import {
   getAuthJwt,
   hasActiveSessionV2Auth,
-  removeAuthJwt,
+  invalidateAuthSessionForAddress,
 } from "@/services/auth/auth.utils";
 import { getAuthTokenFingerprint } from "@/services/auth/auth-token-fingerprint";
 import { validateAuthImmediate } from "@/services/auth/immediate-validation.utils";
@@ -296,11 +296,19 @@ export const runImmediateAuthValidation = async ({
                 reset();
               }
             },
-            onRemoveJwt: () => {
+            onRemoveJwt: async () => {
               if (!beginTerminalAuthTransition()) {
                 return;
               }
-              return removeAuthJwt().catch((error: unknown) => {
+              try {
+                const didInvalidate =
+                  await invalidateAuthSessionForAddress(currentAddress);
+                if (!didInvalidate) {
+                  throw new Error(
+                    "Connected account was missing during auth invalidation"
+                  );
+                }
+              } catch (error: unknown) {
                 if (
                   terminalAuthTransitionScopeRef.current ===
                   terminalAuthTransitionScope
@@ -308,7 +316,7 @@ export const runImmediateAuthValidation = async ({
                   terminalAuthTransitionScopeRef.current = null;
                 }
                 throw error;
-              });
+              }
             },
             onLogError: logErrorSecurely,
           },

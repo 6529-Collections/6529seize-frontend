@@ -1,5 +1,6 @@
 import { ApiDropMainType } from "@/generated/models/ApiDropMainType";
 import { ApiDropType } from "@/generated/models/ApiDropType";
+import { ApiDropModerationStatus } from "@/generated/models/ApiDropModerationStatus";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropV2 } from "@/generated/models/ApiDropV2";
 import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
@@ -538,6 +539,29 @@ describe("fetchWaveDropsFeedV2", () => {
     });
 
     expect(drop.poll).toEqual(poll);
+  });
+
+  it("preserves global and viewer moderation state on mapped drops", () => {
+    const moderation = {
+      status: ApiDropModerationStatus.AiQuarantined,
+      can_view: false,
+    };
+    const viewerContext = {
+      author_blocked: true,
+      drop_hidden: false,
+    };
+
+    const drop = mapLeaderboardDropV2({
+      drop: {
+        ...createDrop(1),
+        moderation,
+        viewer_context: viewerContext,
+      } as unknown as ApiDropV2,
+      wave: waveMin,
+    });
+
+    expect(drop.moderation).toEqual(moderation);
+    expect(drop.viewer_context).toEqual(viewerContext);
   });
 
   it("preserves the over-threshold timestamp on leaderboard drops", () => {

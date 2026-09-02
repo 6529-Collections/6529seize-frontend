@@ -70,6 +70,21 @@ jest.mock("@/hooks/useLongPressInteraction", () => ({
 jest.mock("@/components/waves/drops/WaveDropActionsOpen", () => () => (
   <div data-testid="actions" />
 ));
+jest.mock("@/components/waves/drops/WaveDropActionsMore", () => ({
+  __esModule: true,
+  default: () => <div data-testid="actions" />,
+}));
+jest.mock(
+  "@/components/content-moderation/ContentModerationDropActions",
+  () => ({
+    __esModule: true,
+    default: () => null,
+  })
+);
+jest.mock("@/components/content-moderation/ReportDropModal", () => ({
+  __esModule: true,
+  default: () => null,
+}));
 jest.mock(
   "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper",
   () => (p: any) =>
@@ -261,10 +276,7 @@ describe("MemesWaveWinnersDrop", () => {
       expect(await screen.findByText("Mint date:")).toBeInTheDocument();
       const mintDate = await screen.findByText(expectedMintDate);
       expect(mintDate.tagName).toBe("TIME");
-      expect(mintDate).toHaveAttribute(
-        "datetime",
-        mintInstant.toISOString()
-      );
+      expect(mintDate).toHaveAttribute("datetime", mintInstant.toISOString());
     } finally {
       if (originalLanguagesDescriptor) {
         Object.defineProperty(
@@ -279,9 +291,12 @@ describe("MemesWaveWinnersDrop", () => {
   });
 
   it.each([
-    ["throws", () => {
-      throw new Error("schedule unavailable");
-    }],
+    [
+      "throws",
+      () => {
+        throw new Error("schedule unavailable");
+      },
+    ],
     ["returns an invalid date", () => ({ instantUtc: new Date(Number.NaN) })],
   ])("omits the mint date when the schedule %s", async (_case, schedule) => {
     getMintTimelineDetailsMock.mockImplementation(

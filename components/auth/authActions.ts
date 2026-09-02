@@ -1,5 +1,4 @@
 import { isAddress } from "viem";
-import type { AppToastInput } from "@/components/utils/toast/AppToast";
 import { getNodeEnv, publicEnv } from "@/config/env";
 import {
   InvalidRoleStateError,
@@ -16,6 +15,7 @@ import {
 import { t } from "@/i18n/messages";
 import {
   getAuthJwt,
+  invalidateAuthSessionForAddress,
   PROFILE_SWITCHED_EVENT,
   removeAuthJwt,
 } from "@/services/auth/auth.utils";
@@ -31,12 +31,8 @@ import {
   hasSessionUpgradeRollout,
 } from "./authSessionUpgrade";
 import type {
-  AuthLoadingState,
-  AuthRolloutSettings,
   AuthorizedWalletValidationResult,
   RequestAuthOptions,
-  SessionUpgradePromptStatus,
-  SignModalReason,
 } from "./authTypes";
 import {
   AuthenticationNonceError,
@@ -47,54 +43,12 @@ import {
   createAuthRequestGuard,
   type AuthRequestGuard,
 } from "./authRequestGuard";
+import { createTimedAbortSignal } from "./authRequestAbortSignal";
 import { createAuthRequestSignIn } from "./authRequestSignIn";
-
-type SignMessage = (message: string) => Promise<{
-  readonly signature: string | null;
-  readonly userRejected: boolean;
-  readonly error?: unknown;
-}>;
-
-interface CreateAuthRequestActionsParams {
-  readonly activeProfileProxy: ApiProfileProxy | null;
-  readonly address: string | undefined;
-  readonly authRolloutSettings: AuthRolloutSettings;
-  readonly canSignActiveWallet: boolean;
-  readonly enableWalletAuthentication: boolean;
-  readonly expireSessionUpgradeAuth: (walletAddress: string) => Promise<void>;
-  readonly invalidateAll: () => void;
-  readonly isActiveChainSupported: () => boolean;
-  readonly isAddressAuthorized: boolean;
-  readonly seizeDisconnect: () => Promise<void>;
-  readonly resetSessionUpgradeExpiryDedupe: (walletAddress: string) => void;
-  readonly setActiveProfileProxy: (
-    profileProxy: ApiProfileProxy | null
-  ) => void;
-  readonly setAuthLoadingState: (state: AuthLoadingState) => void;
-  readonly setSessionUpgradeRequired: (required: boolean) => void;
-  readonly setShowSignModal: (show: boolean) => void;
-  readonly setSignModalReason: (reason: SignModalReason) => void;
-  readonly setToast: (toast: AppToastInput) => void;
-  readonly showSessionUpgradePrompt: (
-    walletAddress: string,
-    options?: {
-      readonly forceShow?: boolean;
-      readonly allowWithoutDeadline?: boolean;
-    }
-  ) => SessionUpgradePromptStatus;
-  readonly signMessage: SignMessage;
-  readonly signModalReason: SignModalReason;
-}
-
-interface AuthRequestActions {
-  readonly onActiveProfileProxy: (
-    profileProxy: ApiProfileProxy | null
-  ) => Promise<void>;
-  readonly requestAuth: (
-    options?: RequestAuthOptions
-  ) => Promise<{ success: boolean }>;
-  readonly requestSessionUpgrade: () => Promise<{ success: boolean }>;
-}
+import type {
+  AuthRequestActions,
+  CreateAuthRequestActionsParams,
+} from "./authActionTypes";
 
 const MANUAL_AUTH_VALIDATION_TIMEOUT_MS = 30_000;
 
@@ -115,27 +69,6 @@ const dispatchProfileSwitchedEvent = (profileProxy: ApiProfileProxy | null) => {
       detail: { profileProxy },
     })
   );
-};
-
-const createTimedAbortSignal = ({
-  timeoutMs,
-}: {
-  readonly timeoutMs: number;
-}): {
-  readonly signal: AbortSignal;
-  readonly cleanup: () => void;
-} => {
-  const controller = new AbortController();
-  const timeoutId = globalThis.setTimeout(() => {
-    controller.abort();
-  }, timeoutMs);
-
-  return {
-    signal: controller.signal,
-    cleanup: () => {
-      globalThis.clearTimeout(timeoutId);
-    },
-  };
 };
 
 export function createAuthRequestActions({
@@ -423,8 +356,23 @@ export function createAuthRequestActions({
     if (!validationResult.requiresSessionUpgrade) {
       setSignModalReason("auth");
       setSessionUpgradeRequired(false);
+      if (!canSignActiveWallet) {
+        setToast({
+          message: "Reconnect the wallet for this profile and try again.",
+          type: "error",
+        });
+        return false;
+      }
       if (!serverRejected) {
-        await removeAuthJwt();
+        const didInvalidate =
+          await invalidateAuthSessionForAddress(walletAddress);
+        if (!didInvalidate) {
+          setToast({
+            message: "Reconnect the wallet for this profile and try again.",
+            type: "error",
+          });
+          return false;
+        }
       }
       return true;
     }
@@ -462,6 +410,52 @@ export function createAuthRequestActions({
       setShowSignModal(false);
     }
     return isSuccess;
+  };
+
+  const reauthenticateAfterExpiredSessionUpgrade = async ({
+    authRequestGuard,
+    role,
+    walletAddress,
+  }: {
+    readonly authRequestGuard: AuthRequestGuard;
+    readonly role: string | null;
+    readonly walletAddress: string;
+  }): Promise<boolean> => {
+    const signingAuthRequestGuard =
+      createSigningAuthRequestGuard(authRequestGuard);
+    if (!signingAuthRequestGuard.isCurrent()) {
+      return false;
+    }
+    if (!canSignActiveWallet) {
+      setToast({
+        message: "Reconnect the wallet for this profile and try again.",
+        type: "error",
+      });
+      return false;
+    }
+
+    await expireSessionUpgradeAuth(walletAddress);
+    if (!signingAuthRequestGuard.acceptCurrentState(walletAddress)) {
+      return false;
+    }
+
+    setSignModalReason("auth");
+    setSessionUpgradeRequired(false);
+    const { success } = await requestSignIn({
+      signerAddress: walletAddress,
+      role,
+      authRequestGuard: signingAuthRequestGuard,
+    });
+    if (!signingAuthRequestGuard.isCurrent()) {
+      return false;
+    }
+    if (!success) {
+      setShowSignModal(false);
+      return false;
+    }
+
+    invalidateAll();
+    return finishAuthorizedWalletAuthentication();
   };
 
   const reauthenticateAuthorizedWallet = async ({
@@ -554,8 +548,11 @@ export function createAuthRequestActions({
         authRolloutSettings
       );
       if (promptStatus.timeLeftMs <= 0) {
-        await expireSessionUpgradeAuth(walletAddress);
-        return false;
+        return await reauthenticateAfterExpiredSessionUpgrade({
+          authRequestGuard,
+          role,
+          walletAddress,
+        });
       }
       return finishAuthorizedWalletAuthentication();
     }
@@ -604,6 +601,15 @@ export function createAuthRequestActions({
             authRequestGuard
           );
       return { success };
+    } catch (error) {
+      logErrorSecurely("requestAuth", error);
+      setToast({
+        type: "error",
+        title: "Couldn't verify your session.",
+        description: "Please try again.",
+        details: getToastErrorDetails(error),
+      });
+      return { success: false };
     } finally {
       if (authRequestGuard.isCurrent()) {
         setAuthLoadingState("idle");

@@ -2,11 +2,26 @@ import React, { createRef } from "react";
 import { render, act } from "@testing-library/react";
 import NewMentionsPlugin, {
   MentionTypeaheadOption,
+  type NewMentionsPluginHandles,
 } from "@/components/drops/create/lexical/plugins/mentions/MentionsPlugin";
 import { MentionSearchScopeProvider } from "@/components/drops/create/lexical/plugins/mentions/MentionSearchScopeContext";
 
+let mockEditorText = "";
+const mockEditorState = {
+  read: (callback: () => unknown) => callback(),
+};
+const mockEditor = {
+  getEditorState: () => mockEditorState,
+  update: (callback: () => void) => callback(),
+};
+
 jest.mock("@lexical/react/LexicalComposerContext", () => ({
-  useLexicalComposerContext: () => [{ update: (fn: any) => fn() }],
+  useLexicalComposerContext: () => [mockEditor],
+}));
+
+jest.mock("lexical", () => ({
+  ...jest.requireActual("lexical"),
+  $getRoot: () => ({ getTextContent: () => mockEditorText }),
 }));
 
 let capturedProps: any;
@@ -59,7 +74,40 @@ const {
 describe("MentionsPlugin", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (useMentionAliases as jest.Mock).mockReturnValue({ aliases: [] });
+    mockEditorText = "";
+    (useMentionAliases as jest.Mock).mockReturnValue({
+      aliases: [],
+      enabled: true,
+      isFetched: true,
+      isError: false,
+      refetch: jest.fn(),
+    });
+  });
+
+  it("does not block plain text on an unavailable Quick Tags request", async () => {
+    (useIdentitiesSearch as jest.Mock).mockReturnValue({ identities: [] });
+    const refetch = jest
+      .fn()
+      .mockResolvedValue({ error: new Error("offline") });
+    (useMentionAliases as jest.Mock).mockReturnValue({
+      aliases: [],
+      enabled: true,
+      isFetched: false,
+      isError: true,
+      refetch,
+    });
+    mockEditorText = "hi";
+    const ref = createRef<NewMentionsPluginHandles>();
+
+    render(<NewMentionsPlugin waveId="w1" onSelect={jest.fn()} ref={ref} />);
+
+    let result: { completed: boolean } | undefined;
+    await act(async () => {
+      result = await ref.current?.expandMentionAliases();
+    });
+
+    expect(result?.completed).toBe(true);
+    expect(refetch).not.toHaveBeenCalled();
   });
 
   it("builds options from identities and exposes open state", () => {
