@@ -112,7 +112,7 @@ export const SingleWaveDropVoters: React.FC<SingleWaveDropVotersProps> = ({
     <LazyMotion features={domAnimation}>
       <div>
         <div
-          className={`tw-flex tw-w-full tw-items-center tw-justify-between tw-border-0 tw-px-4 tw-py-4 tw-text-left tw-transition-colors tw-duration-300 tw-ease-out desktop-hover:hover:tw-bg-iron-900 ${
+          className={`tw-flex tw-w-full tw-items-center tw-justify-between tw-border-0 tw-px-4 tw-py-2.5 tw-text-left tw-transition-colors tw-duration-300 tw-ease-out desktop-hover:hover:tw-bg-iron-900 ${
             isVotersOpen ? "tw-bg-iron-800" : "tw-bg-iron-950"
           }`}
         >
