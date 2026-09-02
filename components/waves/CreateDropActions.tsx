@@ -374,7 +374,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                     {...compactTrayMotionProps}
                     role="group"
                     aria-label={actionsLabel}
-                    className="tw-col-span-2 tw-col-start-2 tw-row-start-3 tw-mt-2 tw-overflow-hidden md:tw-col-span-1"
+                    className="tw-col-span-2 tw-col-start-2 tw-row-start-3 tw-mt-2 tw-overflow-hidden md:tw-col-span-1 md:tw-col-start-2"
                   >
                     <div className="tw-rounded-2xl tw-border tw-border-white/10 tw-bg-iron-950/95 tw-p-2 tw-pl-0 tw-shadow-[0_12px_32px_rgba(0,0,0,0.28)]">
                       <div className="tw-flex tw-flex-wrap tw-items-start tw-justify-start tw-gap-6">

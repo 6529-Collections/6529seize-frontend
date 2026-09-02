@@ -56,7 +56,7 @@ installing dependencies.
 ### Private GitHub Packages authentication
 
 The repository has one narrow private-package exception for
-`@6529-collections/release-request@0.0.1`. Each developer should create a
+`@6529-collections/release-request@0.0.2`. Each developer should create a
 GitHub PAT classic with `read:packages` only and authorize organization SSO when
 required. The repository can validate where the token is used, but it cannot
 inspect the token's GitHub permissions.
@@ -165,7 +165,7 @@ For an intentional broader pnpm update, use:
 
 Dependabot intentionally ignores the exact private package because its npm
 update job has no package credential. `6529 update:all` cannot change this
-package: the bypass remains pinned to `0.0.1` before pnpm starts. A future
+package: the bypass remains pinned to `0.0.2` before pnpm starts. A future
 upgrade requires a separate reviewed change that updates the policy constants,
 manifest, release-age exception, and lockfile tarball integrity together. Do
 not add a Dependabot secret or a generic authenticated update mode.
@@ -314,7 +314,7 @@ Socket Firewall Free is still wrapper mode. That means:
 - It does not provide true centralized enforcement by itself.
 - It does not inspect private/custom registries in Free mode. This repository's
   only exception is the fail-closed, direct-TLS rule for the exact
-  `@6529-collections/release-request@0.0.1` GitHub Package described above.
+  `@6529-collections/release-request@0.0.2` GitHub Package described above.
 - It cannot block already-cached artifacts when no network request is made.
 
 Because of those limits, the strongest enforcement in this repo comes from:

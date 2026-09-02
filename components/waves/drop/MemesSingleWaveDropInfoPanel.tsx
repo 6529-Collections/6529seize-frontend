@@ -10,7 +10,7 @@ import {
 } from "@/helpers/waves/drop.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
-import useIsMobileScreen from "@/hooks/isMobileScreen";
+import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 import { useWaveRankReward } from "@/hooks/waves/useWaveRankReward";
 import { useCallback, useMemo } from "react";
 import { MemesDropArtworkHero } from "./MemesDropArtworkHero";
@@ -34,7 +34,7 @@ export const MemesSingleWaveDropInfoPanel = ({
   isVotingControlsLocked = false,
   outcomesVisible = true,
 }: MemesSingleWaveDropInfoPanelProps) => {
-  const isMobileScreen = useIsMobileScreen();
+  const isCompactLayout = useIsMobileLayoutViewport();
   const { isWinner, canDelete, canShowVote, isVotingEnded } =
     useDropInteractionRules(drop);
   const isVotingActionLocked = isVotingClosed || isVotingControlsLocked;
@@ -148,7 +148,7 @@ export const MemesSingleWaveDropInfoPanel = ({
         />
       </div>
 
-      {isMobileScreen ? (
+      {isCompactLayout ? (
         <MobileVotingModal
           drop={drop}
           isOpen={isVotingOpen}
