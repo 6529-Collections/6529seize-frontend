@@ -338,6 +338,39 @@ describe("release-request observation", () => {
     expect(workflowRuns).toHaveLength(1);
   });
 
+  it("stops the release route after a signal-style submit exit", () => {
+    projectDirectory = fs.mkdtempSync(
+      path.join(os.tmpdir(), "frontend-release-request-")
+    );
+    const signalWrapperPath = path.join(projectDirectory, "signal-wrapper");
+    fs.writeFileSync(
+      signalWrapperPath,
+      "#!/usr/bin/env bash\ncat >/dev/null\nexit 130\n",
+      { mode: 0o700 }
+    );
+    const script = [
+      "set -euo pipefail",
+      skillSubmitShellBlock(validInput()),
+      'printf "EXISTING_RELEASE_FLOW_CONTINUED=%s\\n" "$release_request_submit_status"',
+    ].join("\n");
+
+    const result = spawnSync("/bin/bash", ["-c", script], {
+      cwd: projectDirectory,
+      encoding: "utf8",
+      env: {
+        ...process.env,
+        OBSERVATION_PROJECT_DIRECTORY: projectDirectory,
+        RELEASE_REQUEST_WRAPPER: signalWrapperPath,
+      },
+    });
+
+    expect(result.status).toBe(130);
+    expect(result.stdout).not.toContain("EXISTING_RELEASE_FLOW_CONTINUED");
+    expect(result.stderr).toContain(
+      "signal-style status 130; stop and escalate to the Coordinator owner"
+    );
+  });
+
   it.each([
     {
       label: "validation",
@@ -445,6 +478,7 @@ describe("release-request observation", () => {
     expect(normalizedSkill).toContain(
       "Run this observation only when introducing a new staging release intent"
     );
+    expect(normalizedSkill).toContain("a new direct production release intent");
     expect(normalizedSkill).not.toContain("Run this preflight");
     expect(normalizedSkill).toContain(
       "A returned success or failure never gates, replaces, reorders, or weakens"
@@ -502,6 +536,9 @@ describe("release-request observation", () => {
       "do not invent a time limit or an interrupt-to-continue bypass"
     );
     expect(normalizedSkill).toContain(
+      "a signal-style status of 128 or higher stops the release"
+    );
+    expect(normalizedSkill).toContain(
       "Keep the JSON limited to release metadata"
     );
     expect(normalizedSkill).toContain(
@@ -535,6 +572,9 @@ describe("release-request observation", () => {
     );
     expect(normalizedDocumentation).toContain(
       "do not invent a time limit or an interrupt-to-continue bypass"
+    );
+    expect(normalizedDocumentation).toContain(
+      "A signal-style status of 128 or higher stops the release"
     );
     expect(normalizedDocumentation).toContain(
       "`requested_by` is descriptive context, not authentication or approval"

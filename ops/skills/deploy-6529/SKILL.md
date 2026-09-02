@@ -89,19 +89,25 @@ then
   release_request_submit_status=0
 else
   release_request_submit_status=$?
+  [ "$release_request_submit_status" -lt 128 ] || {
+    printf 'Release-request observation ended with signal-style status %s; stop and escalate to the Coordinator owner.\n' "$release_request_submit_status" >&2
+    exit "$release_request_submit_status"
+  }
 fi
 ```
 
 This is synchronous observation mode. `submit` runs in the foreground and
 waits for the central GitHub workflow, so it can delay the release while
-GitHub queues or runs that workflow. The conditional only makes a returned
-failure non-gating; it does not put the call in the background or bound its
-wait. Do not retry, background, detach, wrap in a shell timeout, or replace it
-with a direct GitHub call during the release. If the wait never returns, stop
-and escalate to the Coordinator owner; do not invent a time limit or an
-interrupt-to-continue bypass. A true no-wait path requires a separate future
-change to the Coordinator CLI/package. The CLI owns its central GitHub dispatch
-and wait; do not dispatch, name, or poll a GitHub workflow separately.
+GitHub queues or runs that workflow. The conditional only makes an ordinary
+returned failure below status 128 non-gating; a signal-style status of 128 or
+higher stops the release and escalates to the Coordinator owner. It does not
+put the call in the background or bound its wait. Do not retry, background,
+detach, wrap in a shell timeout, or replace it with a direct GitHub call during
+the release. If the wait never returns, stop and escalate to the Coordinator
+owner; do not invent a time limit or an interrupt-to-continue bypass. A true
+no-wait path requires a separate future change to the Coordinator CLI/package.
+The CLI owns its central GitHub dispatch and wait; do not dispatch, name, or
+poll a GitHub workflow separately.
 
 Treat the result as observation only:
 

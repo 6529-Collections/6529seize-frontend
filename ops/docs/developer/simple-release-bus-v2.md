@@ -106,6 +106,10 @@ then
   release_request_submit_status=0
 else
   release_request_submit_status=$?
+  [ "$release_request_submit_status" -lt 128 ] || {
+    printf 'Release-request observation ended with signal-style status %s; stop and escalate to the Coordinator owner.\n' "$release_request_submit_status" >&2
+    exit "$release_request_submit_status"
+  }
 fi
 ```
 
@@ -115,13 +119,15 @@ workflow, waits for its result, and returns the request ID and workflow URL on
 success. No separate input file is created, and the CLI owns the GitHub
 dispatch and wait. The release flow does not dispatch or poll that workflow
 itself. The command runs in the foreground and can delay the release while it
-waits for GitHub to queue and run the workflow. The conditional only keeps a
-returned failure from gating the existing flow; it does not make submission
-background or no-wait. Do not retry, background, detach, add a shell timeout,
-or replace it with a direct GitHub call during the release. If the wait never
-returns, stop and escalate to the Coordinator owner; do not invent a time limit
-or an interrupt-to-continue bypass. A true no-wait path requires a separate
-future Coordinator CLI/package change.
+waits for GitHub to queue and run the workflow. The conditional only keeps an
+ordinary returned failure below status 128 from gating the existing flow. A
+signal-style status of 128 or higher stops the release and escalates to the
+Coordinator owner. The conditional does not make submission background or
+no-wait. Do not retry, background, detach, add a shell timeout, or replace it
+with a direct GitHub call during the release. If the wait never returns, stop
+and escalate to the Coordinator owner; do not invent a time limit or an
+interrupt-to-continue bypass. A true no-wait path requires a separate future
+Coordinator CLI/package change.
 
 This step is skipped for merge-only work, status or monitoring, retry or
 resume, recovery, production continuation or promotion of an existing release,
