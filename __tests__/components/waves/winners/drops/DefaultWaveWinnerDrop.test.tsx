@@ -44,12 +44,10 @@ jest.mock("@/components/waves/winners/identity/WaveWinnerIdentity", () => ({
   WaveWinnerIdentity: () => <div data-testid="identity" />,
 }));
 jest.mock("@/components/waves/drops/WaveDropActionsOpen", () => () => (
-  <div data-testid="actions" />
+  <button type="button" data-testid="desktop-open-action">
+    Open drop
+  </button>
 ));
-jest.mock("@/components/waves/drops/WaveDropActionsMore", () => ({
-  __esModule: true,
-  default: () => <div data-testid="actions" />,
-}));
 jest.mock(
   "@/components/content-moderation/ContentModerationDropActions",
   () => ({
@@ -129,6 +127,21 @@ describe("DefaultWaveWinnerDrop", () => {
     render(<DefaultWaveWinnersDrop winner={winner} onDropClick={jest.fn()} />);
 
     expect(screen.getByTestId("identity")).toBeInTheDocument();
+    expect(screen.getByTestId("desktop-open-action")).toBeInTheDocument();
+    expect(screen.queryByTestId("more-actions")).not.toBeInTheDocument();
+  });
+
+  it("opens from the direct action without triggering the winner card", async () => {
+    const user = userEvent.setup();
+    const onDropClick = jest.fn();
+
+    render(
+      <DefaultWaveWinnersDrop winner={winner} onDropClick={onDropClick} />
+    );
+
+    await user.click(screen.getByTestId("desktop-open-action"));
+
+    expect(onDropClick).not.toHaveBeenCalled();
   });
 
   it("forwards content presentation to drop content", () => {

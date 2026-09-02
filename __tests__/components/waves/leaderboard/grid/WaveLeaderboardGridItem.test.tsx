@@ -101,9 +101,9 @@ jest.mock("@/components/voting/VotingModalButton", () => ({
   ),
 }));
 
-jest.mock("@/components/waves/drops/WaveDropActionsMore", () => ({
+jest.mock("@/components/waves/drops/WaveDropActionsOpen", () => ({
   __esModule: true,
-  default: () => <button data-testid="more-actions">More actions</button>,
+  default: () => <button data-testid="desktop-open-action">Open drop</button>,
 }));
 
 jest.mock("@/components/waves/drops/WaveDropMobileMenuOpen", () => ({
@@ -547,7 +547,7 @@ describe("WaveLeaderboardGridItem", () => {
       "desktop-hover:group-hover:tw-opacity-100",
       "touch-only:tw-opacity-100"
     );
-    expect(screen.getByTestId("more-actions")).toBeInTheDocument();
+    expect(screen.getByTestId("desktop-open-action")).toBeInTheDocument();
     expect(screen.getByTestId("vote-button")).toBeInTheDocument();
     expect(screen.getByTestId("media")).toBeInTheDocument();
     const mediaWrapper = screen.getByTestId("media")
@@ -857,12 +857,12 @@ describe("WaveLeaderboardGridItem", () => {
       />
     );
 
-    expect(screen.queryByTestId("more-actions")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("desktop-open-action")).not.toBeInTheDocument();
     expect(screen.queryByTestId("vote-button")).not.toBeInTheDocument();
     expect(screen.queryByTestId("mobile-copy-action")).not.toBeInTheDocument();
   });
 
-  it("keeps the desktop actions menu when voting rules hide Vote", () => {
+  it("keeps the desktop open action when voting rules hide Vote", () => {
     useDropInteractionRules.mockReturnValue({ canShowVote: false });
 
     render(
@@ -876,7 +876,7 @@ describe("WaveLeaderboardGridItem", () => {
     expect(
       screen.getByTestId("wave-leaderboard-grid-item-content-only-actions-d1")
     ).toBeInTheDocument();
-    expect(screen.getByTestId("more-actions")).toBeInTheDocument();
+    expect(screen.getByTestId("desktop-open-action")).toBeInTheDocument();
     expect(screen.queryByTestId("vote-button")).not.toBeInTheDocument();
   });
 });

@@ -26,10 +26,12 @@ jest.mock("@/components/voting", () => ({
 jest.mock("@/components/voting/VotingModalButton", () => (p: any) => (
   <button data-testid="vote-btn" onClick={p.onClick} />
 ));
-jest.mock("@/components/waves/drops/WaveDropActionsMore", () => ({
-  __esModule: true,
-  default: () => <div data-testid="more-actions" />,
-}));
+jest.mock("@/components/waves/drops/WaveDropActionsOpen", () => () => (
+  <button type="button" data-testid="desktop-open-action" />
+));
+jest.mock("@/components/waves/drops/WaveDropActionsOptions", () => () => (
+  <button type="button" data-testid="desktop-delete-action" />
+));
 jest.mock("@/components/content-moderation/ContentModerationDropActions", () =>
   jest.fn(() => null)
 );
@@ -148,10 +150,33 @@ test("opens voting modal when button clicked", async () => {
   expect(screen.getByTestId("modal")).toHaveTextContent("false");
   await user.click(screen.getByTestId("vote-btn"));
   expect(screen.getByTestId("modal")).toHaveTextContent("true");
-  expect(screen.getByTestId("more-actions")).toBeInTheDocument();
+  expect(screen.getByTestId("desktop-open-action")).toBeInTheDocument();
+  expect(screen.getByTestId("desktop-delete-action")).toBeInTheDocument();
+  expect(screen.queryByTestId("more-actions")).not.toBeInTheDocument();
 });
 
-test("uses mobile modal and keeps the shared actions menu available", () => {
+test("keeps direct desktop actions from triggering the leaderboard card", async () => {
+  const user = userEvent.setup();
+  const onDropClick = jest.fn();
+  useRules.mockReturnValue({ canShowVote: true, canDelete: true });
+  useDeviceInfo.mockReturnValue({ hasTouchScreen: false });
+  useIsMobileScreen.mockReturnValue(false);
+
+  render(
+    <DefaultWaveLeaderboardDrop
+      drop={drop}
+      wave={wave}
+      onDropClick={onDropClick}
+    />
+  );
+
+  await user.click(screen.getByTestId("desktop-open-action"));
+  await user.click(screen.getByTestId("desktop-delete-action"));
+
+  expect(onDropClick).not.toHaveBeenCalled();
+});
+
+test("uses mobile modal and keeps only the direct open action without delete permission", () => {
   useRules.mockReturnValue({ canShowVote: true, canDelete: false });
   useDeviceInfo.mockReturnValue({ hasTouchScreen: false });
   useIsMobileScreen.mockReturnValue(true);
@@ -168,7 +193,25 @@ test("uses mobile modal and keeps the shared actions menu available", () => {
     />
   );
   expect(screen.getByTestId("mobile")).toHaveTextContent("false");
-  expect(screen.getByTestId("more-actions")).toBeInTheDocument();
+  expect(screen.getByTestId("desktop-open-action")).toBeInTheDocument();
+  expect(screen.queryByTestId("desktop-delete-action")).not.toBeInTheDocument();
+});
+
+test("keeps proposal cards on their read-full path without a duplicate open action", () => {
+  useRules.mockReturnValue({ canShowVote: true, canDelete: true });
+  useDeviceInfo.mockReturnValue({ hasTouchScreen: false });
+  useIsMobileScreen.mockReturnValue(false);
+
+  render(
+    <DefaultWaveLeaderboardDrop
+      drop={drop}
+      onDropClick={jest.fn()}
+      contentPresentation="proposalCard"
+    />
+  );
+
+  expect(screen.queryByTestId("desktop-open-action")).not.toBeInTheDocument();
+  expect(screen.getByTestId("desktop-delete-action")).toBeInTheDocument();
 });
 
 test("keeps native touch scrolling enabled for long-press handlers", () => {
