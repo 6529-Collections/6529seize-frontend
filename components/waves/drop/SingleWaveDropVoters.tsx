@@ -137,7 +137,7 @@ export const SingleWaveDropVoters: React.FC<SingleWaveDropVotersProps> = ({
               loading={isInProgress}
               variant="tertiary"
               size="xs"
-              className="tw-min-h-11 lg:tw-min-h-0"
+              className="tw-min-h-11 md:tw-min-h-0"
               aria-label="Download all top voters as CSV"
             >
               <span>{isInProgress ? "Downloading" : "Download All"}</span>
