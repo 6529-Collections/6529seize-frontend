@@ -13,6 +13,22 @@ describe("one-click production authority completion", () => {
   );
   const completion = YAML.parse(completionSource);
   const completionJob = completion.jobs["complete-production-authority"];
+  const membershipToken = completionJob.steps.find(
+    (step: { readonly name?: string }) =>
+      step.name === "Create maintainer membership token"
+  );
+  const authorizeMaintainer = completionJob.steps.find(
+    (step: { readonly name?: string }) =>
+      step.name === "Authorize maintainer recovery actor"
+  );
+  const reportAuthorization = completionJob.steps.find(
+    (step: { readonly name?: string }) =>
+      step.name === "Report successful maintainer authorization"
+  );
+  const checkoutEvidence = completionJob.steps.find(
+    (step: { readonly name?: string }) =>
+      step.name === "Check out immutable terminal-evidence helper"
+  );
   const proof = completionJob.steps.find(
     (step: { readonly name?: string }) =>
       step.name === "Read exact terminal workflow and immutable evidence"
@@ -50,16 +66,24 @@ describe("one-click production authority completion", () => {
     });
     expect(completion.on.workflow_dispatch).toEqual({
       inputs: {
-        terminal_workflow_run_id: {
-          description: "Exact terminal production workflow run to complete",
+        mode: {
+          description: "Operation to perform",
           required: true,
+          default: "recover",
+          type: "choice",
+          options: ["recover", "authorization-check"],
+        },
+        terminal_workflow_run_id: {
+          description:
+            "Exact terminal production workflow run (required for recover)",
+          required: false,
           type: "string",
         },
       },
     });
     expect(completionJob.if.replace(/\s+/gu, " ").trim()).toBe(
-      "(github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && " +
-        "(github.actor == 'punk6529' || github.actor == 'prxt6529' || github.actor == 'github-actions[bot]')) || " +
+      "(github.event_name == 'workflow_dispatch' && " +
+        "github.ref == 'refs/heads/main') || " +
         "(github.event_name == 'workflow_run' && " +
         "github.event.workflow_run.head_repository.full_name == github.repository && " +
         "github.event.workflow_run.head_branch == 'main' && " +
@@ -69,9 +93,7 @@ describe("one-click production authority completion", () => {
     const dispatchGateLine = completionSource
       .split(/\r?\n/u)
       .find((line) => line.trimStart().startsWith("if: (github.event_name"));
-    expect(dispatchGateLine).toContain("github.actor == 'punk6529'");
-    expect(dispatchGateLine).toContain("github.actor == 'prxt6529'");
-    expect(dispatchGateLine).toContain("github.actor == 'github-actions[bot]'");
+    expect(dispatchGateLine).not.toContain("github.actor ==");
     expect(dispatchGateLine).toMatch(/# NOSONAR$/u);
     expect(completionJob.if).not.toContain("github.event.workflow_run.name");
     expect(completionJob["runs-on"]).toBe("ubuntu-latest");
@@ -95,35 +117,130 @@ describe("one-click production authority completion", () => {
     );
   });
 
-  it("recovers an exact terminal run only from main and an authorized release actor", () => {
+  it("authorizes the current recovery initiator once through live maintainer-team membership", () => {
     expect(completion["run-name"]).toBe(
-      "Production authority completion [${{ github.event.workflow_run.id || inputs.terminal_workflow_run_id }}]"
+      "Production authority ${{ inputs.mode == 'authorization-check' && 'authorization check' || 'completion' }} [${{ inputs.mode == 'authorization-check' && github.triggering_actor || github.event.workflow_run.id || inputs.terminal_workflow_run_id }}]"
     );
+    expect(membershipToken.if).toBe(
+      "github.event_name == 'workflow_dispatch' && github.triggering_actor != 'github-actions[bot]'"
+    );
+    expect(membershipToken.uses).toBe(
+      "actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1"
+    );
+    expect(membershipToken.with).toEqual({
+      "app-id": "${{ vars.RELEASE_BUS_GITHUB_APP_ID }}",
+      "private-key": "${{ secrets.RELEASE_BUS_GITHUB_PRIVATE_KEY }}",
+      owner: "${{ github.repository_owner }}",
+      repositories: "6529seize-frontend",
+      "permission-members": "read",
+    });
+    expect(authorizeMaintainer.if).toBe(
+      "github.event_name == 'workflow_dispatch'"
+    );
+    expect(authorizeMaintainer.env).toEqual({
+      DISPATCH_ACTOR: "${{ github.triggering_actor }}",
+      GH_TOKEN: "${{ steps.maintainer-token.outputs.token }}",
+      MAINTAINER_ORGANIZATION: "${{ github.repository_owner }}",
+      MAINTAINER_TEAM_SLUG: "6529seize-maintainers",
+      MODE: "${{ inputs.mode }}",
+    });
+    expect(authorizeMaintainer.run).toContain(
+      "orgs/${MAINTAINER_ORGANIZATION}/teams/${MAINTAINER_TEAM_SLUG}/memberships/${DISPATCH_ACTOR}"
+    );
+    expect(authorizeMaintainer.run).toContain('.state == "active"');
+    expect(authorizeMaintainer.run).toContain(
+      '(.role == "member" or .role == "maintainer")'
+    );
+    expect(authorizeMaintainer.run).toContain(
+      "Actor is not an active member of the production recovery team."
+    );
+    expect(authorizeMaintainer.run).toContain(
+      'if [ "$DISPATCH_ACTOR" = \'github-actions[bot]\' ]; then'
+    );
+    expect(authorizeMaintainer.run).toContain(
+      "Automatic recovery dispatcher admitted for exact Production E2E proof."
+    );
+    expect(authorizeMaintainer.run).toContain(
+      "Automatic recovery dispatcher cannot perform a maintainer authorization check."
+    );
+    expect(authorizeMaintainer.run).toContain('test -n "$GH_TOKEN"');
+    expect(
+      completionJob.steps.findIndex(
+        (step: { readonly name?: string }) =>
+          step.name === "Authorize maintainer recovery actor"
+      )
+    ).toBeLessThan(
+      completionJob.steps.findIndex(
+        (step: { readonly name?: string }) =>
+          step.name === "Read exact terminal workflow and immutable evidence"
+      )
+    );
+    expect(completionSource.match(/\/memberships\//gu)).toHaveLength(1);
+    expect(completionSource).not.toContain("punk6529");
+    expect(completionSource).not.toContain("prxt6529");
+
     expect(proof.env.WORKFLOW_RUN_ID).toContain(
       "github.event.workflow_run.id || inputs.terminal_workflow_run_id"
     );
     expect(proof.env.EVENT_NAME).toBe("${{ github.event_name }}");
     expect(proof.env.DISPATCH_ACTOR).toBe("${{ github.actor }}");
-    expect(proof.run).toContain(
-      'if [ "$EVENT_NAME" = workflow_dispatch ]; then'
-    );
-    expect(proof.run).toContain(
-      'if [ "$GITHUB_REF" != refs/heads/main ]; then'
-    );
-    expect(proof.run).toContain(
-      "Production authority recovery must run from main."
-    );
-    expect(proof.run).toContain("punk6529|prxt6529|github-actions\\[bot\\])");
-    expect(proof.run).toContain(
-      "Actor is not authorized for production authority recovery."
-    );
+    expect(proof.run).not.toContain("MAINTAINER_TEAM_SLUG");
+    expect(proof.run).not.toContain("GITHUB_REF");
     expect(proof.run).toContain(
       'workflow_path="$(jq -er \'.path | strings\' "$workflow_file")"'
     );
     expect(proof.run).toContain(
       "Automatic authority completion accepts only an exact Production E2E run."
     );
+    expect(proof.run).toContain(
+      "[ \"$DISPATCH_ACTOR\" = 'github-actions[bot]' ] && [ \"$workflow_path\" != '.github/workflows/production-e2e.yml' ]"
+    );
     expect(proof.run).not.toContain("workflow_name=");
+  });
+
+  it("can verify live maintainer authorization without entering recovery", () => {
+    expect(completion.on.workflow_dispatch.inputs.mode.default).toBe(
+      "recover"
+    );
+    expect(completionJob.if).toContain(
+      "github.ref == 'refs/heads/main'"
+    );
+    expect(completionJob.if).not.toContain(
+      "inputs.mode == 'authorization-check'"
+    );
+    expect(reportAuthorization.if).toBe(
+      "github.event_name == 'workflow_dispatch' && inputs.mode == 'authorization-check'"
+    );
+    expect(reportAuthorization.env.DISPATCH_ACTOR).toBe(
+      "${{ github.triggering_actor }}"
+    );
+    expect(reportAuthorization.run).toContain(
+      "Maintainer recovery authorization check passed"
+    );
+    expect(checkoutEvidence.if).toBe(
+      "github.event_name == 'workflow_run' || inputs.mode == 'recover'"
+    );
+    expect(proof.if).toBe(
+      "github.event_name == 'workflow_run' || inputs.mode == 'recover'"
+    );
+    expect(complete.if).toContain("steps.proof.outcome == 'success'");
+    expect(fail.if).toContain("steps.proof.outcome == 'success'");
+    expect(complete.if).toContain("inputs.mode != 'authorization-check'");
+    expect(fail.if).toContain("inputs.mode != 'authorization-check'");
+    expect(reportAuthorization.run).not.toContain("RELEASE_BUS_API_URL");
+    expect(reportAuthorization.run).not.toContain("production-authority/");
+  });
+
+  it("checks the rerun initiator instead of reusing the original actor's authorization", () => {
+    expect(membershipToken.if).toContain("github.triggering_actor");
+    expect(membershipToken.if).not.toContain("github.actor !=");
+    expect(authorizeMaintainer.env.DISPATCH_ACTOR).toBe(
+      "${{ github.triggering_actor }}"
+    );
+    expect(proof.env.DISPATCH_ACTOR).toBe("${{ github.actor }}");
+    expect(authorizeMaintainer.env.DISPATCH_ACTOR).not.toBe(
+      proof.env.DISPATCH_ACTOR
+    );
   });
 
   it("derives the deploy run only from the exact automatic title and re-reads both identities", () => {

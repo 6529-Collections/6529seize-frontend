@@ -202,7 +202,7 @@ function ProfileHeaderActionColumn({
     websiteAction || followHandle ? "tw-flex" : "tw-hidden min-[840px]:tw-flex";
   return (
     <div
-      className={`tw-w-full tw-flex-col tw-items-start tw-gap-3 md:tw-w-auto md:tw-flex-none md:tw-items-end md:tw-pb-2 lg:tw-col-start-2 lg:tw-row-span-2 lg:tw-row-start-1 lg:tw-self-start lg:tw-pt-0 ${topPaddingClass} ${visibilityClass}`}
+      className={`tw-w-full tw-flex-col tw-items-start tw-gap-4 md:tw-w-auto md:tw-flex-none md:tw-items-end md:tw-pb-2 lg:tw-col-start-2 lg:tw-row-span-2 lg:tw-row-start-1 lg:tw-self-start lg:tw-pt-0 ${topPaddingClass} ${visibilityClass}`}
     >
       <div className="tw-flex tw-w-full tw-flex-wrap tw-items-end tw-gap-2 md:tw-w-auto md:tw-justify-end">
         {canManageProfilePreferences ? (
