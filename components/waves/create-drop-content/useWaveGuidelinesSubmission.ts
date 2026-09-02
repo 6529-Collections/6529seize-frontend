@@ -11,8 +11,7 @@ import type { WaveGuidelinesAgreementResult } from "./useWaveGuidelinesAgreement
 const isTypedChatMessage = (drop: DropMutationBody["drop"]): boolean =>
   drop.drop_type === ApiDropType.Chat &&
   drop.parts.some(
-    (part) =>
-      typeof part.content === "string" && part.content.trim().length > 0
+    (part) => typeof part.content === "string" && part.content.trim().length > 0
   );
 
 export function useWaveGuidelinesSubmission({
@@ -36,16 +35,27 @@ export function useWaveGuidelinesSubmission({
       }
 
       if (pendingTypedSubmissionRef.current !== null) {
-        return false;
+        return pendingTypedSubmissionRef.current;
       }
 
-      const submission = requestGuidelinesAgreement(
-        dropRequest.drop.drop_type
-      ).then((guidelinesAgreement) => {
-        if (guidelinesAgreement === "accepted") {
-          return enqueueDrop(dropRequest);
-        }
-        if (guidelinesAgreement === "unavailable") {
+      const submission = requestGuidelinesAgreement(dropRequest.drop.drop_type)
+        .then((guidelinesAgreement) => {
+          if (guidelinesAgreement === "accepted") {
+            return enqueueDrop(dropRequest);
+          }
+          if (guidelinesAgreement === "unavailable") {
+            setToast({
+              type: "error",
+              title: t(locale, "waves.chat.guidelinesDialog.loadErrorTitle"),
+              description: t(
+                locale,
+                "waves.chat.guidelinesDialog.loadErrorDescription"
+              ),
+            });
+          }
+          return false;
+        })
+        .catch(() => {
           setToast({
             type: "error",
             title: t(locale, "waves.chat.guidelinesDialog.loadErrorTitle"),
@@ -54,12 +64,11 @@ export function useWaveGuidelinesSubmission({
               "waves.chat.guidelinesDialog.loadErrorDescription"
             ),
           });
-        }
-        return false;
-      });
+          return false;
+        });
 
       pendingTypedSubmissionRef.current = submission;
-      void submission.then(() => {
+      void submission.finally(() => {
         if (pendingTypedSubmissionRef.current === submission) {
           pendingTypedSubmissionRef.current = null;
         }

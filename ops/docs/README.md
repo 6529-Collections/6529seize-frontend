@@ -35,6 +35,8 @@ March 19, 2026.
 - Run Drop Forge craft and launch claim operations: [Drop Forge](drop-forge/README.md)
 - Check app notifications and push behavior:
   [Notifications](notifications/README.md)
+- Flag, hide, or reveal a post; block a profile; understand posting checks or
+  suspension; or review reported content: [Content Moderation](content-moderation.md)
 - Follow live NFT activity and socket behavior: [Realtime](realtime/README.md)
 - Check metrics, scores, and TDH/xTDH behavior: [Network](network/README.md)
 - Create groups inline and manage scoped network views:
@@ -69,6 +71,8 @@ March 19, 2026.
 - [Drop Forge](drop-forge/README.md): `/drop-forge`, `/drop-forge/craft`,
   `/drop-forge/craft/{id}`, `/drop-forge/launch`, `/drop-forge/launch/{id}`
 - [Notifications](notifications/README.md): `/notifications`
+- [Content Moderation](content-moderation.md): `/preferences`,
+  `/content-preferences`, and authorized `/content-moderation`
 - [Realtime](realtime/README.md): `/nft-activity`
 - [Network](network/README.md): `/network/*`, `/network/xtdh`, `/xtdh`
 - [Delegation](delegation/README.md): `/delegation` and `/delegation/{param+}`
@@ -119,8 +123,9 @@ Route patterns use normalized placeholders: `{param}` for one segment,
 - Drop Forge:
   `/drop-forge`, `/drop-forge/craft`, `/drop-forge/craft/{id}`,
   `/drop-forge/launch`, `/drop-forge/launch/{id}`
-- Notifications and realtime:
-  `/notifications`, `/nft-activity`
+- Notifications, preferences, moderation, and realtime:
+  `/notifications`, `/preferences`, `/content-preferences`,
+  `/content-moderation`, `/nft-activity`
 - Network:
   `/network`, `/network/activity`, `/network/definitions`,
   `/network/health`, `/network/health/network-tdh`, `/network/levels`,
@@ -195,6 +200,7 @@ Route patterns use normalized placeholders: `{param}` for one segment,
 - [Wave Navigation and Posting](waves/troubleshooting-wave-navigation-and-posting.md)
 - [Profile Routes and Tabs](profiles/troubleshooting/troubleshooting-routes-and-tabs.md)
 - [Notifications Feed](notifications/troubleshooting-notifications-feed.md)
+- [Content Moderation](content-moderation.md)
 - [Realtime Connectivity](realtime/troubleshooting-realtime-connectivity.md)
 - [Network Routes and Health](network/troubleshooting-network-routes-and-health.md)
 - [Delegation Routes and Actions](delegation/troubleshooting-delegation-routes-and-actions.md)

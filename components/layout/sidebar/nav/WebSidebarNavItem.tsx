@@ -29,6 +29,7 @@ interface SidebarPrimaryItemProps {
   readonly ariaHasPopup?: React.AriaAttributes["aria-haspopup"] | undefined;
   readonly rightSlot?: React.ReactNode | undefined;
   readonly hasIndicator?: boolean | undefined;
+  readonly indicatorLabel?: string | undefined;
   readonly "data-section"?: string | undefined;
 }
 
@@ -49,6 +50,7 @@ function WebSidebarNavItem({
   ariaHasPopup,
   rightSlot,
   hasIndicator,
+  indicatorLabel,
   "data-section": dataSection,
 }: SidebarPrimaryItemProps) {
   const { hasTouchScreen } = useDeviceInfo();
@@ -69,10 +71,10 @@ function WebSidebarNavItem({
               }`}
             />
             {hasIndicator && (
-              <>
-                <div className="tw-absolute tw-right-0 tw-top-0 tw-h-2 tw-w-2 tw-flex-shrink-0 tw-rounded-full tw-bg-red" />
-                <span className="tw-sr-only">Unread</span>
-              </>
+              <div
+                aria-hidden="true"
+                className="tw-absolute tw-right-0 tw-top-0 tw-h-2 tw-w-2 tw-flex-shrink-0 tw-rounded-full tw-bg-red"
+              />
             )}
           </div>
         )}
@@ -88,8 +90,15 @@ function WebSidebarNavItem({
     </div>
   );
 
+  let accessibleLabel: string | undefined;
+  if (hasIndicator && indicatorLabel) {
+    accessibleLabel = `${label}: ${indicatorLabel}`;
+  } else if (collapsed) {
+    accessibleLabel = label;
+  }
+
   const commonProps = {
-    "aria-label": collapsed ? label : undefined,
+    "aria-label": accessibleLabel,
     ...(!hasTouchScreen && {
       "data-tooltip-id": "sidebar-tooltip",
       "data-tooltip-content": label,

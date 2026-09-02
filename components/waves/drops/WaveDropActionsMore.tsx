@@ -28,6 +28,8 @@ import WaveDropActionsOpen from "./WaveDropActionsOpen";
 import WaveDropActionsOptions from "./WaveDropActionsOptions";
 import WaveDropActionsRestoreLinkPreviews from "./WaveDropActionsRestoreLinkPreviews";
 import WaveDropActionsSetPinnedDrop from "./WaveDropActionsSetPinnedDrop";
+import ContentModerationDropActions from "@/components/content-moderation/ContentModerationDropActions";
+import ReportDropModal from "@/components/content-moderation/ReportDropModal";
 
 interface WaveDropActionsMoreProps {
   readonly drop: ExtendedDrop;
@@ -45,6 +47,7 @@ export default function WaveDropActionsMore({
   const [isOpen, setIsOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isCurationsDialogOpen, setIsCurationsDialogOpen] = useState(false);
+  const [isReportOpen, setIsReportOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const { canDelete, canSetPinnedDrop } = useDropInteractionRules(drop);
   const { showManageCurations, quickAddCuration, quickRemoveCuration } =
@@ -55,8 +58,7 @@ export default function WaveDropActionsMore({
       isTemporaryDrop: drop.id.startsWith("temp-"),
       isWaveAdmin: drop.wave.authenticated_user_admin === true,
       enabled:
-        (isOpen || isCurationsDialogOpen) &&
-        Boolean(connectedProfile?.handle),
+        (isOpen || isCurationsDialogOpen) && Boolean(connectedProfile?.handle),
     });
   const { updateMembershipAsync } = useDropCurationMembershipMutation({
     dropId: drop.id,
@@ -114,7 +116,10 @@ export default function WaveDropActionsMore({
       <button
         ref={buttonRef}
         className="tw-flex tw-size-8 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-400 tw-transition-colors tw-duration-200 tw-ease-out desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-200"
-        onClick={() => handleOpenChange(!isOpen)}
+        onClick={(event) => {
+          event.stopPropagation();
+          handleOpenChange(!isOpen);
+        }}
         aria-label="More actions"
         aria-haspopup="true"
         aria-expanded={isOpen}
@@ -247,6 +252,15 @@ export default function WaveDropActionsMore({
                 )}
               </>
             )}
+            {!showOnlyQuickRemove && (
+              <ContentModerationDropActions
+                drop={drop}
+                onReport={() => {
+                  closeDropdown();
+                  setIsReportOpen(true);
+                }}
+              />
+            )}
           </div>
         </li>
       </CommonDropdownItemsDefaultWrapper>
@@ -273,6 +287,11 @@ export default function WaveDropActionsMore({
           onClose={() => setIsCurationsDialogOpen(false)}
         />
       )}
+      <ReportDropModal
+        drop={drop}
+        isOpen={isReportOpen}
+        onClose={() => setIsReportOpen(false)}
+      />
     </>
   );
 }
