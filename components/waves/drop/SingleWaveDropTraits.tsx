@@ -4,7 +4,7 @@ import type { ApiDropMetadata } from "@/generated/models/ApiDropMetadata";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import Button from "@/components/utils/button/Button";
-import useIsMobileDevice from "@/hooks/isMobileDevice";
+import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 import isNumber from "lodash/isNumber";
 import React, { useMemo, useState } from "react";
 import { Tooltip } from "react-tooltip";
@@ -28,17 +28,16 @@ interface SelectedTrait {
 const MetadataItem: React.FC<{
   readonly label: string;
   readonly value: string | number | boolean;
-  readonly onMobileSelect: (trait: SelectedTrait) => void;
-}> = ({ label, value, onMobileSelect }) => {
-  const isMobile = useIsMobileDevice();
-
+  readonly isCompactLayout: boolean;
+  readonly onCompactSelect: (trait: SelectedTrait) => void;
+}> = ({ label, value, isCompactLayout, onCompactSelect }) => {
   // Format display value
   const displayValue =
     typeof value === "boolean" ? (value ? "Yes" : "No") : String(value);
   const tooltipId = `trait-${label}-${displayValue}`;
   const cardClassName =
-    "tw-flex-1 tw-bg-iron-900 tw-border tw-border-solid tw-border-iron-800 tw-rounded-lg tw-px-3 tw-py-2 tw-flex tw-flex-col tw-min-w-[100px]";
-  const valueClassName = isMobile
+    "tw-flex tw-min-h-11 tw-min-w-[100px] tw-flex-1 tw-flex-col tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-px-3 tw-py-2";
+  const valueClassName = isCompactLayout
     ? "tw-text-xs tw-font-medium tw-leading-snug tw-text-iron-200 tw-line-clamp-2 tw-whitespace-normal tw-break-words"
     : "tw-text-xs tw-font-medium tw-text-iron-200 tw-truncate";
   const content = (
@@ -49,7 +48,7 @@ const MetadataItem: React.FC<{
       <span className={valueClassName} data-tooltip-id={tooltipId}>
         {displayValue}
       </span>
-      {!isMobile && (
+      {!isCompactLayout && (
         <Tooltip
           id={tooltipId}
           place="top"
@@ -67,7 +66,7 @@ const MetadataItem: React.FC<{
     </>
   );
 
-  if (isMobile) {
+  if (isCompactLayout) {
     return (
       <button
         type="button"
@@ -75,7 +74,7 @@ const MetadataItem: React.FC<{
         className={`${cardClassName} tw-cursor-pointer tw-appearance-none tw-text-left`}
         onClick={(e) => {
           e.stopPropagation();
-          onMobileSelect({ label, displayValue });
+          onCompactSelect({ label, displayValue });
         }}
       >
         {content}
@@ -315,9 +314,11 @@ const extractTraitsFromMetadata = (
   return traits;
 };
 
-export const SingleWaveDropTraits: React.FC<SingleWaveDropTraitsProps> = ({
-  drop,
-}) => {
+const SingleWaveDropTraitsContent: React.FC<
+  SingleWaveDropTraitsProps & {
+    readonly isCompactLayout: boolean;
+  }
+> = ({ drop, isCompactLayout }) => {
   const [showAllTraits, setShowAllTraits] = useState(false);
   const [selectedTrait, setSelectedTrait] = useState<SelectedTrait | null>(
     null
@@ -507,21 +508,17 @@ export const SingleWaveDropTraits: React.FC<SingleWaveDropTraitsProps> = ({
     return null;
   }
 
-  const handleShowMore = (e: React.MouseEvent) => {
+  const handleToggleTraits = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setShowAllTraits(true);
+    setShowAllTraits((current) => !current);
   };
 
-  const handleShowLess = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setShowAllTraits(false);
-  };
+  const visibleTraitItems = showAllTraits ? traitItems : traitItems.slice(0, 3);
 
   return (
     <div className="tw-w-full">
       <div className="tw-grid tw-grid-cols-2 tw-gap-3 sm:tw-grid-cols-3 lg:tw-grid-cols-4">
-        {/* Always show first 3 items */}
-        {traitItems.slice(0, 3).map((item) => (
+        {visibleTraitItems.map((item) => (
           <MetadataItem
             key={item.label}
             label={
@@ -530,51 +527,27 @@ export const SingleWaveDropTraits: React.FC<SingleWaveDropTraitsProps> = ({
               ] ?? item.label
             }
             value={item.value}
-            onMobileSelect={setSelectedTrait}
+            isCompactLayout={isCompactLayout}
+            onCompactSelect={setSelectedTrait}
           />
         ))}
-
-        {/* Show more button or additional items */}
-        {traitItems.length > 3 &&
-          (showAllTraits ? (
-            <>
-              {traitItems.slice(3).map((item) => (
-                <MetadataItem
-                  key={item.label}
-                  label={
-                    FIELD_TO_LABEL_MAP[
-                      item.label as keyof typeof FIELD_TO_LABEL_MAP
-                    ] ?? item.label
-                  }
-                  value={item.value}
-                  onMobileSelect={setSelectedTrait}
-                />
-              ))}
-              <Button
-                type="button"
-                onClick={handleShowLess}
-                variant="tertiary"
-                size="xs"
-                fullWidth
-                className="tw-min-w-[100px]"
-              >
-                Show less
-              </Button>
-            </>
-          ) : (
-            <Button
-              type="button"
-              onClick={handleShowMore}
-              variant="tertiary"
-              size="xs"
-              fullWidth
-              className="tw-min-w-[100px]"
-            >
-              Show all
-            </Button>
-          ))}
+        {traitItems.length > 3 && (
+          <Button
+            type="button"
+            onClick={handleToggleTraits}
+            variant="tertiary"
+            size="xs"
+            fullWidth
+            className={`tw-min-w-[100px] tw-self-end ${
+              isCompactLayout ? "tw-min-h-11" : ""
+            }`}
+            aria-expanded={showAllTraits}
+          >
+            {showAllTraits ? "Show less" : "Show all"}
+          </Button>
+        )}
       </div>
-      {selectedTrait && (
+      {selectedTrait && isCompactLayout && (
         <MobileWrapperDialog
           title={selectedTrait.label}
           isOpen={true}
@@ -588,5 +561,19 @@ export const SingleWaveDropTraits: React.FC<SingleWaveDropTraitsProps> = ({
         </MobileWrapperDialog>
       )}
     </div>
+  );
+};
+
+export const SingleWaveDropTraits: React.FC<SingleWaveDropTraitsProps> = ({
+  drop,
+}) => {
+  const isCompactLayout = useIsMobileLayoutViewport();
+
+  return (
+    <SingleWaveDropTraitsContent
+      key={isCompactLayout ? "compact" : "regular"}
+      drop={drop}
+      isCompactLayout={isCompactLayout}
+    />
   );
 };

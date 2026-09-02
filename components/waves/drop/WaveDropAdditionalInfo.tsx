@@ -95,20 +95,22 @@ export const WaveDropAdditionalInfo = ({
         ? resolveIpfsUrlSync(additionalMedia.promo_video)
         : "";
 
-      const mediaItemsValue = additionalMedia.artwork_commentary_media
+      const resolvedMediaUrls = additionalMedia.artwork_commentary_media
         .filter(
           (url): url is string =>
             typeof url === "string" && url.trim().length > 0
         )
         .map((url) => resolveIpfsUrlSync(url))
-        .filter((url): url is string => url.length > 0)
-        .map((url) => {
+        .filter((url): url is string => url.length > 0);
+      const mediaItemsValue = Array.from(new Set(resolvedMediaUrls)).map(
+        (url) => {
           const isVideo = isVideoUrl(url);
           const displayUrl = isVideo
             ? url
             : getScaledImageUri(url, ImageScale.AUTOx600);
           return { url, displayUrl, isVideo };
-        });
+        }
+      );
 
       return {
         commentary: commentaryValue,
@@ -180,13 +182,13 @@ export const WaveDropAdditionalInfo = ({
           <h3 className="tw-text-base tw-font-semibold tw-text-iron-100">
             Additional Media
           </h3>
-          <div className="tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-2 md:tw-gap-4">
+          <div className="tw-grid tw-grid-cols-2 tw-gap-3 md:tw-gap-4">
             {displayedMedia.map((item, index) => (
               <div
-                key={`${item.url}-${index}`}
+                key={item.url}
                 className={`tw-relative tw-overflow-hidden tw-bg-white/[0.02] ${
                   item.isVideo
-                    ? "tw-aspect-video sm:tw-col-span-2"
+                    ? "tw-col-span-2 tw-aspect-video"
                     : "tw-aspect-[4/3]"
                 }`}
               >
@@ -194,7 +196,7 @@ export const WaveDropAdditionalInfo = ({
                   <SeizeVideoPlayer
                     src={item.url}
                     template="watch-media"
-                    preload="metadata"
+                    preload="none"
                     layout="fill"
                   />
                 ) : (
@@ -203,7 +205,7 @@ export const WaveDropAdditionalInfo = ({
                     fallbackSrc={item.url}
                     alt={`Additional media ${index + 1}`}
                     fill
-                    sizes="(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw"
+                    sizes="(min-width: 816px) 376px, calc(50vw - 1.5rem)"
                     className="tw-object-contain"
                   />
                 )}
