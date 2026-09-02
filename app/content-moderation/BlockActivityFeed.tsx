@@ -60,11 +60,11 @@ export default function BlockActivityFeed() {
 
   return (
     <div className="tw-mt-8">
-      <div role="list" className="tw-space-y-3">
+      <ul className="tw-m-0 tw-list-none tw-space-y-3 tw-p-0">
         {items.map((item) => (
           <BlockActivityCard key={item.id} item={item} />
         ))}
-      </div>
+      </ul>
       {hasNextPage && (
         <div
           ref={loadMoreRef}

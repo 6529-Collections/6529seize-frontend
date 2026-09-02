@@ -87,8 +87,7 @@ export default function BlockActivityCard({
   );
 
   return (
-    <article
-      role="listitem"
+    <li
       className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-4 sm:tw-p-5"
     >
       <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-y-3 tw-text-sm tw-font-medium tw-text-iron-400">
@@ -102,6 +101,6 @@ export default function BlockActivityCard({
           {timestamp}
         </time>
       )}
-    </article>
+    </li>
   );
 }

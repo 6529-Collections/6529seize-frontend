@@ -54,7 +54,30 @@ import SuspendedProfileCard from "./SuspendedProfileCard";
 
 type ModerationTab = "OPEN" | "RESOLVED" | "SUSPENDED" | "BLOCK_ACTIVITY";
 
+interface ModerationDataState {
+  readonly isLoading: boolean;
+  readonly isError: boolean;
+}
+
 const MODERATION_QUEUE_PAGE_SIZE = 50;
+
+function isReportsTab(tab: ModerationTab): tab is "OPEN" | "RESOLVED" {
+  return tab === "OPEN" || tab === "RESOLVED";
+}
+
+function getActiveDataState(
+  tab: ModerationTab,
+  queueState: ModerationDataState,
+  suspendedState: ModerationDataState
+): ModerationDataState {
+  if (tab === "SUSPENDED") {
+    return suspendedState;
+  }
+  if (tab === "BLOCK_ACTIVITY") {
+    return { isLoading: false, isError: false };
+  }
+  return queueState;
+}
 
 function ModerationQueueCard({
   item,
@@ -498,6 +521,7 @@ export default function ContentModerationPageClient() {
   const hasModeratorIdentity =
     Boolean(connectedProfile?.id) && activeProfileProxy === null;
   const canModerate = accessQuery.data?.moderator === true;
+  const reportsTabActive = isReportsTab(activeTab);
   const reportsView = activeTab === "RESOLVED" ? "RESOLVED" : "OPEN";
   const queueQuery = useInfiniteQuery({
     queryKey: [...MODERATION_QUEUE_QUERY_KEY, reportsView],
@@ -512,7 +536,7 @@ export default function ContentModerationPageClient() {
       lastPage.length === MODERATION_QUEUE_PAGE_SIZE
         ? lastPage.at(-1)?.cursor
         : undefined,
-    enabled: canModerate && (activeTab === "OPEN" || activeTab === "RESOLVED"),
+    enabled: canModerate && reportsTabActive,
     retry: false,
   });
   const suspendedQuery = useInfiniteQuery({
@@ -540,14 +564,11 @@ export default function ContentModerationPageClient() {
   );
   const permissionsLoading =
     fetchingProfile || (hasModeratorIdentity && accessQuery.isLoading);
-  const activeDataLoading =
-    activeTab === "SUSPENDED"
-      ? suspendedQuery.isLoading
-      : activeTab !== "BLOCK_ACTIVITY" && queueQuery.isLoading;
-  const activeDataError =
-    activeTab === "SUSPENDED"
-      ? suspendedQuery.isError
-      : activeTab !== "BLOCK_ACTIVITY" && queueQuery.isError;
+  const activeDataState = getActiveDataState(
+    activeTab,
+    queueQuery,
+    suspendedQuery
+  );
   const tabs: ReadonlyArray<{
     readonly id: ModerationTab;
     readonly label: string;
@@ -648,20 +669,20 @@ export default function ContentModerationPageClient() {
               </button>
             ))}
           </div>
-          {activeDataLoading && (
+          {activeDataState.isLoading && (
             <output className="tw-mb-0 tw-mt-8 tw-text-sm tw-text-iron-400">
               {t(locale, "contentModeration.moderator.loading")}
             </output>
           )}
         </>
       )}
-      {(accessQuery.isError || activeDataError) && (
+      {(accessQuery.isError || activeDataState.isError) && (
         <p role="alert" className="tw-mb-0 tw-mt-8 tw-text-sm tw-text-red">
           {t(locale, "contentModeration.moderator.loadError")}
         </p>
       )}
       {canModerate &&
-        (activeTab === "OPEN" || activeTab === "RESOLVED") &&
+        reportsTabActive &&
         queueItems.length === 0 &&
         !queueQuery.isLoading && (
           <p className="tw-mb-0 tw-mt-8 tw-text-sm tw-text-iron-400">
@@ -674,7 +695,7 @@ export default function ContentModerationPageClient() {
           </p>
         )}
       {canModerate &&
-        (activeTab === "OPEN" || activeTab === "RESOLVED") &&
+        reportsTabActive &&
         queueItems.length > 0 && (
           <div className="tw-mt-8 tw-space-y-5">
             {queueItems.map((item) => (
