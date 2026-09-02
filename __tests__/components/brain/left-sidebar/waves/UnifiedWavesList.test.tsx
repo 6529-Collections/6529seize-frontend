@@ -142,7 +142,7 @@ describe("UnifiedWavesList", () => {
       disconnect() {}
     };
 
-    render(
+    const { container } = render(
       <UnifiedWavesList
         waves={[createMockMinimalWave({ id: "1", isPinned: false })]}
         fetchNextPage={fetchNextPage}
@@ -158,5 +158,9 @@ describe("UnifiedWavesList", () => {
       observerInstances[0].callback([{ isIntersecting: true }]);
     });
     expect(fetchNextPage).toHaveBeenCalled();
+    const listSurface = container.firstElementChild
+      ?.firstElementChild as HTMLElement;
+    expect(listSurface).toHaveClass("tw-bg-transparent");
+    expect(listSurface).not.toHaveClass("tw-ring-iron-800");
   });
 });
