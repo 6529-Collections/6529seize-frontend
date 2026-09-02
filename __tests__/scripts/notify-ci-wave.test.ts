@@ -1,5 +1,6 @@
 import { spawn } from "node:child_process";
 import { createServer } from "node:http";
+import type { ServerResponse } from "node:http";
 import path from "node:path";
 
 type RunResult = {
@@ -8,8 +9,33 @@ type RunResult = {
   readonly payload: Record<string, unknown> | null;
 };
 
+type ManualWorkflowFixture = {
+  readonly workflow: "Web Deploy - STAGING" | "Web Deploy - PROD";
+  readonly workflowFile: "deploy-staging.yml" | "build-upload-deploy-prod.yml";
+  readonly branch: "1a-staging" | "main";
+  readonly targetEnvironment: "staging" | "prod";
+};
+
+const DEFAULT_MANUAL_WORKFLOW_FIXTURE: ManualWorkflowFixture = {
+  workflow: "Web Deploy - PROD",
+  workflowFile: "build-upload-deploy-prod.yml",
+  branch: "main",
+  targetEnvironment: "prod",
+};
+
+const MANUAL_WORKFLOW_FIXTURES: readonly ManualWorkflowFixture[] = [
+  {
+    workflow: "Web Deploy - STAGING",
+    workflowFile: "deploy-staging.yml",
+    branch: "1a-staging",
+    targetEnvironment: "staging",
+  },
+  DEFAULT_MANUAL_WORKFLOW_FIXTURE,
+];
+
 async function runNotifier(
-  overrides: Record<string, string> = {}
+  overrides: Record<string, string> = {},
+  options: { readonly stallResponseBody?: boolean } = {}
 ): Promise<RunResult> {
   let payload: Record<string, unknown> | null = null;
   let requestError: Error | null = null;
@@ -22,6 +48,14 @@ async function runNotifier(
           string,
           unknown
         >;
+        if (options.stallResponseBody) {
+          response.writeHead(200, {
+            "content-type": "application/json",
+            "content-length": "100",
+          });
+          response.flushHeaders();
+          return;
+        }
         response.writeHead(204);
         response.end();
       } catch (error) {
@@ -55,6 +89,7 @@ async function runNotifier(
         GITHUB_RUN_NUMBER: "45",
         GITHUB_SHA: "a".repeat(40),
         GITHUB_REF_NAME: "main",
+        GITHUB_TOKEN: "",
         ...overrides,
       },
     }
@@ -66,6 +101,7 @@ async function runNotifier(
   const code = await new Promise<number | null>((resolve) =>
     child.on("exit", resolve)
   );
+  server.closeAllConnections();
   await new Promise<void>((resolve, reject) =>
     server.close((error) => (error ? reject(error) : resolve()))
   );
@@ -73,32 +109,589 @@ async function runNotifier(
   return { code, stderr, payload };
 }
 
-describe("notify-ci-wave payload", () => {
-  it("sends canonical contributors and the deployed SHA", async () => {
-    const expectedSha = "b".repeat(40);
-    const result = await runNotifier({
-      CI_RELEASE_TRAIN_ID: "train-123",
-      CI_RELEASE_CONTRIBUTORS: JSON.stringify([
-        "GelatoGenesis",
-        "prxt6529",
-        "gelatogenesis",
-      ]),
-      CI_PIPELINES_SHA: expectedSha,
+async function runManualNotifier({
+  fixture = DEFAULT_MANUAL_WORKFLOW_FIXTURE,
+  currentRunOverrides = {},
+  commits = [
+    {
+      sha: "c".repeat(40),
+      author: { login: "Commit-Author", type: "User" },
+      committer: { login: "web-flow", type: "User" },
+    },
+  ],
+  pullRequests = [
+    {
+      number: 3498,
+      merged_at: "2026-07-23T10:00:00Z",
+      user: { login: "PR-Author", type: "User" },
+      base: { ref: "main" },
+    },
+  ],
+  pullCommits = [
+    {
+      author: { login: "commit-author", type: "User" },
+      committer: { login: "Commit-Committer", type: "User" },
+    },
+  ],
+  githubResponseOverride,
+  notifierOverrides = {},
+}: {
+  readonly fixture?: ManualWorkflowFixture;
+  readonly currentRunOverrides?: Record<string, unknown>;
+  readonly commits?: readonly Record<string, unknown>[];
+  readonly pullRequests?: readonly Record<string, unknown>[];
+  readonly pullCommits?: readonly Record<string, unknown>[];
+  readonly githubResponseOverride?: (
+    pathName: string,
+    response: ServerResponse
+  ) => boolean;
+  readonly notifierOverrides?: Record<string, string>;
+} = {}): Promise<RunResult> {
+  const githubServer = createServer((request, response) => {
+    const pathName = request.url ?? "";
+    if (githubResponseOverride?.(pathName, response)) {
+      return;
+    }
+    let body: unknown;
+    if (pathName.endsWith("/actions/runs/123")) {
+      body = {
+        id: 123,
+        name: fixture.workflow,
+        path: `.github/workflows/${fixture.workflowFile}@refs/heads/${fixture.branch}`,
+        head_sha: "a".repeat(40),
+        head_branch: fixture.branch,
+        status: "in_progress",
+        conclusion: null,
+        created_at: "2026-07-23T11:38:00Z",
+        ...currentRunOverrides,
+      };
+    } else if (
+      pathName.includes(`/actions/workflows/${fixture.workflowFile}/runs`)
+    ) {
+      body = {
+        workflow_runs: [
+          {
+            id: 122,
+            name: fixture.workflow,
+            path: `.github/workflows/${fixture.workflowFile}@refs/heads/${fixture.branch}`,
+            head_sha: "b".repeat(40),
+            head_branch: fixture.branch,
+            status: "completed",
+            conclusion: "success",
+            created_at: "2026-07-22T11:38:00Z",
+          },
+        ],
+      };
+    } else if (
+      pathName.includes(
+        "/actions/workflows/release-bus-deploy-production.yml/runs"
+      )
+    ) {
+      body = { workflow_runs: [] };
+    } else if (pathName.includes("/compare/")) {
+      body = { status: "ahead", commits };
+    } else if (pathName.includes(`/commits/${"c".repeat(40)}/pulls`)) {
+      body = pullRequests;
+    } else if (pathName.includes("/pulls/3498/commits")) {
+      const page = Number(
+        new URL(pathName, "http://localhost").searchParams.get("page") ?? "1"
+      );
+      body = pullCommits.slice((page - 1) * 100, page * 100);
+    } else {
+      response.writeHead(404);
+      response.end();
+      return;
+    }
+    response.writeHead(200, { "content-type": "application/json" });
+    response.end(JSON.stringify(body));
+  });
+  await new Promise<void>((resolve) =>
+    githubServer.listen(0, "127.0.0.1", resolve)
+  );
+  const address = githubServer.address();
+  if (!address || typeof address === "string") {
+    throw new Error("missing port");
+  }
+
+  try {
+    return await runNotifier({
+      CI_PIPELINES_TARGET_ENV: fixture.targetEnvironment,
+      GITHUB_WORKFLOW: fixture.workflow,
+      GITHUB_REF_NAME: fixture.branch,
+      GITHUB_TOKEN: "test-token",
+      GITHUB_API_URL: `http://127.0.0.1:${address.port}`,
+      ...notifierOverrides,
+    });
+  } finally {
+    githubServer.closeAllConnections();
+    await new Promise<void>((resolve, reject) =>
+      githubServer.close((error) => (error ? reject(error) : resolve()))
+    );
+  }
+}
+
+describe("notify-ci-wave Release Train metadata", () => {
+  it.each(MANUAL_WORKFLOW_FIXTURES)(
+    "derives $workflow contributors while its success step is still in progress",
+    async (fixture) => {
+      const result = await runManualNotifier({ fixture });
+      expect(result).toMatchObject({
+        code: 0,
+        stderr: "",
+        payload: {
+          contributor_evidence: "manual-range",
+          contributor_github_logins: [
+            "Commit-Author",
+            "PR-Author",
+            "Commit-Committer",
+          ],
+        },
+      });
+      expect(result.payload).not.toHaveProperty("release_train_id");
+    }
+  );
+
+  it("credits a main-targeted PR carried into manual staging", async () => {
+    const result = await runManualNotifier({
+      fixture: MANUAL_WORKFLOW_FIXTURES[0]!,
+      commits: [
+        {
+          sha: "c".repeat(40),
+          author: null,
+          committer: null,
+        },
+      ],
+      pullRequests: [
+        {
+          number: 3498,
+          merged_at: "2026-07-23T10:00:00Z",
+          user: { login: "Staging-PR-Author", type: "User" },
+          base: { ref: "main" },
+        },
+      ],
+      pullCommits: [],
     });
 
     expect(result).toMatchObject({
       code: 0,
       stderr: "",
       payload: {
-        release_train_id: "train-123",
-        contributor_github_logins: ["GelatoGenesis", "prxt6529"],
-        sha: expectedSha,
+        contributor_evidence: "manual-range",
+        contributor_github_logins: ["Staging-PR-Author"],
       },
     });
-    expect(result.payload).not.toHaveProperty("release_notes_prompt_path");
-    expect(result.payload).not.toHaveProperty("release_group_id");
-    expect(result.payload).not.toHaveProperty("deployed_at");
   });
+
+  it("supports completed successful manual notification replays", async () => {
+    const result = await runManualNotifier({
+      currentRunOverrides: {
+        status: "completed",
+        conclusion: "success",
+      },
+    });
+
+    expect(result.payload).toMatchObject({
+      contributor_evidence: "manual-range",
+      contributor_github_logins: [
+        "Commit-Author",
+        "PR-Author",
+        "Commit-Committer",
+      ],
+    });
+  });
+
+  it("omits contributors for an exact same-SHA manual redeployment", async () => {
+    const fixture = DEFAULT_MANUAL_WORKFLOW_FIXTURE;
+    const result = await runManualNotifier({
+      fixture,
+      githubResponseOverride: (pathName, response) => {
+        if (
+          pathName.includes(`/actions/workflows/${fixture.workflowFile}/runs`)
+        ) {
+          response.writeHead(200, { "content-type": "application/json" });
+          response.end(
+            JSON.stringify({
+              workflow_runs: [
+                {
+                  id: 122,
+                  name: fixture.workflow,
+                  path: `.github/workflows/${fixture.workflowFile}@refs/heads/${fixture.branch}`,
+                  head_sha: "a".repeat(40),
+                  head_branch: fixture.branch,
+                  status: "completed",
+                  conclusion: "success",
+                  created_at: "2026-07-22T11:38:00Z",
+                },
+              ],
+            })
+          );
+          return true;
+        }
+        if (pathName.includes("/compare/")) {
+          response.writeHead(200, { "content-type": "application/json" });
+          response.end(JSON.stringify({ status: "identical", commits: [] }));
+          return true;
+        }
+        return false;
+      },
+    });
+
+    expect(result).toMatchObject({
+      code: 0,
+      stderr: "",
+      payload: {
+        run_id: "123",
+        status: "success",
+      },
+    });
+    expect(result.payload).not.toHaveProperty("contributor_evidence");
+    expect(result.payload).not.toHaveProperty("contributor_github_logins");
+  });
+
+  it("stops paging deployment history after finding an approved baseline", async () => {
+    const fixture: ManualWorkflowFixture = {
+      workflow: "Web Deploy - STAGING",
+      workflowFile: "deploy-staging.yml",
+      branch: "1a-staging",
+      targetEnvironment: "staging",
+    };
+    let historyRequests = 0;
+    const result = await runManualNotifier({
+      fixture,
+      githubResponseOverride: (pathName, response) => {
+        if (!pathName.includes("/actions/workflows/deploy-staging.yml/runs")) {
+          return false;
+        }
+        historyRequests += 1;
+        response.writeHead(200, { "content-type": "application/json" });
+        response.end(
+          JSON.stringify({
+            workflow_runs: Array.from({ length: 100 }, (_, index) => ({
+              id: 122 - index,
+              name: fixture.workflow,
+              path: `.github/workflows/${fixture.workflowFile}@refs/heads/${fixture.branch}`,
+              head_sha: "b".repeat(40),
+              head_branch: fixture.branch,
+              status: "completed",
+              conclusion: "success",
+              created_at: "2026-07-22T11:38:00Z",
+            })),
+          })
+        );
+        return true;
+      },
+    });
+
+    expect(result.stderr).toBe("");
+    expect(result.payload).toMatchObject({
+      contributor_evidence: "manual-range",
+    });
+    expect(historyRequests).toBe(1);
+  });
+
+  it("aborts stalled GitHub evidence and still sends the CI notification", async () => {
+    const result = await runManualNotifier({
+      githubResponseOverride: (pathName) =>
+        pathName.endsWith("/actions/runs/123"),
+      notifierOverrides: {
+        CI_GITHUB_EVIDENCE_REQUEST_TIMEOUT_MS: "50",
+        CI_GITHUB_EVIDENCE_DEADLINE_MS: "500",
+      },
+    });
+
+    expect(result.code).toBe(0);
+    expect(result.stderr).toContain(
+      "GitHub contributor evidence request timed out after 50ms"
+    );
+    expect(result.payload).toMatchObject({
+      run_id: "123",
+      status: "success",
+    });
+    expect(result.payload).not.toHaveProperty("contributor_evidence");
+    expect(result.payload).not.toHaveProperty("contributor_github_logins");
+  });
+
+  it.each([
+    [403, { "retry-after": "0", "x-ratelimit-remaining": "0" }],
+    [429, { "retry-after": "0" }],
+  ])(
+    "retries bounded GitHub evidence response %s and preserves attribution",
+    async (status, headers) => {
+      let currentRunRequests = 0;
+      const result = await runManualNotifier({
+        githubResponseOverride: (pathName, response) => {
+          if (!pathName.endsWith("/actions/runs/123")) return false;
+          currentRunRequests += 1;
+          if (currentRunRequests === 1) {
+            response.writeHead(status, headers);
+            response.end();
+            return true;
+          }
+          return false;
+        },
+        notifierOverrides: {
+          CI_GITHUB_EVIDENCE_REQUEST_TIMEOUT_MS: "1000",
+          CI_GITHUB_EVIDENCE_DEADLINE_MS: "10000",
+        },
+      });
+
+      expect(currentRunRequests).toBe(2);
+      expect(result.payload).toMatchObject({
+        contributor_evidence: "manual-range",
+        contributor_github_logins: [
+          "Commit-Author",
+          "PR-Author",
+          "Commit-Committer",
+        ],
+      });
+    }
+  );
+
+  it("rejects an otherwise matching manual workflow on an unapproved branch", async () => {
+    const result = await runManualNotifier({
+      currentRunOverrides: {
+        head_branch: "feature/unapproved-production",
+      },
+      notifierOverrides: {
+        GITHUB_REF_NAME: "feature/unapproved-production",
+      },
+    });
+
+    expect(result.code).toBe(0);
+    expect(result.stderr).toContain(
+      "Deployment branch feature/unapproved-production is not approved for workflow Web Deploy - PROD"
+    );
+    expect(result.payload).not.toHaveProperty("contributor_github_logins");
+  });
+
+  it("does not retry a rate-limit delay beyond the evidence deadline", async () => {
+    let currentRunRequests = 0;
+    const result = await runManualNotifier({
+      githubResponseOverride: (pathName, response) => {
+        if (!pathName.endsWith("/actions/runs/123")) return false;
+        currentRunRequests += 1;
+        response.writeHead(429, { "retry-after": "10" });
+        response.end();
+        return true;
+      },
+      notifierOverrides: {
+        CI_GITHUB_EVIDENCE_REQUEST_TIMEOUT_MS: "1000",
+        CI_GITHUB_EVIDENCE_DEADLINE_MS: "1500",
+      },
+    });
+
+    expect(currentRunRequests).toBe(1);
+    expect(result.stderr).toContain(
+      "GitHub contributor evidence deadline expired after 1500ms"
+    );
+    expect(result.payload).not.toHaveProperty("contributor_github_logins");
+  });
+
+  it("omits contributors after bounded GitHub retries are exhausted", async () => {
+    let currentRunRequests = 0;
+    const result = await runManualNotifier({
+      githubResponseOverride: (pathName, response) => {
+        if (!pathName.endsWith("/actions/runs/123")) return false;
+        currentRunRequests += 1;
+        response.writeHead(429, { "retry-after": "0" });
+        response.end();
+        return true;
+      },
+      notifierOverrides: {
+        CI_GITHUB_EVIDENCE_REQUEST_TIMEOUT_MS: "1000",
+        CI_GITHUB_EVIDENCE_DEADLINE_MS: "10000",
+      },
+    });
+
+    expect(currentRunRequests).toBe(3);
+    expect(result.stderr).toContain(
+      "GitHub contributor evidence request failed after 3 attempts: 429"
+    );
+    expect(result.payload).toMatchObject({
+      run_id: "123",
+      status: "success",
+    });
+    expect(result.payload).not.toHaveProperty("contributor_evidence");
+    expect(result.payload).not.toHaveProperty("contributor_github_logins");
+  });
+
+  it.each([
+    ["queued", null],
+    ["completed", "failure"],
+    ["completed", "cancelled"],
+  ])("rejects manual run state %s/%s", async (status, conclusion) => {
+    const result = await runManualNotifier({
+      currentRunOverrides: { status, conclusion },
+    });
+
+    expect(result.code).toBe(0);
+    expect(result.stderr).toContain(
+      `Current workflow run state ${status}/${conclusion ?? "null"} is not valid for a success notification`
+    );
+    expect(result.payload).not.toHaveProperty("contributor_github_logins");
+  });
+
+  it.each([
+    [
+      "run ID",
+      { id: 124 },
+      "Current workflow run ID does not match GITHUB_RUN_ID",
+    ],
+    [
+      "workflow name",
+      { name: "Release Bus - Deploy Frontend Production" },
+      "Current workflow run name is not the approved workflow",
+    ],
+    [
+      "workflow path",
+      {
+        path: "untrusted/build-upload-deploy-prod.yml@refs/heads/main",
+      },
+      "Current workflow run path is not the approved workflow",
+    ],
+    [
+      "deployed SHA",
+      { head_sha: "d".repeat(40) },
+      "Current workflow run SHA does not match the deployed SHA",
+    ],
+    [
+      "branch",
+      { head_branch: "untrusted-branch" },
+      "Current workflow run branch does not match the deployed branch",
+    ],
+  ])(
+    "rejects manual contributor evidence with the wrong %s",
+    async (_field, currentRunOverrides, diagnostic) => {
+      const result = await runManualNotifier({ currentRunOverrides });
+
+      expect(result.code).toBe(0);
+      expect(result.stderr).toContain(diagnostic);
+      expect(result.payload).not.toHaveProperty("contributor_github_logins");
+    }
+  );
+
+  it.each([
+    ["empty", [], []],
+    [
+      "bot-only",
+      [
+        {
+          sha: "c".repeat(40),
+          author: { login: "dependabot[bot]", type: "Bot" },
+          committer: { login: "github-actions", type: "Bot" },
+        },
+      ],
+      [],
+    ],
+    [
+      "non-user account",
+      [
+        {
+          sha: "c".repeat(40),
+          author: { login: "release-organization", type: "Organization" },
+          committer: { login: "release-app", type: "App" },
+        },
+      ],
+      [],
+    ],
+  ])(
+    "omits manual contributors for a %s deployment range",
+    async (_name, commits, pullRequests) => {
+      const result = await runManualNotifier({
+        commits,
+        pullRequests,
+        pullCommits: [],
+      });
+
+      expect(result.code).toBe(0);
+      expect(result.stderr).toBe("");
+      expect(result.payload).not.toHaveProperty("contributor_evidence");
+      expect(result.payload).not.toHaveProperty("contributor_github_logins");
+    }
+  );
+
+  it("reports a precise diagnostic when verified contributors exceed the payload bound", async () => {
+    const result = await runManualNotifier({
+      pullCommits: Array.from({ length: 101 }, (_, index) => ({
+        author: { login: `manual-user-${index}`, type: "User" },
+        committer: null,
+      })),
+    });
+
+    expect(result.code).toBe(0);
+    expect(result.stderr).toContain(
+      "Verified manual deployment contributor evidence exceeds 100 users"
+    );
+    expect(result.payload).not.toHaveProperty("contributor_evidence");
+    expect(result.payload).not.toHaveProperty("contributor_github_logins");
+  });
+
+  it("excludes an associated PR that targets a different branch", async () => {
+    const result = await runManualNotifier({
+      commits: [
+        {
+          sha: "c".repeat(40),
+          author: null,
+          committer: null,
+        },
+      ],
+      pullRequests: [
+        {
+          number: 3498,
+          merged_at: "2026-07-23T10:00:00Z",
+          user: { login: "Unrelated-PR-Author", type: "User" },
+          base: { ref: "unrelated-branch" },
+        },
+      ],
+      pullCommits: [
+        {
+          author: { login: "Unrelated-Commit-Author", type: "User" },
+          committer: { login: "Unrelated-Committer", type: "User" },
+        },
+      ],
+    });
+
+    expect(result.code).toBe(0);
+    expect(result.payload).not.toHaveProperty("contributor_evidence");
+    expect(result.payload).not.toHaveProperty("contributor_github_logins");
+  });
+
+  it.each([
+    ["staging", "Release Bus - Deploy Frontend Staging", "staging"],
+    ["prod", "Release Bus - Deploy Frontend Production", "prod"],
+  ])(
+    "preserves scoped Release Bus frontend %s contributors",
+    async (environment, workflow, targetEnvironment) => {
+      const expectedSha = "b".repeat(40);
+      const result = await runNotifier({
+        GITHUB_WORKFLOW: workflow,
+        CI_PIPELINES_TARGET_ENV: targetEnvironment,
+        CI_RELEASE_TRAIN_ID: "a7d3433d-e145-4578-bc78-e96fbd34f591",
+        CI_RELEASE_OPERATION_KEY: `rb2:a7d3433d-e145-4578-bc78-e96fbd34f591:deploy:${environment}:frontend:a1`,
+        CI_RELEASE_CONTRIBUTORS: JSON.stringify([
+          "GelatoGenesis",
+          "prxt6529",
+          "gelatogenesis",
+        ]),
+        CI_PIPELINES_SHA: expectedSha,
+      });
+
+      expect(result).toMatchObject({
+        code: 0,
+        stderr: "",
+        payload: {
+          release_train_id: "a7d3433d-e145-4578-bc78-e96fbd34f591",
+          release_operation_key: `rb2:a7d3433d-e145-4578-bc78-e96fbd34f591:deploy:${environment}:frontend:a1`,
+          contributor_evidence: "release-bus-operation",
+          contributor_github_logins: ["GelatoGenesis", "prxt6529"],
+          sha: expectedSha,
+        },
+      });
+      expect(result.payload).not.toHaveProperty("release_notes_prompt_path");
+      expect(result.payload).not.toHaveProperty("release_group_id");
+      expect(result.payload).not.toHaveProperty("deployed_at");
+    }
+  );
 
   it("adds the autonomous release-note contract for frontend production", async () => {
     const result = await runNotifier({
@@ -120,33 +713,56 @@ describe("notify-ci-wave payload", () => {
     ).toBe(false);
   });
 
-  it("rejects contributors without a train id", async () => {
+  it("bounds a receiver response body that never completes", async () => {
+    const result = await runNotifier(
+      {
+        CI_PIPELINES_ALERT_TIMEOUT_MS: "2000",
+      },
+      { stallResponseBody: true }
+    );
+
+    expect(result.code).toBe(1);
+    expect(result.stderr).toContain(
+      "CI pipeline wave notification request failed: request timed out"
+    );
+    expect(result.payload).toMatchObject({
+      run_id: "123",
+      status: "success",
+    });
+  });
+
+  it("does not trust user-supplied contributors on a manual deployment", async () => {
     const result = await runNotifier({
       CI_RELEASE_CONTRIBUTORS: JSON.stringify(["GelatoGenesis"]),
     });
 
+    expect(result.code).toBe(0);
+    expect(result.stderr).toContain(
+      "Ignoring user-supplied contributors on a manual deployment"
+    );
+    expect(result.payload).not.toHaveProperty("contributor_github_logins");
+  });
+
+  it("requires Release Bus train and operation identities together", async () => {
+    const result = await runNotifier({
+      CI_RELEASE_TRAIN_ID: "a7d3433d-e145-4578-bc78-e96fbd34f591",
+      CI_RELEASE_CONTRIBUTORS: "[]",
+    });
+
     expect(result.code).toBe(1);
     expect(result.stderr).toContain(
-      "CI_RELEASE_TRAIN_ID is required with CI_RELEASE_CONTRIBUTORS"
+      "CI_RELEASE_TRAIN_ID and CI_RELEASE_OPERATION_KEY must be supplied together"
     );
     expect(result.payload).toBeNull();
   });
 
-  it("omits a workflow train id when there are no contributor credits", async () => {
-    const result = await runNotifier({
-      CI_RELEASE_TRAIN_ID: "train-123",
-      CI_RELEASE_CONTRIBUTORS: "[]",
-    });
-
-    expect(result.code).toBe(0);
-    expect(result.payload).not.toHaveProperty("release_train_id");
-    expect(result.payload).not.toHaveProperty("contributor_github_logins");
-  });
-
-  it("sends a deploy train id without requiring contributor credits", async () => {
+  it("sends a Release Bus deploy identity without requiring contributor credits", async () => {
+    const trainId = "a7d3433d-e145-4578-bc78-e96fbd34f591";
+    const operationKey = `rb2:${trainId}:deploy:prod:frontend:a1`;
     const result = await runNotifier({
       CI_PIPELINES_ALERT_TYPE: "deploy",
-      CI_RELEASE_TRAIN_ID: "train-123",
+      CI_RELEASE_TRAIN_ID: trainId,
+      CI_RELEASE_OPERATION_KEY: operationKey,
       CI_RELEASE_CONTRIBUTORS: "[]",
       GITHUB_RUN_ATTEMPT: "2",
     });
@@ -156,11 +772,13 @@ describe("notify-ci-wave payload", () => {
       stderr: "",
       payload: {
         alert_type: "deploy",
-        release_train_id: "train-123",
+        release_train_id: trainId,
+        release_operation_key: operationKey,
         run_attempt: 2,
       },
     });
     expect(result.payload).not.toHaveProperty("contributor_github_logins");
+    expect(result.payload).not.toHaveProperty("contributor_evidence");
   });
 
   it("sends WEB E2E parent identity and validation metadata", async () => {
@@ -194,16 +812,12 @@ describe("notify-ci-wave payload", () => {
     expect(result).toMatchObject({
       code: 0,
       stderr: "",
-      payload: {
-        sha: "abcdef0123456789abcdef0123456789abcdef01",
-      },
+      payload: { sha: "abcdef0123456789abcdef0123456789abcdef01" },
     });
   });
 
   it("requires a validation pack for WEB E2E alerts", async () => {
-    const result = await runNotifier({
-      CI_PIPELINES_ALERT_TYPE: "web_e2e",
-    });
+    const result = await runNotifier({ CI_PIPELINES_ALERT_TYPE: "web_e2e" });
 
     expect(result.code).toBe(1);
     expect(result.stderr).toContain(
@@ -214,7 +828,9 @@ describe("notify-ci-wave payload", () => {
 
   it("rejects an invalid contributor login", async () => {
     const result = await runNotifier({
-      CI_RELEASE_TRAIN_ID: "train-123",
+      CI_RELEASE_TRAIN_ID: "a7d3433d-e145-4578-bc78-e96fbd34f591",
+      CI_RELEASE_OPERATION_KEY:
+        "rb2:a7d3433d-e145-4578-bc78-e96fbd34f591:deploy:prod:frontend:a1",
       CI_RELEASE_CONTRIBUTORS: JSON.stringify(["not a login"]),
     });
 
@@ -229,7 +845,9 @@ describe("notify-ci-wave payload", () => {
     "rejects impossible GitHub login %s",
     async (login) => {
       const result = await runNotifier({
-        CI_RELEASE_TRAIN_ID: "train-123",
+        CI_RELEASE_TRAIN_ID: "a7d3433d-e145-4578-bc78-e96fbd34f591",
+        CI_RELEASE_OPERATION_KEY:
+          "rb2:a7d3433d-e145-4578-bc78-e96fbd34f591:deploy:prod:frontend:a1",
         CI_RELEASE_CONTRIBUTORS: JSON.stringify([login]),
       });
 

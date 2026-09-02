@@ -18,6 +18,7 @@ const {
   CI_RELEASE_GROUP_SERVICES,
   CI_RELEASE_TRAIN_ID,
   CI_RELEASE_CONTRIBUTORS,
+  CI_RELEASE_OPERATION_KEY,
   CI_PIPELINES_SHA,
   CI_PIPELINES_PARENT_DEPLOY_RUN_ID,
   CI_PIPELINES_PARENT_RELEASE_TRAIN_ID,
@@ -32,6 +33,11 @@ const {
   GITHUB_REF_NAME,
   GITHUB_TRIGGERING_ACTOR,
   GITHUB_ACTOR,
+  GITHUB_TOKEN,
+  GITHUB_API_URL = "https://api.github.com",
+  CI_GITHUB_EVIDENCE_REQUEST_TIMEOUT_MS,
+  CI_GITHUB_EVIDENCE_DEADLINE_MS,
+  CI_PIPELINES_ALERT_TIMEOUT_MS,
 } = process.env;
 
 function requireValue(name, value) {
@@ -63,6 +69,34 @@ function getFetchFailureMessage(error) {
   return "unknown request error";
 }
 
+function boundedDuration(value, fallback, minimum, maximum) {
+  const parsed = Number(value);
+  return Number.isSafeInteger(parsed) && parsed >= minimum && parsed <= maximum
+    ? parsed
+    : fallback;
+}
+
+const GITHUB_EVIDENCE_REQUEST_TIMEOUT_MS = boundedDuration(
+  CI_GITHUB_EVIDENCE_REQUEST_TIMEOUT_MS,
+  3_000,
+  25,
+  10_000
+);
+const GITHUB_EVIDENCE_DEADLINE_MS = boundedDuration(
+  CI_GITHUB_EVIDENCE_DEADLINE_MS,
+  12_000,
+  50,
+  30_000
+);
+const GITHUB_EVIDENCE_MAX_ATTEMPTS = 3;
+const GITHUB_EVIDENCE_FALLBACK_RETRY_MS = 250;
+const PIPELINES_ALERT_TIMEOUT_MS = boundedDuration(
+  CI_PIPELINES_ALERT_TIMEOUT_MS,
+  10_000,
+  25,
+  30_000
+);
+
 function isContributorGithubLogin(value) {
   return (
     value.length <= 39 &&
@@ -70,6 +104,42 @@ function isContributorGithubLogin(value) {
       value
     )
   );
+}
+
+const NON_HUMAN_GITHUB_LOGINS = new Set([
+  "dependabot",
+  "github-actions",
+  "renovate",
+  "web-flow",
+]);
+
+function isHumanGithubUser(user) {
+  const login = user?.login?.trim();
+  const type = user?.type?.trim().toLowerCase();
+  return Boolean(
+    login &&
+    type === "user" &&
+    !login.toLowerCase().endsWith("[bot]") &&
+    !NON_HUMAN_GITHUB_LOGINS.has(login.toLowerCase())
+  );
+}
+
+function normalizeContributorGithubLogins(entries) {
+  const contributors = [];
+  const seen = new Set();
+  for (const entry of entries) {
+    const login = entry.trim();
+    const key = login.toLowerCase();
+    if (
+      seen.has(key) ||
+      key.endsWith("[bot]") ||
+      NON_HUMAN_GITHUB_LOGINS.has(key)
+    )
+      continue;
+    seen.add(key);
+    contributors.push(login);
+  }
+  return contributors;
 }
 
 function parseReleaseContributors(value) {
@@ -81,18 +151,348 @@ function parseReleaseContributors(value) {
     );
   }
   const contributors = [];
-  const seen = new Set();
   for (const entry of parsed) {
     if (typeof entry !== "string" || !isContributorGithubLogin(entry.trim())) {
       throw new Error(
         "CI_RELEASE_CONTRIBUTORS contains an invalid GitHub login"
       );
     }
-    const login = entry.trim();
-    const key = login.toLowerCase();
-    if (seen.has(key)) continue;
-    seen.add(key);
-    contributors.push(login);
+    contributors.push(entry);
+  }
+  return normalizeContributorGithubLogins(contributors);
+}
+
+function githubRetryDelayMs(response, attempt) {
+  const retryAfter = response.headers.get("retry-after");
+  if (retryAfter !== null) {
+    const seconds = Number(retryAfter);
+    if (Number.isFinite(seconds) && seconds >= 0) {
+      return Math.ceil(seconds * 1_000);
+    }
+    const retryAt = Date.parse(retryAfter);
+    if (Number.isFinite(retryAt)) {
+      return Math.max(0, retryAt - Date.now());
+    }
+  }
+  const rateLimitReset = Number(response.headers.get("x-ratelimit-reset"));
+  if (Number.isFinite(rateLimitReset) && rateLimitReset > 0) {
+    return Math.max(0, rateLimitReset * 1_000 - Date.now());
+  }
+  return GITHUB_EVIDENCE_FALLBACK_RETRY_MS * 2 ** (attempt - 1);
+}
+
+function isRetryableGithubEvidenceResponse(response) {
+  if (response.status === 429) return true;
+  return (
+    response.status === 403 &&
+    (response.headers.has("retry-after") ||
+      response.headers.get("x-ratelimit-remaining") === "0" ||
+      response.headers.has("x-ratelimit-reset"))
+  );
+}
+
+function githubEvidenceDeadlineError() {
+  return new Error(
+    `GitHub contributor evidence deadline expired after ${GITHUB_EVIDENCE_DEADLINE_MS}ms`
+  );
+}
+
+async function githubApi(repository, path, evidenceBudget) {
+  for (let attempt = 1; attempt <= GITHUB_EVIDENCE_MAX_ATTEMPTS; attempt += 1) {
+    const remainingMs = evidenceBudget.deadlineAt - Date.now();
+    if (remainingMs <= 0) throw githubEvidenceDeadlineError();
+    const requestTimeoutMs = Math.min(
+      GITHUB_EVIDENCE_REQUEST_TIMEOUT_MS,
+      remainingMs
+    );
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), requestTimeoutMs);
+    let response;
+    try {
+      response = await fetch(
+        `${GITHUB_API_URL.replace(/\/$/, "")}/repos/${repository}${path}`,
+        {
+          headers: {
+            Accept: "application/vnd.github+json",
+            ...(GITHUB_TOKEN
+              ? { Authorization: `Bearer ${GITHUB_TOKEN}` }
+              : {}),
+            "User-Agent": "6529-ci-contributor-attribution",
+            "X-GitHub-Api-Version": "2022-11-28",
+          },
+          signal: controller.signal,
+        }
+      );
+      if (response.ok) {
+        return await response.json();
+      }
+    } catch (error) {
+      if (error instanceof Error && error.name === "AbortError") {
+        if (Date.now() >= evidenceBudget.deadlineAt) {
+          throw githubEvidenceDeadlineError();
+        }
+        throw new Error(
+          `GitHub contributor evidence request timed out after ${requestTimeoutMs}ms: ${path}`
+        );
+      }
+      throw error;
+    } finally {
+      clearTimeout(timeoutId);
+    }
+
+    const retryable = isRetryableGithubEvidenceResponse(response);
+    if (!retryable || attempt === GITHUB_EVIDENCE_MAX_ATTEMPTS) {
+      throw new Error(
+        `GitHub contributor evidence request failed after ${attempt} attempt${attempt === 1 ? "" : "s"}: ${response.status} ${response.statusText}`
+      );
+    }
+    const retryDelayMs = githubRetryDelayMs(response, attempt);
+    const retryBudgetMs = evidenceBudget.deadlineAt - Date.now();
+    if (retryDelayMs >= retryBudgetMs) {
+      throw githubEvidenceDeadlineError();
+    }
+    await new Promise((resolve) => setTimeout(resolve, retryDelayMs));
+  }
+  throw new Error("GitHub contributor evidence request exhausted retries");
+}
+
+const MANUAL_FRONTEND_WORKFLOWS = Object.freeze({
+  "Web Deploy - STAGING": Object.freeze({
+    workflowFile: "deploy-staging.yml",
+    branch: "1a-staging",
+    pullRequestBase: "main",
+  }),
+  "Web Deploy - PROD": Object.freeze({
+    workflowFile: "build-upload-deploy-prod.yml",
+    branch: "main",
+    pullRequestBase: "main",
+  }),
+});
+const APPROVED_FRONTEND_PRODUCTION_WORKFLOWS = Object.freeze({
+  "Web Deploy - PROD": "build-upload-deploy-prod.yml",
+  "Release Bus - Deploy Frontend Production":
+    "release-bus-deploy-production.yml",
+});
+
+function validateCurrentManualWorkflowRun({
+  currentRun,
+  runId,
+  workflow,
+  workflowFile,
+  approvedBranch,
+  deployedSha,
+  branch,
+}) {
+  if (String(currentRun.id) !== runId) {
+    throw new Error("Current workflow run ID does not match GITHUB_RUN_ID");
+  }
+  if (currentRun.name !== workflow) {
+    throw new Error("Current workflow run name is not the approved workflow");
+  }
+  const currentWorkflowPath = currentRun.path?.split("@")[0];
+  const approvedWorkflowPath = `.github/workflows/${workflowFile}`;
+  if (currentWorkflowPath !== approvedWorkflowPath) {
+    throw new Error("Current workflow run path is not the approved workflow");
+  }
+  if (currentRun.head_sha !== deployedSha) {
+    throw new Error("Current workflow run SHA does not match the deployed SHA");
+  }
+  if (branch !== approvedBranch) {
+    throw new Error(
+      `Deployment branch ${branch} is not approved for workflow ${workflow}`
+    );
+  }
+  if (currentRun.head_branch !== branch) {
+    throw new Error(
+      "Current workflow run branch does not match the deployed branch"
+    );
+  }
+  const isLiveSuccessNotification =
+    currentRun.status === "in_progress" && currentRun.conclusion === null;
+  const isSuccessfulReplay =
+    currentRun.status === "completed" && currentRun.conclusion === "success";
+  if (!isLiveSuccessNotification && !isSuccessfulReplay) {
+    throw new Error(
+      `Current workflow run state ${currentRun.status ?? "unknown"}/${currentRun.conclusion ?? "null"} is not valid for a success notification`
+    );
+  }
+  if (
+    !currentRun.created_at ||
+    Number.isNaN(Date.parse(currentRun.created_at))
+  ) {
+    throw new Error("Current workflow run creation time is invalid");
+  }
+}
+
+async function listPreviousWorkflowRuns({
+  repository,
+  workflowName,
+  workflowFile,
+  currentRun,
+  branch,
+  evidenceBudget,
+}) {
+  const runs = [];
+  for (let page = 1; page <= 10; page += 1) {
+    const payload = await githubApi(
+      repository,
+      `/actions/workflows/${encodeURIComponent(workflowFile)}/runs?status=success&branch=${encodeURIComponent(branch)}&per_page=100&page=${page}`,
+      evidenceBudget
+    );
+    const pageRuns = payload.workflow_runs ?? [];
+    if (!Array.isArray(pageRuns)) {
+      throw new Error(`Production history for ${workflowName} is malformed`);
+    }
+    for (const run of pageRuns) {
+      if (
+        String(run.id) === String(currentRun.id) ||
+        run.name !== workflowName ||
+        run.path?.split("@")[0] !== `.github/workflows/${workflowFile}` ||
+        run.status !== "completed" ||
+        run.conclusion !== "success" ||
+        run.head_branch !== branch ||
+        !run.created_at ||
+        Date.parse(run.created_at) >= Date.parse(currentRun.created_at)
+      )
+        continue;
+      runs.push(run);
+    }
+    if (runs.length > 0) break;
+    if (pageRuns.length < 100) break;
+    if (page === 10) {
+      throw new Error(`Production history for ${workflowName} is too large`);
+    }
+  }
+  return runs;
+}
+
+async function deriveManualRangeContributors({
+  repository,
+  runId,
+  workflow,
+  deployedSha,
+  branch,
+}) {
+  const evidenceBudget = {
+    deadlineAt: Date.now() + GITHUB_EVIDENCE_DEADLINE_MS,
+  };
+  const workflowConfig = MANUAL_FRONTEND_WORKFLOWS[workflow];
+  if (!workflowConfig) {
+    throw new Error(`Workflow ${workflow} is not an approved manual path`);
+  }
+  const { workflowFile, branch: approvedBranch, pullRequestBase } =
+    workflowConfig;
+  const currentRun = await githubApi(
+    repository,
+    `/actions/runs/${runId}`,
+    evidenceBudget
+  );
+  validateCurrentManualWorkflowRun({
+    currentRun,
+    runId,
+    workflow,
+    workflowFile,
+    approvedBranch,
+    deployedSha,
+    branch,
+  });
+  const baselineWorkflows =
+    workflow === "Web Deploy - PROD"
+      ? APPROVED_FRONTEND_PRODUCTION_WORKFLOWS
+      : { [workflow]: workflowFile };
+  const baselineRuns = (
+    await Promise.all(
+      Object.entries(baselineWorkflows).map(([name, file]) =>
+        listPreviousWorkflowRuns({
+          repository,
+          workflowName: name,
+          workflowFile: file,
+          currentRun,
+          branch,
+          evidenceBudget,
+        })
+      )
+    )
+  )
+    .flat()
+    .sort((left, right) => {
+      const chronology =
+        Date.parse(right.created_at) - Date.parse(left.created_at);
+      return chronology || Number(right.id) - Number(left.id);
+    });
+  const baseline = baselineRuns[0];
+  if (!baseline) {
+    throw new Error("No prior approved successful deployment baseline exists");
+  }
+  const commits = [];
+  for (let page = 1; page <= 3; page += 1) {
+    const comparison = await githubApi(
+      repository,
+      `/compare/${encodeURIComponent(baseline.head_sha)}...${encodeURIComponent(deployedSha)}?per_page=100&page=${page}`,
+      evidenceBudget
+    );
+    if (comparison.status !== "ahead" && comparison.status !== "identical") {
+      throw new Error("Deployment comparison is not a forward range");
+    }
+    const pageCommits = comparison.commits ?? [];
+    if (!Array.isArray(pageCommits)) {
+      throw new Error("Deployment comparison commit evidence is malformed");
+    }
+    commits.push(...pageCommits);
+    if (pageCommits.length < 100) break;
+    if (page === 3) {
+      throw new Error("Deployment comparison exceeds the evidence bound");
+    }
+  }
+  const users = [];
+  const pullRequests = new Map();
+  for (const commit of commits) {
+    users.push(commit.author, commit.committer);
+    const associated = await githubApi(
+      repository,
+      `/commits/${encodeURIComponent(commit.sha)}/pulls`,
+      evidenceBudget
+    );
+    if (!Array.isArray(associated)) {
+      throw new Error(
+        `Pull-request evidence for commit ${commit.sha} is malformed`
+      );
+    }
+    for (const pull of associated) {
+      if (pull.merged_at && pull.base?.ref === pullRequestBase) {
+        pullRequests.set(pull.number, pull);
+      }
+    }
+  }
+  for (const pull of pullRequests.values()) {
+    users.push(pull.user);
+    for (let page = 1; page <= 3; page += 1) {
+      const pullCommits = await githubApi(
+        repository,
+        `/pulls/${pull.number}/commits?per_page=100&page=${page}`,
+        evidenceBudget
+      );
+      if (!Array.isArray(pullCommits)) {
+        throw new Error(`PR #${pull.number} commit evidence is malformed`);
+      }
+      for (const commit of pullCommits) {
+        users.push(commit.author, commit.committer);
+      }
+      if (pullCommits.length < 100) break;
+      if (page === 3) {
+        throw new Error(
+          `PR #${pull.number} contributor evidence is incomplete`
+        );
+      }
+    }
+  }
+  const contributors = normalizeContributorGithubLogins(
+    users.filter(isHumanGithubUser).map((user) => user.login)
+  );
+  if (contributors.length > 100) {
+    throw new Error(
+      "Verified manual deployment contributor evidence exceeds 100 users"
+    );
   }
   return contributors;
 }
@@ -170,13 +570,30 @@ try {
 }
 if (
   CI_RELEASE_TRAIN_ID &&
-  !/^[A-Za-z0-9._-]{1,100}$/.test(CI_RELEASE_TRAIN_ID)
+  !/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i.test(
+    CI_RELEASE_TRAIN_ID
+  )
 ) {
   console.error("CI_RELEASE_TRAIN_ID is invalid");
   process.exit(1);
 }
-if (releaseContributors.length > 0 && !CI_RELEASE_TRAIN_ID) {
-  console.error("CI_RELEASE_TRAIN_ID is required with CI_RELEASE_CONTRIBUTORS");
+if (
+  (CI_RELEASE_TRAIN_ID && !CI_RELEASE_OPERATION_KEY) ||
+  (!CI_RELEASE_TRAIN_ID && CI_RELEASE_OPERATION_KEY)
+) {
+  console.error(
+    "CI_RELEASE_TRAIN_ID and CI_RELEASE_OPERATION_KEY must be supplied together"
+  );
+  process.exit(1);
+}
+if (
+  CI_RELEASE_OPERATION_KEY &&
+  (!/^rb2:[A-Za-z0-9:._-]{1,220}:a[1-9]\d{0,8}$/.test(
+    CI_RELEASE_OPERATION_KEY
+  ) ||
+    !CI_RELEASE_OPERATION_KEY.startsWith(`rb2:${CI_RELEASE_TRAIN_ID}:`))
+) {
+  console.error("CI_RELEASE_OPERATION_KEY is invalid for CI_RELEASE_TRAIN_ID");
   process.exit(1);
 }
 if (CI_PIPELINES_SHA && !/^[a-f0-9]{40}$/i.test(CI_PIPELINES_SHA)) {
@@ -208,16 +625,50 @@ const releaseNotesFields = isReleaseNotesEligible
       deployed_at: new Date().toISOString(),
     }
   : {};
-// Contributor metadata remains atomic, but deploy alerts also send the train
-// id on its own so the corresponding E2E validation can find its parent drop.
-const releaseTrainFields =
-  CI_RELEASE_TRAIN_ID &&
-  (releaseContributors.length > 0 || alertType === "deploy")
+let contributorEvidence = null;
+if (CI_RELEASE_TRAIN_ID && CI_RELEASE_OPERATION_KEY) {
+  contributorEvidence = "release-bus-operation";
+} else if (releaseContributors.length > 0) {
+  console.warn(
+    "Ignoring user-supplied contributors on a manual deployment; immutable GitHub evidence is required."
+  );
+  releaseContributors = [];
+}
+const deployedSha = alertSha;
+if (
+  status === "success" &&
+  !CI_RELEASE_TRAIN_ID &&
+  GITHUB_TOKEN &&
+  deployedSha &&
+  GITHUB_REF_NAME
+) {
+  try {
+    releaseContributors = await deriveManualRangeContributors({
+      repository,
+      runId,
+      workflow: CI_PIPELINES_WORKFLOW || GITHUB_WORKFLOW,
+      deployedSha,
+      branch: GITHUB_REF_NAME,
+    });
+    contributorEvidence = releaseContributors.length ? "manual-range" : null;
+  } catch (error) {
+    console.warn(
+      `Contributors row omitted because exact manual deployment scope could not be established: ${getFetchFailureMessage(error)}`
+    );
+  }
+}
+const releaseIdentityFields =
+  CI_RELEASE_TRAIN_ID && CI_RELEASE_OPERATION_KEY
     ? {
         release_train_id: CI_RELEASE_TRAIN_ID,
-        ...(releaseContributors.length > 0
-          ? { contributor_github_logins: releaseContributors }
-          : {}),
+        release_operation_key: CI_RELEASE_OPERATION_KEY,
+      }
+    : {};
+const contributorFields =
+  contributorEvidence && releaseContributors.length
+    ? {
+        contributor_github_logins: releaseContributors,
+        contributor_evidence: contributorEvidence,
       }
     : {};
 const webE2EFields =
@@ -246,7 +697,8 @@ const payload = {
   environment: targetEnvironment || null,
   service: CI_PIPELINES_SERVICE || null,
   ...webE2EFields,
-  ...releaseTrainFields,
+  ...releaseIdentityFields,
+  ...contributorFields,
   ...releaseNotesFields,
 };
 
@@ -269,9 +721,13 @@ if (CI_PIPELINES_ALERT_API_AUTH) {
 }
 
 const controller = new AbortController();
-const timeoutId = setTimeout(() => controller.abort(), 10_000);
+const timeoutId = setTimeout(
+  () => controller.abort(),
+  PIPELINES_ALERT_TIMEOUT_MS
+);
 
 let response;
+let outcome = null;
 try {
   response = await fetch(CI_PIPELINES_ALERT_URL, {
     method: "POST",
@@ -279,6 +735,20 @@ try {
     body,
     signal: controller.signal,
   });
+  if (!response.ok) {
+    console.error(
+      `CI pipeline wave notification failed: ${response.status} ${response.statusText}`
+    );
+    process.exit(1);
+  }
+  try {
+    outcome = await response.json();
+  } catch (error) {
+    if (error instanceof Error && error.name === "AbortError") {
+      throw error;
+    }
+    // Older receivers returned an empty response. Preserve rollout compatibility.
+  }
 } catch (error) {
   console.error(
     `CI pipeline wave notification request failed: ${getFetchFailureMessage(error)}`
@@ -287,12 +757,26 @@ try {
 } finally {
   clearTimeout(timeoutId);
 }
-
-if (!response.ok) {
-  console.error(
-    `CI pipeline wave notification failed: ${response.status} ${response.statusText}`
-  );
-  process.exit(1);
+if (outcome?.ci_drop === "accepted") {
+  console.log("CI drop accepted.");
+} else if (outcome?.ci_drop === "duplicate") {
+  console.log("CI drop already accepted; duplicate notification skipped.");
+} else if (outcome?.ci_drop === "failed") {
+  console.error("CI drop processing failed after receiver acceptance.");
+} else {
+  console.log("CI pipeline wave notification accepted by receiver.");
 }
-
-console.log("CI pipeline wave notification sent.");
+if (outcome?.release_note === "enqueued") {
+  console.log("Release-note request eligible and enqueued.");
+} else if (outcome?.release_note === "queue-failed") {
+  console.error(
+    `Release-note queue failure: ${outcome.release_note_reason || "unknown"}`
+  );
+} else if (
+  outcome?.release_note === "skipped" ||
+  outcome?.release_note === "ineligible"
+) {
+  console.log(
+    `Release-note request ${outcome.release_note}: ${outcome.release_note_reason || "unspecified"}`
+  );
+}

@@ -290,8 +290,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 75
     permissions:
+      actions: read
       contents: read
       deployments: write
+      pull-requests: read
 
     steps:
       - name: Checkout staging branch
@@ -949,7 +951,8 @@ jobs:
           CI_PIPELINES_TITLE: "WEB deploy complete"
           CI_PIPELINES_ENVIRONMENT: staging
           CI_PIPELINES_SERVICE: web
-          CI_PIPELINES_SHA: ${{ github.sha }}
+          CI_PIPELINES_SHA: ${{ steps.expected-commit.outputs.sha }}
+          GITHUB_TOKEN: ${{ github.token }}
         run: node .ci-wave-notifier/scripts/notify-ci-wave.mjs
 
   notify-staging-prerequisite-failure:
