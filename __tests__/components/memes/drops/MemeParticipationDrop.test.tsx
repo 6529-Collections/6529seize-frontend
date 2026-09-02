@@ -68,6 +68,7 @@ describe("MemeParticipationDrop", () => {
     rating: 1,
     rating_prediction: 2,
     raters_count: 0,
+    reactions: [],
     wave: { voting_credit_type: "A" },
   };
 

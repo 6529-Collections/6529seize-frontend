@@ -37,12 +37,12 @@ const MemeDropTrait: React.FC<MemeDropTraitProps> = ({
 
   return (
     <div className="tw-flex tw-flex-col tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-px-3 tw-py-1.5">
-      <span className="tw-mb-1 tw-block tw-text-[9px] tw-font-normal tw-uppercase tw-tracking-wide tw-text-iron-500">
+      <span className="tw-mb-1 tw-block tw-text-label tw-font-medium tw-uppercase tw-text-iron-600">
         {label}
       </span>
       <>
         <span
-          className="tw-truncate tw-text-xs tw-font-medium tw-text-iron-200"
+          className="tw-truncate tw-text-meta tw-font-semibold tw-text-iron-200"
           data-tooltip-id={tooltipId}
         >
           {convertedValue}

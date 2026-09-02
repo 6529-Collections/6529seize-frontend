@@ -147,6 +147,32 @@ describe("CommonDropdown", () => {
       expect(screen.getByText("Item 1")).toBeInTheDocument();
     });
 
+    it("should render toolbar variant as a framed trigger", () => {
+      render(
+        <CommonDropdown {...defaultProps} variant="toolbar" showFilterLabel />
+      );
+
+      const button = screen.getByRole("button", {
+        name: "Test Filter: Item 1",
+      });
+      expect(button).toHaveClass(
+        "tw-w-full",
+        "tw-py-3",
+        "tw-rounded-lg",
+        "tw-bg-iron-950",
+        "tw-ring-inset",
+        "tw-ring-iron-800"
+      );
+      expect(screen.getByText("Test Filter:")).toHaveClass(
+        "tw-font-medium",
+        "tw-text-iron-500"
+      );
+      expect(screen.getByText("Item 1")).toHaveClass(
+        "tw-font-semibold",
+        "tw-text-iron-200"
+      );
+    });
+
     it("should render dropdown as closed initially", () => {
       render(<CommonDropdown {...defaultProps} />);
 

@@ -24,25 +24,54 @@ export default function MemeDropVoteStats({ drop }: MemeDropVoteStatsProps) {
   const isUserVoteNegative = userVote < 0;
 
   return (
-    <div className="tw-flex tw-items-center tw-flex-wrap tw-gap-x-6 tw-gap-y-2">
+    <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2">
       <div className="tw-flex tw-items-baseline tw-gap-x-1">
         <span
-          className={`tw-text-sm tw-font-semibold ${
-            isPositive ? "tw-text-emerald-500" : "tw-text-rose-500"
-          } `}
+          className={`tw-text-body tw-font-semibold tw-leading-5 tw-tracking-identity tw-tabular-nums ${
+            isPositive ? "tw-text-iron-100" : "tw-text-rose-400"
+          }`}
         >
           {formatNumberWithCommas(current ?? 0)}
         </span>
 
-        <div className="tw-flex tw-items-baseline tw-gap-x-1.5">
-          <span className="tw-text-sm tw-text-iron-500 tw-whitespace-nowrap">
-            <span className="tw-font-medium">{votingCreditType} total</span>
+        <div className="tw-flex tw-items-baseline tw-gap-1">
+          <DropVoteProgressing
+            current={current}
+            projected={projected}
+            numberFont="sans"
+            numberSize="body"
+            numberWeight="semibold"
+            visualVariant="memes"
+          />
+          <span className="tw-whitespace-nowrap tw-text-label tw-font-semibold tw-uppercase tw-leading-5 tw-tracking-ordinal tw-text-iron-500">
+            {votingCreditType} total
           </span>
-
-          <DropVoteProgressing current={current} projected={projected} />
         </div>
       </div>
-      <div className="tw-flex tw-items-center tw-gap-2">
+
+      {/* User's vote */}
+      {hasUserVoted && (
+        <div className="tw-flex tw-items-center tw-gap-x-1.5">
+          <div className="tw-flex tw-items-baseline tw-gap-x-1">
+            <span className="tw-text-sm tw-font-normal tw-text-iron-400">
+              Your vote:
+            </span>
+            <span
+              className={`tw-text-sm tw-font-semibold ${
+                isUserVoteNegative ? "tw-text-rose-500" : "tw-text-emerald-500"
+              }`}
+            >
+              {isUserVoteNegative && "-"}
+              {formatNumberWithCommas(Math.abs(userVote))}{" "}
+              <span className="tw-text-iron-400 tw-font-normal">
+                {votingCreditType}
+              </span>
+            </span>
+          </div>
+        </div>
+      )}
+
+      <div className="tw-ml-auto tw-flex tw-items-center tw-gap-2">
         <div className="tw-flex tw-items-center -tw-space-x-2">
           {firstThreeVoters.map((voter) => (
             <div key={voter.profile.handle}>
@@ -77,30 +106,11 @@ export default function MemeDropVoteStats({ drop }: MemeDropVoteStatsProps) {
             </div>
           ))}
         </div>
-        <ParticipationDropVoteDetailsTrigger drop={drop} />
+        <ParticipationDropVoteDetailsTrigger
+          drop={drop}
+          visualVariant="memes"
+        />
       </div>
-
-      {/* User's vote */}
-      {hasUserVoted && (
-        <div className="tw-flex tw-items-center tw-gap-x-1.5">
-          <div className="tw-flex tw-items-baseline tw-gap-x-1">
-            <span className="tw-text-sm tw-font-normal tw-text-iron-400">
-              Your vote:
-            </span>
-            <span
-              className={`tw-text-sm tw-font-semibold ${
-                isUserVoteNegative ? "tw-text-rose-500" : "tw-text-emerald-500"
-              }`}
-            >
-              {isUserVoteNegative && "-"}
-              {formatNumberWithCommas(Math.abs(userVote))}{" "}
-              <span className="tw-text-iron-400 tw-font-normal">
-                {votingCreditType}
-              </span>
-            </span>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

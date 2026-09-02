@@ -16,10 +16,17 @@ import {
 } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useWave } from "@/hooks/useWave";
 import { commonApiPost } from "@/services/api/common-api";
+import {
+  DropClientDeliveryState,
+  DropSize,
+} from "@/helpers/waves/drop.helpers";
 import { fetchWaveMetadata } from "@/services/api/waves-v2-api";
 
 const mockSetQueryData = jest.fn();
 const mockInvalidateQueries = jest.fn(() => Promise.resolve());
+const mockProcessDropRemoved = jest.fn();
+const mockProcessIncomingDrop = jest.fn();
+const mockApplyOptimisticDropUpdate = jest.fn();
 
 jest.mock("@tanstack/react-query", () => ({
   useQueryClient: () => ({
@@ -40,14 +47,32 @@ jest.mock("@tanstack/react-query", () => ({
   }),
 }));
 jest.mock("@/hooks/useWave", () => ({ useWave: jest.fn() }));
-jest.mock("@/services/api/common-api", () => ({ commonApiPost: jest.fn() }));
+jest.mock("@/services/api/common-api", () => ({
+  commonApiPost: jest.fn(),
+  getStructuredApiErrorCode: (error: unknown) => {
+    const code = (
+      error as {
+        readonly response?: { readonly body?: { readonly code?: unknown } };
+      }
+    ).response?.body?.code;
+    return typeof code === "string" ? code : undefined;
+  },
+  getStructuredApiErrorStatus: (error: unknown) =>
+    typeof error === "object" &&
+    error !== null &&
+    "status" in error &&
+    typeof error.status === "number"
+      ? error.status
+      : undefined,
+}));
 jest.mock("@/services/api/waves-v2-api", () => ({
   fetchWaveMetadata: jest.fn(),
 }));
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
   useMyStream: () => ({
-    processDropRemoved: jest.fn(),
-    processIncomingDrop: jest.fn(),
+    applyOptimisticDropUpdate: mockApplyOptimisticDropUpdate,
+    processDropRemoved: mockProcessDropRemoved,
+    processIncomingDrop: mockProcessIncomingDrop,
   }),
 }));
 jest.mock("@/components/waves/CreateDropStormParts", () => () => (
@@ -72,7 +97,9 @@ jest.mock("@/components/waves/CreateDropContent", () => (props: any) => (
             title: null,
             parts: [
               {
-                content: props.isDropMode ? "Participation drop" : "Chat message",
+                content: props.isDropMode
+                  ? "Participation drop"
+                  : "Chat message",
                 media: [],
                 quoted_drop: null,
               },
@@ -90,6 +117,26 @@ jest.mock("@/components/waves/CreateDropContent", () => (props: any) => (
       }
     >
       submit current mode
+    </button>
+    <button
+      onClick={() =>
+        props.submitDrop({
+          drop: {
+            wave_id: props.wave.id,
+            drop_type: props.isDropMode ? "PARTICIPATORY" : "CHAT",
+            parts: [
+              {
+                content: "Moderation test message",
+                media: [],
+                quoted_drop: null,
+              },
+            ],
+          },
+          dropId: "temp-rejected-drop",
+        } as unknown as DropMutationBody)
+      }
+    >
+      submit optimistic drop
     </button>
     <button
       onClick={() =>
@@ -197,6 +244,7 @@ const mockPendingPosts = () => {
 describe("CreateDrop", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockApplyOptimisticDropUpdate.mockReturnValue(null);
     useWaveMock.mockReturnValue({
       isMemesWave: false,
       isCurationWave: false,
@@ -233,6 +281,202 @@ describe("CreateDrop", () => {
     await waitFor(() => expect(onDropAdded).toHaveBeenCalled());
     await waitFor(() => expect(waitAndInvalidateDrops).toHaveBeenCalled());
     await waitFor(() => expect(commonApiPostMock).toHaveBeenCalled());
+  });
+
+  it("keeps a moderation-rejected optimistic drop until the wave is left", async () => {
+    const setToast = jest.fn();
+    let locallyUpdatedDrop: Record<string, unknown> | undefined;
+    mockApplyOptimisticDropUpdate.mockImplementation(({ update }) => {
+      locallyUpdatedDrop = update({
+        id: "temp-rejected-drop",
+        type: DropSize.FULL,
+      });
+      return { rollback: jest.fn() };
+    });
+    commonApiPostMock.mockRejectedValue({
+      status: 422,
+      response: {
+        body: {
+          code: "CONTENT_MODERATION_REJECTED",
+          message: "Blocked by safety check",
+        },
+      },
+    });
+    const consoleErrorSpy = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+
+    const { unmount } = render(
+      <AuthContext.Provider value={{ setToast } as any}>
+        <ReactQueryWrapperContext.Provider
+          value={{ waitAndInvalidateDrops: jest.fn() } as any}
+        >
+          <CreateDrop
+            activeDrop={null}
+            onCancelReplyQuote={() => {}}
+            onDropAddedToQueue={jest.fn()}
+            wave={wave}
+            dropId={null}
+            fixedDropMode={"CHAT" as any}
+            privileges={{ chatRestriction: null } as any}
+          />
+        </ReactQueryWrapperContext.Provider>
+      </AuthContext.Provider>
+    );
+
+    await userEvent.click(screen.getByText("submit optimistic drop"));
+
+    await waitFor(() => {
+      expect(mockApplyOptimisticDropUpdate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          waveId: "1",
+          dropId: "temp-rejected-drop",
+        })
+      );
+    });
+    expect(locallyUpdatedDrop).toEqual(
+      expect.objectContaining({
+        clientDeliveryState: DropClientDeliveryState.MODERATION_REJECTED,
+      })
+    );
+    expect(mockProcessDropRemoved).not.toHaveBeenCalled();
+    expect(setToast).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: "error",
+        title: "Couldn't submit this drop.",
+      })
+    );
+
+    unmount();
+
+    expect(mockProcessDropRemoved).toHaveBeenCalledWith(
+      "1",
+      "temp-rejected-drop"
+    );
+    consoleErrorSpy.mockRestore();
+  });
+
+  it("accepts the next post after a moderation rejection", async () => {
+    const setToast = jest.fn();
+    commonApiPostMock
+      .mockRejectedValueOnce({
+        status: 422,
+        response: {
+          body: {
+            code: "CONTENT_MODERATION_REJECTED",
+            message: "Blocked by safety check",
+          },
+        },
+      })
+      .mockResolvedValueOnce({ id: "server-drop", wave_id: "1" });
+    const consoleErrorSpy = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+
+    render(
+      <AuthContext.Provider value={{ setToast } as any}>
+        <ReactQueryWrapperContext.Provider
+          value={{ waitAndInvalidateDrops: jest.fn() } as any}
+        >
+          <CreateDrop
+            activeDrop={null}
+            onCancelReplyQuote={() => {}}
+            onDropAddedToQueue={jest.fn()}
+            wave={{
+              ...wave,
+              metrics: { ...wave.metrics, your_drops_count: 1 },
+            }}
+            dropId={null}
+            fixedDropMode={"CHAT" as any}
+            privileges={{ chatRestriction: null } as any}
+          />
+        </ReactQueryWrapperContext.Provider>
+      </AuthContext.Provider>
+    );
+
+    await userEvent.click(screen.getByText("submit optimistic drop"));
+    await waitFor(() => expect(commonApiPostMock).toHaveBeenCalledTimes(1));
+    await waitFor(() =>
+      expect(setToast).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: "error",
+          title: "Couldn't submit this drop.",
+        })
+      )
+    );
+
+    await userEvent.click(screen.getByText("submit optimistic drop"));
+    await waitFor(() => expect(commonApiPostMock).toHaveBeenCalledTimes(2));
+    expect(commonApiPostMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        endpoint: "drops",
+      })
+    );
+    consoleErrorSpy.mockRestore();
+  });
+
+  it("updates posting access immediately after a suspended-profile rejection", async () => {
+    const setToast = jest.fn();
+    commonApiPostMock.mockRejectedValue({
+      status: 403,
+      response: {
+        body: {
+          code: "PROFILE_SUSPENDED",
+          message: "This profile is currently suspended from posting.",
+        },
+      },
+    });
+    const consoleErrorSpy = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+
+    render(
+      <AuthContext.Provider
+        value={
+          {
+            connectedProfile: { id: "profile-1", handle: "viewer" },
+            setToast,
+          } as any
+        }
+      >
+        <ReactQueryWrapperContext.Provider
+          value={{ waitAndInvalidateDrops: jest.fn() } as any}
+        >
+          <CreateDrop
+            activeDrop={null}
+            onCancelReplyQuote={() => {}}
+            onDropAddedToQueue={jest.fn()}
+            wave={{
+              ...wave,
+              metrics: { ...wave.metrics, your_drops_count: 1 },
+            }}
+            dropId={null}
+            fixedDropMode={"CHAT" as any}
+            privileges={{ chatRestriction: null } as any}
+          />
+        </ReactQueryWrapperContext.Provider>
+      </AuthContext.Provider>
+    );
+
+    await userEvent.click(screen.getByText("submit current mode"));
+
+    await waitFor(() =>
+      expect(mockSetQueryData).toHaveBeenCalledWith(
+        [
+          QueryKey.CONTENT_MODERATION_REPORTS,
+          "public-profile-status",
+          "profile-1",
+        ],
+        { profile_id: "profile-1", status: "SUSPENDED" }
+      )
+    );
+    expect(setToast).toHaveBeenCalledWith(
+      expect.objectContaining({
+        description: "Profile suspended",
+        type: "error",
+      })
+    );
+    consoleErrorSpy.mockRestore();
   });
 
   it("gates a first chat message on guidelines until the user agrees", async () => {

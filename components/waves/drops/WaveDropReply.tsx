@@ -2,15 +2,17 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useMemo } from "react";
+import { type ReactNode, useMemo } from "react";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import { useCompactMode } from "@/contexts/CompactModeContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import { ApiDropModerationStatus } from "@/generated/models/ApiDropModerationStatus";
 import ContentDisplay from "./ContentDisplay";
 import DropLoading from "./DropLoading";
 import DropNotFound from "./DropNotFound";
 import { parseStandaloneMediaUrl } from "./media-utils";
 import { useDropContent } from "./useDropContent";
+import ContentModerationDropGate from "@/components/content-moderation/ContentModerationDropGate";
 
 interface WaveDropReplyProps {
   readonly dropId: string;
@@ -53,52 +55,83 @@ export default function WaveDropReply({
     };
   }, [content]);
 
+  const renderFixedReplyContent = (children: ReactNode) => (
+    <div
+      data-testid="wave-drop-reply-fixed-container"
+      className={`${fixedReplyHeightClasses} tw-flex tw-w-full tw-items-center tw-overflow-hidden`}
+    >
+      {children}
+    </div>
+  );
+
   const renderDropContent = () => {
     if (isLoading) {
-      return <DropLoading />;
+      return renderFixedReplyContent(<DropLoading />);
     }
 
-    if (!drop?.author.handle) {
-      return <DropNotFound />;
+    if (!drop) {
+      return renderFixedReplyContent(<DropNotFound />);
+    }
+
+    const hasModeratedPresentation =
+      drop.moderation?.status !== undefined &&
+      drop.moderation.status !== ApiDropModerationStatus.Visible;
+
+    if (!drop.author.handle && !hasModeratedPresentation) {
+      return renderFixedReplyContent(<DropNotFound />);
     }
 
     return (
-      <div className="tw-flex tw-w-full tw-min-w-0 tw-items-center tw-gap-x-1.5">
-        <div className="tw-relative tw-z-10 tw-h-6 tw-w-6 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-md tw-bg-iron-800">
-          {drop.author.pfp ? (
-            <Image
-              src={resolveIpfsUrlSync(drop.author.pfp)}
-              alt={`${drop.author.handle}'s avatar`}
-              fill
-              sizes="24px"
-              className="tw-rounded-md tw-bg-transparent tw-object-contain"
-            />
-          ) : (
-            <div className="tw-h-full tw-w-full tw-rounded-md tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-white/10" />
-          )}
-        </div>
-        <div className="tw-min-w-0 tw-flex-1">
-          <p className="tw-mb-0 tw-mt-0 tw-flex tw-min-w-0 tw-items-center xl:tw-pr-24">
-            <Link
-              href={`/${drop.author.handle}`}
-              className="tw-mr-1 tw-flex-shrink-0 tw-text-sm tw-font-medium tw-text-iron-200 tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-500"
-            >
-              {drop.author.handle}
-            </Link>
-            <ContentDisplay
-              content={replyPreviewContent}
-              onClick={() => {
-                if (drop.serial_no > 0) {
-                  onReplyClick(drop.serial_no);
-                }
-              }}
-              className="tw-min-w-0 tw-flex-1 tw-overflow-hidden"
-              textClassName="tw-min-w-0 tw-overflow-hidden"
-              linkify={false}
-            />
-          </p>
-        </div>
-      </div>
+      <ContentModerationDropGate
+        drop={drop}
+        compact
+        onGlobalTombstoneClick={() => {
+          if (drop.serial_no > 0) {
+            onReplyClick(drop.serial_no);
+          }
+        }}
+      >
+        {drop.author.handle
+          ? renderFixedReplyContent(
+              <div className="tw-flex tw-w-full tw-min-w-0 tw-items-center tw-gap-x-1.5">
+                <div className="tw-relative tw-z-10 tw-h-6 tw-w-6 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-md tw-bg-iron-800">
+                  {drop.author.pfp ? (
+                    <Image
+                      src={resolveIpfsUrlSync(drop.author.pfp)}
+                      alt={`${drop.author.handle}'s avatar`}
+                      fill
+                      sizes="24px"
+                      className="tw-rounded-md tw-bg-transparent tw-object-contain"
+                    />
+                  ) : (
+                    <div className="tw-h-full tw-w-full tw-rounded-md tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-white/10" />
+                  )}
+                </div>
+                <div className="tw-min-w-0 tw-flex-1">
+                  <p className="tw-mb-0 tw-mt-0 tw-flex tw-min-w-0 tw-items-center xl:tw-pr-24">
+                    <Link
+                      href={`/${drop.author.handle}`}
+                      className="tw-mr-1 tw-flex-shrink-0 tw-text-sm tw-font-medium tw-text-iron-200 tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-500"
+                    >
+                      {drop.author.handle}
+                    </Link>
+                    <ContentDisplay
+                      content={replyPreviewContent}
+                      onClick={() => {
+                        if (drop.serial_no > 0) {
+                          onReplyClick(drop.serial_no);
+                        }
+                      }}
+                      className="tw-min-w-0 tw-flex-1 tw-overflow-hidden"
+                      textClassName="tw-min-w-0 tw-overflow-hidden"
+                      linkify={false}
+                    />
+                  </p>
+                </div>
+              </div>
+            )
+          : null}
+      </ContentModerationDropGate>
     );
   };
 
@@ -111,12 +144,7 @@ export default function WaveDropReply({
       <div
         className={`${replyContentOffsetClass} tw-flex tw-items-center tw-gap-x-1.5`}
       >
-        <div
-          data-testid="wave-drop-reply-fixed-container"
-          className={`${fixedReplyHeightClasses} tw-flex tw-w-full tw-items-center tw-overflow-hidden`}
-        >
-          {renderDropContent()}
-        </div>
+        {renderDropContent()}
       </div>
     </div>
   );

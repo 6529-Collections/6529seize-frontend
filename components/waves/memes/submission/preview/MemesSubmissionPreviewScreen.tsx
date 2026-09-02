@@ -53,15 +53,19 @@ export function MemesSubmissionPreviewScreen({
         />
       </div>
 
-      <div className="tw-mt-auto tw-flex tw-items-center tw-justify-between tw-border-t tw-border-iron-800 tw-px-4 tw-pt-6">
-        <SecondaryButton onClicked={onBackToEdit} disabled={isSubmitting}>
+      <div className="tw-mt-auto tw-grid tw-gap-2 tw-border-t tw-border-iron-800 tw-px-4 tw-pt-6 sm:tw-flex sm:tw-items-center sm:tw-justify-between">
+        <SecondaryButton
+          onClicked={onBackToEdit}
+          disabled={isSubmitting}
+          className="tw-w-full sm:tw-w-auto"
+        >
           Back to Edit
         </SecondaryButton>
         <PrimaryButton
           onClicked={onSubmit}
           disabled={false}
           loading={isSubmitting}
-          size="lg"
+          className="tw-w-full sm:tw-w-auto"
         >
           {submitLabel}
         </PrimaryButton>

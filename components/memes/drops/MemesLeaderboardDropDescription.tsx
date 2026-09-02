@@ -9,7 +9,7 @@ const MemesLeaderboardDropDescription: React.FC<
 > = ({ description }) => {
   return (
     <div>
-      <p className="tw-mb-0 tw-whitespace-pre-line tw-text-sm tw-leading-relaxed tw-text-iron-500">
+      <p className="tw-mb-0 tw-whitespace-pre-line tw-text-body tw-font-normal tw-text-iron-300">
         {description}
       </p>
     </div>
