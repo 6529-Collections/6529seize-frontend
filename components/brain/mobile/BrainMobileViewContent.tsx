@@ -16,7 +16,7 @@ function BrainMobileViewLoadingFallback() {
     <div
       aria-hidden="true"
       data-mobile-bottom-nav-scroll-target="true"
-      className="tw-h-full tw-min-h-[50dvh] tw-bg-iron-950"
+      className="tw-h-full tw-min-h-[50dvh] tw-bg-[#0d0d0e]"
     />
   );
 }
