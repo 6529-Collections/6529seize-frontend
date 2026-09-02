@@ -21,6 +21,14 @@ describe("one-click production authority completion", () => {
     (step: { readonly name?: string }) =>
       step.name === "Authorize maintainer recovery actor"
   );
+  const reportAuthorization = completionJob.steps.find(
+    (step: { readonly name?: string }) =>
+      step.name === "Report successful maintainer authorization"
+  );
+  const checkoutEvidence = completionJob.steps.find(
+    (step: { readonly name?: string }) =>
+      step.name === "Check out immutable terminal-evidence helper"
+  );
   const proof = completionJob.steps.find(
     (step: { readonly name?: string }) =>
       step.name === "Read exact terminal workflow and immutable evidence"
@@ -58,15 +66,25 @@ describe("one-click production authority completion", () => {
     });
     expect(completion.on.workflow_dispatch).toEqual({
       inputs: {
-        terminal_workflow_run_id: {
-          description: "Exact terminal production workflow run to complete",
+        mode: {
+          description: "Operation to perform",
           required: true,
+          default: "recover",
+          type: "choice",
+          options: ["recover", "authorization-check"],
+        },
+        terminal_workflow_run_id: {
+          description:
+            "Exact terminal production workflow run (required for recover)",
+          required: false,
           type: "string",
         },
       },
     });
     expect(completionJob.if.replace(/\s+/gu, " ").trim()).toBe(
-      "(github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') || " +
+      "(github.event_name == 'workflow_dispatch' && " +
+        "((inputs.mode == 'recover' && github.ref == 'refs/heads/main') || " +
+        "inputs.mode == 'authorization-check')) || " +
         "(github.event_name == 'workflow_run' && " +
         "github.event.workflow_run.head_repository.full_name == github.repository && " +
         "github.event.workflow_run.head_branch == 'main' && " +
@@ -102,7 +120,7 @@ describe("one-click production authority completion", () => {
 
   it("authorizes the current recovery initiator once through live maintainer-team membership", () => {
     expect(completion["run-name"]).toBe(
-      "Production authority completion [${{ github.event.workflow_run.id || inputs.terminal_workflow_run_id }}]"
+      "Production authority ${{ inputs.mode == 'authorization-check' && 'authorization check' || 'completion' }} [${{ inputs.mode == 'authorization-check' && github.triggering_actor || github.event.workflow_run.id || inputs.terminal_workflow_run_id }}]"
     );
     expect(membershipToken.if).toBe(
       "github.event_name == 'workflow_dispatch' && github.triggering_actor != 'github-actions[bot]'"
@@ -125,6 +143,7 @@ describe("one-click production authority completion", () => {
       GH_TOKEN: "${{ steps.maintainer-token.outputs.token }}",
       MAINTAINER_ORGANIZATION: "${{ github.repository_owner }}",
       MAINTAINER_TEAM_SLUG: "6529seize-maintainers",
+      MODE: "${{ inputs.mode }}",
     });
     expect(authorizeMaintainer.run).toContain(
       "orgs/${MAINTAINER_ORGANIZATION}/teams/${MAINTAINER_TEAM_SLUG}/memberships/${DISPATCH_ACTOR}"
@@ -141,6 +160,9 @@ describe("one-click production authority completion", () => {
     );
     expect(authorizeMaintainer.run).toContain(
       "Automatic recovery dispatcher admitted for exact Production E2E proof."
+    );
+    expect(authorizeMaintainer.run).toContain(
+      "Automatic recovery dispatcher cannot perform a maintainer authorization check."
     );
     expect(authorizeMaintainer.run).toContain('test -n "$GH_TOKEN"');
     expect(
@@ -175,6 +197,34 @@ describe("one-click production authority completion", () => {
       "[ \"$DISPATCH_ACTOR\" = 'github-actions[bot]' ] && [ \"$workflow_path\" != '.github/workflows/production-e2e.yml' ]"
     );
     expect(proof.run).not.toContain("workflow_name=");
+  });
+
+  it("can verify live maintainer authorization without entering recovery", () => {
+    expect(completion.on.workflow_dispatch.inputs.mode.default).toBe(
+      "recover"
+    );
+    expect(completionJob.if).toContain(
+      "inputs.mode == 'authorization-check'"
+    );
+    expect(reportAuthorization.if).toBe(
+      "github.event_name == 'workflow_dispatch' && inputs.mode == 'authorization-check'"
+    );
+    expect(reportAuthorization.env.DISPATCH_ACTOR).toBe(
+      "${{ github.triggering_actor }}"
+    );
+    expect(reportAuthorization.run).toContain(
+      "Maintainer recovery authorization check passed"
+    );
+    expect(checkoutEvidence.if).toBe(
+      "github.event_name == 'workflow_run' || inputs.mode == 'recover'"
+    );
+    expect(proof.if).toBe(
+      "github.event_name == 'workflow_run' || inputs.mode == 'recover'"
+    );
+    expect(complete.if).toContain("steps.proof.outcome == 'success'");
+    expect(fail.if).toContain("steps.proof.outcome == 'success'");
+    expect(reportAuthorization.run).not.toContain("RELEASE_BUS_API_URL");
+    expect(reportAuthorization.run).not.toContain("production-authority/");
   });
 
   it("checks the rerun initiator instead of reusing the original actor's authorization", () => {

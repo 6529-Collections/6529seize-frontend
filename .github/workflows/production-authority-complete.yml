@@ -7,21 +7,29 @@ on:
     branches: [main]
   workflow_dispatch:
     inputs:
-      terminal_workflow_run_id:
-        description: Exact terminal production workflow run to complete
+      mode:
+        description: Operation to perform
         required: true
+        default: recover
+        type: choice
+        options:
+          - recover
+          - authorization-check
+      terminal_workflow_run_id:
+        description: Exact terminal production workflow run (required for recover)
+        required: false
         type: string
 
 permissions: {}
 
-run-name: Production authority completion [${{ github.event.workflow_run.id || inputs.terminal_workflow_run_id }}]
+run-name: Production authority ${{ inputs.mode == 'authorization-check' && 'authorization check' || 'completion' }} [${{ inputs.mode == 'authorization-check' && github.triggering_actor || github.event.workflow_run.id || inputs.terminal_workflow_run_id }}]
 
 jobs:
   complete-production-authority:
-    name: Complete exact production authority
-    # Manual recovery is main-only; the dedicated authorization step performs
-    # the single live team-membership decision for human dispatchers.
-    if: (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_run' && github.event.workflow_run.head_repository.full_name == github.repository && github.event.workflow_run.head_branch == 'main' && (github.event.workflow_run.path == '.github/workflows/production-e2e.yml' || github.event.workflow_run.path == '.github/workflows/build-upload-deploy-prod.yml')) # NOSONAR
+    name: ${{ inputs.mode == 'authorization-check' && 'Check maintainer recovery authorization' || 'Complete exact production authority' }}
+    # Manual recovery remains main-only. Authorization-only dispatches may use
+    # another ref but stop before evidence processing or authority mutation.
+    if: (github.event_name == 'workflow_dispatch' && ((inputs.mode == 'recover' && github.ref == 'refs/heads/main') || inputs.mode == 'authorization-check')) || (github.event_name == 'workflow_run' && github.event.workflow_run.head_repository.full_name == github.repository && github.event.workflow_run.head_branch == 'main' && (github.event.workflow_run.path == '.github/workflows/production-e2e.yml' || github.event.workflow_run.path == '.github/workflows/build-upload-deploy-prod.yml')) # NOSONAR
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
@@ -45,11 +53,16 @@ jobs:
           GH_TOKEN: ${{ steps.maintainer-token.outputs.token }}
           MAINTAINER_ORGANIZATION: ${{ github.repository_owner }}
           MAINTAINER_TEAM_SLUG: 6529seize-maintainers
+          MODE: ${{ inputs.mode }}
         run: |
           set -euo pipefail
           if [ "$DISPATCH_ACTOR" = 'github-actions[bot]' ]; then
-            echo "Automatic recovery dispatcher admitted for exact Production E2E proof."
-            exit 0
+            if [ "$MODE" = 'recover' ]; then
+              echo "Automatic recovery dispatcher admitted for exact Production E2E proof."
+              exit 0
+            fi
+            echo "::error::Automatic recovery dispatcher cannot perform a maintainer authorization check."
+            exit 1
           fi
 
           [[ "$DISPATCH_ACTOR" =~ ^[A-Za-z0-9][A-Za-z0-9-]{0,38}$ ]]
@@ -71,7 +84,13 @@ jobs:
             echo "::error::Actor is not an active member of the production recovery team."
             exit 1
           fi
+      - name: Report successful maintainer authorization
+        if: github.event_name == 'workflow_dispatch' && inputs.mode == 'authorization-check'
+        env:
+          DISPATCH_ACTOR: ${{ github.triggering_actor }}
+        run: echo "Maintainer recovery authorization check passed for ${DISPATCH_ACTOR}."
       - name: Check out immutable terminal-evidence helper
+        if: github.event_name == 'workflow_run' || inputs.mode == 'recover'
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           ref: ${{ github.workflow_sha }}
@@ -82,6 +101,7 @@ jobs:
           sparse-checkout-cone-mode: false
       - name: Read exact terminal workflow and immutable evidence
         id: proof
+        if: github.event_name == 'workflow_run' || inputs.mode == 'recover'
         env:
           WORKFLOW_RUN_ID: ${{ github.event.workflow_run.id || inputs.terminal_workflow_run_id }}
           EVENT_NAME: ${{ github.event_name }}
