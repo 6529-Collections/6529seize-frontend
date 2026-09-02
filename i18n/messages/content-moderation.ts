@@ -154,7 +154,8 @@ export const CONTENT_MODERATION_MESSAGES = {
   "contentModeration.moderator.tabs.suspendedCompact": "Suspended",
   "contentModeration.moderator.tabs.blockActivity": "Block activity",
   "contentModeration.moderator.tabs.blockActivityCompact": "Blocks",
-  "contentModeration.moderator.blockActivity.blocked": "blocked",
+  "contentModeration.moderator.blockActivity.summary":
+    "{blocker} blocked {blocked}",
   "contentModeration.moderator.noPower": "You have no power here",
   "contentModeration.moderator.redirecting": "Redirecting in {seconds}",
   "contentModeration.moderator.openReportsIndicator":

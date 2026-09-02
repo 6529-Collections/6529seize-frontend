@@ -59,21 +59,30 @@ export default function BlockActivityFeed() {
   }
 
   return (
-    <div className="tw-mt-8 tw-space-y-3">
-      {items.map((item) => (
-        <BlockActivityCard key={item.id} item={item} />
-      ))}
+    <div className="tw-mt-8">
+      <div role="list" className="tw-space-y-3">
+        {items.map((item) => (
+          <BlockActivityCard key={item.id} item={item} />
+        ))}
+      </div>
       {hasNextPage && (
         <div
           ref={loadMoreRef}
-          aria-hidden={!isFetchingNextPage}
-          className="tw-flex tw-min-h-12 tw-items-center tw-justify-center tw-pt-2"
+          className="tw-flex tw-min-h-14 tw-items-end tw-justify-center tw-pt-3"
         >
-          {isFetchingNextPage && (
-            <output className="tw-text-sm tw-text-iron-400">
-              {t(locale, "contentModeration.moderator.loadingMore")}
-            </output>
-          )}
+          <button
+            type="button"
+            disabled={isFetchingNextPage}
+            onClick={loadMore}
+            className="tw-cursor-pointer tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-iron-200 hover:tw-bg-iron-800 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 disabled:tw-cursor-default disabled:tw-opacity-50"
+          >
+            {t(
+              locale,
+              isFetchingNextPage
+                ? "contentModeration.moderator.loadingMore"
+                : "contentModeration.moderator.loadMore"
+            )}
+          </button>
         </div>
       )}
     </div>

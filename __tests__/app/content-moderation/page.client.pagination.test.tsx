@@ -353,7 +353,12 @@ describe("ContentModerationPageClient pagination", () => {
     );
     mockFetchContentModerationBlockActivity
       .mockResolvedValueOnce(firstPage)
-      .mockResolvedValueOnce([createBlockActivityItem(51)]);
+      .mockResolvedValueOnce(
+        Array.from({ length: 50 }, (_, index) =>
+          createBlockActivityItem(index + 51)
+        )
+      )
+      .mockResolvedValueOnce([createBlockActivityItem(101)]);
     const queryClient = new QueryClient({
       defaultOptions: { queries: { retry: false } },
     });
@@ -377,6 +382,7 @@ describe("ContentModerationPageClient pagination", () => {
     expect(mockFetchContentModerationBlockActivity).toHaveBeenNthCalledWith(1, {
       limit: 50,
     });
+    expect(screen.getByRole("button", { name: "Load more" })).toBeVisible();
 
     act(() => mockBlockActivityIntersection?.(true));
 
@@ -387,8 +393,15 @@ describe("ContentModerationPageClient pagination", () => {
       before: "block-cursor-50",
       limit: 50,
     });
+
+    await userEvent.click(screen.getByRole("button", { name: "Load more" }));
+
     expect(
-      screen.queryByRole("button", { name: "Load more" })
-    ).not.toBeInTheDocument();
+      await screen.findByRole("link", { name: "@blocker101" })
+    ).toBeVisible();
+    expect(mockFetchContentModerationBlockActivity).toHaveBeenNthCalledWith(3, {
+      before: "block-cursor-100",
+      limit: 50,
+    });
   });
 });

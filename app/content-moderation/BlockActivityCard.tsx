@@ -2,9 +2,10 @@
 
 import type { ApiContentModerationBlockActivityItem } from "@/generated/models/ApiContentModerationBlockActivityItem";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { t } from "@/i18n/messages";
+import { tRich } from "@/i18n/messages";
 import Image from "next/image";
 import Link from "next/link";
+import type { ReactElement } from "react";
 import {
   formatTimestamp,
   getSafeAssetUrl,
@@ -62,23 +63,36 @@ export default function BlockActivityCard({
 }) {
   const locale = useBrowserLocale();
   const timestamp = formatTimestamp(item.created_at, locale);
-
-  return (
-    <article className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-4 sm:tw-p-5">
-      <div className="tw-grid tw-items-center tw-gap-3 sm:tw-grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]">
+  const relationship = tRich<ReactElement>(
+    locale,
+    "contentModeration.moderator.blockActivity.summary",
+    {
+      blocker: (
         <ProfileIdentity
+          key="blocker"
           profileId={item.blocker_profile_id}
           handle={item.blocker_handle}
           pfp={item.blocker_pfp}
         />
-        <span className="tw-pl-11 tw-text-sm tw-font-medium tw-text-iron-400 sm:tw-pl-0">
-          {t(locale, "contentModeration.moderator.blockActivity.blocked")}
-        </span>
+      ),
+      blocked: (
         <ProfileIdentity
+          key="blocked"
           profileId={item.blocked_profile_id}
           handle={item.blocked_handle}
           pfp={item.blocked_pfp}
         />
+      ),
+    }
+  );
+
+  return (
+    <article
+      role="listitem"
+      className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-4 sm:tw-p-5"
+    >
+      <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-y-3 tw-text-sm tw-font-medium tw-text-iron-400">
+        {relationship}
       </div>
       {timestamp && (
         <time
