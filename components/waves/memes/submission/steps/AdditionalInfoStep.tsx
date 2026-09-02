@@ -280,14 +280,19 @@ const AdditionalInfoStep: FC<AdditionalInfoStepProps> = ({
       </div>
 
       <div className="tw-mt-auto tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-py-3">
-        <div className="tw-mx-auto tw-flex tw-w-full tw-max-w-4xl tw-items-center tw-justify-between tw-px-4 md:tw-px-8">
-          <SecondaryButton onClicked={onBack} disabled={isSubmitting}>
+        <div className="tw-mx-auto tw-grid tw-w-full tw-max-w-4xl tw-grid-cols-2 tw-gap-2 tw-px-4 sm:tw-flex sm:tw-items-center sm:tw-justify-between md:tw-px-8">
+          <SecondaryButton
+            onClicked={onBack}
+            disabled={isSubmitting}
+            className="tw-w-full sm:tw-w-auto"
+          >
             Back
           </SecondaryButton>
-          <div className="tw-flex tw-items-center tw-gap-2">
+          <div className="tw-contents sm:tw-flex sm:tw-items-center sm:tw-gap-2">
             <SecondaryButton
               onClicked={onPreview}
               disabled={!formValid || isSubmitting}
+              className="tw-w-full sm:tw-w-auto"
             >
               Preview
             </SecondaryButton>
@@ -295,7 +300,7 @@ const AdditionalInfoStep: FC<AdditionalInfoStepProps> = ({
               onClicked={onSubmit}
               disabled={!formValid}
               loading={isSubmitting}
-              size="lg"
+              className="tw-col-span-2 tw-w-full sm:tw-w-auto"
             >
               {submitLabel}
             </PrimaryButton>

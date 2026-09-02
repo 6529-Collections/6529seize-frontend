@@ -29,6 +29,7 @@ import { t } from "@/i18n/messages";
 import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
 import { Masonry } from "masonic";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import ContentModerationDropGate from "@/components/content-moderation/ContentModerationDropGate";
 
 interface UserPageProfileWaveMasonryProps {
   readonly curationId: string;
@@ -341,70 +342,74 @@ function UserPageProfileWaveMasonryCard({
   }
 
   return (
-    <article className={CURATION_CARD_CLASS_NAME}>
-      {actions}
+    <ContentModerationDropGate drop={drop} compact>
+      <article className={CURATION_CARD_CLASS_NAME}>
+        {actions}
 
-      <div className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950">
-        {layout.shouldUseInlineMinimalLayout ? (
-          <div className="tw-flex tw-items-start tw-gap-x-3 tw-px-4 tw-pb-4 tw-pt-4">
-            <WaveDropAuthorPfp drop={drop} />
-            <div className="tw-min-w-0 tw-flex-1">
-              <DropMinimalIdentityRow drop={drop} timestampLayout="stacked" />
-              <div className="tw-mt-2">{dropContent}</div>
+        <div className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950">
+          {layout.shouldUseInlineMinimalLayout ? (
+            <div className="tw-flex tw-items-start tw-gap-x-3 tw-px-4 tw-pb-4 tw-pt-4">
+              <WaveDropAuthorPfp drop={drop} />
+              <div className="tw-min-w-0 tw-flex-1">
+                <DropMinimalIdentityRow drop={drop} timestampLayout="stacked" />
+                <div className="tw-mt-2">{dropContent}</div>
+                {drop.metadata.length > 0 && (
+                  <WaveDropMetadata metadata={drop.metadata} />
+                )}
+                <CurationDropFooter drop={drop} className="tw-mt-3" />
+              </div>
+            </div>
+          ) : (
+            <>
+              {layout.showMinimalIdentityRow && (
+                <div className="tw-flex tw-items-start tw-gap-x-3 tw-px-4 tw-pt-4">
+                  <WaveDropAuthorPfp drop={drop} />
+                  <div className="tw-min-w-0 tw-flex-1">
+                    <DropMinimalIdentityRow
+                      drop={drop}
+                      timestampLayout="stacked"
+                    />
+                  </div>
+                </div>
+              )}
+
+              <div className={layout.contentWrapperClassName}>
+                {replyTo && (
+                  <div className="tw-mb-3">
+                    <WaveDropReply
+                      dropId={replyTo.drop_id}
+                      dropPartId={replyTo.drop_part_id}
+                      maybeDrop={
+                        replyTo.drop
+                          ? { ...replyTo.drop, wave: drop.wave }
+                          : null
+                      }
+                      onReplyClick={(_serialNo: number) => {}}
+                    />
+                  </div>
+                )}
+
+                {dropContent}
+              </div>
+
               {drop.metadata.length > 0 && (
-                <WaveDropMetadata metadata={drop.metadata} />
-              )}
-              <CurationDropFooter drop={drop} className="tw-mt-3" />
-            </div>
-          </div>
-        ) : (
-          <>
-            {layout.showMinimalIdentityRow && (
-              <div className="tw-flex tw-items-start tw-gap-x-3 tw-px-4 tw-pt-4">
-                <WaveDropAuthorPfp drop={drop} />
-                <div className="tw-min-w-0 tw-flex-1">
-                  <DropMinimalIdentityRow
-                    drop={drop}
-                    timestampLayout="stacked"
-                  />
-                </div>
-              </div>
-            )}
-
-            <div className={layout.contentWrapperClassName}>
-              {replyTo && (
-                <div className="tw-mb-3">
-                  <WaveDropReply
-                    dropId={replyTo.drop_id}
-                    dropPartId={replyTo.drop_part_id}
-                    maybeDrop={
-                      replyTo.drop ? { ...replyTo.drop, wave: drop.wave } : null
-                    }
-                    onReplyClick={(_serialNo: number) => {}}
-                  />
+                <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-px-4 tw-pb-4">
+                  <WaveDropMetadata metadata={drop.metadata} />
                 </div>
               )}
-
-              {dropContent}
-            </div>
-
-            {drop.metadata.length > 0 && (
-              <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-px-4 tw-pb-4">
-                <WaveDropMetadata metadata={drop.metadata} />
-              </div>
-            )}
-            <CurationDropFooter
-              drop={drop}
-              className="tw-px-4 tw-pb-4 tw-pt-2"
-            />
-          </>
-        )}
-      </div>
-      <div
-        aria-hidden="true"
-        className={CURATION_CARD_HOVER_FRAME_CLASS_NAME}
-      />
-    </article>
+              <CurationDropFooter
+                drop={drop}
+                className="tw-px-4 tw-pb-4 tw-pt-2"
+              />
+            </>
+          )}
+        </div>
+        <div
+          aria-hidden="true"
+          className={CURATION_CARD_HOVER_FRAME_CLASS_NAME}
+        />
+      </article>
+    </ContentModerationDropGate>
   );
 }
 

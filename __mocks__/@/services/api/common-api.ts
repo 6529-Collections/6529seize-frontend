@@ -23,3 +23,5 @@ export const commonApiDeleteWithResponse = makeMock(
 export const commonApiDeleteWithBody = makeMock(actual.commonApiDeleteWithBody);
 export const commonApiPut = makeMock(actual.commonApiPut);
 export const commonApiPostForm = makeMock(actual.commonApiPostForm);
+export const getStructuredApiErrorStatus = actual.getStructuredApiErrorStatus;
+export const getStructuredApiErrorCode = actual.getStructuredApiErrorCode;

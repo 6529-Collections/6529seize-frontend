@@ -1,6 +1,8 @@
 import CommonDropdownItemsMobileWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper";
+import ContentModerationDropActions from "@/components/content-moderation/ContentModerationDropActions";
+import ReportDropModal from "@/components/content-moderation/ReportDropModal";
 import { getRankHoverBorderClass } from "@/components/waves/drops/dropRankStyles";
-import WaveDropActionsOpen from "@/components/waves/drops/WaveDropActionsOpen";
+import WaveDropActionsMore from "@/components/waves/drops/WaveDropActionsMore";
 import WaveDropMobileMenuCopyLink from "@/components/waves/drops/WaveDropMobileMenuCopyLink";
 import WaveDropMobileMenuOpen from "@/components/waves/drops/WaveDropMobileMenuOpen";
 import type { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
@@ -51,6 +53,7 @@ export const DefaultWaveWinnersDrop: React.FC<DefaultWaveWinnersDropProps> = ({
 }) => {
   // Get device info from useDeviceInfo hook
   const { hasTouchScreen } = useDeviceInfo();
+  const [isReportOpen, setIsReportOpen] = React.useState(false);
   const suppressNextClickRef = React.useRef(false);
 
   const handleInteractionStart = React.useCallback(() => {
@@ -158,7 +161,7 @@ export const DefaultWaveWinnersDrop: React.FC<DefaultWaveWinnersDropProps> = ({
           {!hasTouchScreen && (
             <div className="tw-flex tw-flex-shrink-0 tw-items-start">
               <div className="tw-h-8">
-                <WaveDropActionsOpen drop={extendedDrop} />
+                <WaveDropActionsMore drop={extendedDrop} />
               </div>
             </div>
           )}
@@ -246,10 +249,23 @@ export const DefaultWaveWinnersDrop: React.FC<DefaultWaveWinnersDropProps> = ({
                 drop={extendedDrop}
                 onCopy={() => setIsActive(false)}
               />
+              <ContentModerationDropActions
+                drop={extendedDrop}
+                mobile
+                onReport={() => {
+                  handleMobileMenuClose();
+                  setIsReportOpen(true);
+                }}
+              />
             </div>
           </CommonDropdownItemsMobileWrapper>,
           document.body
         )}
+      <ReportDropModal
+        drop={extendedDrop}
+        isOpen={isReportOpen}
+        onClose={() => setIsReportOpen(false)}
+      />
     </div>
   );
 };

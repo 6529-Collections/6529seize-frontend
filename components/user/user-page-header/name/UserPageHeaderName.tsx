@@ -13,6 +13,7 @@ import {
   getUserProfileHeaderDisplayName,
   getUserProfileHeaderMessage,
 } from "../user-page-header.messages";
+import type { ReactNode } from "react";
 
 export default function UserPageHeaderName({
   profile,
@@ -21,6 +22,7 @@ export default function UserPageHeaderName({
   level,
   profileEnabledAt,
   variant = "full",
+  titleAccessory,
 }: {
   readonly profile: ApiIdentity;
   readonly canEdit: boolean;
@@ -28,6 +30,7 @@ export default function UserPageHeaderName({
   readonly level: number;
   readonly profileEnabledAt: string | null;
   readonly variant?: "full" | "title" | "meta";
+  readonly titleAccessory?: ReactNode;
 }) {
   const displayName = getUserProfileHeaderDisplayName(profile, mainAddress);
   const profileEnabledLabel = profileEnabledAt
@@ -67,6 +70,7 @@ export default function UserPageHeaderName({
             <UserCICAndLevel level={level} size={UserCICAndLevelSize.SMALL} />
             <ProfileCurationBadge profile={profile} />
           </div>
+          {titleAccessory}
         </div>
       )}
 

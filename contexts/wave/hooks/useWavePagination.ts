@@ -304,7 +304,12 @@ export function useWavePagination({
             );
 
       const handledPromise = rawPromise
-        .then((drops) => updateWithPaginatedData(props.waveId, drops))
+        .then((drops) => {
+          if (controller.signal.aborted) {
+            return null;
+          }
+          return updateWithPaginatedData(props.waveId, drops);
+        })
         .catch((error) => {
           handlePaginationError(props.waveId, error);
           return null;

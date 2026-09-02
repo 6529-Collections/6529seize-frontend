@@ -82,7 +82,7 @@ export const TimelineToggleHeader: FC<TimelineToggleHeaderProps> = ({
   return (
     <button
       type="button"
-      className="tw-group tw-w-full tw-cursor-pointer tw-border-0 tw-bg-iron-950 tw-px-2.5 tw-py-2 tw-text-left tw-transition-colors tw-duration-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400/70 desktop-hover:hover:tw-bg-iron-900/70"
+      className="tw-group tw-w-full tw-cursor-pointer tw-border-0 tw-bg-iron-950 tw-px-2.5 tw-py-1.5 tw-text-left tw-transition-colors tw-duration-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400/70 desktop-hover:hover:tw-bg-iron-900/70"
       onClick={() => setIsOpen(!isOpen)}
       aria-expanded={isOpen}
       aria-label={t(locale, "waves.leaderboard.timeline.toggle")}

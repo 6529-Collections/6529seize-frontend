@@ -13,12 +13,17 @@ export enum DropSize {
   FULL = "FULL",
 }
 
+export enum DropClientDeliveryState {
+  MODERATION_REJECTED = "MODERATION_REJECTED",
+}
+
 export type Drop = ExtendedDrop | ExtendedLightDrop;
 
 export interface ExtendedDrop extends ApiDropV2View {
   type: DropSize.FULL;
   stableKey: string;
   stableHash: string;
+  clientDeliveryState?: DropClientDeliveryState | undefined;
 }
 
 export type LightDropSummary = Pick<ApiLightDrop, "id" | "serial_no"> &

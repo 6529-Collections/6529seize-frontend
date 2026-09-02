@@ -29,18 +29,27 @@ const MemesLeaderboardDropVoteSummary: React.FC<
   return (
     <div className="tw-flex @[700px]:tw-flex-1 tw-items-center tw-gap-4 @[700px]:tw-justify-between">
       {/* Left side: Vote counts + User vote (on large) */}
-      <div className="tw-flex tw-items-center tw-gap-2 tw-text-sm">
+      <div className="tw-flex tw-items-baseline tw-gap-2 tw-text-sm">
         <span
-          className={`tw-font-bold tw-font-mono tw-tracking-tight tw-text-sm ${
-            isPositive ? "tw-text-emerald-500" : "tw-text-rose-500"
+          className={`tw-text-body tw-font-semibold tw-leading-5 tw-tracking-identity tw-tabular-nums ${
+            isPositive ? "tw-text-iron-100" : "tw-text-rose-400"
           }`}
         >
           {formatNumberWithCommas(current)}
         </span>
-        <DropVoteProgressing current={current} projected={projected} />
-        <span className="tw-text-iron-500 tw-text-sm tw-ml-1">
-          {creditType} total
-        </span>
+        <div className="tw-flex tw-items-baseline tw-gap-1">
+          <DropVoteProgressing
+            current={current}
+            projected={projected}
+            numberFont="sans"
+            numberSize="body"
+            numberWeight="semibold"
+            visualVariant="memes"
+          />
+          <span className="tw-whitespace-nowrap tw-text-label tw-font-semibold tw-uppercase tw-leading-5 tw-tracking-ordinal tw-text-iron-600">
+            {creditType} total
+          </span>
+        </div>
         {/* User vote badge - hidden on small containers */}
         {hasUserVoted && (
           <span className="tw-hidden @[500px]:tw-inline tw-text-xs tw-text-iron-500 tw-font-mono tw-ml-3 tw-border-l tw-border-solid tw-border-white/10 tw-pl-3 tw-border-t-0 tw-border-r-0 tw-border-b-0">
@@ -95,7 +104,10 @@ const MemesLeaderboardDropVoteSummary: React.FC<
             </React.Fragment>
           ))}
         </div>
-        <ParticipationDropVoteDetailsTrigger drop={drop} />
+        <ParticipationDropVoteDetailsTrigger
+          drop={drop}
+          visualVariant="memes"
+        />
       </div>
     </div>
   );
