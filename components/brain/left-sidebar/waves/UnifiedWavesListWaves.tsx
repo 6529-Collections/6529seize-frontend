@@ -370,7 +370,8 @@ const UnifiedWavesListWaves = forwardRef<
     const renderWaveRow = (
       row: AnimatedSidebarWaveTreeRow,
       showPin: boolean,
-      parentsWithVisibleSubwaves: ReadonlySet<string>
+      parentsWithVisibleSubwaves: ReadonlySet<string>,
+      isAnnouncement = false
     ) => {
       const showConnectedSubwaves = parentsWithVisibleSubwaves.has(row.wave.id);
 
@@ -391,6 +392,7 @@ const UnifiedWavesListWaves = forwardRef<
 
       return (
         <BrainLeftSidebarWave
+          isAnnouncement={isAnnouncement}
           wave={row.wave}
           onHover={onHover}
           showPin={showPin && row.depth === 0}
@@ -438,7 +440,8 @@ const UnifiedWavesListWaves = forwardRef<
               renderWaveRow(
                 row,
                 !hidePin && row.wave.isPinned,
-                announcementParentsWithVisibleSubwaves
+                announcementParentsWithVisibleSubwaves,
+                true
               )
             }
             rows={animatedAnnouncementRows}
