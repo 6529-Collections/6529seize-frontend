@@ -44,7 +44,11 @@ jest.mock("@/components/waves/winners/identity/WaveWinnerIdentity", () => ({
   WaveWinnerIdentity: () => <div data-testid="identity" />,
 }));
 jest.mock("@/components/waves/drops/WaveDropActionsOpen", () => () => (
-  <button type="button" data-testid="desktop-open-action">
+  <button
+    type="button"
+    data-testid="desktop-open-action"
+    onClick={(event) => event.stopPropagation()}
+  >
     Open drop
   </button>
 ));

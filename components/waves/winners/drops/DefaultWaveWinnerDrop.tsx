@@ -159,10 +159,7 @@ export const DefaultWaveWinnersDrop: React.FC<DefaultWaveWinnersDropProps> = ({
 
           {/* Show open icon when not a touch device */}
           {!hasTouchScreen && (
-            <div
-              className="tw-flex tw-flex-shrink-0 tw-items-start"
-              onClick={(event) => event.stopPropagation()}
-            >
+            <div className="tw-flex tw-flex-shrink-0 tw-items-start">
               <div className="tw-h-8">
                 <WaveDropActionsOpen drop={extendedDrop} />
               </div>

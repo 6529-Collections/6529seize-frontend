@@ -151,10 +151,7 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
               <div className="tw-p-4 tw-pb-3">
                 <div className="tw-flex tw-items-center tw-justify-between tw-gap-4">
                   <MemesLeaderboardDropArtistInfo drop={drop} />
-                  <div
-                    className="tw-flex tw-h-10 tw-items-center tw-gap-2 tw-text-iron-400 [&>button]:tw-flex [&>button]:tw-h-8 [&>button]:tw-items-center [&>button]:tw-justify-center [&>button]:tw-py-0"
-                    onClick={(event) => event.stopPropagation()}
-                  >
+                  <div className="tw-flex tw-h-10 tw-items-center tw-gap-2 tw-text-iron-400 [&>button]:tw-flex [&>button]:tw-h-8 [&>button]:tw-items-center [&>button]:tw-justify-center [&>button]:tw-py-0">
                     {!hasTouchScreen && (
                       <>
                         <WaveDropActionsOpen drop={drop} />

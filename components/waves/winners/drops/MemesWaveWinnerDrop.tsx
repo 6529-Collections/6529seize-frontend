@@ -274,10 +274,7 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
               </div>
 
               {!hasTouchScreen && (
-                <div
-                  className="tw-flex tw-flex-shrink-0 tw-items-center"
-                  onClick={(event) => event.stopPropagation()}
-                >
+                <div className="tw-flex tw-flex-shrink-0 tw-items-center">
                   <div className="tw-h-8">
                     <WaveDropActionsOpen drop={extendedDrop} />
                   </div>

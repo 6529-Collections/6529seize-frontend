@@ -27,10 +27,18 @@ jest.mock("@/components/voting/VotingModalButton", () => (p: any) => (
   <button data-testid="vote-btn" onClick={p.onClick} />
 ));
 jest.mock("@/components/waves/drops/WaveDropActionsOpen", () => () => (
-  <button type="button" data-testid="desktop-open-action" />
+  <button
+    type="button"
+    data-testid="desktop-open-action"
+    onClick={(event) => event.stopPropagation()}
+  />
 ));
 jest.mock("@/components/waves/drops/WaveDropActionsOptions", () => () => (
-  <button type="button" data-testid="desktop-delete-action" />
+  <button
+    type="button"
+    data-testid="desktop-delete-action"
+    onClick={(event) => event.stopPropagation()}
+  />
 ));
 jest.mock("@/components/content-moderation/ContentModerationDropActions", () =>
   jest.fn(() => null)
@@ -162,13 +170,7 @@ test("keeps direct desktop actions from triggering the leaderboard card", async 
   useDeviceInfo.mockReturnValue({ hasTouchScreen: false });
   useIsMobileScreen.mockReturnValue(false);
 
-  render(
-    <DefaultWaveLeaderboardDrop
-      drop={drop}
-      wave={wave}
-      onDropClick={onDropClick}
-    />
-  );
+  render(<DefaultWaveLeaderboardDrop drop={drop} onDropClick={onDropClick} />);
 
   await user.click(screen.getByTestId("desktop-open-action"));
   await user.click(screen.getByTestId("desktop-delete-action"));

@@ -77,10 +77,18 @@ jest.mock(
   () => () => <div data-testid="media" />
 );
 jest.mock("@/components/waves/drops/WaveDropActionsOpen", () => () => (
-  <button type="button" data-testid="desktop-open-action" />
+  <button
+    type="button"
+    data-testid="desktop-open-action"
+    onClick={(event) => event.stopPropagation()}
+  />
 ));
 jest.mock("@/components/waves/drops/WaveDropActionsOptions", () => () => (
-  <button type="button" data-testid="desktop-delete-action" />
+  <button
+    type="button"
+    data-testid="desktop-delete-action"
+    onClick={(event) => event.stopPropagation()}
+  />
 ));
 jest.mock("@/components/content-moderation/ContentModerationDropActions", () =>
   jest.fn(() => null)

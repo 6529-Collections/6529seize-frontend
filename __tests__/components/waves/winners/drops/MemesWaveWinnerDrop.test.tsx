@@ -68,7 +68,11 @@ jest.mock("@/hooks/useLongPressInteraction", () => ({
   default: jest.fn(),
 }));
 jest.mock("@/components/waves/drops/WaveDropActionsOpen", () => () => (
-  <button type="button" data-testid="desktop-open-action">
+  <button
+    type="button"
+    data-testid="desktop-open-action"
+    onClick={(event) => event.stopPropagation()}
+  >
     Open drop
   </button>
 ));
