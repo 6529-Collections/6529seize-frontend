@@ -110,6 +110,7 @@ function OngoingParticipationDropInner({
     wave: drop.wave,
     metadata: drop.metadata,
   });
+  const isProposalCard = contentPresentation === "proposalCard";
   const isSelfNominee = identityProfile
     ? areSameProfileIdentity({
         left: drop.author,
@@ -117,8 +118,7 @@ function OngoingParticipationDropInner({
       })
     : false;
   const showIdentity = identityMode !== "hidden";
-  const isChatProposal =
-    contentPresentation === "proposalCard" && location === DropLocation.WAVE;
+  const isChatProposal = isProposalCard && location === DropLocation.WAVE;
   const isVotingActionLocked = isVotingClosed || isVotingControlsLocked;
 
   const [activePartIndex, setActivePartIndex] = useState(0);
@@ -204,10 +204,7 @@ function OngoingParticipationDropInner({
 
   const detachedProposalHeader =
     isChatProposal && showIdentity ? (
-      <ProposalCardDetachedHeader
-        drop={drop}
-        identityHeader={identityHeader}
-      />
+      <ProposalCardDetachedHeader drop={drop} identityHeader={identityHeader} />
     ) : null;
 
   const primaryContent = isChatProposal ? (
@@ -237,7 +234,11 @@ function OngoingParticipationDropInner({
           {showIdentity && <WaveDropAuthorPfp drop={drop} />}
           <div className="tw-flex tw-w-full tw-flex-col">
             {showIdentity && identityHeader}
-            {content}
+            {isProposalCard && showIdentity ? (
+              <div className="tw-mt-2">{content}</div>
+            ) : (
+              content
+            )}
           </div>
         </>
       )}

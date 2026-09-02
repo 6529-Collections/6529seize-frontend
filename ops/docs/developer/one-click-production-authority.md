@@ -19,6 +19,35 @@ The parent workflow run is the authority owner. The helper derives
 frontend production identity fields. All SHA and run identifiers are bounded
 and validated before a body is emitted.
 
+## Recovery access and automatic completion
+
+Manual dispatch of `production-authority-complete.yml` has two modes. The
+default `recover` mode is restricted to `main`, requires the exact terminal
+production workflow run ID, and may complete or fail the matching authority.
+The `authorization-check` mode also runs only from `main` and stops immediately
+after validating the dispatcher; it does not read terminal evidence or call a
+Release Bus production-authority endpoint. Keeping both modes on `main` ensures
+the secret-consuming membership check uses the trusted workflow revision. Both
+manual modes require the dispatcher to be an active member of the GitHub team
+`6529-Collections/6529seize-maintainers`. The workflow resolves membership at
+run time for the user who started the current attempt, including a rerun,
+rather than maintaining a second list of GitHub usernames. The
+Release Bus GitHub App installation must therefore grant organization
+**Members: read** permission; the workflow requests only that permission for
+the short-lived membership token. The existing app ID and private-key settings
+are `RELEASE_BUS_GITHUB_APP_ID` and
+`RELEASE_BUS_GITHUB_PRIVATE_KEY`.
+
+Automatic completion is dispatched by `github-actions[bot]` after the exact
+Production E2E run becomes terminal. Its trusted path is independently limited
+to an exact `production-e2e.yml` run, so it does not use the human team gate.
+The E2E workflow itself runs from protected `main`, whose workflow-source SHA
+can legitimately advance after the production deployment. Completion is bound
+to the deployment through the deploy run ID, exact run titles, immutable
+selection and qualification artifacts, and the deployed SHA recorded in that
+evidence; it must not require the E2E workflow-source SHA to equal the deployed
+SHA.
+
 ## Build request bodies
 
 Each command writes one compact, recursively key-sorted JSON object to stdout.

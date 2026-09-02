@@ -7,28 +7,90 @@ on:
     branches: [main]
   workflow_dispatch:
     inputs:
-      terminal_workflow_run_id:
-        description: Exact terminal production workflow run to complete
+      mode:
+        description: Operation to perform
         required: true
+        default: recover
+        type: choice
+        options:
+          - recover
+          - authorization-check
+      terminal_workflow_run_id:
+        description: Exact terminal production workflow run (required for recover)
+        required: false
         type: string
 
 permissions: {}
 
-run-name: Production authority completion [${{ github.event.workflow_run.id || inputs.terminal_workflow_run_id }}]
+run-name: Production authority ${{ inputs.mode == 'authorization-check' && 'authorization check' || 'completion' }} [${{ inputs.mode == 'authorization-check' && github.triggering_actor || github.event.workflow_run.id || inputs.terminal_workflow_run_id }}]
 
 jobs:
   complete-production-authority:
-    name: Complete exact production authority
-    # A workflow_dispatch actor is the authenticated dispatcher. This early gate is
-    # defense in depth; the shell and authority API independently verify identity.
-    if: (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && (github.actor == 'punk6529' || github.actor == 'prxt6529' || github.actor == 'github-actions[bot]')) || (github.event_name == 'workflow_run' && github.event.workflow_run.head_repository.full_name == github.repository && github.event.workflow_run.head_branch == 'main' && (github.event.workflow_run.path == '.github/workflows/production-e2e.yml' || github.event.workflow_run.path == '.github/workflows/build-upload-deploy-prod.yml')) # NOSONAR
+    name: ${{ inputs.mode == 'authorization-check' && 'Check maintainer recovery authorization' || 'Complete exact production authority' }}
+    # Manual modes are main-only so secret-consuming authorization always uses
+    # the trusted workflow revision. Authorization checks stop before mutation.
+    if: (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_run' && github.event.workflow_run.head_repository.full_name == github.repository && github.event.workflow_run.head_branch == 'main' && (github.event.workflow_run.path == '.github/workflows/production-e2e.yml' || github.event.workflow_run.path == '.github/workflows/build-upload-deploy-prod.yml')) # NOSONAR
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
       actions: read
       contents: read
     steps:
+      - name: Create maintainer membership token
+        id: maintainer-token
+        if: github.event_name == 'workflow_dispatch' && github.triggering_actor != 'github-actions[bot]'
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3
+        with:
+          app-id: ${{ vars.RELEASE_BUS_GITHUB_APP_ID }}
+          private-key: ${{ secrets.RELEASE_BUS_GITHUB_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: 6529seize-frontend
+          permission-members: read
+      - name: Authorize maintainer recovery actor
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          DISPATCH_ACTOR: ${{ github.triggering_actor }}
+          GH_TOKEN: ${{ steps.maintainer-token.outputs.token }}
+          MAINTAINER_ORGANIZATION: ${{ github.repository_owner }}
+          MAINTAINER_TEAM_SLUG: 6529seize-maintainers
+          MODE: ${{ inputs.mode }}
+        run: |
+          set -euo pipefail
+          if [ "$DISPATCH_ACTOR" = 'github-actions[bot]' ]; then
+            if [ "$MODE" = 'recover' ]; then
+              echo "Automatic recovery dispatcher admitted for exact Production E2E proof."
+              exit 0
+            fi
+            echo "::error::Automatic recovery dispatcher cannot perform a maintainer authorization check."
+            exit 1
+          fi
+
+          [[ "$DISPATCH_ACTOR" =~ ^[A-Za-z0-9][A-Za-z0-9-]{0,38}$ ]]
+          test -n "$GH_TOKEN"
+
+          membership_file="$(mktemp)"
+          trap 'rm -f "$membership_file"' EXIT
+          if ! gh api --method GET \
+            "orgs/${MAINTAINER_ORGANIZATION}/teams/${MAINTAINER_TEAM_SLUG}/memberships/${DISPATCH_ACTOR}" \
+            > "$membership_file"; then
+            echo "::error::Actor is not an active member of the production recovery team."
+            exit 1
+          fi
+          if ! jq -e '
+            type == "object" and
+            .state == "active" and
+            (.role == "member" or .role == "maintainer")
+          ' "$membership_file" >/dev/null; then
+            echo "::error::Actor is not an active member of the production recovery team."
+            exit 1
+          fi
+      - name: Report successful maintainer authorization
+        if: github.event_name == 'workflow_dispatch' && inputs.mode == 'authorization-check'
+        env:
+          DISPATCH_ACTOR: ${{ github.triggering_actor }}
+        run: echo "Maintainer recovery authorization check passed for ${DISPATCH_ACTOR}."
       - name: Check out immutable terminal-evidence helper
+        if: github.event_name == 'workflow_run' || inputs.mode == 'recover'
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           ref: ${{ github.workflow_sha }}
@@ -39,6 +101,7 @@ jobs:
           sparse-checkout-cone-mode: false
       - name: Read exact terminal workflow and immutable evidence
         id: proof
+        if: github.event_name == 'workflow_run' || inputs.mode == 'recover'
         env:
           WORKFLOW_RUN_ID: ${{ github.event.workflow_run.id || inputs.terminal_workflow_run_id }}
           EVENT_NAME: ${{ github.event_name }}
@@ -46,20 +109,6 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-
-          if [ "$EVENT_NAME" = workflow_dispatch ]; then
-            if [ "$GITHUB_REF" != refs/heads/main ]; then
-              echo "::error::Production authority recovery must run from main."
-              exit 1
-            fi
-            case "$DISPATCH_ACTOR" in
-              punk6529|prxt6529|github-actions\[bot\]) ;;
-              *)
-                echo "::error::Actor is not authorized for production authority recovery."
-                exit 1
-                ;;
-            esac
-          fi
 
           proof_dir="$(mktemp -d)"
           trap 'rm -rf "$proof_dir"' EXIT
@@ -688,7 +737,7 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
       - name: Complete exact production authority
-        if: always() && steps.proof.outcome == 'success' && steps.proof.outputs.action == 'complete'
+        if: always() && inputs.mode != 'authorization-check' && steps.proof.outcome == 'success' && steps.proof.outputs.action == 'complete'
         env:
           EVIDENCE_DIGEST: ${{ steps.proof.outputs.evidence_digest }}
           E2E_RUN_ID: ${{ steps.proof.outputs.e2e_run_id }}
@@ -745,7 +794,7 @@ jobs:
             "$response_file" >/dev/null
 
       - name: Fail exact production authority after E2E failure
-        if: always() && steps.proof.outcome == 'success' && steps.proof.outputs.action == 'fail'
+        if: always() && inputs.mode != 'authorization-check' && steps.proof.outcome == 'success' && steps.proof.outputs.action == 'fail'
         env:
           QUALIFIER_WORKFLOW_RUN_ID: ${{ steps.proof.outputs.qualifier_workflow_run_id }}
           QUALIFIER_WORKFLOW_RUN_ATTEMPT: ${{ steps.proof.outputs.qualifier_workflow_run_attempt }}
