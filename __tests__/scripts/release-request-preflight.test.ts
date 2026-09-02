@@ -63,6 +63,7 @@ const releaseBusDocPath = path.join(
   "simple-release-bus-v2.md"
 );
 
+/** Returns one valid frontend release-request fixture. */
 function validInput() {
   return {
     requested_by: "release-agent",
@@ -85,6 +86,22 @@ function validInput() {
   };
 }
 
+/** Replaces one expected token and fails loudly if the skill example drifts. */
+function replaceExactlyOnce(
+  source: string,
+  token: string,
+  replacement: string
+) {
+  const occurrences = source.split(token).length - 1;
+  if (occurrences !== 1) {
+    throw new Error(
+      `Expected exactly one ${JSON.stringify(token)} token, found ${occurrences}.`
+    );
+  }
+  return source.replace(token, replacement);
+}
+
+/** Extracts the documented submit block and supplies deterministic test input. */
 function skillSubmitShellBlock(input: unknown) {
   const skill = fs.readFileSync(deploySkillPath, "utf8");
   const match = skill.match(
@@ -96,18 +113,24 @@ function skillSubmitShellBlock(input: unknown) {
     );
   }
 
-  return match[1]
-    .replace(
-      "{...completed release-request JSON...}",
-      JSON.stringify(input, null, 2)
-    )
-    .replace(
-      "submit --input -",
-      'submit --input - --project-dir "$OBSERVATION_PROJECT_DIRECTORY"'
-    )
-    .replace("./bin/6529", '"$RELEASE_REQUEST_WRAPPER"');
+  const withInput = replaceExactlyOnce(
+    match[1],
+    "{...completed release-request JSON...}",
+    JSON.stringify(input, null, 2)
+  );
+  const withProjectDirectory = replaceExactlyOnce(
+    withInput,
+    "submit --input -",
+    'submit --input - --project-dir "$OBSERVATION_PROJECT_DIRECTORY"'
+  );
+  return replaceExactlyOnce(
+    withProjectDirectory,
+    "./bin/6529",
+    '"$RELEASE_REQUEST_WRAPPER"'
+  );
 }
 
+/** Writes the POSIX fake `gh` executable used by the observation harness. */
 function writeFakeGitHubCli(fakeBinDirectory: string) {
   fs.mkdirSync(fakeBinDirectory, { recursive: true });
   const fakeGitHubCliPath = path.join(fakeBinDirectory, "gh");
@@ -200,7 +223,7 @@ process.exit(2);
   fs.chmodSync(fakeGitHubCliPath, 0o700);
 }
 
-/** Runs the skill's documented observation block without contacting GitHub. */
+/** Runs the skill's POSIX observation block without contacting GitHub. */
 function runObservationHarness(
   projectDirectory: string,
   input: unknown,
@@ -237,6 +260,7 @@ function runObservationHarness(
   return { result, stateDirectory };
 }
 
+/** Reads the only CLI run record created by one harness execution. */
 function readSingleRun(projectDirectory: string) {
   const runsDirectory = path.join(
     projectDirectory,
@@ -254,6 +278,7 @@ function readSingleRun(projectDirectory: string) {
   ) as RunRecord;
 }
 
+/** Reads the fake GitHub CLI invocation log when the scenario created one. */
 function readGitHubInvocations(stateDirectory: string) {
   const logPath = path.join(stateDirectory, "invocations.jsonl");
   if (!fs.existsSync(logPath)) {
