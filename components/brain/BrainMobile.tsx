@@ -272,7 +272,7 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
   }, [isApp, searchParams, connectedProfile, closeCreateOverlay]);
 
   const dropOverlayClass = isApp
-    ? "tw-fixed tw-inset-0 tw-z-[1010] tw-bg-black tailwind-scope"
+    ? "tw-fixed tw-inset-0 tw-z-[1010] tw-bg-iron-950 tailwind-scope"
     : "tw-absolute tw-inset-0 tw-z-[1010]";
   const quickVoteRuntimeIntent =
     activeView === BrainView.WAVES && quickVote.shouldMountRuntime
@@ -280,7 +280,11 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
       : null;
 
   return (
-    <div className="tw-relative tw-flex tw-h-full tw-flex-col">
+    <div
+      className={`tw-relative tw-flex tw-h-full tw-flex-col ${
+        isApp ? "tw-bg-iron-950" : ""
+      }`}
+    >
       {createOverlay}
       {isDropOpen && (
         <div className={dropOverlayClass}>

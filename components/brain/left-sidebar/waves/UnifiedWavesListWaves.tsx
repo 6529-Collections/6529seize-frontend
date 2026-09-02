@@ -177,6 +177,12 @@ const UnifiedWavesListWaves = forwardRef<
       set: setActiveWave,
     } = activeWave;
     const { isApp, hasTouchScreen } = useDeviceInfo();
+    const sectionDividerColorClass = isApp
+      ? "tw-border-iron-800"
+      : "tw-border-iron-700";
+    const firstSectionDividerSpacingClass = isApp
+      ? "tw-my-3"
+      : "tw-mb-1 tw-mt-2";
     const prefetchWaveData = usePrefetchWaveData();
     // Persisted-hint fallback so the active subwave expands/highlights
     // immediately after a cold reload (see useActiveSubwaveParentHint).
@@ -453,7 +459,9 @@ const UnifiedWavesListWaves = forwardRef<
           (highlyRatedRows.length > 0 ||
             pinnedRows.length > 0 ||
             shouldShowBottomHeader) && (
-            <div className="tw-mb-1 tw-mt-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700" />
+            <div
+              className={`${firstSectionDividerSpacingClass} tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid ${sectionDividerColorClass}`}
+            />
           )}
 
         {highlyRatedRows.length > 0 && (
@@ -467,6 +475,7 @@ const UnifiedWavesListWaves = forwardRef<
                 />
                 <HighlyRatedWavesToggle
                   isTouchPreview={hasTouchScreen}
+                  compactTouchPadding={isApp}
                   paddingClassName="tw-px-4"
                   previewItems={highlyRatedPreviewItems}
                 />
@@ -503,7 +512,9 @@ const UnifiedWavesListWaves = forwardRef<
         {!hideHeaders &&
           highlyRatedRows.length > 0 &&
           (pinnedRows.length > 0 || shouldShowBottomHeader) && (
-            <div className="tw-my-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700" />
+            <div
+              className={`tw-my-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid ${sectionDividerColorClass}`}
+            />
           )}
 
         {/* Conditionally show pinned section */}
@@ -532,7 +543,9 @@ const UnifiedWavesListWaves = forwardRef<
         )}
 
         {!hideHeaders && pinnedRows.length > 0 && shouldShowBottomHeader && (
-          <div className="tw-my-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700" />
+          <div
+            className={`tw-my-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid ${sectionDividerColorClass}`}
+          />
         )}
 
         {shouldShowBottomHeader && (

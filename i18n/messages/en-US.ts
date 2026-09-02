@@ -481,6 +481,7 @@ const MEMES_WAVE_FOOTER_MESSAGES = objectMessages("memes.waveFooter", {
   "quickVote.open": "Open quick vote",
   "uncastPower.ariaLabel":
     "Uncast Power, {power} {votingLabel} left, {leftThisRound}, {unrated}",
+  "uncastPower.compactLeft": "{count} left",
   "uncastPower.title": "Uncast Power",
   "uncastPower.visibleValue": "{power} {votingLabel}",
   "uncastPower.votes": "Votes",
