@@ -116,29 +116,29 @@ fi
 `submit` creates and validates the request, saves its run and accepted request
 under `.release-coordinator/`, starts the central validation-and-logging
 workflow, waits for its result, and returns the request ID and workflow URL on
-success. No separate input file is created, and the CLI owns the GitHub
-dispatch and wait. The release flow does not dispatch or poll that workflow
-itself. The command runs in the foreground and can delay the release while it
-waits for GitHub to queue and run the workflow. The conditional only keeps an
-ordinary returned failure below status 128 from gating the existing flow. A
-signal-style status of 128 or higher stops the release and escalates to the
-Coordinator owner. The conditional does not make submission background or
-no-wait. Do not retry, background, detach, add a shell timeout, or replace it
-with a direct GitHub call during the release. If the wait never returns, stop
-and escalate to the Coordinator owner; do not invent a time limit or an
-interrupt-to-continue bypass. A true no-wait path requires a separate future
-Coordinator CLI/package change.
+success, together with the inbox Issue number and URL. No separate input file is
+created, and the CLI owns the GitHub dispatch and wait. The release flow does
+not dispatch or poll that workflow itself. The command runs in the foreground
+and can delay the release while it waits for GitHub to queue and run the
+workflow. The conditional only keeps an ordinary returned failure below status
+128 from gating the existing flow. A signal-style status of 128 or higher stops
+the release and escalates to the Coordinator owner. The conditional does not
+make submission background or no-wait. Do not retry, background, detach, add a
+shell timeout, or replace it with a direct GitHub call during the release. If
+the wait never returns, stop and escalate to the Coordinator owner; do not
+invent a time limit or an interrupt-to-continue bypass. A true no-wait path
+requires a separate future Coordinator CLI/package change.
 
 This step is skipped for merge-only work, status or monitoring, retry or
 resume, recovery, production continuation or promotion of an existing release,
-and lane toggles. Success is reported with the request ID and workflow URL.
-Failure is reported as a short observation warning with its reason and
-available local run evidence. Neither returned outcome gates, replaces,
-reorders, or weakens the existing release flow, and the developer is not asked
-to repair an observation failure during the release. Version `0.0.2` only
-validates and logs through the central workflow; it does not send to a
-Coordinator inbox, grants no deployment authority, and changes none of the
-release checks or ordering described below.
+and lane toggles. Success is reported with the request ID, workflow URL, and
+inbox Issue number and URL. Failure is reported as a short observation warning
+with its reason and available local run evidence. Neither returned outcome
+gates, replaces, reorders, or weakens the existing release flow, and the
+developer is not asked to repair an observation failure during the release.
+Version `0.0.3` validates and saves the request through the central workflow as
+a private Coordinator inbox Issue. It grants no deployment authority and
+changes none of the release checks or ordering described below.
 
 ## Dashboard read model
 
