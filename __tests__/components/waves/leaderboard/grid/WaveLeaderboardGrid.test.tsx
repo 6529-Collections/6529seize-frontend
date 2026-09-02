@@ -5,6 +5,11 @@ import { ApiWaveType } from "@/generated/models/ApiWaveType";
 
 const mockOpenVotingModal = jest.fn();
 
+jest.mock("@/components/content-moderation/ContentModerationDropGate", () => ({
+  __esModule: true,
+  default: ({ children }: any) => children,
+}));
+
 jest.mock("@/hooks/useWaveDropsLeaderboard", () => ({
   useWaveDropsLeaderboard: jest.fn(),
   WaveDropsLeaderboardSort: { RANK: "RANK" },
@@ -31,17 +36,14 @@ jest.mock(
     ),
   })
 );
-jest.mock(
-  "@/components/waves/leaderboard/WaveLeaderboardVotingModal",
-  () => ({
-    useWaveLeaderboardVotingModal: () => ({
-      votingDrop: null,
-      openVotingModal: mockOpenVotingModal,
-      closeVotingModal: jest.fn(),
-    }),
-    WaveLeaderboardVotingModal: () => null,
-  })
-);
+jest.mock("@/components/waves/leaderboard/WaveLeaderboardVotingModal", () => ({
+  useWaveLeaderboardVotingModal: () => ({
+    votingDrop: null,
+    openVotingModal: mockOpenVotingModal,
+    closeVotingModal: jest.fn(),
+  }),
+  WaveLeaderboardVotingModal: () => null,
+}));
 
 jest.mock(
   "@/components/waves/leaderboard/grid/WaveLeaderboardGridItem",

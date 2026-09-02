@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import React from "react";
 import { useDropContent } from "@/components/waves/drops/useDropContent";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import { ApiDropModerationStatus } from "@/generated/models/ApiDropModerationStatus";
 import { fetchDropByIdBatched } from "@/services/api/drop-api";
 
 // Mock dependencies
@@ -149,6 +150,34 @@ describe("useDropContent", () => {
       expect(result.current.content.segments).toEqual([
         { type: "text", content: "Test content" },
       ]);
+    });
+
+    it("keeps a redacted moderated preview authoritative without refetching", () => {
+      const moderatedPreview = {
+        ...mockDrop,
+        author: { ...mockDrop.author, id: "", handle: null },
+        parts: [
+          {
+            part_id: 1,
+            content: null,
+            quoted_drop: null,
+            media: [],
+          },
+        ],
+        moderation: {
+          status: ApiDropModerationStatus.ModeratorRemoved,
+          can_view: false,
+        },
+      } as unknown as ApiDrop;
+
+      const { result } = renderHook(
+        () => useDropContent("drop-123", 1, moderatedPreview),
+        { wrapper: createWrapper() }
+      );
+
+      expect(result.current.drop).toBe(moderatedPreview);
+      expect(result.current.isLoading).toBe(false);
+      expect(mockFetchDropByIdBatched).not.toHaveBeenCalled();
     });
   });
 

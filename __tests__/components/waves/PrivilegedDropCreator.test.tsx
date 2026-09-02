@@ -18,13 +18,14 @@ type ProfileSetupVisibilityInput = {
   readonly hasValidWalletAuth?: boolean | undefined;
 };
 type DropPlaceholderMockProps = {
-  readonly type: "chat" | "submission" | "both";
+  readonly type: "chat" | "submission" | "both" | "profile-check" | "suspended";
   readonly profileSetupHref?: string | undefined;
 };
 type MockAuthState = {
   readonly connectedProfile?:
     | {
         readonly handle?: string | null | undefined;
+        readonly id?: string | undefined;
       }
     | null
     | undefined;
@@ -48,6 +49,20 @@ jest.mock("@/hooks/useDropPriviledges", () => ({
   useDropPrivileges: jest.fn(),
   ChatRestriction: { SLOW_MODE: "SLOW_MODE" },
 }));
+const mockUsePublicProfileModerationStatus = jest.fn(
+  (_profileId?: string | null) => ({
+    isError: false,
+    isLoading: false,
+    isSuspended: false,
+  })
+);
+jest.mock(
+  "@/hooks/content-moderation/usePublicProfileModerationStatus",
+  () => ({
+    usePublicProfileModerationStatus: (profileId: string | null | undefined) =>
+      mockUsePublicProfileModerationStatus(profileId),
+  })
+);
 const mockUseAuth = jest.fn<MockAuthState, []>(() => ({}));
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: () => mockUseAuth(),
@@ -136,6 +151,11 @@ describe("PrivilegedDropCreator", () => {
   beforeEach(() => {
     mockPriv.mockReset();
     mockInvalidateQueries.mockClear();
+    mockUsePublicProfileModerationStatus.mockReturnValue({
+      isError: false,
+      isLoading: false,
+      isSuspended: false,
+    });
     mockUseAuth.mockReturnValue({
       connectedProfile: undefined,
       activeProfileProxy: undefined,
@@ -192,6 +212,80 @@ describe("PrivilegedDropCreator", () => {
     expect(screen.getByTestId("create")).toBeInTheDocument();
   });
 
+  it("replaces the composer while posting access is being checked", () => {
+    mockUseAuth.mockReturnValue({
+      connectedProfile: { handle: "alice", id: "profile-1" },
+      activeProfileProxy: null,
+      fetchingProfile: false,
+    });
+    mockUsePublicProfileModerationStatus.mockReturnValue({
+      isError: false,
+      isLoading: true,
+      isSuspended: false,
+    });
+    mockPriv.mockReturnValue({
+      submissionRestriction: null,
+      chatRestriction: null,
+    });
+
+    renderPrivilegedDropCreator();
+
+    expect(screen.getByTestId("placeholder")).toHaveAttribute(
+      "data-type",
+      "profile-check"
+    );
+    expect(screen.queryByTestId("create")).not.toBeInTheDocument();
+    expect(mockUsePublicProfileModerationStatus).toHaveBeenCalledWith(
+      "profile-1"
+    );
+  });
+
+  it("replaces the composer for a suspended profile", () => {
+    mockUseAuth.mockReturnValue({
+      connectedProfile: { handle: "alice", id: "profile-1" },
+      activeProfileProxy: null,
+      fetchingProfile: false,
+    });
+    mockUsePublicProfileModerationStatus.mockReturnValue({
+      isError: false,
+      isLoading: false,
+      isSuspended: true,
+    });
+    mockPriv.mockReturnValue({
+      submissionRestriction: null,
+      chatRestriction: null,
+    });
+
+    renderPrivilegedDropCreator();
+
+    expect(screen.getByTestId("placeholder")).toHaveAttribute(
+      "data-type",
+      "suspended"
+    );
+    expect(screen.queryByTestId("create")).not.toBeInTheDocument();
+  });
+
+  it("keeps the backend authoritative when the status lookup fails", () => {
+    mockUseAuth.mockReturnValue({
+      connectedProfile: { handle: "alice", id: "profile-1" },
+      activeProfileProxy: null,
+      fetchingProfile: false,
+    });
+    mockUsePublicProfileModerationStatus.mockReturnValue({
+      isError: true,
+      isLoading: false,
+      isSuspended: false,
+    });
+    mockPriv.mockReturnValue({
+      submissionRestriction: null,
+      chatRestriction: null,
+    });
+
+    renderPrivilegedDropCreator();
+
+    expect(screen.getByTestId("create")).toBeInTheDocument();
+  });
+
   it("passes needs profile state for connected wallets without a profile", () => {
     mockUseSeizeConnectContext.mockReturnValue({
       address: "0xabc",
@@ -239,7 +333,10 @@ describe("PrivilegedDropCreator", () => {
         needsProfile: false,
       })
     );
-    expect(screen.queryByTestId("placeholder")).not.toBeInTheDocument();
+    expect(screen.getByTestId("placeholder")).toHaveAttribute(
+      "data-type",
+      "profile-check"
+    );
     expect(screen.queryByTestId("create")).not.toBeInTheDocument();
   });
 

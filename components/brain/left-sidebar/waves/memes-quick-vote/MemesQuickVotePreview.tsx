@@ -20,6 +20,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import MemesQuickVoteDescription from "./MemesQuickVoteDescription";
 import MemesQuickVoteDropHeader from "./MemesQuickVoteDropHeader";
 import useMemesQuickVotePreviewSwipe from "./useMemesQuickVotePreviewSwipe";
+import ContentModerationDropGate from "@/components/content-moderation/ContentModerationDropGate";
 
 const MOBILE_SWIPE_CENTER_SLIDE_INDEX = 1;
 
@@ -424,5 +425,9 @@ function MemesQuickVotePreviewContent({
 export default function MemesQuickVotePreview(
   props: MemesQuickVotePreviewProps
 ) {
-  return <MemesQuickVotePreviewContent {...props} />;
+  return (
+    <ContentModerationDropGate drop={props.drop}>
+      <MemesQuickVotePreviewContent {...props} />
+    </ContentModerationDropGate>
+  );
 }

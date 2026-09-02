@@ -69,13 +69,10 @@ jest.mock(
   "@/components/waves/drops/WaveDropMobileMenuReactionPicker",
   () => () => <div data-testid="reaction-picker" />
 );
-jest.mock(
-  "@/components/mobile-wrapper-dialog/MobileWrapperDialog",
-  () => ({
-    __esModule: true,
-    default: (props: any) => mobileWrapperMock(props),
-  })
-);
+jest.mock("@/components/mobile-wrapper-dialog/MobileWrapperDialog", () => ({
+  __esModule: true,
+  default: (props: any) => mobileWrapperMock(props),
+}));
 
 jest.mock("@/contexts/SeizeSettingsContext", () => ({
   useSeizeSettings: () => ({
@@ -605,6 +602,34 @@ test("shows clap by default for non-author profiles", () => {
   );
 
   expect(screen.getByTestId("clap")).toBeInTheDocument();
+});
+
+test("shows one Flag Content action as the final authenticated mobile menu entry", () => {
+  render(
+    <AuthContext.Provider
+      value={
+        {
+          connectedProfile: { id: "viewer-1", handle: "bob" },
+          activeProfileProxy: null,
+        } as unknown as AuthProviderValue
+      }
+    >
+      <WaveDropMobileMenu
+        drop={dropFixture}
+        isOpen
+        showReplyAndQuote
+        longPressTriggered={false}
+        setOpen={jest.fn()}
+        onReply={jest.fn()}
+        onAddReaction={jest.fn()}
+      />
+    </AuthContext.Provider>
+  );
+
+  const reportAction = screen.getByRole("button", { name: "Flag Content" });
+  expect(reportAction.parentElement?.lastElementChild).toBe(reportAction);
+  expect(screen.queryByRole("button", { name: "Hide post" })).toBeNull();
+  expect(screen.queryByRole("button", { name: "Block author" })).toBeNull();
 });
 
 test("hides clap when voting is hidden", () => {
