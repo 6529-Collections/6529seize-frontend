@@ -180,7 +180,7 @@ function DiscoverWavesLink() {
   return (
     <Link
       href="/discover"
-      className="desktop-hover:hover:tw-text-primary-200 tw-rounded-lg tw-px-2.5 tw-py-2 tw-text-sm tw-font-semibold tw-leading-none tw-text-primary-300 tw-no-underline tw-transition-colors tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black motion-reduce:tw-transition-none"
+      className="tw-inline-flex tw-h-7 tw-items-center tw-rounded-md tw-px-1.5 tw-text-[13px] tw-font-medium tw-leading-none tw-text-primary-300 tw-no-underline tw-transition-colors tw-duration-150 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black active:tw-text-primary-100 desktop-hover:hover:tw-text-primary-200 motion-reduce:tw-transition-none"
       aria-label={label}
     >
       {label}
@@ -216,7 +216,7 @@ function WebWavesListHeader({
       label="Waves"
       paddingClassName={headerPaddingClassName}
       rightContent={
-        <div className="tw-flex tw-items-center tw-gap-x-2">
+        <div className="tw-flex tw-items-center tw-gap-x-1.5">
           <DiscoverWavesLink />
           {showCreateWaveButton && <CreateWaveButton onClick={onCreateWave} />}
         </div>
@@ -472,7 +472,8 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
   const renderWaveRow = (
     row: AnimatedSidebarWaveTreeRow,
     showPin: boolean,
-    parentsWithVisibleSubwaves: ReadonlySet<string>
+    parentsWithVisibleSubwaves: ReadonlySet<string>,
+    isAnnouncement = false
   ) => {
     const showConnectedSubwaves = parentsWithVisibleSubwaves.has(row.wave.id);
 
@@ -493,6 +494,7 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
 
     return (
       <WebBrainLeftSidebarWave
+        isAnnouncement={isAnnouncement}
         wave={row.wave}
         onHover={onHover}
         showPin={showPin && row.depth === 0}
@@ -544,7 +546,8 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
                 renderWaveRow(
                   row,
                   !hidePin && !isCollapsed && row.wave.isPinned,
-                  announcementParentsWithVisibleSubwaves
+                  announcementParentsWithVisibleSubwaves,
+                  true
                 )
               }
               rows={animatedAnnouncementRows}

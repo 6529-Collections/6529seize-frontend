@@ -103,11 +103,18 @@ export default function CompactMenuMobileBottomSheet({
                 disabled={item.disabled}
                 onClick={() => selectAction(item.onSelect)}
                 className={clsx(
-                  "tw-flex tw-min-h-12 tw-w-full tw-items-center tw-rounded-xl tw-border-0 tw-bg-transparent tw-px-0 tw-py-3 tw-text-left tw-text-base tw-font-medium tw-text-iron-200 tw-transition-colors tw-duration-200 active:tw-bg-iron-800 disabled:tw-cursor-not-allowed disabled:tw-opacity-50",
+                  "tw-flex tw-min-h-12 tw-w-full tw-items-center tw-gap-3 tw-rounded-xl tw-border-0 tw-bg-transparent tw-px-0 tw-py-3 tw-text-left tw-text-base tw-font-medium tw-text-iron-200 tw-transition-colors tw-duration-200 active:tw-bg-iron-800 disabled:tw-cursor-not-allowed disabled:tw-opacity-50",
                   item.className
                 )}
               >
-                {item.label}
+                {item.icon !== undefined &&
+                item.icon !== null &&
+                item.icon !== false ? (
+                  <span className="tw-flex tw-size-5 tw-flex-none tw-items-center tw-justify-center">
+                    {item.icon}
+                  </span>
+                ) : null}
+                <span className="tw-min-w-0 tw-flex-1">{item.label}</span>
               </button>
             )
           )}

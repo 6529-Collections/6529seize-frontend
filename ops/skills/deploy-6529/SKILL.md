@@ -38,6 +38,94 @@ emergency fence blocks fallback. If Release Bus cannot safely self-deploy while
 `ON`, stop for explicit owner direction; never infer an exception from the
 component or GitHub actor.
 
+## Release-request observation
+
+The initial `release-bus-status.mjs` check above remains the first action. After
+it succeeds, classify the requested work before any candidate registration,
+merge, deployment, or environment mutation.
+
+Run this observation only when introducing a new staging release intent or a new
+direct production release intent. Do not run it for merge-only work, status or
+monitoring, retry or resume, recovery, production continuation, promotion of an
+existing release, or lane toggles.
+
+For a new intent, print the installed CLI's current input template. This command
+is read-only and creates no run or request record:
+
+```bash
+./bin/6529 exec 6529-release-request template
+```
+
+Fill that canonical shape with the exact known release data:
+
+- `requested_by`, `target` (`staging` or `production`), and `database_change`
+  (`yes`, `no`, or `unknown`);
+- `release_parts[]`, with one frontend and/or backend part. Each part has `id`,
+  `repository`, `pull_requests[]`, and `depends_on[]` part IDs;
+- each `pull_requests[]` item has `number`, `branch`, and `commit`, where
+  `commit` is the exact 40-character lowercase head SHA;
+- a backend part also has `deploy_units[]` and `deploy_dependencies[]`, whose
+  items are `{ "before": "unit", "after": "unit" }` edges.
+
+Remove any frontend or backend template part that is not in this release. Do
+not add `schema_version`, `request_id`, or `created_at`; the CLI creates them.
+Keep the JSON limited to release metadata. Never include tokens, passwords,
+cookies, signed URLs, environment values, production data, or other secrets.
+`requested_by` is descriptive context only; it is not authentication or
+approval. The GitHub actor recorded by the central workflow is the trusted
+sender identity.
+
+Pass the completed JSON exactly once on standard input from the repository
+root. Do not create a separate input file, and do not call `create` before or
+after this command because `submit` already creates, validates, and saves the
+local run and outbox request:
+
+```bash
+release_request_submit_status=0
+if ./bin/6529 exec 6529-release-request submit --input - <<'JSON'
+{...completed release-request JSON...}
+JSON
+then
+  release_request_submit_status=0
+else
+  release_request_submit_status=$?
+  [ "$release_request_submit_status" -lt 128 ] || {
+    printf 'Release-request observation ended with signal-style status %s; stop and escalate to the Coordinator owner.\n' "$release_request_submit_status" >&2
+    exit "$release_request_submit_status"
+  }
+fi
+```
+
+This is synchronous observation mode. `submit` runs in the foreground and
+waits for the central GitHub workflow, so it can delay the release while
+GitHub queues or runs that workflow. The conditional only makes an ordinary
+returned failure below status 128 non-gating; a signal-style status of 128 or
+higher stops the release and escalates to the Coordinator owner. It does not
+put the call in the background or bound its wait. Do not retry, background,
+detach, wrap in a shell timeout, or replace it with a direct GitHub call during
+the release. If the wait never returns, stop and escalate to the Coordinator
+owner; do not invent a time limit or an interrupt-to-continue bypass. A true
+no-wait path requires a separate future change to the Coordinator CLI/package.
+The CLI owns its central GitHub dispatch and wait; do not dispatch, name, or
+poll a GitHub workflow separately.
+
+Treat the result as observation only:
+
+- On success, report and retain the returned `request_id`,
+  `workflow_run_url`, `inbox_issue_number`, `inbox_issue_url`, `run_path`, and
+  `request_path`, then continue the existing Release Bus or manual-fallback
+  route unchanged.
+- On failure, report one short observation warning with the returned reason or
+  first error and any available `run_path`, `request_path`, or
+  `workflow_run_url`. Keep the local evidence, do not ask the developer to fix
+  the observation during the release, and continue the same existing route.
+
+A returned success or failure never gates, replaces, reorders, or weakens any
+candidate, merge, readiness, deployment, E2E, or recovery step below. Version
+`0.0.3` validates and saves the request through the central workflow as a
+private Coordinator inbox Issue. The request and workflow result grant no
+deployment authority and are not Release Bus inputs.
+
 ## V2 readiness
 
 1. Require an open PR whose exact head and green merge-tree checks are current.
@@ -159,7 +247,11 @@ manifest-bound E2E. V2 never publishes release notes.
 
 ## Closeout
 
-Report exact candidate SHAs/dependencies, train and operation states, deployed
-versions, manifest/E2E evidence, failures or holds, and both effective lane
-states. Do
-not expose credentials, signed URLs, raw production data, or hidden prompts.
+For a release with request observation, report its outcome. On success include
+`request_id`, `workflow_run_url`, `inbox_issue_number`, `inbox_issue_url`,
+`request_path`, and `run_path`; on failure include the short observation warning
+and available local or workflow evidence.
+Also report exact candidate SHAs/dependencies, train and operation states,
+deployed versions, manifest/E2E evidence, failures or holds, and both effective
+lane states. Do not expose credentials, signed URLs, raw production data, or
+hidden prompts.

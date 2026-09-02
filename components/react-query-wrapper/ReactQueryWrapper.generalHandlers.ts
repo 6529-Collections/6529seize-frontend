@@ -29,6 +29,14 @@ const AUTH_SENSITIVE_QUERY_KEY_SET = new Set<QueryKey>(
   AUTH_SENSITIVE_QUERY_KEYS
 );
 
+const VIEWER_CONTEXT_QUERY_KEYS = [
+  QueryKey.DROP,
+  QueryKey.DROPS,
+  QueryKey.DROPS_LEADERBOARD,
+  QueryKey.PROFILE_DROPS,
+  QueryKey.FEED_ITEMS,
+] as const;
+
 export const createGeneralQueryHandlers = (
   queryClient: QueryClient,
   invalidateWavesV2: () => void
@@ -38,6 +46,9 @@ export const createGeneralQueryHandlers = (
     queryClient.invalidateQueries();
   };
   const invalidateAuthSensitiveQueries = () => {
+    VIEWER_CONTEXT_QUERY_KEYS.forEach((queryKey) => {
+      queryClient.removeQueries({ queryKey: [queryKey] });
+    });
     queryClient.invalidateQueries({
       predicate: (query) => {
         const [queryKey] = query.queryKey;

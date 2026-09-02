@@ -40,6 +40,8 @@ import WaveDropActionsQuickReact from "./WaveDropActionsQuickReact";
 import { useWaveDropLayers } from "./WaveDropLayerContext";
 import WaveDropMobileMenuCopyLink from "./WaveDropMobileMenuCopyLink";
 import WaveDropMobileMenuCopyText from "./WaveDropMobileMenuCopyText";
+import ContentModerationDropActions from "@/components/content-moderation/ContentModerationDropActions";
+import ReportDropModal from "@/components/content-moderation/ReportDropModal";
 import WaveDropMobileMenuReactionPicker from "./WaveDropMobileMenuReactionPicker";
 
 export interface WaveDropMobileMenuProps {
@@ -112,6 +114,7 @@ function WaveDropMobileMenuAuthenticatedActions({
   canDelete,
   closeMenu,
   showVoting,
+  onReport,
   showOnlyQuickRemove,
 }: {
   readonly extendedDrop: ExtendedDrop;
@@ -137,6 +140,7 @@ function WaveDropMobileMenuAuthenticatedActions({
   readonly canDelete: boolean;
   readonly closeMenu: () => void;
   readonly showVoting: boolean;
+  readonly onReport: () => void;
   readonly showOnlyQuickRemove: boolean;
 }) {
   const locale = useBrowserLocale();
@@ -335,6 +339,7 @@ function WaveDropMobileMenuAuthenticatedActions({
       {canDelete && (
         <WaveDropMobileMenuDelete drop={drop} onDropDeleted={closeMenu} />
       )}
+      <ContentModerationDropActions drop={drop} mobile onReport={onReport} />
     </>
   );
 }
@@ -374,6 +379,7 @@ const WaveDropMobileMenuContent: FC<WaveDropMobileMenuProps> = ({
   const [activeView, setActiveView] =
     useState<WaveDropMobileMenuView>("actions");
   const reactionButtonRef = useRef<HTMLButtonElement>(null);
+  const [isReportOpen, setIsReportOpen] = useState(false);
   const curationsDialogTimeoutRef = useRef<ReturnType<
     typeof setTimeout
   > | null>(null);
@@ -486,7 +492,7 @@ const WaveDropMobileMenuContent: FC<WaveDropMobileMenuProps> = ({
         {activeView === "actions" ? (
           <div className="tw-px-4 sm:tw-px-6">
             <div
-              className={`tw-grid tw-grid-cols-1 tw-gap-y-1 [&>button]:tw-min-h-12 [&>button]:tw-gap-x-3 [&>button]:tw-rounded-lg [&>button]:tw-px-3.5 [&>button]:tw-py-2.5 [&>button>span]:tw-text-base [&>button>span]:tw-font-medium ${
+              className={`tw-grid tw-grid-cols-1 tw-gap-y-1 [&>button>span]:tw-text-base [&>button>span]:tw-font-medium [&>button]:tw-min-h-12 [&>button]:tw-gap-x-3 [&>button]:tw-rounded-lg [&>button]:tw-px-3.5 [&>button]:tw-py-2.5 ${
                 longPressTriggered && "tw-select-none"
               }`}
             >
@@ -528,6 +534,10 @@ const WaveDropMobileMenuContent: FC<WaveDropMobileMenuProps> = ({
                   canDelete={canDelete}
                   closeMenu={closeMenu}
                   showVoting={showVoting}
+                  onReport={() => {
+                    closeMenu();
+                    setIsReportOpen(true);
+                  }}
                   showOnlyQuickRemove={showOnlyQuickRemove}
                 />
               )}
@@ -549,6 +559,11 @@ const WaveDropMobileMenuContent: FC<WaveDropMobileMenuProps> = ({
           onClose={() => setIsCurationsDialogOpen(false)}
         />
       )}
+      <ReportDropModal
+        drop={drop}
+        isOpen={isReportOpen}
+        onClose={() => setIsReportOpen(false)}
+      />
     </>
   );
 };

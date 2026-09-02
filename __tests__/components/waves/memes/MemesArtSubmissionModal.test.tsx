@@ -1,4 +1,11 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import React from "react";
 import MemesArtSubmissionModal from "@/components/waves/memes/MemesArtSubmissionModal";
 
@@ -31,7 +38,7 @@ describe("MemesArtSubmissionModal", () => {
     expect(onClose).not.toHaveBeenCalled();
   });
 
-  it("calls onClose on Escape when open", () => {
+  it("calls onClose on Escape when open", async () => {
     const onClose = jest.fn();
     render(
       <MemesArtSubmissionModal isOpen={true} wave={wave} onClose={onClose} />
@@ -39,25 +46,44 @@ describe("MemesArtSubmissionModal", () => {
 
     fireEvent.keyDown(document, { key: "Escape" });
 
-    expect(onClose).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
   });
 
-  it("calls onClose when backdrop clicked", () => {
+  it("calls onClose when backdrop clicked", async () => {
     const onClose = jest.fn();
+    const user = userEvent.setup();
     render(
       <MemesArtSubmissionModal isOpen={true} wave={wave} onClose={onClose} />
     );
-    const overlay = document.querySelector(".tailwind-scope") as HTMLElement;
-    fireEvent.click(overlay);
+    await user.click(screen.getByTestId("memes-art-submission-modal-backdrop"));
     expect(onClose).toHaveBeenCalled();
   });
 
-  it("uses full mobile viewport height constraints", () => {
+  it("renders above the mobile drop detail layer with an accessible name", () => {
+    render(
+      <MemesArtSubmissionModal isOpen={true} wave={wave} onClose={jest.fn()} />
+    );
+
+    expect(
+      screen.getByRole("dialog", { name: "Submit Work to The Memes" })
+    ).toHaveClass("tw-z-[1020]");
+    expect(
+      within(screen.getByTestId("memes-art-submission-modal-panel")).getByText(
+        "Submit Work to The Memes"
+      )
+    ).toBeInTheDocument();
+  });
+
+  it("uses keyboard-aware mobile viewport height constraints", () => {
     render(
       <MemesArtSubmissionModal isOpen={true} wave={wave} onClose={jest.fn()} />
     );
     const panel = screen.getByTestId("memes-art-submission-modal-panel");
-    expect(panel).toHaveClass("tw-h-[100dvh]");
-    expect(panel).toHaveClass("tw-max-h-[100dvh]");
+    expect(panel).toHaveClass(
+      "tw-h-[calc(100dvh-var(--native-keyboard-inset-bottom,0px))]"
+    );
+    expect(panel).toHaveClass(
+      "tw-max-h-[calc(100dvh-var(--native-keyboard-inset-bottom,0px))]"
+    );
   });
 });

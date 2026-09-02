@@ -50,13 +50,108 @@ shell after running it, or activate it immediately in the current shell:
 source <(./bin/6529 bootstrap --print-export)
 ```
 
-Then install dependencies:
+Then supply the private-package authentication described below before
+installing dependencies.
+
+### Private GitHub Packages authentication
+
+The repository has one narrow private-package exception for
+`@6529-collections/release-request@0.0.3`. Each developer should create a
+GitHub PAT classic with `read:packages` only and authorize organization SSO when
+required. The repository can validate where the token is used, but it cannot
+inspect the token's GitHub permissions.
+
+Do not save the token in the repository, pnpm configuration, `.env` files,
+shell profiles, shell history, or command arguments.
+
+For a normal interactive package command, just use the existing wrapper:
 
 ```bash
 6529 install
 ```
 
-To apply audit fixes, use the same secure wrapper path:
+If `NODE_AUTH_TOKEN` is not already set, `6529` asks for it with hidden input.
+The token stays in memory only for that command. Empty input is rejected. CI
+and other non-interactive shells never prompt or wait; they must receive
+`NODE_AUTH_TOKEN` at runtime and fail closed when it is missing.
+
+The prompt applies only to package commands that can resolve or install
+dependencies: `install`, `i`, `ci`, `install:frozen`, `install:prod`, `add`,
+`update`, and `update:all`. It does not run for ordinary development, test,
+build, or application commands.
+
+### One-time Codex worktree setup on macOS
+
+Codex creates a worktree non-interactively, so it cannot use the terminal
+prompt. Save the read-only token once in your private macOS login Keychain with
+this command:
+
+```bash
+security add-generic-password \
+  -U \
+  -a "$(id -un)" \
+  -s "6529seize-frontend-github-packages" \
+  -w
+```
+
+Keep `-w` last and do not put the token after it. The `security` command asks
+for the token separately with hidden input, so the token is not placed in the
+command or shell history. Run the same command again to replace an expired
+token.
+
+The checked-in Codex environment setup reads this one exact Keychain item only
+for `./bin/6529 install`. It passes the token into the existing secure package
+helper, then the helper process exits. The setup also removes any inherited
+`NODE_AUTH_TOKEN` before Codex captures the successful setup environment. It
+copies existing `.env.development` and `.env.production` files from the primary
+worktree for local development and restricts the copies to the current user.
+It does not write the package token into those files or a shell profile. If the
+Keychain item is missing, Codex setup fails immediately with a clear message.
+
+On non-macOS Codex hosts, supply `NODE_AUTH_TOKEN` to the setup process at
+runtime. The setup removes it before Codex captures the resulting environment.
+
+Commands that may change dependency resolution first update the manifest and
+lockfile without package credentials. The helper validates the resulting
+policy before it runs a fixed authenticated `install --frozen-lockfile`, so
+new public package metadata cannot use the private token to resolve another
+GitHub Package.
+
+The authenticated fetch phase disables lifecycle scripts and pnpm hook files.
+Repository-local pnpm hooks and pnpm config dependencies are rejected before
+the command starts. User and global npm config layers are pinned to the same
+validated repository `.npmrc` so they cannot add another registry, credential,
+proxy, CA, or TLS override. After that phase succeeds and the package policy is
+checked again, the helper rebuilds the repository's explicitly approved
+dependencies without passing any case variant of `NODE_AUTH_TOKEN` to pnpm or
+its lifecycle scripts. It uses one pending rebuild so each approved dependency
+and the root lifecycle run at most once. Pnpm hooks remain disabled during the
+token-free rebuild.
+
+The existing `6529` commands remain the only supported entrypoint. The secure
+pnpm helper checks the committed `.npmrc`, package manifest, lockfile integrity,
+exact release-age exception, command arguments, and token presence before it
+starts pnpm. It fails closed if the private host, scope, package, version,
+tarball, integrity, or network routing is extended or changed. Project-level
+registry, credential, proxy, TLS, CA, and pnpm project/workspace relocation
+overrides are rejected rather than forwarded to an authenticated command.
+Dependency aliases, overrides, resolutions, and catalogs also cannot point an
+otherwise innocent package name at the private scope. Workspace policy checks
+decode quoted YAML escapes and reject private-host resolver URLs before pnpm
+starts.
+
+The worktree and staging setup helpers keep the token out of bootstrap, build,
+and long-running application processes. They attach it only to the secure
+install command and remove it again before continuing.
+
+Socket Firewall Free cannot proxy this private registry correctly. For this one
+case, pnpm connects directly to `npm.pkg.github.com` with normal TLS certificate
+verification. The helper keeps Socket's loopback proxy for every other host,
+including `registry.npmjs.org`, and keeps Socket's CA as an additional trusted
+root for those proxied requests. There is no general skip-Socket option.
+
+To apply audit fixes, use the same secure wrapper path. It prompts silently when
+the token is not already present:
 
 ```bash
 6529 update
@@ -67,6 +162,13 @@ For an intentional broader pnpm update, use:
 ```bash
 6529 update:all
 ```
+
+Dependabot intentionally ignores the exact private package because its npm
+update job has no package credential. `6529 update:all` cannot change this
+package: the bypass remains pinned to `0.0.3` before pnpm starts. A future
+upgrade requires a separate reviewed change that updates the policy constants,
+manifest, release-age exception, and lockfile tarball integrity together. Do
+not add a Dependabot secret or a generic authenticated update mode.
 
 After bootstrap, prefer the bare `6529` command for day-to-day work while you
 are inside this repository. Outside the repo, `6529` should remain unavailable.
@@ -210,7 +312,9 @@ Socket Firewall Free is still wrapper mode. That means:
 - It only protects commands that are actually prefixed with `sfw`.
 - It blocks confirmed malware, but AI-flagged packages may only warn.
 - It does not provide true centralized enforcement by itself.
-- It does not support private/custom registries in Free mode.
+- It does not inspect private/custom registries in Free mode. This repository's
+  only exception is the fail-closed, direct-TLS rule for the exact
+  `@6529-collections/release-request@0.0.3` GitHub Package described above.
 - It cannot block already-cached artifacts when no network request is made.
 
 Because of those limits, the strongest enforcement in this repo comes from:

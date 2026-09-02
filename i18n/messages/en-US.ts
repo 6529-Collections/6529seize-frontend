@@ -28,6 +28,7 @@ import profileCmsArtDisplayMessages from "@/i18n/messages/profileCmsArtDisplay.e
 import { EN_US_THE_MEMES_COLLECTORS_MESSAGES } from "@/i18n/messages/the-memes-collectors";
 import { TRANSFER_MESSAGES } from "@/i18n/messages/transfer";
 import { PUBLIC_REVIEW_MESSAGES } from "@/i18n/messages/public-review";
+import { CONTENT_MODERATION_MESSAGES } from "@/i18n/messages/content-moderation";
 import { EULA_MESSAGES } from "@/i18n/messages/eula";
 import { PROFILE_CURATION_MESSAGES } from "@/i18n/messages/profile-curation";
 
@@ -288,6 +289,27 @@ const REP_CATEGORY_MESSAGES = objectMessages("rep.categories", {
   "wave.loadingMore": "Loading...",
 } as const);
 
+const USER_PROFILE_REP_MESSAGES = objectMessages("user.profile.rep", {
+  "contributors.raters.one": "{count} rater",
+  "contributors.raters.other": "{count} raters",
+  "contributors.receivers.one": "{count} receiver",
+  "contributors.receivers.other": "{count} receivers",
+  "contributors.viewRaters.one": "View {count} rater",
+  "contributors.viewRaters.other": "View {count} raters",
+  "contributors.viewReceivers.one": "View {count} receiver",
+  "contributors.viewReceivers.other": "View {count} receivers",
+  "nic.yourRating": "Your rating: {value}",
+  "nic.rateAction": "Rate NIC",
+  "rep.assignedToYou": "Assigned to you: {value}",
+  "rep.youAssigned": "You assigned: {value}",
+  "rep.grantAction": "Grant Rep",
+  "categories.loadMore": "Load more",
+  "categories.loadingMore": "Loading...",
+  "categories.more": "+{count} more",
+  "empty.given": "No rep given yet.",
+  "empty.received": "No rep received yet.",
+} as const);
+
 // Rep-category validation copy. Kept as its own group with unquoted keys
 // (not merged into the big REP block above) so its lines don't extend that
 // block's quoted-key run — which the duplication detector matches against
@@ -447,6 +469,11 @@ const MEMES_QUICK_VOTE_MESSAGES = objectMessages("memes.quickVote", {
   unrated: "{count} unrated",
   summary: "{leftThisRound}, {unrated}",
   inMemesWave: "{leftThisRound}, {unrated} in the memes wave",
+} as const);
+
+const MEMES_SUBMISSION_MESSAGES = objectMessages("memes.submission", {
+  "media.missingUpload": "Select artwork or choose Interactive HTML.",
+  "media.missingInteractive": "Enter a valid hash or choose Upload File.",
 } as const);
 
 const MEMES_WAVE_FOOTER_MESSAGES = objectMessages("memes.waveFooter", {
@@ -1242,6 +1269,38 @@ const WAVE_CREATE_GROUPS_MESSAGES = objectMessages("waves.create.groups", {
   allowAdminsToDeletePosts: "Allow admins to delete posts",
   defaultGroupName: "Wave Group",
   notAppliedYet: "Not applied yet.",
+  hideCriteriaAndMembers: "Hide criteria and members",
+  hideCriteriaAndMembersTooltip:
+    "The criteria and member list are visible to members of this group, but hidden from everyone else.",
+  hideCriteriaAndMembersInfoLabel: "About criteria and member visibility",
+  "editAccess.title": "Edit {groupLabel} access",
+  "editAccess.triggerLabel": "Edit {groupLabel} access",
+  "editAccess.chatLabel": "Chat",
+  "editAccess.description":
+    "The current criteria are prefilled. Saving creates a new group and changes only {groupLabel} access.",
+  "editAccess.loading": "Loading current criteria…",
+  "editAccess.loadErrorTitle": "Couldn't load the current criteria.",
+  "editAccess.loadErrorDescription":
+    "Nothing has been changed. Try loading the group again.",
+  "editAccess.retry": "Try again",
+  "editAccess.makePublic": "Make wave public",
+  "editAccess.makePublicDescription":
+    "Remove the Visibility restriction so everyone can access this wave.",
+  "editAccess.useVisibility": "Use visibility criteria",
+  "editAccess.useVisibilityDescription":
+    "Set {groupLabel} access to the same criteria as Visibility.",
+  "editAccess.useVisibilityPublicDescription":
+    "Visibility is public. Set {groupLabel} access to public too.",
+  "editAccess.makePublicConfirmTitle": "Make wave public?",
+  "editAccess.makePublicConfirmMessage":
+    "Everyone will be able to find and view this wave. Only Visibility access will change.",
+  "editAccess.useVisibilityConfirmTitle": "Use visibility criteria?",
+  "editAccess.useVisibilityConfirmMessage":
+    "{groupLabel} access will use the same group as Visibility. Only this access setting will change.",
+  "editAccess.useVisibilityPublicConfirmMessage":
+    "Visibility is public, so {groupLabel} access will become public too. Only this access setting will change.",
+  "editAccess.confirmMakePublic": "Make public",
+  "editAccess.confirmUseVisibility": "Use visibility criteria",
   "actions.editCriteria": "Edit criteria",
   "actions.chooseGroup": "Choose group",
   "draft.notReadyTitle": "Not ready yet.",
@@ -1829,12 +1888,28 @@ const NETWORK_GROUP_INSPECTION_MESSAGES = objectMessages(
     close: "Clear selected group",
     membersTitle: "Members",
     membersUnavailable: "Group members unavailable.",
+    bulkRep: "REP everyone matching criteria",
+    bulkNic: "NIC everyone matching criteria",
+    bulkActionsLabel: "Bulk rating actions",
+    bulkRepSuccess: "REP distributed.",
+    bulkNicSuccess: "NIC distributed.",
+    source: "Source: filters + optional manual list",
     loading: "Loading group criteria",
     unavailableTitle: "Group criteria unavailable",
     unavailableDescription:
       "This group may be private, deleted, or temporarily unavailable.",
   } as const
 );
+
+const NETWORK_GROUP_FILTER_MESSAGES = objectMessages("network.groupFilter", {
+  title: "Filter Network",
+  suggestedName: "Network filter",
+  defaultLabel: "All Network members",
+  membersRoleLabel: "Network",
+  createErrorTitle: "Couldn't create this group.",
+  createErrorDescription: "Please check the group setup and try again.",
+  createSuccess: "Group created and applied as the Network filter.",
+} as const);
 
 const WAVE_LOADING_MESSAGES = objectMessages("waves", {
   loadingStatus: "Loading waves",
@@ -2495,6 +2570,13 @@ export const EN_US_MESSAGES = {
     "Push notifications are managed separately on each device.",
   "notifications.filter.ariaLabel": "Filter notifications: {selection}",
   "notifications.filter.selected": "{count} selected",
+  "notifications.filter.sheetTitle": "Filter notifications",
+  "notifications.filter.option.mentions": "Mentions",
+  "notifications.filter.option.replies": "Replies",
+  "notifications.filter.option.identity": "Identity",
+  "notifications.filter.option.reactions": "Reactions",
+  "notifications.filter.option.invites": "Invites",
+  "notifications.filter.option.subscriptions": "Subscriptions",
   "linkPreview.twitter.kind.article": "Article",
   "linkPreview.twitter.kind.post": "Post",
   "linkPreview.twitter.article.provider": "Article on X",
@@ -3466,6 +3548,7 @@ export const EN_US_MESSAGES = {
   ...WAVE_STORM_COMPOSER_MESSAGES,
   ...WAVE_CHAT_SETTINGS_MESSAGES,
   ...NETWORK_GROUP_INSPECTION_MESSAGES,
+  ...NETWORK_GROUP_FILTER_MESSAGES,
   ...WAVE_LOADING_MESSAGES,
   ...WAVE_DROPS_SEARCH_MODAL_MESSAGES,
   ...WAVE_GIF_PICKER_MESSAGES,
@@ -3506,6 +3589,7 @@ export const EN_US_MESSAGES = {
   ...REVIEWBOT_USAGE_MESSAGES,
   ...REMEMES_DETAIL_MESSAGES,
   ...REP_CATEGORY_MESSAGES,
+  ...USER_PROFILE_REP_MESSAGES,
   ...REP_CATEGORY_VALIDATION_MESSAGES,
   ...CREATE_WAVE_DRAFTS_MESSAGES,
   ...MEDIA_VIDEO_MESSAGES,
@@ -3526,6 +3610,7 @@ export const EN_US_MESSAGES = {
   ...PROFILE_CURATION_MESSAGES,
   ...WAVE_SCORE_NAVIGATION_MESSAGES,
   ...MEMES_QUICK_VOTE_MESSAGES,
+  ...MEMES_SUBMISSION_MESSAGES,
   ...MEMES_WAVE_FOOTER_MESSAGES,
   ...DROP_REACTION_MESSAGES,
   ...WAVES_MOBILE_MESSAGES,
@@ -3539,6 +3624,7 @@ export const EN_US_MESSAGES = {
   ...WAVE_POLL_MESSAGES,
   ...WAVE_SUBMISSION_BUTTON_LABEL_MESSAGES,
   ...TRANSFER_MESSAGES,
+  ...CONTENT_MODERATION_MESSAGES,
 } as const;
 
 export type MessageKey = keyof typeof EN_US_MESSAGES;

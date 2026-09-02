@@ -23,14 +23,15 @@ export function MemesArtSubmissionShell({
       <div className="tw-relative tw-flex tw-h-full tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-backdrop-blur">
         <div className="tw-relative tw-z-10 tw-flex tw-h-full tw-flex-col">
           <div className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-px-4 tw-pb-6 md:tw-px-8">
-            <div className="tw-flex tw-w-full tw-flex-shrink-0 tw-items-center tw-justify-between tw-pt-6 lg:tw-border-b-0">
-              <motion.h3 className="tw-mb-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-iron-100 md:tw-text-2xl">
+            <div className="tw-grid tw-w-full tw-flex-shrink-0 tw-grid-cols-[minmax(0,1fr)_auto] tw-items-start tw-gap-x-4 tw-pt-6 lg:tw-border-b-0">
+              <motion.h3 className="tw-mb-0 tw-mt-0 tw-min-w-0 tw-max-w-[21ch] tw-text-pretty tw-break-words tw-text-xl tw-font-semibold tw-tracking-tight tw-text-iron-100 sm:tw-max-w-none md:tw-text-2xl">
                 {title}
               </motion.h3>
               <motion.button
+                data-autofocus
                 type="button"
                 onClick={onClose}
-                className="tw-flex tw-size-9 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-300 tw-ring-1 tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-text-iron-400 lg:tw-size-10"
+                className="tw-flex tw-size-9 tw-flex-shrink-0 tw-items-center tw-justify-center tw-self-start tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-300 tw-ring-1 tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-text-iron-400 lg:tw-size-10"
                 aria-label="Close modal"
               >
                 <FontAwesomeIcon
@@ -40,7 +41,7 @@ export function MemesArtSubmissionShell({
               </motion.button>
             </div>
             {description && (
-              <p className="tw-mb-0 tw-mt-3 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-400">
+              <p className="tw-mb-0 tw-mt-3 tw-max-w-3xl tw-text-pretty tw-text-sm tw-leading-6 tw-text-iron-400">
                 {description}
               </p>
             )}

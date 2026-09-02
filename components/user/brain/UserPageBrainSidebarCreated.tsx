@@ -41,6 +41,10 @@ export default function UserPageBrainSidebarCreated({
     }
   }, [isExpanded]);
 
+  if (state.status === "success" && state.waves.length === 0) {
+    return null;
+  }
+
   return (
     <section aria-labelledby="brain-created-waves-heading">
       <h2

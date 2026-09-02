@@ -84,6 +84,7 @@ describe("WaveleaderboardSort", () => {
         activeItem: WaveDropsLeaderboardSort.TREND,
         filterLabel: "Sort",
         size: "sm",
+        variant: "toolbar",
         showFilterLabel: true,
       })
     );

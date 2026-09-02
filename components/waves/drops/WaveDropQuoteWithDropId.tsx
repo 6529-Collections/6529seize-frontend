@@ -1,12 +1,13 @@
 "use client";
 
-import React from "react";
+import React, { useCallback, useSyncExternalStore } from "react";
 import {
   keepPreviousData,
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import { ApiDropModerationStatus } from "@/generated/models/ApiDropModerationStatus";
 import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
 import { DropSize, type ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import {
@@ -15,6 +16,35 @@ import {
   getDropQueryKey,
 } from "@/services/api/drop-api";
 import WaveDropQuote from "./WaveDropQuote";
+
+type MyStreamContext = ReturnType<typeof useMyStreamOptional>;
+
+const useOptionalWaveMessages = (
+  myStream: MyStreamContext,
+  waveId: string | null
+) => {
+  const subscribe = useCallback(
+    (onStoreChange: () => void) => {
+      if (!myStream || !waveId) {
+        return () => undefined;
+      }
+
+      const listener = () => onStoreChange();
+      myStream.waveMessagesStore.subscribe(waveId, listener);
+      return () => myStream.waveMessagesStore.unsubscribe(waveId, listener);
+    },
+    [myStream, waveId]
+  );
+  const getSnapshot = useCallback(
+    () =>
+      myStream && waveId
+        ? myStream.waveMessagesStore.getData(waveId)
+        : undefined,
+    [myStream, waveId]
+  );
+
+  return useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
+};
 
 interface WaveDropQuoteWithDropIdProps {
   readonly dropId: string;
@@ -66,6 +96,10 @@ const isDropNotFoundError = (
   return error === expectedMessage;
 };
 
+const isModeratedPresentation = (drop: ApiDrop | null): boolean =>
+  drop?.moderation?.status !== undefined &&
+  drop.moderation.status !== ApiDropModerationStatus.Visible;
+
 const WaveDropQuoteWithDropId: React.FC<WaveDropQuoteWithDropIdProps> = ({
   dropId,
   partId,
@@ -81,19 +115,34 @@ const WaveDropQuoteWithDropId: React.FC<WaveDropQuoteWithDropIdProps> = ({
   const normalizedDropId = dropId.trim();
   const queryClient = useQueryClient();
   const myStream = useMyStreamOptional();
+  const targetWaveId = waveId ?? myStream?.activeWave.id ?? null;
+  const waveMessages = useOptionalWaveMessages(myStream, targetWaveId);
   const cachedDrop = queryClient.getQueryData<ApiDrop>(
     getDropQueryKey(normalizedDropId)
   );
-  const targetWaveId = waveId ?? myStream?.activeWave.id ?? null;
-  const waveMessagesDrop = targetWaveId
-    ? myStream?.waveMessagesStore
-        .getData(targetWaveId)
-        ?.drops.find(
+  const waveMessagesDrop =
+    (targetWaveId
+      ? waveMessages?.drops.find(
           (drop): drop is ExtendedDrop =>
             drop.type === DropSize.FULL && drop.id === normalizedDropId
         )
-    : null;
-  const initialDrop = maybeDrop ?? cachedDrop ?? waveMessagesDrop ?? null;
+      : null) ?? null;
+  const isActiveWaveHydrating =
+    targetWaveId !== null &&
+    targetWaveId === myStream?.activeWave.id &&
+    (waveMessages === undefined || waveMessages.isLoading);
+  const currentPresentationDrop = maybeDrop ?? waveMessagesDrop ?? null;
+  let authoritativeModeratedDrop: ApiDrop | null = null;
+  if (isModeratedPresentation(maybeDrop)) {
+    authoritativeModeratedDrop = maybeDrop;
+  } else if (isModeratedPresentation(waveMessagesDrop)) {
+    authoritativeModeratedDrop = waveMessagesDrop;
+  }
+
+  let initialDrop = currentPresentationDrop;
+  if (initialDrop === null && !isActiveWaveHydrating) {
+    initialDrop = cachedDrop ?? null;
+  }
 
   const { data: drop, error } = useQuery<ApiDrop | undefined>({
     queryKey: getDropQueryKey(normalizedDropId),
@@ -104,8 +153,18 @@ const WaveDropQuoteWithDropId: React.FC<WaveDropQuoteWithDropIdProps> = ({
     ...(initialDrop === null ? {} : { initialData: initialDrop }),
   });
 
-  const isNotFound = isDropNotFoundError(error, normalizedDropId);
-  const resolvedDrop = isNotFound ? null : (drop ?? null);
+  const isNotFound =
+    authoritativeModeratedDrop === null &&
+    waveMessagesDrop === null &&
+    !isActiveWaveHydrating &&
+    isDropNotFoundError(error, normalizedDropId);
+  let resolvedDrop = authoritativeModeratedDrop;
+  if (resolvedDrop === null && !isNotFound) {
+    resolvedDrop = currentPresentationDrop;
+  }
+  if (resolvedDrop === null && !isNotFound && !isActiveWaveHydrating) {
+    resolvedDrop = drop ?? null;
+  }
 
   return (
     <WaveDropQuote

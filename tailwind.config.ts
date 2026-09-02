@@ -31,8 +31,17 @@ const tailwindConfig: Config = {
         "3xl": "2048px",
       },
       fontSize: {
+        label: ["11px", { letterSpacing: "0.14em" }],
+        meta: "13px",
+        body: ["15px", { lineHeight: "1.72" }],
         xxs: ["0.8125rem", "20px"],
         md: ["0.9375rem", "24px"],
+      },
+      letterSpacing: {
+        title: "-0.02em",
+        identity: "-0.01em",
+        rank: "-0.03em",
+        ordinal: "0.04em",
       },
       colors: {
         "primary-300": "#84ADFF",

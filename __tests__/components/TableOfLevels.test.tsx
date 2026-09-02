@@ -20,8 +20,16 @@ describe("TableOfLevels", () => {
   });
   it("renders a row for each level with the correct values", () => {
     render(<TableOfLevels />);
+    const scrollRegion = screen.getByRole("region", {
+      name: "Level and TDH + Rep thresholds",
+    });
     const table = screen.getByRole("table");
     const rows = within(table).getAllByRole("row");
+    expect(scrollRegion).toHaveAttribute("tabindex", "0");
+    expect(within(table).getAllByRole("columnheader")[0]).toHaveClass(
+      "tw-sticky",
+      "tw-top-0"
+    );
     // header row + one row per level
     expect(rows).toHaveLength(levels.length + 1);
 

@@ -11,6 +11,15 @@ import type { MessageKey } from "@/i18n/messages/en-US";
 const RETRY_LABEL = "Erneut versuchen";
 
 export const DE_DE_MESSAGES = {
+  "network.groupInspection.bulkRep":
+    "Allen Profilen, die den Kriterien entsprechen, REP geben",
+  "network.groupInspection.bulkNic":
+    "Allen Profilen, die den Kriterien entsprechen, NIC geben",
+  "network.groupInspection.bulkActionsLabel": "Massenbewertungsaktionen",
+  "network.groupInspection.bulkRepSuccess": "REP wurde verteilt.",
+  "network.groupInspection.bulkNicSuccess": "NIC wurde verteilt.",
+  "network.groupInspection.source":
+    "Quelle: Filter und optionale manuelle Liste",
   "user.brain.sidebar.createdHeading": "Erstellte Waves",
   "user.brain.sidebar.createdMobileHeading": "Erstellt",
   "user.brain.sidebar.recentlyActiveHeading": "Kürzlich aktiv in",
@@ -508,6 +517,47 @@ export const DE_DE_MESSAGES = {
   "waves.create.groups.dialog.changeDescription":
     "Erstelle eine neue Gruppe oder wähle eine andere vorhandene aus.",
   "waves.create.groups.identities": "Identitäten",
+  "waves.create.groups.hideCriteriaAndMembers":
+    "Kriterien und Mitglieder ausblenden",
+  "waves.create.groups.hideCriteriaAndMembersTooltip":
+    "Die Kriterien und die Mitgliederliste sind für Mitglieder dieser Gruppe sichtbar, für alle anderen jedoch ausgeblendet.",
+  "waves.create.groups.hideCriteriaAndMembersInfoLabel":
+    "Informationen zur Sichtbarkeit von Kriterien und Mitgliedern",
+  "waves.create.groups.editAccess.title": "Zugriff für {groupLabel} bearbeiten",
+  "waves.create.groups.editAccess.triggerLabel":
+    "Zugriff für {groupLabel} bearbeiten",
+  "waves.create.groups.editAccess.chatLabel": "Chat",
+  "waves.create.groups.editAccess.description":
+    "Die aktuellen Kriterien sind vorausgefüllt. Beim Speichern wird eine neue Gruppe erstellt und nur der Zugriff für {groupLabel} geändert.",
+  "waves.create.groups.editAccess.loading":
+    "Aktuelle Kriterien werden geladen…",
+  "waves.create.groups.editAccess.loadErrorTitle":
+    "Die aktuellen Kriterien konnten nicht geladen werden.",
+  "waves.create.groups.editAccess.loadErrorDescription":
+    "Es wurde nichts geändert. Versuche erneut, die Gruppe zu laden.",
+  "waves.create.groups.editAccess.retry": "Erneut versuchen",
+  "waves.create.groups.editAccess.makePublic": "Wave öffentlich machen",
+  "waves.create.groups.editAccess.makePublicDescription":
+    "Entferne die Sichtbarkeitsbeschränkung, damit alle auf diese Wave zugreifen können.",
+  "waves.create.groups.editAccess.useVisibility":
+    "Sichtbarkeitskriterien verwenden",
+  "waves.create.groups.editAccess.useVisibilityDescription":
+    "Lege für {groupLabel} dieselben Zugriffskriterien wie für die Sichtbarkeit fest.",
+  "waves.create.groups.editAccess.useVisibilityPublicDescription":
+    "Die Sichtbarkeit ist öffentlich. Mache auch den Zugriff für {groupLabel} öffentlich.",
+  "waves.create.groups.editAccess.makePublicConfirmTitle":
+    "Wave öffentlich machen?",
+  "waves.create.groups.editAccess.makePublicConfirmMessage":
+    "Alle können diese Wave finden und ansehen. Nur der Sichtbarkeitszugriff wird geändert.",
+  "waves.create.groups.editAccess.useVisibilityConfirmTitle":
+    "Sichtbarkeitskriterien verwenden?",
+  "waves.create.groups.editAccess.useVisibilityConfirmMessage":
+    "Der Zugriff für {groupLabel} verwendet dieselbe Gruppe wie die Sichtbarkeit. Nur diese Zugriffseinstellung wird geändert.",
+  "waves.create.groups.editAccess.useVisibilityPublicConfirmMessage":
+    "Die Sichtbarkeit ist öffentlich, daher wird auch der Zugriff für {groupLabel} öffentlich. Nur diese Zugriffseinstellung wird geändert.",
+  "waves.create.groups.editAccess.confirmMakePublic": "Öffentlich machen",
+  "waves.create.groups.editAccess.confirmUseVisibility":
+    "Sichtbarkeitskriterien verwenden",
   "waves.create.groups.actions.editCriteria": "Kriterien bearbeiten",
   "waves.create.groups.inlineIdentities.modeLabel":
     "Behandlung von Identitäten",
@@ -935,5 +985,16 @@ export const DE_DE_MESSAGES = {
   "home.mintAllowlist.pill.allowlist": "{phase} · {allowlist}x Allowlist",
   "home.mintAllowlist.pill.mixed":
     "{phase} · {airdrop}x Airdrop · {allowlist}x Allowlist",
+  "profilePreferences.notifications.heading": "Benachrichtigungen",
+  "profilePreferences.notifications.ALL.label": "Alle",
+  "notifications.filter.ariaLabel": "Benachrichtigungen filtern: {selection}",
+  "notifications.filter.selected": "{count} ausgewählt",
+  "notifications.filter.sheetTitle": "Benachrichtigungen filtern",
+  "notifications.filter.option.mentions": "Erwähnungen",
+  "notifications.filter.option.replies": "Antworten",
+  "notifications.filter.option.identity": "Identität",
+  "notifications.filter.option.reactions": "Reaktionen",
+  "notifications.filter.option.invites": "Einladungen",
+  "notifications.filter.option.subscriptions": "Abonnements",
   ...DE_DE_TRANSFER_MESSAGES,
 } satisfies Partial<Record<MessageKey, string>>;

@@ -131,7 +131,6 @@ const ABOUT_CONTENTS_NAV_GROUPS: readonly AboutContentsNavGroup[] = [
   aboutGroup("networkReputation", [
     aboutRouteItem("network-identities", "/network", "networkIdentities"),
     aboutRouteItem("network-activity", "/network/activity", "networkActivity"),
-    aboutRouteItem("network-groups", "/network/groups", "networkGroups"),
     aboutRouteItem("network-tdh", "/network/tdh", "tdh"),
     aboutRouteItem("network-xtdh", "/network/xtdh", "xtdhOverview", {
       descriptionId: "xtdh",

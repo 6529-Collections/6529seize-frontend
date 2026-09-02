@@ -54,6 +54,12 @@ step is user-reachable for `Chat`, `Rank`, and `Approve`.
   opens the criteria editor, where `Identities` remains available alongside the
   rule choices. The identity editor supports both explicitly included and
   explicitly excluded identities.
+- The criteria editor includes a `Hide criteria and members` switch. Its
+  tooltip explains that the criteria and member list remain visible to members
+  of the group but are hidden from everyone else. The switch is off for a new
+  inline group and keeps the saved privacy setting when criteria are copied
+  from the row's current group. `Create and use new group` saves its current
+  setting with the new group.
 - For either identity treatment, users can search for profiles, import every
   wallet from one EMMA allowlist, or drag and drop/select a CSV file. EMMA and
   CSV choices remain attached to the unsaved group when the identity editor is
@@ -165,6 +171,5 @@ group`. Navigating away from `Groups`, including moving backward from the
 - [Wave Creation Rules Step](feature-rules-step.md)
 - [Wave Creation Description Step](feature-description-step.md)
 - [Wave Right Sidebar Group and Curation Management](../sidebars/feature-right-sidebar-group-management.md)
-- [Group Creation and Edit Flow](../../groups/feature-group-create-and-edit.md)
-- [Groups List Filters](../../groups/feature-groups-list-filters.md)
+- [Network Group Scope Flow](../../network/flow-network-group-scope.md)
 - [Docs Home](../../README.md)

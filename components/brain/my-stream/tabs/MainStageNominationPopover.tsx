@@ -37,15 +37,15 @@ function RepStatusCard({
   return (
     <div className="tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-white/5 tw-p-4">
       {title && (
-        <p className="tw-mb-0 tw-text-xs tw-font-semibold tw-tracking-wider tw-text-iron-400">
+        <p className="tw-mb-0 tw-mt-0 tw-text-xs tw-font-semibold tw-tracking-wider tw-text-iron-400">
           {title}
         </p>
       )}
       <p
         className={
           title
-            ? "tw-mb-0 tw-mt-2 tw-text-xs tw-font-medium tw-leading-5 tw-text-iron-500"
-            : "tw-mb-0 tw-text-xs tw-font-medium tw-text-iron-400"
+            ? "tw-mb-0 tw-mt-2 tw-text-pretty tw-text-xs tw-font-medium tw-leading-5 tw-text-iron-500"
+            : "tw-mb-0 tw-mt-0 tw-text-pretty tw-text-xs tw-font-medium tw-text-iron-400"
         }
       >
         {children}

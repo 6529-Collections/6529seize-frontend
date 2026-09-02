@@ -9,6 +9,14 @@ import stormComposerEsMessages from "@/i18n/messages/stormComposer.es-ES.json";
 import type { MessageKey } from "@/i18n/messages/en-US";
 
 export const ES_ES_MESSAGES = {
+  "network.groupInspection.bulkRep":
+    "Dar REP a todos los perfiles que cumplen los criterios",
+  "network.groupInspection.bulkNic":
+    "Dar NIC a todos los perfiles que cumplen los criterios",
+  "network.groupInspection.bulkActionsLabel": "Acciones de valoración masiva",
+  "network.groupInspection.bulkRepSuccess": "REP distribuido.",
+  "network.groupInspection.bulkNicSuccess": "NIC distribuido.",
+  "network.groupInspection.source": "Fuente: filtros y lista manual opcional",
   "user.brain.sidebar.createdHeading": "Waves creadas",
   "user.brain.sidebar.createdMobileHeading": "Creadas",
   "user.brain.sidebar.recentlyActiveHeading": "Actividad reciente en",
@@ -506,6 +514,45 @@ export const ES_ES_MESSAGES = {
   "waves.create.groups.dialog.changeDescription":
     "Crea un grupo nuevo o elige otro grupo existente.",
   "waves.create.groups.identities": "Identidades",
+  "waves.create.groups.hideCriteriaAndMembers": "Ocultar criterios y miembros",
+  "waves.create.groups.hideCriteriaAndMembersTooltip":
+    "Los criterios y la lista de miembros son visibles para los miembros de este grupo, pero están ocultos para los demás.",
+  "waves.create.groups.hideCriteriaAndMembersInfoLabel":
+    "Acerca de la visibilidad de los criterios y miembros",
+  "waves.create.groups.editAccess.title": "Editar acceso de {groupLabel}",
+  "waves.create.groups.editAccess.triggerLabel":
+    "Editar acceso de {groupLabel}",
+  "waves.create.groups.editAccess.chatLabel": "Chat",
+  "waves.create.groups.editAccess.description":
+    "Los criterios actuales aparecen precargados. Al guardar se crea un grupo nuevo y solo cambia el acceso de {groupLabel}.",
+  "waves.create.groups.editAccess.loading": "Cargando los criterios actuales…",
+  "waves.create.groups.editAccess.loadErrorTitle":
+    "No se pudieron cargar los criterios actuales.",
+  "waves.create.groups.editAccess.loadErrorDescription":
+    "No se ha cambiado nada. Intenta cargar el grupo de nuevo.",
+  "waves.create.groups.editAccess.retry": "Volver a intentar",
+  "waves.create.groups.editAccess.makePublic": "Hacer pública la wave",
+  "waves.create.groups.editAccess.makePublicDescription":
+    "Elimina la restricción de visibilidad para que todo el mundo pueda acceder a esta wave.",
+  "waves.create.groups.editAccess.useVisibility":
+    "Usar criterios de visibilidad",
+  "waves.create.groups.editAccess.useVisibilityDescription":
+    "Aplica al acceso de {groupLabel} los mismos criterios que a Visibilidad.",
+  "waves.create.groups.editAccess.useVisibilityPublicDescription":
+    "La visibilidad es pública. Haz público también el acceso de {groupLabel}.",
+  "waves.create.groups.editAccess.makePublicConfirmTitle":
+    "¿Hacer pública la wave?",
+  "waves.create.groups.editAccess.makePublicConfirmMessage":
+    "Todo el mundo podrá encontrar y ver esta wave. Solo cambiará el acceso de Visibilidad.",
+  "waves.create.groups.editAccess.useVisibilityConfirmTitle":
+    "¿Usar los criterios de visibilidad?",
+  "waves.create.groups.editAccess.useVisibilityConfirmMessage":
+    "El acceso de {groupLabel} usará el mismo grupo que Visibilidad. Solo cambiará este ajuste de acceso.",
+  "waves.create.groups.editAccess.useVisibilityPublicConfirmMessage":
+    "La visibilidad es pública, así que el acceso de {groupLabel} también será público. Solo cambiará este ajuste de acceso.",
+  "waves.create.groups.editAccess.confirmMakePublic": "Hacer pública",
+  "waves.create.groups.editAccess.confirmUseVisibility":
+    "Usar criterios de visibilidad",
   "waves.create.groups.actions.editCriteria": "Editar criterios",
   "waves.create.groups.inlineIdentities.modeLabel":
     "Tratamiento de identidades",
@@ -936,5 +983,16 @@ export const ES_ES_MESSAGES = {
   "home.mintAllowlist.pill.allowlist": "{phase} · {allowlist}x Allowlist",
   "home.mintAllowlist.pill.mixed":
     "{phase} · {airdrop}x Airdrop · {allowlist}x Allowlist",
+  "profilePreferences.notifications.heading": "Notificaciones",
+  "profilePreferences.notifications.ALL.label": "Todas",
+  "notifications.filter.ariaLabel": "Filtrar notificaciones: {selection}",
+  "notifications.filter.selected": "{count} seleccionadas",
+  "notifications.filter.sheetTitle": "Filtrar notificaciones",
+  "notifications.filter.option.mentions": "Menciones",
+  "notifications.filter.option.replies": "Respuestas",
+  "notifications.filter.option.identity": "Identidad",
+  "notifications.filter.option.reactions": "Reacciones",
+  "notifications.filter.option.invites": "Invitaciones",
+  "notifications.filter.option.subscriptions": "Suscripciones",
   ...ES_ES_TRANSFER_MESSAGES,
 } satisfies Partial<Record<MessageKey, string>>;

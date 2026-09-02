@@ -1,7 +1,6 @@
 "use client";
 
 import { useAuth } from "@/components/auth/Auth";
-import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import {
   QueryKey,
   ReactQueryWrapperContext,
@@ -21,7 +20,7 @@ import {
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { commonApiFetch, commonApiPut } from "@/services/api/common-api";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   AnimatePresence,
   LazyMotion,
@@ -31,11 +30,6 @@ import {
 } from "framer-motion";
 import { useContext, useState } from "react";
 import Toggle from "react-toggle";
-
-interface ProfilePreferencesSettingsProps {
-  readonly isOpen: boolean;
-  readonly onClose: () => void;
-}
 
 const CATEGORY_KEYS = [
   "direct_messages",
@@ -73,34 +67,33 @@ const UPDATE_NOTIFICATION_LEVEL: Record<
   [NotificationLevel.EssentialOnly]: UpdateNotificationLevel.EssentialOnly,
 };
 
-export default function ProfilePreferencesSettings({
-  isOpen,
-  onClose,
-}: ProfilePreferencesSettingsProps) {
+export default function ProfilePreferencesSettings() {
   const locale = useBrowserLocale();
+  const { connectedProfile } = useAuth();
+  const profileId = connectedProfile?.id ?? null;
   const preferencesQuery = useQuery({
-    queryKey: [QueryKey.PROFILE_PREFERENCES],
+    queryKey: [QueryKey.PROFILE_PREFERENCES, profileId],
     queryFn: () =>
       commonApiFetch<ApiProfilePreferences>({
         endpoint: "profile-preferences",
       }),
-    enabled: isOpen,
+    enabled: profileId !== null,
     staleTime: 0,
   });
 
   return (
-    <MobileWrapperDialog
-      title={t(locale, "profilePreferences.title")}
-      isOpen={isOpen}
-      onClose={onClose}
-      noPadding
-      tall
-      fixedHeight
-      headerClassName="tw-pt-5 sm:tw-pt-6"
+    <section
+      aria-label={t(locale, "preferences.tabs.notifications")}
+      className="tw-overflow-hidden tw-rounded-2xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950"
     >
+      {profileId === null && (
+        <p className="tw-m-0 tw-p-6 tw-text-center tw-text-sm tw-text-iron-400">
+          {t(locale, "preferences.signIn")}
+        </p>
+      )}
       {preferencesQuery.isLoading && (
         <output
-          className="tw-flex tw-flex-1 tw-items-center tw-justify-center"
+          className="tw-flex tw-min-h-48 tw-items-center tw-justify-center"
           aria-label={t(locale, "profilePreferences.loading")}
         >
           <div className="tw-size-6 tw-animate-spin tw-rounded-full tw-border-2 tw-border-iron-600 tw-border-t-primary-400" />
@@ -111,26 +104,28 @@ export default function ProfilePreferencesSettings({
           {t(locale, "profilePreferences.loadError")}
         </p>
       )}
-      {isOpen && preferencesQuery.data && (
+      {profileId && preferencesQuery.data && (
         <ProfilePreferencesForm
+          key={profileId}
           preferences={preferencesQuery.data}
-          onClose={onClose}
+          profileId={profileId}
         />
       )}
-    </MobileWrapperDialog>
+    </section>
   );
 }
 
 function ProfilePreferencesForm({
   preferences,
-  onClose,
+  profileId,
 }: {
   readonly preferences: ApiProfilePreferences;
-  readonly onClose: () => void;
+  readonly profileId: string;
 }) {
   const locale = useBrowserLocale();
   const { setToast } = useAuth();
   const { invalidateNotifications } = useContext(ReactQueryWrapperContext);
+  const queryClient = useQueryClient();
   const [original, setOriginal] = useState(preferences);
   const [current, setCurrent] = useState(preferences);
   const prefersReducedMotion = useReducedMotion() ?? false;
@@ -153,12 +148,15 @@ function ProfilePreferencesForm({
     onSuccess: (savedPreferences) => {
       setOriginal(savedPreferences);
       setCurrent(savedPreferences);
+      queryClient.setQueryData(
+        [QueryKey.PROFILE_PREFERENCES, profileId],
+        savedPreferences
+      );
       setToast({
         message: t(locale, "profilePreferences.saveSuccess"),
         type: "success",
       });
       invalidateNotifications();
-      onClose();
     },
     onError: (error: unknown) => {
       console.error("Error saving profile preferences:", error);
@@ -183,8 +181,8 @@ function ProfilePreferencesForm({
     current.notification_level === NotificationLevel.EssentialOnly;
 
   return (
-    <div className="tw-flex tw-min-h-0 tw-flex-1 tw-flex-col">
-      <div className="tw-flex-1 tw-divide-y tw-divide-iron-800 tw-overflow-y-auto tw-px-4 sm:tw-px-6">
+    <div className="tw-flex tw-flex-col">
+      <div className="tw-divide-y tw-divide-iron-800 tw-px-4 sm:tw-px-6">
         <section
           aria-labelledby="profile-preferences-notifications-heading"
           className="tw-pb-0 tw-pt-6"
@@ -339,7 +337,7 @@ function ProfilePreferencesForm({
           </div>
         </section>
       </div>
-      <div className="tw-flex tw-justify-end tw-border-t tw-border-iron-800 tw-bg-iron-950 tw-px-4 tw-pb-2 tw-pt-6 sm:tw-px-6 sm:tw-pb-3">
+      <div className="tw-flex tw-justify-end tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-4 tw-pb-4 tw-pt-6 sm:tw-px-6 sm:tw-pb-5">
         <Button
           type="button"
           onClick={() => void save()}

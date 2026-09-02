@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 import { MyStreamWaveTab } from "@/types/waves.types";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
@@ -102,6 +102,10 @@ jest.mock("@/components/auth/Auth", () => ({
   useAuth: jest.fn(),
 }));
 
+jest.mock("@/hooks/useBrowserLocale", () => ({
+  useBrowserLocale: () => "en-US",
+}));
+
 import MyStreamWaveDesktopTabs from "@/components/brain/my-stream/MyStreamWaveDesktopTabs";
 
 let mockAvailableTabs: MyStreamWaveTab[] = [];
@@ -159,7 +163,30 @@ beforeEach(() => {
   (useAuth as jest.Mock).mockReturnValue({
     connectedProfile: { handle: "alice" },
   });
+  Object.defineProperty(window, "matchMedia", {
+    configurable: true,
+    value: jest.fn().mockReturnValue({ matches: false }),
+  });
 });
+
+const setMobileScrollMetrics = (
+  scroller: HTMLElement,
+  {
+    clientWidth,
+    scrollLeft,
+    scrollWidth,
+  }: {
+    readonly clientWidth: number;
+    readonly scrollLeft: number;
+    readonly scrollWidth: number;
+  }
+) => {
+  Object.defineProperties(scroller, {
+    clientWidth: { configurable: true, value: clientWidth },
+    scrollLeft: { configurable: true, value: scrollLeft, writable: true },
+    scrollWidth: { configurable: true, value: scrollWidth },
+  });
+};
 
 describe("MyStreamWaveDesktopTabs", () => {
   it("renders Polls for chat waves when available", () => {
@@ -362,6 +389,158 @@ describe("MyStreamWaveDesktopTabs", () => {
     fireEvent.click(screen.getAllByRole("tab", { name: "Leaderboard" })[0]);
 
     expect(setActiveTab).toHaveBeenCalledWith(MyStreamWaveTab.LEADERBOARD);
+  });
+
+  it("shows compact scroll controls only where more tabs are available", () => {
+    mockAvailableTabs = [
+      MyStreamWaveTab.LEADERBOARD,
+      MyStreamWaveTab.CHAT,
+      MyStreamWaveTab.WINNERS,
+      MyStreamWaveTab.MY_VOTES,
+      MyStreamWaveTab.OUTCOME,
+    ];
+    const { container } = renderComponent(MyStreamWaveTab.LEADERBOARD);
+    const scroller = container.querySelector<HTMLElement>(
+      '[data-wave-tabs-scroll="mobile"]'
+    );
+    expect(scroller).not.toBeNull();
+    if (!scroller) return;
+
+    setMobileScrollMetrics(scroller, {
+      clientWidth: 240,
+      scrollLeft: 0,
+      scrollWidth: 520,
+    });
+    fireEvent(window, new Event("resize"));
+
+    const unavailableLeftControl = screen.getByRole("button", {
+      name: "Scroll wave sections left",
+    });
+    expect(unavailableLeftControl).toHaveClass("tw-invisible");
+    expect(unavailableLeftControl).toHaveAttribute("tabindex", "-1");
+    const rightControl = screen.getByRole("button", {
+      name: "Scroll wave sections right",
+    });
+    expect(rightControl).toBeInTheDocument();
+    expect(rightControl.querySelector("svg")).toHaveClass(
+      "tw-translate-x-1.5"
+    );
+
+    scroller.scrollLeft = 120;
+    fireEvent.scroll(scroller);
+    const leftControl = screen.getByRole("button", {
+      name: "Scroll wave sections left",
+    });
+    expect(leftControl).toBeInTheDocument();
+    expect(leftControl.querySelector("svg")).toHaveClass(
+      "-tw-translate-x-1.5"
+    );
+    expect(
+      screen.getByRole("button", { name: "Scroll wave sections right" })
+    ).toBeInTheDocument();
+
+    scroller.scrollLeft = 280;
+    fireEvent.scroll(scroller);
+    expect(
+      screen.getByRole("button", { name: "Scroll wave sections left" })
+    ).toBeInTheDocument();
+    const unavailableRightControl = screen.getByRole("button", {
+      name: "Scroll wave sections right",
+    });
+    expect(unavailableRightControl).toHaveClass("tw-invisible");
+    expect(unavailableRightControl).toHaveAttribute("tabindex", "-1");
+
+    setMobileScrollMetrics(scroller, {
+      clientWidth: 520,
+      scrollLeft: 0,
+      scrollWidth: 520,
+    });
+    fireEvent(window, new Event("resize"));
+    for (const control of screen.getAllByRole("button", {
+      name: /scroll wave sections/i,
+    })) {
+      expect(control).toHaveClass("tw-invisible");
+      expect(control).toHaveAttribute("tabindex", "-1");
+    }
+  });
+
+  it("scrolls compact tabs and respects reduced motion", () => {
+    mockAvailableTabs = [
+      MyStreamWaveTab.LEADERBOARD,
+      MyStreamWaveTab.CHAT,
+      MyStreamWaveTab.WINNERS,
+      MyStreamWaveTab.OUTCOME,
+    ];
+    const { container } = renderComponent(MyStreamWaveTab.LEADERBOARD);
+    const scroller = container.querySelector<HTMLElement>(
+      '[data-wave-tabs-scroll="mobile"]'
+    );
+    expect(scroller).not.toBeNull();
+    if (!scroller) return;
+
+    const scrollBy = jest.fn();
+    Object.defineProperty(scroller, "scrollBy", {
+      configurable: true,
+      value: scrollBy,
+    });
+    setMobileScrollMetrics(scroller, {
+      clientWidth: 200,
+      scrollLeft: 0,
+      scrollWidth: 500,
+    });
+    fireEvent(window, new Event("resize"));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Scroll wave sections right" })
+    );
+
+    expect(scrollBy).toHaveBeenLastCalledWith({
+      behavior: "smooth",
+      left: 160,
+    });
+
+    (window.matchMedia as jest.Mock).mockReturnValue({ matches: true });
+    fireEvent.click(
+      screen.getByRole("button", { name: "Scroll wave sections right" })
+    );
+    expect(scrollBy).toHaveBeenLastCalledWith({
+      behavior: "auto",
+      left: 160,
+    });
+  });
+
+  it("keeps focus available when a compact scroll edge is reached", async () => {
+    mockAvailableTabs = [
+      MyStreamWaveTab.LEADERBOARD,
+      MyStreamWaveTab.CHAT,
+      MyStreamWaveTab.WINNERS,
+      MyStreamWaveTab.OUTCOME,
+    ];
+    const { container } = renderComponent(MyStreamWaveTab.LEADERBOARD);
+    const scroller = container.querySelector<HTMLElement>(
+      '[data-wave-tabs-scroll="mobile"]'
+    );
+    expect(scroller).not.toBeNull();
+    if (!scroller) return;
+
+    setMobileScrollMetrics(scroller, {
+      clientWidth: 200,
+      scrollLeft: 0,
+      scrollWidth: 500,
+    });
+    fireEvent(window, new Event("resize"));
+    const rightControl = screen.getByRole("button", {
+      name: "Scroll wave sections right",
+    });
+    rightControl.focus();
+
+    scroller.scrollLeft = 300;
+    fireEvent.scroll(scroller);
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("button", { name: "Scroll wave sections left" })
+      ).toHaveFocus();
+    });
   });
 
   it("keeps Sales hidden outside curation waves", () => {

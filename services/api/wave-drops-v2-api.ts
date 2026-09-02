@@ -37,6 +37,7 @@ import {
   DEFAULT_WAVE_DROPS_RETRY_OPTIONS,
   getDropApprovalTiming,
   getDropEndpointId,
+  getNormalizedDropId,
   getDropType,
   getWinningContext,
   rethrowAbortFetchError,
@@ -266,6 +267,8 @@ const hydrateDropV2 = async ({
     top_raters: topRaters,
     raters_count: voting?.voters_count ?? 0,
     context_profile_context: getContextProfileContext(drop),
+    ...(drop.viewer_context ? { viewer_context: drop.viewer_context } : {}),
+    ...(drop.moderation ? { moderation: drop.moderation } : {}),
     subscribed_actions: [],
     is_signed: drop.is_signed,
     reactions: mapDropReactionCountersV2(drop),
@@ -319,6 +322,8 @@ export const mapLeaderboardDropV2 = ({
     top_raters: [],
     raters_count: voting?.voters_count ?? 0,
     context_profile_context: getContextProfileContext(drop),
+    ...(drop.viewer_context ? { viewer_context: drop.viewer_context } : {}),
+    ...(drop.moderation ? { moderation: drop.moderation } : {}),
     subscribed_actions: [],
     is_signed: drop.is_signed,
     reactions: mapDropReactionCountersV2(drop),
@@ -404,14 +409,6 @@ const hydrateDropsWithEmbeddedWavesV2 = async ({
         result.status === "fulfilled"
     )
     .map((result) => result.value);
-};
-
-const getNormalizedDropId = (dropId: string): string => {
-  const normalizedDropId = dropId.trim();
-  if (!normalizedDropId) {
-    throw new Error("Cannot fetch drop without a drop id");
-  }
-  return normalizedDropId;
 };
 
 const fetchDropAndWaveV2 = async (

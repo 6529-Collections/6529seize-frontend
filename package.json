@@ -5,9 +5,6 @@
   "scripts": {
     "build:env-schema": "node scripts/require-6529-command.cjs && node scripts/build-env-schema.cjs",
     "guard:no-package-lock": "node scripts/require-6529-command.cjs && node scripts/assert-no-package-lock.cjs",
-    "install:secure": "node scripts/require-6529-command.cjs && node scripts/assert-no-package-lock.cjs && node scripts/run-secure-pnpm.cjs install",
-    "install:secure:frozen": "node scripts/require-6529-command.cjs && node scripts/assert-no-package-lock.cjs && node scripts/run-secure-pnpm.cjs install --frozen-lockfile",
-    "install:secure:prod": "node scripts/require-6529-command.cjs && node scripts/assert-no-package-lock.cjs && node scripts/run-secure-pnpm.cjs install --frozen-lockfile --prod",
     "preinstall": "node scripts/enforce-package-manager.cjs",
     "export-mint-page": "node scripts/require-6529-command.cjs && pnpm run build:env-schema && node standalone/standalone-memes-mint/scripts/export-mint-page.cjs",
     "export-mint-page:sync": "node scripts/require-6529-command.cjs && pnpm run export-mint-page -- --sync",
@@ -266,6 +263,7 @@
     "zod": "3.25.76"
   },
   "devDependencies": {
+    "@6529-collections/release-request": "0.0.3",
     "@axe-core/playwright": "4.12.1",
     "@jest/globals": "30.4.1",
     "@openapitools/openapi-generator-cli": "2.31.1",

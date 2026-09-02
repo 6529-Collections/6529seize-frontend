@@ -21,6 +21,7 @@ export * from '../models/ApiAttachmentUploadMimeType';
 export * from '../models/ApiAuthSettings';
 export * from '../models/ApiAvailableRatingCredit';
 export * from '../models/ApiBlockItem';
+export * from '../models/ApiBlockedProfile';
 export * from '../models/ApiBlocksPage';
 export * from '../models/ApiBulkRateRequest';
 export * from '../models/ApiBulkRateResponse';
@@ -102,6 +103,25 @@ export * from '../models/ApiConsolidatedTdhMetricsContent';
 export * from '../models/ApiConsolidatedTdhMetricsPage';
 export * from '../models/ApiConsolidatedTdhMetricsSort';
 export * from '../models/ApiConsolidatedTdhView';
+export * from '../models/ApiContentModerationAuditEntry';
+export * from '../models/ApiContentModerationDropDecisionRequest';
+export * from '../models/ApiContentModerationDropDecisionResponse';
+export * from '../models/ApiContentModerationProfileListItem';
+export * from '../models/ApiContentModerationProfileStatusRequest';
+export * from '../models/ApiContentModerationProfileStatusResponse';
+export * from '../models/ApiContentModerationQueueItem';
+export * from '../models/ApiContentModerationRecommendation';
+export * from '../models/ApiContentModerationReportReason';
+export * from '../models/ApiContentModerationReportRequest';
+export * from '../models/ApiContentModerationReportResponse';
+export * from '../models/ApiContentModerationReportStatus';
+export * from '../models/ApiContentModerationReportWithdrawalResponse';
+export * from '../models/ApiContentModerationReportedAttachment';
+export * from '../models/ApiContentModerationReportedContent';
+export * from '../models/ApiContentModerationReportedContentPart';
+export * from '../models/ApiContentModerationReportedMedia';
+export * from '../models/ApiContentModerationUserReport';
+export * from '../models/ApiContentModeratorAccess';
 export * from '../models/ApiCreateAttachmentMultipartUploadRequest';
 export * from '../models/ApiCreateAttachmentMultipartUploadResponse';
 export * from '../models/ApiCreateConnectionShareRequest';
@@ -149,6 +169,7 @@ export * from '../models/ApiDecentralizedMediaProtocol';
 export * from '../models/ApiDecentralizedMediaResolution';
 export * from '../models/ApiDeleteEulaConsentRequest';
 export * from '../models/ApiDeleteEulaConsentResponse';
+export * from '../models/ApiDeleteMyWaveChatHistoryResponse';
 export * from '../models/ApiDistributionAirdropsCsvUploadRequest';
 export * from '../models/ApiDistributionAirdropsUploadResponse';
 export * from '../models/ApiDmDropsUnreadCount';
@@ -165,6 +186,7 @@ export * from '../models/ApiDropContextProfileContext';
 export * from '../models/ApiDropCuration';
 export * from '../models/ApiDropCurationRequest';
 export * from '../models/ApiDropGroupMention';
+export * from '../models/ApiDropHiddenState';
 export * from '../models/ApiDropId';
 export * from '../models/ApiDropMainType';
 export * from '../models/ApiDropMedia';
@@ -173,6 +195,8 @@ export * from '../models/ApiDropMentionedUser';
 export * from '../models/ApiDropMetadata';
 export * from '../models/ApiDropMetadataResponse';
 export * from '../models/ApiDropMetadataV2';
+export * from '../models/ApiDropModeration';
+export * from '../models/ApiDropModerationStatus';
 export * from '../models/ApiDropNftLink';
 export * from '../models/ApiDropPart';
 export * from '../models/ApiDropPartQuoteV2';
@@ -199,6 +223,7 @@ export * from '../models/ApiDropV2';
 export * from '../models/ApiDropV2ContextProfileContext';
 export * from '../models/ApiDropV2Page';
 export * from '../models/ApiDropV2PageWithoutCount';
+export * from '../models/ApiDropViewerModerationContext';
 export * from '../models/ApiDropVote';
 export * from '../models/ApiDropVoteEditLog';
 export * from '../models/ApiDropVoter';
@@ -282,6 +307,7 @@ export * from '../models/ApiMintingClaimActionTypesResponse';
 export * from '../models/ApiMintingClaimActionUpdateRequest';
 export * from '../models/ApiMintingClaimActionsResponse';
 export * from '../models/ApiMintingClaimsPhaseTotalItem';
+export * from '../models/ApiModeratedProfileStatus';
 export * from '../models/ApiNft';
 export * from '../models/ApiNftLinkData';
 export * from '../models/ApiNftLinkMediaPreview';
@@ -315,6 +341,7 @@ export * from '../models/ApiPageSortDirection';
 export * from '../models/ApiPageWithNextUriBase';
 export * from '../models/ApiPageWithoutCount';
 export * from '../models/ApiPaymentDetails';
+export * from '../models/ApiProfileBlockState';
 export * from '../models/ApiProfileClassification';
 export * from '../models/ApiProfileCmsAgentPatchValidationResult';
 export * from '../models/ApiProfileCmsAgentPatchValidationResultTarget';
@@ -681,6 +708,7 @@ import { ApiAttachmentUploadMimeType } from '../models/ApiAttachmentUploadMimeTy
 import { ApiAuthSettings } from '../models/ApiAuthSettings';
 import { ApiAvailableRatingCredit } from '../models/ApiAvailableRatingCredit';
 import { ApiBlockItem } from '../models/ApiBlockItem';
+import { ApiBlockedProfile } from '../models/ApiBlockedProfile';
 import { ApiBlocksPage } from '../models/ApiBlocksPage';
 import { ApiBulkRateRequest     } from '../models/ApiBulkRateRequest';
 import { ApiBulkRateResponse } from '../models/ApiBulkRateResponse';
@@ -762,6 +790,25 @@ import { ApiConsolidatedTdhMetricsContent } from '../models/ApiConsolidatedTdhMe
 import { ApiConsolidatedTdhMetricsPage } from '../models/ApiConsolidatedTdhMetricsPage';
 import { ApiConsolidatedTdhMetricsSort } from '../models/ApiConsolidatedTdhMetricsSort';
 import { ApiConsolidatedTdhView } from '../models/ApiConsolidatedTdhView';
+import { ApiContentModerationAuditEntry } from '../models/ApiContentModerationAuditEntry';
+import { ApiContentModerationDropDecisionRequest, ApiContentModerationDropDecisionRequestDecisionEnum    } from '../models/ApiContentModerationDropDecisionRequest';
+import { ApiContentModerationDropDecisionResponse   } from '../models/ApiContentModerationDropDecisionResponse';
+import { ApiContentModerationProfileListItem         } from '../models/ApiContentModerationProfileListItem';
+import { ApiContentModerationProfileStatusRequest   } from '../models/ApiContentModerationProfileStatusRequest';
+import { ApiContentModerationProfileStatusResponse   } from '../models/ApiContentModerationProfileStatusResponse';
+import { ApiContentModerationQueueItem                             } from '../models/ApiContentModerationQueueItem';
+import { ApiContentModerationRecommendation } from '../models/ApiContentModerationRecommendation';
+import { ApiContentModerationReportReason } from '../models/ApiContentModerationReportReason';
+import { ApiContentModerationReportRequest     } from '../models/ApiContentModerationReportRequest';
+import { ApiContentModerationReportResponse    } from '../models/ApiContentModerationReportResponse';
+import { ApiContentModerationReportStatus } from '../models/ApiContentModerationReportStatus';
+import { ApiContentModerationReportWithdrawalResponse    } from '../models/ApiContentModerationReportWithdrawalResponse';
+import { ApiContentModerationReportedAttachment } from '../models/ApiContentModerationReportedAttachment';
+import { ApiContentModerationReportedContent } from '../models/ApiContentModerationReportedContent';
+import { ApiContentModerationReportedContentPart } from '../models/ApiContentModerationReportedContentPart';
+import { ApiContentModerationReportedMedia } from '../models/ApiContentModerationReportedMedia';
+import { ApiContentModerationUserReport              } from '../models/ApiContentModerationUserReport';
+import { ApiContentModeratorAccess } from '../models/ApiContentModeratorAccess';
 import { ApiCreateAttachmentMultipartUploadRequest   } from '../models/ApiCreateAttachmentMultipartUploadRequest';
 import { ApiCreateAttachmentMultipartUploadResponse     } from '../models/ApiCreateAttachmentMultipartUploadResponse';
 import { ApiCreateConnectionShareRequest, ApiCreateConnectionShareRequestTargetClientTypeEnum   , ApiCreateConnectionShareRequestClientTypeEnum     } from '../models/ApiCreateConnectionShareRequest';
@@ -803,18 +850,19 @@ import { ApiCreateWaveMetadataRequest } from '../models/ApiCreateWaveMetadataReq
 import { ApiCreateWaveOutcome        } from '../models/ApiCreateWaveOutcome';
 import { ApiCreateWaveOutcomeDistributionItem } from '../models/ApiCreateWaveOutcomeDistributionItem';
 import { ApiCuratedProfileWaveDropsPage } from '../models/ApiCuratedProfileWaveDropsPage';
-import { ApiCurationDrop                                 } from '../models/ApiCurationDrop';
+import { ApiCurationDrop                                   } from '../models/ApiCurationDrop';
 import { ApiCurationDropsPage } from '../models/ApiCurationDropsPage';
 import { ApiDecentralizedMediaProtocol } from '../models/ApiDecentralizedMediaProtocol';
 import { ApiDecentralizedMediaResolution          } from '../models/ApiDecentralizedMediaResolution';
 import { ApiDeleteEulaConsentRequest } from '../models/ApiDeleteEulaConsentRequest';
 import { ApiDeleteEulaConsentResponse } from '../models/ApiDeleteEulaConsentResponse';
+import { ApiDeleteMyWaveChatHistoryResponse } from '../models/ApiDeleteMyWaveChatHistoryResponse';
 import { ApiDistributionAirdropsCsvUploadRequest } from '../models/ApiDistributionAirdropsCsvUploadRequest';
 import { ApiDistributionAirdropsUploadResponse } from '../models/ApiDistributionAirdropsUploadResponse';
 import { ApiDmDropsUnreadCount } from '../models/ApiDmDropsUnreadCount';
 import { ApiDmUnreadConversationState } from '../models/ApiDmUnreadConversationState';
 import { ApiDmUnreadSnapshot } from '../models/ApiDmUnreadSnapshot';
-import { ApiDrop                                 } from '../models/ApiDrop';
+import { ApiDrop                                   } from '../models/ApiDrop';
 import { ApiDropAndDropVote } from '../models/ApiDropAndDropVote';
 import { ApiDropAndWave } from '../models/ApiDropAndWave';
 import { ApiDropAttachmentReference } from '../models/ApiDropAttachmentReference';
@@ -825,6 +873,7 @@ import { ApiDropContextProfileContext } from '../models/ApiDropContextProfileCon
 import { ApiDropCuration } from '../models/ApiDropCuration';
 import { ApiDropCurationRequest } from '../models/ApiDropCurationRequest';
 import { ApiDropGroupMention } from '../models/ApiDropGroupMention';
+import { ApiDropHiddenState } from '../models/ApiDropHiddenState';
 import { ApiDropId } from '../models/ApiDropId';
 import { ApiDropMainType } from '../models/ApiDropMainType';
 import { ApiDropMedia      } from '../models/ApiDropMedia';
@@ -833,6 +882,8 @@ import { ApiDropMentionedUser } from '../models/ApiDropMentionedUser';
 import { ApiDropMetadata } from '../models/ApiDropMetadata';
 import { ApiDropMetadataResponse } from '../models/ApiDropMetadataResponse';
 import { ApiDropMetadataV2 } from '../models/ApiDropMetadataV2';
+import { ApiDropModeration   } from '../models/ApiDropModeration';
+import { ApiDropModerationStatus } from '../models/ApiDropModerationStatus';
 import { ApiDropNftLink } from '../models/ApiDropNftLink';
 import { ApiDropPart } from '../models/ApiDropPart';
 import { ApiDropPartQuoteV2 } from '../models/ApiDropPartQuoteV2';
@@ -855,16 +906,17 @@ import { ApiDropSubscriptionActions } from '../models/ApiDropSubscriptionActions
 import { ApiDropSubscriptionTargetAction } from '../models/ApiDropSubscriptionTargetAction';
 import { ApiDropTraceItem } from '../models/ApiDropTraceItem';
 import { ApiDropType } from '../models/ApiDropType';
-import { ApiDropV2                           } from '../models/ApiDropV2';
+import { ApiDropV2                             } from '../models/ApiDropV2';
 import { ApiDropV2ContextProfileContext } from '../models/ApiDropV2ContextProfileContext';
 import { ApiDropV2Page } from '../models/ApiDropV2Page';
 import { ApiDropV2PageWithoutCount } from '../models/ApiDropV2PageWithoutCount';
+import { ApiDropViewerModerationContext } from '../models/ApiDropViewerModerationContext';
 import { ApiDropVote } from '../models/ApiDropVote';
 import { ApiDropVoteEditLog } from '../models/ApiDropVoteEditLog';
 import { ApiDropVoter } from '../models/ApiDropVoter';
 import { ApiDropVotersPage } from '../models/ApiDropVotersPage';
 import { ApiDropWinningContext } from '../models/ApiDropWinningContext';
-import { ApiDropWithoutWave                                } from '../models/ApiDropWithoutWave';
+import { ApiDropWithoutWave                                  } from '../models/ApiDropWithoutWave';
 import { ApiDropWithoutWavesPageWithoutCount } from '../models/ApiDropWithoutWavesPageWithoutCount';
 import { ApiDropsLeaderboardPage } from '../models/ApiDropsLeaderboardPage';
 import { ApiDropsLeaderboardPageV2 } from '../models/ApiDropsLeaderboardPageV2';
@@ -914,7 +966,7 @@ import { ApiIdentitySubscriptionTargetType } from '../models/ApiIdentitySubscrip
 import { ApiIdentityWaveParticipation } from '../models/ApiIdentityWaveParticipation';
 import { ApiIncomingIdentitySubscriptionsPage } from '../models/ApiIncomingIdentitySubscriptionsPage';
 import { ApiIntRange } from '../models/ApiIntRange';
-import { ApiLightDrop             } from '../models/ApiLightDrop';
+import { ApiLightDrop               } from '../models/ApiLightDrop';
 import { ApiLoginRequest } from '../models/ApiLoginRequest';
 import { ApiLoginResponse } from '../models/ApiLoginResponse';
 import { ApiMarkDropUnreadResponse } from '../models/ApiMarkDropUnreadResponse';
@@ -942,6 +994,7 @@ import { ApiMintingClaimActionTypesResponse } from '../models/ApiMintingClaimAct
 import { ApiMintingClaimActionUpdateRequest } from '../models/ApiMintingClaimActionUpdateRequest';
 import { ApiMintingClaimActionsResponse } from '../models/ApiMintingClaimActionsResponse';
 import { ApiMintingClaimsPhaseTotalItem } from '../models/ApiMintingClaimsPhaseTotalItem';
+import { ApiModeratedProfileStatus } from '../models/ApiModeratedProfileStatus';
 import { ApiNft      , ApiNftTokenTypeEnum                               } from '../models/ApiNft';
 import { ApiNftLinkData } from '../models/ApiNftLinkData';
 import { ApiNftLinkMediaPreview, ApiNftLinkMediaPreviewStatusEnum          } from '../models/ApiNftLinkMediaPreview';
@@ -975,6 +1028,7 @@ import { ApiPageSortDirection } from '../models/ApiPageSortDirection';
 import { ApiPageWithNextUriBase } from '../models/ApiPageWithNextUriBase';
 import { ApiPageWithoutCount } from '../models/ApiPageWithoutCount';
 import { ApiPaymentDetails } from '../models/ApiPaymentDetails';
+import { ApiProfileBlockState } from '../models/ApiProfileBlockState';
 import { ApiProfileClassification } from '../models/ApiProfileClassification';
 import { ApiProfileCmsAgentPatchValidationResult, ApiProfileCmsAgentPatchValidationResultSchemaEnum          } from '../models/ApiProfileCmsAgentPatchValidationResult';
 import { ApiProfileCmsAgentPatchValidationResultTarget } from '../models/ApiProfileCmsAgentPatchValidationResultTarget';
@@ -1356,6 +1410,10 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiConsolidatedTdhMetricsContent",
     "ApiConsolidatedTdhMetricsSort",
     "ApiConsolidatedTdhView",
+    "ApiContentModerationDropDecisionRequestDecisionEnum",
+    "ApiContentModerationRecommendation",
+    "ApiContentModerationReportReason",
+    "ApiContentModerationReportStatus",
     "ApiCreateConnectionShareRequestTargetClientTypeEnum",
     "ApiCreateConnectionShareRequestClientTypeEnum",
     "ApiCreateConnectionShareResponseTargetClientTypeEnum",
@@ -1364,6 +1422,7 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiDropGroupMention",
     "ApiDropMainType",
     "ApiDropMediaStatus",
+    "ApiDropModerationStatus",
     "ApiDropSearchStrategy",
     "ApiDropSubscriptionTargetAction",
     "ApiDropType",
@@ -1378,6 +1437,7 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiIdentitySubscriptionTargetType",
     "ApiMediaUploadMimeType",
     "ApiMemesExtendedDataTokenTypeEnum",
+    "ApiModeratedProfileStatus",
     "ApiNftTokenTypeEnum",
     "ApiNftLinkMediaPreviewStatusEnum",
     "ApiNotificationCause",
@@ -1564,6 +1624,7 @@ let typeMap: {[index: string]: any} = {
     "ApiAuthSettings": ApiAuthSettings,
     "ApiAvailableRatingCredit": ApiAvailableRatingCredit,
     "ApiBlockItem": ApiBlockItem,
+    "ApiBlockedProfile": ApiBlockedProfile,
     "ApiBlocksPage": ApiBlocksPage,
     "ApiBulkRateRequest": ApiBulkRateRequest,
     "ApiBulkRateResponse": ApiBulkRateResponse,
@@ -1632,6 +1693,22 @@ let typeMap: {[index: string]: any} = {
     "ApiConsolidatedTdh": ApiConsolidatedTdh,
     "ApiConsolidatedTdhMetrics": ApiConsolidatedTdhMetrics,
     "ApiConsolidatedTdhMetricsPage": ApiConsolidatedTdhMetricsPage,
+    "ApiContentModerationAuditEntry": ApiContentModerationAuditEntry,
+    "ApiContentModerationDropDecisionRequest": ApiContentModerationDropDecisionRequest,
+    "ApiContentModerationDropDecisionResponse": ApiContentModerationDropDecisionResponse,
+    "ApiContentModerationProfileListItem": ApiContentModerationProfileListItem,
+    "ApiContentModerationProfileStatusRequest": ApiContentModerationProfileStatusRequest,
+    "ApiContentModerationProfileStatusResponse": ApiContentModerationProfileStatusResponse,
+    "ApiContentModerationQueueItem": ApiContentModerationQueueItem,
+    "ApiContentModerationReportRequest": ApiContentModerationReportRequest,
+    "ApiContentModerationReportResponse": ApiContentModerationReportResponse,
+    "ApiContentModerationReportWithdrawalResponse": ApiContentModerationReportWithdrawalResponse,
+    "ApiContentModerationReportedAttachment": ApiContentModerationReportedAttachment,
+    "ApiContentModerationReportedContent": ApiContentModerationReportedContent,
+    "ApiContentModerationReportedContentPart": ApiContentModerationReportedContentPart,
+    "ApiContentModerationReportedMedia": ApiContentModerationReportedMedia,
+    "ApiContentModerationUserReport": ApiContentModerationUserReport,
+    "ApiContentModeratorAccess": ApiContentModeratorAccess,
     "ApiCreateAttachmentMultipartUploadRequest": ApiCreateAttachmentMultipartUploadRequest,
     "ApiCreateAttachmentMultipartUploadResponse": ApiCreateAttachmentMultipartUploadResponse,
     "ApiCreateConnectionShareRequest": ApiCreateConnectionShareRequest,
@@ -1678,6 +1755,7 @@ let typeMap: {[index: string]: any} = {
     "ApiDecentralizedMediaResolution": ApiDecentralizedMediaResolution,
     "ApiDeleteEulaConsentRequest": ApiDeleteEulaConsentRequest,
     "ApiDeleteEulaConsentResponse": ApiDeleteEulaConsentResponse,
+    "ApiDeleteMyWaveChatHistoryResponse": ApiDeleteMyWaveChatHistoryResponse,
     "ApiDistributionAirdropsCsvUploadRequest": ApiDistributionAirdropsCsvUploadRequest,
     "ApiDistributionAirdropsUploadResponse": ApiDistributionAirdropsUploadResponse,
     "ApiDmDropsUnreadCount": ApiDmDropsUnreadCount,
@@ -1693,12 +1771,14 @@ let typeMap: {[index: string]: any} = {
     "ApiDropContextProfileContext": ApiDropContextProfileContext,
     "ApiDropCuration": ApiDropCuration,
     "ApiDropCurationRequest": ApiDropCurationRequest,
+    "ApiDropHiddenState": ApiDropHiddenState,
     "ApiDropId": ApiDropId,
     "ApiDropMedia": ApiDropMedia,
     "ApiDropMentionedUser": ApiDropMentionedUser,
     "ApiDropMetadata": ApiDropMetadata,
     "ApiDropMetadataResponse": ApiDropMetadataResponse,
     "ApiDropMetadataV2": ApiDropMetadataV2,
+    "ApiDropModeration": ApiDropModeration,
     "ApiDropNftLink": ApiDropNftLink,
     "ApiDropPart": ApiDropPart,
     "ApiDropPartQuoteV2": ApiDropPartQuoteV2,
@@ -1722,6 +1802,7 @@ let typeMap: {[index: string]: any} = {
     "ApiDropV2ContextProfileContext": ApiDropV2ContextProfileContext,
     "ApiDropV2Page": ApiDropV2Page,
     "ApiDropV2PageWithoutCount": ApiDropV2PageWithoutCount,
+    "ApiDropViewerModerationContext": ApiDropViewerModerationContext,
     "ApiDropVote": ApiDropVote,
     "ApiDropVoteEditLog": ApiDropVoteEditLog,
     "ApiDropVoter": ApiDropVoter,
@@ -1826,6 +1907,7 @@ let typeMap: {[index: string]: any} = {
     "ApiPageWithNextUriBase": ApiPageWithNextUriBase,
     "ApiPageWithoutCount": ApiPageWithoutCount,
     "ApiPaymentDetails": ApiPaymentDetails,
+    "ApiProfileBlockState": ApiProfileBlockState,
     "ApiProfileCmsAgentPatchValidationResult": ApiProfileCmsAgentPatchValidationResult,
     "ApiProfileCmsAgentPatchValidationResultTarget": ApiProfileCmsAgentPatchValidationResultTarget,
     "ApiProfileCmsAgentSchemaBundle": ApiProfileCmsAgentSchemaBundle,

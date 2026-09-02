@@ -125,6 +125,8 @@ export default function UserPageBrainSidebarMobileStrip({
   const firstCreatedWave = createdState.waves[0];
   const canOpenCreatedWaves =
     createdState.waves.length > 1 || createdState.hasNextPage;
+  const showCreatedSection =
+    createdState.status !== "success" || createdState.waves.length > 0;
 
   return (
     <section
@@ -132,55 +134,59 @@ export default function UserPageBrainSidebarMobileStrip({
         locale,
         "user.brain.sidebar.mobileStripLabel"
       )}
-      className="tw-mb-4 lg:tw-hidden"
+      className="lg:tw-hidden"
       data-testid="brain-sidebar-mobile-strip"
     >
       <div className="tw-flex tw-items-end tw-gap-4 tw-overflow-x-auto tw-overflow-y-hidden tw-pb-1.5 tw-pr-4 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/60 desktop-hover:hover:tw-scrollbar-thumb-iron-500">
-        <div className="tw-flex tw-shrink-0 tw-flex-col tw-gap-2">
-          <span className="tw-px-1 tw-text-[10px] tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
-            {getUserPageBrainSidebarMessage(
-              locale,
-              "user.brain.sidebar.createdMobileHeading"
-            )}
-          </span>
-          <div className="tw-flex tw-items-center tw-gap-2">
-            {firstCreatedWave ? (
-              <UserPageBrainSidebarMobileWavePill wave={firstCreatedWave} />
-            ) : (
-              <MobileSectionState
-                state={createdState}
-                emptyMessageKey="user.brain.sidebar.createdEmpty"
-              />
-            )}
-            {firstCreatedWave && canOpenCreatedWaves && (
-              <button
-                type="button"
-                onClick={onOpenCreatedWaves}
-                className={PILL_BUTTON_CLASS}
-                aria-label={getUserPageBrainSidebarMessage(
+        {showCreatedSection && (
+          <>
+            <div className="tw-flex tw-shrink-0 tw-flex-col tw-gap-2">
+              <span className="tw-px-1 tw-text-[10px] tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
+                {getUserPageBrainSidebarMessage(
                   locale,
-                  "user.brain.sidebar.viewMoreCreatedWaves"
+                  "user.brain.sidebar.createdMobileHeading"
                 )}
-              >
-                <PlusIcon
-                  aria-hidden="true"
-                  className="tw-h-3 tw-w-3 tw-flex-shrink-0"
-                />
-                <span>
-                  {getUserPageBrainSidebarMessage(
-                    locale,
-                    "user.brain.sidebar.more"
-                  )}
-                </span>
-              </button>
-            )}
-          </div>
-        </div>
+              </span>
+              <div className="tw-flex tw-items-center tw-gap-2">
+                {firstCreatedWave ? (
+                  <UserPageBrainSidebarMobileWavePill wave={firstCreatedWave} />
+                ) : (
+                  <MobileSectionState
+                    state={createdState}
+                    emptyMessageKey="user.brain.sidebar.createdEmpty"
+                  />
+                )}
+                {firstCreatedWave && canOpenCreatedWaves && (
+                  <button
+                    type="button"
+                    onClick={onOpenCreatedWaves}
+                    className={PILL_BUTTON_CLASS}
+                    aria-label={getUserPageBrainSidebarMessage(
+                      locale,
+                      "user.brain.sidebar.viewMoreCreatedWaves"
+                    )}
+                  >
+                    <PlusIcon
+                      aria-hidden="true"
+                      className="tw-h-3 tw-w-3 tw-flex-shrink-0"
+                    />
+                    <span>
+                      {getUserPageBrainSidebarMessage(
+                        locale,
+                        "user.brain.sidebar.more"
+                      )}
+                    </span>
+                  </button>
+                )}
+              </div>
+            </div>
 
-        <div
-          aria-hidden="true"
-          className="tw-mb-1 tw-h-11 tw-w-px tw-shrink-0 tw-bg-white/5"
-        />
+            <div
+              aria-hidden="true"
+              className="tw-mb-1 tw-h-11 tw-w-px tw-shrink-0 tw-bg-white/5"
+            />
+          </>
+        )}
 
         <div className="tw-flex tw-shrink-0 tw-flex-col tw-gap-2">
           <span className="tw-px-1 tw-text-[10px] tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">

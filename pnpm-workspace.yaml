@@ -1,5 +1,7 @@
 # 7 days, in minutes.
 minimumReleaseAge: 10080
+minimumReleaseAgeExclude:
+  - "@6529-collections/release-request@0.0.3"
 allowBuilds:
   "@nestjs/core": true
   "@openapitools/openapi-generator-cli": true

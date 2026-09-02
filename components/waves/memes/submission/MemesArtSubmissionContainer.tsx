@@ -2,11 +2,12 @@
 
 import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import useKeyboardFocusScroll from "@/components/waves/create-wave/hooks/useKeyboardFocusScroll";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { FC, ReactNode } from "react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MemesArtSubmissionShell } from "./MemesArtSubmissionShell";
 import { MemesArtSubmissionStepContent } from "./MemesArtSubmissionStepContent";
 import { ResubmitAcknowledgement } from "./ResubmitAcknowledgement";
@@ -42,6 +43,9 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
   sourceDrop,
   onSourceDropDeleted,
 }) => {
+  const keyboardFocusContainerRef = useRef<HTMLDivElement>(null);
+  useKeyboardFocusScroll(keyboardFocusContainerRef);
+
   const initialDraft = useMemo(
     () =>
       sourceDrop ? buildMemesSubmissionDraftFromDrop(sourceDrop) : undefined,
@@ -297,17 +301,19 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
   }
 
   return (
-    <MemesArtSubmissionShell
-      title={
-        isResubmission
-          ? "Resubmit Work to The Memes"
-          : "Submit Work to The Memes"
-      }
-      description={shellDescription}
-      onClose={onClose}
-    >
-      {submissionContent}
-    </MemesArtSubmissionShell>
+    <div ref={keyboardFocusContainerRef} className="tw-h-full tw-min-h-0">
+      <MemesArtSubmissionShell
+        title={
+          isResubmission
+            ? "Resubmit Work to The Memes"
+            : "Submit Work to The Memes"
+        }
+        description={shellDescription}
+        onClose={onClose}
+      >
+        {submissionContent}
+      </MemesArtSubmissionShell>
+    </div>
   );
 };
 

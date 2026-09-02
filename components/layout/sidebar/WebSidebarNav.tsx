@@ -5,6 +5,7 @@ import { useAuth } from "@/components/auth/Auth";
 import ChatBubbleIcon from "@/components/common/icons/ChatBubbleIcon";
 import DropForgeIcon from "@/components/common/icons/DropForgeIcon";
 import Join6529Icon from "@/components/common/icons/Join6529Icon";
+import WatchTowerIcon from "@/components/common/icons/WatchTowerIcon";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import {
   DROP_FORGE_PATH,
@@ -13,6 +14,7 @@ import {
 import type { SidebarSection } from "@/components/navigation/navTypes";
 import useCapacitor from "@/hooks/useCapacitor";
 import { useDropForgePermissions } from "@/hooks/useDropForgePermissions";
+import { useContentModeratorAccess } from "@/hooks/content-moderation/useContentModeratorAccess";
 import { useSectionMap, useSidebarSections } from "@/hooks/useSidebarSections";
 import { useUnreadIndicator } from "@/hooks/useUnreadIndicator";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
@@ -58,6 +60,10 @@ const WebSidebarNav = React.forwardRef<
   const { connectedProfile } = useAuth();
   const { appWalletsSupported } = useAppWallets();
   const { canAccessLanding: showDropForge } = useDropForgePermissions();
+  const moderatorAccess = useContentModeratorAccess();
+  const showModeration = moderatorAccess.data?.moderator === true;
+  const hasOpenModerationReports =
+    moderatorAccess.data?.has_open_reports === true;
   const { hasUnread: hasUnreadMessages } = useUnreadIndicator({
     type: "messages",
     handle: connectedProfile?.handle ?? null,
@@ -461,6 +467,26 @@ const WebSidebarNav = React.forwardRef<
               }
               collapsed={isCollapsed}
               label={DROP_FORGE_TITLE}
+            />
+          </li>
+        )}
+
+        {showModeration && (
+          <li>
+            <WebSidebarNavItem
+              href="/content-moderation"
+              icon={WatchTowerIcon}
+              active={
+                safePathname === "/content-moderation" ||
+                safePathname.startsWith("/content-moderation/")
+              }
+              collapsed={isCollapsed}
+              label={t(DEFAULT_LOCALE, "contentModeration.moderator.menu")}
+              hasIndicator={hasOpenModerationReports}
+              indicatorLabel={t(
+                DEFAULT_LOCALE,
+                "contentModeration.moderator.openReportsIndicator"
+              )}
             />
           </li>
         )}

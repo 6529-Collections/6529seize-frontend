@@ -44,7 +44,7 @@ const BrainLeftSidebarWaveDropTime: React.FC<
 
   const label = getTimeAgoShort(time, now);
 
-  return <span className="tw-text-iron-300">{label}</span>;
+  return <span>{label}</span>;
 };
 
 export default BrainLeftSidebarWaveDropTime;

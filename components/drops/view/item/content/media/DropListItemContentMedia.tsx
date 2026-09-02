@@ -108,6 +108,7 @@ export default function DropListItemContentMedia({
           fillContainer={fillVideoContainer}
           align={videoAlign}
           showFullscreen={showVideoFullscreen}
+          loadStrategy={loadStrategy}
         />
       );
     case MediaType.AUDIO:

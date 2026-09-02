@@ -1,6 +1,7 @@
 import * as Sentry from "@sentry/nextjs";
 import { act, renderHook } from "@testing-library/react";
 import { useWaveAbortController } from "@/contexts/wave/hooks/useWaveAbortController";
+import { PROFILE_SWITCHED_EVENT } from "@/services/auth/auth.utils";
 
 jest.mock("@sentry/nextjs", () => ({
   addBreadcrumb: jest.fn(),
@@ -127,5 +128,25 @@ describe("useWaveAbortController", () => {
       });
     }).not.toThrow();
     expect(abortSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it("aborts old-profile requests when the active profile changes", () => {
+    const { result } = renderHook(() => useWaveAbortController("feed"));
+    const controller = result.current.createController("w1");
+    const abortSpy = jest.spyOn(controller, "abort");
+
+    act(() => {
+      globalThis.dispatchEvent(new CustomEvent(PROFILE_SWITCHED_EVENT));
+    });
+
+    expect(abortSpy).toHaveBeenCalledTimes(1);
+    expect(addBreadcrumbMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: {
+          request_kind: "initial_visible",
+          trigger: "profile_switched",
+        },
+      })
+    );
   });
 });
