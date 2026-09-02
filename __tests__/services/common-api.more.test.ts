@@ -3,6 +3,8 @@ import {
   commonApiDeleteWithBody,
   commonApiDeleteWithResponse,
   commonApiPut,
+  getStructuredApiErrorCode,
+  getStructuredApiErrorStatus,
 } from "@/services/api/common-api";
 import { getAuthJwt, getStagingAuth } from "@/services/auth/auth.utils";
 
@@ -18,6 +20,33 @@ beforeEach(() => {
 });
 
 describe("commonApi utility methods", () => {
+  it("reads status only from a structured API error shape", () => {
+    expect(getStructuredApiErrorStatus({ status: 422 })).toBe(422);
+    expect(getStructuredApiErrorStatus(new Error("422 in message"))).toBe(
+      undefined
+    );
+    expect(getStructuredApiErrorStatus({ status: "422" })).toBeUndefined();
+  });
+
+  it("reads a code only from a structured API error response body", () => {
+    expect(
+      getStructuredApiErrorCode({
+        response: {
+          body: JSON.stringify({ code: "CONTENT_MODERATION_REJECTED" }),
+        },
+      })
+    ).toBe("CONTENT_MODERATION_REJECTED");
+    expect(
+      getStructuredApiErrorCode({
+        response: { body: { code: "CONTENT_MODERATION_REJECTED" } },
+      })
+    ).toBe("CONTENT_MODERATION_REJECTED");
+    expect(
+      getStructuredApiErrorCode({ response: { body: "not-json" } })
+    ).toBeUndefined();
+    expect(getStructuredApiErrorCode({ status: 422 })).toBeUndefined();
+  });
+
   it("commonApiPut posts JSON body", async () => {
     (global.fetch as jest.Mock).mockResolvedValue({
       ok: true,
@@ -63,6 +92,30 @@ describe("commonApi utility methods", () => {
           Authorization: "Bearer jwt",
         },
         body: JSON.stringify({ a: 1 }),
+      }
+    );
+  });
+
+  it("commonApiDeleteWithResponse parses a DELETE response without a body", async () => {
+    (globalThis.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({ status: "WITHDRAWN" }),
+      headers: new Headers({ "content-type": "application/json" }),
+    });
+
+    await expect(
+      commonApiDeleteWithResponse({ endpoint: "report" })
+    ).resolves.toEqual({ status: "WITHDRAWN" });
+    expect(globalThis.fetch).toHaveBeenCalledWith(
+      "https://api.test.6529.io/api/report",
+      {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          "x-6529-auth": "stage",
+          Authorization: "Bearer jwt",
+        },
       }
     );
   });

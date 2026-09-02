@@ -500,6 +500,7 @@ it("keeps the overlaid score inside the wave link and opens details on hover", a
     "tw-size-8",
     "tw-cursor-pointer"
   );
+  expect(waveLink.closest(".tw-pt-1")).not.toBeNull();
   const scoreBadgeText = screen.getByText("93", { selector: "text" });
   const scoreBadge = scoreBadgeText.closest("span");
   expect(scoreBadgeText).toBeInTheDocument();
@@ -514,6 +515,14 @@ it("keeps the overlaid score inside the wave link and opens details on hover", a
   );
   expect(scoreBadgeText.closest("svg")).toHaveClass("tw-h-5");
   expect(scoreBadgeText.closest("svg")).toHaveClass("tw-w-6");
+  const scoreBadgePaths = scoreBadgeText
+    .closest("svg")
+    ?.querySelectorAll("path");
+  expect(scoreBadgePaths).toHaveLength(1);
+  expect(scoreBadgePaths?.[0]).toHaveClass(
+    "tw-fill-iron-900",
+    "tw-stroke-white/25"
+  );
   fireEvent.click(scoreBadgeText);
   expect(
     screen.queryByRole("dialog", { name: "Wave score details" })

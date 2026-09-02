@@ -11,6 +11,7 @@ import { useState } from "react";
 import WaveRepRatingModal from "./WaveRepRatingModal";
 
 const WAVE_REP_ACTION_LOCALE = DEFAULT_LOCALE;
+const WAVE_REP_BUTTON_BORDER_CLASSES = "!tw-border-iron-700";
 const formatCompactRep = (value: number): string =>
   formatNumber(WAVE_REP_ACTION_LOCALE, value, {
     notation: "compact",
@@ -52,8 +53,8 @@ export default function WaveRepButton({
         size={variant === "compact" ? null : "sm"}
         className={
           variant === "compact"
-            ? "tw-h-7 tw-rounded-md tw-px-2 tw-text-[11px] tw-leading-4"
-            : undefined
+            ? `${WAVE_REP_BUTTON_BORDER_CLASSES} tw-h-7 tw-rounded-md tw-px-2 tw-text-[11px] tw-leading-4`
+            : WAVE_REP_BUTTON_BORDER_CLASSES
         }
       >
         <ScaleIcon

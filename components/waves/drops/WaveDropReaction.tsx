@@ -251,15 +251,17 @@ function WaveDropReaction({
   const isEligibleToChat =
     waveEligibility?.authenticated_user_eligible_to_chat ??
     drop.wave.authenticated_user_eligible_to_chat;
-  const isSlowModeOnlyBlock =
+  const isChatOnlyRestriction =
     isEligibleToChat === false &&
-    waveEligibility?.authenticated_user_chat_restriction ===
-      ChatRestriction.SLOW_MODE;
+    (waveEligibility?.authenticated_user_chat_restriction ===
+      ChatRestriction.SLOW_MODE ||
+      waveEligibility?.authenticated_user_chat_restriction ===
+        ChatRestriction.NO_PERMISSION);
   const canReact =
     !isRecoveryPending &&
     Boolean(connectedProfile?.handle) &&
     !activeProfileProxy &&
-    (isEligibleToChat !== false || isSlowModeOnlyBlock);
+    (isEligibleToChat !== false || isChatOnlyRestriction);
   const updateEligibilityAfterExpectedDisabledReaction = useCallback(
     (error: unknown, method: "DELETE" | "POST") => {
       if (
@@ -275,6 +277,7 @@ function WaveDropReaction({
 
       updateEligibility(drop.wave.id, {
         authenticated_user_eligible_to_chat: false,
+        authenticated_user_chat_restriction: ChatRestriction.DISABLED,
       });
     },
     [drop.id, drop.wave.id, updateEligibility]

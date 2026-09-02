@@ -5,6 +5,7 @@ import WaveDropActionsAddReaction from "@/components/waves/drops/WaveDropActions
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import { ApiDropType } from "@/generated/models/ApiDropType";
+import { ChatRestriction } from "@/hooks/useDropPriviledges";
 import * as commonApi from "@/services/api/common-api";
 
 const applyOptimisticDropUpdateMock = jest.fn(() => ({ rollback: jest.fn() }));
@@ -180,9 +181,10 @@ describe("WaveDropActionsAddReaction", () => {
     expect(button).toBeDisabled();
   });
 
-  it("disables the picker when the current wave capability is disabled", () => {
+  it("disables the picker when chat and reactions are disabled for the wave", () => {
     mockGetEligibility.mockReturnValue({
       authenticated_user_eligible_to_chat: false,
+      authenticated_user_chat_restriction: ChatRestriction.DISABLED,
     });
 
     renderWithQueryClient(<WaveDropActionsAddReaction drop={mockDrop} />);
@@ -192,6 +194,20 @@ describe("WaveDropActionsAddReaction", () => {
     fireEvent.click(button);
     expect(screen.queryByTestId("mock-picker")).not.toBeInTheDocument();
     expect(commonApi.commonApiPost).not.toHaveBeenCalled();
+  });
+
+  it("keeps the picker enabled when the viewer lacks chat-group permission", async () => {
+    mockGetEligibility.mockReturnValue({
+      authenticated_user_eligible_to_chat: false,
+      authenticated_user_chat_restriction: ChatRestriction.NO_PERMISSION,
+    });
+
+    renderWithQueryClient(<WaveDropActionsAddReaction drop={mockDrop} />);
+    const button = screen.getByRole("button", { name: /add reaction/i });
+
+    expect(button).toBeEnabled();
+    fireEvent.click(button);
+    expect(await screen.findByTestId("mock-picker")).toBeInTheDocument();
   });
 
   it("opens and closes picker on desktop button click", async () => {

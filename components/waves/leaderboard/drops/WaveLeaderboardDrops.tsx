@@ -124,7 +124,7 @@ export const WaveLeaderboardDrops: React.FC<WaveLeaderboardDropsProps> = ({
         estimatedRowHeight={
           usesCompactRows ? PROPOSAL_CARD_ROW_ESTIMATE_PX : undefined
         }
-        measureLoadedRowsAtNaturalHeight={usesCompactRows}
+        measureLoadedRowsAtNaturalHeight
         renderItem={(drop) => (
           <WaveLeaderboardDrop
             drop={drop}

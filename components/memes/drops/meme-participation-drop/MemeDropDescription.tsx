@@ -7,7 +7,7 @@ export default function MemeDropDescription({
 }: MemeDropDescriptionProps) {
   return (
     <div>
-      <p className="tw-mb-0 tw-whitespace-pre-line tw-text-md tw-text-iron-400">
+      <p className="tw-mb-0 tw-mt-2 tw-whitespace-pre-line tw-text-body tw-font-normal tw-text-iron-300">
         {description}
       </p>
     </div>

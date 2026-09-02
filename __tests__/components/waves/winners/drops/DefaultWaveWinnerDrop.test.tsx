@@ -46,6 +46,21 @@ jest.mock("@/components/waves/winners/identity/WaveWinnerIdentity", () => ({
 jest.mock("@/components/waves/drops/WaveDropActionsOpen", () => () => (
   <div data-testid="actions" />
 ));
+jest.mock("@/components/waves/drops/WaveDropActionsMore", () => ({
+  __esModule: true,
+  default: () => <div data-testid="actions" />,
+}));
+jest.mock(
+  "@/components/content-moderation/ContentModerationDropActions",
+  () => ({
+    __esModule: true,
+    default: () => null,
+  })
+);
+jest.mock("@/components/content-moderation/ReportDropModal", () => ({
+  __esModule: true,
+  default: () => null,
+}));
 jest.mock("@/components/waves/drops/WaveDropMobileMenuOpen", () => ({
   __esModule: true,
   default: (props: { onOpenChange: () => void }) => (
@@ -159,11 +174,7 @@ describe("DefaultWaveWinnerDrop", () => {
     const identityRow = contentColumn?.parentElement;
 
     expect(contentColumn).toHaveClass("tw-gap-y-2");
-    expect(identityRow).toHaveClass(
-      "tw-items-start",
-      "tw-gap-x-3",
-      "tw-pb-3"
-    );
+    expect(identityRow).toHaveClass("tw-items-start", "tw-gap-x-3", "tw-pb-3");
   });
 
   it("keeps native tap behavior for touch long-press handlers", () => {

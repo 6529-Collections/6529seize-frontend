@@ -457,7 +457,6 @@
     "__tests__/components/user/user-page-header/name/UserPageHeaderEditName.test.tsx": 3,
     "__tests__/components/user/user-page-header/name/UserPageHeaderName.test.tsx": 1,
     "__tests__/components/user/user-page-header/stats/UserPageHeaderStats.test.tsx": 1,
-    "__tests__/components/user/user-page-header/UserPageHeader.test.tsx": 1,
     "__tests__/components/user/utils/CommonProfileLink.test.tsx": 1,
     "__tests__/components/user/utils/icons/ArtBlocksIcon.test.tsx": 1,
     "__tests__/components/user/utils/icons/FacebookIcon.test.tsx": 1,

@@ -13,11 +13,15 @@
 
 import { ApiAttachment } from '../models/ApiAttachment';
 import { ApiDropMedia } from '../models/ApiDropMedia';
+import { ApiDropModeration } from '../models/ApiDropModeration';
 import { ApiDropPartQuoteV2 } from '../models/ApiDropPartQuoteV2';
+import { ApiDropViewerModerationContext } from '../models/ApiDropViewerModerationContext';
 import { HttpFile } from '../http/http';
 
 export class ApiDropPartV2 {
     'part_no': number;
+    'viewer_context'?: ApiDropViewerModerationContext;
+    'moderation'?: ApiDropModeration;
     'content'?: string;
     'media'?: Array<ApiDropMedia>;
     'attachments'?: Array<ApiAttachment>;
@@ -33,6 +37,18 @@ export class ApiDropPartV2 {
             "baseName": "part_no",
             "type": "number",
             "format": "int64"
+        },
+        {
+            "name": "viewer_context",
+            "baseName": "viewer_context",
+            "type": "ApiDropViewerModerationContext",
+            "format": ""
+        },
+        {
+            "name": "moderation",
+            "baseName": "moderation",
+            "type": "ApiDropModeration",
+            "format": ""
         },
         {
             "name": "content",

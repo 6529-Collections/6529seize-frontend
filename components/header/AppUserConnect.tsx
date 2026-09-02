@@ -2,12 +2,12 @@ import {
   faPlugCircleMinus,
   faPlugCirclePlus,
   faPlugCircleXmark,
+  faSliders,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   ArrowPathRoundedSquareIcon,
   ArrowRightEndOnRectangleIcon,
-  Cog6ToothIcon,
 } from "@heroicons/react/24/outline";
 import BellIcon from "@/components/common/icons/BellIcon";
 import { useContext, useState } from "react";
@@ -15,11 +15,11 @@ import { AuthContext } from "../auth/Auth";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import Button from "../utils/button/Button";
 import PushNotificationSettings from "./PushNotificationSettings";
-import ProfilePreferencesSettings from "./ProfilePreferencesSettings";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import HeaderQRScanner from "./share/HeaderQRScanner";
 import { useChainSwitcher } from "./useChainSwitcher";
+import Link from "next/link";
 
 export default function AppUserConnect({
   onNavigate,
@@ -38,7 +38,6 @@ export default function AppUserConnect({
   const { setToast } = useContext(AuthContext);
   const locale = useBrowserLocale();
   const [isPushSettingsOpen, setIsPushSettingsOpen] = useState(false);
-  const [isProfileSettingsOpen, setIsProfileSettingsOpen] = useState(false);
   const { chains, currentChainName, nextChainName, switchToNextChain } =
     useChainSwitcher();
   const availableConnectedAccounts = connectedAccounts ?? [];
@@ -132,14 +131,18 @@ export default function AppUserConnect({
 
   const authorizedButtons = (
     <>
-      <button
-        onClick={() => setIsProfileSettingsOpen(true)}
-        className="tw-flex tw-w-full tw-items-center tw-space-x-4 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-4 tw-py-3.5 tw-text-base tw-font-semibold tw-text-iron-300 tw-transition-colors tw-duration-200 active:tw-bg-iron-700 active:tw-text-iron-200"
-        aria-label={t(locale, "profilePreferences.title")}
+      <Link
+        href="/preferences"
+        onClick={onNavigate}
+        className="tw-flex tw-w-full tw-items-center tw-space-x-4 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-4 tw-py-3.5 tw-text-base tw-font-semibold tw-text-iron-300 tw-no-underline tw-transition-colors tw-duration-200 active:tw-bg-iron-700 active:tw-text-iron-200"
+        aria-label={t(locale, "profilePreferences.button")}
       >
-        <Cog6ToothIcon className="tw-h-6 tw-w-6 tw-flex-shrink-0" />
-        <span>{t(locale, "profilePreferences.title")}</span>
-      </button>
+        <FontAwesomeIcon
+          icon={faSliders}
+          className="tw-h-6 tw-w-6 tw-flex-shrink-0"
+        />
+        <span>{t(locale, "profilePreferences.button")}</span>
+      </Link>
       <button
         type="button"
         onClick={() => setIsPushSettingsOpen(true)}
@@ -199,10 +202,6 @@ export default function AppUserConnect({
       <PushNotificationSettings
         isOpen={isPushSettingsOpen}
         onClose={() => setIsPushSettingsOpen(false)}
-      />
-      <ProfilePreferencesSettings
-        isOpen={isProfileSettingsOpen}
-        onClose={() => setIsProfileSettingsOpen(false)}
       />
     </>
   );

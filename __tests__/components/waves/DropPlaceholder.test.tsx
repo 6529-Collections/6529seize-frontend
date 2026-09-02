@@ -6,6 +6,45 @@ import {
 import { render, screen } from "@testing-library/react";
 
 describe("DropPlaceholder", () => {
+  it("renders the posting access loading placeholder", () => {
+    render(<DropPlaceholder type="profile-check" />);
+
+    const status = screen.getByRole("status");
+    expect(status).toHaveTextContent("Checking posting access…");
+    expect(status).toHaveAttribute("aria-busy", "true");
+    expect(status).toHaveClass(
+      "tw-min-h-11",
+      "tw-grid-cols-[auto_minmax(0,1fr)_auto]"
+    );
+    expect(screen.getByTestId("posting-access-skeleton")).toBe(status);
+    const skeletonParts = status.querySelectorAll(
+      '[data-wave-composer-skeleton-part="true"]'
+    );
+    expect(skeletonParts).toHaveLength(3);
+    skeletonParts.forEach((part) => {
+      expect(part.className).toContain("shimmer");
+      expect(part).toHaveClass("motion-reduce:tw-animate-none");
+    });
+    expect(screen.getByText("Checking posting access…")).toHaveClass(
+      "tw-sr-only"
+    );
+  });
+
+  it("renders the suspended profile placeholder", () => {
+    render(<DropPlaceholder type="suspended" />);
+
+    const status = screen.getByRole("status");
+    expect(status).toHaveTextContent(
+      "Profile suspended· Posting disabled. Contact support if this is an error."
+    );
+    expect(screen.getByText("Profile suspended")).toHaveClass(
+      "tw-text-amber-300"
+    );
+    expect(screen.getByText(/Posting disabled\. Contact support/)).toHaveClass(
+      "tw-text-iron-400"
+    );
+  });
+
   describe("chat restrictions", () => {
     it("renders not logged in message for chat", () => {
       render(
@@ -267,7 +306,7 @@ describe("DropPlaceholder", () => {
       expect(
         screen.getByText(
           (_content, element) =>
-            element?.tagName.toLowerCase() === "p" &&
+            element?.tagName.toLowerCase() === "output" &&
             element.textContent ===
               "Create a profile to participate in this wave"
         )
