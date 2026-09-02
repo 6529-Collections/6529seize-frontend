@@ -61,6 +61,19 @@ const COLLAPSED_SUBWAVE_TOGGLE_ROW_HEIGHT = 42 as const;
 const VIRTUALIZATION_OVERSCAN = 5 as const; // Number of extra items to render outside viewport
 const SIDEBAR_LOCALE = DEFAULT_LOCALE;
 
+const APP_SECTION_DIVIDER_STYLES = {
+  colorClass: "tw-border-iron-800",
+  firstSpacingClass: "tw-my-3",
+} as const;
+
+const DESKTOP_SECTION_DIVIDER_STYLES = {
+  colorClass: "tw-border-iron-700",
+  firstSpacingClass: "tw-mb-1 tw-mt-2",
+} as const;
+
+const getSectionDividerStyles = (isApp: boolean) =>
+  isApp ? APP_SECTION_DIVIDER_STYLES : DESKTOP_SECTION_DIVIDER_STYLES;
+
 // Common styles for positioned elements
 const listContainerStyle = {
   position: "relative",
@@ -177,12 +190,10 @@ const UnifiedWavesListWaves = forwardRef<
       set: setActiveWave,
     } = activeWave;
     const { isApp, hasTouchScreen } = useDeviceInfo();
-    const sectionDividerColorClass = isApp
-      ? "tw-border-iron-800"
-      : "tw-border-iron-700";
-    const firstSectionDividerSpacingClass = isApp
-      ? "tw-my-3"
-      : "tw-mb-1 tw-mt-2";
+    const {
+      colorClass: sectionDividerColorClass,
+      firstSpacingClass: firstSectionDividerSpacingClass,
+    } = getSectionDividerStyles(isApp);
     const prefetchWaveData = usePrefetchWaveData();
     // Persisted-hint fallback so the active subwave expands/highlights
     // immediately after a cold reload (see useActiveSubwaveParentHint).
