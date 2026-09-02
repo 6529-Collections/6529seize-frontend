@@ -263,7 +263,7 @@
     "zod": "3.25.76"
   },
   "devDependencies": {
-    "@6529-collections/release-request": "0.0.1",
+    "@6529-collections/release-request": "0.0.2",
     "@axe-core/playwright": "4.12.1",
     "@jest/globals": "30.4.1",
     "@openapitools/openapi-generator-cli": "2.31.1",
