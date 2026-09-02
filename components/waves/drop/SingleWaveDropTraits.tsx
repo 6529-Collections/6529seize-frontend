@@ -538,7 +538,7 @@ const SingleWaveDropTraitsContent: React.FC<
             variant="tertiary"
             size="xs"
             fullWidth
-            className={`tw-min-w-[100px] ${
+            className={`tw-min-w-[100px] tw-self-end ${
               isCompactLayout ? "tw-min-h-11" : ""
             }`}
             aria-expanded={showAllTraits}
