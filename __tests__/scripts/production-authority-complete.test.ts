@@ -223,6 +223,8 @@ describe("one-click production authority completion", () => {
     );
     expect(complete.if).toContain("steps.proof.outcome == 'success'");
     expect(fail.if).toContain("steps.proof.outcome == 'success'");
+    expect(complete.if).toContain("inputs.mode != 'authorization-check'");
+    expect(fail.if).toContain("inputs.mode != 'authorization-check'");
     expect(reportAuthorization.run).not.toContain("RELEASE_BUS_API_URL");
     expect(reportAuthorization.run).not.toContain("production-authority/");
   });

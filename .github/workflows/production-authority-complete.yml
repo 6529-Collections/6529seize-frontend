@@ -737,7 +737,7 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
       - name: Complete exact production authority
-        if: always() && steps.proof.outcome == 'success' && steps.proof.outputs.action == 'complete'
+        if: always() && inputs.mode != 'authorization-check' && steps.proof.outcome == 'success' && steps.proof.outputs.action == 'complete'
         env:
           EVIDENCE_DIGEST: ${{ steps.proof.outputs.evidence_digest }}
           E2E_RUN_ID: ${{ steps.proof.outputs.e2e_run_id }}
@@ -794,7 +794,7 @@ jobs:
             "$response_file" >/dev/null
 
       - name: Fail exact production authority after E2E failure
-        if: always() && steps.proof.outcome == 'success' && steps.proof.outputs.action == 'fail'
+        if: always() && inputs.mode != 'authorization-check' && steps.proof.outcome == 'success' && steps.proof.outputs.action == 'fail'
         env:
           QUALIFIER_WORKFLOW_RUN_ID: ${{ steps.proof.outputs.qualifier_workflow_run_id }}
           QUALIFIER_WORKFLOW_RUN_ATTEMPT: ${{ steps.proof.outputs.qualifier_workflow_run_attempt }}
