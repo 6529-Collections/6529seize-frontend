@@ -112,8 +112,9 @@ poll a GitHub workflow separately.
 Treat the result as observation only:
 
 - On success, report and retain the returned `request_id`,
-  `workflow_run_url`, `run_path`, and `request_path`, then continue the existing
-  Release Bus or manual-fallback route unchanged.
+  `workflow_run_url`, `inbox_issue_number`, `inbox_issue_url`, `run_path`, and
+  `request_path`, then continue the existing Release Bus or manual-fallback
+  route unchanged.
 - On failure, report one short observation warning with the returned reason or
   first error and any available `run_path`, `request_path`, or
   `workflow_run_url`. Keep the local evidence, do not ask the developer to fix
@@ -121,8 +122,8 @@ Treat the result as observation only:
 
 A returned success or failure never gates, replaces, reorders, or weakens any
 candidate, merge, readiness, deployment, E2E, or recovery step below. Version
-`0.0.2` only validates and logs the request through the central workflow;
-there is no Coordinator inbox yet. The request and workflow result grant no
+`0.0.3` validates and saves the request through the central workflow as a
+private Coordinator inbox Issue. The request and workflow result grant no
 deployment authority and are not Release Bus inputs.
 
 ## V2 readiness
@@ -247,8 +248,9 @@ manifest-bound E2E. V2 never publishes release notes.
 ## Closeout
 
 For a release with request observation, report its outcome. On success include
-`request_id`, `workflow_run_url`, `request_path`, and `run_path`; on failure
-include the short observation warning and available local or workflow evidence.
+`request_id`, `workflow_run_url`, `inbox_issue_number`, `inbox_issue_url`,
+`request_path`, and `run_path`; on failure include the short observation warning
+and available local or workflow evidence.
 Also report exact candidate SHAs/dependencies, train and operation states,
 deployed versions, manifest/E2E evidence, failures or holds, and both effective
 lane states. Do not expose credentials, signed URLs, raw production data, or

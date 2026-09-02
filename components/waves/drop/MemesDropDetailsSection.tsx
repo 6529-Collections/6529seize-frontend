@@ -49,14 +49,16 @@ export function MemesDropDetailsSection({
 
         {hasDownloads ? (
           <div className="tw-mt-8 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-8">
-            <div className="tw-inline-grid tw-grid-cols-[auto_auto_auto] tw-items-center tw-gap-x-3 tw-gap-y-2">
+            <div className="tw-inline-grid tw-grid-cols-[auto_auto] tw-items-center tw-gap-x-3 tw-gap-y-2">
               {artworkMedia && fileInfo && (
                 <>
-                  <span className="tw-text-xs tw-font-medium tw-text-iron-600">
-                    Media Type:
-                  </span>
-                  <span className="tw-text-xs tw-font-medium tw-text-iron-400">
-                    {fileInfo.extension.toUpperCase()}
+                  <span className="tw-inline-flex tw-items-baseline tw-gap-x-1.5">
+                    <span className="tw-text-xs tw-font-medium tw-text-iron-600">
+                      Media Type:
+                    </span>
+                    <span className="tw-text-xs tw-font-medium tw-text-iron-400">
+                      {fileInfo.extension.toUpperCase()}
+                    </span>
                   </span>
                   <Download
                     href={artworkMedia.url}
@@ -69,11 +71,13 @@ export function MemesDropDetailsSection({
               )}
               {previewImageData && (
                 <>
-                  <span className="tw-text-xs tw-font-medium tw-text-iron-600">
-                    Preview:
-                  </span>
-                  <span className="tw-text-xs tw-font-medium tw-text-iron-400">
-                    {previewImageData.fileInfo.extension.toUpperCase()}
+                  <span className="tw-inline-flex tw-items-baseline tw-gap-x-1.5">
+                    <span className="tw-text-xs tw-font-medium tw-text-iron-600">
+                      Preview:
+                    </span>
+                    <span className="tw-text-xs tw-font-medium tw-text-iron-400">
+                      {previewImageData.fileInfo.extension.toUpperCase()}
+                    </span>
                   </span>
                   <Download
                     href={previewImageData.url}
@@ -86,11 +90,13 @@ export function MemesDropDetailsSection({
               )}
               {promoVideoData && (
                 <>
-                  <span className="tw-text-xs tw-font-medium tw-text-iron-600">
-                    Promo Video:
-                  </span>
-                  <span className="tw-text-xs tw-font-medium tw-text-iron-400">
-                    {promoVideoData.fileInfo.extension.toUpperCase()}
+                  <span className="tw-inline-flex tw-items-baseline tw-gap-x-1.5">
+                    <span className="tw-text-xs tw-font-medium tw-text-iron-600">
+                      Promo Video:
+                    </span>
+                    <span className="tw-text-xs tw-font-medium tw-text-iron-400">
+                      {promoVideoData.fileInfo.extension.toUpperCase()}
+                    </span>
                   </span>
                   <Download
                     href={promoVideoData.url}
