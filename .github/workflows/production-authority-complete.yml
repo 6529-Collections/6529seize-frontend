@@ -27,9 +27,9 @@ run-name: Production authority ${{ inputs.mode == 'authorization-check' && 'auth
 jobs:
   complete-production-authority:
     name: ${{ inputs.mode == 'authorization-check' && 'Check maintainer recovery authorization' || 'Complete exact production authority' }}
-    # Manual recovery remains main-only. Authorization-only dispatches may use
-    # another ref but stop before evidence processing or authority mutation.
-    if: (github.event_name == 'workflow_dispatch' && ((inputs.mode == 'recover' && github.ref == 'refs/heads/main') || inputs.mode == 'authorization-check')) || (github.event_name == 'workflow_run' && github.event.workflow_run.head_repository.full_name == github.repository && github.event.workflow_run.head_branch == 'main' && (github.event.workflow_run.path == '.github/workflows/production-e2e.yml' || github.event.workflow_run.path == '.github/workflows/build-upload-deploy-prod.yml')) # NOSONAR
+    # Manual modes are main-only so secret-consuming authorization always uses
+    # the trusted workflow revision. Authorization checks stop before mutation.
+    if: (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_run' && github.event.workflow_run.head_repository.full_name == github.repository && github.event.workflow_run.head_branch == 'main' && (github.event.workflow_run.path == '.github/workflows/production-e2e.yml' || github.event.workflow_run.path == '.github/workflows/build-upload-deploy-prod.yml')) # NOSONAR
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:

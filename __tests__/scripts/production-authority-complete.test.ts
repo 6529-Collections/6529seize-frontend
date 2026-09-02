@@ -83,8 +83,7 @@ describe("one-click production authority completion", () => {
     });
     expect(completionJob.if.replace(/\s+/gu, " ").trim()).toBe(
       "(github.event_name == 'workflow_dispatch' && " +
-        "((inputs.mode == 'recover' && github.ref == 'refs/heads/main') || " +
-        "inputs.mode == 'authorization-check')) || " +
+        "github.ref == 'refs/heads/main') || " +
         "(github.event_name == 'workflow_run' && " +
         "github.event.workflow_run.head_repository.full_name == github.repository && " +
         "github.event.workflow_run.head_branch == 'main' && " +
@@ -204,6 +203,9 @@ describe("one-click production authority completion", () => {
       "recover"
     );
     expect(completionJob.if).toContain(
+      "github.ref == 'refs/heads/main'"
+    );
+    expect(completionJob.if).not.toContain(
       "inputs.mode == 'authorization-check'"
     );
     expect(reportAuthorization.if).toBe(

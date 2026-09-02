@@ -24,10 +24,11 @@ and validated before a body is emitted.
 Manual dispatch of `production-authority-complete.yml` has two modes. The
 default `recover` mode is restricted to `main`, requires the exact terminal
 production workflow run ID, and may complete or fail the matching authority.
-The `authorization-check` mode may run from another ref and stops immediately
+The `authorization-check` mode also runs only from `main` and stops immediately
 after validating the dispatcher; it does not read terminal evidence or call a
-Release Bus production-authority endpoint. Both manual modes require the
-dispatcher to be an active member of the GitHub team
+Release Bus production-authority endpoint. Keeping both modes on `main` ensures
+the secret-consuming membership check uses the trusted workflow revision. Both
+manual modes require the dispatcher to be an active member of the GitHub team
 `6529-Collections/6529seize-maintainers`. The workflow resolves membership at
 run time for the user who started the current attempt, including a rerun,
 rather than maintaining a second list of GitHub usernames. The
