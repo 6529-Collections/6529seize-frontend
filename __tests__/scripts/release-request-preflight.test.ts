@@ -224,7 +224,7 @@ function runObservationHarness(
       ...process.env,
       FAKE_GH_MODE: mode,
       FAKE_GH_STATE_DIR: stateDirectory,
-      PATH: `${fakeBinDirectory}:${process.env.PATH ?? ""}`,
+      PATH: `${fakeBinDirectory}:${process.env["PATH"] ?? ""}`,
       OBSERVATION_PROJECT_DIRECTORY: projectDirectory,
       RELEASE_REQUEST_WRAPPER: wrapperPath,
     },
