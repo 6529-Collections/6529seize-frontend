@@ -1917,6 +1917,47 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiContentModeratorAccess"
+  /content-moderation/block-activity:
+    get:
+      tags:
+        - ContentModeration
+      summary: List profile block activity for authorized moderators.
+      operationId: getContentModerationBlockActivity
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+        - name: before
+          in: query
+          required: false
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 1000
+      responses:
+        "200":
+          description: Block activity ordered from newest to oldest
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiContentModerationBlockActivityItem"
+        "403":
+          description: Moderator access required
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/content-moderation/get-block-activity.handler"
+          name: handleGetContentModerationBlockActivity
   /content-moderation/reports:
     get:
       tags:
@@ -16166,6 +16207,42 @@ components:
           type: object
           nullable: true
           additionalProperties: true
+    ApiContentModerationBlockActivityItem:
+      type: object
+      required:
+        - id
+        - blocker_profile_id
+        - blocker_handle
+        - blocker_pfp
+        - blocked_profile_id
+        - blocked_handle
+        - blocked_pfp
+        - created_at
+        - cursor
+      properties:
+        id:
+          type: string
+        blocker_profile_id:
+          type: string
+        blocker_handle:
+          type: string
+          nullable: true
+        blocker_pfp:
+          type: string
+          nullable: true
+        blocked_profile_id:
+          type: string
+        blocked_handle:
+          type: string
+          nullable: true
+        blocked_pfp:
+          type: string
+          nullable: true
+        created_at:
+          type: integer
+          format: int64
+        cursor:
+          type: string
     ApiContentModerationDropDecisionRequest:
       type: object
       required:
