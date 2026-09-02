@@ -200,6 +200,10 @@ if (command === "run view") {
           },
         ]
       : [],
+    inbox_issue_number: failed ? null : 73,
+    inbox_issue_url: failed
+      ? null
+      : "https://github.com/6529-Collections/6529-release-coordinator/issues/73",
     github: {
       actor: "synthetic-actor",
       actor_id: "12345",
@@ -319,6 +323,9 @@ describe("release-request observation", () => {
     expect(result.stdout).toContain(
       '"workflow_run_url": "https://github.com/6529-Collections/6529-release-coordinator/actions/runs/424242"'
     );
+    expect(result.stdout).toContain(
+      '"inbox_issue_url": "https://github.com/6529-Collections/6529-release-coordinator/issues/73"'
+    );
     const run = readSingleRun(projectDirectory);
     expect(run).toMatchObject({
       status: "succeeded",
@@ -329,6 +336,9 @@ describe("release-request observation", () => {
         workflow_run_id: "424242",
         workflow_run_url:
           "https://github.com/6529-Collections/6529-release-coordinator/actions/runs/424242",
+        inbox_issue_number: 73,
+        inbox_issue_url:
+          "https://github.com/6529-Collections/6529-release-coordinator/issues/73",
         reason: null,
       },
     });
@@ -547,7 +557,7 @@ describe("release-request observation", () => {
     expect(normalizedSkill).toContain(
       "The GitHub actor recorded by the central workflow is the trusted sender identity"
     );
-    expect(normalizedSkill).toContain("there is no Coordinator inbox yet");
+    expect(normalizedSkill).toContain("a private Coordinator inbox Issue");
   });
 
   it("keeps the developer documentation aligned with observation mode", () => {
@@ -583,7 +593,7 @@ describe("release-request observation", () => {
       "The GitHub actor recorded by the central workflow is the trusted sender identity"
     );
     expect(normalizedDocumentation).toContain(
-      "does not send to a Coordinator inbox"
+      "a private Coordinator inbox Issue"
     );
   });
 

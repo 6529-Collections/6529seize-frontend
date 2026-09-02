@@ -135,10 +135,10 @@ and lane toggles. Success is reported with the request ID and workflow URL.
 Failure is reported as a short observation warning with its reason and
 available local run evidence. Neither returned outcome gates, replaces,
 reorders, or weakens the existing release flow, and the developer is not asked
-to repair an observation failure during the release. Version `0.0.2` only
-validates and logs through the central workflow; it does not send to a
-Coordinator inbox, grants no deployment authority, and changes none of the
-release checks or ordering described below.
+to repair an observation failure during the release. Version `0.0.3` validates
+and saves the request through the central workflow as a private Coordinator
+inbox Issue. It grants no deployment authority and changes none of the release
+checks or ordering described below.
 
 ## Dashboard read model
 

@@ -121,8 +121,8 @@ Treat the result as observation only:
 
 A returned success or failure never gates, replaces, reorders, or weakens any
 candidate, merge, readiness, deployment, E2E, or recovery step below. Version
-`0.0.2` only validates and logs the request through the central workflow;
-there is no Coordinator inbox yet. The request and workflow result grant no
+`0.0.3` validates and saves the request through the central workflow as a
+private Coordinator inbox Issue. The request and workflow result grant no
 deployment authority and are not Release Bus inputs.
 
 ## V2 readiness
