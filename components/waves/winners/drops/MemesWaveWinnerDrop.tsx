@@ -194,7 +194,8 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
     winner.drop.context_profile_context.rating !== 0;
   const userVote = winner.drop.context_profile_context?.rating ?? 0;
   const isUserVoteNegative = userVote < 0;
-  const totalVoteClass = rating < 0 ? "tw-text-rose-400" : "tw-text-iron-50";
+  const totalVoteClass =
+    rating < 0 ? "tw-text-rose-400" : "tw-text-iron-100";
   const userVoteClass = isUserVoteNegative
     ? "tw-text-rose-400"
     : "tw-text-iron-50";
@@ -284,14 +285,15 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
           </div>
 
           {/* Title and Description */}
-          <div className="tw-grid tw-grid-cols-[24px_minmax(0,1fr)] tw-gap-x-[8px] tw-gap-y-[5px] tw-px-[13px] tw-pb-[13px] tw-pt-[13px]">
+          <div className="tw-grid tw-grid-cols-[20px_minmax(0,1fr)] tw-gap-x-[8px] tw-gap-y-[5px] tw-px-[13px] tw-pb-[13px] tw-pt-[13px]">
             <MediaTypeBadge
               mimeType={artworkMedia?.mime_type}
               dropId={winner.drop.id}
-              size="sm"
+              size="xs"
+              className="tw-self-start"
             />
             <div className="tw-min-w-0">
-              <div className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-[8px] tw-gap-y-[3px]">
+              <div className="tw-flex tw-min-h-5 tw-flex-wrap tw-items-center tw-gap-x-[8px] tw-gap-y-[3px]">
                 <h3 className="tw-mb-0 tw-mt-0 tw-text-base tw-font-semibold tw-leading-tight tw-text-iron-100">
                   {title}
                 </h3>
@@ -331,20 +333,22 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
           )}
 
           {/* Footer Section: Traits + Vote Summary */}
-          <div className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.05] tw-bg-black/10 tw-px-[13px] tw-py-[13px] lg:tw-space-y-[13px]">
+          <div className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.05] tw-bg-black/10 tw-px-[13px] tw-py-3 lg:tw-space-y-[13px]">
             <MemeDropTraits drop={winner.drop} />
 
-            <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-[13px] tw-gap-y-[8px]">
-              <div className="tw-flex tw-items-center tw-gap-x-[8px] tw-text-sm tw-leading-5">
-                <span className={`tw-font-medium ${totalVoteClass}`}>
+            <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-x-[13px] tw-gap-y-[8px]">
+              <div className="tw-flex tw-items-baseline tw-gap-x-1 tw-leading-5">
+                <span
+                  className={`tw-text-body tw-font-semibold tw-tracking-identity tw-tabular-nums ${totalVoteClass}`}
+                >
                   {formatNumberWithCommas(rating)}
                 </span>
-                <span className="tw-font-normal tw-text-iron-500">
+                <span className="tw-whitespace-nowrap tw-text-label tw-font-medium tw-uppercase tw-tracking-ordinal tw-text-iron-500">
                   {creditType} {WAVE_VOTE_STATS_LABELS.TOTAL}
                 </span>
               </div>
 
-              <div className="tw-flex tw-items-center tw-gap-2 tw-text-sm tw-leading-5">
+              <div className="tw-order-3 tw-ml-auto tw-flex tw-items-center tw-gap-2 tw-text-sm tw-leading-5">
                 {topVoters.length > 0 && (
                   <div className="tw-flex tw-items-center -tw-space-x-2">
                     {topVoters.map((voter) => (
@@ -391,12 +395,13 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                 <ParticipationDropVoteDetailsTrigger
                   drop={winner.drop}
                   density="gallery"
+                  visualVariant="memes"
                 />
               </div>
 
               {/* User's vote */}
               {hasUserVoted && (
-                <div className="tw-flex tw-items-center tw-gap-1.5 tw-text-sm tw-leading-5">
+                <div className="tw-order-2 tw-flex tw-items-center tw-gap-1.5 tw-text-sm tw-leading-5">
                   <div className="tw-flex tw-items-baseline tw-gap-x-1">
                     <span className="tw-font-normal tw-text-iron-400">
                       {WAVE_VOTE_STATS_LABELS.YOUR_VOTES}:

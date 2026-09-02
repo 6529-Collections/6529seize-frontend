@@ -44,6 +44,7 @@ import {
 import MyStreamActionTooltip from "./MyStreamActionTooltip";
 import MyStreamWaveCreateActionsMenu from "./tabs/MyStreamWaveCreateActionsMenu";
 import MyStreamWaveCurationTabMenu from "./tabs/MyStreamWaveCurationTabMenu";
+import MobileTabsScrollControls from "./MobileTabsScrollControls";
 
 interface MyStreamWaveDesktopTabsProps {
   readonly activeTab: MyStreamWaveTab;
@@ -622,10 +623,11 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
 
   return (
     <div className="tw-flex tw-w-full tw-items-center tw-gap-3 tw-px-2 tw-@container/tabs sm:tw-px-4">
-      <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-1 sm:tw-hidden">
+      <div className="tw-relative tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-1 tw-overflow-hidden sm:tw-hidden">
         <div
           ref={mobileTabsScrollerRef}
-          className="tw-min-w-0 tw-flex-1 tw-overflow-x-auto tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 hover:tw-scrollbar-thumb-iron-300"
+          data-wave-tabs-scroll="mobile"
+          className="tw-min-w-0 tw-flex-1 tw-scroll-px-8 tw-overflow-x-auto tw-overscroll-x-contain tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 [touch-action:pan-x] hover:tw-scrollbar-thumb-iron-300"
         >
           <div className="tw-inline-flex tw-items-center tw-gap-1">
             <TabToggle
@@ -643,6 +645,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
             />
           </div>
         </div>
+        <MobileTabsScrollControls scrollerRef={mobileTabsScrollerRef} />
       </div>
       <div
         ref={desktopTabsScrollerRef}
@@ -653,7 +656,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
           collisionDetection={closestCenter}
           onDragEnd={handleCurationDragEnd}
         >
-          <div className="tw-flex tw-w-auto tw-gap-x-1" role="tablist">
+          <div className="tw-flex tw-w-auto tw-gap-x-[13px]" role="tablist">
             {standardOptions.map((option) => (
               <DesktopTabOption
                 key={option.key}

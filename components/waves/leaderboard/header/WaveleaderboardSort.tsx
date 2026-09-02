@@ -170,13 +170,13 @@ export const WaveleaderboardSort: React.FC<WaveleaderboardSortProps> = ({
 }) => {
   const getTabClassName = (value: WaveDropsLeaderboardSort): string => {
     const baseClass =
-      "tw-flex tw-items-center tw-justify-center tw-gap-2 tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-px-3 tw-py-1.5 tw-text-xs tw-font-medium tw-leading-5 tw-transition-all tw-duration-300 tw-ease-out";
+      "tw-flex tw-h-[30px] tw-items-center tw-justify-center tw-gap-2 tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-px-2.5 tw-py-0 tw-text-xs tw-font-medium tw-leading-5 tw-transition-[color,background-color,box-shadow] tw-duration-200 tw-ease-out focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70 focus-visible:tw-ring-offset-1 focus-visible:tw-ring-offset-iron-900 motion-reduce:tw-transition-none";
 
     if (sort === value) {
-      return `${baseClass} tw-bg-iron-800 tw-text-iron-100`;
+      return `${baseClass} tw-bg-iron-800/90 tw-text-iron-50 tw-shadow-sm tw-shadow-black/30 tw-ring-1 tw-ring-inset tw-ring-white/[0.06]`;
     }
 
-    return `${baseClass} tw-bg-iron-950 tw-text-iron-500 hover:tw-bg-iron-900 hover:tw-text-iron-100`;
+    return `${baseClass} tw-border-transparent tw-bg-transparent tw-text-iron-500 desktop-hover:hover:tw-bg-iron-800/50 desktop-hover:hover:tw-text-iron-200`;
   };
 
   if (mode === "tabs") {
@@ -184,7 +184,7 @@ export const WaveleaderboardSort: React.FC<WaveleaderboardSortProps> = ({
       <div
         role="tablist"
         aria-label="Sort options"
-        className="tw-flex tw-items-center tw-gap-x-1 tw-rounded-lg tw-bg-iron-950 tw-p-1 tw-ring-1 tw-ring-inset tw-ring-iron-800"
+        className="tw-box-border tw-flex tw-h-[38px] tw-flex-shrink-0 tw-items-center tw-gap-x-1 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-900/75 tw-p-1 tw-shadow-sm tw-shadow-black/30 tw-backdrop-blur"
       >
         {items.map((item) => (
           <button
@@ -212,6 +212,7 @@ export const WaveleaderboardSort: React.FC<WaveleaderboardSortProps> = ({
         filterLabel="Sort"
         setSelected={onSortChange}
         size="sm"
+        variant="toolbar"
         showFilterLabel={true}
       />
     </div>

@@ -64,5 +64,21 @@ describe("AdditionalInfoStep", () => {
     expect(
       screen.getByRole("button", { name: "Submit Artwork" })
     ).toBeDisabled();
+
+    expect(screen.getByRole("button", { name: "Back" })).toHaveClass(
+      "tw-h-10",
+      "tw-text-sm",
+      "tw-bg-white/[0.07]"
+    );
+    expect(screen.getByRole("button", { name: "Preview" })).toHaveClass(
+      "tw-h-10",
+      "tw-text-sm",
+      "tw-bg-white/[0.07]"
+    );
+    expect(screen.getByRole("button", { name: "Submit Artwork" })).toHaveClass(
+      "tw-h-10",
+      "tw-text-sm",
+      "tw-bg-iron-200"
+    );
   });
 });
