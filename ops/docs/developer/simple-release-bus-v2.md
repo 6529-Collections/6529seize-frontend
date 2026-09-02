@@ -84,28 +84,52 @@ operations use the dedicated immutable-artifact workflows and their normal
 operation authorization; a valid operation identity never converts a legacy
 rebuilding workflow into a train deploy path.
 
-## Local release-request preflight
+## Release-request observation
 
 When a new staging release or a new direct production release starts, the
-`deploy-6529` flow first runs the live lane-status check above. It then sends
+`deploy-6529` flow first runs the live lane-status check above. It then reuses
 the known requester, target, exact PR heads, frontend/backend parts,
-dependencies, backend deploy units, and database-change state using the
-installed CLI's read-only `template` shape. It sends the completed JSON on
-standard input to:
+dependencies, backend deploy units, and database-change state in the installed
+CLI's read-only `template` shape. It sends that completed JSON exactly once on
+standard input to the synchronous observation step. The JSON contains release
+metadata only. It must never contain tokens, passwords, cookies, signed URLs,
+environment values, production data, or other secrets. `requested_by` is
+descriptive context, not authentication or approval. The GitHub actor recorded
+by the central workflow is the trusted sender identity.
 
 ```bash
-./bin/6529 exec 6529-release-request create --input -
+release_request_submit_status=0
+if ./bin/6529 exec 6529-release-request submit --input - <<'JSON'
+{...completed release-request JSON...}
+JSON
+then
+  release_request_submit_status=0
+else
+  release_request_submit_status=$?
+fi
 ```
 
-The command validates the request and saves its run and accepted request under
-`.release-coordinator/`; no separate input file is created. A failed validation
-stops before candidate registration, merge, deployment, or environment
-mutation, while its failed run record remains available.
+`submit` creates and validates the request, saves its run and accepted request
+under `.release-coordinator/`, starts the central validation-and-logging
+workflow, waits for its result, and returns the request ID and workflow URL on
+success. No separate input file is created, and the CLI owns the GitHub
+dispatch and wait. The release flow does not dispatch or poll that workflow
+itself. The command runs in the foreground and can delay the release while it
+waits for GitHub to queue and run the workflow. The conditional only keeps a
+returned failure from gating the existing flow; it does not make submission
+background or no-wait. Do not retry, background, detach, add a shell timeout,
+or replace it with a direct GitHub call during the release. A true no-wait path
+requires a separate future Coordinator CLI/package change.
 
 This step is skipped for merge-only work, status or monitoring, retry or
 resume, recovery, production continuation or promotion of an existing release,
-and lane toggles. Its output is only a local audit shadow: it is not sent to an
-API or Release Bus, grants no deployment authority, and changes none of the
+and lane toggles. Success is reported with the request ID and workflow URL.
+Failure is reported as a short observation warning with its reason and
+available local run evidence. Neither returned outcome gates, replaces,
+reorders, or weakens the existing release flow, and the developer is not asked
+to repair an observation failure during the release. Version `0.0.2` only
+validates and logs through the central workflow; it does not send to a
+Coordinator inbox, grants no deployment authority, and changes none of the
 release checks or ordering described below.
 
 ## Dashboard read model
