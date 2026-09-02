@@ -815,6 +815,7 @@ export const EN_GB_MESSAGES = {
   "memes.waveFooter.uncastPower.votesVisible": "votes",
   "waves.mobile.profileFeed.title": "Profile Waves Feed",
   "waves.mobile.profileFeed.subtitle": "Featured drops from profile waves",
+  "waves.header.postLabel.inProgress": "Posting",
   "waves.profileFeed.title": "Latest From Profile Waves",
   "waves.profileFeed.description":
     "See what the community is sharing in Profile Waves.",

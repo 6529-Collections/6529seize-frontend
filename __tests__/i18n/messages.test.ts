@@ -36,6 +36,14 @@ const PROFILE_WAVE_FEED_DICTIONARIES = [
   DE_DE_MESSAGES,
 ] as const;
 
+const WAVE_POSTING_LABELS = [
+  ["en-US", "Posting"],
+  ["en-GB", "Posting"],
+  ["fr-FR", "Publication en cours"],
+  ["es-ES", "Publicando"],
+  ["de-DE", "Beitrag wird veröffentlicht"],
+] as const;
+
 const NEW_VERSION_TOAST_LOCALE_MESSAGES = [
   {
     locale: "en-GB",
@@ -544,6 +552,13 @@ describe("frontend i18n helpers", () => {
       "Kopieren fehlgeschlagen"
     );
   });
+
+  it.each(WAVE_POSTING_LABELS)(
+    "translates the Wave posting label for %s",
+    (locale, expected) => {
+      expect(t(locale, "waves.header.postLabel.inProgress")).toBe(expected);
+    }
+  );
 
   it("backs curation removal controls with source-locale fallbacks", () => {
     for (const locale of SUPPORTED_LOCALES) {

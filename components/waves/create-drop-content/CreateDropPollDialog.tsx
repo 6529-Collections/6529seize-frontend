@@ -31,6 +31,7 @@ export default function CreateDropPollDialog({
   const [isOpen, setIsOpen] = useState(true);
   const title = t(locale, "waves.poll.composer.title");
   const postLabel = t(locale, "waves.header.postLabel.one");
+  const postingLabel = t(locale, "waves.header.postLabel.inProgress");
   const close = () => setIsOpen(false);
   const handleAfterLeave = () => {
     if (!isOpen) {
@@ -69,7 +70,7 @@ export default function CreateDropPollDialog({
           variant="primary"
           size="lg"
           fullWidth
-          aria-label={submitting ? `${postLabel} in progress` : postLabel}
+          aria-label={submitting ? postingLabel : postLabel}
           hideChildrenWhenLoading
         >
           {postLabel}

@@ -1196,6 +1196,7 @@ const WAVE_HEADER_MESSAGES = objectMessages("waves.header", {
   pictureEditLabel: "Edit wave picture",
   pictureEditSave: "Save",
   pictureEditTitle: "Update wave picture",
+  "postLabel.inProgress": "Posting",
   "postLabel.one": "Post",
   "postLabel.other": "Posts",
 } as const);

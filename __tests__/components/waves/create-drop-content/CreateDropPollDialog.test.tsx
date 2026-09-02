@@ -46,15 +46,22 @@ jest.mock("@/components/waves/CreateDropPoll", () => ({
 jest.mock("@/components/utils/button/Button", () => ({
   __esModule: true,
   default: ({
+    "aria-label": ariaLabel,
     children,
     disabled,
     onClick,
   }: {
+    readonly "aria-label"?: string;
     readonly children: React.ReactNode;
     readonly disabled?: boolean;
     readonly onClick: () => void;
   }) => (
-    <button type="button" disabled={disabled} onClick={onClick}>
+    <button
+      type="button"
+      aria-label={ariaLabel}
+      disabled={disabled}
+      onClick={onClick}
+    >
       {children}
     </button>
   ),
@@ -122,5 +129,6 @@ describe("CreateDropPollDialog", () => {
       "false"
     );
     expect(screen.queryByText("Back from poll")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Posting" })).toBeDisabled();
   });
 });
