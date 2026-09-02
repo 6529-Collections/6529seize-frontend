@@ -15,6 +15,8 @@ type RunRecord = {
   errors: Array<{ code?: string; location?: string; message?: string }>;
   request: { id: string; path: string } | null;
   submission: {
+    inbox_issue_number: number | null;
+    inbox_issue_url: string | null;
     status: string;
     workflow_run_id: string | null;
     workflow_run_url: string | null;
@@ -558,6 +560,9 @@ describe("release-request observation", () => {
       "The GitHub actor recorded by the central workflow is the trusted sender identity"
     );
     expect(normalizedSkill).toContain("a private Coordinator inbox Issue");
+    expect(
+      skill.match(/`inbox_issue_number`, `inbox_issue_url`/gu)
+    ).toHaveLength(2);
   });
 
   it("keeps the developer documentation aligned with observation mode", () => {
@@ -595,6 +600,7 @@ describe("release-request observation", () => {
     expect(normalizedDocumentation).toContain(
       "a private Coordinator inbox Issue"
     );
+    expect(documentation.match(/inbox Issue number and URL/gu)).toHaveLength(2);
   });
 
   it("uses the canonical CLI template and exact release field names", () => {
