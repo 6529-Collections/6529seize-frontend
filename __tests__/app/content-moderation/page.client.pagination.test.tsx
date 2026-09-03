@@ -385,12 +385,12 @@ describe("ContentModerationPageClient pagination", () => {
       "href",
       "/blocked1"
     );
-    expect(screen.getAllByText("blocked")[0]).toBeVisible();
-    expect(screen.getAllByText("unblocked")[0]).toBeVisible();
-    expect(screen.getAllByRole("listitem")[0]).toHaveTextContent(
+    expect(screen.getAllByText("Blocked")[0]).toBeVisible();
+    expect(screen.getAllByText("Unblocked")[0]).toBeVisible();
+    expect(screen.getAllByRole("listitem")[0]).toHaveAccessibleName(
       "@blocker1 blocked @blocked1"
     );
-    expect(screen.getAllByRole("listitem")[1]).toHaveTextContent(
+    expect(screen.getAllByRole("listitem")[1]).toHaveAccessibleName(
       "@blocker2 unblocked @blocked2"
     );
     expect(mockFetchContentModerationBlockActivity).toHaveBeenNthCalledWith(1, {

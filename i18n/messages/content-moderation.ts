@@ -158,6 +158,8 @@ export const CONTENT_MODERATION_MESSAGES = {
     "{blocker} blocked {blocked}",
   "contentModeration.moderator.blockActivity.unblockedSummary":
     "{blocker} unblocked {blocked}",
+  "contentModeration.moderator.blockActivity.blocked": "Blocked",
+  "contentModeration.moderator.blockActivity.unblocked": "Unblocked",
   "contentModeration.moderator.noPower": "You have no power here",
   "contentModeration.moderator.redirecting": "Redirecting in {seconds}",
   "contentModeration.moderator.openReportsIndicator":
