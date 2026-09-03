@@ -33,10 +33,12 @@ jest.mock("@/components/voting/VotingModalButton", () => ({
   default: (p: any) => <button data-testid="vote" onClick={p.onClick} />,
 }));
 
-jest.mock("@/components/waves/drops/WaveDropActionsMore", () => ({
-  __esModule: true,
-  default: () => <div data-testid="more-actions" />,
-}));
+jest.mock("@/components/waves/drops/WaveDropActionsOpen", () => () => (
+  <div data-testid="desktop-open-action" />
+));
+jest.mock("@/components/waves/drops/WaveDropActionsOptions", () => () => (
+  <div data-testid="desktop-delete-action" />
+));
 jest.mock("@/components/content-moderation/ContentModerationDropActions", () =>
   jest.fn(() => null)
 );
