@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       release_note_opt_out:
-        description: Skip autonomous release notes for an internal operation
+        description: Suppress autonomous release notes only when explicitly requested by the user
         type: boolean
         required: false
         default: false
