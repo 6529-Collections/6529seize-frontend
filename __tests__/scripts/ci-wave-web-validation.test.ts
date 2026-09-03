@@ -78,6 +78,7 @@ describe("frontend CI wave WEB E2E lifecycle", () => {
 
     expect(deployment.needs).toEqual([
       "build-production-artifact",
+      "resolve-production-artifact",
       "verify-production-artifact",
       "build-upload-deploy",
     ]);

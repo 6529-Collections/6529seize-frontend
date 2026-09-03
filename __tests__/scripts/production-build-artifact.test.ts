@@ -125,6 +125,7 @@ describe("production exact-artifact deployment contract", () => {
     );
     expect(deploy.jobs["build-upload-deploy"].needs).toEqual([
       "build-production-artifact",
+      "resolve-production-artifact",
       "verify-production-artifact",
     ]);
     expect(deploySource).toContain("sha256sum -c SHA256SUMS");
