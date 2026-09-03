@@ -104,7 +104,7 @@ description: Write, open, iterate, and prepare pull requests for merge or deploy
 - Use `6529 run build` for build-time, generated API model, Next.js config, route, or deployment-sensitive changes.
 - Use `6529 run test:e2e` for local Playwright E2E when relevant; this repo's default Playwright config starts the app locally on port `3001`.
 - For staging or production validation, inspect the repo's current deploy and E2E configuration before running. If no target-specific E2E command exists, run the strongest available smoke checks and report the gap clearly.
-- For merge, staging, production, or release-lane work, include a deployment-bus handoff when relevant: release set, candidate SHA, included PRs, backend dependencies, validation owners, and held or blocked changes. Use `ops/docs/developer/simple-release-bus-v2.md` for the current process.
+- For authorized merge, staging, or production work, include affected PRs, backend service dependencies and order, deployment run links, validation results, and any unresolved failure. Follow `ops/docs/developer/deployment.md` and `ops/skills/deploy-6529/SKILL.md` for the direct workflow process.
 
 ## Merge And Deploy Gates
 
@@ -112,8 +112,8 @@ description: Write, open, iterate, and prepare pull requests for merge or deploy
 - Use `ops/skills/deploy-6529/SKILL.md` for actual merge execution, staging deployment, production deployment, backend deployment coordination, cross-agent coordination, and deployed-environment E2E validation.
 - Before merging, ensure the PR is agent-happy, bot-happy, required checks are passing or explained, and required approvals are present.
 - Order the final gates correctly: bring the branch up to date with `main` first, then seek the maintainer approval. The `main` ruleset requires approval of the most recent push, so a branch update resets the approval requirement to unmet and prior approvals no longer satisfy it. The approval must come from the `6529seize-maintainers` team and be submitted on behalf of that team, or the ruleset rejects it.
-- Before staging deploy, confirm the merge commit/ref, use the repo-approved staging deployment path, then validate the deployed target. In this repo, the documented fresh-clone staging refresh path is `./bin/6529 staging`.
-- Before production deploy, require successful staging validation for the same `origin/main` SHA or ordered frontend/backend release set unless the user explicitly overrides it. Use the repo-approved production deployment path and verify the deployed version or visible behavior afterward. In this repo, production deploy is the `Web Deploy - PROD` workflow in `.github/workflows/build-upload-deploy-prod.yml`, and it rejects non-`main` refs.
+- For authorized staging deployment, merge the reviewed development branch into current `1a-staging` and push, then follow the automatic frontend deployment and E2E. Complete required backend service deployments first for coupled changes.
+- Before production deployment, require successful staging validation for the same reviewed change set unless the user explicitly authorizes an override. Separate staging and main merges can produce different commit IDs; verify the reviewed changes and normal workflow/runtime results without a cross-branch baseline requirement. Merge to `main` and dispatch `Web Deploy - PROD` in `.github/workflows/build-upload-deploy-prod.yml`, which rejects non-`main` refs.
 - If deployment or E2E fails, hand off to `ops/skills/deploy-6529/SKILL.md` to diagnose, fix, redeploy, and rerun validation before proceeding.
 
 ## Anti-Patterns

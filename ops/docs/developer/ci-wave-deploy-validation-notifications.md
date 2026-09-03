@@ -1,92 +1,70 @@
 # CI Wave Deploy And WEB E2E Notifications
 
-Frontend deploy and WEB E2E workflows post operational results to the staging
-or production CI wave through the backend CI alert endpoint. The backend owns
-message rendering, profile mentions, deploy-to-E2E correlation, and actual drop
-creation; workflows send identities and outcomes only.
+Frontend deploy and WEB E2E workflows post results to the staging or production
+CI wave through the backend CI alert endpoint. The backend owns message
+rendering, profile mentions, reply correlation, and drop creation; workflows
+send run identities and outcomes.
 
 ## Message Contract
 
-Deploy headings retain a dedicated environment marker and end with the outcome:
+Deploy headings retain the environment and outcome:
 
 ```text
 [🚧 STAGING] WEB deploy complete ✅
 [🚀 PRODUCTION] WEB deploy failed 🚨
 ```
 
-`WEB` is uppercase. Backend Lambda names and desktop build names must remain
-exact identifiers; do not split camelCase names into prose.
-
-A successful WEB E2E validation is intentionally one line and mentions nobody:
+`WEB` is uppercase. Backend Lambda and desktop build names retain their exact
+identifiers. A successful WEB E2E result is one line with no mentions:
 
 ```text
 [🚧 STAGING] WEB E2E passed ✅ [Run #791 (attempt 2)](https://github.com/owner/repository/actions/runs/791)
 ```
 
-The attempt suffix is omitted for attempt 1. A failed validation includes its
-validation mode, optional pack, deploy commit, linked run, and a separate
-`cc @devs6529` line. It also mentions the mapped manual validation initiator and
-the original deploy initiator when they are distinct.
+Attempt 1 omits the suffix. Failed validation includes its mode, optional pack,
+deploy commit, run link, and `cc @devs6529`; it also mentions the mapped manual
+initiator and original deploy initiator when distinct.
 
-## Correlation Flow
+## Correlation And Reruns
 
-1. A successful WEB deploy notification includes its GitHub run ID and, for a
-   Release Bus deploy, its release train ID.
-2. The backend creates the deploy drop and stores its drop/part target against
-   those identities.
-3. The terminal E2E notification includes `parent_deploy_run_id`,
-   `parent_release_train_id`, or both.
-4. The backend resolves the identities and supplies the drop API `reply_to`
-   value. Workflows never persist or transmit a raw drop ID.
+1. A successful WEB deploy notification includes its GitHub deployment run ID.
+2. The backend creates the deploy drop and stores its drop/part target by
+   repository, environment, and run ID.
+3. Terminal E2E notifications carry `parent_deploy_run_id`.
+4. The backend resolves that identity and supplies the drop API `reply_to`.
+   Workflows never persist or transmit a raw drop ID.
 
-When both parent identities are supplied, both must resolve to the same deploy
-drop. Missing, expired, mismatched, ambiguous, or unavailable correlation data
-produces a standalone E2E post instead of risking a reply to the wrong deploy.
-
-## Automatic, Manual, And Rerun Behavior
-
-| E2E invocation                                | Correlation identity                  | Posting behavior                                          |
-| --------------------------------------------- | ------------------------------------- | --------------------------------------------------------- |
-| Automatic after a normal deploy               | `automatic_deploy_run_id`             | Reply to that deploy drop                                 |
-| Release Bus validation                        | `release_train_id`                    | Reply to that train's deploy drop                         |
-| Rerun of either workflow                      | Preserved original workflow inputs    | Reply to the same deploy; show `(attempt N)` when `N > 1` |
-| New manual dispatch with a parent identity    | Operator-supplied deploy run or train | Reply when the identity resolves safely                   |
-| New manual dispatch without a parent identity | None                                  | Standalone post                                           |
-
-Notification jobs use `always()` and are best effort. A notification transport
-failure must not change the deploy or E2E result.
+Reruns preserve the original deploy identity and show `(attempt N)` for later
+attempts. Missing, expired, malformed, or unavailable correlation data produces
+a standalone E2E post instead of a guessed reply. Notification jobs use
+`always()` and are best effort; transport failure does not change the result.
 
 ## Workflow Ownership
 
 - Deploy workflows call `scripts/notify-ci-wave.mjs` with `alert_type=deploy`.
-- `staging-e2e.yml` and `production-e2e.yml` have terminal notification jobs
-  that call the same script with `alert_type=web_e2e`, the run attempt, resolved
-  deployed SHA when available, validation pack, and available parent
-  identities. The notifier never substitutes the E2E workflow SHA for a missing
-  deploy SHA; backend correlation retains the original deploy SHA.
-- `staging-e2e-dispatch.yml` and `production-e2e-dispatch.yml` carry the
-  completed deploy run ID into the E2E workflow.
-- Release Bus workflows carry the release train ID through deployment and E2E.
+- `deploy-staging.yml` calls `staging-e2e.yml` after deployment;
+  `build-upload-deploy-prod.yml` calls `production-e2e.yml`. Each passes its
+  deployed commit and parent deployment run ID directly to the reusable
+  workflow. E2E completes within the canonical deployment run.
+- E2E terminal notifications use `alert_type=web_e2e`, the attempt, resolved
+  deployed SHA, validation pack, and parent run ID. They never substitute the
+  E2E source SHA for a missing deployed SHA.
+- To validate a deployed version again, dispatch the E2E workflow on `main`
+  with `automatic_deploy_run_id` naming the original deployment. The workflow
+  verifies that its deployment job succeeded and the selected version is still
+  live. The staging workflow also accepts a targeted `pack`.
 
-The automatic post-deploy dispatchers invoke the E2E workflow from the default
-branch (`main`). Consequently, merging only to `1a-staging` does not activate a
-new E2E notification implementation. Before the change reaches `main`, an
-operator can test it only by explicitly dispatching the feature-branch E2E
-workflow with the intended parent deploy identity.
+Automatic E2E uses the reusable workflow revision included in the canonical
+deployment workflow. Explicit recovery dispatches use the `main` revision;
+keep the workflow definitions compatible when changing those inputs.
 
-## Rollout
+## Rollout And Recovery
 
-The backend PR changes two runtime services for different reasons:
+The backend `api` owns this receiver. Deploy it before enabling senders that
+need new fields, and coordinate removal of old fields so no in-flight sender
+relies on them. Restore compatible sender/receiver versions together during a
+rollback. Keep run correlation, autonomous release-note grouping, and the
+final publication signal intact; no separate worker deployment is needed for
+a sender-only change.
 
-- `api` owns alert validation, rendering, Redis correlation, and wave posting;
-- the production-only `releaseBus` service trusts the frontend PR-CI policy
-  bundle introduced by these workflow changes.
-
-Deploy `api` before merging the frontend workflow changes because the older
-receiver does not accept the new WEB E2E fields. Deploy `releaseBus` before
-asking the production Release Bus to accept frontend heads with the new policy
-bundle. A staging-only notification test needs the updated `api`, not a
-`releaseBus` deployment. For rollback, revert the frontend sender and policy
-bundle before rolling back the corresponding backend services, so no active
-sender targets an older receiver and no accepted frontend policy loses its
-trusted digest.
+See [Deployment](deployment.md) for the ordinary staging/production process.

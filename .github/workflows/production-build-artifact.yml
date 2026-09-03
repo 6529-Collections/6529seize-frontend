@@ -7,18 +7,10 @@ on:
         description: Exact 40-character commit SHA to build
         required: true
         type: string
-      operation_id:
-        description: Operation identity; 1-80 ASCII letters, digits, dot, underscore, or hyphen
-        required: true
-        type: string
   workflow_call:
     inputs:
       target_sha:
         description: Exact 40-character commit SHA to build
-        required: true
-        type: string
-      operation_id:
-        description: Operation identity; 1-80 ASCII letters, digits, dot, underscore, or hyphen
         required: true
         type: string
     secrets:
@@ -46,7 +38,7 @@ on:
         description: GitHub artifact digest for the uploaded exact artifact
         value: ${{ jobs.build-production-artifact.outputs.artifact_digest }}
       artifact_name:
-        description: Exact operation-bound artifact name
+        description: Exact run-bound artifact name
         value: ${{ jobs.build-production-artifact.outputs.artifact_name }}
       package_sha256:
         description: SHA-256 digest of target/package.zip
@@ -57,9 +49,6 @@ on:
       producer_run_id:
         description: GitHub producer workflow run ID
         value: ${{ jobs.build-production-artifact.outputs.producer_run_id }}
-      operation_id:
-        description: Stable operation-bound identity
-        value: ${{ jobs.build-production-artifact.outputs.operation_id }}
       protected_main_sha:
         description: Fresh protected origin/main commit used for ancestry proof
         value: ${{ jobs.build-production-artifact.outputs.protected_main_sha }}
@@ -70,13 +59,13 @@ on:
         description: Producer workflow run API head SHA
         value: ${{ jobs.build-production-artifact.outputs.workflow_sha }}
 
-run-name: Build production artifact ${{ inputs.target_sha }} [${{ inputs.operation_id }}]
+run-name: Build production artifact ${{ inputs.target_sha }}
 
 permissions:
   contents: read
 
 concurrency:
-  group: production-artifact-${{ inputs.target_sha }}-${{ inputs.operation_id }}
+  group: production-artifact-${{ inputs.target_sha }}
   cancel-in-progress: false
 
 env:
@@ -102,11 +91,10 @@ jobs:
       packages: read
     outputs:
       artifact_name: ${{ steps.validate-inputs.outputs.artifact_name }}
-      operation_id: ${{ steps.validate-inputs.outputs.operation_id }}
       package_sha256: ${{ steps.package.outputs.package_sha256 }}
       target_sha: ${{ steps.validate-inputs.outputs.target_sha }}
       artifact_id: ${{ steps.upload.outputs.artifact-id }}
-      artifact_digest: ${{ steps.upload.outputs.artifact-digest }}
+      artifact_digest: sha256:${{ steps.upload.outputs.artifact-digest }}
       producer_run_id: ${{ github.run_id }}
       producer_run_attempt: ${{ github.run_attempt }}
       protected_main_sha: ${{ steps.verify-target.outputs.protected_main_sha }}
@@ -116,7 +104,6 @@ jobs:
       - name: Validate exact build inputs
         id: validate-inputs
         env:
-          OPERATION_ID: ${{ inputs.operation_id }}
           PRODUCER_RUN_ATTEMPT: ${{ github.run_attempt }}
           PRODUCER_RUN_ID: ${{ github.run_id }}
           TARGET_SHA: ${{ inputs.target_sha }}
@@ -131,10 +118,6 @@ jobs:
             echo "::error::workflow SHA is malformed."
             exit 1
           fi
-          if ! [[ "$OPERATION_ID" =~ ^[A-Za-z0-9][A-Za-z0-9._-]{0,79}$ ]]; then
-            echo "::error::operation_id must be 1-80 artifact-safe characters."
-            exit 1
-          fi
           if ! [[ "$PRODUCER_RUN_ID" =~ ^[1-9][0-9]{0,19}$ ]]; then
             echo "::error::GitHub workflow run ID is malformed."
             exit 1
@@ -143,26 +126,24 @@ jobs:
             echo "::error::GitHub workflow run attempt is malformed."
             exit 1
           fi
-          artifact_name="production-frontend-${TARGET_SHA}-${OPERATION_ID}"
+          artifact_name="production-frontend-${TARGET_SHA}-${PRODUCER_RUN_ID}"
           if ! [[ "$artifact_name" =~ ^[A-Za-z0-9._-]{1,180}$ ]]; then
             echo "::error::Derived production artifact name is invalid."
             exit 1
           fi
           {
             echo "TARGET_SHA=$TARGET_SHA"
-            echo "OPERATION_ID=$OPERATION_ID"
             echo "ARTIFACT_NAME=$artifact_name"
             echo "WORKFLOW_SHA=$WORKFLOW_SHA"
           } >> "$GITHUB_ENV"
           {
             echo "artifact_name=$artifact_name"
-            echo "operation_id=$OPERATION_ID"
             echo "target_sha=$TARGET_SHA"
             echo "workflow_sha=$WORKFLOW_SHA"
           } >> "$GITHUB_OUTPUT"
 
       # This workflow checks out only the protected main history. It has no
-      # AWS or Release Bus mutation credentials.
+      # AWS mutation credentials.
       - name: Checkout protected main history
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
@@ -311,13 +292,12 @@ jobs:
             --arg artifact_name "$ARTIFACT_NAME" \
             --arg package_digest "$package_digest" \
             --arg build_timestamp "$VERSION_BUILD_TIMESTAMP" \
-            --arg operation_id "$OPERATION_ID" \
             --arg producer_run_id "$GITHUB_RUN_ID" \
             --argjson producer_run_attempt "$GITHUB_RUN_ATTEMPT" \
             --arg protected_main_sha "$PROTECTED_MAIN_SHA" \
             --arg target_sha "$TARGET_SHA" \
             --arg workflow_sha "$WORKFLOW_SHA" \
-            '{schema_version:2,artifact_contract:"production-prebuild-v2",repository:"frontend",artifact_name:$artifact_name,source_sha:$target_sha,target_sha:$target_sha,operation_id:$operation_id,workflow_sha:$workflow_sha,protected_main_sha:$protected_main_sha,workflow_run_id:$producer_run_id,run_attempt:$producer_run_attempt,environment:"production",package_sha256:$package_digest,build_timestamp:$build_timestamp}' \
+            '{schema_version:1,artifact_contract:"production-deployment-v1",repository:"frontend",artifact_name:$artifact_name,source_sha:$target_sha,target_sha:$target_sha,workflow_sha:$workflow_sha,protected_main_sha:$protected_main_sha,workflow_run_id:$producer_run_id,run_attempt:$producer_run_attempt,environment:"production",package_sha256:$package_digest,build_timestamp:$build_timestamp}' \
             > production-artifact/manifest.json
           node ops/scripts/artifact-portability.cjs inventory \
             --manifest production-artifact/manifest.json \
@@ -343,7 +323,7 @@ jobs:
         id: upload
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: production-frontend-${{ inputs.target_sha }}-${{ inputs.operation_id }}
+          name: ${{ steps.validate-inputs.outputs.artifact_name }}
           path: production-artifact
           include-hidden-files: true
           if-no-files-found: error

@@ -269,8 +269,9 @@ this workstream.
   [`32183553695`](https://github.com/6529-Collections/6529seize-frontend/actions/runs/32183553695)
   and staging E2E
   [`32184698162`](https://github.com/6529-Collections/6529seize-frontend/actions/runs/32184698162);
-  the governing procedure is `ops/skills/deploy-6529/SKILL.md`, “Manual fallback
-  while the target lane is OFF and changeable.”
+  the procedure at that historical release was the then-current deployment
+  skill's manual-fallback section. Future releases follow
+  `ops/docs/developer/deployment.md`.
 - Production deploy `32186095060` succeeded on exact main after immutable
   artifact builder `32186126216` and independent artifact selection and
   verification passed. Three uncached `/api/version` reads returned exact main

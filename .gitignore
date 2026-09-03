@@ -13,8 +13,13 @@
 /playwright-report/
 /playwright/.cache/
 /.playwright-mcp/
+/.deployment-e2e-output/
+# Keep retired local operational artifacts out of commits.
 /.release-bus-e2e-output/
 /.release-coordinator/
+/.deploy
+# Existing staging host storage, until its physical migration is complete.
+/.release-bus/
 /storageState.json
 /playwright/.auth/
 storageState.json
