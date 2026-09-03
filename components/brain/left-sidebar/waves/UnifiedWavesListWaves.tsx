@@ -61,6 +61,19 @@ const COLLAPSED_SUBWAVE_TOGGLE_ROW_HEIGHT = 42 as const;
 const VIRTUALIZATION_OVERSCAN = 5 as const; // Number of extra items to render outside viewport
 const SIDEBAR_LOCALE = DEFAULT_LOCALE;
 
+const APP_SECTION_DIVIDER_STYLES = {
+  colorClass: "tw-border-iron-800",
+  firstSpacingClass: "tw-my-3",
+} as const;
+
+const DESKTOP_SECTION_DIVIDER_STYLES = {
+  colorClass: "tw-border-iron-700",
+  firstSpacingClass: "tw-mb-1 tw-mt-2",
+} as const;
+
+const getSectionDividerStyles = (isApp: boolean) =>
+  isApp ? APP_SECTION_DIVIDER_STYLES : DESKTOP_SECTION_DIVIDER_STYLES;
+
 // Common styles for positioned elements
 const listContainerStyle = {
   position: "relative",
@@ -177,6 +190,10 @@ const UnifiedWavesListWaves = forwardRef<
       set: setActiveWave,
     } = activeWave;
     const { isApp, hasTouchScreen } = useDeviceInfo();
+    const {
+      colorClass: sectionDividerColorClass,
+      firstSpacingClass: firstSectionDividerSpacingClass,
+    } = getSectionDividerStyles(isApp);
     const prefetchWaveData = usePrefetchWaveData();
     // Persisted-hint fallback so the active subwave expands/highlights
     // immediately after a cold reload (see useActiveSubwaveParentHint).
@@ -453,7 +470,9 @@ const UnifiedWavesListWaves = forwardRef<
           (highlyRatedRows.length > 0 ||
             pinnedRows.length > 0 ||
             shouldShowBottomHeader) && (
-            <div className="tw-mb-1 tw-mt-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700" />
+            <div
+              className={`${firstSectionDividerSpacingClass} tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid ${sectionDividerColorClass}`}
+            />
           )}
 
         {highlyRatedRows.length > 0 && (
@@ -467,6 +486,7 @@ const UnifiedWavesListWaves = forwardRef<
                 />
                 <HighlyRatedWavesToggle
                   isTouchPreview={hasTouchScreen}
+                  compactTouchPadding={isApp}
                   paddingClassName="tw-px-4"
                   previewItems={highlyRatedPreviewItems}
                 />
@@ -503,7 +523,9 @@ const UnifiedWavesListWaves = forwardRef<
         {!hideHeaders &&
           highlyRatedRows.length > 0 &&
           (pinnedRows.length > 0 || shouldShowBottomHeader) && (
-            <div className="tw-my-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700" />
+            <div
+              className={`tw-my-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid ${sectionDividerColorClass}`}
+            />
           )}
 
         {/* Conditionally show pinned section */}
@@ -532,7 +554,9 @@ const UnifiedWavesListWaves = forwardRef<
         )}
 
         {!hideHeaders && pinnedRows.length > 0 && shouldShowBottomHeader && (
-          <div className="tw-my-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700" />
+          <div
+            className={`tw-my-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid ${sectionDividerColorClass}`}
+          />
         )}
 
         {shouldShowBottomHeader && (

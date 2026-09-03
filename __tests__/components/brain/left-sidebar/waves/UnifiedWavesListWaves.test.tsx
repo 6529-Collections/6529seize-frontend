@@ -406,6 +406,43 @@ it("renders announcement, highly rated preview, pinned, and one filterable botto
   expect(ref.current?.sentinelRef.current).toBeInstanceOf(HTMLElement);
 });
 
+it("uses darker section dividers in the app without changing the web tone", () => {
+  const { container, rerender } = render(
+    <UnifiedWavesListWaves
+      waves={baseWaves}
+      onHover={jest.fn()}
+      scrollContainerRef={scrollRef}
+    />
+  );
+  const getSectionDividers = () =>
+    Array.from(container.querySelectorAll("div.tw-border-t"));
+
+  expect(getSectionDividers()).toHaveLength(3);
+  expect(getSectionDividers()[0]).toHaveClass("tw-mb-1", "tw-mt-2");
+  expect(getSectionDividers()[0]).not.toHaveClass("tw-my-3");
+  getSectionDividers().forEach((divider) => {
+    expect(divider).toHaveClass("tw-border-iron-700");
+    expect(divider).not.toHaveClass("tw-border-iron-800");
+  });
+
+  mockDeviceInfo = { isApp: true, hasTouchScreen: true };
+  rerender(
+    <UnifiedWavesListWaves
+      waves={baseWaves}
+      onHover={jest.fn()}
+      scrollContainerRef={scrollRef}
+    />
+  );
+
+  expect(getSectionDividers()).toHaveLength(3);
+  expect(getSectionDividers()[0]).toHaveClass("tw-my-3");
+  expect(getSectionDividers()[0]).not.toHaveClass("tw-mb-1", "tw-mt-2");
+  getSectionDividers().forEach((divider) => {
+    expect(divider).toHaveClass("tw-border-iron-800");
+    expect(divider).not.toHaveClass("tw-border-iron-700");
+  });
+});
+
 it("keeps worth checking out waves in All at their recent-activity position", () => {
   render(
     <UnifiedWavesListWaves

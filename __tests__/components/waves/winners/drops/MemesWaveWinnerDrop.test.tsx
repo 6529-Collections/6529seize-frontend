@@ -68,12 +68,14 @@ jest.mock("@/hooks/useLongPressInteraction", () => ({
   default: jest.fn(),
 }));
 jest.mock("@/components/waves/drops/WaveDropActionsOpen", () => () => (
-  <div data-testid="actions" />
+  <button
+    type="button"
+    data-testid="desktop-open-action"
+    onClick={(event) => event.stopPropagation()}
+  >
+    Open drop
+  </button>
 ));
-jest.mock("@/components/waves/drops/WaveDropActionsMore", () => ({
-  __esModule: true,
-  default: () => <div data-testid="actions" />,
-}));
 jest.mock(
   "@/components/content-moderation/ContentModerationDropActions",
   () => ({
@@ -209,7 +211,26 @@ describe("MemesWaveWinnersDrop", () => {
     expect(screen.getByText("5")).toBeInTheDocument();
     expect(screen.getByTestId("author-badges")).toBeInTheDocument();
     expect(screen.getByTestId("identity")).toBeInTheDocument();
+    expect(screen.getByTestId("desktop-open-action")).toBeInTheDocument();
+    expect(screen.queryByTestId("more-actions")).not.toBeInTheDocument();
     expect(screen.getByAltText("alice's profile picture")).toBeInTheDocument();
+  });
+
+  it("opens from the direct action without triggering the winner card", async () => {
+    const user = userEvent.setup();
+    const onDropClick = jest.fn();
+
+    render(
+      <MemesWaveWinnersDrop
+        winner={winner}
+        wave={wave}
+        onDropClick={onDropClick}
+      />
+    );
+
+    await user.click(screen.getByTestId("desktop-open-action"));
+
+    expect(onDropClick).not.toHaveBeenCalled();
   });
 
   it("opens the mapped Meme card without opening the winner drop", async () => {
