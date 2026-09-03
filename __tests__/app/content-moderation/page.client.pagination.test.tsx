@@ -387,11 +387,11 @@ describe("ContentModerationPageClient pagination", () => {
     );
     expect(screen.getAllByText("Blocked")[0]).toBeVisible();
     expect(screen.getAllByText("Unblocked")[0]).toBeVisible();
-    expect(screen.getAllByRole("listitem")[0]).toHaveAccessibleName(
-      "@blocker1 blocked @blocked1"
+    expect(screen.getAllByRole("listitem")[0]).toHaveTextContent(
+      "@blocker1 Blocked @blocked1"
     );
-    expect(screen.getAllByRole("listitem")[1]).toHaveAccessibleName(
-      "@blocker2 unblocked @blocked2"
+    expect(screen.getAllByRole("listitem")[1]).toHaveTextContent(
+      "@blocker2 Unblocked @blocked2"
     );
     expect(mockFetchContentModerationBlockActivity).toHaveBeenNthCalledWith(1, {
       limit: 50,

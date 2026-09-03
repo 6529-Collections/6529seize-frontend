@@ -43,9 +43,12 @@ describe("BlockActivityCard", () => {
         </ul>
       );
       const row = screen.getByRole("listitem");
-      expect(row).toHaveAccessibleName(
-        `@phoebeum ${label.toLowerCase()} @usrname`
-      );
+      expect(row).not.toHaveAttribute("aria-label");
+      expect(row).not.toHaveAttribute("aria-labelledby");
+      expect(row).toHaveTextContent(`@phoebeum ${label} @usrname`);
+      expect(
+        screen.getAllByRole("link").map((link) => link.textContent)
+      ).toEqual(["@phoebeum", "@usrname"]);
       const verb = screen.getByText(label);
       expect(verb).toHaveClass(colorClass, "tw-font-semibold", "tw-gap-2");
       expect(verb.querySelector("svg")).toHaveAttribute("aria-hidden", "true");
@@ -80,8 +83,8 @@ describe("BlockActivityCard", () => {
           <BlockActivityCard item={{ ...item, action: Action.Unblocked }} />
         </ul>
       );
-      expect(screen.getByRole("listitem")).toHaveAccessibleName(
-        "@phoebeum unblocked @usrname"
+      expect(screen.getByRole("listitem")).toHaveTextContent(
+        "@phoebeum Unblocked @usrname"
       );
       expect(screen.getByText("Unblocked")).toBeVisible();
       expect(container.querySelector("time")?.textContent).toBeTruthy();
@@ -94,8 +97,8 @@ describe("BlockActivityCard", () => {
         <BlockActivityCard item={{ ...item, blocked_handle: null }} />
       </ul>
     );
-    expect(screen.getByRole("listitem")).toHaveAccessibleName(
-      "@phoebeum blocked target-1"
+    expect(screen.getByRole("listitem")).toHaveTextContent(
+      "@phoebeum Blocked target-1"
     );
     expect(screen.getAllByRole("link")).toHaveLength(1);
   });
@@ -110,8 +113,8 @@ describe("BlockActivityCard", () => {
         />
       </ul>
     );
-    expect(screen.getByRole("listitem")).toHaveAccessibleName(
-      `@${blocker} blocked @${blocked}`
+    expect(screen.getByRole("listitem")).toHaveTextContent(
+      `@${blocker} Blocked @${blocked}`
     );
     for (const handle of [blocker, blocked]) {
       expect(screen.getByRole("link", { name: `@${handle}` })).toHaveAttribute(
