@@ -4,7 +4,6 @@ import {
   ApiContentModerationBlockActivityItemActionEnum as Action,
 } from "@/generated/models/ApiContentModerationBlockActivityItem";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import * as messages from "@/i18n/messages";
 import { render, screen } from "@testing-library/react";
 
 jest.mock("@/hooks/useBrowserLocale", () => ({ useBrowserLocale: jest.fn() }));
@@ -33,19 +32,28 @@ describe("BlockActivityCard", () => {
   beforeEach(() => jest.mocked(useBrowserLocale).mockReturnValue("en-US"));
 
   it.each([
-    [Action.Blocked, "blocked"],
-    [Action.Unblocked, "unblocked"],
+    [Action.Blocked, "Blocked", "tw-text-red"],
+    [Action.Unblocked, "Unblocked", "tw-text-green"],
   ])(
-    "renders %s with spaced identities and an inline date",
-    (action, label) => {
+    "renders %s with a prominent action, decorative lock, and linked profiles",
+    (action, label, colorClass) => {
       const { container } = render(
         <ul>
           <BlockActivityCard item={{ ...item, action }} />
         </ul>
       );
       const row = screen.getByRole("listitem");
+      expect(row).not.toHaveAttribute("aria-label");
+      expect(row).not.toHaveAttribute("aria-labelledby");
       expect(row).toHaveTextContent(`@phoebeum ${label} @usrname`);
+      expect(
+        screen.getAllByRole("link").map((link) => link.textContent)
+      ).toEqual(["@phoebeum", "@usrname"]);
       const verb = screen.getByText(label);
+      expect(verb).toHaveClass(colorClass, "tw-font-semibold", "tw-gap-2");
+      expect(verb.querySelector("svg")).toHaveAttribute("aria-hidden", "true");
+      expect(verb.querySelector("svg")).toHaveClass("tw-size-5");
+      expect(row).toHaveClass("tw-grid");
       expect(verb.parentElement).toHaveClass("tw-gap-x-3");
       expect(screen.getByRole("link", { name: "@phoebeum" })).toHaveAttribute(
         "href",
@@ -76,8 +84,9 @@ describe("BlockActivityCard", () => {
         </ul>
       );
       expect(screen.getByRole("listitem")).toHaveTextContent(
-        "@phoebeum unblocked @usrname"
+        "@phoebeum Unblocked @usrname"
       );
+      expect(screen.getByText("Unblocked")).toBeVisible();
       expect(container.querySelector("time")?.textContent).toBeTruthy();
     }
   );
@@ -89,38 +98,53 @@ describe("BlockActivityCard", () => {
       </ul>
     );
     expect(screen.getByRole("listitem")).toHaveTextContent(
-      "@phoebeum blocked target-1"
+      "@phoebeum Blocked target-1"
     );
     expect(screen.getAllByRole("link")).toHaveLength(1);
   });
 
-  it("renders repeated translated text without duplicate React keys", () => {
-    const richMessage = jest
-      .spyOn(messages, "tRich")
-      .mockReturnValueOnce([
-        " • ",
-        <span key="actor">actor</span>,
-        " • ",
-        <span key="target">target</span>,
-        " • ",
-      ]);
-    const consoleError = jest
-      .spyOn(console, "error")
-      .mockImplementation(() => undefined);
-    try {
-      render(
-        <ul>
-          <BlockActivityCard item={item} />
-        </ul>
+  it("keeps full long handles in wrapping profile columns", () => {
+    const blocker = "a_very_long_profile_handle_that_must_remain_readable";
+    const blocked = "another_long_profile_handle_with_no_truncation";
+    render(
+      <ul>
+        <BlockActivityCard
+          item={{ ...item, blocker_handle: blocker, blocked_handle: blocked }}
+        />
+      </ul>
+    );
+    expect(screen.getByRole("listitem")).toHaveTextContent(
+      `@${blocker} Blocked @${blocked}`
+    );
+    for (const handle of [blocker, blocked]) {
+      expect(screen.getByRole("link", { name: `@${handle}` })).toHaveAttribute(
+        "href",
+        `/${handle}`
       );
-      expect(screen.getAllByText("•")).toHaveLength(3);
-      expect(screen.getByRole("listitem")).toHaveTextContent(
-        "• actor • target •"
+      expect(screen.getByText(`@${handle}`)).toHaveClass(
+        "[overflow-wrap:anywhere]"
       );
-      expect(consoleError).not.toHaveBeenCalled();
-    } finally {
-      richMessage.mockRestore();
-      consoleError.mockRestore();
+      expect(screen.getByText(`@${handle}`)).not.toHaveClass("tw-truncate");
     }
+  });
+
+  it("uses different lock shapes for block and unblock events", () => {
+    const { container, rerender } = render(
+      <ul>
+        <BlockActivityCard item={item} />
+      </ul>
+    );
+    const closedLockPath = container
+      .querySelector("svg path")
+      ?.getAttribute("d");
+    expect(closedLockPath).toBeTruthy();
+    rerender(
+      <ul>
+        <BlockActivityCard item={{ ...item, action: Action.Unblocked }} />
+      </ul>
+    );
+    const openLockPath = container.querySelector("svg path")?.getAttribute("d");
+    expect(openLockPath).toBeTruthy();
+    expect(openLockPath).not.toBe(closedLockPath);
   });
 });

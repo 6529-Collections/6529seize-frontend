@@ -5,10 +5,10 @@ import {
   ApiContentModerationBlockActivityItemActionEnum,
 } from "@/generated/models/ApiContentModerationBlockActivityItem";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { tRich } from "@/i18n/messages";
+import { t } from "@/i18n/messages";
+import { LockClosedIcon, LockOpenIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import Link from "next/link";
-import { Children, type ReactElement } from "react";
 import {
   formatTimestamp,
   getSafeAssetUrl,
@@ -41,19 +41,21 @@ function ProfileIdentity({
           className="tw-size-7 tw-flex-none tw-rounded-md tw-bg-iron-800"
         />
       )}
-      <span className="tw-min-w-0 tw-truncate tw-font-semibold">{label}</span>
+      <span className="tw-min-w-0 tw-font-semibold [overflow-wrap:anywhere]">
+        {label}
+      </span>
     </>
   );
 
   return handle ? (
     <Link
       href={`/${handle}`}
-      className="tw-inline-flex tw-min-w-0 tw-max-w-full tw-items-center tw-gap-2 tw-text-iron-50 tw-no-underline hover:tw-text-primary-300 focus-visible:tw-rounded-md focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 sm:tw-max-w-64"
+      className="tw-flex tw-min-w-0 tw-flex-col tw-items-start tw-gap-2 tw-text-iron-50 tw-no-underline hover:tw-text-primary-300 focus-visible:tw-rounded-md focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 @[32rem]:tw-flex-row @[32rem]:tw-items-center"
     >
       {content}
     </Link>
   ) : (
-    <span className="tw-inline-flex tw-min-w-0 tw-max-w-full tw-items-center tw-gap-2 tw-text-iron-50 sm:tw-max-w-64">
+    <span className="tw-flex tw-min-w-0 tw-flex-col tw-items-start tw-gap-2 tw-text-iron-50 @[32rem]:tw-flex-row @[32rem]:tw-items-center">
       {content}
     </span>
   );
@@ -66,46 +68,37 @@ export default function BlockActivityCard({
 }) {
   const locale = useBrowserLocale();
   const timestamp = formatTimestamp(item.created_at, locale);
-  const relationship = tRich<ReactElement>(
-    locale,
-    item.action === ApiContentModerationBlockActivityItemActionEnum.Unblocked
-      ? "contentModeration.moderator.blockActivity.unblockedSummary"
-      : "contentModeration.moderator.blockActivity.summary",
-    {
-      blocker: (
-        <ProfileIdentity
-          key="blocker"
-          profileId={item.blocker_profile_id}
-          handle={item.blocker_handle}
-          pfp={item.blocker_pfp}
-        />
-      ),
-      blocked: (
-        <ProfileIdentity
-          key="blocked"
-          profileId={item.blocked_profile_id}
-          handle={item.blocked_handle}
-          pfp={item.blocked_pfp}
-        />
-      ),
-    }
-  );
+  const isUnblock =
+    item.action === ApiContentModerationBlockActivityItemActionEnum.Unblocked;
+  const LockIcon = isUnblock ? LockOpenIcon : LockClosedIcon;
 
   return (
-    <li className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-6 tw-gap-y-2 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-px-3 tw-py-3">
-      <div className="tw-flex tw-min-w-0 tw-max-w-full tw-flex-1 tw-basis-80 tw-items-center tw-gap-x-3 tw-text-sm tw-font-medium tw-text-iron-400">
-        {Children.map(relationship, (part) =>
-          typeof part === "string" ? (
-            <span className="tw-flex-none tw-whitespace-pre-wrap">{part}</span>
-          ) : (
-            part
-          )
+    <li className="tw-grid tw-grid-cols-[minmax(0,1fr)_7.5rem_minmax(0,1fr)] tw-items-center tw-gap-x-3 tw-gap-y-2 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-px-3 tw-py-3 tw-text-sm @[32rem]:tw-gap-x-6 @[48rem]:tw-grid-cols-[minmax(0,1fr)_8.5rem_minmax(0,1fr)_10.5rem] @[64rem]:tw-grid-cols-[18rem_8.5rem_18rem_minmax(10.5rem,1fr)]">
+      <ProfileIdentity
+        profileId={item.blocker_profile_id}
+        handle={item.blocker_handle}
+        pfp={item.blocker_pfp}
+      />{" "}
+      <span
+        className={`tw-inline-flex tw-items-center tw-gap-2 tw-font-semibold ${isUnblock ? "tw-text-green" : "tw-text-red"}`}
+      >
+        {t(
+          locale,
+          isUnblock
+            ? "contentModeration.moderator.blockActivity.unblocked"
+            : "contentModeration.moderator.blockActivity.blocked"
         )}
-      </div>{" "}
+        <LockIcon aria-hidden="true" className="tw-size-5 tw-flex-none" />
+      </span>{" "}
+      <ProfileIdentity
+        profileId={item.blocked_profile_id}
+        handle={item.blocked_handle}
+        pfp={item.blocked_pfp}
+      />{" "}
       {timestamp && (
         <time
           dateTime={new Date(item.created_at).toISOString()}
-          className="tw-ml-auto tw-flex-none tw-whitespace-nowrap tw-text-xs tw-text-iron-400"
+          className="tw-col-span-3 tw-justify-self-end tw-whitespace-nowrap tw-text-xs tw-text-iron-400 @[48rem]:tw-col-span-1"
         >
           {timestamp}
         </time>

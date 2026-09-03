@@ -219,8 +219,10 @@ Authorized moderators can review open reports in **WatchTower** at
 WatchTower separates **Open reports**, **Resolved reports**, **Suspended
 profiles**, and **Block activity**. Block activity is a newest-first,
 continuously loaded trail showing who blocked or unblocked whom. Each compact
-row links both available profiles and shows the action and date together;
-content wraps only when space is limited. Block and unblock events appear in
+row aligns the two linked profiles, action, and date in consistent columns.
+**Blocked** has red text and a closed lock; **Unblocked** has green text and an
+open lock. Full handles wrap when needed instead of being truncated, and the
+date moves below on narrow screens. Block and unblock events appear in
 the same feed, and an unblock does not remove the earlier block from history.
 It records only actual relationship transitions;
 blocking remains independent from reporting, AI assessment, content decisions,
