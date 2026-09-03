@@ -12,7 +12,7 @@ interface DropVoteProgressingProps {
   readonly compact?: boolean | undefined;
   readonly tooltipLabel?: string | undefined;
   readonly numberFont?: "mono" | "sans" | undefined;
-  readonly numberSize?: "sm" | "body" | undefined;
+  readonly numberSize?: "mobile-xs" | "sm" | "body" | undefined;
   readonly numberWeight?: "bold" | "semibold" | undefined;
   readonly visualVariant?: "default" | "memes" | undefined;
 }
@@ -119,10 +119,12 @@ export default function DropVoteProgressing({
     visualVariant
   );
 
-  const numberSizeClass =
-    numberSize === "body"
-      ? "tw-text-body tw-leading-5"
-      : "tw-text-sm";
+  let numberSizeClass = "tw-text-sm";
+  if (numberSize === "body") {
+    numberSizeClass = "tw-text-body tw-leading-5";
+  } else if (numberSize === "mobile-xs") {
+    numberSizeClass = "tw-text-xs sm:tw-text-sm";
+  }
   const numberTypographyClass =
     compact || numberFont === "sans" ? "tw-tabular-nums" : "tw-font-mono";
   const numberWeightClass =

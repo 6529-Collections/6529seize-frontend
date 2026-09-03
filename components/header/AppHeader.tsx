@@ -552,6 +552,10 @@ export default function AppHeader() {
     isPageShareSupported({ activeView, pathname, surface: "mobile" });
 
   const isProfilePage = typeof params["user"] === "string";
+  const preferencesProfileReturnTo =
+    isCapacitor && pathname === "/preferences" && connectedProfile?.handle
+      ? `/${encodeURIComponent(connectedProfile.handle)}`
+      : null;
   const profileCollectedReturnContext = isCapacitor
     ? getProfileCollectedTokenReturnContext({
         pathname,
@@ -563,6 +567,7 @@ export default function AppHeader() {
     isInsideWave ||
     isCreateRoute ||
     isProfileWavesFeedView ||
+    preferencesProfileReturnTo !== null ||
     profileCollectedReturnContext !== null ||
     (isProfilePage && canGoBack);
   const pfpImage = (
@@ -649,6 +654,7 @@ export default function AppHeader() {
             <BackButton
               key={`${pathname}?${searchParams.toString()}`}
               returnTo={
+                preferencesProfileReturnTo ??
                 profileCollectedReturnContext?.href ??
                 (isProfileWavesFeedView ? "/waves" : undefined)
               }

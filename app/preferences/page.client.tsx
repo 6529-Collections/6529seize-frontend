@@ -7,7 +7,9 @@ import ContentPreferencesSettings from "@/components/preferences/ContentPreferen
 import ReportsPreferencesSettings from "@/components/preferences/ReportsPreferencesSettings";
 import UserSetUpProfileCta from "@/components/user/utils/set-up-profile/UserSetUpProfileCta";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import useCapacitor from "@/hooks/useCapacitor";
 import { t } from "@/i18n/messages";
+import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 
 export type PreferencesTab = "notifications" | "blocked-profiles" | "reports";
@@ -43,6 +45,7 @@ export default function PreferencesPageClient({
   readonly activeTab: PreferencesTab;
 }) {
   const locale = useBrowserLocale();
+  const { isCapacitor } = useCapacitor();
   const { connectedProfile, fetchingProfile } = useAuth();
   const { connectionState, hasValidWalletAuth } = useSeizeConnectContext();
   const isLoadingProfile =
@@ -54,11 +57,26 @@ export default function PreferencesPageClient({
     hasValidWalletAuth === true &&
     !connectedProfile?.handle;
   const canManagePreferences = Boolean(connectedProfile?.handle);
+  const profileHref = connectedProfile?.handle
+    ? `/${encodeURIComponent(connectedProfile.handle)}`
+    : null;
 
   return (
     <main className="tailwind-scope tw-min-h-dvh tw-bg-black tw-px-4 tw-py-8 sm:tw-px-6 sm:tw-py-12">
       <div className="tw-mx-auto tw-w-full tw-max-w-5xl">
         <div>
+          {!isCapacitor && profileHref && (
+            <Link
+              href={profileHref}
+              className="tw-group -tw-ml-2 tw-mb-4 tw-inline-flex tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-md tw-px-2 tw-text-sm tw-font-medium tw-text-iron-300 tw-no-underline tw-transition-colors desktop-hover:hover:tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+            >
+              <ArrowLeftIcon
+                aria-hidden="true"
+                className="tw-size-4 tw-flex-shrink-0 tw-transition-transform desktop-hover:group-hover:-tw-translate-x-0.5"
+              />
+              <span>{t(locale, "preferences.backToProfile")}</span>
+            </Link>
+          )}
           <h1 className="tw-m-0 tw-text-3xl tw-font-semibold tw-tracking-tight tw-text-iron-50">
             {t(locale, "preferences.title")}
           </h1>
