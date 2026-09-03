@@ -1,4 +1,4 @@
 interface:
   display_name: "Deploy 6529"
   short_description: "Deploy with Git merges and GitHub Actions."
-  default_prompt: "Use $deploy-6529 to merge, deploy, and validate the requested 6529 frontend or coupled change in the authorized environment using GitHub Actions."
+  default_prompt: "Use $deploy-6529 to merge and deploy the requested 6529 frontend or coupled change in the authorized environment using GitHub Actions. Complete deployment after artifact, version, and health checks; report automatic E2E separately without waiting for it."

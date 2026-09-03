@@ -20,9 +20,12 @@
   conflicts normally, and never force-push or overwrite a moved shared ref.
   Do not cancel another developer's deployment; coordinate through GitHub run
   visibility and wait when the work would conflict.
-- Follow each deployment through its existing health and automatic E2E checks.
-  Fix failures on the development branch and repeat the authorized sequence.
-  Keep ordinary CI, artifact integrity, and runtime version checks intact.
+- Complete deployments after build, artifact integrity, runtime version, and
+  health checks pass. Automatic E2E runs separately and does not hold up a
+  merge, deployment, or promotion to the next authorized environment.
+- Unrelated PR E2E failures or pending runs do not block releases. Keep relevant
+  build, unit/contract, and security checks intact; report E2E status separately.
+  Fix known regressions attributable to the change on the development branch.
 - CI wave notifications carry deploy run IDs through E2E and reruns. The
   backend alone resolves the drop reply target; notification failures remain
   best effort. Keep receiver and sender contracts compatible during rollout.
