@@ -12,6 +12,8 @@
     // 2) Optionally add entries Knip can't infer from scripts/configs
     //    (Next.js entries are auto-added by the Next plugin)
     "entry": [
+      // The generated serializer catalogs the full API, including models not used by today's UI.
+      "generated/models/ObjectSerializer.ts",
       "scripts/**/*.{ts,js,cjs,mjs}",  // local CLIs used via package.json scripts
       "bin/**/*.mjs",                // repo-local Node CLIs launched from shell helpers
       "ops/skills/**/scripts/**/*.{js,cjs,mjs}", // repo-local skill CLIs invoked by SKILL.md instructions
@@ -50,8 +52,6 @@
 
     // 5) Generated code: keep analyzing, but avoid noisy "unused exports/files" here
     "ignoreIssues": {
-      // Archived source is intentionally inert and may retain historical
-      // relative imports that are no longer valid from its archive location.
       "__mocks__/**": ["files", "exports", "types"],
       "__tests__/**": ["files", "exports", "types"],
       "tests/**": ["files", "exports", "types"],

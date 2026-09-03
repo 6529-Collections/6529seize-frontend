@@ -318,7 +318,15 @@ describe("serialized post-deploy E2E", () => {
     ["production", productionE2e],
   ])("keeps %s deployed-source execution cache-free", (_environment, e2e) => {
     const source = e2e.source;
+    const job =
+      e2e.workflow.jobs.readonly ?? e2e.workflow.jobs["staging-packs"];
+    const nodeSetups = job.steps.filter((step: { uses?: string }) =>
+      step.uses?.startsWith("actions/setup-node@")
+    );
 
+    expect(nodeSetups).toHaveLength(1);
+    expect(nodeSetups[0].with["package-manager-cache"]).toBe(false);
+    expect(nodeSetups[0].with.cache).toBeUndefined();
     expect(source).not.toContain("actions/cache");
     expect(source).not.toContain("cache: pnpm");
     expect(source).not.toContain("PLAYWRIGHT_CACHE_HIT");
