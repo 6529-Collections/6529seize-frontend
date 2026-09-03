@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       automatic_deploy_run_id:
-        description: Successful Web Deploy - PROD run ID to validate again
+        description: Successful Web Deploy - PROD run ID; supplied automatically, required for a manual rerun
         type: string
-        required: false
+        required: true
 
 permissions:
   actions: read

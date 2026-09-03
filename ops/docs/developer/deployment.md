@@ -27,6 +27,8 @@ actual deployment.
 - Keep CI, artifact integrity, deployed-version checks, and health checks.
   Successful frontend deployments automatically trigger separate E2E workflows.
   Web Deploy finishes before E2E; follow both runs before calling the change validated.
+  Automatic dispatch supplies the deployment run ID. To rerun E2E manually, select
+  `main` and supply that successful deployment run ID; no SHA input is needed.
 - Coordinate potentially conflicting deployments through GitHub run visibility;
   existing concurrency is repository-scoped. Do not cancel another developer's
   run. Wait for that work to finish when the environment would conflict.

@@ -32,6 +32,7 @@ jobs:
       - name: Dispatch exact successful deploy to staging E2E
         id: e2e
         env:
+          # Run the verifier from main, then check out the exact deployed source for testing.
           DEPLOY_REF: main
           DEPLOY_CONCLUSION: ${{ github.event.workflow_run.conclusion }}
           DEPLOY_HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
@@ -46,7 +47,7 @@ jobs:
           test "$DEPLOY_CONCLUSION" = success
           test "$DEPLOY_HEAD_BRANCH" = 1a-staging
           test "$DEPLOY_HEAD_REPOSITORY" = "$GITHUB_REPOSITORY"
-          [[ "$DEPLOY_CREATED_AT" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9:.]+Z$ ]]
+          [[ "$DEPLOY_CREATED_AT" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}([.][0-9]+)?Z$ ]]
 
           runs_file="$(mktemp)"
           trap 'rm -f "$runs_file"' EXIT
@@ -102,7 +103,11 @@ jobs:
             "repos/${GITHUB_REPOSITORY}/actions/workflows/staging-e2e.yml/dispatches" \
             --input - <<<"$dispatch_payload" || dispatch_status=$?
 
-          for _ in $(seq 1 20); do
+          if [ "$dispatch_status" -ne 0 ]; then
+            echo "::warning::Dispatch request returned gh status ${dispatch_status}; checking whether GitHub accepted it before any retry."
+          fi
+
+          for _ in $(seq 1 60); do
             observed="$(list_exact_runs)"
             observed_count="$(jq -er 'length' <<<"$observed")"
             if [ "$observed_count" -gt 1 ]; then

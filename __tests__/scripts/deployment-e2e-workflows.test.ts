@@ -182,7 +182,7 @@ describe("separate post-deploy E2E", () => {
       expect(
         e2e.workflow.on.workflow_dispatch.inputs.automatic_deploy_run_id
           .required
-      ).toBe(false);
+      ).toBe(true);
       expect(
         e2e.workflow.on.workflow_dispatch.inputs.target_sha
       ).toBeUndefined();
@@ -192,7 +192,11 @@ describe("separate post-deploy E2E", () => {
       );
       expect(resolve.run).toContain(`.head_branch == "${branch}"`);
       expect(resolve.run).toContain(`.name == "${deployJobName}"`);
-      expect(resolve.run).toContain('.conclusion == "success"');
+      const [runSelection, jobSelection] = resolve.run.split(
+        "deploy_run_attempt="
+      );
+      expect(runSelection).toContain('.conclusion == "success"');
+      expect(jobSelection).toContain('.conclusion == "success"');
       expect(resolve.run).toContain('test "$GITHUB_REF" = refs/heads/main');
       expect(resolve.run).toContain("/attempts/\${deploy_run_attempt}/jobs");
       expect(resolve.run).not.toContain("MANUAL_TARGET_SHA");
