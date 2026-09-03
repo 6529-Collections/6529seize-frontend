@@ -569,6 +569,7 @@ export default function ContentModerationPageClient() {
   );
   const permissionsLoading =
     fetchingProfile || (hasModeratorIdentity && accessQuery.isLoading);
+  const moderatorContentReady = canModerate && !permissionsLoading;
   const activeDataState = getActiveDataState(
     activeTab,
     queueQuery,
@@ -592,7 +593,7 @@ export default function ContentModerationPageClient() {
         (!hasModeratorIdentity || (accessQuery.isSuccess && !canModerate)) && (
           <ContentModerationNoAccess locale={locale} />
         )}
-      {!permissionsLoading && canModerate && (
+      {moderatorContentReady && (
         <ContentModerationTabs
           activeTab={activeTab}
           openCount={accessQuery.data?.open_report_count ?? 0}
@@ -602,16 +603,16 @@ export default function ContentModerationPageClient() {
       )}
       <div
         id="moderation-tabpanel"
-        role={canModerate && !permissionsLoading ? "tabpanel" : undefined}
+        role={moderatorContentReady ? "tabpanel" : undefined}
         aria-labelledby={
-          canModerate && !permissionsLoading
+          moderatorContentReady
             ? `moderation-tab-${activeTab}`
             : undefined
         }
-        tabIndex={canModerate && !permissionsLoading ? 0 : undefined}
+        tabIndex={moderatorContentReady ? 0 : undefined}
         className="focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400"
       >
-        {!permissionsLoading && canModerate && activeDataState.isLoading && (
+        {moderatorContentReady && activeDataState.isLoading && (
           <output className="tw-mb-0 tw-mt-8 tw-text-sm tw-text-iron-400">
             {t(locale, "contentModeration.moderator.loading")}
           </output>
@@ -666,7 +667,9 @@ export default function ContentModerationPageClient() {
               {t(locale, "contentModeration.moderator.emptySuspended")}
             </p>
           )}
-        {canModerate && activeTab === "BLOCK_ACTIVITY" && <BlockActivityFeed />}
+        {canModerate && activeTab === "BLOCK_ACTIVITY" && (
+          <BlockActivityFeed enabled={moderatorContentReady} />
+        )}
         {canModerate &&
           activeTab === "SUSPENDED" &&
           suspendedProfiles.length > 0 && (

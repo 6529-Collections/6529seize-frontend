@@ -11,7 +11,11 @@ import BlockActivityCard from "./BlockActivityCard";
 
 const BLOCK_ACTIVITY_PAGE_SIZE = 50;
 
-export default function BlockActivityFeed() {
+export default function BlockActivityFeed({
+  enabled,
+}: {
+  readonly enabled: boolean;
+}) {
   const locale = useBrowserLocale();
   const query = useInfiniteQuery({
     queryKey: BLOCK_ACTIVITY_QUERY_KEY,
@@ -25,16 +29,21 @@ export default function BlockActivityFeed() {
       lastPage.length === BLOCK_ACTIVITY_PAGE_SIZE
         ? lastPage.at(-1)?.cursor
         : undefined,
+    enabled,
     retry: false,
   });
   const items = useMemo(() => query.data?.pages.flat() ?? [], [query.data]);
   const { fetchNextPage, hasNextPage, isFetchingNextPage } = query;
   const loadMore = useCallback(() => {
-    if (hasNextPage && !isFetchingNextPage) {
+    if (enabled && hasNextPage && !isFetchingNextPage) {
       void fetchNextPage();
     }
-  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
+  }, [enabled, fetchNextPage, hasNextPage, isFetchingNextPage]);
   const loadMoreRef = useIntersectionObserver(loadMore);
+
+  if (!enabled) {
+    return null;
+  }
 
   if (query.isLoading) {
     return (

@@ -1,3 +1,4 @@
+import BlockActivityFeed from "@/app/content-moderation/BlockActivityFeed";
 import ContentModerationPageClient from "@/app/content-moderation/page.client";
 import {
   type ApiContentModerationBlockActivityItem,
@@ -14,6 +15,7 @@ import {
   fetchContentModerationQueue,
   fetchSuspendedModerationProfiles,
 } from "@/services/api/content-moderation-api";
+import { BLOCK_ACTIVITY_QUERY_KEY } from "@/services/content-moderation/content-moderation-query";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   act,
@@ -176,6 +178,83 @@ describe("ContentModerationPageClient pagination", () => {
     mockFetchingProfile = false;
     mockCanModerate = true;
     mockBlockActivityIntersection = null;
+  });
+
+  it("does not fetch a mounted disabled block feed until access is enabled", async () => {
+    mockFetchContentModerationBlockActivity.mockResolvedValue([]);
+    const client = new QueryClient();
+    const feed = (enabled: boolean) => (
+      <QueryClientProvider client={client}>
+        <BlockActivityFeed enabled={enabled} />
+      </QueryClientProvider>
+    );
+    const { container, rerender } = render(feed(false));
+    await act(async () => {
+      mockBlockActivityIntersection?.(true);
+    });
+    expect(container).toBeEmptyDOMElement();
+    expect(mockFetchContentModerationBlockActivity).not.toHaveBeenCalled();
+
+    rerender(feed(true));
+    expect(
+      await screen.findByText("There is no block activity yet.")
+    ).toBeVisible();
+    expect(mockFetchContentModerationBlockActivity).toHaveBeenCalledTimes(1);
+  });
+
+  it("hides cached block activity and prevents pagination after access is disabled", async () => {
+    const client = new QueryClient({
+      defaultOptions: { queries: { staleTime: Infinity } },
+    });
+    client.setQueryData(BLOCK_ACTIVITY_QUERY_KEY, {
+      pages: [
+        Array.from({ length: 50 }, (_, index) => createBlockActivityItem(index)),
+      ],
+      pageParams: [undefined],
+    });
+    const feed = (enabled: boolean) => (
+      <QueryClientProvider client={client}>
+        <BlockActivityFeed enabled={enabled} />
+      </QueryClientProvider>
+    );
+    const { container, rerender } = render(feed(true));
+    expect(screen.getByRole("button", { name: "Load more" })).toBeVisible();
+    rerender(feed(false));
+    await act(async () => {
+      mockBlockActivityIntersection?.(true);
+      await client.invalidateQueries({ queryKey: BLOCK_ACTIVITY_QUERY_KEY });
+    });
+    expect(container).toBeEmptyDOMElement();
+    expect(mockFetchContentModerationBlockActivity).not.toHaveBeenCalled();
+  });
+
+  it("waits for the profile to finish loading before requesting block activity", async () => {
+    mockFetchingProfile = true;
+    mockFetchContentModerationBlockActivity.mockResolvedValue([]);
+    globalThis.history.replaceState(null, "", "/content-moderation/block-activity");
+    const client = new QueryClient();
+    const page = (
+      <QueryClientProvider client={client}>
+        <ContentModerationPageClient />
+      </QueryClientProvider>
+    );
+    const { rerender } = render(page);
+    await act(async () => {
+      mockBlockActivityIntersection?.(true);
+    });
+    expect(mockFetchContentModerationBlockActivity).not.toHaveBeenCalled();
+    expect(screen.queryByRole("tablist")).not.toBeInTheDocument();
+
+    mockFetchingProfile = false;
+    rerender(
+      <QueryClientProvider client={client}>
+        <ContentModerationPageClient />
+      </QueryClientProvider>
+    );
+    expect(
+      await screen.findByText("There is no block activity yet.")
+    ).toBeVisible();
+    expect(mockFetchContentModerationBlockActivity).toHaveBeenCalledTimes(1);
   });
 
   it.each([
