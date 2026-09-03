@@ -50,7 +50,7 @@ async function runNotifier(
         CI_PIPELINES_TITLE: "Deploy complete",
         CI_PIPELINES_SERVICE: "web",
         GITHUB_REPOSITORY: "6529-Collections/6529seize-frontend",
-        GITHUB_WORKFLOW: "Release Bus - Deploy Frontend Production",
+        GITHUB_WORKFLOW: "Web Deploy - PROD",
         GITHUB_RUN_ID: "123",
         GITHUB_RUN_NUMBER: "45",
         GITHUB_SHA: "a".repeat(40),
@@ -77,7 +77,6 @@ describe("notify-ci-wave payload", () => {
   it("sends canonical contributors and the deployed SHA", async () => {
     const expectedSha = "b".repeat(40);
     const result = await runNotifier({
-      CI_RELEASE_TRAIN_ID: "train-123",
       CI_RELEASE_CONTRIBUTORS: JSON.stringify([
         "GelatoGenesis",
         "prxt6529",
@@ -90,7 +89,6 @@ describe("notify-ci-wave payload", () => {
       code: 0,
       stderr: "",
       payload: {
-        release_train_id: "train-123",
         contributor_github_logins: ["GelatoGenesis", "prxt6529"],
         sha: expectedSha,
       },
@@ -120,54 +118,51 @@ describe("notify-ci-wave payload", () => {
     ).toBe(false);
   });
 
-  it("rejects contributors without a train id", async () => {
-    const result = await runNotifier({
-      CI_RELEASE_CONTRIBUTORS: JSON.stringify(["GelatoGenesis"]),
-    });
-
-    expect(result.code).toBe(1);
-    expect(result.stderr).toContain(
-      "CI_RELEASE_TRAIN_ID is required with CI_RELEASE_CONTRIBUTORS"
-    );
-    expect(result.payload).toBeNull();
-  });
-
-  it("omits a workflow train id when there are no contributor credits", async () => {
-    const result = await runNotifier({
-      CI_RELEASE_TRAIN_ID: "train-123",
-      CI_RELEASE_CONTRIBUTORS: "[]",
-    });
-
+  it("omits empty contributor credits", async () => {
+    const result = await runNotifier({ CI_RELEASE_CONTRIBUTORS: "[]" });
     expect(result.code).toBe(0);
-    expect(result.payload).not.toHaveProperty("release_train_id");
     expect(result.payload).not.toHaveProperty("contributor_github_logins");
   });
 
-  it("sends a deploy train id without requiring contributor credits", async () => {
+  it("sends ordinary deploy identity without contributor credits", async () => {
     const result = await runNotifier({
       CI_PIPELINES_ALERT_TYPE: "deploy",
-      CI_RELEASE_TRAIN_ID: "train-123",
-      CI_RELEASE_CONTRIBUTORS: "[]",
       GITHUB_RUN_ATTEMPT: "2",
     });
-
     expect(result).toMatchObject({
       code: 0,
-      stderr: "",
-      payload: {
-        alert_type: "deploy",
-        release_train_id: "train-123",
-        run_attempt: 2,
-      },
+      payload: { alert_type: "deploy", run_id: "123", run_attempt: 2 },
     });
-    expect(result.payload).not.toHaveProperty("contributor_github_logins");
+  });
+
+  it("keeps deployment alerts while opting out of release notes", async () => {
+    const result = await runNotifier({
+      CI_PIPELINES_ALERT_TYPE: "deploy",
+      CI_RELEASE_NOTES_PROMPT_PATH: "ops/release-notes/release-notes.prompt.md",
+      CI_RELEASE_NOTE_OPT_OUT: "true",
+    });
+    expect(result).toMatchObject({
+      code: 0,
+      payload: { alert_type: "deploy" },
+    });
+    expect(result.payload).not.toHaveProperty("release_notes_prompt_path");
+    expect(result.payload).not.toHaveProperty("release_group_id");
+    expect(result.payload).not.toHaveProperty("deployed_at");
+  });
+
+  it("rejects malformed release-note opt-out", async () => {
+    const result = await runNotifier({ CI_RELEASE_NOTE_OPT_OUT: "yes" });
+    expect(result.code).toBe(1);
+    expect(result.stderr).toContain(
+      "CI_RELEASE_NOTE_OPT_OUT must be true or false"
+    );
+    expect(result.payload).toBeNull();
   });
 
   it("sends WEB E2E parent identity and validation metadata", async () => {
     const result = await runNotifier({
       CI_PIPELINES_ALERT_TYPE: "web_e2e",
       CI_PIPELINES_PARENT_DEPLOY_RUN_ID: "791",
-      CI_PIPELINES_PARENT_RELEASE_TRAIN_ID: "train-123",
       CI_PIPELINES_VALIDATION_PACK: "core",
       GITHUB_RUN_ATTEMPT: "2",
     });
@@ -178,7 +173,6 @@ describe("notify-ci-wave payload", () => {
       payload: {
         alert_type: "web_e2e",
         parent_deploy_run_id: "791",
-        parent_release_train_id: "train-123",
         validation_pack: "core",
         run_attempt: 2,
         sha: null,
@@ -214,7 +208,6 @@ describe("notify-ci-wave payload", () => {
 
   it("rejects an invalid contributor login", async () => {
     const result = await runNotifier({
-      CI_RELEASE_TRAIN_ID: "train-123",
       CI_RELEASE_CONTRIBUTORS: JSON.stringify(["not a login"]),
     });
 
@@ -229,7 +222,6 @@ describe("notify-ci-wave payload", () => {
     "rejects impossible GitHub login %s",
     async (login) => {
       const result = await runNotifier({
-        CI_RELEASE_TRAIN_ID: "train-123",
         CI_RELEASE_CONTRIBUTORS: JSON.stringify([login]),
       });
 

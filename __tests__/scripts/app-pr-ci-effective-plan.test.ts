@@ -5,7 +5,7 @@ import path from "node:path";
 
 type EffectivePlan = {
   checks: {
-    release_bus_contract: { required: boolean };
+    deployment_contract: { required: boolean };
     test_typecheck: { required: boolean };
     playwright_smoke?: { required: boolean };
     playwright_critical_shell?: { required: boolean };
@@ -61,7 +61,7 @@ describe("effective App PR CI plan", () => {
   it("preserves risk-selected browser checks for ordinary runtime changes", () => {
     const effective = executePlan(["components/header/AppHeader.tsx"]);
 
-    expect(effective.checks.release_bus_contract.required).toBe(false);
+    expect(effective.checks.deployment_contract.required).toBe(false);
     expect(effective.checks.test_typecheck.required).toBe(false);
     expect(effective.checks.playwright_smoke?.required).toBe(true);
     expect(effective.checks.playwright_critical_shell?.required).toBe(true);
@@ -90,6 +90,8 @@ describe("effective App PR CI plan", () => {
 
   it.each([
     ".github/workflows/deploy-staging.yml",
+    "ops/docs/developer/frontend-deployment.md",
+    "ops/skills/deploy-6529/SKILL.md",
     "ops/scripts/deploy-staging-artifact.sh",
     "ops/scripts/artifact-portability-report-source.cjs",
     "scripts/museum-release-tier.cjs",
@@ -97,17 +99,15 @@ describe("effective App PR CI plan", () => {
     "tests/packs.manifest.cjs",
     "components/museum/MuseumNetworkProposition.tsx",
     "__tests__/components/museum/MuseumNetworkProposition.test.tsx",
-    "ops/docs/developer/simple-release-bus-v2.md",
-    "ops/skills/deploy-6529/SKILL.md",
-    "__tests__/scripts/release-request-preflight.test.ts",
-  ])("requires Release Bus contracts for %s", (file) => {
-    expect(executePlan([file]).checks.release_bus_contract.required).toBe(true);
+    "__tests__/scripts/deployment-e2e-workflows.test.ts",
+  ])("requires frontend deployment contracts for %s", (file) => {
+    expect(executePlan([file]).checks.deployment_contract.required).toBe(true);
   });
 
   it("rejects malformed portability paths without ambiguous backtracking", () => {
     const malformed = `ops/scripts/artifact-portability-${"--".repeat(5_000)}.cjs`;
 
-    expect(executePlan([malformed]).checks.release_bus_contract.required).toBe(
+    expect(executePlan([malformed]).checks.deployment_contract.required).toBe(
       false
     );
   });

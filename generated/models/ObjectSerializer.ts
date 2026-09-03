@@ -397,25 +397,6 @@ export * from '../models/ApiRedeemConnectionShareResponse';
 export * from '../models/ApiRedeemRefreshTokenRequest';
 export * from '../models/ApiRedeemRefreshTokenResponse';
 export * from '../models/ApiRegisterPushNotificationTokenRequest';
-export * from '../models/ApiReleaseBusV2BaselineAdoptionBackendUnit';
-export * from '../models/ApiReleaseBusV2BaselineAdoptionCandidate';
-export * from '../models/ApiReleaseBusV2BaselineAdoptionRequest';
-export * from '../models/ApiReleaseBusV2BaselineAdoptionResponse';
-export * from '../models/ApiReleaseBusV2BaselineAutomaticE2EDecisionRequest';
-export * from '../models/ApiReleaseBusV2BaselineAutomaticE2EDecisionResponse';
-export * from '../models/ApiReleaseBusV2BaselineBackendDeploymentEventRequest';
-export * from '../models/ApiReleaseBusV2BaselineBackendDeploymentEventResponse';
-export * from '../models/ApiReleaseBusV2CandidateDeregistrationCandidateVersion';
-export * from '../models/ApiReleaseBusV2CandidateDeregistrationCommittedError';
-export * from '../models/ApiReleaseBusV2CandidateDeregistrationControlVersion';
-export * from '../models/ApiReleaseBusV2CandidateDeregistrationError';
-export * from '../models/ApiReleaseBusV2CandidateDeregistrationExecuteRequest';
-export * from '../models/ApiReleaseBusV2CandidateDeregistrationLockVersion';
-export * from '../models/ApiReleaseBusV2CandidateDeregistrationPrepareRequest';
-export * from '../models/ApiReleaseBusV2CandidateDeregistrationRequest';
-export * from '../models/ApiReleaseBusV2CandidateDeregistrationResponse';
-export * from '../models/ApiReleaseBusV2CandidateDeregistrationStagingRefs';
-export * from '../models/ApiReleaseBusV2CandidateDeregistrationUncommittedError';
 export * from '../models/ApiRepCategoriesPage';
 export * from '../models/ApiRepCategory';
 export * from '../models/ApiRepContributor';
@@ -629,49 +610,6 @@ export * from '../models/RedeemedSubscriptionCounts';
 export * from '../models/RedeemedSubscriptionCountsPage';
 export * from '../models/RedeemedSubscriptionPage';
 export * from '../models/RefreshWalletAuthSessionRequest';
-export * from '../models/ReleaseBusV2Candidate';
-export * from '../models/ReleaseBusV2CandidateActionRequest';
-export * from '../models/ReleaseBusV2CandidateListResponse';
-export * from '../models/ReleaseBusV2CandidateResponse';
-export * from '../models/ReleaseBusV2CandidateStatus';
-export * from '../models/ReleaseBusV2ControlRequest';
-export * from '../models/ReleaseBusV2ControlUpdateResponse';
-export * from '../models/ReleaseBusV2ControlsResponse';
-export * from '../models/ReleaseBusV2Dependency';
-export * from '../models/ReleaseBusV2DependencyRequest';
-export * from '../models/ReleaseBusV2DeployPlan';
-export * from '../models/ReleaseBusV2LaneState';
-export * from '../models/ReleaseBusV2Manifest';
-export * from '../models/ReleaseBusV2ManifestListResponse';
-export * from '../models/ReleaseBusV2Mode';
-export * from '../models/ReleaseBusV2ProductionAuthorityBindRequest';
-export * from '../models/ReleaseBusV2ProductionAuthorityBindResponse';
-export * from '../models/ReleaseBusV2ProductionAuthorityCompleteRequest';
-export * from '../models/ReleaseBusV2ProductionAuthorityCompletionResponse';
-export * from '../models/ReleaseBusV2ProductionAuthorityDenialResponse';
-export * from '../models/ReleaseBusV2ProductionAuthorityEpoch';
-export * from '../models/ReleaseBusV2ProductionAuthorityFailRequest';
-export * from '../models/ReleaseBusV2ProductionAuthorityIdentityRequest';
-export * from '../models/ReleaseBusV2ProductionAuthorityPrepareRequest';
-export * from '../models/ReleaseBusV2ProductionAuthorityPrepareResponse';
-export * from '../models/ReleaseBusV2ProductionAuthorityReauthorizeRequest';
-export * from '../models/ReleaseBusV2ProductionAuthorityResponseIdentity';
-export * from '../models/ReleaseBusV2ProductionSelectionItem';
-export * from '../models/ReleaseBusV2ProductionSelectionRequest';
-export * from '../models/ReleaseBusV2ProductionSelectionResponse';
-export * from '../models/ReleaseBusV2RegisterRequest';
-export * from '../models/ReleaseBusV2StagingState';
-export * from '../models/ReleaseBusV2StagingTransitionRequest';
-export * from '../models/ReleaseBusV2Train';
-export * from '../models/ReleaseBusV2TrainDetailResponse';
-export * from '../models/ReleaseBusV2TrainListResponse';
-export * from '../models/ReleaseBusV2VersionedActionRequest';
-export * from '../models/RepairCurrentReleaseBusV2StagingCandidates200Response';
-export * from '../models/RepairCurrentReleaseBusV2StagingCandidates200ResponseCandidatesInner';
-export * from '../models/RepairCurrentReleaseBusV2StagingCandidates200ResponseGithubStatusUpdates';
-export * from '../models/RepairCurrentReleaseBusV2StagingCandidates200ResponseGithubStatusUpdatesFailedCandidatesInner';
-export * from '../models/RepairCurrentReleaseBusV2StagingCandidatesRequest';
-export * from '../models/RepairCurrentReleaseBusV2StagingCandidatesRequestCandidatesInner';
 export * from '../models/SubscribeAllEditionsResponse';
 export * from '../models/SubscriptionCountResponse';
 export * from '../models/SubscriptionCounts';
@@ -1085,25 +1023,6 @@ import { ApiRedeemConnectionShareResponse    , ApiRedeemConnectionShareResponseC
 import { ApiRedeemRefreshTokenRequest } from '../models/ApiRedeemRefreshTokenRequest';
 import { ApiRedeemRefreshTokenResponse } from '../models/ApiRedeemRefreshTokenResponse';
 import { ApiRegisterPushNotificationTokenRequest } from '../models/ApiRegisterPushNotificationTokenRequest';
-import { ApiReleaseBusV2BaselineAdoptionBackendUnit, ApiReleaseBusV2BaselineAdoptionBackendUnitServiceEnum    } from '../models/ApiReleaseBusV2BaselineAdoptionBackendUnit';
-import { ApiReleaseBusV2BaselineAdoptionCandidate , ApiReleaseBusV2BaselineAdoptionCandidateRepositoryEnum      } from '../models/ApiReleaseBusV2BaselineAdoptionCandidate';
-import { ApiReleaseBusV2BaselineAdoptionRequest    , ApiReleaseBusV2BaselineAdoptionRequestExpectedFrontendRefEnum    , ApiReleaseBusV2BaselineAdoptionRequestExpectedBackendRefEnum       } from '../models/ApiReleaseBusV2BaselineAdoptionRequest';
-import { ApiReleaseBusV2BaselineAdoptionResponse        , ApiReleaseBusV2BaselineAdoptionResponseStatusEnum    } from '../models/ApiReleaseBusV2BaselineAdoptionResponse';
-import { ApiReleaseBusV2BaselineAutomaticE2EDecisionRequest  , ApiReleaseBusV2BaselineAutomaticE2EDecisionRequestDeployedRefEnum    } from '../models/ApiReleaseBusV2BaselineAutomaticE2EDecisionRequest';
-import { ApiReleaseBusV2BaselineAutomaticE2EDecisionResponse, ApiReleaseBusV2BaselineAutomaticE2EDecisionResponseDecisionEnum       } from '../models/ApiReleaseBusV2BaselineAutomaticE2EDecisionResponse';
-import { ApiReleaseBusV2BaselineBackendDeploymentEventRequest, ApiReleaseBusV2BaselineBackendDeploymentEventRequestEnvironmentEnum     , ApiReleaseBusV2BaselineBackendDeploymentEventRequestSourceRefEnum   , ApiReleaseBusV2BaselineBackendDeploymentEventRequestStatusEnum   } from '../models/ApiReleaseBusV2BaselineBackendDeploymentEventRequest';
-import { ApiReleaseBusV2BaselineBackendDeploymentEventResponse, ApiReleaseBusV2BaselineBackendDeploymentEventResponseOutcomeEnum     } from '../models/ApiReleaseBusV2BaselineBackendDeploymentEventResponse';
-import { ApiReleaseBusV2CandidateDeregistrationCandidateVersion } from '../models/ApiReleaseBusV2CandidateDeregistrationCandidateVersion';
-import { ApiReleaseBusV2CandidateDeregistrationCommittedError, ApiReleaseBusV2CandidateDeregistrationCommittedErrorOutcomeEnum     , ApiReleaseBusV2CandidateDeregistrationCommittedErrorPhysicalStagingPresenceEnum   } from '../models/ApiReleaseBusV2CandidateDeregistrationCommittedError';
-import { ApiReleaseBusV2CandidateDeregistrationControlVersion, ApiReleaseBusV2CandidateDeregistrationControlVersionScopeEnum     } from '../models/ApiReleaseBusV2CandidateDeregistrationControlVersion';
-import { ApiReleaseBusV2CandidateDeregistrationErrorClass } from '../models/ApiReleaseBusV2CandidateDeregistrationError';
-import { ApiReleaseBusV2CandidateDeregistrationExecuteRequest, ApiReleaseBusV2CandidateDeregistrationExecuteRequestPhaseEnum           } from '../models/ApiReleaseBusV2CandidateDeregistrationExecuteRequest';
-import { ApiReleaseBusV2CandidateDeregistrationLockVersion, ApiReleaseBusV2CandidateDeregistrationLockVersionNameEnum    } from '../models/ApiReleaseBusV2CandidateDeregistrationLockVersion';
-import { ApiReleaseBusV2CandidateDeregistrationPrepareRequest, ApiReleaseBusV2CandidateDeregistrationPrepareRequestPhaseEnum    } from '../models/ApiReleaseBusV2CandidateDeregistrationPrepareRequest';
-import { ApiReleaseBusV2CandidateDeregistrationRequestClass } from '../models/ApiReleaseBusV2CandidateDeregistrationRequest';
-import { ApiReleaseBusV2CandidateDeregistrationResponse, ApiReleaseBusV2CandidateDeregistrationResponsePhaseEnum          , ApiReleaseBusV2CandidateDeregistrationResponseModeEnum    , ApiReleaseBusV2CandidateDeregistrationResponsePhysicalStagingPresenceEnum    } from '../models/ApiReleaseBusV2CandidateDeregistrationResponse';
-import { ApiReleaseBusV2CandidateDeregistrationStagingRefs } from '../models/ApiReleaseBusV2CandidateDeregistrationStagingRefs';
-import { ApiReleaseBusV2CandidateDeregistrationUncommittedError, ApiReleaseBusV2CandidateDeregistrationUncommittedErrorOutcomeEnum    , ApiReleaseBusV2CandidateDeregistrationUncommittedErrorPhysicalStagingPresenceEnum   } from '../models/ApiReleaseBusV2CandidateDeregistrationUncommittedError';
 import { ApiRepCategoriesPage } from '../models/ApiRepCategoriesPage';
 import { ApiRepCategory } from '../models/ApiRepCategory';
 import { ApiRepContributor } from '../models/ApiRepContributor';
@@ -1317,49 +1236,6 @@ import { RedeemedSubscriptionCounts } from '../models/RedeemedSubscriptionCounts
 import { RedeemedSubscriptionCountsPage } from '../models/RedeemedSubscriptionCountsPage';
 import { RedeemedSubscriptionPage } from '../models/RedeemedSubscriptionPage';
 import { RefreshWalletAuthSessionRequestClass } from '../models/RefreshWalletAuthSessionRequest';
-import { ReleaseBusV2Candidate , ReleaseBusV2CandidateRepositoryEnum            , ReleaseBusV2CandidateStagingLiveStateEnum     , ReleaseBusV2CandidateStagingTransitionRequestEnum               } from '../models/ReleaseBusV2Candidate';
-import { ReleaseBusV2CandidateActionRequest } from '../models/ReleaseBusV2CandidateActionRequest';
-import { ReleaseBusV2CandidateListResponse   } from '../models/ReleaseBusV2CandidateListResponse';
-import { ReleaseBusV2CandidateResponse   } from '../models/ReleaseBusV2CandidateResponse';
-import { ReleaseBusV2CandidateStatus } from '../models/ReleaseBusV2CandidateStatus';
-import { ReleaseBusV2ControlRequest, ReleaseBusV2ControlRequestScopeEnum    } from '../models/ReleaseBusV2ControlRequest';
-import { ReleaseBusV2ControlUpdateResponse    } from '../models/ReleaseBusV2ControlUpdateResponse';
-import { ReleaseBusV2ControlsResponse      } from '../models/ReleaseBusV2ControlsResponse';
-import { ReleaseBusV2Dependency   , ReleaseBusV2DependencyEnvironmentEnum    } from '../models/ReleaseBusV2Dependency';
-import { ReleaseBusV2DependencyRequest , ReleaseBusV2DependencyRequestEnvironmentEnum   } from '../models/ReleaseBusV2DependencyRequest';
-import { ReleaseBusV2DeployPlan } from '../models/ReleaseBusV2DeployPlan';
-import { ReleaseBusV2LaneState, ReleaseBusV2LaneStateLaneEnum  , ReleaseBusV2LaneStateStatusEnum     } from '../models/ReleaseBusV2LaneState';
-import { ReleaseBusV2Manifest  , ReleaseBusV2ManifestLaneEnum   , ReleaseBusV2ManifestStatusEnum             } from '../models/ReleaseBusV2Manifest';
-import { ReleaseBusV2ManifestListResponse } from '../models/ReleaseBusV2ManifestListResponse';
-import { ReleaseBusV2Mode } from '../models/ReleaseBusV2Mode';
-import { ReleaseBusV2ProductionAuthorityBindRequest , ReleaseBusV2ProductionAuthorityBindRequestControllerIdentityEnum  , ReleaseBusV2ProductionAuthorityBindRequestRepositoryEnum  , ReleaseBusV2ProductionAuthorityBindRequestEnvironmentEnum    , ReleaseBusV2ProductionAuthorityBindRequestSelectionDigestEnum     } from '../models/ReleaseBusV2ProductionAuthorityBindRequest';
-import { ReleaseBusV2ProductionAuthorityBindResponse  , ReleaseBusV2ProductionAuthorityBindResponseRepositoryEnum  , ReleaseBusV2ProductionAuthorityBindResponseEnvironmentEnum       , ReleaseBusV2ProductionAuthorityBindResponseStatusEnum            } from '../models/ReleaseBusV2ProductionAuthorityBindResponse';
-import { ReleaseBusV2ProductionAuthorityCompleteRequest , ReleaseBusV2ProductionAuthorityCompleteRequestControllerIdentityEnum  , ReleaseBusV2ProductionAuthorityCompleteRequestRepositoryEnum  , ReleaseBusV2ProductionAuthorityCompleteRequestEnvironmentEnum           } from '../models/ReleaseBusV2ProductionAuthorityCompleteRequest';
-import { ReleaseBusV2ProductionAuthorityCompletionResponse , ReleaseBusV2ProductionAuthorityCompletionResponseStatusEnum         } from '../models/ReleaseBusV2ProductionAuthorityCompletionResponse';
-import { ReleaseBusV2ProductionAuthorityDenialResponse } from '../models/ReleaseBusV2ProductionAuthorityDenialResponse';
-import { ReleaseBusV2ProductionAuthorityEpoch    } from '../models/ReleaseBusV2ProductionAuthorityEpoch';
-import { ReleaseBusV2ProductionAuthorityFailRequest , ReleaseBusV2ProductionAuthorityFailRequestControllerIdentityEnum  , ReleaseBusV2ProductionAuthorityFailRequestRepositoryEnum  , ReleaseBusV2ProductionAuthorityFailRequestEnvironmentEnum          , ReleaseBusV2ProductionAuthorityFailRequestReasonCodeEnum   } from '../models/ReleaseBusV2ProductionAuthorityFailRequest';
-import { ReleaseBusV2ProductionAuthorityIdentityRequest , ReleaseBusV2ProductionAuthorityIdentityRequestControllerIdentityEnum  , ReleaseBusV2ProductionAuthorityIdentityRequestRepositoryEnum  , ReleaseBusV2ProductionAuthorityIdentityRequestEnvironmentEnum     } from '../models/ReleaseBusV2ProductionAuthorityIdentityRequest';
-import { ReleaseBusV2ProductionAuthorityPrepareRequest , ReleaseBusV2ProductionAuthorityPrepareRequestControllerIdentityEnum  , ReleaseBusV2ProductionAuthorityPrepareRequestRepositoryEnum  , ReleaseBusV2ProductionAuthorityPrepareRequestEnvironmentEnum    , ReleaseBusV2ProductionAuthorityPrepareRequestSelectionDigestEnum   } from '../models/ReleaseBusV2ProductionAuthorityPrepareRequest';
-import { ReleaseBusV2ProductionAuthorityPrepareResponse  , ReleaseBusV2ProductionAuthorityPrepareResponseRepositoryEnum  , ReleaseBusV2ProductionAuthorityPrepareResponseEnvironmentEnum       , ReleaseBusV2ProductionAuthorityPrepareResponseStatusEnum            } from '../models/ReleaseBusV2ProductionAuthorityPrepareResponse';
-import { ReleaseBusV2ProductionAuthorityReauthorizeRequest , ReleaseBusV2ProductionAuthorityReauthorizeRequestControllerIdentityEnum  , ReleaseBusV2ProductionAuthorityReauthorizeRequestRepositoryEnum  , ReleaseBusV2ProductionAuthorityReauthorizeRequestEnvironmentEnum        } from '../models/ReleaseBusV2ProductionAuthorityReauthorizeRequest';
-import { ReleaseBusV2ProductionAuthorityResponseIdentity  , ReleaseBusV2ProductionAuthorityResponseIdentityRepositoryEnum  , ReleaseBusV2ProductionAuthorityResponseIdentityEnvironmentEnum       , ReleaseBusV2ProductionAuthorityResponseIdentityStatusEnum       } from '../models/ReleaseBusV2ProductionAuthorityResponseIdentity';
-import { ReleaseBusV2ProductionSelectionItem } from '../models/ReleaseBusV2ProductionSelectionItem';
-import { ReleaseBusV2ProductionSelectionRequest } from '../models/ReleaseBusV2ProductionSelectionRequest';
-import { ReleaseBusV2ProductionSelectionResponse , ReleaseBusV2ProductionSelectionResponseQualificationPolicyEnum     } from '../models/ReleaseBusV2ProductionSelectionResponse';
-import { ReleaseBusV2RegisterRequest , ReleaseBusV2RegisterRequestRepositoryEnum        } from '../models/ReleaseBusV2RegisterRequest';
-import { ReleaseBusV2StagingState, ReleaseBusV2StagingStateIdEnum  , ReleaseBusV2StagingStateStatusEnum               } from '../models/ReleaseBusV2StagingState';
-import { ReleaseBusV2StagingTransitionRequest  , ReleaseBusV2StagingTransitionRequestTransitionEnum    } from '../models/ReleaseBusV2StagingTransitionRequest';
-import { ReleaseBusV2Train , ReleaseBusV2TrainLaneEnum  , ReleaseBusV2TrainStatusEnum          , ReleaseBusV2TrainStagingPolicyEnum    , ReleaseBusV2TrainQualificationPolicyEnum             } from '../models/ReleaseBusV2Train';
-import { ReleaseBusV2TrainDetailResponse } from '../models/ReleaseBusV2TrainDetailResponse';
-import { ReleaseBusV2TrainListResponse   } from '../models/ReleaseBusV2TrainListResponse';
-import { ReleaseBusV2VersionedActionRequest } from '../models/ReleaseBusV2VersionedActionRequest';
-import { RepairCurrentReleaseBusV2StagingCandidates200Response    , RepairCurrentReleaseBusV2StagingCandidates200ResponseModeEnum      } from '../models/RepairCurrentReleaseBusV2StagingCandidates200Response';
-import { RepairCurrentReleaseBusV2StagingCandidates200ResponseCandidatesInner , RepairCurrentReleaseBusV2StagingCandidates200ResponseCandidatesInnerRepositoryEnum      , RepairCurrentReleaseBusV2StagingCandidates200ResponseCandidatesInnerDerivedStatusEnum  , RepairCurrentReleaseBusV2StagingCandidates200ResponseCandidatesInnerDerivedStagingLiveStateEnum     } from '../models/RepairCurrentReleaseBusV2StagingCandidates200ResponseCandidatesInner';
-import { RepairCurrentReleaseBusV2StagingCandidates200ResponseGithubStatusUpdates } from '../models/RepairCurrentReleaseBusV2StagingCandidates200ResponseGithubStatusUpdates';
-import { RepairCurrentReleaseBusV2StagingCandidates200ResponseGithubStatusUpdatesFailedCandidatesInner , RepairCurrentReleaseBusV2StagingCandidates200ResponseGithubStatusUpdatesFailedCandidatesInnerRepositoryEnum     } from '../models/RepairCurrentReleaseBusV2StagingCandidates200ResponseGithubStatusUpdatesFailedCandidatesInner';
-import { RepairCurrentReleaseBusV2StagingCandidatesRequest } from '../models/RepairCurrentReleaseBusV2StagingCandidatesRequest';
-import { RepairCurrentReleaseBusV2StagingCandidatesRequestCandidatesInner, RepairCurrentReleaseBusV2StagingCandidatesRequestCandidatesInnerRepositoryEnum     } from '../models/RepairCurrentReleaseBusV2StagingCandidatesRequestCandidatesInner';
 import { SubscribeAllEditionsResponse } from '../models/SubscribeAllEditionsResponse';
 import { SubscriptionCountResponse } from '../models/SubscriptionCountResponse';
 import { SubscriptionCounts } from '../models/SubscriptionCounts';
@@ -1474,31 +1350,6 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiRateMatter",
     "ApiRedeemConnectionShareRequestTargetClientTypeEnum",
     "ApiRedeemConnectionShareResponseClientTypeEnum",
-    "ApiReleaseBusV2BaselineAdoptionBackendUnitServiceEnum",
-    "ApiReleaseBusV2BaselineAdoptionCandidateRepositoryEnum",
-    "ApiReleaseBusV2BaselineAdoptionRequestExpectedFrontendRefEnum",
-    "ApiReleaseBusV2BaselineAdoptionRequestExpectedBackendRefEnum",
-    "ApiReleaseBusV2BaselineAdoptionResponseStatusEnum",
-    "ApiReleaseBusV2BaselineAutomaticE2EDecisionRequestDeployedRefEnum",
-    "ApiReleaseBusV2BaselineAutomaticE2EDecisionResponseDecisionEnum",
-    "ApiReleaseBusV2BaselineBackendDeploymentEventRequestEnvironmentEnum",
-    "ApiReleaseBusV2BaselineBackendDeploymentEventRequestSourceRefEnum",
-    "ApiReleaseBusV2BaselineBackendDeploymentEventRequestStatusEnum",
-    "ApiReleaseBusV2BaselineBackendDeploymentEventResponseOutcomeEnum",
-    "ApiReleaseBusV2CandidateDeregistrationCommittedErrorOutcomeEnum",
-    "ApiReleaseBusV2CandidateDeregistrationCommittedErrorPhysicalStagingPresenceEnum",
-    "ApiReleaseBusV2CandidateDeregistrationControlVersionScopeEnum",
-    "ApiReleaseBusV2CandidateDeregistrationErrorOutcomeEnum",
-    "ApiReleaseBusV2CandidateDeregistrationErrorPhysicalStagingPresenceEnum",
-    "ApiReleaseBusV2CandidateDeregistrationExecuteRequestPhaseEnum",
-    "ApiReleaseBusV2CandidateDeregistrationLockVersionNameEnum",
-    "ApiReleaseBusV2CandidateDeregistrationPrepareRequestPhaseEnum",
-    "ApiReleaseBusV2CandidateDeregistrationRequestPhaseEnum",
-    "ApiReleaseBusV2CandidateDeregistrationResponsePhaseEnum",
-    "ApiReleaseBusV2CandidateDeregistrationResponseModeEnum",
-    "ApiReleaseBusV2CandidateDeregistrationResponsePhysicalStagingPresenceEnum",
-    "ApiReleaseBusV2CandidateDeregistrationUncommittedErrorOutcomeEnum",
-    "ApiReleaseBusV2CandidateDeregistrationUncommittedErrorPhysicalStagingPresenceEnum",
     "ApiRepDirection",
     "ApiSessionLoginRequestClientTypeEnum",
     "ApiSessionLoginRequestWalletKindHintEnum",
@@ -1550,64 +1401,6 @@ let enumsMap: Set<string> = new Set<string>([
     "MintingClaimAnimationDetailsGlbFormatEnum",
     "MintingClaimAnimationDetailsHtmlFormatEnum",
     "RefreshWalletAuthSessionRequestClientTypeEnum",
-    "ReleaseBusV2CandidateRepositoryEnum",
-    "ReleaseBusV2CandidateStagingLiveStateEnum",
-    "ReleaseBusV2CandidateStagingTransitionRequestEnum",
-    "ReleaseBusV2CandidateStatus",
-    "ReleaseBusV2ControlRequestScopeEnum",
-    "ReleaseBusV2DependencyEnvironmentEnum",
-    "ReleaseBusV2DependencyRequestEnvironmentEnum",
-    "ReleaseBusV2LaneStateLaneEnum",
-    "ReleaseBusV2LaneStateStatusEnum",
-    "ReleaseBusV2ManifestLaneEnum",
-    "ReleaseBusV2ManifestStatusEnum",
-    "ReleaseBusV2Mode",
-    "ReleaseBusV2ProductionAuthorityBindRequestControllerIdentityEnum",
-    "ReleaseBusV2ProductionAuthorityBindRequestRepositoryEnum",
-    "ReleaseBusV2ProductionAuthorityBindRequestEnvironmentEnum",
-    "ReleaseBusV2ProductionAuthorityBindRequestSelectionDigestEnum",
-    "ReleaseBusV2ProductionAuthorityBindResponseRepositoryEnum",
-    "ReleaseBusV2ProductionAuthorityBindResponseEnvironmentEnum",
-    "ReleaseBusV2ProductionAuthorityBindResponseStatusEnum",
-    "ReleaseBusV2ProductionAuthorityCompleteRequestControllerIdentityEnum",
-    "ReleaseBusV2ProductionAuthorityCompleteRequestRepositoryEnum",
-    "ReleaseBusV2ProductionAuthorityCompleteRequestEnvironmentEnum",
-    "ReleaseBusV2ProductionAuthorityCompletionResponseStatusEnum",
-    "ReleaseBusV2ProductionAuthorityFailRequestControllerIdentityEnum",
-    "ReleaseBusV2ProductionAuthorityFailRequestRepositoryEnum",
-    "ReleaseBusV2ProductionAuthorityFailRequestEnvironmentEnum",
-    "ReleaseBusV2ProductionAuthorityFailRequestReasonCodeEnum",
-    "ReleaseBusV2ProductionAuthorityIdentityRequestControllerIdentityEnum",
-    "ReleaseBusV2ProductionAuthorityIdentityRequestRepositoryEnum",
-    "ReleaseBusV2ProductionAuthorityIdentityRequestEnvironmentEnum",
-    "ReleaseBusV2ProductionAuthorityPrepareRequestControllerIdentityEnum",
-    "ReleaseBusV2ProductionAuthorityPrepareRequestRepositoryEnum",
-    "ReleaseBusV2ProductionAuthorityPrepareRequestEnvironmentEnum",
-    "ReleaseBusV2ProductionAuthorityPrepareRequestSelectionDigestEnum",
-    "ReleaseBusV2ProductionAuthorityPrepareResponseRepositoryEnum",
-    "ReleaseBusV2ProductionAuthorityPrepareResponseEnvironmentEnum",
-    "ReleaseBusV2ProductionAuthorityPrepareResponseStatusEnum",
-    "ReleaseBusV2ProductionAuthorityReauthorizeRequestControllerIdentityEnum",
-    "ReleaseBusV2ProductionAuthorityReauthorizeRequestRepositoryEnum",
-    "ReleaseBusV2ProductionAuthorityReauthorizeRequestEnvironmentEnum",
-    "ReleaseBusV2ProductionAuthorityResponseIdentityRepositoryEnum",
-    "ReleaseBusV2ProductionAuthorityResponseIdentityEnvironmentEnum",
-    "ReleaseBusV2ProductionAuthorityResponseIdentityStatusEnum",
-    "ReleaseBusV2ProductionSelectionResponseQualificationPolicyEnum",
-    "ReleaseBusV2RegisterRequestRepositoryEnum",
-    "ReleaseBusV2StagingStateIdEnum",
-    "ReleaseBusV2StagingStateStatusEnum",
-    "ReleaseBusV2StagingTransitionRequestTransitionEnum",
-    "ReleaseBusV2TrainLaneEnum",
-    "ReleaseBusV2TrainStatusEnum",
-    "ReleaseBusV2TrainStagingPolicyEnum",
-    "ReleaseBusV2TrainQualificationPolicyEnum",
-    "RepairCurrentReleaseBusV2StagingCandidates200ResponseModeEnum",
-    "RepairCurrentReleaseBusV2StagingCandidates200ResponseCandidatesInnerRepositoryEnum",
-    "RepairCurrentReleaseBusV2StagingCandidates200ResponseCandidatesInnerDerivedStatusEnum",
-    "RepairCurrentReleaseBusV2StagingCandidates200ResponseCandidatesInnerDerivedStagingLiveStateEnum",
-    "RepairCurrentReleaseBusV2StagingCandidates200ResponseGithubStatusUpdatesFailedCandidatesInnerRepositoryEnum",
-    "RepairCurrentReleaseBusV2StagingCandidatesRequestCandidatesInnerRepositoryEnum",
 ]);
 
 let typeMap: {[index: string]: any} = {
@@ -1961,25 +1754,6 @@ let typeMap: {[index: string]: any} = {
     "ApiRedeemRefreshTokenRequest": ApiRedeemRefreshTokenRequest,
     "ApiRedeemRefreshTokenResponse": ApiRedeemRefreshTokenResponse,
     "ApiRegisterPushNotificationTokenRequest": ApiRegisterPushNotificationTokenRequest,
-    "ApiReleaseBusV2BaselineAdoptionBackendUnit": ApiReleaseBusV2BaselineAdoptionBackendUnit,
-    "ApiReleaseBusV2BaselineAdoptionCandidate": ApiReleaseBusV2BaselineAdoptionCandidate,
-    "ApiReleaseBusV2BaselineAdoptionRequest": ApiReleaseBusV2BaselineAdoptionRequest,
-    "ApiReleaseBusV2BaselineAdoptionResponse": ApiReleaseBusV2BaselineAdoptionResponse,
-    "ApiReleaseBusV2BaselineAutomaticE2EDecisionRequest": ApiReleaseBusV2BaselineAutomaticE2EDecisionRequest,
-    "ApiReleaseBusV2BaselineAutomaticE2EDecisionResponse": ApiReleaseBusV2BaselineAutomaticE2EDecisionResponse,
-    "ApiReleaseBusV2BaselineBackendDeploymentEventRequest": ApiReleaseBusV2BaselineBackendDeploymentEventRequest,
-    "ApiReleaseBusV2BaselineBackendDeploymentEventResponse": ApiReleaseBusV2BaselineBackendDeploymentEventResponse,
-    "ApiReleaseBusV2CandidateDeregistrationCandidateVersion": ApiReleaseBusV2CandidateDeregistrationCandidateVersion,
-    "ApiReleaseBusV2CandidateDeregistrationCommittedError": ApiReleaseBusV2CandidateDeregistrationCommittedError,
-    "ApiReleaseBusV2CandidateDeregistrationControlVersion": ApiReleaseBusV2CandidateDeregistrationControlVersion,
-    "ApiReleaseBusV2CandidateDeregistrationError": ApiReleaseBusV2CandidateDeregistrationErrorClass,
-    "ApiReleaseBusV2CandidateDeregistrationExecuteRequest": ApiReleaseBusV2CandidateDeregistrationExecuteRequest,
-    "ApiReleaseBusV2CandidateDeregistrationLockVersion": ApiReleaseBusV2CandidateDeregistrationLockVersion,
-    "ApiReleaseBusV2CandidateDeregistrationPrepareRequest": ApiReleaseBusV2CandidateDeregistrationPrepareRequest,
-    "ApiReleaseBusV2CandidateDeregistrationRequest": ApiReleaseBusV2CandidateDeregistrationRequestClass,
-    "ApiReleaseBusV2CandidateDeregistrationResponse": ApiReleaseBusV2CandidateDeregistrationResponse,
-    "ApiReleaseBusV2CandidateDeregistrationStagingRefs": ApiReleaseBusV2CandidateDeregistrationStagingRefs,
-    "ApiReleaseBusV2CandidateDeregistrationUncommittedError": ApiReleaseBusV2CandidateDeregistrationUncommittedError,
     "ApiRepCategoriesPage": ApiRepCategoriesPage,
     "ApiRepCategory": ApiRepCategory,
     "ApiRepContributor": ApiRepContributor,
@@ -2162,47 +1936,6 @@ let typeMap: {[index: string]: any} = {
     "RedeemedSubscriptionCountsPage": RedeemedSubscriptionCountsPage,
     "RedeemedSubscriptionPage": RedeemedSubscriptionPage,
     "RefreshWalletAuthSessionRequest": RefreshWalletAuthSessionRequestClass,
-    "ReleaseBusV2Candidate": ReleaseBusV2Candidate,
-    "ReleaseBusV2CandidateActionRequest": ReleaseBusV2CandidateActionRequest,
-    "ReleaseBusV2CandidateListResponse": ReleaseBusV2CandidateListResponse,
-    "ReleaseBusV2CandidateResponse": ReleaseBusV2CandidateResponse,
-    "ReleaseBusV2ControlRequest": ReleaseBusV2ControlRequest,
-    "ReleaseBusV2ControlUpdateResponse": ReleaseBusV2ControlUpdateResponse,
-    "ReleaseBusV2ControlsResponse": ReleaseBusV2ControlsResponse,
-    "ReleaseBusV2Dependency": ReleaseBusV2Dependency,
-    "ReleaseBusV2DependencyRequest": ReleaseBusV2DependencyRequest,
-    "ReleaseBusV2DeployPlan": ReleaseBusV2DeployPlan,
-    "ReleaseBusV2LaneState": ReleaseBusV2LaneState,
-    "ReleaseBusV2Manifest": ReleaseBusV2Manifest,
-    "ReleaseBusV2ManifestListResponse": ReleaseBusV2ManifestListResponse,
-    "ReleaseBusV2ProductionAuthorityBindRequest": ReleaseBusV2ProductionAuthorityBindRequest,
-    "ReleaseBusV2ProductionAuthorityBindResponse": ReleaseBusV2ProductionAuthorityBindResponse,
-    "ReleaseBusV2ProductionAuthorityCompleteRequest": ReleaseBusV2ProductionAuthorityCompleteRequest,
-    "ReleaseBusV2ProductionAuthorityCompletionResponse": ReleaseBusV2ProductionAuthorityCompletionResponse,
-    "ReleaseBusV2ProductionAuthorityDenialResponse": ReleaseBusV2ProductionAuthorityDenialResponse,
-    "ReleaseBusV2ProductionAuthorityEpoch": ReleaseBusV2ProductionAuthorityEpoch,
-    "ReleaseBusV2ProductionAuthorityFailRequest": ReleaseBusV2ProductionAuthorityFailRequest,
-    "ReleaseBusV2ProductionAuthorityIdentityRequest": ReleaseBusV2ProductionAuthorityIdentityRequest,
-    "ReleaseBusV2ProductionAuthorityPrepareRequest": ReleaseBusV2ProductionAuthorityPrepareRequest,
-    "ReleaseBusV2ProductionAuthorityPrepareResponse": ReleaseBusV2ProductionAuthorityPrepareResponse,
-    "ReleaseBusV2ProductionAuthorityReauthorizeRequest": ReleaseBusV2ProductionAuthorityReauthorizeRequest,
-    "ReleaseBusV2ProductionAuthorityResponseIdentity": ReleaseBusV2ProductionAuthorityResponseIdentity,
-    "ReleaseBusV2ProductionSelectionItem": ReleaseBusV2ProductionSelectionItem,
-    "ReleaseBusV2ProductionSelectionRequest": ReleaseBusV2ProductionSelectionRequest,
-    "ReleaseBusV2ProductionSelectionResponse": ReleaseBusV2ProductionSelectionResponse,
-    "ReleaseBusV2RegisterRequest": ReleaseBusV2RegisterRequest,
-    "ReleaseBusV2StagingState": ReleaseBusV2StagingState,
-    "ReleaseBusV2StagingTransitionRequest": ReleaseBusV2StagingTransitionRequest,
-    "ReleaseBusV2Train": ReleaseBusV2Train,
-    "ReleaseBusV2TrainDetailResponse": ReleaseBusV2TrainDetailResponse,
-    "ReleaseBusV2TrainListResponse": ReleaseBusV2TrainListResponse,
-    "ReleaseBusV2VersionedActionRequest": ReleaseBusV2VersionedActionRequest,
-    "RepairCurrentReleaseBusV2StagingCandidates200Response": RepairCurrentReleaseBusV2StagingCandidates200Response,
-    "RepairCurrentReleaseBusV2StagingCandidates200ResponseCandidatesInner": RepairCurrentReleaseBusV2StagingCandidates200ResponseCandidatesInner,
-    "RepairCurrentReleaseBusV2StagingCandidates200ResponseGithubStatusUpdates": RepairCurrentReleaseBusV2StagingCandidates200ResponseGithubStatusUpdates,
-    "RepairCurrentReleaseBusV2StagingCandidates200ResponseGithubStatusUpdatesFailedCandidatesInner": RepairCurrentReleaseBusV2StagingCandidates200ResponseGithubStatusUpdatesFailedCandidatesInner,
-    "RepairCurrentReleaseBusV2StagingCandidatesRequest": RepairCurrentReleaseBusV2StagingCandidatesRequest,
-    "RepairCurrentReleaseBusV2StagingCandidatesRequestCandidatesInner": RepairCurrentReleaseBusV2StagingCandidatesRequestCandidatesInner,
     "SubscribeAllEditionsResponse": SubscribeAllEditionsResponse,
     "SubscriptionCountResponse": SubscriptionCountResponse,
     "SubscriptionCounts": SubscriptionCounts,

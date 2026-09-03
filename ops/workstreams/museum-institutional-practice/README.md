@@ -50,6 +50,7 @@ source and contribution route already used throughout the Museum.
 
 - source PR changes the public paths or manuscript structure
 - required publication size exceeds the existing document or manifest ceiling
-- release-bus state prohibits a sanctioned staging or production mutation
+- the requested deployment exceeds the authorized phase or conflicts with
+  another developer's active deployment
 - a reviewer identifies a material source, rights, accessibility, or trust
   defect
