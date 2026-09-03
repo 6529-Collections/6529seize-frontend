@@ -536,6 +536,7 @@ jobs:
             __tests__/scripts/museum-surface-registry.test.ts \
             __tests__/scripts/package-public-review-artifacts.test.ts \
             __tests__/scripts/production-build-artifact.test.ts \
+            __tests__/scripts/production-artifact-metadata.test.ts \
             __tests__/scripts/production-artifact-verifier.test.ts \
             __tests__/scripts/deployment-e2e-workflows.test.ts \
             __tests__/scripts/public-review-artifact-workflows.test.ts \
