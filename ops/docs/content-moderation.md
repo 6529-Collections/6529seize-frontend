@@ -215,9 +215,30 @@ Other assessments remain in the occasional moderator queue without changing
 the post's global visibility.
 
 Authorized moderators can review open reports in **WatchTower** at
-`/content-moderation`. The full-width queue fills the available page height.
-WatchTower separates **Open reports**, **Resolved reports**, and **Suspended
-profiles**, each with a current count. Each report identifies both the author
+`/content-moderation`, which defaults to **Open reports**. All tabs share the
+site's bordered page frame and consistent content padding:
+
+- **Open reports**: `/content-moderation/open-reports`
+- **Resolved reports**: `/content-moderation/resolved-reports`
+- **Suspended profiles**: `/content-moderation/suspended-profiles`
+- **Block activity**: `/content-moderation/block-activity`
+
+Selecting a tab updates the URL without reloading the page. Direct links and
+refresh open the selected tab, and browser Back and Forward restore previous
+tab selections. Arrow keys, Home, and End move focus between tabs; Enter or
+Space activates the focused tab. Unknown tab URLs show the not-found page.
+
+Block activity is a newest-first,
+continuously loaded trail showing who blocked or unblocked whom. Each compact
+row aligns the two linked profiles, action, and date in consistent columns
+across the full available content width inside the shared page frame.
+**Blocked** has red text and a closed lock; **Unblocked** has green text and an
+open lock. Full handles wrap when needed instead of being truncated, and the
+date moves below on narrow screens. Block and unblock events appear in
+the same feed, and an unblock does not remove the earlier block from history.
+It records only actual relationship transitions;
+blocking remains independent from reporting, AI assessment, content decisions,
+and profile suspension. Each report identifies both the author
 and the profile that submitted it, makes the content primary, shows a compact
 AI summary with expandable detail, and keeps audit history available. A neutral
 AI category is omitted; a substantive category is labelled **Potential
@@ -255,7 +276,8 @@ state allows it. A red indicator appears while the queue contains open reports;
 the client refreshes this lightweight state periodically while active, without
 a WebSocket. The backend checks every moderator request; hiding the link is not
 the authorization boundary. A user who opens `/content-moderation` without
-access sees the no-access countdown and is redirected home. A failed access
+access, including through a direct tab link, sees the no-access countdown and
+is redirected home. A failed access
 request shows an error instead of incorrectly treating the user as
 unauthorized.
 
