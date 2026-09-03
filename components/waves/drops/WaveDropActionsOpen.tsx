@@ -52,7 +52,8 @@ const WaveDropActionsOpen: React.FC<WaveDropActionsOpenProps> = ({
     return (
       <button
         type="button"
-        onClick={() => {
+        onClick={(event) => {
+          event.stopPropagation();
           onDropClick(drop);
           onOpen?.();
         }}
@@ -83,7 +84,10 @@ const WaveDropActionsOpen: React.FC<WaveDropActionsOpenProps> = ({
       <button
         type="button"
         className="tw-cursor-pointer tw-border-0 tw-bg-transparent tw-px-2 tw-text-iron-400 tw-transition-colors desktop-hover:hover:tw-text-white"
-        onClick={() => onDropClick(drop)}
+        onClick={(event) => {
+          event.stopPropagation();
+          onDropClick(drop);
+        }}
         aria-label="Open drop"
         data-tooltip-id={`open-${drop.id}`}
       >

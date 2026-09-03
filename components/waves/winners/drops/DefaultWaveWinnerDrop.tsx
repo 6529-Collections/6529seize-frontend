@@ -2,7 +2,7 @@ import CommonDropdownItemsMobileWrapper from "@/components/utils/select/dropdown
 import ContentModerationDropActions from "@/components/content-moderation/ContentModerationDropActions";
 import ReportDropModal from "@/components/content-moderation/ReportDropModal";
 import { getRankHoverBorderClass } from "@/components/waves/drops/dropRankStyles";
-import WaveDropActionsMore from "@/components/waves/drops/WaveDropActionsMore";
+import WaveDropActionsOpen from "@/components/waves/drops/WaveDropActionsOpen";
 import WaveDropMobileMenuCopyLink from "@/components/waves/drops/WaveDropMobileMenuCopyLink";
 import WaveDropMobileMenuOpen from "@/components/waves/drops/WaveDropMobileMenuOpen";
 import type { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
@@ -161,7 +161,7 @@ export const DefaultWaveWinnersDrop: React.FC<DefaultWaveWinnersDropProps> = ({
           {!hasTouchScreen && (
             <div className="tw-flex tw-flex-shrink-0 tw-items-start">
               <div className="tw-h-8">
-                <WaveDropActionsMore drop={extendedDrop} />
+                <WaveDropActionsOpen drop={extendedDrop} />
               </div>
             </div>
           )}
