@@ -132,7 +132,7 @@ export const CONTENT_MODERATION_MESSAGES = {
   "contentModeration.moderator.metaDescription": "Review reported content.",
   "contentModeration.moderator.title": "WatchTower - Content Moderation",
   "contentModeration.moderator.description":
-    "Review reports, apply content decisions and manage suspended profiles.",
+    "Review reports, block activity and suspended profiles.",
   "contentModeration.moderator.checkingPermissions": "Checking permissions…",
   "contentModeration.moderator.loading": "Loading reports…",
   "contentModeration.moderator.loadingMore": "Loading more…",
@@ -141,6 +141,10 @@ export const CONTENT_MODERATION_MESSAGES = {
   "contentModeration.moderator.emptyResolved": "There are no resolved reports.",
   "contentModeration.moderator.emptySuspended":
     "There are no suspended profiles.",
+  "contentModeration.moderator.emptyBlockActivity":
+    "There is no block activity yet.",
+  "contentModeration.moderator.blockActivity.loading":
+    "Loading block activity…",
   "contentModeration.moderator.tabs.label": "Moderation views",
   "contentModeration.moderator.tabs.open": "Open reports",
   "contentModeration.moderator.tabs.openCompact": "Open",
@@ -148,6 +152,10 @@ export const CONTENT_MODERATION_MESSAGES = {
   "contentModeration.moderator.tabs.resolvedCompact": "Resolved",
   "contentModeration.moderator.tabs.suspended": "Suspended profiles",
   "contentModeration.moderator.tabs.suspendedCompact": "Suspended",
+  "contentModeration.moderator.tabs.blockActivity": "Block activity",
+  "contentModeration.moderator.tabs.blockActivityCompact": "Blocks",
+  "contentModeration.moderator.blockActivity.blocked": "Blocked",
+  "contentModeration.moderator.blockActivity.unblocked": "Unblocked",
   "contentModeration.moderator.noPower": "You have no power here",
   "contentModeration.moderator.redirecting": "Redirecting in {seconds}",
   "contentModeration.moderator.openReportsIndicator":
