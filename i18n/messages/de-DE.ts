@@ -827,6 +827,17 @@ export const DE_DE_MESSAGES = {
   ...DE_DE_DROP_REACTION_MESSAGES,
   "waves.mobile.profileFeed.title": "Profile-Waves-Feed",
   "waves.mobile.profileFeed.subtitle": "Ausgewählte Drops aus Profile-Waves",
+  "waves.header.postLabel.inProgress": "Beitrag wird veröffentlicht",
+  "waves.profileFeed.title": "Neueste Beiträge aus Profile Waves",
+  "waves.profileFeed.description":
+    "Entdecke, was die Community in Profile Waves teilt.",
+  "waves.profileFeed.errorTitle":
+    "Profilbeiträge konnten nicht geladen werden",
+  "waves.profileFeed.errorDescription":
+    "Aktualisiere diese Ansicht, um es erneut zu versuchen.",
+  "waves.profileFeed.emptyTitle": "Noch keine Profilbeiträge",
+  "waves.profileFeed.emptyDescription":
+    "Neue Beiträge aus den Profile Waves der Mitglieder erscheinen hier.",
   "waves.leaderboard.listLabel": "Leaderboard-Drops",
   "waves.leaderboard.loadingEarlier": "Frühere Drops werden geladen",
   "waves.leaderboard.previousLoadError":
