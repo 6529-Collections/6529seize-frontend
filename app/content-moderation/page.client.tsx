@@ -69,16 +69,33 @@ function isReportsTab(tab: ModerationTab): tab is "OPEN" | "RESOLVED" {
   return tab === "OPEN" || tab === "RESOLVED";
 }
 
+function getModeratorPermissions(
+  access: ReturnType<typeof useContentModeratorAccess>,
+  hasModeratorIdentity: boolean,
+  fetchingProfile: boolean
+) {
+  const canModerate = access.data?.moderator === true;
+  const permissionsLoading =
+    fetchingProfile || (hasModeratorIdentity && access.isLoading);
+  return {
+    canModerate,
+    permissionsLoading,
+    moderatorContentReady:
+      hasModeratorIdentity && canModerate && !permissionsLoading,
+  };
+}
+
 function getActiveDataState(
   tab: ModerationTab,
   queueState: ModerationDataState,
-  suspendedState: ModerationDataState
+  suspendedState: ModerationDataState,
+  enabled: boolean
 ): ModerationDataState {
+  if (!enabled || tab === "BLOCK_ACTIVITY") {
+    return { isLoading: false, isError: false };
+  }
   if (tab === "SUSPENDED") {
     return suspendedState;
-  }
-  if (tab === "BLOCK_ACTIVITY") {
-    return { isLoading: false, isError: false };
   }
   return queueState;
 }
@@ -525,7 +542,8 @@ export default function ContentModerationPageClient() {
   const accessQuery = useContentModeratorAccess();
   const hasModeratorIdentity =
     Boolean(connectedProfile?.id) && activeProfileProxy === null;
-  const canModerate = accessQuery.data?.moderator === true;
+  const { canModerate, permissionsLoading, moderatorContentReady } =
+    getModeratorPermissions(accessQuery, hasModeratorIdentity, fetchingProfile);
   const reportsTabActive = isReportsTab(activeTab);
   const reportsView = activeTab === "RESOLVED" ? "RESOLVED" : "OPEN";
   const queueQuery = useInfiniteQuery({
@@ -541,7 +559,7 @@ export default function ContentModerationPageClient() {
       lastPage.length === MODERATION_QUEUE_PAGE_SIZE
         ? lastPage.at(-1)?.cursor
         : undefined,
-    enabled: canModerate && reportsTabActive,
+    enabled: moderatorContentReady && reportsTabActive,
     retry: false,
   });
   const suspendedQuery = useInfiniteQuery({
@@ -556,7 +574,7 @@ export default function ContentModerationPageClient() {
       lastPage.length === MODERATION_QUEUE_PAGE_SIZE
         ? lastPage.at(-1)?.cursor
         : undefined,
-    enabled: canModerate && activeTab === "SUSPENDED",
+    enabled: moderatorContentReady && activeTab === "SUSPENDED",
     retry: false,
   });
   const queueItems = useMemo(
@@ -567,13 +585,11 @@ export default function ContentModerationPageClient() {
     () => suspendedQuery.data?.pages.flat() ?? [],
     [suspendedQuery.data]
   );
-  const permissionsLoading =
-    fetchingProfile || (hasModeratorIdentity && accessQuery.isLoading);
-  const moderatorContentReady = canModerate && !permissionsLoading;
   const activeDataState = getActiveDataState(
     activeTab,
     queueQuery,
-    suspendedQuery
+    suspendedQuery,
+    moderatorContentReady
   );
   return (
     <main className="tailwind-scope tw-min-h-dvh tw-w-full tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-800 tw-bg-black tw-px-4 tw-py-8 sm:tw-px-6 sm:tw-py-12 lg:tw-px-8">
@@ -605,9 +621,7 @@ export default function ContentModerationPageClient() {
         id="moderation-tabpanel"
         role={moderatorContentReady ? "tabpanel" : undefined}
         aria-labelledby={
-          moderatorContentReady
-            ? `moderation-tab-${activeTab}`
-            : undefined
+          moderatorContentReady ? `moderation-tab-${activeTab}` : undefined
         }
         tabIndex={moderatorContentReady ? 0 : undefined}
         className="focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400"
@@ -617,12 +631,13 @@ export default function ContentModerationPageClient() {
             {t(locale, "contentModeration.moderator.loading")}
           </output>
         )}
-        {(accessQuery.isError || activeDataState.isError) && (
-          <p role="alert" className="tw-mb-0 tw-mt-8 tw-text-sm tw-text-red">
-            {t(locale, "contentModeration.moderator.loadError")}
-          </p>
-        )}
-        {canModerate &&
+        {hasModeratorIdentity &&
+          (accessQuery.isError || activeDataState.isError) && (
+            <p role="alert" className="tw-mb-0 tw-mt-8 tw-text-sm tw-text-red">
+              {t(locale, "contentModeration.moderator.loadError")}
+            </p>
+          )}
+        {moderatorContentReady &&
           reportsTabActive &&
           queueItems.length === 0 &&
           !queueQuery.isLoading && (
@@ -635,7 +650,7 @@ export default function ContentModerationPageClient() {
               )}
             </p>
           )}
-        {canModerate && reportsTabActive && queueItems.length > 0 && (
+        {moderatorContentReady && reportsTabActive && queueItems.length > 0 && (
           <div className="tw-mt-8 tw-space-y-5">
             {queueItems.map((item) => (
               <ModerationQueueCard key={item.id} item={item} />
@@ -659,7 +674,7 @@ export default function ContentModerationPageClient() {
             )}
           </div>
         )}
-        {canModerate &&
+        {moderatorContentReady &&
           activeTab === "SUSPENDED" &&
           suspendedProfiles.length === 0 &&
           !suspendedQuery.isLoading && (
@@ -667,10 +682,10 @@ export default function ContentModerationPageClient() {
               {t(locale, "contentModeration.moderator.emptySuspended")}
             </p>
           )}
-        {canModerate && activeTab === "BLOCK_ACTIVITY" && (
+        {moderatorContentReady && activeTab === "BLOCK_ACTIVITY" && (
           <BlockActivityFeed enabled={moderatorContentReady} />
         )}
-        {canModerate &&
+        {moderatorContentReady &&
           activeTab === "SUSPENDED" &&
           suspendedProfiles.length > 0 && (
             <div className="tw-mt-8 tw-space-y-3">

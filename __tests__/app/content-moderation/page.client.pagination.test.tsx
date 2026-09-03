@@ -64,13 +64,15 @@ function render(ui: ReactNode) {
 
 let mockFetchingProfile = false;
 let mockCanModerate = true;
+let mockProfileId: string | null = "moderator-1";
+let mockActiveProfileProxy: { id: string } | null = null;
 let mockBlockActivityIntersection: ((isIntersecting: boolean) => void) | null =
   null;
 
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: () => ({
-    connectedProfile: { id: "moderator-1" },
-    activeProfileProxy: null,
+    connectedProfile: mockProfileId === null ? null : { id: mockProfileId },
+    activeProfileProxy: mockActiveProfileProxy,
     fetchingProfile: mockFetchingProfile,
     setToast: jest.fn(),
   }),
@@ -177,7 +179,67 @@ describe("ContentModerationPageClient pagination", () => {
     jest.mocked(fetchSuspendedModerationProfiles).mockResolvedValue([]);
     mockFetchingProfile = false;
     mockCanModerate = true;
+    mockProfileId = "moderator-1";
+    mockActiveProfileProxy = null;
     mockBlockActivityIntersection = null;
+  });
+
+  describe.each(["proxy", "signed out"])("when %s", (identity) => {
+    it.each([
+      "open-reports",
+      "resolved-reports",
+      "suspended-profiles",
+      "block-activity",
+    ])(
+      "hides cached %s despite a stale positive access result",
+      async (tab) => {
+        globalThis.history.replaceState(null, "", `/content-moderation/${tab}`);
+        mockFetchContentModerationQueue.mockResolvedValue([createQueueItem(1)]);
+        mockFetchContentModerationBlockActivity.mockResolvedValue([
+          createBlockActivityItem(1),
+        ]);
+        jest.mocked(fetchSuspendedModerationProfiles).mockResolvedValue([
+          {
+            profile_id: "suspended-1",
+            handle: "suspended1",
+            pfp: null,
+            status: ApiModeratedProfileStatus.Suspended,
+            updated_by_profile_id: "moderator-1",
+            reason: "private reason",
+            updated_at: Date.UTC(2026, 8, 2),
+            cursor: "suspended-cursor-1",
+          },
+        ]);
+        const client = new QueryClient();
+        const page = () => (
+          <QueryClientProvider client={client}>
+            <ContentModerationPageClient />
+          </QueryClientProvider>
+        );
+        const { rerender } = render(page());
+        await waitFor(() =>
+          expect(screen.getAllByRole("link").length).toBeGreaterThan(0)
+        );
+        if (identity === "proxy") {
+          mockActiveProfileProxy = { id: "proxy-1" };
+        } else {
+          mockProfileId = null;
+        }
+        rerender(page());
+        expect(screen.getByText("No moderator access")).toBeVisible();
+        expect(screen.queryByRole("tablist")).not.toBeInTheDocument();
+        expect(screen.queryByRole("tabpanel")).not.toBeInTheDocument();
+        expect(screen.queryByRole("link")).not.toBeInTheDocument();
+        jest.clearAllMocks();
+        await act(async () => {
+          mockBlockActivityIntersection?.(true);
+          await client.invalidateQueries();
+        });
+        expect(mockFetchContentModerationQueue).not.toHaveBeenCalled();
+        expect(mockFetchContentModerationBlockActivity).not.toHaveBeenCalled();
+        expect(fetchSuspendedModerationProfiles).not.toHaveBeenCalled();
+      }
+    );
   });
 
   it("does not fetch a mounted disabled block feed until access is enabled", async () => {
@@ -208,7 +270,9 @@ describe("ContentModerationPageClient pagination", () => {
     });
     client.setQueryData(BLOCK_ACTIVITY_QUERY_KEY, {
       pages: [
-        Array.from({ length: 50 }, (_, index) => createBlockActivityItem(index)),
+        Array.from({ length: 50 }, (_, index) =>
+          createBlockActivityItem(index)
+        ),
       ],
       pageParams: [undefined],
     });
@@ -231,7 +295,11 @@ describe("ContentModerationPageClient pagination", () => {
   it("waits for the profile to finish loading before requesting block activity", async () => {
     mockFetchingProfile = true;
     mockFetchContentModerationBlockActivity.mockResolvedValue([]);
-    globalThis.history.replaceState(null, "", "/content-moderation/block-activity");
+    globalThis.history.replaceState(
+      null,
+      "",
+      "/content-moderation/block-activity"
+    );
     const client = new QueryClient();
     const page = (
       <QueryClientProvider client={client}>
