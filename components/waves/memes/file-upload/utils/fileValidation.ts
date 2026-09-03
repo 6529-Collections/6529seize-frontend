@@ -4,7 +4,11 @@
  * Functions for validating files, checking formats, and testing compatibility.
  */
 
-import { COMPATIBILITY_CHECK_TIMEOUT_MS, FILE_SIZE_LIMIT } from "./constants";
+import {
+  COMPATIBILITY_CHECK_TIMEOUT_MS,
+  FILE_SIZE_LIMIT,
+  FILE_SIZE_LIMIT_LABEL,
+} from "./constants";
 import { getFileExtension, getBrowserSpecificMessage } from "./formatHelpers";
 import type {
   FileValidationResult,
@@ -59,10 +63,9 @@ export const validateFile = async (
   }
 
   if (file.size > FILE_SIZE_LIMIT) {
-    const sizeMiB = Math.round(FILE_SIZE_LIMIT / (1024 * 1024));
     return {
       valid: false,
-      error: `File size exceeds ${sizeMiB} MiB limit.`,
+      error: `File size exceeds ${FILE_SIZE_LIMIT_LABEL} limit.`,
     };
   }
 

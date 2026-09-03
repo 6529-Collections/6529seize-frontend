@@ -5,7 +5,7 @@ import UploadArea from '@/components/waves/memes/file-upload/components/UploadAr
 jest.mock('framer-motion', () => ({ motion: { div: (props: any) => <div {...props} /> } }));
 
 jest.mock('@/components/waves/memes/file-upload/components/FileTypeIndicator', () => (props: any) => (
-  <div data-testid="format">{props.format}</div>
+  <div data-testid="format">{props.label}</div>
 ));
 
 jest.mock('@/components/waves/memes/file-upload/components/ErrorMessage', () => (props: any) => (
@@ -19,6 +19,10 @@ describe('UploadArea', () => {
     );
     expect(screen.getByText('Select Art')).toBeInTheDocument();
     expect(getAllByTestId('format')).toHaveLength(3);
+    expect(screen.getByText('Max 250 MB')).toBeInTheDocument();
+    expect(screen.getByText('GLB').parentElement).toBe(
+      screen.getByText('Max 250 MB').parentElement
+    );
   });
 
   it('shows processing overlay', () => {
@@ -26,6 +30,8 @@ describe('UploadArea', () => {
       <UploadArea visualState="processing" error={null} hasRecoveryOption={false} onRetry={jest.fn()} />
     );
     expect(screen.getByText('Processing file...')).toBeInTheDocument();
+    expect(screen.getByText('Large files may take longer.')).toBeInTheDocument();
+    expect(screen.queryByText(/100MB/)).not.toBeInTheDocument();
   });
 
   it('renders error message when provided', () => {
@@ -33,5 +39,6 @@ describe('UploadArea', () => {
       <UploadArea visualState="idle" error="Oops" hasRecoveryOption={true} onRetry={jest.fn()} />
     );
     expect(screen.getByTestId('error')).toHaveTextContent('Oops');
+    expect(screen.getByText('Max 250 MB')).toBeInTheDocument();
   });
 });

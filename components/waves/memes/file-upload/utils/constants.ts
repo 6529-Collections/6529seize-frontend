@@ -2,7 +2,9 @@
  * Constants for the file upload system
  */
 
-export const FILE_SIZE_LIMIT: number = 250 * 1024 * 1024;
+// Decimal MB: keep the upload ceiling and its visible label in sync.
+export const FILE_SIZE_LIMIT = 250_000_000;
+export const FILE_SIZE_LIMIT_LABEL = `${FILE_SIZE_LIMIT / 1_000_000} MB`;
 
 /**
  * Maximum number of processing attempts before giving up
