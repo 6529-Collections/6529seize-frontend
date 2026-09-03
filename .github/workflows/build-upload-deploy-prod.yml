@@ -331,20 +331,6 @@ jobs:
           if-no-files-found: ignore
           retention-days: 90
 
-  automatic-production-e2e:
-    name: Automatic production E2E
-    needs:
-      - build-upload-deploy
-      - notify-production-deployment
-    uses: ./.github/workflows/production-e2e.yml
-    with:
-      trusted_deployed_sha: ${{ github.sha }}
-      canonical_deploy_call: true
-      parent_deploy_run_id: ${{ github.run_id }}
-    secrets:
-      CI_PIPELINES_ALERT_API_AUTH: ${{ secrets.CI_PIPELINES_ALERT_API_AUTH }}
-      CI_PIPELINES_ALERT_SECRET: ${{ secrets.CI_PIPELINES_ALERT_SECRET }}
-
   notify-production-deployment:
     name: Notify production deployment outcome
     if: always()

@@ -1,34 +1,6 @@
 name: Staging E2E
 
 on:
-  workflow_call:
-    inputs:
-      pack:
-        description: Post-deploy pack alias; use all for the full set
-        type: string
-        required: false
-        default: all
-      trusted_deployed_sha:
-        description: Exact SHA deployed by the calling canonical staging workflow
-        type: string
-        required: true
-      canonical_deploy_call:
-        description: Confirms invocation by the canonical staging deploy workflow
-        type: boolean
-        required: true
-      parent_deploy_run_id:
-        description: Canonical staging deployment run ID used for CI-wave reply correlation
-        type: string
-        required: true
-    secrets:
-      CI_PIPELINES_ALERT_API_AUTH:
-        required: false
-      CI_PIPELINES_ALERT_SECRET:
-        required: true
-      STAGING_AUTH:
-        required: false
-      PLAYWRIGHT_STAGING_ACCESS_CODE:
-        required: true
   workflow_dispatch:
     inputs:
       pack:
@@ -65,13 +37,10 @@ permissions:
   contents: read
   packages: read
 
-run-name: Staging E2E
+run-name: Staging E2E ${{ inputs.automatic_deploy_run_id && format('automatic {0}', inputs.automatic_deploy_run_id) || 'manual' }}
 
 concurrency:
-  # Automatic E2E runs while the caller owns staging-deploy. Manual recovery
-  # runs acquire staging-deploy themselves so deployment cannot change the
-  # environment while it is being validated.
-  group: ${{ inputs.trusted_deployed_sha != '' && 'staging-e2e' || 'staging-deploy' }}
+  group: staging-e2e
   cancel-in-progress: false
 
 jobs:
@@ -93,52 +62,40 @@ jobs:
         id: source
         env:
           AUTOMATIC_DEPLOY_RUN_ID: ${{ inputs.automatic_deploy_run_id }}
-          CALLER_WORKFLOW_REF: ${{ github.workflow_ref }}
-          CANONICAL_DEPLOY_CALL: ${{ inputs.canonical_deploy_call && 'true' || 'false' }}
           GH_TOKEN: ${{ github.token }}
-          TRUSTED_DEPLOYED_SHA: ${{ inputs.trusted_deployed_sha }}
         run: |
           set -euo pipefail
-          if [ -n "$TRUSTED_DEPLOYED_SHA" ]; then
-            [[ "$TRUSTED_DEPLOYED_SHA" =~ ^[a-f0-9]{40}$ ]]
-            test -z "$AUTOMATIC_DEPLOY_RUN_ID"
-              test "$CANONICAL_DEPLOY_CALL" = true
-              test "$CALLER_WORKFLOW_REF" = \
-                "$GITHUB_REPOSITORY/.github/workflows/deploy-staging.yml@refs/heads/1a-staging"
-            deployed_sha="$TRUSTED_DEPLOYED_SHA"
-          else
-            test "$GITHUB_REF" = refs/heads/main
-            [[ "$AUTOMATIC_DEPLOY_RUN_ID" =~ ^[1-9][0-9]{0,19}$ ]]
-            gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${AUTOMATIC_DEPLOY_RUN_ID}" > "$RUNNER_TEMP/deploy-run.json"
-            deployed_sha="$(jq -er \
-              --arg repository "$GITHUB_REPOSITORY" '
-                select(
-                  .path == ".github/workflows/deploy-staging.yml" and
-                  (.event == "push" or .event == "workflow_dispatch") and
-                  .head_branch == "1a-staging" and
-                  .status == "completed" and
-                  .repository.full_name == $repository and
-                  .head_repository.full_name == $repository and
-                  (.run_attempt | type == "number" and . >= 1 and . <= 1000000) and
-                  (.head_sha | test("^[a-f0-9]{40}$"))
-                ) | .head_sha
-              ' "$RUNNER_TEMP/deploy-run.json")"
-            deploy_run_attempt="$(jq -er '.run_attempt' "$RUNNER_TEMP/deploy-run.json")"
-            gh api \
-              "repos/${GITHUB_REPOSITORY}/actions/runs/${AUTOMATIC_DEPLOY_RUN_ID}/attempts/${deploy_run_attempt}/jobs?per_page=100" \
-              > "$RUNNER_TEMP/deploy-jobs.json"
-            jq -e '
-              [.jobs[] | select(
-                .name == "Deploy exact staging artifact" and
+          test "$GITHUB_REF" = refs/heads/main
+          [[ "$AUTOMATIC_DEPLOY_RUN_ID" =~ ^[1-9][0-9]{0,19}$ ]]
+          gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${AUTOMATIC_DEPLOY_RUN_ID}" > "$RUNNER_TEMP/deploy-run.json"
+          deployed_sha="$(jq -er \
+            --arg repository "$GITHUB_REPOSITORY" '
+              select(
+                .path == ".github/workflows/deploy-staging.yml" and
+                (.event == "push" or .event == "workflow_dispatch") and
+                .head_branch == "1a-staging" and
                 .status == "completed" and
-                .conclusion == "success"
-              )] | length == 1
-            ' "$RUNNER_TEMP/deploy-jobs.json" >/dev/null
-          fi
+                .conclusion == "success" and
+                .repository.full_name == $repository and
+                .head_repository.full_name == $repository and
+                (.run_attempt | type == "number" and . >= 1 and . <= 1000000) and
+                (.head_sha | test("^[a-f0-9]{40}$"))
+              ) | .head_sha
+            ' "$RUNNER_TEMP/deploy-run.json")"
+          deploy_run_attempt="$(jq -er '.run_attempt' "$RUNNER_TEMP/deploy-run.json")"
+          gh api \
+            "repos/${GITHUB_REPOSITORY}/actions/runs/${AUTOMATIC_DEPLOY_RUN_ID}/attempts/${deploy_run_attempt}/jobs?per_page=100" \
+            > "$RUNNER_TEMP/deploy-jobs.json"
+          jq -e '
+            [.jobs[] | select(
+              .name == "Deploy exact staging artifact" and
+              .status == "completed" and
+              .conclusion == "success"
+            )] | length == 1
+          ' "$RUNNER_TEMP/deploy-jobs.json" >/dev/null
           echo "sha=$deployed_sha" >> "$GITHUB_OUTPUT"
 
       - name: Check out trusted version verifier
-        if: inputs.trusted_deployed_sha == ''
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           ref: main
@@ -150,7 +107,6 @@ jobs:
           sparse-checkout-cone-mode: false
 
       - name: Require the selected staging deployment to still be live
-        if: inputs.trusted_deployed_sha == ''
         env:
           EXPECTED_SHA: ${{ steps.source.outputs.sha }}
           STAGING_AUTH: ${{ secrets.STAGING_AUTH }}
@@ -202,7 +158,7 @@ jobs:
         id: museum-selection
         env:
           DEPLOYED_SHA: ${{ steps.source.outputs.sha }}
-          DEPLOY_RUN_ID: ${{ inputs.parent_deploy_run_id || inputs.automatic_deploy_run_id }}
+          DEPLOY_RUN_ID: ${{ inputs.automatic_deploy_run_id }}
           GH_TOKEN: ${{ github.token }}
           MUSEUM_RELEASE_TIER_MODE: ${{ vars.MUSEUM_RELEASE_TIER_MODE || 'tiered' }}
         run: |
@@ -405,6 +361,6 @@ jobs:
           CI_PIPELINES_TITLE: ${{ needs.staging-packs.result == 'success' && 'WEB E2E passed' || 'WEB E2E failed' }}
           CI_PIPELINES_SERVICE: web
           CI_PIPELINES_SHA: ${{ needs.staging-packs.outputs.expected-sha }}
-          CI_PIPELINES_PARENT_DEPLOY_RUN_ID: ${{ inputs.parent_deploy_run_id || inputs.automatic_deploy_run_id }}
+          CI_PIPELINES_PARENT_DEPLOY_RUN_ID: ${{ inputs.automatic_deploy_run_id }}
           CI_PIPELINES_VALIDATION_PACK: ${{ inputs.pack || 'all' }}
         run: node .ci-wave-notifier/scripts/notify-ci-wave.mjs

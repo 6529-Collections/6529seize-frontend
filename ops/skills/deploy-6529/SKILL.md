@@ -53,14 +53,15 @@ description: Execute authorized 6529 frontend, backend, or coupled staging and p
    release to each backend production run. Set `release_note_publish=true`
    only for the final successful service. Use `release_note_groups` when the
    release contains multiple PR groups, preserving their service membership.
-   For an authorized internal operation, omit PR/group metadata, set
-   `release_note_opt_out=true`, and leave `release_note_publish=false`.
+   Keep autonomous release notes enabled, including for internal maintenance.
+   Only if the user explicitly asks to suppress notes, omit PR/group metadata,
+   set `release_note_opt_out=true`, and leave `release_note_publish=false`.
 3. After required backend dependencies are deployed, merge the frontend
    development branch into current `main` and dispatch
    `.github/workflows/build-upload-deploy-prod.yml` (`Web Deploy - PROD`) with
-   `--ref main`. The workflow builds, verifies, deploys, and runs Production
-   E2E automatically; no separate artifact selection or E2E dispatch is needed.
-4. Wait for the complete workflow result. Preserve the workflow's autonomous
+   `--ref main`. The workflow builds, verifies, and deploys. Its successful
+   completion automatically starts a separate Production E2E workflow.
+4. Follow the deployment and its corresponding E2E run to completion. Preserve the workflow's autonomous
    release-note notification; never compose or publish the note yourself.
 
 ## Failure and closeout

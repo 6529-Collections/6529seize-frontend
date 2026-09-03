@@ -27,8 +27,8 @@
   backend alone resolves the drop reply target; notification failures remain
   best effort. Keep receiver and sender contracts compatible during rollout.
 - Never author or post release notes manually. Preserve the autonomous bot's
-  PR/service grouping metadata and final publication signal; use the explicit
-  release-note opt-out for authorized internal operations.
+  PR/service grouping metadata and final publication signal; use the release-note opt-out
+  only when the user explicitly requests suppressing release notes.
 
 <!-- BEGIN:nextjs-agent-rules -->
 
