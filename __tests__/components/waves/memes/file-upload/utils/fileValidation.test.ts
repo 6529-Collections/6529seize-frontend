@@ -2,6 +2,7 @@ import {
   validateFile,
   testVideoCompatibility,
 } from "@/components/waves/memes/file-upload/utils/fileValidation";
+import { FILE_SIZE_LIMIT } from "@/components/waves/memes/file-upload/utils/constants";
 
 // Mock MediaError constants
 const MediaErrorMock = {
@@ -13,12 +14,6 @@ const MediaErrorMock = {
 
 // Define MediaError globally for tests
 (global as any).MediaError = MediaErrorMock;
-
-// Mock constants
-jest.mock("@/components/waves/memes/file-upload/utils/constants", () => ({
-  FILE_SIZE_LIMIT: 50 * 1024 * 1024, // 50MB
-  COMPATIBILITY_CHECK_TIMEOUT_MS: 5000,
-}));
 
 // Mock format helpers
 jest.mock("@/components/waves/memes/file-upload/utils/formatHelpers", () => ({
@@ -94,13 +89,30 @@ describe("fileValidation", () => {
       expect(result.error).toContain("File type not supported");
     });
 
-    it("should reject file exceeding size limit", async () => {
-      const largeContent = "x".repeat(51 * 1024 * 1024); // 51MB
-      const file = new File([largeContent], "large.png", { type: "image/png" });
-      const result = await validateFile(file);
-      expect(result.valid).toBe(false);
-      expect(result.error).toContain("exceeds");
+    it("uses exactly 250 decimal MB", () => {
+      expect(FILE_SIZE_LIMIT).toBe(250_000_000);
     });
+
+    it.each([249_999_999, 250_000_000])(
+      "accepts a file of %i bytes within the decimal limit",
+      async (size) => {
+        const file = new File([], "artwork.mp4", { type: "video/mp4" });
+        Object.defineProperty(file, "size", { value: size });
+        await expect(validateFile(file)).resolves.toEqual({ valid: true });
+      }
+    );
+
+    it.each([250_000_001, 262_144_000])(
+      "rejects a file of %i bytes above the decimal limit",
+      async (size) => {
+        const file = new File([], "artwork.mp4", { type: "video/mp4" });
+        Object.defineProperty(file, "size", { value: size });
+        await expect(validateFile(file)).resolves.toEqual({
+          valid: false,
+          error: "File size exceeds 250 MB limit.",
+        });
+      }
+    );
   });
 
   describe("testVideoCompatibility", () => {

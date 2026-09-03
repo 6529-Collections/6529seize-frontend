@@ -17,7 +17,7 @@ describe('SubmissionProgress', () => {
   });
 
   it('renders uploading state with file info', () => {
-    const fileInfo = { name: 'test.jpg', size: 1048576 };
+    const fileInfo = { name: 'test.jpg', size: 1_000_000 };
     render(
       <SubmissionProgress 
         {...defaultProps} 
@@ -89,8 +89,9 @@ describe('SubmissionProgress', () => {
   it('formats file sizes correctly', () => {
     const testCases = [
       { size: 500, expected: 'Uploading test.txt (500 bytes)' },
-      { size: 1536, expected: 'Uploading test.txt (1.5 KB)' },
-      { size: 2097152, expected: 'Uploading test.txt (2.0 MB)' },
+      { size: 1500, expected: 'Uploading test.txt (1.5 KB)' },
+      { size: 2_000_000, expected: 'Uploading test.txt (2.0 MB)' },
+      { size: 250_000_000, expected: 'Uploading test.txt (250.0 MB)' },
     ];
 
     testCases.forEach(({ size, expected }) => {
