@@ -1,5 +1,6 @@
 import type { Page } from "@playwright/test";
 
+import { EN_US_MESSAGES } from "../../i18n/messages/en-US";
 import { expect, test } from "../testHelpers";
 import {
   expectProfileShell,
@@ -7,6 +8,12 @@ import {
   gotoReady,
   PROFILE_HANDLE,
 } from "./profileReadonlyHelpers";
+
+const englishMessages: Readonly<Record<string, string>> = EN_US_MESSAGES;
+// Staging can include the localized Profile Waves feed before it reaches main.
+const PROFILE_FEED_DESCRIPTION =
+  englishMessages["waves.profileFeed.description"] ??
+  "Drops 6529 users are featuring from their own profile waves.";
 
 const PROFILE_TAB_PATHS = [
   {
@@ -90,11 +97,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
           name: "Latest From Profile Waves",
         })
       ).toBeVisible();
-      await expect(
-        page.getByText(
-          "Drops 6529 users are featuring from their own profile waves."
-        )
-      ).toBeVisible();
+      await expect(page.getByText(PROFILE_FEED_DESCRIPTION)).toBeVisible();
       await expect(
         page.getByRole("link", { name: "Profile Waves Feed" })
       ).toHaveAttribute("href", "/waves");
