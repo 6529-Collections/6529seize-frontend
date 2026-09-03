@@ -15,6 +15,7 @@ import { HttpFile } from '../http/http';
 
 export class ApiContentModerationBlockActivityItem {
     'id': string;
+    'action': ApiContentModerationBlockActivityItemActionEnum;
     'blocker_profile_id': string;
     'blocker_handle': string | null;
     'blocker_pfp': string | null;
@@ -33,6 +34,12 @@ export class ApiContentModerationBlockActivityItem {
             "name": "id",
             "baseName": "id",
             "type": "string",
+            "format": ""
+        },
+        {
+            "name": "action",
+            "baseName": "action",
+            "type": "ApiContentModerationBlockActivityItemActionEnum",
             "format": ""
         },
         {
@@ -91,3 +98,9 @@ export class ApiContentModerationBlockActivityItem {
     public constructor() {
     }
 }
+
+export enum ApiContentModerationBlockActivityItemActionEnum {
+    Blocked = 'PROFILE_BLOCKED',
+    Unblocked = 'PROFILE_UNBLOCKED'
+}
+

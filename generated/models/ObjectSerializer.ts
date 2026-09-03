@@ -792,7 +792,7 @@ import { ApiConsolidatedTdhMetricsPage } from '../models/ApiConsolidatedTdhMetri
 import { ApiConsolidatedTdhMetricsSort } from '../models/ApiConsolidatedTdhMetricsSort';
 import { ApiConsolidatedTdhView } from '../models/ApiConsolidatedTdhView';
 import { ApiContentModerationAuditEntry } from '../models/ApiContentModerationAuditEntry';
-import { ApiContentModerationBlockActivityItem } from '../models/ApiContentModerationBlockActivityItem';
+import { ApiContentModerationBlockActivityItem , ApiContentModerationBlockActivityItemActionEnum           } from '../models/ApiContentModerationBlockActivityItem';
 import { ApiContentModerationDropDecisionRequest, ApiContentModerationDropDecisionRequestDecisionEnum    } from '../models/ApiContentModerationDropDecisionRequest';
 import { ApiContentModerationDropDecisionResponse   } from '../models/ApiContentModerationDropDecisionResponse';
 import { ApiContentModerationProfileListItem         } from '../models/ApiContentModerationProfileListItem';
@@ -1412,6 +1412,7 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiConsolidatedTdhMetricsContent",
     "ApiConsolidatedTdhMetricsSort",
     "ApiConsolidatedTdhView",
+    "ApiContentModerationBlockActivityItemActionEnum",
     "ApiContentModerationDropDecisionRequestDecisionEnum",
     "ApiContentModerationRecommendation",
     "ApiContentModerationReportReason",

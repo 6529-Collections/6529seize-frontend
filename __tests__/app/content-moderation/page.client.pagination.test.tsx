@@ -1,5 +1,8 @@
 import ContentModerationPageClient from "@/app/content-moderation/page.client";
-import type { ApiContentModerationBlockActivityItem } from "@/generated/models/ApiContentModerationBlockActivityItem";
+import {
+  type ApiContentModerationBlockActivityItem,
+  ApiContentModerationBlockActivityItemActionEnum,
+} from "@/generated/models/ApiContentModerationBlockActivityItem";
 import type { ApiContentModerationQueueItem } from "@/generated/models/ApiContentModerationQueueItem";
 import { ApiContentModerationRecommendation } from "@/generated/models/ApiContentModerationRecommendation";
 import { ApiContentModerationReportReason } from "@/generated/models/ApiContentModerationReportReason";
@@ -102,6 +105,10 @@ const createBlockActivityItem = (
   index: number
 ): ApiContentModerationBlockActivityItem => ({
   id: `block-${index}`,
+  action:
+    index % 2 === 0
+      ? ApiContentModerationBlockActivityItemActionEnum.Unblocked
+      : ApiContentModerationBlockActivityItemActionEnum.Blocked,
   blocker_profile_id: `blocker-${index}`,
   blocker_handle: `blocker${index}`,
   blocker_pfp: null,
@@ -379,6 +386,13 @@ describe("ContentModerationPageClient pagination", () => {
       "/blocked1"
     );
     expect(screen.getAllByText("blocked")[0]).toBeVisible();
+    expect(screen.getAllByText("unblocked")[0]).toBeVisible();
+    expect(screen.getAllByRole("listitem")[0]).toHaveTextContent(
+      "@blocker1 blocked @blocked1"
+    );
+    expect(screen.getAllByRole("listitem")[1]).toHaveTextContent(
+      "@blocker2 unblocked @blocked2"
+    );
     expect(mockFetchContentModerationBlockActivity).toHaveBeenNthCalledWith(1, {
       limit: 50,
     });
