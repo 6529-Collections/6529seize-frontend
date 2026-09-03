@@ -38,10 +38,11 @@ description: Execute authorized 6529 frontend, backend, or coupled staging and p
    and workflow changes; its existing `ops/**`-only exclusion remains. When an
    authorized ops-only change needs deployment, dispatch `deploy-staging.yml`
    on `1a-staging` explicitly.
-4. Follow the frontend deployment and its automatic Staging E2E to completion.
-   Keep the target stable while its validation runs. Fix an attributable
-   failure on the development branch, merge the fix into staging, and repeat
-   the affected deployment and validation.
+4. Wait for the frontend build, artifact verification, deployed-version check,
+   and health checks. Successful Web Deploy completion starts Staging E2E
+   separately. Do not wait for E2E before reporting deployment complete or
+   continuing to the next authorized environment; report its current status
+   separately. Fix known regressions attributable to the change.
 
 ## Production
 
@@ -61,20 +62,29 @@ description: Execute authorized 6529 frontend, backend, or coupled staging and p
    `.github/workflows/build-upload-deploy-prod.yml` (`Web Deploy - PROD`) with
    `--ref main`. The workflow builds, verifies, and deploys. Its successful
    completion automatically starts a separate Production E2E workflow.
-4. Follow the deployment and its corresponding E2E run to completion. Preserve the workflow's autonomous
-   release-note notification; never compose or publish the note yourself.
+4. Complete the deployment after its artifact, version, and health checks pass.
+   Report Production E2E separately; it does not gate release completion.
+   Preserve the workflow's autonomous release-note notification; never compose
+   or publish the note yourself.
 
 ## Failure and closeout
 
-Inspect the failed job and logs before retrying. A successful deploy job with
-failed E2E is a deployed but unvalidated change. Fix attributable failures and
-repeat the necessary authorized work; do not report success from a green build
-alone. Roll back through the ordinary deployment workflow using a reviewed
+Inspect failed jobs and logs before retrying. A failed deployment, artifact,
+version, or health check blocks deployment completion; a green build alone is
+not sufficient. Automatic E2E is asynchronous and reports its own result.
+Do not hold up releases for pending E2E or unrelated failures such as Museum
+checks on a change outside Museum. Keep relevant build, unit/contract, and
+security checks. If an aggregate PR check is blocked solely by unrelated E2E,
+record the result and use the authorized merge path without changing repository
+protections or claiming those tests passed. Fix known attributable regressions
+through the development branch and the authorized deployment sequence.
+
+Roll back through the ordinary deployment workflow using a reviewed
 revert or compatible known-good source, preserving shared branch history and
 checking database/API compatibility first.
 
-Report the PRs, deployed services and order, deployment run links, automatic
-validation results, and any remaining failure. The workflows resolve and
+Report the PRs, deployed services and order, deployment run links, available
+E2E results, and any remaining failure. The workflows resolve and
 verify commits and artifact digests automatically; developers supply ordinary
 branch/environment/service choices. Keep credentials and private data out of
 reports.
