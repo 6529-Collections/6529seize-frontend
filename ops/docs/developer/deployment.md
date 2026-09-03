@@ -25,8 +25,10 @@ actual deployment.
   `dbMigrationsLoop` before `api`, then dependent frontend changes; queues and
   consumers may need their own earlier steps.
 - Keep CI, artifact integrity, deployed-version checks, and health checks.
-  Frontend workflows run their E2E checks automatically as part of the same
-  deployment. Follow the complete result before calling a deployment validated.
+  Successful frontend deployments automatically trigger separate E2E workflows.
+  Web Deploy finishes before E2E; follow both runs before calling the change validated.
+  Automatic dispatch supplies the deployment run ID. To rerun E2E manually, select
+  `main` and supply that successful deployment run ID; no SHA input is needed.
 - Coordinate potentially conflicting deployments through GitHub run visibility;
   existing concurrency is repository-scoped. Do not cancel another developer's
   run. Wait for that work to finish when the environment would conflict.
@@ -61,7 +63,7 @@ Backend production also carries release-note inputs:
   across that PR's sequential deployments;
 - `release_note_publish`: `false` until the final service, then `true`;
 - `release_note_groups`: per-PR groups when several PRs share the deployment;
-- `release_note_opt_out=true`: an authorized internal operation that should not
+- `release_note_opt_out=true`: only when the user explicitly requests that the deployment not
   create a release note, with PR/group metadata omitted and publish left false.
 
 The autonomous bot owns release-note writing and publication. Preserve its
