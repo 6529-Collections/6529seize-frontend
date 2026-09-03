@@ -12,12 +12,56 @@ import { ApiModeratedProfileStatus } from "@/generated/models/ApiModeratedProfil
 import {
   fetchContentModerationBlockActivity,
   fetchContentModerationQueue,
+  fetchSuspendedModerationProfiles,
 } from "@/services/api/content-moderation-api";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { act, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  render as renderUi,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { PathnameContext } from "next/dist/shared/lib/hooks-client-context.shared-runtime";
+import { useEffect, useState, type ReactNode } from "react";
+
+// Supply Next's pathname context and model its native-history integration.
+function NavigationTestProvider({
+  children,
+}: {
+  readonly children: ReactNode;
+}) {
+  const [pathname, setPathname] = useState(globalThis.location.pathname);
+  useEffect(() => {
+    const updatePathname = () => setPathname(globalThis.location.pathname);
+    const originalPushState = globalThis.history.pushState.bind(
+      globalThis.history
+    );
+    const pushState = jest
+      .spyOn(globalThis.history, "pushState")
+      .mockImplementation((...args) => {
+        originalPushState(...args);
+        updatePathname();
+      });
+    globalThis.addEventListener("popstate", updatePathname);
+    return () => {
+      pushState.mockRestore();
+      globalThis.removeEventListener("popstate", updatePathname);
+    };
+  }, []);
+  return (
+    <PathnameContext.Provider value={pathname}>
+      {children}
+    </PathnameContext.Provider>
+  );
+}
+
+function render(ui: ReactNode) {
+  return renderUi(ui, { wrapper: NavigationTestProvider });
+}
 
 let mockFetchingProfile = false;
+let mockCanModerate = true;
 let mockBlockActivityIntersection: ((isIntersecting: boolean) => void) | null =
   null;
 
@@ -33,7 +77,7 @@ jest.mock("@/components/auth/Auth", () => ({
 jest.mock("@/hooks/content-moderation/useContentModeratorAccess", () => ({
   useContentModeratorAccess: () => ({
     data: {
-      moderator: true,
+      moderator: mockCanModerate,
       has_open_reports: true,
       open_report_count: 51,
       resolved_report_count: 0,
@@ -43,6 +87,11 @@ jest.mock("@/hooks/content-moderation/useContentModeratorAccess", () => ({
     isLoading: false,
     isSuccess: true,
   }),
+}));
+
+jest.mock("@/components/content-moderation/ContentModerationNoAccess", () => ({
+  __esModule: true,
+  default: () => <p>No moderator access</p>,
 }));
 
 jest.mock("@/hooks/useBrowserLocale", () => ({
@@ -122,8 +171,158 @@ const createBlockActivityItem = (
 describe("ContentModerationPageClient pagination", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    globalThis.history.replaceState(null, "", "/content-moderation");
+    jest.mocked(fetchSuspendedModerationProfiles).mockResolvedValue([]);
     mockFetchingProfile = false;
+    mockCanModerate = true;
     mockBlockActivityIntersection = null;
+  });
+
+  it.each([
+    "open-reports",
+    "resolved-reports",
+    "suspended-profiles",
+    "block-activity",
+  ])(
+    "does not request private data without moderator access at %s",
+    async (slug) => {
+      mockCanModerate = false;
+      globalThis.history.replaceState(null, "", `/content-moderation/${slug}`);
+      render(
+        <QueryClientProvider client={new QueryClient()}>
+          <ContentModerationPageClient />
+        </QueryClientProvider>
+      );
+      expect(await screen.findByText("No moderator access")).toBeVisible();
+      expect(screen.queryByRole("tablist")).not.toBeInTheDocument();
+      expect(mockFetchContentModerationQueue).not.toHaveBeenCalled();
+      expect(mockFetchContentModerationBlockActivity).not.toHaveBeenCalled();
+      expect(fetchSuspendedModerationProfiles).not.toHaveBeenCalled();
+    }
+  );
+
+  it.each([
+    ["open-reports", "Open reports", "There are no open reports."],
+    ["resolved-reports", "Resolved reports", "There are no resolved reports."],
+    [
+      "suspended-profiles",
+      "Suspended profiles",
+      "There are no suspended profiles.",
+    ],
+    ["block-activity", "Block activity", "There is no block activity yet."],
+  ])(
+    "opens the %s deep link within the shared frame",
+    async (slug, label, empty) => {
+      globalThis.history.replaceState(null, "", `/content-moderation/${slug}`);
+      mockFetchContentModerationQueue.mockResolvedValue([]);
+      mockFetchContentModerationBlockActivity.mockResolvedValue([]);
+      render(
+        <QueryClientProvider
+          client={
+            new QueryClient({ defaultOptions: { queries: { retry: false } } })
+          }
+        >
+          <ContentModerationPageClient />
+        </QueryClientProvider>
+      );
+      expect(
+        screen.getByRole("tab", { name: new RegExp(label), selected: true })
+      ).toHaveAttribute("tabindex", "0");
+      expect(screen.getByRole("main")).toHaveClass(
+        "tw-border-r",
+        "tw-border-iron-800",
+        "lg:tw-px-8"
+      );
+      expect(await screen.findByText(empty)).toBeVisible();
+      expect(screen.getByRole("tabpanel")).toHaveAccessibleName(
+        new RegExp(label)
+      );
+      if (slug === "block-activity" || slug === "suspended-profiles") {
+        expect(mockFetchContentModerationQueue).not.toHaveBeenCalled();
+      }
+    }
+  );
+
+  it("switches shallowly, preserves the frame, and restores tabs with Back and Forward", async () => {
+    globalThis.history.replaceState(
+      null,
+      "",
+      "/content-moderation?context=watchtower#queue"
+    );
+    mockFetchContentModerationQueue.mockResolvedValue([]);
+    mockFetchContentModerationBlockActivity.mockResolvedValue([]);
+    const view = render(
+      <QueryClientProvider
+        client={
+          new QueryClient({ defaultOptions: { queries: { retry: false } } })
+        }
+      >
+        <ContentModerationPageClient />
+      </QueryClientProvider>
+    );
+    const frame = screen.getByRole("main");
+    const historyLength = globalThis.history.length;
+    await userEvent.click(screen.getByRole("tab", { name: "Block activity" }));
+    expect(globalThis.location.pathname).toBe(
+      "/content-moderation/block-activity"
+    );
+    expect(globalThis.location.search).toBe("?context=watchtower");
+    expect(globalThis.location.hash).toBe("#queue");
+    expect(screen.getByRole("main")).toBe(frame);
+    await userEvent.click(screen.getByRole("tab", { name: "Block activity" }));
+    expect(globalThis.history.length).toBe(historyLength + 1);
+    act(() => globalThis.history.back());
+    await waitFor(() =>
+      expect(
+        screen.getByRole("tab", { name: /Open reports/, selected: true })
+      ).toBeVisible()
+    );
+    act(() => globalThis.history.forward());
+    await waitFor(() =>
+      expect(
+        screen.getByRole("tab", { name: "Block activity", selected: true })
+      ).toBeVisible()
+    );
+    expect(screen.getByRole("main")).toBe(frame);
+    view.unmount();
+    render(
+      <QueryClientProvider
+        client={
+          new QueryClient({ defaultOptions: { queries: { retry: false } } })
+        }
+      >
+        <ContentModerationPageClient />
+      </QueryClientProvider>
+    );
+    expect(
+      screen.getByRole("tab", { name: "Block activity", selected: true })
+    ).toBeVisible();
+  });
+
+  it("supports arrow, Home, End and keyboard activation without changing tabs on focus", async () => {
+    mockFetchContentModerationQueue.mockResolvedValue([]);
+    mockFetchContentModerationBlockActivity.mockResolvedValue([]);
+    render(
+      <QueryClientProvider
+        client={
+          new QueryClient({ defaultOptions: { queries: { retry: false } } })
+        }
+      >
+        <ContentModerationPageClient />
+      </QueryClientProvider>
+    );
+    screen.getByRole("tab", { name: /Open reports/ }).focus();
+    await userEvent.keyboard("{ArrowLeft}");
+    expect(screen.getByRole("tab", { name: "Block activity" })).toHaveFocus();
+    expect(globalThis.location.pathname).toBe("/content-moderation");
+    await userEvent.keyboard("{Home}{ArrowRight}{Enter}");
+    expect(globalThis.location.pathname).toBe(
+      "/content-moderation/resolved-reports"
+    );
+    await userEvent.keyboard("{End} ");
+    expect(globalThis.location.pathname).toBe(
+      "/content-moderation/block-activity"
+    );
   });
 
   it("identifies the profile that submitted each report", async () => {

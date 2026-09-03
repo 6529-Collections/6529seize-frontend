@@ -73,14 +73,14 @@ export default function BlockActivityCard({
   const LockIcon = isUnblock ? LockOpenIcon : LockClosedIcon;
 
   return (
-    <li className="tw-grid tw-grid-cols-[minmax(0,1fr)_7.5rem_minmax(0,1fr)] tw-items-center tw-gap-x-3 tw-gap-y-2 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-px-3 tw-py-3 tw-text-sm @[32rem]:tw-gap-x-6 @[48rem]:tw-grid-cols-[minmax(0,1fr)_8.5rem_minmax(0,1fr)_10.5rem] @[64rem]:tw-grid-cols-[18rem_8.5rem_18rem_minmax(10.5rem,1fr)]">
+    <li className="tw-grid tw-grid-cols-[minmax(0,1fr)_7.5rem_minmax(0,1fr)] tw-items-center tw-gap-x-3 tw-gap-y-2 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-px-3 tw-py-3 tw-text-sm @[32rem]:tw-gap-x-6 @[48rem]:tw-grid-cols-[minmax(0,1fr)_7.5rem_minmax(0,1fr)_10.5rem]">
       <ProfileIdentity
         profileId={item.blocker_profile_id}
         handle={item.blocker_handle}
         pfp={item.blocker_pfp}
       />{" "}
       <span
-        className={`tw-inline-flex tw-items-center tw-gap-2 tw-font-semibold ${isUnblock ? "tw-text-green" : "tw-text-red"}`}
+        className={`tw-grid tw-grid-cols-[minmax(0,1fr)_1.25rem] tw-items-center tw-gap-2 tw-font-semibold ${isUnblock ? "tw-text-green" : "tw-text-red"}`}
       >
         {t(
           locale,
