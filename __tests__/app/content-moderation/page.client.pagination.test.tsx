@@ -733,6 +733,9 @@ describe("ContentModerationPageClient pagination", () => {
     );
     expect(screen.getAllByText("Blocked")[0]).toBeVisible();
     expect(screen.getAllByText("Unblocked")[0]).toBeVisible();
+    const feed = screen.getByRole("list").parentElement;
+    expect(feed).toHaveClass("tw-w-full", "tw-@container");
+    expect(feed?.className).not.toContain("tw-max-w-");
     expect(screen.getAllByRole("listitem")[0]).toHaveTextContent(
       "@blocker1 Blocked @blocked1"
     );

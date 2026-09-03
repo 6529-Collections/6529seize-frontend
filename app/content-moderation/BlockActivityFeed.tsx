@@ -68,7 +68,7 @@ export default function BlockActivityFeed({
   }
 
   return (
-    <div className="tw-mt-4 tw-w-full tw-max-w-[52rem] tw-@container">
+    <div className="tw-mt-4 tw-w-full tw-@container">
       <ul className="tw-m-0 tw-list-none tw-p-0">
         {items.map((item) => (
           <BlockActivityCard key={item.id} item={item} />

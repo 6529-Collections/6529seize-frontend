@@ -12,5 +12,5 @@
 ## Block activity follow-up
 
 - The `contentModeration.moderator.blockActivity.blocked` and `.unblocked` action labels currently use the same source-locale fallback. Visible text is also the accessible action text; there is no separate translated row summary to drift from it.
-- The aligned action column is 7.5rem, with a fixed slot for the lock icon, inside a feed capped at 52rem. Before enabling translated labels, verify their text plus the lock icon at every container breakpoint, especially around 32rem, and at increased text size. Adjust wrapping or the shared column width if needed; do not truncate labels or profile handles.
+- The aligned action column is 7.5rem, with a fixed slot for the lock icon, inside a full-width feed. Before enabling translated labels, verify their text plus the lock icon at every container breakpoint, especially around 32rem, and at increased text size. Adjust wrapping or the shared column width if needed; do not truncate labels or profile handles.
 - Owner: frontend content-moderation localization follow-up. Source-locale labels fit today; longer translations must pass browser layout and accessibility checks before release.

@@ -231,7 +231,7 @@ Space activates the focused tab. Unknown tab URLs show the not-found page.
 Block activity is a newest-first,
 continuously loaded trail showing who blocked or unblocked whom. Each compact
 row aligns the two linked profiles, action, and date in consistent columns
-within a compact-width feed rather than spreading them across the whole page.
+across the full available content width inside the shared page frame.
 **Blocked** has red text and a closed lock; **Unblocked** has green text and an
 open lock. Full handles wrap when needed instead of being truncated, and the
 date moves below on narrow screens. Block and unblock events appear in
