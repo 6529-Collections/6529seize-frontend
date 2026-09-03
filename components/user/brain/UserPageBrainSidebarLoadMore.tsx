@@ -3,6 +3,7 @@
 import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import type { ProfileWaveActivityQueryState } from "@/hooks/useProfileWaveActivityWaves";
+import { keepFocusedSidebarControlVisible } from "./userPageBrainSidebar.helpers";
 import { getUserPageBrainSidebarMessage } from "./userPageBrainSidebar.messages";
 
 interface UserPageBrainSidebarLoadMoreProps {
@@ -33,7 +34,7 @@ export default function UserPageBrainSidebarLoadMore({
   useLayoutEffect(() => {
     const button = buttonRef.current;
     if (button && globalThis.document.activeElement === button) {
-      button.scrollIntoView({ block: "nearest", inline: "nearest" });
+      keepFocusedSidebarControlVisible(button);
     }
   }, [state.waves.length]);
 

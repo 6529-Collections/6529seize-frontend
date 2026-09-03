@@ -1,9 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import Link from "next/link";
 import dynamic from "next/dynamic";
-import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import BrainMobileWaves from "./BrainMobileWaves";
@@ -18,7 +16,7 @@ function BrainMobileViewLoadingFallback() {
     <div
       aria-hidden="true"
       data-mobile-bottom-nav-scroll-target="true"
-      className="tw-h-full tw-min-h-[50dvh] tw-bg-black"
+      className="tw-h-full tw-min-h-[50dvh] tw-bg-[#0d0d0e]"
     />
   );
 }
@@ -135,21 +133,7 @@ function BrainMobileProfileFeed() {
   const { mobileWavesViewStyle } = useLayout();
 
   return (
-    <CommunityCurations
-      heightStyle={mobileWavesViewStyle}
-      topContent={
-        <div className="tw-mb-5">
-          <Link
-            href="/waves"
-            prefetch={false}
-            className="tw-inline-flex tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-300 tw-no-underline tw-transition desktop-hover:hover:tw-border-iron-600 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white"
-          >
-            <ArrowLeftIcon className="tw-size-4" aria-hidden="true" />
-            <span>Back to Waves</span>
-          </Link>
-        </div>
-      }
-    />
+    <CommunityCurations heightStyle={mobileWavesViewStyle} />
   );
 }
 

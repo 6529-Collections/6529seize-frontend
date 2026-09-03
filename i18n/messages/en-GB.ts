@@ -809,6 +809,7 @@ export const EN_GB_MESSAGES = {
   "memes.waveFooter.quickVote.open": "Open quick vote",
   "memes.waveFooter.uncastPower.ariaLabel":
     "Uncast Power, {power} {votingLabel} left, {leftThisRound}, {unrated}",
+  "memes.waveFooter.uncastPower.compactLeft": "{count} left",
   "memes.waveFooter.uncastPower.title": "Uncast Power",
   "memes.waveFooter.uncastPower.visibleValue": "{power} {votingLabel}",
   "memes.waveFooter.uncastPower.votes": "Votes",

@@ -824,6 +824,7 @@ export const FR_FR_MESSAGES = {
   "memes.waveFooter.quickVote.open": "Ouvrir le vote rapide",
   "memes.waveFooter.uncastPower.ariaLabel":
     "Pouvoir non utilisé, {power} {votingLabel} restants, {leftThisRound}, {unrated}",
+  "memes.waveFooter.uncastPower.compactLeft": "Encore {count}",
   "memes.waveFooter.uncastPower.title": "Pouvoir non utilisé",
   "memes.waveFooter.uncastPower.visibleValue": "{power} {votingLabel}",
   "memes.waveFooter.uncastPower.votes": "Votes",

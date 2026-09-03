@@ -819,6 +819,7 @@ export const DE_DE_MESSAGES = {
   "memes.waveFooter.quickVote.open": "Schnellvoting öffnen",
   "memes.waveFooter.uncastPower.ariaLabel":
     "Nicht vergebene Power, {power} {votingLabel} übrig, {leftThisRound}, {unrated}",
+  "memes.waveFooter.uncastPower.compactLeft": "{count} übrig",
   "memes.waveFooter.uncastPower.title": "Nicht vergebene Power",
   "memes.waveFooter.uncastPower.visibleValue": "{power} {votingLabel}",
   "memes.waveFooter.uncastPower.votes": "Stimmen",

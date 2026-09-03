@@ -6,7 +6,8 @@ import ReportDropModal from "@/components/content-moderation/ReportDropModal";
 import { MobileVotingModal, VotingModal } from "@/components/voting";
 import VotingModalButton from "@/components/voting/VotingModalButton";
 import { useVotingModalState } from "@/components/voting/useVotingModalState";
-import WaveDropActionsMore from "@/components/waves/drops/WaveDropActionsMore";
+import WaveDropActionsOpen from "@/components/waves/drops/WaveDropActionsOpen";
+import WaveDropActionsOptions from "@/components/waves/drops/WaveDropActionsOptions";
 import WaveDropMobileMenuDelete from "@/components/waves/drops/WaveDropMobileMenuDelete";
 import WaveDropMobileMenuCopyLink from "@/components/waves/drops/WaveDropMobileMenuCopyLink";
 import WaveDropMobileMenuOpen from "@/components/waves/drops/WaveDropMobileMenuOpen";
@@ -170,7 +171,8 @@ export const DefaultWaveLeaderboardDrop: React.FC<
                 winningThreshold={winningThreshold}
               />
               <div className="tw-hidden tw-h-8 tw-items-center lg:tw-flex">
-                <WaveDropActionsMore drop={drop} />
+                {!isProposalCard && <WaveDropActionsOpen drop={drop} />}
+                {canDelete && <WaveDropActionsOptions drop={drop} />}
               </div>
             </div>
             <WaveLeaderboardDropContent
