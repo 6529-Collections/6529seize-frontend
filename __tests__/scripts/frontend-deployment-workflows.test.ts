@@ -37,6 +37,7 @@ describe("frontend deployment workflow contract", () => {
       "build-upload-deploy-prod.yml",
       "deploy-staging.yml",
       "production-artifact-verifier.yml",
+      "production-artifact-metadata.yml",
       "production-build-artifact.yml",
       "production-e2e.yml",
       "staging-e2e.yml",
@@ -153,6 +154,7 @@ describe("frontend deployment workflow contract", () => {
 
     expect(deployment.needs).toEqual([
       "build-production-artifact",
+      "resolve-production-artifact",
       "verify-production-artifact",
       "build-upload-deploy",
     ]);

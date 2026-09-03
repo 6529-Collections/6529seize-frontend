@@ -48,6 +48,12 @@ Find the new run by workflow, branch, service, and commit; follow that run to
 completion. The workflows resolve and verify the source commit and artifact
 identity automatically.
 
+Frontend production resolves the uploaded artifact through a reusable workflow
+that receives no build secrets. It reads GitHub's artifact metadata and binds it
+to the successful builder attempt, including when only failed jobs are rerun.
+This avoids secret masking of ordinary build outputs while preserving the
+independent archive, manifest, package digest, and deployed-version checks.
+
 Backend production also carries release-note inputs:
 
 - `release_pull_request`: merged PR represented by the deployment;

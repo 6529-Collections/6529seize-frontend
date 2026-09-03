@@ -45,25 +45,35 @@ jobs:
       SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
       SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
 
+  resolve-production-artifact:
+    name: Resolve production artifact metadata
+    needs: build-production-artifact
+    uses: ./.github/workflows/production-artifact-metadata.yml
+
   verify-production-artifact:
     name: Verify exact production artifact
     permissions:
       actions: read
       contents: read
-    needs: build-production-artifact
+    needs: resolve-production-artifact
     uses: ./.github/workflows/production-artifact-verifier.yml
     with:
       target_sha: ${{ github.sha }}
-      artifact_run_id: ${{ needs.build-production-artifact.outputs.producer_run_id }}
-      artifact_run_attempt: ${{ needs.build-production-artifact.outputs.producer_run_attempt }}
-      artifact_id: ${{ needs.build-production-artifact.outputs.artifact_id }}
-      artifact_digest: ${{ needs.build-production-artifact.outputs.artifact_digest }}
-      artifact_name: ${{ needs.build-production-artifact.outputs.artifact_name }}
-      artifact_workflow_sha: ${{ needs.build-production-artifact.outputs.workflow_sha }}
+      artifact_run_id: ${{ github.run_id }}
+      artifact_run_attempt: ${{ needs.resolve-production-artifact.outputs.producer_run_attempt }}
+      artifact_id: ${{ needs.resolve-production-artifact.outputs.artifact_id }}
+      artifact_digest: ${{ needs.resolve-production-artifact.outputs.artifact_digest }}
+      artifact_name: production-frontend-${{ github.sha }}-${{ github.run_id }}
+      artifact_workflow_sha: ${{ github.sha }}
 
   build-upload-deploy:
     name: Deploy verified production artifact
-    needs: [build-production-artifact, verify-production-artifact]
+    needs:
+      [
+        build-production-artifact,
+        resolve-production-artifact,
+        verify-production-artifact,
+      ]
     runs-on: ubuntu-latest
     timeout-minutes: 75
     permissions:
@@ -90,17 +100,16 @@ jobs:
       - name: Download exact production artifact
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
-          name: ${{ needs.build-production-artifact.outputs.artifact_name }}
+          name: production-frontend-${{ github.sha }}-${{ github.run_id }}
           path: production-artifact
 
       - name: Independently verify selected production bytes
         env:
-          ARTIFACT_NAME: ${{ needs.build-production-artifact.outputs.artifact_name }}
-          BUILDER_PACKAGE_SHA256: ${{ needs.build-production-artifact.outputs.package_sha256 }}
-          PRODUCER_RUN_ATTEMPT: ${{ needs.build-production-artifact.outputs.producer_run_attempt }}
-          PRODUCER_RUN_ID: ${{ needs.build-production-artifact.outputs.producer_run_id }}
+          ARTIFACT_NAME: production-frontend-${{ github.sha }}-${{ github.run_id }}
+          PRODUCER_RUN_ATTEMPT: ${{ needs.resolve-production-artifact.outputs.producer_run_attempt }}
+          PRODUCER_RUN_ID: ${{ github.run_id }}
           VERIFIER_PACKAGE_SHA256: ${{ needs.verify-production-artifact.outputs.package_sha256 }}
-          WORKFLOW_SHA: ${{ needs.build-production-artifact.outputs.workflow_sha }}
+          WORKFLOW_SHA: ${{ github.sha }}
         run: |
           set -euo pipefail
           (cd production-artifact && sha256sum -c SHA256SUMS)
@@ -125,7 +134,6 @@ jobs:
               (.package_sha256 | test("^[a-f0-9]{64}$"))
             ' production-artifact/manifest.json >/dev/null
           package_digest="$(sha256sum production-artifact/target/package.zip | cut -d' ' -f1)"
-          test "$package_digest" = "$BUILDER_PACKAGE_SHA256"
           test "$package_digest" = "$VERIFIER_PACKAGE_SHA256"
           test "$package_digest" = "$(jq -r .package_sha256 production-artifact/manifest.json)"
           jq -e \
@@ -342,6 +350,7 @@ jobs:
     if: always()
     needs:
       - build-production-artifact
+      - resolve-production-artifact
       - verify-production-artifact
       - build-upload-deploy
     runs-on: ubuntu-latest
@@ -361,6 +370,7 @@ jobs:
       - name: Notify CI wave about failure
         if: >-
           (needs.build-production-artifact.result != 'success' ||
+          needs.resolve-production-artifact.result != 'success' ||
           needs.verify-production-artifact.result != 'success' ||
           needs.build-upload-deploy.result != 'success') &&
           hashFiles('.ci-wave-notifier/scripts/notify-ci-wave.mjs') != ''
@@ -381,6 +391,7 @@ jobs:
       - name: Notify CI wave about success
         if: >-
           needs.build-production-artifact.result == 'success' &&
+          needs.resolve-production-artifact.result == 'success' &&
           needs.verify-production-artifact.result == 'success' &&
           needs.build-upload-deploy.result == 'success' &&
           hashFiles('.ci-wave-notifier/scripts/notify-ci-wave.mjs') != ''
