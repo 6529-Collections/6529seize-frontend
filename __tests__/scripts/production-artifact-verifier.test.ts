@@ -124,7 +124,7 @@ describe("production artifact verifier", () => {
       group: "production-artifact-verifier-${{ inputs.artifact_id }}",
       "cancel-in-progress": false,
     });
-    expect(source).toContain("actions/artifacts/${ARTIFACT_ID}");
+    expect(source).toContain(`actions/artifacts/\${ARTIFACT_ID}`);
     expect(source).toContain(
       "actions/runs/${ARTIFACT_RUN_ID}/attempts/${ARTIFACT_RUN_ATTEMPT}"
     );
