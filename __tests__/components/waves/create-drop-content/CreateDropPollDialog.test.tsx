@@ -49,17 +49,19 @@ jest.mock("@/components/utils/button/Button", () => ({
     "aria-label": ariaLabel,
     children,
     disabled,
+    loading,
     onClick,
   }: {
     readonly "aria-label"?: string;
     readonly children: React.ReactNode;
     readonly disabled?: boolean;
+    readonly loading?: boolean;
     readonly onClick: () => void;
   }) => (
     <button
       type="button"
       aria-label={ariaLabel}
-      disabled={disabled}
+      disabled={disabled || loading}
       onClick={onClick}
     >
       {children}
@@ -122,7 +124,9 @@ describe("CreateDropPollDialog", () => {
   });
 
   it("disables dismissal while a Poll is submitting", () => {
-    render(<CreateDropPollDialog {...defaultProps} submitting />);
+    render(
+      <CreateDropPollDialog {...defaultProps} canSubmit submitting />
+    );
 
     expect(screen.getByTestId("mobile-poll-dialog")).toHaveAttribute(
       "data-dismissible",
