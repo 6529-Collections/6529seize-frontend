@@ -120,7 +120,7 @@ exec "$NODE_BINARY" "$MUSEUM_SELECTION_TOOL" "$@"
     root,
     env: {
       ...process.env,
-      PATH: `${path.join(root, "bin")}:${process.env.PATH}`,
+      PATH: `${path.join(root, "bin")}:${process.env["PATH"]}`,
       REAL_GIT: realGit,
       NODE_BINARY: process.execPath,
       MUSEUM_SELECTION_TOOL: path.join(

@@ -16178,7 +16178,7 @@ components:
             $ref: "#/components/schemas/ApiWaveParticipationRequirement"
         required_metadata:
           description: |
-            The metadata that must be provided by the participant.
+            The metadata that must be provided by the participant. 
             Empty array if nothing is required.
           type: array
           items:
@@ -22895,7 +22895,7 @@ components:
             $ref: "#/components/schemas/ApiWaveParticipationRequirement"
         required_metadata:
           description: |
-            The metadata that must be provided by the participant.
+            The metadata that must be provided by the participant. 
             Empty array if nothing is required.
           type: array
           items:
@@ -24039,7 +24039,7 @@ components:
           nullable: true
         required_metadata:
           description: |
-            The metadata that must be provided by the participant.
+            The metadata that must be provided by the participant. 
             Empty array if nothing is required.
           type: array
           items:

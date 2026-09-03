@@ -35,7 +35,7 @@ function verifyMetadata(
     JSON.stringify([
       {
         name:
-          run.path === ".github/workflows/production-build-artifact.yml"
+          run["path"] === ".github/workflows/production-build-artifact.yml"
             ? "Build exact production artifact"
             : "Build exact production artifact / Build exact production artifact",
         run_id: 123,
