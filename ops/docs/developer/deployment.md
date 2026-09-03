@@ -25,8 +25,14 @@ actual deployment.
   `dbMigrationsLoop` before `api`, then dependent frontend changes; queues and
   consumers may need their own earlier steps.
 - Keep CI, artifact integrity, deployed-version checks, and health checks.
-  Frontend workflows run their E2E checks automatically as part of the same
-  deployment. Follow the complete result before calling a deployment validated.
+  Successful frontend deployments automatically trigger separate E2E workflows.
+  Deployment is complete when build, artifact, live-version, and health checks
+  pass. E2E reports separately and does not gate merges, deployments, promotion,
+  or release completion. Unrelated PR E2E (for example, Museum tests for a change
+  outside Museum) must not delay a release; keep relevant CI checks and report
+  the separate E2E status accurately.
+  Automatic dispatch supplies the deployment run ID. To rerun E2E manually, select
+  `main` and supply that successful deployment run ID; no SHA input is needed.
 - Coordinate potentially conflicting deployments through GitHub run visibility;
   existing concurrency is repository-scoped. Do not cancel another developer's
   run. Wait for that work to finish when the environment would conflict.
@@ -61,7 +67,7 @@ Backend production also carries release-note inputs:
   across that PR's sequential deployments;
 - `release_note_publish`: `false` until the final service, then `true`;
 - `release_note_groups`: per-PR groups when several PRs share the deployment;
-- `release_note_opt_out=true`: an authorized internal operation that should not
+- `release_note_opt_out=true`: only when the user explicitly requests that the deployment not
   create a release note, with PR/group metadata omitted and publish left false.
 
 The autonomous bot owns release-note writing and publication. Preserve its
@@ -73,7 +79,9 @@ run IDs to correlate E2E replies.
 Inspect the failing job and logs. Fix attributable failures on the development
 branch, merge the fix into the authorized target, and repeat only the required
 deployments. Keep dependent frontend changes waiting for successful backend
-dependencies. A passed deploy with failed E2E is deployed but unvalidated.
+dependencies. Report deployment health and E2E as separate outcomes. Investigate
+known attributable regressions, but do not wait for E2E or block releases on
+unrelated E2E failures.
 
 Use a reviewed revert or compatible known-good source through the same ordinary
 workflow for rollback; retain shared history and account for database/API

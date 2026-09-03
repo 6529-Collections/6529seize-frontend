@@ -109,9 +109,8 @@ curl() { command cat "$REPO_DIR/.deploy/current/version.json"; }
   );
 }
 
-describe("staging runtime directory adoption", () => {
+describe("staging runtime directory", () => {
   let repo: string;
-  let legacyRoot: string;
   let runtimeRoot: string;
 
   beforeEach(() => {
@@ -119,7 +118,6 @@ describe("staging runtime directory adoption", () => {
       fs.mkdtempSync(path.join(os.tmpdir(), "staging-runtime-"))
     );
     fs.mkdirSync(path.join(repo, ".git"));
-    legacyRoot = path.join(repo, ".release-bus");
     runtimeRoot = path.join(repo, ".deploy");
   });
 
@@ -128,35 +126,35 @@ describe("staging runtime directory adoption", () => {
   });
 
   function createPreviousRuntime() {
-    const previousApp = createRelease(legacyRoot, previousSha, previousSha);
-    fs.symlinkSync(previousApp, path.join(legacyRoot, "current"));
-    fs.writeFileSync(path.join(legacyRoot, "deploy.lock"), "existing lock");
+    const previousApp = createRelease(runtimeRoot, previousSha, previousSha);
+    fs.symlinkSync(previousApp, path.join(runtimeRoot, "current"));
+    fs.writeFileSync(path.join(runtimeRoot, "deploy.lock"), "existing lock");
     fs.writeFileSync(
-      path.join(legacyRoot, "ecosystem.config.cjs"),
+      path.join(runtimeRoot, "ecosystem.config.cjs"),
       "// config\n"
     );
-    fs.writeFileSync(path.join(legacyRoot, "runtime-secrets.json"), "{}", {
+    fs.writeFileSync(path.join(runtimeRoot, "runtime-secrets.json"), "{}", {
       mode: 0o600,
     });
     return previousApp;
   }
 
   it.each(["current", "release"])(
-    "adopts a live previous %s path without moving files or replacing the lock",
+    "recognizes a live %s path without moving files or replacing the lock",
     (pm2Path) => {
       const previousApp = createPreviousRuntime();
-      const lockBefore = fs.statSync(path.join(legacyRoot, "deploy.lock"));
+      const lockBefore = fs.statSync(path.join(runtimeRoot, "deploy.lock"));
       const secretsBefore = fs.statSync(
-        path.join(legacyRoot, "runtime-secrets.json")
+        path.join(runtimeRoot, "runtime-secrets.json")
       );
       const result = runHostPreflight(
         repo,
-        pm2Path === "current" ? path.join(legacyRoot, "current") : previousApp
+        pm2Path === "current" ? path.join(runtimeRoot, "current") : previousApp
       );
 
       expect(result.stderr).toBe("");
       expect(result.status).toBe(0);
-      expect(fs.readlinkSync(runtimeRoot)).toBe(legacyRoot);
+      expect(fs.lstatSync(runtimeRoot).isDirectory()).toBe(true);
       expect(fs.realpathSync(path.join(runtimeRoot, "current"))).toBe(
         previousApp
       );
@@ -172,10 +170,9 @@ describe("staging runtime directory adoption", () => {
     }
   );
 
-  it("recognizes the new PM2 path and rolls back to a pre-adoption release", () => {
+  it("rolls back to the previous managed release", () => {
     const previousApp = createPreviousRuntime();
-    fs.symlinkSync(legacyRoot, runtimeRoot);
-    createRelease(legacyRoot, `${expectedSha}-${expectedDigest}`, expectedSha);
+    createRelease(runtimeRoot, `${expectedSha}-${expectedDigest}`, expectedSha);
 
     const result = runHostPreflight(
       repo,
@@ -200,19 +197,18 @@ describe("staging runtime directory adoption", () => {
     expect(result.status).toBe(0);
     expect(fs.lstatSync(runtimeRoot).isDirectory()).toBe(true);
     expect(fs.existsSync(path.join(runtimeRoot, "deploy.lock"))).toBe(true);
-    expect(fs.existsSync(legacyRoot)).toBe(false);
   });
 
-  it("keeps an already healthy exact artifact idempotent after adoption", () => {
+  it("keeps an already healthy exact artifact idempotent", () => {
     const releaseId = `${expectedSha}-${expectedDigest}`;
-    const app = createRelease(legacyRoot, releaseId, expectedSha);
-    fs.symlinkSync(app, path.join(legacyRoot, "current"));
+    const app = createRelease(runtimeRoot, releaseId, expectedSha);
+    fs.symlinkSync(app, path.join(runtimeRoot, "current"));
     fs.writeFileSync(
-      path.join(legacyRoot, "releases", releaseId, "artifact.env"),
+      path.join(runtimeRoot, "releases", releaseId, "artifact.env"),
       `source_sha=${expectedSha}\npackage_sha256=${expectedDigest}\n`
     );
 
-    const result = runHostPreflight(repo, path.join(legacyRoot, "current"));
+    const result = runHostPreflight(repo, path.join(runtimeRoot, "current"));
 
     expect(result.stderr).toBe("");
     expect(result.status).toBe(0);
@@ -225,7 +221,7 @@ describe("staging runtime directory adoption", () => {
     const previousApp = createPreviousRuntime();
     const result = runHostPreflight(
       repo,
-      path.join(legacyRoot, "current"),
+      path.join(runtimeRoot, "current"),
       "",
       true
     );
@@ -234,20 +230,10 @@ describe("staging runtime directory adoption", () => {
     expect(result.stderr).toContain(
       "Another instance-local staging deployment"
     );
-    expect(fs.realpathSync(path.join(legacyRoot, "current"))).toBe(previousApp);
-    expect(fs.existsSync(runtimeRoot)).toBe(false);
+    expect(fs.realpathSync(path.join(runtimeRoot, "current"))).toBe(
+      previousApp
+    );
     expect(fs.existsSync(path.join(repo, "pm2-events"))).toBe(false);
-  });
-
-  it("rejects separate old and new roots before creating a second lock", () => {
-    createPreviousRuntime();
-    fs.mkdirSync(runtimeRoot);
-
-    const result = runHostPreflight(repo, path.join(legacyRoot, "current"));
-
-    expect(result.status).toBe(1);
-    expect(result.stderr).toContain("separate staging runtime directories");
-    expect(fs.existsSync(path.join(runtimeRoot, "deploy.lock"))).toBe(false);
   });
 
   it("rejects an unexpected runtime symlink", () => {
@@ -256,14 +242,14 @@ describe("staging runtime directory adoption", () => {
     const result = runHostPreflight(repo);
 
     expect(result.status).toBe(1);
-    expect(result.stderr).toContain("unexpected staging runtime symlink");
+    expect(result.stderr).toContain("staging runtime symlink");
     expect(fs.existsSync(path.join(repo, "deploy.lock"))).toBe(false);
   });
 
-  it("rejects a current release outside the adopted cache", () => {
+  it("rejects a current release outside the managed cache", () => {
     const otherApp = createRelease(repo, previousSha, previousSha);
-    fs.mkdirSync(legacyRoot);
-    fs.symlinkSync(otherApp, path.join(legacyRoot, "current"));
+    fs.mkdirSync(runtimeRoot);
+    fs.symlinkSync(otherApp, path.join(runtimeRoot, "current"));
 
     const result = runHostPreflight(repo, otherApp);
 
