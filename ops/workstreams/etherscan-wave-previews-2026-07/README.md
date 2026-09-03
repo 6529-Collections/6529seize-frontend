@@ -17,7 +17,7 @@ environment verification.
 6. `ops/skills/6529-autonomous-manager/SKILL.md`
 7. `ops/skills/write-prs/SKILL.md`
 8. `ops/skills/deploy-6529/SKILL.md`
-9. `ops/docs/developer/simple-release-bus-v2.md`
+9. `ops/docs/developer/deployment.md`
 
 ## Owned paths
 
@@ -66,16 +66,16 @@ environment verification.
 3. Latest-head review bots, CI, DCO, required approval, and review-thread gates
    pass.
 4. The implementation merges without bypassing repository rules.
-5. The exact merged SHA reaches `STAGING_VALIDATED` through Release Bus v2 and
-   passes Etherscan-specific staging E2E.
-6. The unchanged exact SHA is explicitly marked production-ready, reaches
-   production, and passes Etherscan-specific production smoke/E2E.
+5. Merge the implementation into `1a-staging` and follow its automatic
+   deployment, E2E, and Etherscan-specific staging validation.
+6. When production is authorized, merge into `main`, dispatch the production
+   workflow, and pass its automatic and Etherscan-specific smoke/E2E checks.
 
 ## Escalation triggers
 
 - Required maintainer approval remains unavailable after direct review request.
-- The Release Bus v2 lane or relevant control is paused.
+- Another deployment conflicts with the requested environment work.
 - A newer `main` change conflicts with Etherscan ownership or the release set.
-- Staging and production cannot be proven to run the same exact SHA.
+- The deployed change cannot be verified from its workflow and runtime result.
 - A required RPC/network capability would require a new secret or paid service
   not already approved.

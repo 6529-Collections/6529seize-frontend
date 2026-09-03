@@ -53,13 +53,12 @@ the burn-down.
 3. Test generic-`any` debt reaches zero.
 4. The final baseline is zero and regression-proof for both scopes.
 5. All PRs merge with signed commits and resolved latest-head feedback.
-6. The equivalent release set passes staging and production validation under
-   the deployment-bus process, followed by normal automated release closeout.
+6. The change passes staging and production validation through the direct
+   process in `ops/docs/developer/deployment.md`, within the authorized scope.
 
 ## Escalation triggers
 
 - Missing required maintainer approval or repository access.
-- A conflicting active release owner or paused deployment lane.
-- A production candidate that cannot be proven equivalent to staging.
+- A conflicting active deployment or unresolved environment validation failure.
 - A proposed type change that would require an unapproved runtime contract
   change.

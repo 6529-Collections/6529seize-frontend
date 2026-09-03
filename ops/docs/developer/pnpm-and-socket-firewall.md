@@ -259,9 +259,8 @@ workflow has a hard guard that rejects every non-`main` ref. Before triggering
 If those checks pass, it asks for confirmation before running the production
 workflow against `main`.
 
-For release-lane ownership, shared validation, backend coordination, and
-production promotion gates, use
-[`simple-release-bus-v2.md`](simple-release-bus-v2.md).
+For staging/production merges, deployment workflows, backend ordering, and
+automatic validation, use [Deployment](deployment.md).
 
 ## Guardrails in this repo
 

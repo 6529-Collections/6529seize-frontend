@@ -510,10 +510,11 @@ describe("testing strategy CI plan", () => {
     expect(workflow).toContain("PLAYWRIGHT_WEB_SERVER_COMMAND");
     expect(stagingWorkflow).toContain("--trigger post-deploy");
     expect(stagingWorkflow).toContain("SELECTED_PACK");
-    expect(stagingWorkflow).toContain(
-      'args+=(--exclude-pack "$museum_pack_alias")'
-    );
-    expect(stagingWorkflow).toContain("const isMuseumPack = (pack) =>");
+    expect(stagingWorkflow).toContain("--exclude-pack");
+    expect(stagingWorkflow).not.toContain("const isMuseumPack = (pack) =>");
+    expect(stagingWorkflow).not.toContain("release-bus-museum-hold");
+    expect(productionWorkflow).toContain("--exclude-pack");
+    expect(productionWorkflow).not.toContain("release-bus-museum-hold");
     expect(stagingWorkflow).not.toContain("scripts/museum-e2e-change-set.cjs");
     expect(museumReleaseSelector).toContain("failClosedClassification");
     expect(museumReleaseSelector).toContain("effectiveActivation");
@@ -546,9 +547,8 @@ describe("testing strategy CI plan", () => {
     expect(workflow).toContain("./bin/6529 exec playwright test");
     expect(workflow).not.toContain('./bin/6529 run "$selected_pack"');
     expect(workflow).toContain("--workers=1");
-    expect(stagingWorkflow).toContain(
-      "Unable to prove the deployed parent; retaining every Museum pack."
-    );
+    expect(stagingWorkflow).toContain("DEPLOYMENT_E2E_SOURCE_SHA");
+    expect(stagingWorkflow).toContain("--retry-failed-packs 1");
     expect(museumSpec).not.toContain(
       'test.describe.configure({ mode: "serial" })'
     );

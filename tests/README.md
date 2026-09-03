@@ -164,15 +164,12 @@ App PR CI:
   The desktop/mobile route sweep adds browser evidence for Museum-impacting PRs
   and exact staging changes. Unrelated changes exclude it; explicit manual
   Museum selection remains available.
-- Uploaded PR CI artifacts are short-term debugging evidence. Durable
-  deployment-train evidence still belongs on approved 6529-controlled artifact
-  storage, not Git LFS.
-- Deployment workflows use `deployment-bus upload-validation-artifact` to
-  redact, hash, upload, and record GET `/api/version` evidence as
-  `deployment:http-version` when the approved artifact store is writable. A
-  failed upload warns and records no durable pointer. This is durable
-  deployment evidence, but it does not replace the required Playwright pack
-  artifacts for release readiness.
+- Uploaded PR CI artifacts are short-term debugging evidence. Deployment
+  workflows retain their version, health, and validation artifacts in GitHub
+  Actions; use approved artifact storage for longer retention, not Git LFS.
+- Deployment workflows verify GET `/api/version` against the deployed commit
+  and upload their health/E2E evidence. A version check does not replace the
+  required Playwright validation.
 
 WCAG and i18n route evidence:
 
@@ -354,11 +351,9 @@ Surface matrix:
   smoke.
 - `test:e2e:production:readonly` runs the full production-safe read-only pack
   family in one Playwright invocation so release validation fails fast and
-  returns one aggregate status. Deployment-bus manifests know this as the
-  optional production-only `playwright:production-readonly` pack; record that
-  pack only with redacted durable evidence and desktop Chromium surface
-  metadata. Use the targeted staging or local readonly scripts when a release
-  train needs paired mobile-web evidence for one of the aggregate packs.
+  returns one aggregate status. Retain redacted evidence with desktop Chromium
+  surface metadata. Use the targeted staging or local readonly scripts when
+  a release needs paired mobile-web evidence for one of the aggregate packs.
 - `web-desktop-firefox` and `web-desktop-webkit` are browser-diversity
   projects for train, nightly, or targeted compatibility checks.
 - `capacitor-ios-sim`, `capacitor-android-sim`, and `electron-shell-sim` are
@@ -484,8 +479,7 @@ Large-pack ownership:
   exact sandbox reaction endpoint and body.
 - `test:e2e:production:readonly` is owned by the release captain or validation
   agent after a production deploy. It is a production-safe aggregate of the
-  individual public read-only packs on desktop Chromium and is the command
-  behind the optional deployment-bus pack `playwright:production-readonly`. Do
+  individual public read-only packs on desktop Chromium. Do
   not make it a staging requirement unless a real staging aggregate command and
   evidence path exist; use targeted staging/local commands for mobile-web
   follow-up evidence.
@@ -514,9 +508,8 @@ Real-device evidence (AWS Device Farm):
   iOS Safari rendering of the deployed frontend, plus the real Capacitor shell
   APK (launch, WebView boot of `6529.io`, `mobile6529://` deep links, built-in
   fuzz crash detection).
-- Deployment-bus manifests know these as `devicefarm:mobile-web-smoke`,
-  `devicefarm:native-android-smoke`, and `devicefarm:native-android-fuzz`.
-  They are scheduled/dispatch packs, not PR CI packs, and stay read-only
-  against live environments.
+- Mobile-web smoke, native Android smoke, and native Android fuzz are
+  scheduled/dispatch packs, not PR CI packs, and stay read-only against live
+  environments.
 - Regime documentation, provisioning, cost model, and triage:
   `ops/docs/developer/device-farm-qa.md`.
