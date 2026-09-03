@@ -203,7 +203,6 @@ export default function CreateDropComposer({
             onDrop={submitWithResolvedAliases}
             isDropMode={isDropMode}
             label={submitLabel}
-            showLabelOnMobile={isStormModeActive}
             disabledTooltip={
               isLinksSubmitBlocked ? CHAT_LINK_RESTRICTION_MESSAGE : null
             }

@@ -323,6 +323,41 @@ describe("CreateDropActions", () => {
     expect(screen.queryByLabelText("Remove poll")).not.toBeInTheDocument();
   });
 
+  it("uses the compact action slot to indicate an active poll", () => {
+    render(
+      <CreateDropActions
+        {...defaultProps}
+        isCompactLayout={true}
+        canCreatePoll={true}
+        isPollActive={true}
+      />
+    );
+
+    expect(screen.getByTestId("drop-actions-compact-slot")).toHaveClass(
+      "tw-size-10"
+    );
+    expect(
+      screen.getByTestId("drop-actions-compact-slot").querySelector("button")
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId("drop-actions-toggle-motion")
+    ).not.toBeInTheDocument();
+  });
+
+  it("keeps compact tray spacing inside its animated height", () => {
+    render(
+      <CreateDropActions
+        {...defaultProps}
+        isCompactLayout={true}
+        showOptions={true}
+      />
+    );
+
+    const tray = screen.getByTestId("drop-actions-compact-tray");
+    expect(tray).not.toHaveClass("tw-mt-2");
+    expect(tray.firstElementChild).toHaveClass("tw-h-2");
+  });
+
   it("disables the storm action while a poll is active", () => {
     render(
       <CreateDropActions
