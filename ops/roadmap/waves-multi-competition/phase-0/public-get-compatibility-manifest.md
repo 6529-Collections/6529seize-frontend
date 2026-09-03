@@ -22,6 +22,20 @@ Fields and endpoints may be added where existing clients tolerate additive
 data. A frozen field cannot be removed, narrowed, renamed, retargeted to a
 different competition, or change null/required/type/enum meaning.
 
+## Accepted Operational Retirements
+
+The accepted complete Release Bus removal retires the operational UI routes
+`/deploy/ui/branch-head`, `/deploy/ui/bus`, and `/deploy/ui/bus/app.js`.
+The earlier V1 removal in backend PR #1831 retired
+`/deploy/release-bus/controls`, `/deploy/release-candidates`,
+`/deploy/release-trains`, and `/deploy/release-trains/:id`.
+
+The frozen 296-route baseline remains byte-for-byte unchanged as historical
+contract evidence. The backend runtime census excludes only these seven
+explicitly retired operational routes. The ordinary deployment UI and all
+other GET compatibility checks remain enforced; this exception does not relax
+wave, drop, competition, or unrelated API contracts.
+
 ## Machine-Readable Census
 
 The complete contract is split into two checked-in snapshots:

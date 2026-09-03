@@ -14,13 +14,12 @@ const {
   CI_PIPELINES_SERVICE,
   CI_PIPELINES_WORKFLOW,
   CI_RELEASE_NOTES_PROMPT_PATH,
+  CI_RELEASE_NOTE_OPT_OUT,
   CI_RELEASE_GROUP_ID,
   CI_RELEASE_GROUP_SERVICES,
-  CI_RELEASE_TRAIN_ID,
   CI_RELEASE_CONTRIBUTORS,
   CI_PIPELINES_SHA,
   CI_PIPELINES_PARENT_DEPLOY_RUN_ID,
-  CI_PIPELINES_PARENT_RELEASE_TRAIN_ID,
   CI_PIPELINES_VALIDATION_PACK,
   GITHUB_REPOSITORY,
   GITHUB_WORKFLOW,
@@ -143,13 +142,6 @@ if (
   process.exit(1);
 }
 if (
-  CI_PIPELINES_PARENT_RELEASE_TRAIN_ID &&
-  !/^[A-Za-z0-9._-]{1,100}$/.test(CI_PIPELINES_PARENT_RELEASE_TRAIN_ID)
-) {
-  console.error("CI_PIPELINES_PARENT_RELEASE_TRAIN_ID is invalid");
-  process.exit(1);
-}
-if (
   CI_PIPELINES_VALIDATION_PACK &&
   !/^[A-Za-z0-9._-]{1,100}$/.test(CI_PIPELINES_VALIDATION_PACK)
 ) {
@@ -168,17 +160,6 @@ try {
   console.error(releaseContributorMetadataErrorMessage(error));
   process.exit(1);
 }
-if (
-  CI_RELEASE_TRAIN_ID &&
-  !/^[A-Za-z0-9._-]{1,100}$/.test(CI_RELEASE_TRAIN_ID)
-) {
-  console.error("CI_RELEASE_TRAIN_ID is invalid");
-  process.exit(1);
-}
-if (releaseContributors.length > 0 && !CI_RELEASE_TRAIN_ID) {
-  console.error("CI_RELEASE_TRAIN_ID is required with CI_RELEASE_CONTRIBUTORS");
-  process.exit(1);
-}
 if (CI_PIPELINES_SHA && !/^[a-f0-9]{40}$/i.test(CI_PIPELINES_SHA)) {
   console.error("CI_PIPELINES_SHA must be a 40-character Git SHA");
   process.exit(1);
@@ -188,7 +169,16 @@ const alertSha = CI_PIPELINES_SHA
   : alertType === "web_e2e"
     ? null
     : GITHUB_SHA || null;
+const releaseNoteOptOut = CI_RELEASE_NOTE_OPT_OUT === "true";
+if (
+  CI_RELEASE_NOTE_OPT_OUT &&
+  !["true", "false"].includes(CI_RELEASE_NOTE_OPT_OUT)
+) {
+  console.error("CI_RELEASE_NOTE_OPT_OUT must be true or false");
+  process.exit(1);
+}
 const isReleaseNotesEligible =
+  !releaseNoteOptOut &&
   status === "success" &&
   targetEnvironment === "prod" &&
   Boolean(CI_RELEASE_NOTES_PROMPT_PATH);
@@ -208,27 +198,17 @@ const releaseNotesFields = isReleaseNotesEligible
       deployed_at: new Date().toISOString(),
     }
   : {};
-// Contributor metadata remains atomic, but deploy alerts also send the train
-// id on its own so the corresponding E2E validation can find its parent drop.
-const releaseTrainFields =
-  CI_RELEASE_TRAIN_ID &&
-  (releaseContributors.length > 0 || alertType === "deploy")
-    ? {
-        release_train_id: CI_RELEASE_TRAIN_ID,
-        ...(releaseContributors.length > 0
-          ? { contributor_github_logins: releaseContributors }
-          : {}),
-      }
+const contributorFields =
+  releaseContributors.length > 0
+    ? { contributor_github_logins: releaseContributors }
     : {};
 const webE2EFields =
   alertType === "web_e2e"
     ? {
         parent_deploy_run_id: CI_PIPELINES_PARENT_DEPLOY_RUN_ID || null,
-        parent_release_train_id: CI_PIPELINES_PARENT_RELEASE_TRAIN_ID || null,
         validation_pack: CI_PIPELINES_VALIDATION_PACK,
       }
     : {};
-
 const payload = {
   alert_type: alertType,
   repo: repository.split("/").pop() ?? repository,
@@ -246,7 +226,7 @@ const payload = {
   environment: targetEnvironment || null,
   service: CI_PIPELINES_SERVICE || null,
   ...webE2EFields,
-  ...releaseTrainFields,
+  ...contributorFields,
   ...releaseNotesFields,
 };
 

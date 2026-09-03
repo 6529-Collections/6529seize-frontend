@@ -24,7 +24,6 @@ on:
         required: true
         type: choice
         options:
-          - .github/workflows/release-bus-v2-preflight.yml
           - .github/workflows/deploy-staging.yml
       production_run_id:
         description: GitHub Actions run containing the production artifact
@@ -47,7 +46,6 @@ on:
         required: true
         type: choice
         options:
-          - .github/workflows/release-bus-v2-preflight.yml
           - .github/workflows/production-build-artifact.yml
 
 permissions:
