@@ -218,8 +218,11 @@ Authorized moderators can review open reports in **WatchTower** at
 `/content-moderation`. The full-width queue fills the available page height.
 WatchTower separates **Open reports**, **Resolved reports**, **Suspended
 profiles**, and **Block activity**. Block activity is a newest-first,
-continuously loaded trail showing who blocked whom, with both profiles linked
-and each event dated. It records only actual unblocked-to-blocked transitions;
+continuously loaded trail showing who blocked or unblocked whom. Each compact
+row links both available profiles and shows the action and date together;
+content wraps only when space is limited. Block and unblock events appear in
+the same feed, and an unblock does not remove the earlier block from history.
+It records only actual relationship transitions;
 blocking remains independent from reporting, AI assessment, content decisions,
 and profile suspension. Each report identifies both the author
 and the profile that submitted it, makes the content primary, shows a compact

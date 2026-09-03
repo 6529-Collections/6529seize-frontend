@@ -1921,11 +1921,20 @@ paths:
     get:
       tags:
         - ContentModeration
-      summary: List profile block activity for authorized moderators.
+      summary: List profile block and unblock activity for authorized moderators.
       operationId: getContentModerationBlockActivity
       security:
         - bearerAuth: []
       parameters:
+        - name: include_unblocks
+          in: query
+          required: false
+          description: >-
+            Include unblock transitions in the same feed. Defaults to false for
+            clients that only render block events.
+          schema:
+            type: boolean
+            default: false
         - name: limit
           in: query
           required: false
@@ -16211,6 +16220,7 @@ components:
       type: object
       required:
         - id
+        - action
         - blocker_profile_id
         - blocker_handle
         - blocker_pfp
@@ -16222,6 +16232,11 @@ components:
       properties:
         id:
           type: string
+        action:
+          type: string
+          enum:
+            - PROFILE_BLOCKED
+            - PROFILE_UNBLOCKED
         blocker_profile_id:
           type: string
         blocker_handle:

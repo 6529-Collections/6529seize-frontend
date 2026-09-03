@@ -92,6 +92,7 @@ export const fetchContentModerationBlockActivity = ({
   >({
     endpoint: "content-moderation/block-activity",
     params: {
+      include_unblocks: "true",
       limit: String(limit),
       ...(before === undefined ? {} : { before }),
     },
