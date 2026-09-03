@@ -165,9 +165,7 @@ test.describe("Critical read-only route shells @critical-shell @medium @large", 
         })
       ).toBeVisible();
       await expect(
-        page.getByText(
-          "Drops 6529 users are featuring from their own profile waves."
-        )
+        page.getByText("See what the community is sharing in Profile Waves.")
       ).toBeVisible();
       await expect(
         page.getByRole("link", { name: "Profile Waves Feed" })
