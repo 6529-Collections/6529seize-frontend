@@ -8,7 +8,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { tRich } from "@/i18n/messages";
 import Image from "next/image";
 import Link from "next/link";
-import type { ReactElement } from "react";
+import { Children, type ReactElement } from "react";
 import {
   formatTimestamp,
   getSafeAssetUrl,
@@ -94,11 +94,9 @@ export default function BlockActivityCard({
   return (
     <li className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-6 tw-gap-y-2 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-px-3 tw-py-3">
       <div className="tw-flex tw-min-w-0 tw-max-w-full tw-flex-1 tw-basis-80 tw-items-center tw-gap-x-3 tw-text-sm tw-font-medium tw-text-iron-400">
-        {relationship.map((part) =>
+        {Children.map(relationship, (part) =>
           typeof part === "string" ? (
-            <span key={part} className="tw-flex-none tw-whitespace-pre-wrap">
-              {part}
-            </span>
+            <span className="tw-flex-none tw-whitespace-pre-wrap">{part}</span>
           ) : (
             part
           )

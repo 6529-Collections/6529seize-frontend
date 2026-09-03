@@ -4,6 +4,7 @@ import {
   ApiContentModerationBlockActivityItemActionEnum as Action,
 } from "@/generated/models/ApiContentModerationBlockActivityItem";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import * as messages from "@/i18n/messages";
 import { render, screen } from "@testing-library/react";
 
 jest.mock("@/hooks/useBrowserLocale", () => ({ useBrowserLocale: jest.fn() }));
@@ -91,5 +92,35 @@ describe("BlockActivityCard", () => {
       "@phoebeum blocked target-1"
     );
     expect(screen.getAllByRole("link")).toHaveLength(1);
+  });
+
+  it("renders repeated translated text without duplicate React keys", () => {
+    const richMessage = jest
+      .spyOn(messages, "tRich")
+      .mockReturnValueOnce([
+        " • ",
+        <span key="actor">actor</span>,
+        " • ",
+        <span key="target">target</span>,
+        " • ",
+      ]);
+    const consoleError = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+    try {
+      render(
+        <ul>
+          <BlockActivityCard item={item} />
+        </ul>
+      );
+      expect(screen.getAllByText("•")).toHaveLength(3);
+      expect(screen.getByRole("listitem")).toHaveTextContent(
+        "• actor • target •"
+      );
+      expect(consoleError).not.toHaveBeenCalled();
+    } finally {
+      richMessage.mockRestore();
+      consoleError.mockRestore();
+    }
   });
 });
