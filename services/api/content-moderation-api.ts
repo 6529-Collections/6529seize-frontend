@@ -1,6 +1,7 @@
 import type { ApiBlockedProfile } from "@/generated/models/ApiBlockedProfile";
 import type { ApiContentModerationDropDecisionRequest } from "@/generated/models/ApiContentModerationDropDecisionRequest";
 import type { ApiContentModerationDropDecisionResponse } from "@/generated/models/ApiContentModerationDropDecisionResponse";
+import type { ApiContentModerationBlockActivityItem } from "@/generated/models/ApiContentModerationBlockActivityItem";
 import type { ApiContentModerationProfileStatusRequest } from "@/generated/models/ApiContentModerationProfileStatusRequest";
 import type { ApiContentModerationProfileListItem } from "@/generated/models/ApiContentModerationProfileListItem";
 import type { ApiContentModerationProfileStatusResponse } from "@/generated/models/ApiContentModerationProfileStatusResponse";
@@ -77,6 +78,26 @@ export const fetchContentModeratorAccess =
       endpoint: "content-moderation/moderator-access",
       errorMode: "structured",
     });
+
+export const fetchContentModerationBlockActivity = ({
+  limit = 50,
+  before,
+}: {
+  readonly limit?: number | undefined;
+  readonly before?: string | undefined;
+} = {}): Promise<ApiContentModerationBlockActivityItem[]> =>
+  commonApiFetch<
+    ApiContentModerationBlockActivityItem[],
+    Record<string, string>
+  >({
+    endpoint: "content-moderation/block-activity",
+    params: {
+      include_unblocks: "true",
+      limit: String(limit),
+      ...(before === undefined ? {} : { before }),
+    },
+    errorMode: "structured",
+  });
 
 export const fetchMyContentModerationReports = ({
   limit = 50,
