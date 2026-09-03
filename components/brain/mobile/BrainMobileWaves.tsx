@@ -2,7 +2,10 @@
 
 import React, { useRef } from "react";
 import Link from "next/link";
-import { Squares2X2Icon } from "@heroicons/react/24/outline";
+import {
+  ChevronRightIcon,
+  Squares2X2Icon,
+} from "@heroicons/react/24/outline";
 import BrainLeftSidebarWaves from "../left-sidebar/waves/BrainLeftSidebarWaves";
 import { MemesWaveFooterView } from "../left-sidebar/waves/MemesWaveFooter";
 import { useLayout } from "../my-stream/layout/LayoutContext";
@@ -13,6 +16,7 @@ import {
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useMemesWaveFooterStats } from "@/hooks/useMemesWaveFooterStats";
 import { t } from "@/i18n/messages";
+import { SidebarIconTile } from "../left-sidebar/waves/SidebarIconTile";
 
 interface BrainMobileWavesProps {
   readonly onOpenQuickVote: () => void;
@@ -35,7 +39,7 @@ const BrainMobileWaves: React.FC<BrainMobileWavesProps> = ({
 
   return (
     <div
-      className="tw-flex tw-h-full tw-min-h-0 tw-flex-col"
+      className="tw-flex tw-h-full tw-min-h-0 tw-flex-col tw-bg-[#0d0d0e]"
       style={mobileWavesViewStyle}
     >
       <div
@@ -46,19 +50,25 @@ const BrainMobileWaves: React.FC<BrainMobileWavesProps> = ({
         <Link
           href="/waves?view=profile-feed"
           prefetch={false}
-          className="tw-group tw-flex tw-items-center tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-4 tw-py-3 tw-text-iron-200 tw-no-underline tw-ring-1 tw-ring-inset tw-ring-white/5 tw-transition desktop-hover:hover:tw-border-iron-700 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white"
+          className="tw-group tw-mx-4 tw-flex tw-box-border tw-items-center tw-gap-3 tw-rounded-xl tw-bg-iron-900/70 tw-px-4 tw-py-3 tw-text-iron-200 tw-no-underline tw-ring-1 tw-ring-inset tw-ring-white/[0.06] tw-transition-colors tw-duration-200 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-iron-800/90 desktop-hover:hover:tw-text-white motion-reduce:tw-transition-none"
         >
-          <span className="tw-flex tw-size-9 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-900 tw-text-primary-300 tw-ring-1 tw-ring-inset tw-ring-iron-700 desktop-hover:group-hover:tw-bg-iron-800">
-            <Squares2X2Icon className="tw-size-5" aria-hidden="true" />
+          <span className="tw-relative tw-size-8 tw-flex-shrink-0">
+            <SidebarIconTile variant="selected">
+              <Squares2X2Icon className="tw-size-4" aria-hidden="true" />
+            </SidebarIconTile>
           </span>
-          <span className="tw-min-w-0">
-            <span className="tw-block tw-text-sm tw-font-semibold">
+          <span className="tw-min-w-0 tw-flex-1">
+            <span className="tw-block tw-text-sm tw-font-normal">
               {t(locale, "waves.mobile.profileFeed.title")}
             </span>
             <span className="tw-mt-0.5 tw-block tw-text-xs tw-leading-5 tw-text-iron-400">
               {t(locale, "waves.mobile.profileFeed.subtitle")}
             </span>
           </span>
+          <ChevronRightIcon
+            className="tw-size-5 tw-flex-shrink-0 tw-text-iron-500 tw-transition-colors tw-duration-200 desktop-hover:group-hover:tw-text-iron-300 motion-reduce:tw-transition-none"
+            aria-hidden="true"
+          />
         </Link>
         <BrainLeftSidebarWaves scrollContainerRef={scrollContainerRef} />
       </div>

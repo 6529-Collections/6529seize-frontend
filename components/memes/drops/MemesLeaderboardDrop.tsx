@@ -9,7 +9,8 @@ import { MobileVotingModal, VotingModal } from "@/components/voting";
 import VotingModalButton from "@/components/voting/VotingModalButton";
 import { DropLocation } from "@/components/waves/drops/Drop";
 import { AdditionalActionPromiseBadge } from "@/components/waves/drops/AdditionalActionPromiseBadge";
-import WaveDropActionsMore from "@/components/waves/drops/WaveDropActionsMore";
+import WaveDropActionsOpen from "@/components/waves/drops/WaveDropActionsOpen";
+import WaveDropActionsOptions from "@/components/waves/drops/WaveDropActionsOptions";
 import WaveDropMobileMenuDelete from "@/components/waves/drops/WaveDropMobileMenuDelete";
 import WaveDropMobileMenuCopyLink from "@/components/waves/drops/WaveDropMobileMenuCopyLink";
 import WaveDropMobileMenuOpen from "@/components/waves/drops/WaveDropMobileMenuOpen";
@@ -153,12 +154,13 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
                   <div className="tw-flex tw-h-10 tw-items-center tw-gap-2 tw-text-iron-400 [&>button]:tw-flex [&>button]:tw-h-8 [&>button]:tw-items-center [&>button]:tw-justify-center [&>button]:tw-py-0">
                     {!hasTouchScreen && (
                       <>
+                        <WaveDropActionsOpen drop={drop} />
                         <MemesArtResubmitAction
                           drop={drop}
                           wave={wave}
                           onSourceDropDeleted={onSourceDropDeleted}
                         />
-                        <WaveDropActionsMore drop={drop} />
+                        {canDelete && <WaveDropActionsOptions drop={drop} />}
                       </>
                     )}
                   </div>

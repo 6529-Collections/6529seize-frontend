@@ -7,6 +7,7 @@ import {
   type ProfileWaveActivityQueryState,
 } from "@/hooks/useProfileWaveActivityWaves";
 import type { ProfileWaveActivitySidebarItem } from "@/types/profile-wave-activity.types";
+import { keepFocusedSidebarControlVisible } from "@/components/user/brain/userPageBrainSidebar.helpers";
 
 jest.mock("next/image", () => ({
   __esModule: true,
@@ -133,6 +134,9 @@ describe("UserPageBrainSidebar", () => {
     expect(scrollRegion).toHaveAccessibleName("Brain waves");
     expect(scrollRegion.tagName).toBe("SECTION");
     expect(scrollRegion).toHaveAttribute("tabindex", "0");
+    expect(scrollRegion).toHaveAttribute(
+      "data-brain-sidebar-scroll-region"
+    );
     expect(scrollRegion).toHaveClass(
       "lg:tw-max-h-[calc(100dvh-4rem)]",
       "lg:tw-overflow-y-auto",
@@ -253,10 +257,7 @@ describe("UserPageBrainSidebar", () => {
       within(createdSection).getByRole("button", { name: "Show less" })
     ).toBe(toggle);
     expect(globalThis.document.activeElement).toBe(toggle);
-    expect(toggle.scrollIntoView).toHaveBeenLastCalledWith({
-      block: "nearest",
-      inline: "nearest",
-    });
+    expect(toggle.scrollIntoView).not.toHaveBeenCalled();
     expect(within(createdSection).getByText("Hidden Wave")).toBeInTheDocument();
 
     fireEvent.click(toggle);
@@ -264,7 +265,7 @@ describe("UserPageBrainSidebar", () => {
       within(createdSection).getByRole("button", { name: "Show more" })
     ).toBe(toggle);
     expect(globalThis.document.activeElement).toBe(toggle);
-    expect(toggle.scrollIntoView).toHaveBeenCalledTimes(2);
+    expect(toggle.scrollIntoView).not.toHaveBeenCalled();
     expect(within(createdSection).queryByText("Hidden Wave")).toBeNull();
   });
 
@@ -281,7 +282,15 @@ describe("UserPageBrainSidebar", () => {
     const loadMore = within(recentSection).getByRole("button", {
       name: "Load more",
     });
+    const scrollRegion = screen.getByTestId("brain-sidebar-desktop");
     loadMore.scrollIntoView = jest.fn();
+    scrollRegion.scrollTop = 64;
+    scrollRegion.getBoundingClientRect = jest.fn(
+      () => ({ top: 100, bottom: 300 }) as DOMRect
+    );
+    loadMore.getBoundingClientRect = jest.fn(
+      () => ({ top: 320, bottom: 350 }) as DOMRect
+    );
     loadMore.focus();
 
     recentState = makeState({
@@ -306,7 +315,17 @@ describe("UserPageBrainSidebar", () => {
     rerender(<UserPageBrainSidebar profile={baseProfile} />);
 
     expect(globalThis.document.activeElement).toBe(loadMore);
-    expect(loadMore.scrollIntoView).toHaveBeenCalledWith({
+    expect(loadMore.scrollIntoView).not.toHaveBeenCalled();
+    expect(scrollRegion.scrollTop).toBe(114);
+  });
+
+  it("retains native control positioning outside the desktop sidebar", () => {
+    const control = globalThis.document.createElement("button");
+    control.scrollIntoView = jest.fn();
+
+    keepFocusedSidebarControlVisible(control);
+
+    expect(control.scrollIntoView).toHaveBeenCalledWith({
       block: "nearest",
       inline: "nearest",
     });

@@ -541,6 +541,11 @@ export default function AppHeader() {
     activeWaveId: waveParam,
     searchParams,
   });
+  const isProfileWavesFeedView =
+    isCapacitor &&
+    pathname === "/waves" &&
+    !waveParam &&
+    searchParams.get("view") === "profile-feed";
   const showPageShareAction =
     isCapacitor &&
     !isInsideWave &&
@@ -557,6 +562,7 @@ export default function AppHeader() {
   const showBackButton =
     isInsideWave ||
     isCreateRoute ||
+    isProfileWavesFeedView ||
     profileCollectedReturnContext !== null ||
     (isProfilePage && canGoBack);
   const pfpImage = (
@@ -642,7 +648,10 @@ export default function AppHeader() {
           {showBackButton ? (
             <BackButton
               key={`${pathname}?${searchParams.toString()}`}
-              returnTo={profileCollectedReturnContext?.href}
+              returnTo={
+                profileCollectedReturnContext?.href ??
+                (isProfileWavesFeedView ? "/waves" : undefined)
+              }
             />
           ) : (
             <button

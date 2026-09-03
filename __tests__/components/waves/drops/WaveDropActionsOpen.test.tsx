@@ -57,3 +57,26 @@ test("pushes route on click", async () => {
   await user.click(screen.getByRole("button"));
   expect(push).toHaveBeenCalled();
 });
+
+test("does not bubble the open action to a parent card", async () => {
+  const user = userEvent.setup();
+  const push = jest.fn();
+  const onParentClick = jest.fn();
+  const drop = { id: "3", drop_type: ApiDropType.Winner } as any;
+  (useRouter as jest.Mock).mockReturnValue({ push });
+  (usePathname as jest.Mock).mockReturnValue("/wave");
+  (useSearchParams as jest.Mock).mockReturnValue({
+    toString: () => "",
+  });
+
+  render(
+    <div onClick={onParentClick}>
+      <WaveDropActionsOpen drop={drop} />
+    </div>
+  );
+
+  await user.click(screen.getByRole("button"));
+
+  expect(push).toHaveBeenCalled();
+  expect(onParentClick).not.toHaveBeenCalled();
+});

@@ -367,10 +367,12 @@ function HighlyRatedWavePreviewLink({
 
 export function HighlyRatedWavesToggle({
   isTouchPreview = false,
+  compactTouchPadding = false,
   paddingClassName,
   previewItems,
 }: {
   readonly isTouchPreview?: boolean | undefined;
+  readonly compactTouchPadding?: boolean | undefined;
   readonly paddingClassName: string;
   readonly previewItems: readonly HighlyRatedWavePreviewItem[];
 }) {
@@ -429,7 +431,7 @@ export function HighlyRatedWavesToggle({
 
   return (
     <div
-      className={`${paddingClassName} tw-pt-1 ${isTouchPreview ? "tw-pb-3" : "tw-pb-1"}`}
+      className={`${paddingClassName} tw-pt-1 ${isTouchPreview && !compactTouchPadding ? "tw-pb-3" : "tw-pb-1"}`}
     >
       <div
         ref={previewStripRef}

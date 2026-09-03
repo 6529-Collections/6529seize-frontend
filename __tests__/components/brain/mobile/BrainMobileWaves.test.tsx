@@ -100,9 +100,17 @@ test("applies style, forwards scroll ref, and passes the quick-vote opener", () 
   expect(root).toHaveClass("tw-flex", "tw-h-full", "tw-min-h-0");
   expect(scrollContainer).toBeInTheDocument();
   expect(root.lastElementChild).toBe(screen.getByTestId("footer"));
-  expect(
-    screen.getByRole("link", { name: /profile waves feed/i })
-  ).toHaveAttribute("href", "/waves?view=profile-feed");
+  const profileFeedLink = screen.getByRole("link", {
+    name: /profile waves feed/i,
+  });
+  expect(profileFeedLink).toHaveAttribute("href", "/waves?view=profile-feed");
+  expect(profileFeedLink).toHaveClass(
+    "tw-mx-4",
+    "tw-box-border",
+    "tw-bg-iron-900/70",
+    "tw-ring-white/[0.06]"
+  );
+  expect(profileFeedLink).not.toHaveClass("tw-text-primary-300");
   expect(receivedRef).toBeDefined();
   expect(receivedRef.current).toBe(scrollContainer);
   expect(receivedRef.current).toContainElement(screen.getByTestId("waves"));
