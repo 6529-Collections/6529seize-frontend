@@ -119,7 +119,17 @@ The craft surface combines:
 - If media upload or patching fails, the page shows the returned error and keeps
   the unsaved state so the user can retry or adjust the input.
 - If publish fails, the page shows an inline Arweave error. Save or revert any
-  remaining pending changes, then retry.
+  remaining pending changes before retrying a temporary failure. Invalid or
+  oversized media must be corrected first; retrying the same file cannot fix it.
+- A winning submission cannot become a new craft claim until its media can be
+  inspected successfully. Computed binary-media details need a positive file size
+  within 250 MB (250,000,000 bytes) and a valid SHA-256 digest; images and videos
+  need positive dimensions, and videos also need positive duration and codecs.
+  Inspection failure does not create a claim with zero or empty placeholders.
+- GLB files are checked server-side for a valid binary container during media
+  inspection and again before animation publication. Renaming another file to
+  `.glb` is not sufficient. This check does not guarantee scene rendering or
+  availability of externally referenced resources.
 - If access is denied, the route falls back to the shared Drop Forge permission
   screen and eventual home redirect.
 
@@ -128,6 +138,9 @@ The craft surface combines:
 - Craft access is limited to distribution-admin wallets.
 - Arweave publishing is a separate step after editing; saving metadata alone
   does not publish the claim.
+- Media-detail checks do not require all editable draft fields to be complete.
+  HTML animation details remain format-only, and GLB does not require video
+  dimensions, duration, or codecs.
 - The craft editor is section-based. Different sections can have independent
   dirty state and save actions.
 - Published links are informational only; launch initialization happens from the
