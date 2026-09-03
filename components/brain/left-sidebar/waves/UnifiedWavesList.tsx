@@ -86,15 +86,16 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
 
   return (
     <div className="tw-mb-4">
-      <div className="tw-h-full tw-rounded-xl tw-bg-iron-950 tw-py-4 tw-ring-1 tw-ring-inset tw-ring-iron-800">
+      <div
+        className={
+          isApp
+            ? "tw-h-full tw-bg-transparent tw-py-1"
+            : "tw-h-full tw-rounded-xl tw-bg-iron-950 tw-py-4 tw-ring-1 tw-ring-inset tw-ring-iron-800"
+        }
+      >
         {!isApp && (
           <div className="tw-mb-4 tw-w-full tw-px-4">
-            <Button
-              onClick={openWave}
-              variant="primary"
-              size="sm"
-              fullWidth
-            >
+            <Button onClick={openWave} variant="primary" size="sm" fullWidth>
               <FontAwesomeIcon
                 icon={faPlus}
                 className="tw-size-3.5 tw-flex-shrink-0"

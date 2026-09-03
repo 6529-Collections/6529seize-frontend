@@ -8,6 +8,7 @@ import { t } from "@/i18n/messages";
 import {
   MEMES_WAVE_FLOATING_FOOTER_FALLBACK_BOTTOM_STYLE,
   MEMES_WAVE_FLOATING_FOOTER_SCALE_PROPERTY,
+  MEMES_WAVE_FLOATING_FOOTER_WIDTH_CLASS_NAME,
 } from "@/components/brain/left-sidebar/waves/MemesWaveFooter.constants";
 import {
   MOBILE_BOTTOM_NAV_DOCK_ATTRIBUTE,
@@ -298,10 +299,23 @@ describe("MemesWaveFooter", () => {
     const button = screen.getByRole("button", {
       name: "Uncast Power, 5,000 TDH left, 3 left this round, 12 unrated",
     });
+    expect(button).toHaveAttribute(
+      "data-memes-wave-footer-variant",
+      "compact-app"
+    );
+    expect(button).toHaveClass("tw-h-11", "tw-w-full", "tw-rounded-full");
+    expect(screen.queryByText("Uncast Power")).not.toBeInTheDocument();
+    expect(screen.getByText("5,000")).toBeInTheDocument();
+    expect(screen.getByText("TDH")).toHaveClass("tw-text-iron-500");
+    expect(screen.getByText("3 left")).toHaveClass("tw-text-primary-300");
+    expect(screen.getByText("12 unrated")).toHaveClass("tw-text-iron-500");
     const floatingFrame = button.closest(
       '[data-memes-wave-footer-frame="floating"]'
     );
     expect(floatingFrame).toHaveClass("tw-pointer-events-auto");
+    expect(floatingFrame).toHaveClass(
+      MEMES_WAVE_FLOATING_FOOTER_WIDTH_CLASS_NAME
+    );
     expect(floatingFrame).toHaveClass(
       "tw-scale-[var(--memes-wave-floating-footer-scale)]"
     );
