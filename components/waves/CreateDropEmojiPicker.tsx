@@ -45,14 +45,7 @@ const CreateDropEmojiPickerContent: FC<CreateDropEmojiPickerContentProps> = ({
   const [pickerPosition, setPickerPosition] = useState<{
     top: number;
     left: number;
-    width: number;
-    height: number;
-  }>({
-    top: 0,
-    left: 0,
-    width: EMOJI_PICKER_WIDTH_PX,
-    height: EMOJI_PICKER_HEIGHT_PX,
-  });
+  }>({ top: 0, left: 0 });
 
   const isPickerOpen = showPicker && !disabled;
 
@@ -66,32 +59,18 @@ const CreateDropEmojiPickerContent: FC<CreateDropEmojiPickerContentProps> = ({
     const rect = button.getBoundingClientRect();
     const viewportTop = globalThis.scrollY + VIEWPORT_PADDING_PX;
     const viewportLeft = globalThis.scrollX + VIEWPORT_PADDING_PX;
-    const pickerWidth = Math.max(
-      0,
-      Math.min(
-        EMOJI_PICKER_WIDTH_PX,
-        globalThis.innerWidth - VIEWPORT_PADDING_PX * 2
-      )
-    );
-    const pickerHeight = Math.max(
-      0,
-      Math.min(
-        EMOJI_PICKER_HEIGHT_PX,
-        globalThis.innerHeight - VIEWPORT_PADDING_PX * 2
-      )
-    );
     const maxTop = Math.max(
       viewportTop,
       globalThis.scrollY +
         globalThis.innerHeight -
-        pickerHeight -
+        EMOJI_PICKER_HEIGHT_PX -
         VIEWPORT_PADDING_PX
     );
     const maxLeft = Math.max(
       viewportLeft,
       globalThis.scrollX +
         globalThis.innerWidth -
-        pickerWidth -
+        EMOJI_PICKER_WIDTH_PX -
         VIEWPORT_PADDING_PX
     );
     const preferredTop = rect.top + globalThis.scrollY - 420;
@@ -100,8 +79,6 @@ const CreateDropEmojiPickerContent: FC<CreateDropEmojiPickerContentProps> = ({
     return {
       top: Math.min(Math.max(preferredTop, viewportTop), maxTop),
       left: Math.min(Math.max(preferredLeft, viewportLeft), maxLeft),
-      width: pickerWidth,
-      height: pickerHeight,
     };
   };
 
@@ -215,17 +192,11 @@ const CreateDropEmojiPickerContent: FC<CreateDropEmojiPickerContentProps> = ({
                 position: "absolute",
                 top: pickerPosition.top,
                 left: pickerPosition.left,
-                width: pickerPosition.width,
-                height: pickerPosition.height,
                 zIndex: desktopZIndex,
               }}
-              className="tw-rounded-lg tw-border tw-bg-iron-800 tw-p-[1px] tw-shadow-lg [&_em-emoji-picker]:tw-h-full [&_em-emoji-picker]:tw-w-full"
+              className="tw-rounded-lg tw-border tw-bg-iron-800 tw-p-[1px] tw-shadow-lg"
             >
-              <LazyEmojiPicker
-                onEmojiSelect={addEmoji}
-                autoFocus
-                dynamicWidth
-              />
+              <LazyEmojiPicker onEmojiSelect={addEmoji} autoFocus />
             </div>,
             document.body
           )}
