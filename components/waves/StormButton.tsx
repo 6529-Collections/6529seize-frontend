@@ -35,7 +35,11 @@ const StormButton: React.FC<StormButtonProps> = ({
         disabled={disabled}
         type="button"
         aria-label={label}
-        className={`tw-flex tw-h-8 tw-w-auto tw-flex-shrink-0 tw-items-center tw-justify-center tw-gap-1.5 tw-whitespace-nowrap tw-rounded-full tw-border-0 tw-px-2.5 tw-transition tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 md:tw-size-8 md:tw-px-0 lg:tw-size-7 ${
+        className={`tw-flex tw-h-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-full tw-border-0 tw-transition tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 ${
+          isMobile
+            ? "tw-w-auto tw-gap-1.5 tw-px-2.5"
+            : "tw-size-8 tw-px-0 lg:tw-size-7"
+        } ${
           !disabled
             ? "tw-cursor-pointer tw-bg-iron-700 tw-text-iron-300 desktop-hover:hover:tw-bg-primary-300/20 desktop-hover:hover:tw-text-primary-400"
             : "tw-cursor-default tw-bg-iron-900 tw-text-iron-600 desktop-hover:hover:tw-text-iron-600"
@@ -43,7 +47,9 @@ const StormButton: React.FC<StormButtonProps> = ({
         data-tooltip-id="storm-button-tooltip"
       >
         <svg
-          className={`tw-h-[1.1rem] tw-w-[1.1rem] tw-flex-shrink-0 md:tw-size-4 ${
+          className={`tw-flex-shrink-0 ${
+            isMobile ? "tw-h-[1.1rem] tw-w-[1.1rem]" : "tw-size-4"
+          } ${
             disabled ? "tw-opacity-50" : ""
           }`}
           viewBox="0 0 24 24"
@@ -59,9 +65,9 @@ const StormButton: React.FC<StormButtonProps> = ({
             strokeLinejoin="round"
           />
         </svg>
-        <span className="tw-text-[11px] tw-font-medium md:tw-hidden">
-          {label}
-        </span>
+        {isMobile && (
+          <span className="tw-text-[11px] tw-font-medium">{label}</span>
+        )}
       </button>
       {!isMobile && (
         <Tooltip

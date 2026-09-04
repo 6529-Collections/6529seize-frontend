@@ -29,7 +29,6 @@ import {
   useReducedMotion,
 } from "framer-motion";
 import { useContext, useState } from "react";
-import Toggle from "react-toggle";
 
 const CATEGORY_KEYS = [
   "direct_messages",
@@ -50,6 +49,76 @@ const NOTIFICATION_LEVELS = [
   NotificationLevel.All,
   NotificationLevel.EssentialOnly,
 ] as const;
+
+const RADIO_GROUP_CLASSES = "tw-space-y-4";
+
+function PreferenceRadioOption({
+  name,
+  value,
+  checked,
+  label,
+  description,
+  onChange,
+}: {
+  readonly name: string;
+  readonly value: string;
+  readonly checked: boolean;
+  readonly label: string;
+  readonly description: string;
+  readonly onChange: () => void;
+}) {
+  return (
+    <label className="tw-group tw-relative tw-flex tw-w-full tw-cursor-pointer tw-rounded-lg">
+      <input
+        type="radio"
+        name={name}
+        value={value}
+        checked={checked}
+        aria-label={label}
+        onChange={onChange}
+        className="tw-peer tw-sr-only"
+      />
+      <span
+        className={`tw-flex tw-min-h-12 tw-w-full tw-items-start tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-px-4 tw-py-3.5 tw-shadow-sm tw-shadow-black/10 tw-transition-colors tw-duration-200 peer-focus-visible:tw-ring-2 peer-focus-visible:tw-ring-primary-400 peer-focus-visible:tw-ring-offset-2 peer-focus-visible:tw-ring-offset-iron-900 peer-disabled:tw-cursor-not-allowed peer-disabled:tw-opacity-50 motion-reduce:tw-transition-none ${
+          checked
+            ? "tw-border-primary-500 tw-bg-primary-500/10"
+            : "tw-border-iron-800 tw-bg-transparent desktop-hover:hover:tw-border-iron-700 desktop-hover:hover:tw-bg-iron-900/40"
+        }`}
+      >
+        <span
+          aria-hidden="true"
+          className={`tw-mt-0.5 tw-flex tw-size-4 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-transition-colors tw-duration-200 motion-reduce:tw-transition-none ${
+            checked
+              ? "tw-border-primary-500 tw-bg-primary-500"
+              : "tw-border-iron-500 tw-bg-transparent group-hover:tw-border-iron-400"
+          }`}
+        >
+          <span
+            className={`tw-size-1.5 tw-rounded-full tw-bg-white tw-transition-transform tw-duration-200 motion-reduce:tw-transition-none ${
+              checked ? "tw-scale-100" : "tw-scale-0"
+            }`}
+          />
+        </span>
+        <span className="tw-min-w-0">
+          <span
+            className={`tw-block tw-text-sm tw-font-medium ${
+              checked ? "tw-text-iron-50" : "tw-text-iron-200"
+            }`}
+          >
+            {label}
+          </span>
+          <span
+            className={`tw-mt-0.5 tw-block tw-text-xs tw-leading-5 ${
+              checked ? "tw-text-primary-300" : "tw-text-iron-400"
+            }`}
+          >
+            {description}
+          </span>
+        </span>
+      </span>
+    </label>
+  );
+}
 
 const UPDATE_DM_POLICY: Record<DirectMessagePolicy, UpdateDirectMessagePolicy> =
   {
@@ -84,7 +153,7 @@ export default function ProfilePreferencesSettings() {
   return (
     <section
       aria-label={t(locale, "preferences.tabs.notifications")}
-      className="tw-overflow-hidden tw-rounded-2xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950"
+      className="tw-overflow-hidden tw-rounded-2xl tw-border tw-border-solid tw-border-iron-800/80 tw-bg-iron-900/70 tw-shadow-sm tw-shadow-black/20"
     >
       {profileId === null && (
         <p className="tw-m-0 tw-p-6 tw-text-center tw-text-sm tw-text-iron-400">
@@ -182,57 +251,50 @@ function ProfilePreferencesForm({
 
   return (
     <div className="tw-flex tw-flex-col">
-      <div className="tw-divide-y tw-divide-iron-800 tw-px-4 sm:tw-px-6">
+      <div className="tw-px-4 sm:tw-px-6 lg:tw-px-8">
         <section
           aria-labelledby="profile-preferences-notifications-heading"
-          className="tw-pb-0 tw-pt-6"
+          className="tw-pt-6 sm:tw-pt-8"
         >
           <h2
             id="profile-preferences-notifications-heading"
-            className="tw-text-base tw-font-semibold tw-text-iron-100"
+            className="tw-m-0 tw-text-lg tw-font-medium tw-text-iron-100"
           >
             {t(locale, "profilePreferences.notifications.heading")}
           </h2>
-          <p className="tw-mt-1 tw-text-sm tw-text-iron-400">
+          <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-text-iron-400">
             {t(locale, "profilePreferences.notifications.description")}
           </p>
-          <div className="tw-mt-4 tw-divide-y tw-divide-white/5 tw-overflow-hidden tw-rounded-lg tw-bg-white/[0.025] tw-ring-1 tw-ring-white/10">
-            {NOTIFICATION_LEVELS.map((level) => (
-              <label
-                key={level}
-                aria-label={t(
+          <fieldset className="tw-m-0 tw-mt-6 tw-min-w-0 tw-border-0 tw-p-0">
+            <legend className="tw-sr-only">
+              {t(locale, "profilePreferences.notifications.heading")}
+            </legend>
+            <div className={RADIO_GROUP_CLASSES}>
+              {NOTIFICATION_LEVELS.map((level) => {
+                const label = t(
                   locale,
                   `profilePreferences.notifications.${level}.label`
-                )}
-                className="tw-flex tw-cursor-pointer tw-items-start tw-gap-3 tw-px-3 tw-py-3 tw-transition-colors desktop-hover:hover:tw-bg-white/[0.035]"
-              >
-                <input
-                  type="radio"
-                  name="notification-level"
-                  value={level}
-                  checked={current.notification_level === level}
-                  onChange={() =>
-                    setCurrent({ ...current, notification_level: level })
-                  }
-                  className="tw-mt-1 tw-size-4 tw-accent-primary-500"
-                />
-                <span>
-                  <span className="tw-block tw-text-sm tw-font-medium tw-text-iron-100">
-                    {t(
-                      locale,
-                      `profilePreferences.notifications.${level}.label`
-                    )}
-                  </span>
-                  <span className="tw-mt-0.5 tw-block tw-text-xs tw-leading-5 tw-text-iron-400">
-                    {t(
+                );
+
+                return (
+                  <PreferenceRadioOption
+                    key={level}
+                    name="notification-level"
+                    value={level}
+                    checked={current.notification_level === level}
+                    label={label}
+                    description={t(
                       locale,
                       `profilePreferences.notifications.${level}.description`
                     )}
-                  </span>
-                </span>
-              </label>
-            ))}
-          </div>
+                    onChange={() =>
+                      setCurrent({ ...current, notification_level: level })
+                    }
+                  />
+                );
+              })}
+            </div>
+          </fieldset>
 
           <LazyMotion features={domAnimation}>
             <AnimatePresence initial={false}>
@@ -256,88 +318,107 @@ function ProfilePreferencesForm({
                   }}
                   className="tw-overflow-hidden"
                 >
-                  <div className="tw-mt-4 tw-divide-y tw-divide-iron-800 tw-overflow-hidden tw-rounded-lg tw-border tw-border-iron-800">
+                  <div className="tw-mt-6 tw-space-y-1">
                     {CATEGORY_KEYS.map((key) => (
-                      <div
+                      <label
                         key={key}
-                        className="tw-flex tw-min-h-12 tw-items-center tw-justify-between tw-gap-4 tw-bg-iron-900/40 tw-px-3 tw-py-2.5"
+                        htmlFor={`profile-notification-${key}`}
+                        className="tw-group tw-relative tw-flex tw-min-h-12 tw-w-full tw-cursor-pointer tw-items-center tw-justify-between tw-gap-4 tw-rounded-lg tw-px-4 tw-py-3 tw-transition-colors tw-duration-200 desktop-hover:hover:tw-bg-iron-800/30 motion-reduce:tw-transition-none"
                       >
-                        <label
-                          htmlFor={`profile-notification-${key}`}
-                          className="tw-text-sm tw-text-iron-200"
-                        >
+                        <span className="tw-min-w-0 tw-text-sm tw-font-medium tw-text-iron-300">
                           {t(
                             locale,
                             `profilePreferences.notifications.category.${key}`
                           )}
-                        </label>
-                        <Toggle
+                        </span>
+                        <input
                           id={`profile-notification-${key}`}
+                          type="checkbox"
                           checked={current.notifications[key]}
-                          icons={false}
                           onChange={(event) =>
                             updateCategory(key, event.target.checked)
                           }
+                          className="tw-peer tw-sr-only"
                         />
-                      </div>
+                        <span
+                          aria-hidden="true"
+                          className={`tw-relative tw-flex tw-h-6 tw-w-11 tw-flex-shrink-0 tw-items-center tw-rounded-full tw-border tw-border-solid tw-p-0.5 tw-transition-colors tw-duration-200 peer-focus-visible:tw-ring-2 peer-focus-visible:tw-ring-primary-400 peer-focus-visible:tw-ring-offset-2 peer-focus-visible:tw-ring-offset-iron-900 peer-disabled:tw-opacity-50 motion-reduce:tw-transition-none ${
+                            current.notifications[key]
+                              ? "tw-border-emerald-400/60 tw-bg-emerald-500"
+                              : "tw-border-iron-600 tw-bg-iron-700"
+                          }`}
+                        >
+                          <span
+                            className={`tw-size-5 tw-rounded-full tw-bg-iron-50 tw-shadow-sm tw-transition-transform tw-duration-200 motion-reduce:tw-transition-none ${
+                              current.notifications[key]
+                                ? "tw-translate-x-5"
+                                : "tw-translate-x-0"
+                            }`}
+                          />
+                        </span>
+                      </label>
                     ))}
                   </div>
                 </m.div>
               )}
             </AnimatePresence>
           </LazyMotion>
-          <p className="tw-mt-3 tw-text-xs tw-leading-5 tw-text-iron-500">
+          <p className="tw-mb-0 tw-mt-4 tw-px-4 tw-text-xs tw-leading-5 tw-text-iron-500">
             {t(locale, "profilePreferences.notifications.deviceNote")}
           </p>
         </section>
 
+        <div aria-hidden="true" className="tw-my-10 tw-h-px tw-bg-iron-800" />
+
         <section
           aria-labelledby="profile-preferences-dm-heading"
-          className="tw-pb-0 tw-pt-6"
+          className="tw-pb-8 sm:tw-pb-10"
         >
           <h2
             id="profile-preferences-dm-heading"
-            className="tw-text-base tw-font-semibold tw-text-iron-100"
+            className="tw-m-0 tw-text-lg tw-font-medium tw-text-iron-100"
           >
             {t(locale, "profilePreferences.dm.heading")}
           </h2>
-          <p className="tw-mt-1 tw-text-sm tw-text-iron-400">
+          <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-text-iron-400">
             {t(locale, "profilePreferences.dm.description")}
           </p>
-          <div className="tw-mt-4 tw-divide-y tw-divide-white/5 tw-overflow-hidden tw-rounded-lg tw-bg-white/[0.025] tw-ring-1 tw-ring-white/10">
-            {DM_OPTIONS.map((option) => (
-              <label
-                key={option}
-                aria-label={t(locale, `profilePreferences.dm.${option}.label`)}
-                className="tw-flex tw-cursor-pointer tw-gap-3 tw-px-3 tw-py-3 tw-transition-colors desktop-hover:hover:tw-bg-white/[0.035]"
-              >
-                <input
-                  type="radio"
-                  name="direct-message-policy"
-                  value={option}
-                  checked={current.direct_message_policy === option}
-                  onChange={() =>
-                    setCurrent({
-                      ...current,
-                      direct_message_policy: option,
-                    })
-                  }
-                  className="tw-mt-1 tw-size-4 tw-accent-primary-500"
-                />
-                <span>
-                  <span className="tw-block tw-text-sm tw-font-medium tw-text-iron-100">
-                    {t(locale, `profilePreferences.dm.${option}.label`)}
-                  </span>
-                  <span className="tw-mt-0.5 tw-block tw-text-xs tw-leading-5 tw-text-iron-400">
-                    {t(locale, `profilePreferences.dm.${option}.description`)}
-                  </span>
-                </span>
-              </label>
-            ))}
-          </div>
+          <fieldset className="tw-m-0 tw-mt-6 tw-min-w-0 tw-border-0 tw-p-0">
+            <legend className="tw-sr-only">
+              {t(locale, "profilePreferences.dm.heading")}
+            </legend>
+            <div className={RADIO_GROUP_CLASSES}>
+              {DM_OPTIONS.map((option) => {
+                const label = t(
+                  locale,
+                  `profilePreferences.dm.${option}.label`
+                );
+
+                return (
+                  <PreferenceRadioOption
+                    key={option}
+                    name="direct-message-policy"
+                    value={option}
+                    checked={current.direct_message_policy === option}
+                    label={label}
+                    description={t(
+                      locale,
+                      `profilePreferences.dm.${option}.description`
+                    )}
+                    onChange={() =>
+                      setCurrent({
+                        ...current,
+                        direct_message_policy: option,
+                      })
+                    }
+                  />
+                );
+              })}
+            </div>
+          </fieldset>
         </section>
       </div>
-      <div className="tw-flex tw-justify-end tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-4 tw-pb-4 tw-pt-6 sm:tw-px-6 sm:tw-pb-5">
+      <div className="tw-mx-4 tw-flex tw-justify-end tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-py-6 sm:tw-mx-6 lg:tw-mx-8">
         <Button
           type="button"
           onClick={() => void save()}
@@ -345,7 +426,6 @@ function ProfilePreferencesForm({
           loading={isSaving}
           variant="action"
           size="md"
-          className="tw-w-full sm:tw-w-auto sm:tw-min-w-40"
         >
           {isSaving
             ? t(locale, "profilePreferences.saving")

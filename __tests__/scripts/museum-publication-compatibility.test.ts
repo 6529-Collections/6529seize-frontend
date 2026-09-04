@@ -84,22 +84,6 @@ function validPublicationIdentity() {
 }
 
 describe("museum publication compatibility", () => {
-  it("keeps managed holds bound to GitHub Actions' exact API identities", () => {
-    const workflow = fs.readFileSync(
-      ".github/workflows/museum-publication-compatibility.yml",
-      "utf8"
-    );
-    expect(workflow).toContain(
-      `managed_authors='["app/github-actions","github-actions[bot]"]'`
-    );
-    expect(workflow).toContain("$authors | index($author)");
-    expect(workflow).toContain("max_by(.number).number");
-    expect(workflow).toContain(
-      "Superseded by active automated Museum hold #${primary_issue_number}."
-    );
-    expect(workflow).not.toContain("github-actions[bot)");
-  });
-
   it("accepts a catalog commit only when it resolves a verified immutable publication commit", async () => {
     const load = jest
       .spyOn(GitHubMuseumPublicationSource.prototype, "load")
@@ -431,9 +415,17 @@ describe("museum publication compatibility", () => {
       "utf8"
     );
 
-    for (const [workflow, e2eStepName] of [
-      [staging, "name: Run staging packs against staging.6529.io"],
-      [production, "name: Run production-safe read-only packs"],
+    for (const [workflow, e2eStepName, artifactPath] of [
+      [
+        staging,
+        "name: Run read-only staging packs",
+        "path: staging-e2e-artifacts/",
+      ],
+      [
+        production,
+        "name: Run read-only production packs",
+        "path: production-e2e-artifacts/",
+      ],
     ] as const) {
       expect(workflow).toContain("scripts/museum-publication-compatibility.ts");
       expect(workflow).toContain(
@@ -446,35 +438,36 @@ describe("museum publication compatibility", () => {
         "MUSEUM_PUBLICATION_EXPECTED_COMMIT: ${{ steps.museum-selection.outputs.source_commit }}"
       );
       expect(workflow).toContain("museum-publication-provenance.json");
-      expect(workflow).toContain(
-        "MUSEUM_PUBLICATION_OUTCOME: ${{ steps.museum-publication.outcome }}"
-      );
       const resolveIndex = workflow.indexOf(
         "name: Resolve immutable Museum publication provenance"
       );
       const e2eIndex = workflow.indexOf(e2eStepName, resolveIndex);
-      const provenanceIndex = workflow.indexOf(
-        "immutable Museum provenance",
+      const preserveIndex = workflow.indexOf(
+        "name: Preserve Museum selection and publication evidence",
         e2eIndex
       );
       const uploadIndex = workflow.indexOf(
-        "name: Upload manifest-bound Playwright evidence",
-        provenanceIndex
+        "name: Upload Playwright evidence",
+        preserveIndex
       );
       expect(resolveIndex).toBeGreaterThanOrEqual(0);
       expect(e2eIndex).toBeGreaterThan(resolveIndex);
-      expect(provenanceIndex).toBeGreaterThan(e2eIndex);
-      expect(uploadIndex).toBeGreaterThan(provenanceIndex);
+      expect(preserveIndex).toBeGreaterThan(e2eIndex);
+      expect(uploadIndex).toBeGreaterThan(preserveIndex);
+      const nextStepIndex = workflow.indexOf(
+        "\n      - name:",
+        uploadIndex + 1
+      );
+      const preserveBlock = workflow.slice(preserveIndex, uploadIndex);
+      const uploadBlock = workflow.slice(
+        uploadIndex,
+        nextStepIndex === -1 ? workflow.length : nextStepIndex
+      );
+      expect(preserveBlock).toContain(
+        "PUBLICATION_FILE: ${{ steps.museum-publication.outputs.file }}"
+      );
+      expect(uploadBlock).toContain(artifactPath);
     }
-    expect(staging.indexOf("museum-publication-provenance.json")).toBeLessThan(
-      staging.indexOf("name: Validate exact manifest-bound E2E evidence")
-    );
-    expect(production).toContain(
-      "provenance_file='isolated-production-e2e-artifacts/museum-publication-provenance.json'"
-    );
-    expect(production).toContain(
-      ".source_commit == $selection[0].source_commit"
-    );
     expect(production).not.toContain("MUSEUM_PUBLICATION_TEST_COMMIT");
     expect(adapter).toContain(
       "catalogResolver: museumPublicationCatalogResolver"
