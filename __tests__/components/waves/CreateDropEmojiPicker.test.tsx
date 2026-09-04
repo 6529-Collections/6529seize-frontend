@@ -103,6 +103,14 @@ describe("CreateDropEmojiPicker", () => {
     // Clear scroll
     window.scrollY = 0;
     window.scrollX = 0;
+    Object.defineProperty(window, "innerWidth", {
+      configurable: true,
+      value: 1024,
+    });
+    Object.defineProperty(window, "innerHeight", {
+      configurable: true,
+      value: 768,
+    });
   });
 
   it("toggles picker on button click, positions it, and inserts emoji", async () => {
@@ -135,8 +143,8 @@ describe("CreateDropEmojiPicker", () => {
     const wrapper = picker.parentElement!;
     await waitFor(() => {
       expect(wrapper.style.position).toBe("absolute");
-      expect(wrapper.style.top).toBe("-320px");
-      expect(wrapper.style.left).toBe("-50px");
+      expect(wrapper.style.top).toBe("8px");
+      expect(wrapper.style.left).toBe("8px");
       expect(wrapper.style.zIndex).toBe("1000");
     });
 
@@ -259,6 +267,28 @@ describe("CreateDropEmojiPicker", () => {
     const picker = await screen.findByTestId("picker");
     expect(screen.queryByTestId("mobile-dialog")).not.toBeInTheDocument();
     expect(picker.parentElement?.style.position).toBe("absolute");
+  });
+
+  it("keeps the anchored picker inside the viewport", async () => {
+    render(<CreateDropEmojiPicker />);
+    const toggleButton = screen.getByRole("button", { hidden: true });
+
+    jest.spyOn(toggleButton, "getBoundingClientRect").mockReturnValue({
+      top: 1000,
+      left: 2000,
+      width: 0,
+      height: 0,
+      right: 0,
+      bottom: 0,
+    } as DOMRect);
+
+    fireEvent.click(toggleButton);
+    const picker = await screen.findByTestId("picker");
+
+    await waitFor(() => {
+      expect(picker.parentElement?.style.top).toBe("325px");
+      expect(picker.parentElement?.style.left).toBe("664px");
+    });
   });
 
   it("uses scoped layer values when provided", async () => {

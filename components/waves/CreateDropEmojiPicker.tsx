@@ -23,6 +23,10 @@ interface CreateDropEmojiPickerContentProps {
   verticalAlignment: "top" | "center";
 }
 
+const EMOJI_PICKER_WIDTH_PX = 352;
+const EMOJI_PICKER_HEIGHT_PX = 435;
+const VIEWPORT_PADDING_PX = 8;
+
 const CreateDropEmojiPickerContent: FC<CreateDropEmojiPickerContentProps> = ({
   disabled,
   top,
@@ -53,10 +57,28 @@ const CreateDropEmojiPickerContent: FC<CreateDropEmojiPickerContentProps> = ({
     }
 
     const rect = button.getBoundingClientRect();
+    const viewportTop = globalThis.scrollY + VIEWPORT_PADDING_PX;
+    const viewportLeft = globalThis.scrollX + VIEWPORT_PADDING_PX;
+    const maxTop = Math.max(
+      viewportTop,
+      globalThis.scrollY +
+        globalThis.innerHeight -
+        EMOJI_PICKER_HEIGHT_PX -
+        VIEWPORT_PADDING_PX
+    );
+    const maxLeft = Math.max(
+      viewportLeft,
+      globalThis.scrollX +
+        globalThis.innerWidth -
+        EMOJI_PICKER_WIDTH_PX -
+        VIEWPORT_PADDING_PX
+    );
+    const preferredTop = rect.top + globalThis.scrollY - 420;
+    const preferredLeft = rect.left + globalThis.scrollX - 250;
 
     return {
-      top: rect.top + globalThis.scrollY - 420,
-      left: rect.left + globalThis.scrollX - 250,
+      top: Math.min(Math.max(preferredTop, viewportTop), maxTop),
+      left: Math.min(Math.max(preferredLeft, viewportLeft), maxLeft),
     };
   };
 
