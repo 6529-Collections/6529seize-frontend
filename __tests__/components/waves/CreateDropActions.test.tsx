@@ -290,6 +290,14 @@ describe("CreateDropActions", () => {
     expect(screen.getAllByTestId("storm-button").length).toBeGreaterThan(0);
   });
 
+  it("centers the desktop action row against the input", () => {
+    render(<CreateDropActions {...defaultProps} />);
+
+    const actionSlot = screen.getByTestId("drop-actions-motion-shell").parentElement;
+    expect(actionSlot).toHaveClass("tw-self-center");
+    expect(actionSlot).not.toHaveClass("tw-self-end", "tw-mb-1");
+  });
+
   it("renders poll action for admins and toggles it", async () => {
     render(<CreateDropActions {...defaultProps} canCreatePoll={true} />);
 

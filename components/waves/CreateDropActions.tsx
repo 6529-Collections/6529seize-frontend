@@ -454,7 +454,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
               </AnimatePresence>
             </>
           ) : (
-            <div className="tw-relative tw-col-start-1 tw-row-start-2 tw-mb-1 tw-self-end">
+            <div className="tw-relative tw-col-start-1 tw-row-start-2 tw-self-center">
               <motion.div
                 data-testid="drop-actions-motion-shell"
                 {...shellMotionProps}
