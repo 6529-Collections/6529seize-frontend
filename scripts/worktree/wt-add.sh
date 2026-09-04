@@ -274,7 +274,7 @@ echo "Running secure install in $WORKTREE_NAME..."
   NODE_AUTH_TOKEN="$PACKAGE_AUTH_TOKEN" \
     "$NODE_BINARY" "$MAIN_REPO/scripts/run-secure-pnpm.cjs" \
     --seize-secure-repository-root "$WORKTREE_PATH" \
-    --seize-secure-pnpm-binary "$TRUSTED_PNPM_BINARY" -- install
+    --seize-secure-pnpm-binary "$TRUSTED_PNPM_BINARY" -- install --frozen-lockfile
 )
 unset PACKAGE_AUTH_TOKEN
 

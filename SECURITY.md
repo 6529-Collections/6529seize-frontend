@@ -46,10 +46,13 @@ integration. Do not bypass the wrapper with plain `pnpm install`, `pnpm dev`, or
 Use:
 
 ```bash
-6529 install
+6529 ci
 6529 add <package>
 6529 add -D <package>
-6529 update
+6529 remove <package>
+6529 update [package]
+6529 audit
+6529 audit:fix
 ```
 
 For more details, read

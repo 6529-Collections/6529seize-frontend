@@ -343,13 +343,13 @@ jobs:
           mode: firewall
 
       - name: Assert npm lockfile is absent
-        run: ./bin/6529 guard:no-package-lock
+        run: ./bin/6529 run guard:no-package-lock
 
       - name: Install dependencies
         env:
           NODE_AUTH_TOKEN: ${{ github.token }}
           SFW_BIN: ${{ steps.socket_firewall.outputs.firewall-path-binary }}
-        run: ./bin/6529 install:frozen
+        run: ./bin/6529 ci
 
       - name: Run small Playwright smoke pack
         if: matrix.lane == 'playwright-smoke'
@@ -489,13 +489,13 @@ jobs:
           mode: firewall
 
       - name: Assert npm lockfile is absent
-        run: ./bin/6529 guard:no-package-lock
+        run: ./bin/6529 run guard:no-package-lock
 
       - name: Install dependencies
         env:
           NODE_AUTH_TOKEN: ${{ github.token }}
           SFW_BIN: ${{ steps.socket_firewall.outputs.firewall-path-binary }}
-        run: ./bin/6529 install:frozen
+        run: ./bin/6529 ci
 
       - name: Run Knip dead-code check
         if: matrix.lane == 'quality'
@@ -503,7 +503,7 @@ jobs:
 
       - name: Lint package.json versions
         if: matrix.lane == 'quality' && needs.plan.outputs.dependency_governance_required == 'true'
-        run: ./bin/6529 lint:package-json
+        run: ./bin/6529 run lint:package-json
 
       - name: Classify dependency risk
         if: matrix.lane == 'quality' && needs.plan.outputs.dependency_governance_required == 'true'
