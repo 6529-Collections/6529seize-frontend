@@ -15,6 +15,7 @@ import { ApiModeratedProfileStatus } from "@/generated/models/ApiModeratedProfil
 import { amIUser } from "@/helpers/Helpers";
 import { navigateToDirectMessage } from "@/helpers/navigation.helpers";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
+import { PROFILE_PREFERENCES_HREF } from "@/helpers/preferences-navigation";
 import { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
 import { createDirectMessageWave } from "@/helpers/waves/waves.helpers";
 import { getBannerColorValue } from "@/helpers/profile-banner.helpers";
@@ -93,7 +94,7 @@ function ProfilePreferencesButton() {
     <ButtonLink
       variant="tertiary"
       size="sm"
-      href="/preferences"
+      href={PROFILE_PREFERENCES_HREF}
       aria-label={t(DEFAULT_LOCALE, PROFILE_PREFERENCES_BUTTON_KEY)}
       className={`${USER_PAGE_HEADER_SURFACE_CLASS} ${USER_PAGE_HEADER_INTERACTIVE_SURFACE_CLASS}`}
     >
@@ -144,7 +145,7 @@ function MobileHeaderControls({
         <ButtonLink
           variant="tertiary"
           size={null}
-          href="/preferences"
+          href={PROFILE_PREFERENCES_HREF}
           aria-label={t(DEFAULT_LOCALE, PROFILE_PREFERENCES_BUTTON_KEY)}
           title={t(DEFAULT_LOCALE, PROFILE_PREFERENCES_BUTTON_KEY)}
           className="tw-group tw-size-11 !tw-rounded-full !tw-border-transparent !tw-bg-transparent !tw-p-1 !tw-shadow-none focus-visible:!tw-outline-none active:!tw-bg-transparent desktop-hover:hover:!tw-border-transparent desktop-hover:hover:!tw-bg-transparent sm:tw-size-10 sm:!tw-p-0.5 min-[840px]:tw-hidden"

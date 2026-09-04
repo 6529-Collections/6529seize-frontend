@@ -89,7 +89,7 @@ export const WaveContentTabs: React.FC<WaveContentTabsProps> = ({
       className={clsx(
         "tw-no-scrollbar tw-min-w-0 tw-flex-shrink-0 tw-overflow-x-auto tw-overflow-y-hidden tw-overscroll-x-contain tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid",
         variant === "compactPills"
-          ? "tw-border-iron-900 tw-bg-iron-950 tw-px-2 tw-py-2 sm:tw-px-4 md:tw-px-6"
+          ? "tw-border-white/5 tw-bg-iron-950 tw-px-4 tw-py-2.5 md:tw-px-6"
           : "tw-border-white/5 tw-px-2 [&_button[role=tab]]:tw-px-2 [&_button[role=tab]]:tw-py-2.5 [&_button[role=tab]]:!tw-text-sm [&_button[role=tab]]:tw-font-medium [&_button[role=tab]]:tw-tracking-normal"
       )}
     >

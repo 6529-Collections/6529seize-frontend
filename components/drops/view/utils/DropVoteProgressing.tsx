@@ -12,7 +12,7 @@ interface DropVoteProgressingProps {
   readonly compact?: boolean | undefined;
   readonly tooltipLabel?: string | undefined;
   readonly numberFont?: "mono" | "sans" | undefined;
-  readonly numberSize?: "sm" | "body" | undefined;
+  readonly numberSize?: "mobile-xs" | "sm" | "body" | undefined;
   readonly numberWeight?: "bold" | "semibold" | undefined;
   readonly visualVariant?: "default" | "memes" | undefined;
 }
@@ -33,9 +33,7 @@ const getBaseVisualClasses = (
 ): DropVoteProgressingVisualClasses => {
   if (subtle) {
     return {
-      color: isPositiveProgressing
-        ? "tw-text-iron-400"
-        : MUTED_TEXT_CLASS_NAME,
+      color: isPositiveProgressing ? "tw-text-iron-400" : MUTED_TEXT_CLASS_NAME,
       arrowColor: MUTED_TEXT_CLASS_NAME,
       wrapperClasses: "tw-flex tw-items-center tw-gap-2",
       valueClasses: "tw-tracking-tight",
@@ -81,9 +79,7 @@ const getVisualClasses = (
 
   return {
     ...baseClasses,
-    color: isPositiveProgressing
-      ? "tw-text-emerald-300"
-      : "tw-text-rose-400",
+    color: isPositiveProgressing ? "tw-text-emerald-300" : "tw-text-rose-400",
     arrowColor: MUTED_TEXT_CLASS_NAME,
     valueClasses: "tw-leading-5 tw-tracking-identity",
   };
@@ -119,10 +115,12 @@ export default function DropVoteProgressing({
     visualVariant
   );
 
-  const numberSizeClass =
-    numberSize === "body"
-      ? "tw-text-body tw-leading-5"
-      : "tw-text-sm";
+  let numberSizeClass = "tw-text-sm";
+  if (numberSize === "body") {
+    numberSizeClass = "tw-text-body tw-leading-5";
+  } else if (numberSize === "mobile-xs") {
+    numberSizeClass = "tw-text-xs sm:tw-text-sm";
+  }
   const numberTypographyClass =
     compact || numberFont === "sans" ? "tw-tabular-nums" : "tw-font-mono";
   const numberWeightClass =

@@ -3,6 +3,7 @@
 import MyStreamActionTooltip from "@/components/brain/my-stream/MyStreamActionTooltip";
 import Button from "@/components/utils/button/Button";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import { formatNumber } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -28,6 +29,7 @@ export default function WaveRepButton({
   readonly variant?: WaveRepButtonVariant | undefined;
 }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const isTouchDevice = useIsTouchDevice();
   const authenticatedUserContribution =
     wave.wave_rep?.authenticated_user_contribution ?? 0;
   const hasUserContribution = authenticatedUserContribution !== 0;
@@ -41,13 +43,18 @@ export default function WaveRepButton({
     : t(WAVE_REP_ACTION_LOCALE, "waves.rep.action.addAriaLabel");
   const tooltipContent = t(WAVE_REP_ACTION_LOCALE, "waves.rep.action.tooltip");
   const tooltipId = `wave-rep-rating-${wave.id}`;
+  const showTooltip = !isTouchDevice && !isModalOpen;
   return (
     <>
       <Button
         type="button"
         aria-label={label}
-        data-tooltip-id={tooltipId}
-        data-tooltip-content={tooltipContent}
+        {...(showTooltip
+          ? {
+              "data-tooltip-id": tooltipId,
+              "data-tooltip-content": tooltipContent,
+            }
+          : {})}
         onClick={() => setIsModalOpen(true)}
         variant="tertiary"
         size={variant === "compact" ? null : "sm"}
@@ -65,7 +72,7 @@ export default function WaveRepButton({
         />
         <span>{actionText}</span>
       </Button>
-      <MyStreamActionTooltip id={tooltipId} />
+      {showTooltip && <MyStreamActionTooltip id={tooltipId} />}
       {isModalOpen && (
         <WaveRepRatingModal wave={wave} onClose={() => setIsModalOpen(false)} />
       )}
