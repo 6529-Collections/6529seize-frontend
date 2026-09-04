@@ -1550,7 +1550,7 @@ describe("documented private-package setup flows", () => {
             encoding: "utf8",
             env: {
               ...process.env,
-              PATH: `${fakeBinaryDirectory}:${process.env.PATH ?? ""}`,
+              PATH: `${fakeBinaryDirectory}:${process.env["PATH"] ?? ""}`,
             },
           }
         );
