@@ -32,9 +32,11 @@ describe("StreamArtworkConceptPreview", () => {
     await user.click(
       within(viewNavigation).getByRole("button", { name: /Release/ })
     );
-    expect(
-      screen.getByRole("region", { name: "The artist sets the release" })
-    ).toHaveTextContent("a fixed price of 1.00 ETH");
+    const planView = screen.getByRole("region", {
+      name: "The artist sets the release",
+    });
+    expect(planView).toHaveTextContent("a fixed price of 1.00 ETH");
+    expect(planView).toHaveTextContent("90% to Mira · 10% to the studio");
 
     await user.click(
       within(viewNavigation).getByRole("button", { name: /Artist check/ })
@@ -72,6 +74,8 @@ describe("StreamArtworkConceptPreview", () => {
     expect(
       screen.getByRole("link", { name: "Share feedback on this preview" })
     ).toHaveAttribute("href", "#public-review-feedback");
-    expect(screen.getByRole("status")).toHaveTextContent("Step 5 of 5");
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Step 5 of 5: The history stays clear"
+    );
   });
 });

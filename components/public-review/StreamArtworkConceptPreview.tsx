@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { formatInteger, formatNumber } from "@/i18n/format";
+import { formatInteger, formatNumber, formatPercent } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 
@@ -10,36 +10,45 @@ type PreviewStepId = "artwork" | "plan" | "approval" | "collector" | "history";
 
 type PreviewStep = {
   readonly id: PreviewStepId;
+  readonly headingKey: MessageKey;
   readonly labelKey: MessageKey;
 };
 
 const PREVIEW_STEPS = [
   {
     id: "artwork",
+    headingKey: "publicReview.conceptPreview.artwork.heading",
     labelKey: "publicReview.conceptPreview.steps.artwork",
   },
   {
     id: "plan",
+    headingKey: "publicReview.conceptPreview.plan.heading",
     labelKey: "publicReview.conceptPreview.steps.plan",
   },
   {
     id: "approval",
+    headingKey: "publicReview.conceptPreview.approval.heading",
     labelKey: "publicReview.conceptPreview.steps.approval",
   },
   {
     id: "collector",
+    headingKey: "publicReview.conceptPreview.collector.heading",
     labelKey: "publicReview.conceptPreview.steps.collector",
   },
   {
     id: "history",
+    headingKey: "publicReview.conceptPreview.history.heading",
     labelKey: "publicReview.conceptPreview.steps.history",
   },
 ] as const satisfies readonly PreviewStep[];
 
+const PREVIEW_EDITION_NUMBER = formatInteger(DEFAULT_LOCALE, 1);
 const PREVIEW_PRICE = formatNumber(DEFAULT_LOCALE, 1, {
   minimumFractionDigits: 2,
   maximumFractionDigits: 2,
 });
+const PREVIEW_ARTIST_SHARE = formatPercent(DEFAULT_LOCALE, 0.9, 0);
+const PREVIEW_STUDIO_SHARE = formatPercent(DEFAULT_LOCALE, 0.1, 0);
 
 function ArtworkVisual() {
   return (
@@ -78,7 +87,11 @@ function ArtworkVisual() {
         <span className="tw-rounded-full tw-border tw-border-solid tw-border-white/15 tw-bg-black/40 tw-px-2.5 tw-py-1 tw-font-mono tw-text-[0.62rem] tw-font-semibold tw-text-white">
           {t(
             DEFAULT_LOCALE,
-            "publicReview.conceptPreview.artwork.editionLabel"
+            "publicReview.conceptPreview.artwork.editionLabel",
+            {
+              current: PREVIEW_EDITION_NUMBER,
+              total: PREVIEW_EDITION_NUMBER,
+            }
           )}
         </span>
       </div>
@@ -97,10 +110,7 @@ function PreviewPanel({
 }) {
   return (
     <div>
-      <h3
-        id="stream-concept-preview-view-heading"
-        className="tw-m-0 tw-text-2xl tw-font-semibold tw-tracking-tight tw-text-white sm:tw-text-3xl"
-      >
+      <h3 className="tw-m-0 tw-text-2xl tw-font-semibold tw-tracking-tight tw-text-white sm:tw-text-3xl">
         {heading}
       </h3>
       <p className="tw-mb-0 tw-mt-3 tw-text-base tw-leading-7 tw-text-iron-300">
@@ -146,7 +156,11 @@ function PreviewView({ stepId }: { readonly stepId: PreviewStepId }) {
           )}
           takeaway={t(
             DEFAULT_LOCALE,
-            "publicReview.conceptPreview.plan.takeaway"
+            "publicReview.conceptPreview.plan.takeaway",
+            {
+              artistShare: PREVIEW_ARTIST_SHARE,
+              studioShare: PREVIEW_STUDIO_SHARE,
+            }
           )}
         />
       );
@@ -181,7 +195,11 @@ function PreviewView({ stepId }: { readonly stepId: PreviewStepId }) {
           takeaway={t(
             DEFAULT_LOCALE,
             "publicReview.conceptPreview.collector.takeaway",
-            { price: PREVIEW_PRICE }
+            {
+              current: PREVIEW_EDITION_NUMBER,
+              price: PREVIEW_PRICE,
+              total: PREVIEW_EDITION_NUMBER,
+            }
           )}
         />
       );
@@ -230,10 +248,7 @@ export function StreamArtworkConceptPreview() {
         <p className="tw-mb-0 tw-mt-3 tw-max-w-2xl tw-text-sm tw-leading-6 tw-text-iron-300">
           {t(DEFAULT_LOCALE, "publicReview.conceptPreview.description")}
         </p>
-        <p
-          className="tw-mb-0 tw-mt-3 tw-text-xs tw-leading-5 tw-text-iron-500"
-          role="note"
-        >
+        <p className="tw-mb-0 tw-mt-3 tw-text-xs tw-leading-5 tw-text-iron-500">
           {t(DEFAULT_LOCALE, "publicReview.conceptPreview.disclaimer")}
         </p>
       </header>
@@ -273,18 +288,18 @@ export function StreamArtworkConceptPreview() {
       </nav>
 
       <p
-        aria-live="polite"
         className="tw-mb-0 tw-px-5 tw-pt-5 tw-font-mono tw-text-[0.64rem] tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-primary-300 sm:tw-px-7 lg:tw-px-8"
         role="status"
       >
         {t(DEFAULT_LOCALE, "publicReview.conceptPreview.stepStatus", {
           current: formatInteger(DEFAULT_LOCALE, activeStepIndex + 1),
+          heading: t(DEFAULT_LOCALE, activeStep.headingKey),
           total: formatInteger(DEFAULT_LOCALE, PREVIEW_STEPS.length),
         })}
       </p>
 
       <div
-        aria-labelledby="stream-concept-preview-view-heading"
+        aria-label={t(DEFAULT_LOCALE, activeStep.headingKey)}
         className="tw-grid @3xl:tw-grid-cols-[minmax(0,1.04fr)_minmax(20rem,0.96fr)]"
         id="stream-concept-preview-view"
         role="region"

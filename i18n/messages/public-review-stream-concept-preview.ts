@@ -8,7 +8,8 @@ export const PUBLIC_REVIEW_STREAM_CONCEPT_PREVIEW_MESSAGES = {
     "Nothing here buys, signs, uploads, or saves anything.",
   "publicReview.conceptPreview.navigationLabel":
     "Choose a view in the Stream artwork concept preview",
-  "publicReview.conceptPreview.stepStatus": "Step {current} of {total}",
+  "publicReview.conceptPreview.stepStatus":
+    "Step {current} of {total}: {heading}",
   "publicReview.conceptPreview.steps.artwork": "Artwork",
   "publicReview.conceptPreview.steps.plan": "Release",
   "publicReview.conceptPreview.steps.approval": "Artist check",
@@ -19,7 +20,7 @@ export const PUBLIC_REVIEW_STREAM_CONCEPT_PREVIEW_MESSAGES = {
   "publicReview.conceptPreview.artwork.visualDescription":
     "Signal / No. 1, a fictional abstract artwork made from blue light, dark space, and intersecting frames",
   "publicReview.conceptPreview.artwork.seriesLabel": "SIGNAL / NO. 1",
-  "publicReview.conceptPreview.artwork.editionLabel": "1/1",
+  "publicReview.conceptPreview.artwork.editionLabel": "{current}/{total}",
   "publicReview.conceptPreview.artwork.heading": "Meet the artwork",
   "publicReview.conceptPreview.artwork.description":
     "Signal / No. 1 is a fictional one-of-one artwork by Mira Vale.",
@@ -28,7 +29,7 @@ export const PUBLIC_REVIEW_STREAM_CONCEPT_PREVIEW_MESSAGES = {
   "publicReview.conceptPreview.plan.description":
     "Mira chooses one token, a fixed price of {price} ETH, and who gets paid.",
   "publicReview.conceptPreview.plan.takeaway":
-    "90% to Mira · 10% to the studio",
+    "{artistShare} to Mira · {studioShare} to the studio",
   "publicReview.conceptPreview.approval.heading":
     "The artist checks the exact plan",
   "publicReview.conceptPreview.approval.description":
@@ -40,7 +41,7 @@ export const PUBLIC_REVIEW_STREAM_CONCEPT_PREVIEW_MESSAGES = {
   "publicReview.conceptPreview.collector.description":
     "Before buying, the collector sees what they receive, the price, and where the money goes.",
   "publicReview.conceptPreview.collector.takeaway":
-    "Signal / No. 1 · 1 of 1 · {price} ETH",
+    "Signal / No. 1 · {current} of {total} · {price} ETH",
   "publicReview.conceptPreview.history.heading": "The history stays clear",
   "publicReview.conceptPreview.history.description":
     "The record shows which artwork was sold, its price, and its current owner.",
