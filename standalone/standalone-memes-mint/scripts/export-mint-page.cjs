@@ -53,7 +53,7 @@ function parseArgs(argv) {
     console.log(`Mint standalone export
 
 Usage:
-  node standalone/standalone-memes-mint/scripts/export-mint-page.cjs [options]
+  6529 run export-mint-page -- [options]
 
 Options:
   --test   Use bucket ${S3_BUCKET_TEST} (BASE_ENDPOINT https://${S3_BUCKET_TEST}) unless STANDALONE_S3_BUCKET_TEST is set

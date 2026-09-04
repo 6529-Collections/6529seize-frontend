@@ -40,7 +40,9 @@ export const CreateDropSubmit: React.FC<CreateDropSubmitProps> = ({
       hideChildrenWhenLoading
     >
       <span
-        className={showLabelOnMobile ? "tw-inline" : "tw-hidden lg:tw-inline"}
+        className={`${
+          showLabelOnMobile ? "tw-inline" : "tw-hidden lg:tw-inline"
+        } ${label ? "tw-text-[10px]" : ""}`}
       >
         {submitLabel}
       </span>
