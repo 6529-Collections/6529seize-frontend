@@ -47,6 +47,8 @@ jobs:
 
   resolve-production-artifact:
     name: Resolve production artifact metadata
+    permissions:
+      actions: read
     needs: build-production-artifact
     uses: ./.github/workflows/production-artifact-metadata.yml
 
