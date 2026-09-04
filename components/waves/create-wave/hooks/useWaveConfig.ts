@@ -40,7 +40,7 @@ const getPrivilegeGroupDefaults = ({
   waveType,
   manuallySelected,
 }: {
-  readonly groupId: string;
+  readonly groupId: string | null;
   readonly waveType: ApiWaveType;
   readonly manuallySelected: ReadonlySet<PrivilegeGroupKey>;
 }): Partial<CreateWaveConfig["groups"]> => {
@@ -409,13 +409,11 @@ export function useWaveConfig() {
           groups: {
             ...prev.groups,
             canView: group?.id ?? null,
-            ...(group
-              ? getPrivilegeGroupDefaults({
-                  groupId: group.id,
-                  waveType: prev.overview.type,
-                  manuallySelected: manuallySelectedPrivilegeGroups.current,
-                })
-              : {}),
+            ...getPrivilegeGroupDefaults({
+              groupId: group?.id ?? null,
+              waveType: prev.overview.type,
+              manuallySelected: manuallySelectedPrivilegeGroups.current,
+            }),
           },
         }));
         break;

@@ -780,6 +780,35 @@ describe("useWaveConfig", () => {
       });
     });
 
+    it("returns linked privilege groups to Public when access becomes Public", () => {
+      const { result } = renderHook(() => useWaveConfig());
+
+      act(() => {
+        result.current.setOverview({
+          ...result.current.config.overview,
+          type: ApiWaveType.Rank,
+        });
+      });
+      act(() => {
+        result.current.onGroupSelect({
+          group: mockGroup,
+          groupType: CreateWaveGroupConfigType.CAN_VIEW,
+        });
+        result.current.onGroupSelect({
+          group: null,
+          groupType: CreateWaveGroupConfigType.CAN_VIEW,
+        });
+      });
+
+      expect(result.current.config.groups).toEqual({
+        admin: null,
+        canView: null,
+        canDrop: null,
+        canVote: null,
+        canChat: null,
+      });
+    });
+
     it("should update canDrop group", () => {
       const { result } = renderHook(() => useWaveConfig());
 

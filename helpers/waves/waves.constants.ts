@@ -147,21 +147,21 @@ export const CREATE_WAVE_SELECT_GROUP_LABELS: Record<
   Record<CreateWaveGroupConfigType, string>
 > = {
   [ApiWaveType.Chat]: {
-    [CreateWaveGroupConfigType.CAN_VIEW]: "Visibility",
+    [CreateWaveGroupConfigType.CAN_VIEW]: "Who can access this wave",
     [CreateWaveGroupConfigType.CAN_DROP]: "Who can drop",
     [CreateWaveGroupConfigType.CAN_VOTE]: "Who can rate",
     [CreateWaveGroupConfigType.CAN_CHAT]: "Who can chat",
     [CreateWaveGroupConfigType.ADMIN]: "Admins",
   },
   [ApiWaveType.Rank]: {
-    [CreateWaveGroupConfigType.CAN_VIEW]: "Visibility",
+    [CreateWaveGroupConfigType.CAN_VIEW]: "Who can access this wave",
     [CreateWaveGroupConfigType.CAN_DROP]: "Who can drop",
     [CreateWaveGroupConfigType.CAN_VOTE]: "Who can vote",
     [CreateWaveGroupConfigType.CAN_CHAT]: "Who can chat",
     [CreateWaveGroupConfigType.ADMIN]: "Admins",
   },
   [ApiWaveType.Approve]: {
-    [CreateWaveGroupConfigType.CAN_VIEW]: "Visibility",
+    [CreateWaveGroupConfigType.CAN_VIEW]: "Who can access this wave",
     [CreateWaveGroupConfigType.CAN_DROP]: "Who can drop",
     [CreateWaveGroupConfigType.CAN_VOTE]: "Who can vote",
     [CreateWaveGroupConfigType.CAN_CHAT]: "Who can chat",

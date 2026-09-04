@@ -515,7 +515,10 @@ export const EN_GB_MESSAGES = {
   "waves.create.groups.title": "Access",
   "waves.create.groups.description":
     "Choose who can access, participate in, and manage this wave.",
-  "waves.create.groups.viewGroupName": "Visibility",
+  "waves.create.groups.viewGroupName": "Who can access this wave",
+  "waves.create.groups.accessHelper":
+    "By default, everyone with access can participate. Only you can administer the wave.",
+  "waves.create.groups.customizePermissions": "Customise permissions",
   "waves.create.groups.adminGroupName": "Admins",
   "waves.create.groups.currentGroupWithName": "Current group: {name}",
   "waves.create.groups.dialog.addTitle": "Add group",

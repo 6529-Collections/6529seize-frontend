@@ -504,7 +504,10 @@ export const ES_ES_MESSAGES = {
   "waves.create.groups.title": "Acceso",
   "waves.create.groups.description":
     "Elige quién puede acceder, participar y gestionar esta Wave.",
-  "waves.create.groups.viewGroupName": "Visibilidad",
+  "waves.create.groups.viewGroupName": "Quién puede acceder a esta Wave",
+  "waves.create.groups.accessHelper":
+    "De forma predeterminada, todas las personas con acceso pueden participar. Solo tú puedes administrar la Wave.",
+  "waves.create.groups.customizePermissions": "Personalizar permisos",
   "waves.create.groups.adminGroupName": "Administradores",
   "waves.create.groups.currentGroupWithName": "Grupo actual: {name}",
   "waves.create.groups.dialog.addTitle": "Añadir grupo",

@@ -507,7 +507,10 @@ export const DE_DE_MESSAGES = {
   "waves.create.groups.title": "Zugriff",
   "waves.create.groups.description":
     "Lege fest, wer auf diese Wave zugreifen, teilnehmen und sie verwalten kann.",
-  "waves.create.groups.viewGroupName": "Sichtbarkeit",
+  "waves.create.groups.viewGroupName": "Wer auf diese Wave zugreifen kann",
+  "waves.create.groups.accessHelper":
+    "Standardmäßig können alle Personen mit Zugriff teilnehmen. Nur du kannst die Wave verwalten.",
+  "waves.create.groups.customizePermissions": "Berechtigungen anpassen",
   "waves.create.groups.adminGroupName": "Administratoren",
   "waves.create.groups.currentGroupWithName": "Aktuelle Gruppe: {name}",
   "waves.create.groups.dialog.addTitle": "Gruppe hinzufügen",
@@ -831,8 +834,7 @@ export const DE_DE_MESSAGES = {
   "waves.profileFeed.title": "Neueste Beiträge aus Profile Waves",
   "waves.profileFeed.description":
     "Entdecke, was die Community in Profile Waves teilt.",
-  "waves.profileFeed.errorTitle":
-    "Profilbeiträge konnten nicht geladen werden",
+  "waves.profileFeed.errorTitle": "Profilbeiträge konnten nicht geladen werden",
   "waves.profileFeed.errorDescription":
     "Aktualisiere diese Ansicht, um es erneut zu versuchen.",
   "waves.profileFeed.emptyTitle": "Noch keine Profilbeiträge",

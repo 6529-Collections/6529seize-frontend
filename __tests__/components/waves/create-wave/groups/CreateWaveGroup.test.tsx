@@ -168,7 +168,7 @@ describe("CreateWaveGroup", () => {
   });
 
   it.each([
-    [CreateWaveGroupConfigType.CAN_VIEW, "Visibility"],
+    [CreateWaveGroupConfigType.CAN_VIEW, "Who can access this wave"],
     [CreateWaveGroupConfigType.ADMIN, "Admins"],
   ])("shows the updated %s scope title", (groupType, label) => {
     renderComponent({ groupType });

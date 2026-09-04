@@ -29,14 +29,17 @@ step is user-reachable for `Chat`, `Rank`, and `Approve`.
 
 ## What You Configure
 
-- All access and moderation rows are visible when the step opens. Each row
-  groups its permission name, current scope, and related actions so the page can
-  be scanned from `Visibility` through `Admins` without opening a disclosure.
-- Helper copy clarifies that `Visibility` controls who can access the wave,
-  and that followers who can view the wave may get a notification when it is
-  created.
-- `Chat` rows: `Visibility`, `Who can chat`, `Admins`
-- `Rank` and `Approve` rows: `Visibility`, `Who can drop`, `Who can vote`,
+- The step initially shows one access row: `Who can access this wave`.
+- Helper copy explains that everyone with access can participate by default and
+  only the creator can administer the wave.
+- Selecting an access group also uses that group for chat and, on `Rank` and
+  `Approve` waves, submissions and voting. Returning access to `Public` returns
+  every still-linked permission to `Public` too.
+- `Customize permissions` expands the less common controls so each permission
+  can use a different group. Customized permissions stay independent if the
+  main access group changes later.
+- `Chat` custom permission rows: `Who can chat`, `Admins`
+- `Rank` and `Approve` custom permission rows: `Who can drop`, `Who can vote`,
   `Who can chat`, `Admins`
 - `Rank` and `Approve` only:
   - `Enable chat` toggle controls whether `Who can chat` is editable
@@ -50,10 +53,10 @@ step is user-reachable for `Chat`, `Rank`, and `Approve`.
 
 ## Group Picker Behavior
 
-- Each access row offers `Edit criteria` and `Choose group`. `Edit criteria`
-  opens the criteria editor, where `Identities` remains available alongside the
-  rule choices. The identity editor supports both explicitly included and
-  explicitly excluded identities.
+- Each visible access row offers `Edit criteria` and `Choose group`. `Edit
+  criteria` opens the criteria editor, where `Identities` remains available
+  alongside the rule choices. The identity editor supports both explicitly
+  included and explicitly excluded identities.
 - The criteria editor includes a `Hide criteria and members` switch. Its
   tooltip explains that the criteria and member list remain visible to members
   of the group but are hidden from everyone else. The switch is off for a new
@@ -104,7 +107,7 @@ group`. Navigating away from `Groups`, including moving backward from the
   notes that profile, reputation, and ownership changes can change who matches
   the group.
 - Inline identity groups use access-group wording and warn when the connected
-  creator is excluded, because excluding yourself from a `Visibility` group
+  creator is excluded, because excluding yourself from the main access group
   can prevent you from opening the created wave.
 - New inline groups include the connected creator by default, including groups
   composed only from rules. `Include me` can be switched off while editing
@@ -118,9 +121,9 @@ group`. Navigating away from `Groups`, including moving backward from the
 
 ## Warnings and State Changes
 
-- When `Visibility` is restricted, every active `Drop`, `Vote`, `Chat`, and
-  `Admins` group must contain only people who also belong to the visibility
-  group.
+- When `Who can access this wave` is restricted, every active `Drop`, `Vote`,
+  `Chat`, and `Admins` group must contain only people who also belong to the
+  access group.
 - The app checks the active groups together, highlights each incompatible row,
   and keeps `Next` unavailable while the check is running.
 - On `Rank` and `Approve`, turning `Enable chat` off disables editing for

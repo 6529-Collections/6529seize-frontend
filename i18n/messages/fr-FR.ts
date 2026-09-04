@@ -512,7 +512,10 @@ export const FR_FR_MESSAGES = {
   "waves.create.groups.title": "Accès",
   "waves.create.groups.description":
     "Choisissez qui peut accéder à cette Wave, y participer et la gérer.",
-  "waves.create.groups.viewGroupName": "Visibilité",
+  "waves.create.groups.viewGroupName": "Qui peut accéder à cette Wave",
+  "waves.create.groups.accessHelper":
+    "Par défaut, toutes les personnes ayant accès peuvent participer. Vous seul pouvez administrer la Wave.",
+  "waves.create.groups.customizePermissions": "Personnaliser les autorisations",
   "waves.create.groups.adminGroupName": "Administrateurs",
   "waves.create.groups.currentGroupWithName": "Groupe actuel : {name}",
   "waves.create.groups.dialog.addTitle": "Ajouter un groupe",
@@ -838,10 +841,8 @@ export const FR_FR_MESSAGES = {
     "Découvrez ce que la communauté partage dans les Profile Waves.",
   "waves.profileFeed.errorTitle":
     "Impossible de charger les publications de profil",
-  "waves.profileFeed.errorDescription":
-    "Actualisez cette vue pour réessayer.",
-  "waves.profileFeed.emptyTitle":
-    "Aucune publication de profil pour le moment",
+  "waves.profileFeed.errorDescription": "Actualisez cette vue pour réessayer.",
+  "waves.profileFeed.emptyTitle": "Aucune publication de profil pour le moment",
   "waves.profileFeed.emptyDescription":
     "Les nouvelles publications des Profile Waves des membres apparaîtront ici.",
   "waves.leaderboard.listLabel": "Drops du classement",

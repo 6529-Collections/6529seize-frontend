@@ -16,7 +16,7 @@ jest.mock(
   )
 );
 describe("CreateWaveGroups", () => {
-  it("shows the default access controls without an extra disclosure", () => {
+  it("shows only the main access control until permissions are expanded", () => {
     render(
       <CreateWaveGroups
         waveName="Test Wave"
@@ -45,14 +45,26 @@ describe("CreateWaveGroups", () => {
 
     expect(screen.getByRole("heading", { name: "Access" })).toBeVisible();
     expect(
-      screen.queryByRole("button", { name: /Advanced settings/ })
-    ).toBeNull();
+      screen.getByText(
+        "By default, everyone with access can participate. Only you can administer the wave."
+      )
+    ).toBeVisible();
+    const permissionsButton = screen.getByRole("button", {
+      name: "Customize permissions",
+    });
+    expect(permissionsButton).toHaveAttribute("aria-expanded", "false");
     expect(screen.getAllByTestId("group")).toHaveLength(
       CREATE_WAVE_GROUPS[ApiWaveType.Chat].length
     );
-    for (const group of screen.getAllByTestId("group")) {
-      expect(group).toBeVisible();
-    }
+    expect(screen.getAllByTestId("group")[0]).toBeVisible();
+    expect(screen.getAllByTestId("group")[1]).not.toBeVisible();
+    expect(screen.getAllByTestId("group")[2]).not.toBeVisible();
+
+    fireEvent.click(permissionsButton);
+
+    expect(permissionsButton).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getAllByTestId("group")[1]).toBeVisible();
+    expect(screen.getAllByTestId("group")[2]).toBeVisible();
   });
 
   it("does not render the limited access warning for restricted groups", () => {
@@ -119,6 +131,9 @@ describe("CreateWaveGroups", () => {
         .getAllByTestId("group")
         .find((row) => row.textContent?.startsWith("CAN_DROP"))
     ).toHaveAttribute("data-error", expect.stringContaining("Who can drop"));
+    expect(
+      screen.getByRole("button", { name: /^Customize permissions/ })
+    ).toHaveAttribute("aria-expanded", "true");
   });
 
   it("reports which access role has an open criteria replacement", () => {
