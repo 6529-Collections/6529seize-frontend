@@ -1464,6 +1464,8 @@ describe("documented private-package setup flows", () => {
     it("fails closed when the Codex Keychain item is missing", () => {
       const result = runAuthHarness({
         statements: [
+          "private_package_auth_is_macos() { return 0; }",
+          "private_package_auth_is_windows() { return 1; }",
           "private_package_auth_keychain_is_available() { return 0; }",
           "private_package_auth_read_keychain() { return 1; }",
           "load_private_package_auth_for_codex",
