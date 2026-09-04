@@ -51,6 +51,7 @@ const PREVIEW_PRICE = formatNumber(DEFAULT_LOCALE, 1, {
 const PREVIEW_ARTIST_SHARE = formatPercent(DEFAULT_LOCALE, 0.9, 0);
 const PREVIEW_STUDIO_SHARE = formatPercent(DEFAULT_LOCALE, 0.1, 0);
 
+/** Renders the fictional artwork used throughout the concept preview. */
 function ArtworkVisual() {
   return (
     <div
@@ -100,6 +101,7 @@ function ArtworkVisual() {
   );
 }
 
+/** Renders the short explanation and takeaway for one preview step. */
 function PreviewPanel({
   heading,
   description,
@@ -124,6 +126,7 @@ function PreviewPanel({
   );
 }
 
+/** Selects the panel content for the active preview step. */
 function PreviewView({ stepId }: { readonly stepId: PreviewStepId }) {
   switch (stepId) {
     case "artwork":
@@ -224,6 +227,7 @@ function PreviewView({ stepId }: { readonly stepId: PreviewStepId }) {
   }
 }
 
+/** Walks reviewers through one fictional artwork without live actions. */
 export function StreamArtworkConceptPreview() {
   const [activeStepIndex, setActiveStepIndex] = useState(0);
   const stepButtonRefs = useRef<Array<HTMLButtonElement | null>>([]);

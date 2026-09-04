@@ -7,6 +7,7 @@ import {
   usePublicReviewFeedbackPanelCoordination,
 } from "@/components/public-review/PublicReviewReadingLayout";
 
+/** Renders a test link that opens the coordinated feedback panel. */
 function FeedbackLink() {
   const feedbackPanel = usePublicReviewFeedbackPanelCoordination();
 

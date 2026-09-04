@@ -115,6 +115,7 @@ const AUDIENCE_PATHS = [
   },
 ] as const satisfies readonly LinkedOverviewItem[];
 
+/** Introduces the current Stream review through a concept and guided paths. */
 export function StreamReviewOverviewGuide({
   pages,
 }: {

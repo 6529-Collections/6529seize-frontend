@@ -36,10 +36,12 @@ const PublicReviewFeedbackPanelCoordinationContext = createContext({
   open: (): void => undefined,
 });
 
+/** Returns whether the public review feedback panel is currently open. */
 export function usePublicReviewCommentPanelOpen(): boolean {
   return useContext(PublicReviewCommentPanelOpenContext);
 }
 
+/** Returns shared controls for the public review feedback panel. */
 export function usePublicReviewFeedbackPanelCoordination(): {
   readonly close: () => void;
   readonly isOpen: boolean;
@@ -48,6 +50,7 @@ export function usePublicReviewFeedbackPanelCoordination(): {
   return useContext(PublicReviewFeedbackPanelCoordinationContext);
 }
 
+/** Lays out review content beside its coordinated feedback panel. */
 export function PublicReviewReadingLayout({
   content,
   feedbackAvailable,
