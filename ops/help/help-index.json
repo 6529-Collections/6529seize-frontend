@@ -466,7 +466,8 @@
       "facts": [
         "The 6529 Stream public review is published at /reviews/6529-stream in local development, shared staging, and production while its lifecycle permits public routes.",
         "The review explains how Stream supports serious one-of-one digital art and artist-chosen editions.",
-        "The current Overview opens with a broad introduction for artists, collectors, and the wider community, followed by five important parts of a Stream artwork—identity, media, artist control, sales and payments, and locked Core details—a short explanation of artist control defined in Stream's ADRs but not implemented in the current contracts, a seven-step artwork journey, and focused starting points for artists, collectors and minters, and smart contract auditors.",
+        "The current Overview opens with Follow one artwork, a clearly labelled concept preview with five short steps: artwork, release, artist check, collector, and history. Each step shows one explanation and one takeaway for the same fictional 1/1. The preview says Stream is not live and that nothing there can buy, sign, upload, or save. It ends with one feedback question linked to the existing page-feedback rail. The normal feedback eligibility rules still apply.",
+        "After the concept preview, the current Overview explains five important parts of a Stream artwork—identity, media, artist control, sales and payments, and locked Core details—a short explanation of artist control defined in Stream's ADRs but not implemented in the current contracts, a seven-step artwork journey, and focused starting points for artists, collectors and minters, and smart contract auditors.",
         "The current Overview ends after its audience paths and does not repeat the versioned technical editorial or its evidence legend.",
         "The current Artwork Lifecycle page replaces the archived technical walkthrough with plain-language stages from collection identity and artwork setup through minting, payments, preservation, and finality. It separates artist-signed evidence from permission to mint, and archived version routes keep their exact editorial snapshot.",
         "The current Curation and TDH Authorization page starts with a one-minute answer, then explains the offchain decision, signed permission, contract checks, signer and admin powers, open public-evidence work, risks, and reviewer questions. It labels ADR 0001 as accepted design while treating the pinned Solidity as proof of current behavior. Its existing section anchors remain stable, and archived version routes keep their exact editorial snapshot.",
@@ -514,6 +515,7 @@
       "source_refs": [
         "app/reviews/[review]/page.tsx",
         "components/public-review/PublicReviewShell.tsx",
+        "components/public-review/StreamArtworkConceptPreview.tsx",
         "components/public-review/StreamReviewForArtistsGuide.tsx",
         "components/public-review/StreamReviewOverviewGuide.tsx",
         "components/public-review/StreamReviewRolesGuide.tsx",

@@ -71,15 +71,22 @@ Every page includes:
 - a collapsible page-feedback rail that reads existing comments and includes a
   structured feedback form bound to the immutable displayed review version
 
-The current overview opens with a broad introduction for artists, collectors,
-and the wider community, followed by five important parts of a Stream artwork,
-a seven-step artwork journey, and focused starting points for artists,
-collectors and minters, and auditors. It ends after those audience paths. The
-secondary **Review history** destination opens the immutable technical Overview
-for the active snapshot. The current **For Artists** page starts with a plain
-artist guide covering six decisions: what artwork to publish; whether it is
-unique or an edition; how collectors can get it; where the money goes; what the
-artist approves; and what can change or become permanent. A six-stage guide
+The current overview opens with the **Follow one artwork** concept preview. It
+uses five short steps: artwork, release, artist check, collector, and history.
+Each step shows one explanation and one takeaway for the same fictional 1/1.
+The preview clearly says that Stream is not live and that nothing on the page
+can buy, sign, upload, or save. It ends with one feedback question and links to
+the existing page-feedback rail; the normal feedback eligibility rules still
+apply.
+
+The overview then explains five important parts of a Stream artwork, a
+seven-step artwork journey, and focused starting points for artists, collectors
+and minters, and auditors. It ends after those audience paths. The secondary
+**Review history** destination opens the immutable technical Overview for the
+active snapshot. The current **For Artists** page starts with a plain artist
+guide covering six decisions: what artwork to publish; whether it is unique or
+an edition; how collectors can get it; where the money goes; what the artist
+approves; and what can change or become permanent. A six-stage guide
 shows how the artwork moves through Stream and keeps finality separate from
 ending minting, freezing settings, and recording preservation evidence. A
 focused approval checklist separates the details covered by the artist's wallet
@@ -145,7 +152,8 @@ the versioned technical Overview there. Its on-page section navigation and
 feedback section choices therefore omit the hidden technical headings. A link
 from the current review-wide navigation opens its immutable technical editorial.
 Immutable version routes show their exact review version and continue to
-describe their exact review snapshot.
+describe their exact review snapshot. The artwork concept preview follows this
+same current-route-only boundary and does not appear in saved snapshots.
 The plain artist guide and its short technical detail layer follow the same
 rule: they appear only on the current, unversioned **For Artists** route and
 replace the versioned editorial there. Immutable version routes continue to
