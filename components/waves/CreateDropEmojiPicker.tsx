@@ -6,7 +6,6 @@ import { createPortal } from "react-dom";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { $createTextNode, $insertNodes } from "lexical";
 import MobileWrapperDialog from "../mobile-wrapper-dialog/MobileWrapperDialog";
-import useDeviceInfo from "@/hooks/useDeviceInfo";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import { useCreateDropEmojiPickerLayer } from "./CreateDropEmojiPickerLayerContext";
 import LazyEmojiPicker, { type EmojiPickerSelection } from "./LazyEmojiPicker";
@@ -28,9 +27,7 @@ const CreateDropEmojiPickerContent: FC<CreateDropEmojiPickerContentProps> = ({
   top,
   verticalAlignment,
 }) => {
-  const isMobileScreen = useIsMobileScreen();
-  const { hasTouchScreen, isApp } = useDeviceInfo();
-  const usesMobileSheet = isMobileScreen && (hasTouchScreen || isApp);
+  const isMobile = useIsMobileScreen();
   const { desktopZIndex, mobileZIndexClassName } =
     useCreateDropEmojiPickerLayer();
 
@@ -161,7 +158,7 @@ const CreateDropEmojiPickerContent: FC<CreateDropEmojiPickerContentProps> = ({
           </svg>
         </button>
 
-        {!usesMobileSheet &&
+        {!isMobile &&
           isPickerOpen &&
           createPortal(
             <div
@@ -180,7 +177,7 @@ const CreateDropEmojiPickerContent: FC<CreateDropEmojiPickerContentProps> = ({
           )}
       </div>
 
-      {usesMobileSheet && (
+      {isMobile && (
         <MobileWrapperDialog
           isOpen={isPickerOpen}
           onClose={() => setShowPicker(false)}
