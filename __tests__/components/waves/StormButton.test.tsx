@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, within } from "@testing-library/react";
 import StormButton from "@/components/waves/StormButton";
 
 describe("StormButton", () => {
@@ -41,5 +41,35 @@ describe("StormButton", () => {
       />
     );
     expect(screen.getByRole("button")).toBeDisabled();
+  });
+
+  it("keeps the storm action icon-only at the 751px transition", () => {
+    const originalWidth = window.innerWidth;
+    Object.defineProperty(window, "innerWidth", {
+      configurable: true,
+      value: 751,
+    });
+
+    try {
+      render(
+        <StormButton
+          isStormMode={false}
+          isPollActive={false}
+          submitting={false}
+          breakIntoStorm={jest.fn()}
+        />
+      );
+
+      const button = screen.getByRole("button", { name: "Break into storm" });
+      expect(button).toHaveClass("tw-size-8", "tw-px-0");
+      expect(
+        within(button).queryByText("Break into storm")
+      ).not.toBeInTheDocument();
+    } finally {
+      Object.defineProperty(window, "innerWidth", {
+        configurable: true,
+        value: originalWidth,
+      });
+    }
   });
 });
