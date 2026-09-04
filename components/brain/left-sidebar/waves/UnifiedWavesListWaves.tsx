@@ -242,16 +242,15 @@ const UnifiedWavesListWaves = forwardRef<
       () => getRows(pinnedWaves),
       [pinnedWaves, getRows]
     );
-    const activeContainerWaveId = isDirectMessage
-      ? null
-      : effectiveActiveParentWaveId;
-    const prioritizedAllWaves = useMemo(
-      () => prioritizeActiveWaveContainer(allWaves, activeContainerWaveId),
-      [activeContainerWaveId, allWaves]
-    );
     const allRows = useMemo(
-      () => getRows(prioritizedAllWaves),
-      [getRows, prioritizedAllWaves]
+      () =>
+        getRows(
+          prioritizeActiveWaveContainer(
+            allWaves,
+            isDirectMessage ? null : effectiveActiveParentWaveId
+          )
+        ),
+      [allWaves, effectiveActiveParentWaveId, getRows, isDirectMessage]
     );
     const animatedAnnouncementRows =
       useAnimatedSidebarWaveRows(announcementRows);

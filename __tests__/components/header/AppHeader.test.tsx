@@ -508,9 +508,14 @@ describe("AppHeader", () => {
     expect(
       screen.getByRole("navigation", { name: "Wave hierarchy" })
     ).toHaveTextContent(/Subwave of\s*Follow The Repo/);
-    expect(
-      screen.getByRole("link", { name: "Follow The Repo" })
-    ).toHaveAttribute("href", "/waves/parent-wave");
+    const parentLink = screen.getByRole("link", {
+      name: "Subwave of Follow The Repo",
+    });
+    expect(parentLink).toHaveAttribute(
+      "title",
+      "Open parent wave: Follow The Repo"
+    );
+    expect(parentLink).toHaveAttribute("href", "/waves/parent-wave");
   });
 
   it("shows profile image on waves root page", () => {
