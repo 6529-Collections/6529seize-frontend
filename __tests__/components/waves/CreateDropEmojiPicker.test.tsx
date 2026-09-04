@@ -13,6 +13,10 @@ jest.mock("@/hooks/isMobileScreen", () => ({
   __esModule: true,
   default: jest.fn(),
 }));
+jest.mock("@/hooks/useDeviceInfo", () => ({
+  __esModule: true,
+  default: jest.fn(),
+}));
 jest.mock("@/contexts/EmojiContext", () => ({
   __esModule: true,
   useEmoji: jest.fn(),
@@ -54,12 +58,14 @@ jest.mock("@/components/mobile-wrapper-dialog/MobileWrapperDialog", () => ({
 import CreateDropEmojiPicker from "@/components/waves/CreateDropEmojiPicker";
 import { CreateDropEmojiPickerLayerProvider } from "@/components/waves/CreateDropEmojiPickerLayerContext";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useEmoji } from "@/contexts/EmojiContext";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { $createTextNode, $insertNodes } from "lexical";
 
 describe("CreateDropEmojiPicker", () => {
   const mockUseIsMobile = useIsMobileScreen as jest.Mock;
+  const mockUseDeviceInfo = useDeviceInfo as jest.Mock;
   const mockUseEmoji = useEmoji as jest.Mock;
   const mockUseLexical = useLexicalComposerContext as jest.Mock;
 
@@ -88,6 +94,12 @@ describe("CreateDropEmojiPicker", () => {
     });
     // Default to desktop
     mockUseIsMobile.mockReturnValue(false);
+    mockUseDeviceInfo.mockReturnValue({
+      hasTouchScreen: false,
+      isApp: false,
+      isAppleMobile: false,
+      isMobileDevice: false,
+    });
     // Clear scroll
     window.scrollY = 0;
     window.scrollX = 0;
@@ -209,6 +221,12 @@ describe("CreateDropEmojiPicker", () => {
 
   it("uses mobile dialog on mobile screens and inserts emoji", async () => {
     mockUseIsMobile.mockReturnValue(true);
+    mockUseDeviceInfo.mockReturnValue({
+      hasTouchScreen: true,
+      isApp: false,
+      isAppleMobile: true,
+      isMobileDevice: true,
+    });
 
     // Clear the mock call count before this test
     fakeEditor.update.mockClear();
@@ -229,6 +247,18 @@ describe("CreateDropEmojiPicker", () => {
     await waitFor(() =>
       expect(screen.queryByTestId("mobile-dialog")).toBeNull()
     );
+  });
+
+  it("uses the anchored picker in a narrow fine-pointer window", async () => {
+    mockUseIsMobile.mockReturnValue(true);
+
+    render(<CreateDropEmojiPicker />);
+    const toggleButton = screen.getByRole("button", { hidden: true });
+    fireEvent.click(toggleButton);
+
+    const picker = await screen.findByTestId("picker");
+    expect(screen.queryByTestId("mobile-dialog")).not.toBeInTheDocument();
+    expect(picker.parentElement?.style.position).toBe("absolute");
   });
 
   it("uses scoped layer values when provided", async () => {
@@ -261,6 +291,12 @@ describe("CreateDropEmojiPicker", () => {
 
   it("passes scoped layer values to the mobile dialog", async () => {
     mockUseIsMobile.mockReturnValue(true);
+    mockUseDeviceInfo.mockReturnValue({
+      hasTouchScreen: true,
+      isApp: false,
+      isAppleMobile: true,
+      isMobileDevice: true,
+    });
 
     render(
       <CreateDropEmojiPickerLayerProvider
