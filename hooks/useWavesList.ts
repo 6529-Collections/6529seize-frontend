@@ -9,7 +9,6 @@ import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import { normalizeOptionalWaveId } from "@/helpers/waves/wave.helpers";
 import { mapApiWaveToSidebarWave, useWavesV2 } from "./useWavesV2";
-import { mapApiWaveOverviewToSidebarWave } from "@/services/api/waves-v2-api";
 import {
   SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS,
   WAVE_FOLLOWING_WAVES_PARAMS,
@@ -27,6 +26,7 @@ import type { SidebarWave } from "@/types/waves.types";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   buildMainWaves,
+  getActiveSidebarContext,
   getConnectedIdentity,
   getHasAuthenticatedProfile,
   getMainWavesFetching,
@@ -87,49 +87,6 @@ const getFirstUnreadSerialNo = (
 
 const noopWaveAction = (_waveId: string) => {};
 const noopListAction = () => {};
-
-interface ActiveSidebarContext {
-  readonly containerWave: SidebarWaveWithDiscoverySection | null;
-  readonly subwave: SidebarWave | null;
-}
-
-const getActiveSidebarContext = (
-  activeWave: ApiWave | null
-): ActiveSidebarContext => {
-  if (activeWave === null) {
-    return { containerWave: null, subwave: null };
-  }
-
-  const activeSidebarWave = mapApiWaveToSidebarWave(activeWave);
-  if (activeSidebarWave.isDirectMessage) {
-    return { containerWave: null, subwave: null };
-  }
-
-  if (activeSidebarWave.parentWaveId === null) {
-    return {
-      containerWave: {
-        ...activeSidebarWave,
-        isInAllWaves: true,
-        sidebarSection: SIDEBAR_DISCOVERY_SECTION_ALL,
-      },
-      subwave: null,
-    };
-  }
-
-  if (!activeWave.parent_wave) {
-    return { containerWave: null, subwave: null };
-  }
-
-  return {
-    containerWave: {
-      ...mapApiWaveOverviewToSidebarWave(activeWave.parent_wave),
-      hasSubwaves: true,
-      isInAllWaves: true,
-      sidebarSection: SIDEBAR_DISCOVERY_SECTION_ALL,
-    },
-    subwave: activeSidebarWave,
-  };
-};
 
 /**
  * Hook for managing and fetching waves list including pinned waves
