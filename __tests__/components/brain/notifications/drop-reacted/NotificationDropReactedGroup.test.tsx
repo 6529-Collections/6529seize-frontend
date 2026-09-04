@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import type { ReactNode } from "react";
 import NotificationDropReactedGroup from "@/components/brain/notifications/drop-reacted/NotificationDropReactedGroup";
 import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
@@ -61,7 +62,17 @@ jest.mock(
 
 jest.mock("@/components/brain/notifications/subcomponents/NotificationDrop", () => ({
   __esModule: true,
-  default: () => <div data-testid="drop" />,
+  default: ({
+    onDropContentClick,
+  }: {
+    onDropContentClick?: ((drop: unknown) => void) | undefined;
+  }) => (
+    <button
+      type="button"
+      data-testid="drop"
+      onClick={() => onDropContentClick?.({})}
+    />
+  ),
 }));
 
 jest.mock(
@@ -540,5 +551,56 @@ describe("NotificationDropReactedGroup", () => {
         notificationId: 1,
       })
     );
+  });
+
+  it("marks each unique notification once when the drop is opened", async () => {
+    const user = userEvent.setup();
+    const onMarkAsRead = jest.fn();
+    const onDropContentClick = jest.fn();
+
+    render(
+      <NotificationDropReactedGroup
+        group={{
+          type: "grouped_reactions",
+          id: 3,
+          createdAt: 300,
+          drop: createMockDrop(),
+          notifications: [
+            createNotification({
+              id: 1,
+              createdAt: 100,
+              reaction: ":heart:",
+              handle: "gpebbles",
+              pfp: "alice.png",
+            }),
+            createNotification({
+              id: 2,
+              createdAt: 200,
+              reaction: ":fire:",
+              handle: "prxt0",
+              pfp: "bob.png",
+            }),
+            createNotification({
+              id: 1,
+              createdAt: 300,
+              reaction: ":heart:",
+              handle: "gpebbles",
+              pfp: "alice.png",
+            }),
+          ],
+        }}
+        activeDrop={null}
+        onReply={jest.fn()}
+        onMarkAsRead={onMarkAsRead}
+        onDropContentClick={onDropContentClick}
+      />
+    );
+
+    await user.click(screen.getByTestId("drop"));
+    await user.click(screen.getByTestId("drop"));
+
+    expect(onMarkAsRead).toHaveBeenCalledTimes(1);
+    expect(onMarkAsRead).toHaveBeenCalledWith([1, 2]);
+    expect(onDropContentClick).toHaveBeenCalledTimes(2);
   });
 });

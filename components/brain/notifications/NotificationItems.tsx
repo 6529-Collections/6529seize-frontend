@@ -23,7 +23,7 @@ interface NotificationItemsProps {
   readonly activeDrop: ActiveDropState | null;
   readonly onReply: (param: DropInteractionParams) => void;
   readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
-  readonly onMarkGroupAsRead?: ((ids: number[]) => Promise<void>) | undefined;
+  readonly onMarkGroupAsRead?: ((ids: number[]) => void) | undefined;
 }
 
 const getItemDrops = (item: NotificationDisplayItem): readonly ApiDrop[] => {
