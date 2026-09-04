@@ -250,7 +250,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
                 dropId={drop.id}
                 size="sm"
               />
-              <h3 className="tw-mb-0 tw-text-base tw-font-semibold tw-text-iron-50">
+              <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50">
                 {drop.title}
               </h3>
             </div>
