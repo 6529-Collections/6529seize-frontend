@@ -52,6 +52,36 @@ describe("useLoadActiveSidebarParentSubwaves", () => {
     expect(loadSubwavesForParent).toHaveBeenCalledTimes(1);
   });
 
+  it("waits for a direct-linked parent to enter the sidebar before loading", () => {
+    const loadSubwavesForParent = jest.fn();
+    mockUseMyStream.mockReturnValue({
+      waves: { loadSubwavesForParent },
+    });
+    const parentWave = createMockMinimalWave({
+      id: "parent",
+      hasSubwaves: true,
+    });
+    const { rerender } = renderHook(
+      ({ waves }: { readonly waves: readonly (typeof parentWave)[] }) =>
+        useLoadActiveSidebarParentSubwaves({
+          activeParentWaveId: "parent",
+          waves,
+        }),
+      {
+        initialProps: {
+          waves: [] as readonly (typeof parentWave)[],
+        },
+      }
+    );
+
+    expect(loadSubwavesForParent).not.toHaveBeenCalled();
+
+    rerender({ waves: [parentWave] });
+
+    expect(loadSubwavesForParent).toHaveBeenCalledTimes(1);
+    expect(loadSubwavesForParent).toHaveBeenCalledWith("parent");
+  });
+
   it("allows a missing active parent to be requested again after leaving it", () => {
     const loadSubwavesForParent = jest.fn();
     mockUseMyStream.mockReturnValue({
@@ -93,7 +123,7 @@ describe("useLoadActiveSidebarParentSubwaves", () => {
     expect(loadSubwavesForParent).toHaveBeenLastCalledWith("parent");
   });
 
-  it("does not load when the active parent's child rows are already present", () => {
+  it("registers the active parent once when child rows are already present", () => {
     const loadSubwavesForParent = jest.fn();
     mockUseMyStream.mockReturnValue({
       waves: { loadSubwavesForParent },
@@ -116,6 +146,7 @@ describe("useLoadActiveSidebarParentSubwaves", () => {
       })
     );
 
-    expect(loadSubwavesForParent).not.toHaveBeenCalled();
+    expect(loadSubwavesForParent).toHaveBeenCalledTimes(1);
+    expect(loadSubwavesForParent).toHaveBeenCalledWith("parent");
   });
 });

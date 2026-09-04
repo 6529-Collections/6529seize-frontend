@@ -464,7 +464,8 @@
       "facts": [
         "The 6529 Stream public review is published at /reviews/6529-stream in local development, shared staging, and production while its lifecycle permits public routes.",
         "The review explains how Stream supports serious one-of-one digital art and artist-chosen editions.",
-        "The current Overview opens with a broad introduction for artists, collectors, and the wider community, followed by five important parts of a Stream artwork—identity, media, artist control, sales and payments, and locked Core details—a short explanation of artist control defined in Stream's ADRs but not implemented in the current contracts, a seven-step artwork journey, and focused starting points for artists, collectors and minters, and smart contract auditors.",
+        "The current Overview opens with Follow one artwork, a clearly labelled concept preview with five short steps: artwork, release, artist check, collector, and history. Each step shows one explanation and one takeaway for the same fictional 1/1. The preview says Stream is not live and that nothing there can buy, sign, upload, or save. It ends with one feedback question linked to the existing page-feedback rail. The normal feedback eligibility rules still apply.",
+        "After the concept preview, the current Overview explains five important parts of a Stream artwork—identity, media, artist control, sales and payments, and locked Core details—a short explanation of artist control defined in Stream's ADRs but not implemented in the current contracts, a seven-step artwork journey, and focused starting points for artists, collectors and minters, and smart contract auditors.",
         "The current Overview ends after its audience paths and does not repeat the versioned technical editorial or its evidence legend.",
         "The current Artwork Lifecycle page replaces the archived technical walkthrough with plain-language stages from collection identity and artwork setup through minting, payments, preservation, and finality. It separates artist-signed evidence from permission to mint, and archived version routes keep their exact editorial snapshot.",
         "The current Curation and TDH Authorization page starts with a one-minute answer, then explains the offchain decision, signed permission, contract checks, signer and admin powers, open public-evidence work, risks, and reviewer questions. It labels ADR 0001 as accepted design while treating the pinned Solidity as proof of current behavior. Its existing section anchors remain stable, and archived version routes keep their exact editorial snapshot.",
@@ -512,6 +513,7 @@
       "source_refs": [
         "app/reviews/[review]/page.tsx",
         "components/public-review/PublicReviewShell.tsx",
+        "components/public-review/StreamArtworkConceptPreview.tsx",
         "components/public-review/StreamReviewForArtistsGuide.tsx",
         "components/public-review/StreamReviewOverviewGuide.tsx",
         "components/public-review/StreamReviewRolesGuide.tsx",
@@ -2291,14 +2293,18 @@
         "On desktop with no selected Wave, /waves shows the latest posts from members' effective public Profile Wave curations, newest first.",
         "Each latest-profile-post card identifies the author, posting time, and originating Profile Wave; curated replies can also appear. On small screens, the default /waves view remains a Wave navigator.",
         "In Worth Checking Out, each avatar and its overlaid score shield form one wave navigation link; hovering or focusing the combined link shows score details.",
-        "Every Worth Checking Out recommendation also appears in All at its recent-activity position; Joined includes only waves the user has joined."
+        "Every Worth Checking Out recommendation also appears in All at its recent-activity position; Joined normally includes only waves the user has joined.",
+        "A Wave opened from a direct link remains visible and highlighted in the left sidebar even when it is not followed, pinned, or present in the loaded overview; this temporary route context does not join or pin it.",
+        "When a direct link opens a subwave, the sidebar surfaces its visible parent, loads and expands the subwave list, reveals the selected child row, and keeps that parent tree ahead of paginated activity rows so every sibling remains reachable.",
+        "An active subwave header shows an up-left arrow and a linked parent wave name; selecting that name opens the parent wave."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves?create=wave", "/messages"],
       "tags": ["waves", "glossary"],
       "source_refs": [
         "ops/docs/waves/README.md",
-        "ops/docs/waves/sidebars/feature-wave-list-navigation.md"
+        "ops/docs/waves/sidebars/feature-wave-list-navigation.md",
+        "ops/docs/wave-subwave-interaction-model.md"
       ]
     },
     {

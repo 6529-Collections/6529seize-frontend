@@ -515,8 +515,7 @@ const PROFILE_WAVE_FEED_MESSAGES = objectMessages("waves.profileFeed", {
   errorTitle: "Couldn’t load profile posts",
   errorDescription: "Refresh this view to try again.",
   emptyTitle: "No profile posts yet",
-  emptyDescription:
-    "New posts from members’ Profile Waves will appear here.",
+  emptyDescription: "New posts from members’ Profile Waves will appear here.",
 } as const);
 
 const WAVE_LEADERBOARD_MESSAGES = objectMessages("waves.leaderboard", {
@@ -1192,6 +1191,10 @@ const WAVE_HEADER_MESSAGES = objectMessages("waves.header", {
   ownerOptionsDelete: "Delete",
   ownerOptionsOpenLabel: "Open options",
   ownerOptionsTitle: "Wave options",
+  "parentNavigation.linkAriaLabel": "Subwave of {parentWaveName}",
+  "parentNavigation.linkTitle": "Open parent wave: {parentWaveName}",
+  "parentNavigation.regionLabel": "Wave hierarchy",
+  "parentNavigation.relationshipLabel": "Subwave of",
   pictureEditCancel: "Cancel",
   pictureEditDescription: "Choose a new image up to 10 MB.",
   pictureEditLabel: "Edit wave picture",

@@ -358,7 +358,7 @@ install_dependencies() {
     color yellow "Removing existing node_modules for a clean install…"
     rm -rf "$REPO_ROOT/node_modules"
   fi
-  ( cd "$REPO_ROOT" && NODE_AUTH_TOKEN="$package_auth_token" ./bin/6529 install:frozen )
+  ( cd "$REPO_ROOT" && NODE_AUTH_TOKEN="$package_auth_token" ./bin/6529 ci )
   color green "Dependencies installed."
   return 0
 }

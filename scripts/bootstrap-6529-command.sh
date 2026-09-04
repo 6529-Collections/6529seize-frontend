@@ -296,7 +296,7 @@ If you want a one-liner for the current shell:
   source <("$REPO_ROOT/bin/6529" bootstrap --print-export)
 
 Then install project dependencies:
-  6529 install
+  6529 ci
 EOF
 
 if [[ "$REMOVED_GLOBAL_SHIM" == "1" ]]; then

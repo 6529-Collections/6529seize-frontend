@@ -3,6 +3,7 @@
 /* eslint max-lines-per-function: "off" */
 
 import { useMemo, useCallback, useState } from "react";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
@@ -25,6 +26,7 @@ import type { SidebarWave } from "@/types/waves.types";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   buildMainWaves,
+  getActiveSidebarContext,
   getConnectedIdentity,
   getHasAuthenticatedProfile,
   getMainWavesFetching,
@@ -92,6 +94,7 @@ const noopListAction = () => {};
  */
 interface UseWavesListOptions {
   readonly enabled?: boolean | undefined;
+  readonly activeWave?: ApiWave | null | undefined;
 }
 
 const useWavesList = (options: UseWavesListOptions = {}) => {
@@ -105,6 +108,11 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
   const { address, hasValidWalletAuth } = useSeizeConnectContext();
   const { seizeSettings, isAnnouncementsWave } = useSeizeSettings();
   const isEnabled = options.enabled !== false;
+  const activeWave = options.activeWave ?? null;
+  const activeSidebarContext = useMemo(
+    () => getActiveSidebarContext(activeWave),
+    [activeWave]
+  );
   const {
     pinnedIds,
     pinnedWaves: serverPinnedWaves,
@@ -411,7 +419,15 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
     const pinnedWavesSet = new Set(pinnedIds);
     const allWavesArray: EnhancedWave[] = [];
 
-    [...mainWaves, ...separatelyFetchedPinnedWaves].forEach((wave) => {
+    const activeContainerWave = activeSidebarContext.containerWave;
+    const activeContainerWaveId = activeContainerWave?.id ?? null;
+    const sourceWaves = [
+      ...(activeContainerWave ? [activeContainerWave] : []),
+      ...mainWaves,
+      ...separatelyFetchedPinnedWaves,
+    ];
+
+    sourceWaves.forEach((wave) => {
       if (
         wave.isDirectMessage ||
         !isExpectedRootSidebarWave(wave) ||
@@ -443,7 +459,9 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
       if (hasHighlyRatedSection && (!isJoinedMode || !hasAllSection)) {
         preservedSidebarSection = SIDEBAR_DISCOVERY_SECTION_HIGHLY_RATED;
       }
-      const isPinned = pinnedWavesSet.has(wave.id);
+      const isPinned =
+        pinnedWavesSet.has(wave.id) ||
+        (wave.id === activeContainerWaveId && wave.pinned);
 
       // The current source has the freshest wave payload; the fields below
       // intentionally preserve cross-source sidebar state that can appear only
@@ -525,6 +543,7 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
     isAnnouncementsWave,
     isJoinedMode,
     shouldLoadMainWaves,
+    activeSidebarContext,
   ]);
 
   const [loadedSubwaveParentIds, setLoadedSubwaveParentIds] = useState<
@@ -639,27 +658,38 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
   }, [combinedWaves, isAnnouncementsWave]);
 
   // Derived data should come directly from memoized inputs.
-  const allWaves = useMemo(
-    () =>
-      shouldLoadMainWaves
-        ? [
-            ...combinedWaves,
-            ...subwaves.filter(
-              (wave) =>
-                !isJoinedMode ||
-                wave.subscribed ||
-                topSectionWaveIds.has(wave.parentWaveId ?? "")
-            ),
-          ]
-        : [],
-    [
-      combinedWaves,
-      isJoinedMode,
-      shouldLoadMainWaves,
-      subwaves,
-      topSectionWaveIds,
-    ]
-  );
+  const allWaves = useMemo(() => {
+    if (!shouldLoadMainWaves) {
+      return [];
+    }
+
+    const visibleSubwaves = new Map<string, SidebarWave>();
+    const activeSubwave = activeSidebarContext.subwave;
+    if (activeSubwave !== null) {
+      visibleSubwaves.set(activeSubwave.id, activeSubwave);
+    }
+
+    subwaves.forEach((wave) => {
+      if (
+        !isJoinedMode ||
+        wave.subscribed ||
+        wave.id === activeSubwave?.id ||
+        topSectionWaveIds.has(wave.parentWaveId ?? "")
+      ) {
+        // The overview is fresher than the temporary full-wave route context.
+        visibleSubwaves.set(wave.id, wave);
+      }
+    });
+
+    return [...combinedWaves, ...visibleSubwaves.values()];
+  }, [
+    combinedWaves,
+    activeSidebarContext.subwave,
+    isJoinedMode,
+    shouldLoadMainWaves,
+    subwaves,
+    topSectionWaveIds,
+  ]);
 
   // New drops counting logic has been removed and will be managed by context
 

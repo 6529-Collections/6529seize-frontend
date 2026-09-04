@@ -63,13 +63,13 @@ jobs:
           mode: firewall
 
       - name: Assert npm lockfile is absent
-        run: ./bin/6529 guard:no-package-lock
+        run: ./bin/6529 run guard:no-package-lock
 
       - name: Install dependencies
         env:
           NODE_AUTH_TOKEN: ${{ github.token }}
           SFW_BIN: ${{ steps.socket_firewall.outputs.firewall-path-binary }}
-        run: ./bin/6529 install:frozen
+        run: ./bin/6529 ci
 
       - name: Configure AWS credentials for optional CDN sync
         if: ${{ inputs.dry_run == false && inputs.skip_cdn_sync == false && startsWith(vars.DELEGATION_DOCS_CDN_S3_URI, 's3://') }}

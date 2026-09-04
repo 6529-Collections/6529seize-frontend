@@ -9,7 +9,7 @@ if (!userAgent.includes("pnpm/")) {
     console.error("This repository requires installs to run through the `6529` wrapper.");
     console.error("npm_config_user_agent is not set, which usually means pnpm was not");
     console.error("invoked via its CLI. Use the wrapper directly instead:");
-    console.error("  6529 install");
+    console.error("  6529 ci");
   } else {
     console.error("This repository uses pnpm via Corepack and does not allow npm or yarn installs.");
     console.error("Run the secure install path instead:");
@@ -17,7 +17,7 @@ if (!userAgent.includes("pnpm/")) {
     console.error("  2. corepack enable pnpm");
     console.error(`  3. corepack prepare ${packageManager} --activate`);
     console.error("  4. npm install --global sfw");
-    console.error("  5. 6529 install");
+    console.error("  5. 6529 ci");
   }
   process.exit(1);
 }
@@ -25,8 +25,7 @@ if (!userAgent.includes("pnpm/")) {
 if (!secureInstall) {
   console.error("Plain pnpm installs are blocked in this repository.");
   console.error("Use the secure install path so Socket Firewall wraps dependency downloads:");
-  console.error("  6529 install");
-  console.error("  6529 install:frozen");
+  console.error("  6529 ci");
   console.error("  6529 install:prod");
   process.exit(1);
 }

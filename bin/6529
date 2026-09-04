@@ -12,22 +12,20 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 # shellcheck source=../scripts/private-github-packages-auth.sh
 source "$REPO_ROOT/scripts/private-github-packages-auth.sh"
 
-command_name="${1:-}"
-
-if [[ -z "$command_name" ]]; then
+print_usage() {
   cat <<'EOF'
 Usage:
   6529 <command> [args...]
 
 Common commands:
   6529 bootstrap       -> enable the repo-scoped 6529 command for future shells
-  6529 install         -> validated Socket Firewall + pnpm install
-  6529 i               -> validated Socket Firewall + pnpm install
-  6529 install:frozen  -> validated Socket Firewall + frozen pnpm install
   6529 ci              -> validated Socket Firewall + frozen pnpm install
   6529 install:prod    -> validated Socket Firewall + production pnpm install
-  6529 update          -> sfw pnpm audit --fix
-  6529 update:all      -> sfw pnpm update
+  6529 add <package>   -> add or update a dependency intentionally
+  6529 remove <package> -> remove a dependency intentionally
+  6529 update [package] -> update dependencies intentionally
+  6529 audit           -> report dependency vulnerabilities
+  6529 audit:fix       -> apply pnpm audit fixes
   6529 run dev         -> pnpm run dev
   6529 run build       -> pnpm run build
   6529 approve-builds  -> pnpm approve-builds
@@ -38,9 +36,13 @@ Common commands:
   6529 run start       -> pnpm run start
   6529 run test        -> pnpm run test
   6529 run lint        -> pnpm run lint
-
-Anything else is forwarded to pnpm unchanged.
 EOF
+}
+
+command_name="${1:-}"
+
+if [[ -z "$command_name" ]]; then
+  print_usage
   exit 1
 fi
 
@@ -49,6 +51,10 @@ shift
 case "$command_name" in
   bootstrap)
     exec bash "$REPO_ROOT/scripts/bootstrap-6529-command.sh" "$@"
+    ;;
+  help|-h|--help)
+    print_usage
+    exit 0
     ;;
   env)
     exec node "$REPO_ROOT/scripts/env-target.cjs" "$@"
@@ -91,36 +97,18 @@ case "$command_name" in
     echo "Use \`6529 run $command_name\` for package.json scripts." >&2
     exit 1
     ;;
-  i)
-    if [[ "$#" -gt 0 ]]; then
-      echo "Use \`6529 add <package>\` to add dependencies." >&2
-      exit 1
-    fi
-    ensure_private_package_auth
-    exec node "$REPO_ROOT/scripts/run-secure-pnpm.cjs" \
-      --seize-secure-pnpm-binary "$REAL_PNPM" -- install
+  i|install)
+    echo "Direct install-style commands are intentionally unavailable." >&2
+    echo "Use \`6529 ci\` for a frozen install or \`6529 add <package>\` to change dependencies." >&2
+    exit 1
     ;;
-  install)
-    if [[ "$#" -gt 0 ]]; then
-      echo "Use \`6529 add <package>\` to add dependencies." >&2
-      exit 1
-    fi
-    ensure_private_package_auth
-    exec node "$REPO_ROOT/scripts/run-secure-pnpm.cjs" \
-      --seize-secure-pnpm-binary "$REAL_PNPM" -- install
+  install:frozen)
+    echo "\`6529 install:frozen\` is intentionally unavailable because \`6529 ci\` is the canonical frozen install." >&2
+    exit 1
     ;;
   ci)
     if [[ "$#" -gt 0 ]]; then
       echo "\`6529 ci\` does not accept package arguments." >&2
-      exit 1
-    fi
-    ensure_private_package_auth
-    exec node "$REPO_ROOT/scripts/run-secure-pnpm.cjs" \
-      --seize-secure-pnpm-binary "$REAL_PNPM" -- install --frozen-lockfile
-    ;;
-  install:frozen)
-    if [[ "$#" -gt 0 ]]; then
-      echo "\`6529 install:frozen\` does not accept package arguments." >&2
       exit 1
     fi
     ensure_private_package_auth
@@ -145,20 +133,36 @@ case "$command_name" in
     exec node "$REPO_ROOT/scripts/run-secure-pnpm.cjs" \
       --seize-secure-pnpm-binary "$REAL_PNPM" -- add "$@"
     ;;
-  update)
-    if [[ "$#" -gt 0 ]]; then
-      echo "\`6529 update\` runs audit fixes and does not accept package arguments." >&2
-      echo "Use \`6529 update:all [package...]\` for intentional pnpm updates." >&2
+  remove|rm|uninstall)
+    if [[ "$#" -eq 0 ]]; then
+      echo "Usage: \`6529 remove <package>\`" >&2
       exit 1
     fi
     ensure_private_package_auth
     exec node "$REPO_ROOT/scripts/run-secure-pnpm.cjs" \
-      --seize-secure-pnpm-binary "$REAL_PNPM" -- audit --fix
+      --seize-secure-pnpm-binary "$REAL_PNPM" -- remove "$@"
     ;;
-  update:all)
+  update)
     ensure_private_package_auth
     exec node "$REPO_ROOT/scripts/run-secure-pnpm.cjs" \
       --seize-secure-pnpm-binary "$REAL_PNPM" -- update "$@"
+    ;;
+  up|upgrade|update:all)
+    echo "Use \`6529 update [package]\` for intentional dependency updates." >&2
+    exit 1
+    ;;
+  audit)
+    ensure_private_package_auth
+    exec node "$REPO_ROOT/scripts/run-secure-pnpm.cjs" \
+      --seize-secure-pnpm-binary "$REAL_PNPM" -- audit "$@"
+    ;;
+  audit:fix)
+    ensure_private_package_auth
+    exec node "$REPO_ROOT/scripts/run-secure-pnpm.cjs" \
+      --seize-secure-pnpm-binary "$REAL_PNPM" -- audit --fix "$@"
+    ;;
+  approve-builds)
+    exec "$REAL_PNPM" approve-builds "$@"
     ;;
   prune:prod)
     exec "$REAL_PNPM" run prune:prod "$@"
@@ -170,6 +174,8 @@ case "$command_name" in
     exec "$REAL_PNPM" exec "$@"
     ;;
   *)
-    exec "$REAL_PNPM" "$command_name" "$@"
+    echo "Unsupported 6529 command: $command_name" >&2
+    print_usage >&2
+    exit 1
     ;;
 esac

@@ -138,7 +138,28 @@ API returns enough parent-container metadata to do so.
 - The control shows a loading state while child rows are being fetched.
 - The control points down only when child rows are visible.
 - Active subwaves request their parent children so the parent can open once the rows are available.
+- A direct-linked active subwave can temporarily surface the visible parent
+  overview returned with the active-wave response, even when the parent is not
+  followed, pinned, or present in the current sidebar page.
+- The active route overrides a previously persisted collapse for that parent,
+  reveals the parent while children load, and then reveals and highlights the
+  exact subwave row.
+- In the activity section, the active route's parent tree stays ahead of the
+  timestamp-sorted roots. Loading another page cannot insert roots above the
+  expanded tree, so every sibling remains reachable without scroll chasing.
+- Surfacing route context does not join or pin the parent or child and does not
+  synthesize metadata for an inaccessible parent.
 - Collapsed icon-only sidebar mode hides child rows and preserves the expanded state for the full sidebar.
+
+## Active Wave Header
+
+- When the active destination is a subwave, its header shows an up-left arrow
+  followed by the parent wave name. Assistive technology receives the fuller
+  `Subwave of` relationship text.
+- The visible parent wave name is a navigation link that opens the parent wave.
+- Root-wave and direct-message headers do not show this hierarchy row.
+- Long parent names truncate in the compact header instead of overlapping the
+  wave title or header actions.
 
 ## Mobile
 
