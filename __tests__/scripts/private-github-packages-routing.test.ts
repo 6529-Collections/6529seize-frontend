@@ -1621,12 +1621,21 @@ describe("documented private-package setup flows", () => {
   });
 
   it.each([
-    ["i", "ambiguous between frozen setup and dependency mutation"],
-    ["install", "ambiguous between frozen setup and dependency mutation"],
-    ["install:frozen", "canonical frozen install"],
+    [
+      "i",
+      "Direct install-style commands are intentionally unavailable.\nUse `6529 ci` for a frozen install or `6529 add <package>` to change dependencies.\n",
+    ],
+    [
+      "install",
+      "Direct install-style commands are intentionally unavailable.\nUse `6529 ci` for a frozen install or `6529 add <package>` to change dependencies.\n",
+    ],
+    [
+      "install:frozen",
+      "`6529 install:frozen` is intentionally unavailable because `6529 ci` is the canonical frozen install.\n",
+    ],
   ])(
     "rejects ambiguous install-style command %s with exact guidance",
-    (command, expectedReason) => {
+    (command, expectedError) => {
       const fakeBinaryDirectory = fs.mkdtempSync(
         path.join(os.tmpdir(), "frontend-package-command-")
       );
@@ -1649,11 +1658,7 @@ describe("documented private-package setup flows", () => {
         );
 
         expect(result.status).toBe(1);
-        expect(result.stderr).toContain(expectedReason);
-        expect(result.stderr).toContain("6529 ci");
-        if (command !== "install:frozen") {
-          expect(result.stderr).toContain("6529 add <package>");
-        }
+        expect(result.stderr).toBe(expectedError);
       } finally {
         fs.rmSync(fakeBinaryDirectory, { recursive: true, force: true });
       }

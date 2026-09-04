@@ -93,7 +93,6 @@ case "$command_name" in
     ;;
   i|install)
     echo "Direct install-style commands are intentionally unavailable." >&2
-    echo "They are ambiguous between frozen setup and dependency mutation." >&2
     echo "Use \`6529 ci\` for a frozen install or \`6529 add <package>\` to change dependencies." >&2
     exit 1
     ;;
