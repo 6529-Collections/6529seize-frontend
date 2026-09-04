@@ -72,10 +72,12 @@ For a normal interactive package command, just use the existing wrapper:
 6529 ci
 ```
 
-If `NODE_AUTH_TOKEN` is not already set, `6529` asks for it with hidden input.
-The token stays in memory only for that command. Empty input is rejected. CI
-and other non-interactive shells never prompt or wait; they must receive
-`NODE_AUTH_TOKEN` at runtime and fail closed when it is missing.
+If `NODE_AUTH_TOKEN` is not already set, `6529` first checks the macOS Keychain
+or Windows Credential Manager. When no stored credential is available, it asks
+for the token with hidden input and keeps it in memory only for that command.
+Empty input is rejected. CI and other non-interactive shells never read a
+developer credential, prompt, or wait; they must receive `NODE_AUTH_TOKEN` at
+runtime and fail closed when it is missing.
 
 The prompt applies only to package commands that can resolve, install, or audit
 dependencies: `ci`, `install:prod`, `add`, `remove`, `update`, `audit`, and
@@ -90,11 +92,10 @@ are ambiguous between frozen setup and dependency mutation. The redundant
 frozen-install vocabulary. Use `6529 add`, `6529 remove`, or `6529 update`
 when intentionally changing dependencies.
 
-### One-time Codex worktree setup on macOS
+### One-time credential-store setup
 
-Codex creates a worktree non-interactively, so it cannot use the terminal
-prompt. Save the read-only token once in your private macOS login Keychain with
-this command:
+On macOS, save the read-only token once in your private login Keychain with this
+command:
 
 ```bash
 security add-generic-password \
@@ -109,17 +110,29 @@ for the token separately with hidden input, so the token is not placed in the
 command or shell history. Run the same command again to replace an expired
 token.
 
-The checked-in Codex environment setup reads this one exact Keychain item only
-for `./bin/6529 ci`. It passes the token into the existing secure package
-helper, then the helper process exits. The setup also removes any inherited
-`NODE_AUTH_TOKEN` before Codex captures the successful setup environment. It
-copies existing `.env.development` and `.env.production` files from the primary
-worktree for local development and restricts the copies to the current user.
-It does not write the package token into those files or a shell profile. If the
-Keychain item is missing, Codex setup fails immediately with a clear message.
+On Windows, open PowerShell in the repository and run:
 
-On non-macOS Codex hosts, supply `NODE_AUTH_TOKEN` to the setup process at
-runtime. The setup removes it before Codex captures the resulting environment.
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass `
+  -File .\scripts\private-github-packages-credential.ps1 store
+```
+
+The helper asks for the token with hidden input and stores it as the generic
+credential `6529seize-frontend-github-packages` in Windows Credential Manager.
+Run the same command again to replace an expired token.
+
+Normal interactive package commands read the matching operating-system
+credential automatically and fall back to the hidden terminal prompt when it
+is missing. The checked-in Codex environment setup uses the same credential for
+its non-interactive `./bin/6529 ci`, then removes `NODE_AUTH_TOKEN` before
+Codex captures the successful setup environment. It also copies existing
+`.env.development` and `.env.production` files from the primary worktree for
+local development and restricts the copies to the current user. It does not
+write the package token into those files or a shell profile. If the credential
+is missing, Codex setup fails immediately with a clear message.
+
+On other Codex hosts, supply `NODE_AUTH_TOKEN` to the setup process at runtime.
+The setup removes it before Codex captures the resulting environment.
 
 Commands that may change dependency resolution first update the manifest and
 lockfile without package credentials. The helper validates the resulting

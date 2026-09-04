@@ -98,6 +98,9 @@ describe("production artifact metadata without build secrets", () => {
     expect(
       deployment.jobs["resolve-production-artifact"].secrets
     ).toBeUndefined();
+    expect(deployment.jobs["resolve-production-artifact"].permissions).toEqual({
+      actions: "read",
+    });
     expect(JSON.stringify(deployment.jobs)).not.toContain(
       "needs.build-production-artifact.outputs."
     );

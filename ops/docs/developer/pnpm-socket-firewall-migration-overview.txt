@@ -53,8 +53,7 @@ Key repo changes
 package.json
 - packageManager changed from npm to pnpm@10.33.0
 - secure installs use the repo wrapper:
-  - 6529 install
-  - 6529 install:frozen
+  - 6529 ci
   - 6529 install:prod
 - the wrapper invokes the validated secure helper directly; secure package
   scripts are intentionally absent so pnpm cannot apply unvalidated .npmrc
@@ -126,7 +125,7 @@ Bootstrap once (fresh clone):
    source <(./bin/6529 bootstrap --print-export)
 
 Install dependencies:
-2. 6529 install
+2. 6529 ci
 
 Normal day-to-day commands:
 - 6529 run dev
