@@ -7,7 +7,7 @@ import {
   ApiProfilePreferencesNotificationLevelEnum as NotificationLevel,
 } from "@/generated/models/ApiProfilePreferences";
 import { commonApiFetch, commonApiPut } from "@/services/api/common-api";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 jest.mock("@/components/auth/Auth", () => ({ useAuth: jest.fn() }));
@@ -81,6 +81,37 @@ describe("ProfilePreferencesSettings", () => {
     expect(
       screen.getByRole("button", { name: "Save Changes" }).parentElement
     ).toHaveClass("tw-pt-6");
+  });
+
+  it("keeps native controls and full-row labels for each option", async () => {
+    render(<ProfilePreferencesSettings />);
+
+    await screen.findByText("Subscription coverage");
+
+    const notificationGroup = screen.getByRole("group", {
+      name: "Notifications",
+    });
+    const directMessageGroup = screen.getByRole("group", {
+      name: "Who can start a direct message with me?",
+    });
+    const radios = [
+      ...within(notificationGroup).getAllByRole("radio"),
+      ...within(directMessageGroup).getAllByRole("radio"),
+    ];
+    const categoryCheckboxes = screen.getAllByRole("checkbox");
+
+    expect(radios).toHaveLength(5);
+    radios.forEach((radio) => {
+      expect(radio).toHaveClass("tw-peer", "tw-sr-only");
+      expect(radio.nextElementSibling).toHaveClass("tw-min-h-12", "tw-w-full");
+    });
+
+    expect(categoryCheckboxes).toHaveLength(6);
+    categoryCheckboxes.forEach((checkbox) => {
+      expect(checkbox).toHaveClass("tw-peer", "tw-sr-only");
+      expect(checkbox.closest("label")).toHaveClass("tw-min-h-12", "tw-w-full");
+    });
+    expect(document.querySelector(".react-toggle")).not.toBeInTheDocument();
   });
 
   it("hides optional categories while preserving their saved values", async () => {
