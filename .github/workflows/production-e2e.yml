@@ -125,7 +125,7 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ github.token }}
           SFW_BIN: ${{ steps.socket-firewall.outputs.firewall-path-binary }}
-        run: ./bin/6529 install:frozen
+        run: ./bin/6529 ci
 
       - name: Select Museum packs for the deployed change
         id: museum-selection
