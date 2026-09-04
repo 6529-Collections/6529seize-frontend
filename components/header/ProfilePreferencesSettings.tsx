@@ -426,7 +426,6 @@ function ProfilePreferencesForm({
           loading={isSaving}
           variant="action"
           size="md"
-          className="tw-w-full sm:tw-w-auto sm:tw-px-6"
         >
           {isSaving
             ? t(locale, "profilePreferences.saving")

@@ -92,8 +92,13 @@ describe("ProfilePreferencesSettings", () => {
       "tw-mx-4",
       "lg:tw-mx-8"
     );
-    expect(saveButton).toHaveClass("tw-bg-primary-500", "sm:tw-px-6");
-    expect(saveButton).not.toHaveClass("sm:tw-min-w-40");
+    expect(saveButton).toHaveClass("tw-bg-primary-500", "tw-px-3.5");
+    expect(saveButton).not.toHaveClass(
+      "tw-w-full",
+      "sm:tw-w-auto",
+      "sm:tw-px-6",
+      "sm:tw-min-w-40"
+    );
   });
 
   it("keeps native controls and full-row labels for each option", async () => {
