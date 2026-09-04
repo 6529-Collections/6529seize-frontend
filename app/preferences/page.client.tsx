@@ -78,10 +78,10 @@ export default function PreferencesPageClient({
                 key={tab.id}
                 href={tab.href}
                 aria-current={isActive ? "page" : undefined}
-                className={`tw-relative tw-px-3 tw-pb-3 tw-pt-2 tw-text-sm tw-font-semibold tw-no-underline tw-transition-colors focus-visible:tw-rounded focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 ${
+                className={`-tw-mb-px tw-flex tw-min-h-10 tw-items-center tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-no-underline tw-transition-colors tw-duration-150 motion-reduce:tw-transition-none focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 ${
                   isActive
-                    ? "tw-text-iron-50 after:tw-absolute after:tw-inset-x-0 after:-tw-bottom-px after:tw-h-0.5 after:tw-bg-primary-400"
-                    : "tw-text-iron-400 desktop-hover:hover:tw-text-iron-100"
+                    ? "tw-border-primary-400 tw-text-iron-50"
+                    : "tw-border-transparent tw-text-iron-400 desktop-hover:hover:tw-text-iron-100"
                 }`}
               >
                 {t(locale, tab.labelKey)}

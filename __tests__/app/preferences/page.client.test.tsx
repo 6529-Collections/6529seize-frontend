@@ -46,9 +46,14 @@ describe("PreferencesPageClient", () => {
 
     expect(screen.getByRole("heading", { name: "Preferences" })).toBeVisible();
     expect(screen.queryByText("@alice")).not.toBeInTheDocument();
-    expect(
-      screen.getByRole("link", { name: "Notifications & messages" })
-    ).toHaveAttribute("aria-current", "page");
+    const notificationsTab = screen.getByRole("link", {
+      name: "Notifications & messages",
+    });
+    expect(notificationsTab).toHaveAttribute("aria-current", "page");
+    expect(notificationsTab).toHaveClass(
+      "tw-border-b-2",
+      "tw-border-primary-400"
+    );
     expect(screen.getByText("Notification settings panel")).toBeVisible();
     expect(container.querySelector("main")).toHaveClass("tw-min-h-dvh");
   });

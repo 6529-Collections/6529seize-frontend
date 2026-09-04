@@ -251,10 +251,10 @@ function ProfilePreferencesForm({
 
   return (
     <div className="tw-flex tw-flex-col">
-      <div className="tw-divide-y tw-divide-iron-800 tw-px-4 sm:tw-px-6 lg:tw-px-8">
+      <div className="tw-px-4 sm:tw-px-6 lg:tw-px-8">
         <section
           aria-labelledby="profile-preferences-notifications-heading"
-          className="tw-pb-8 tw-pt-6 sm:tw-pb-10 sm:tw-pt-8"
+          className="tw-pt-6 sm:tw-pt-8"
         >
           <h2
             id="profile-preferences-notifications-heading"
@@ -344,7 +344,7 @@ function ProfilePreferencesForm({
                           aria-hidden="true"
                           className={`tw-relative tw-flex tw-h-6 tw-w-11 tw-flex-shrink-0 tw-items-center tw-rounded-full tw-border tw-border-solid tw-p-0.5 tw-transition-colors tw-duration-200 peer-focus-visible:tw-ring-2 peer-focus-visible:tw-ring-primary-400 peer-focus-visible:tw-ring-offset-2 peer-focus-visible:tw-ring-offset-iron-900 peer-disabled:tw-opacity-50 motion-reduce:tw-transition-none ${
                             current.notifications[key]
-                              ? "tw-border-primary-400/60 tw-bg-primary-500"
+                              ? "tw-border-emerald-400/60 tw-bg-emerald-500"
                               : "tw-border-iron-600 tw-bg-iron-700"
                           }`}
                         >
@@ -368,9 +368,11 @@ function ProfilePreferencesForm({
           </p>
         </section>
 
+        <div aria-hidden="true" className="tw-my-10 tw-h-px tw-bg-iron-800" />
+
         <section
           aria-labelledby="profile-preferences-dm-heading"
-          className="tw-pb-8 tw-pt-8 sm:tw-pb-10 sm:tw-pt-10"
+          className="tw-pb-8 sm:tw-pb-10"
         >
           <h2
             id="profile-preferences-dm-heading"
@@ -424,7 +426,7 @@ function ProfilePreferencesForm({
           loading={isSaving}
           variant="action"
           size="md"
-          className="tw-w-full sm:tw-w-auto sm:tw-min-w-40 sm:tw-px-6"
+          className="tw-w-full sm:tw-w-auto sm:tw-px-6"
         >
           {isSaving
             ? t(locale, "profilePreferences.saving")

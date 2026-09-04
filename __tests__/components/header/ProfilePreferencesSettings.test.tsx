@@ -69,20 +69,31 @@ describe("ProfilePreferencesSettings", () => {
         .getAllByRole("heading", { level: 2 })
         .map(({ textContent }) => textContent?.trim())
     ).toEqual(["Notifications", "Who can start a direct message with me?"]);
-    expect(screen.getByRole("region", { name: "Notifications" })).toHaveClass(
-      "tw-pb-8",
+    const notificationsSection = screen.getByRole("region", {
+      name: "Notifications",
+    });
+    expect(notificationsSection).toHaveClass(
       "tw-pt-6",
-      "sm:tw-pb-10",
       "sm:tw-pt-8"
+    );
+    expect(notificationsSection.nextElementSibling).toHaveClass(
+      "tw-my-10",
+      "tw-h-px",
+      "tw-bg-iron-800"
     );
     expect(
       screen.getByRole("region", {
         name: "Who can start a direct message with me?",
       })
-    ).toHaveClass("tw-pb-8", "tw-pt-8", "sm:tw-pb-10", "sm:tw-pt-10");
-    expect(
-      screen.getByRole("button", { name: "Save Changes" }).parentElement
-    ).toHaveClass("tw-py-6", "tw-mx-4", "lg:tw-mx-8");
+    ).toHaveClass("tw-pb-8", "sm:tw-pb-10");
+    const saveButton = screen.getByRole("button", { name: "Save Changes" });
+    expect(saveButton.parentElement).toHaveClass(
+      "tw-py-6",
+      "tw-mx-4",
+      "lg:tw-mx-8"
+    );
+    expect(saveButton).toHaveClass("tw-bg-primary-500", "sm:tw-px-6");
+    expect(saveButton).not.toHaveClass("sm:tw-min-w-40");
   });
 
   it("keeps native controls and full-row labels for each option", async () => {
@@ -112,6 +123,10 @@ describe("ProfilePreferencesSettings", () => {
     categoryCheckboxes.forEach((checkbox) => {
       expect(checkbox).toHaveClass("tw-peer", "tw-sr-only");
       expect(checkbox.closest("label")).toHaveClass("tw-min-h-12", "tw-w-full");
+      expect(checkbox.nextElementSibling).toHaveClass(
+        "tw-border-emerald-400/60",
+        "tw-bg-emerald-500"
+      );
     });
     expect(document.querySelector(".react-toggle")).not.toBeInTheDocument();
   });
