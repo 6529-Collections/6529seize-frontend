@@ -56,7 +56,7 @@ export default function PreferencesPageClient({
   const canManagePreferences = Boolean(connectedProfile?.handle);
 
   return (
-    <main className="tailwind-scope tw-min-h-dvh tw-bg-black tw-px-4 tw-py-8 sm:tw-px-6 sm:tw-py-12">
+    <main className="tailwind-scope tw-min-h-dvh tw-w-full tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-800 tw-bg-black tw-px-4 tw-py-8 sm:tw-px-6 sm:tw-py-12">
       <div className="tw-mx-auto tw-w-full tw-max-w-5xl">
         <div>
           <h1 className="tw-m-0 tw-text-3xl tw-font-semibold tw-tracking-tight tw-text-iron-50">

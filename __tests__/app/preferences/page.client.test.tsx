@@ -60,7 +60,14 @@ describe("PreferencesPageClient", () => {
       screen.getByRole("navigation", { name: "Preference sections" })
     ).toHaveClass("tw-gap-x-3", "lg:tw-gap-x-4");
     expect(screen.getByText("Notification settings panel")).toBeVisible();
-    expect(container.querySelector("main")).toHaveClass("tw-min-h-dvh");
+    expect(container.querySelector("main")).toHaveClass(
+      "tw-min-h-dvh",
+      "tw-w-full",
+      "tw-border-y-0",
+      "tw-border-l-0",
+      "tw-border-r",
+      "tw-border-iron-800"
+    );
   });
 
   it("renders the blocked profiles tab and preserves its deep link", () => {
