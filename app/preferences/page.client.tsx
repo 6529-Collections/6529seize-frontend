@@ -56,7 +56,7 @@ export default function PreferencesPageClient({
   const canManagePreferences = Boolean(connectedProfile?.handle);
 
   return (
-    <main className="tailwind-scope tw-min-h-dvh tw-bg-black tw-px-4 tw-py-8 sm:tw-px-6 sm:tw-py-12">
+    <main className="tailwind-scope tw-min-h-dvh tw-w-full tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-800 tw-bg-black tw-px-4 tw-py-8 sm:tw-px-6 sm:tw-py-12">
       <div className="tw-mx-auto tw-w-full tw-max-w-5xl">
         <div>
           <h1 className="tw-m-0 tw-text-3xl tw-font-semibold tw-tracking-tight tw-text-iron-50">
@@ -69,7 +69,7 @@ export default function PreferencesPageClient({
 
         <nav
           aria-label={t(locale, "preferences.tabs.ariaLabel")}
-          className="tw-mt-8 tw-flex tw-gap-1 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800"
+          className="tw-mt-8 tw-flex tw-gap-x-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 lg:tw-gap-x-4"
         >
           {TABS.map((tab) => {
             const isActive = tab.id === activeTab;
@@ -78,10 +78,10 @@ export default function PreferencesPageClient({
                 key={tab.id}
                 href={tab.href}
                 aria-current={isActive ? "page" : undefined}
-                className={`tw-relative tw-px-3 tw-pb-3 tw-pt-2 tw-text-sm tw-font-semibold tw-no-underline tw-transition-colors focus-visible:tw-rounded focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 ${
+                className={`-tw-mb-px tw-flex tw-min-h-10 tw-items-center tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-px-1 tw-py-4 tw-text-sm tw-font-semibold tw-no-underline tw-transition-colors tw-duration-150 motion-reduce:tw-transition-none focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 ${
                   isActive
-                    ? "tw-text-iron-50 after:tw-absolute after:tw-inset-x-0 after:-tw-bottom-px after:tw-h-0.5 after:tw-bg-primary-400"
-                    : "tw-text-iron-400 desktop-hover:hover:tw-text-iron-100"
+                    ? "tw-border-primary-400 tw-text-iron-50"
+                    : "tw-border-transparent tw-text-iron-400 desktop-hover:hover:tw-text-iron-100"
                 }`}
               >
                 {t(locale, tab.labelKey)}
