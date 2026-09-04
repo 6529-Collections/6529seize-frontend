@@ -42,7 +42,7 @@ export const CreateDropSubmit: React.FC<CreateDropSubmitProps> = ({
       <span
         className={`${
           showLabelOnMobile ? "tw-inline" : "tw-hidden lg:tw-inline"
-        } ${label ? "tw-text-xs" : ""}`}
+        } ${label ? "tw-text-[10px]" : ""}`}
       >
         {submitLabel}
       </span>
