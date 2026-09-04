@@ -492,6 +492,27 @@ describe("AppHeader", () => {
     expect(screen.getByText("WaveOne")).toBeInTheDocument();
   });
 
+  it("shows a linked parent wave for an active subwave", () => {
+    const wave = {
+      id: "child-wave",
+      name: "CI-PRODUCTION",
+      parent_wave: { id: "parent-wave", name: "Follow The Repo" },
+      chat: { scope: { group: { is_direct_message: false } } },
+    };
+    setup({
+      wave,
+      asPath: "/waves/child-wave",
+      waveInfo: { isRankWave: false, isMemesWave: false, isDm: false },
+    });
+
+    expect(
+      screen.getByRole("navigation", { name: "Wave hierarchy" })
+    ).toHaveTextContent(/Subwave of\s*Follow The Repo/);
+    expect(
+      screen.getByRole("link", { name: "Follow The Repo" })
+    ).toHaveAttribute("href", "/waves/parent-wave");
+  });
+
   it("shows profile image on waves root page", () => {
     setup({
       address: "0xabc",

@@ -39,6 +39,10 @@ describe("SidebarWaveTreeRowTransition", () => {
     expect(screen.getByText("Child row").parentElement).toHaveClass(
       "tw-overflow-hidden"
     );
+    expect(screen.getByText("Child row").parentElement).toHaveAttribute(
+      "data-sidebar-wave-id",
+      "child"
+    );
   });
 
   it("does not clip entered child rows so connector segments can overlap", () => {

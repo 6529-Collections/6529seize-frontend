@@ -13,10 +13,12 @@ export function useLoadActiveSidebarParentSubwaves({
 }: UseLoadActiveSidebarParentSubwavesOptions) {
   const { waves: streamWaves } = useMyStream();
   const requestedParentIdsRef = useRef(new Set<string>());
-  const hasLoadedActiveParentSubwaves = useMemo(
+  const hasActiveParentInSidebar = useMemo(
     () =>
       activeParentWaveId !== null &&
-      waves.some((wave) => wave.parentWaveId === activeParentWaveId),
+      waves.some(
+        (wave) => wave.id === activeParentWaveId && wave.parentWaveId === null
+      ),
     [activeParentWaveId, waves]
   );
   const loadActiveParentSubwaves = useEffectEvent((parentWaveId: string) => {
@@ -24,12 +26,7 @@ export function useLoadActiveSidebarParentSubwaves({
   });
 
   useEffect(() => {
-    if (activeParentWaveId === null) {
-      return;
-    }
-
-    if (hasLoadedActiveParentSubwaves) {
-      requestedParentIdsRef.current.delete(activeParentWaveId);
+    if (activeParentWaveId === null || !hasActiveParentInSidebar) {
       return;
     }
 
@@ -44,5 +41,5 @@ export function useLoadActiveSidebarParentSubwaves({
     return () => {
       requestedParentIds.delete(activeParentWaveId);
     };
-  }, [activeParentWaveId, hasLoadedActiveParentSubwaves]);
+  }, [activeParentWaveId, hasActiveParentInSidebar]);
 }

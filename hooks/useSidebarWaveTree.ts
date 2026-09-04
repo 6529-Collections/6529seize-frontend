@@ -311,13 +311,15 @@ export function useSidebarWaveTree({
 
   const getIsExpanded = useCallback(
     (waveId: string) => {
+      if (resolvedActiveParentWaveId === waveId) {
+        return true;
+      }
+
       if (collapsedParentIds.has(waveId)) {
         return false;
       }
 
-      return (
-        expandedParentIds.has(waveId) || resolvedActiveParentWaveId === waveId
-      );
+      return expandedParentIds.has(waveId);
     },
     [collapsedParentIds, resolvedActiveParentWaveId, expandedParentIds]
   );
