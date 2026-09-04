@@ -29,10 +29,7 @@ export default function GlobalRepCategoryDialog({
       titleClassName="tw-sr-only"
     >
       <div
-        className={`
-          tw-px-6 tw-pt-4 sm:tw-px-10 sm:tw-pt-6
-          [&_.rep-category-header]:tw-pr-14 sm:[&_.rep-category-header]:tw-pr-16
-        `}
+        className={`tw-px-6 tw-pt-4 sm:tw-px-10 sm:tw-pt-6 [&_.rep-category-header]:tw-pr-14 sm:[&_.rep-category-header]:tw-pr-16`}
       >
         {category && (
           <GlobalRepCategoryDetail

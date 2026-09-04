@@ -49,8 +49,12 @@ export default function WaveRepButton({
       <Button
         type="button"
         aria-label={label}
-        data-tooltip-id={showTooltip ? tooltipId : undefined}
-        data-tooltip-content={showTooltip ? tooltipContent : undefined}
+        {...(showTooltip
+          ? {
+              "data-tooltip-id": tooltipId,
+              "data-tooltip-content": tooltipContent,
+            }
+          : {})}
         onClick={() => setIsModalOpen(true)}
         variant="tertiary"
         size={variant === "compact" ? null : "sm"}

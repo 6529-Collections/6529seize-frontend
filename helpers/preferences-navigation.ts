@@ -34,6 +34,6 @@ export const PROFILE_PREFERENCES_HREF = getPreferencesHref({
 export const isProfilePreferencesEntry = (
   source: string | readonly string[] | null | undefined
 ): boolean => {
-  const value = Array.isArray(source) ? source[0] : source;
+  const value = typeof source === "string" ? source : source?.[0];
   return value === PREFERENCES_PROFILE_ENTRY_SOURCE;
 };

@@ -33,9 +33,7 @@ const getBaseVisualClasses = (
 ): DropVoteProgressingVisualClasses => {
   if (subtle) {
     return {
-      color: isPositiveProgressing
-        ? "tw-text-iron-400"
-        : MUTED_TEXT_CLASS_NAME,
+      color: isPositiveProgressing ? "tw-text-iron-400" : MUTED_TEXT_CLASS_NAME,
       arrowColor: MUTED_TEXT_CLASS_NAME,
       wrapperClasses: "tw-flex tw-items-center tw-gap-2",
       valueClasses: "tw-tracking-tight",
@@ -81,9 +79,7 @@ const getVisualClasses = (
 
   return {
     ...baseClasses,
-    color: isPositiveProgressing
-      ? "tw-text-emerald-300"
-      : "tw-text-rose-400",
+    color: isPositiveProgressing ? "tw-text-emerald-300" : "tw-text-rose-400",
     arrowColor: MUTED_TEXT_CLASS_NAME,
     valueClasses: "tw-leading-5 tw-tracking-identity",
   };

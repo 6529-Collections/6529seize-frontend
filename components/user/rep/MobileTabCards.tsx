@@ -11,26 +11,22 @@ const ACTIVE_TAB_STYLES: Record<
   MobileTab,
   Readonly<{
     button: string;
-    indicator: string;
     label: string;
     pressed: string;
   }>
 > = {
   rep: {
     button: "tw-bg-primary-500/10",
-    indicator: "tw-bg-primary-400",
     label: "tw-text-primary-300",
     pressed: "active:tw-bg-primary-500/20",
   },
   nic: {
     button: "tw-bg-emerald-500/10",
-    indicator: "tw-bg-emerald-400",
     label: "tw-text-emerald-300",
     pressed: "active:tw-bg-emerald-500/20",
   },
   statements: {
     button: "tw-bg-emerald-500/10",
-    indicator: "tw-bg-emerald-400",
     label: "tw-text-emerald-300",
     pressed: "active:tw-bg-emerald-500/20",
   },
@@ -76,12 +72,6 @@ function MobileTabButton({
       >
         {label}
       </span>
-      {isSelected && (
-        <span
-          aria-hidden="true"
-          className={`tw-absolute tw-inset-x-4 tw-bottom-1 tw-h-0.5 tw-rounded-full ${activeStyles.indicator}`}
-        />
-      )}
     </button>
   );
 }
@@ -113,9 +103,7 @@ export default function MobileTabCards({
       <MobileTabButton
         tab="rep"
         label={t(locale, "user.profile.identity.mobileTabs.totalRep")}
-        value={
-          overview ? formatInteger(locale, overview.total_rep) : "\u2014"
-        }
+        value={overview ? formatInteger(locale, overview.total_rep) : "\u2014"}
         activeTab={activeTab}
         onTabChange={onTabChange}
       />

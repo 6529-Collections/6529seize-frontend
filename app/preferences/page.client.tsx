@@ -74,7 +74,7 @@ export default function PreferencesPageClient({
           {!isCapacitor && returnToProfile && profileHref && (
             <Link
               href={profileHref}
-              className="tw-group -tw-ml-2 tw-mb-4 tw-inline-flex tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-md tw-px-2 tw-text-sm tw-font-medium tw-text-iron-300 tw-no-underline tw-transition-colors desktop-hover:hover:tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+              className="tw-group -tw-ml-2 tw-mb-4 tw-inline-flex tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-md tw-px-2 tw-text-sm tw-font-medium tw-text-iron-300 tw-no-underline tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-iron-50"
             >
               <ArrowLeftIcon
                 aria-hidden="true"

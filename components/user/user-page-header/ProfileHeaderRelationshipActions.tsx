@@ -75,8 +75,7 @@ export default function ProfileHeaderRelationshipActions({
           <ProfileBlockActionMenu
             handle={profile.handle}
             disabled={
-              moderationControls.isLoading ||
-              moderationControls.isActionPending
+              moderationControls.isLoading || moderationControls.isActionPending
             }
             showPersonalActions={!moderationControls.isBlocked}
             moderationAction={moderationAction}
