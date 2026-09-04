@@ -48,7 +48,7 @@ The runtime `NODE_AUTH_TOKEN` needs read-only GitHub Packages access. For a
 normal interactive install, run:
 
 ```bash
-6529 install
+6529 ci
 ```
 
 If `NODE_AUTH_TOKEN` is not already set, the wrapper asks for it silently and

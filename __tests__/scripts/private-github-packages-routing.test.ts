@@ -589,7 +589,10 @@ describe("private GitHub Packages repository policy", () => {
   it("rejects CLI attempts to change routing or extend the package bypass", () => {
     expect(() =>
       policy.validatePnpmArguments(["config", "get", policy.AUTH_KEY])
-    ).toThrow("only install, add, update, and audit");
+    ).toThrow("only install, add, remove, update, and audit");
+    expect(() =>
+      policy.validatePnpmArguments(["remove", "public-package"])
+    ).not.toThrow();
     expect(() =>
       policy.validatePnpmArguments([
         "add",
@@ -996,6 +999,31 @@ describe("host-specific Socket Firewall routing", () => {
     }
     expect(spawnCalls[2]?.[2].env.NODE_AUTH_TOKEN).toBe(TEST_TOKEN);
     expect(JSON.stringify(consoleError.mock.calls)).not.toContain(TEST_TOKEN);
+  });
+
+  it("routes dependency removal without auth before the frozen fetch", () => {
+    const spawn = jest.fn(() => ({ status: 0 }));
+
+    expect(
+      routing.runPnpm({
+        args: ["remove", "public-package"],
+        environment: socketEnvironment(socketCaPath),
+        repositoryRoot: REPOSITORY_ROOT,
+        spawn,
+      })
+    ).toBe(0);
+    const spawnCalls = spawn.mock.calls as unknown as Array<
+      [string, string[], { env: Environment }]
+    >;
+
+    expect(spawnCalls.map((call) => call[1])).toEqual([
+      ["remove", "public-package"],
+      routing.TOKEN_FREE_LOCKFILE_ARGUMENTS,
+      routing.AUTHENTICATED_FROZEN_INSTALL_ARGUMENTS,
+      routing.TOKEN_FREE_REBUILD_ARGUMENTS,
+    ]);
+    expect(spawnCalls[0]?.[2].env).not.toHaveProperty("NODE_AUTH_TOKEN");
+    expect(spawnCalls[2]?.[2].env.NODE_AUTH_TOKEN).toBe(TEST_TOKEN);
   });
 
   it("rejects a newly resolved private dependency before auth is attached", () => {
@@ -1447,16 +1475,21 @@ describe("documented private-package setup flows", () => {
 
     expect(wrapper).not.toContain('"$REAL_PNPM" run install:secure');
     expect(wrapper).not.toContain("scripts/assert-no-package-lock.cjs");
-    expect(wrapper.match(/run-secure-pnpm\.cjs/g)).toHaveLength(8);
-    expect(wrapper.match(/--seize-secure-pnpm-binary/g)).toHaveLength(8);
-    expect(wrapper.match(/ensure_private_package_auth/g)).toHaveLength(8);
+    expect(wrapper.match(/run-secure-pnpm\.cjs/g)).toHaveLength(7);
+    expect(wrapper.match(/--seize-secure-pnpm-binary/g)).toHaveLength(7);
+    expect(wrapper.match(/ensure_private_package_auth/g)).toHaveLength(7);
     expect(wrapper).toContain('SEIZE_STAGING_TRUSTED_PNPM_BINARY="$REAL_PNPM"');
+    expect(wrapper).toContain("-- install --frozen-lockfile");
+    expect(wrapper).toContain('-- remove "$@"');
+    expect(wrapper).toContain('-- update "$@"');
+    expect(wrapper).toContain('-- audit "$@"');
+    expect(wrapper).toContain('-- audit --fix "$@"');
     expect(packageJson.scripts).not.toHaveProperty("install:secure");
     expect(packageJson.scripts).not.toHaveProperty("install:secure:frozen");
     expect(packageJson.scripts).not.toHaveProperty("install:secure:prod");
   });
 
-  it("prompts only after validating the eight package commands", () => {
+  it("prompts only for the seven authenticated package command branches", () => {
     const wrapper = fs.readFileSync(
       path.join(REPOSITORY_ROOT, "bin", "6529"),
       "utf8"
@@ -1471,25 +1504,79 @@ describe("documented private-package setup flows", () => {
       .map((match) => match[1]);
 
     expect(promptedCommands).toEqual([
-      "i",
-      "install",
       "ci",
-      "install:frozen",
       "install:prod",
       "add",
+      "remove|rm|uninstall",
       "update",
-      "update:all",
+      "audit",
+      "audit:fix",
     ]);
 
-    for (const command of promptedCommands.filter(
-      (entry) => entry !== "update:all"
-    )) {
+    for (const command of [
+      "ci",
+      "install:prod",
+      "add",
+      "remove|rm|uninstall",
+    ]) {
       const branch = commandBranches.find((match) => match[1] === command)?.[2];
       expect(branch).toBeDefined();
       expect(branch?.indexOf("ensure_private_package_auth")).toBeGreaterThan(
         branch?.indexOf("fi") ?? -1
       );
     }
+  });
+
+  it.each([
+    ["i", "ambiguous between frozen setup and dependency mutation"],
+    ["install", "ambiguous between frozen setup and dependency mutation"],
+    ["install:frozen", "canonical frozen install"],
+  ])(
+    "rejects ambiguous install-style command %s with exact guidance",
+    (command, expectedReason) => {
+      const fakeBinaryDirectory = fs.mkdtempSync(
+        path.join(os.tmpdir(), "frontend-package-command-")
+      );
+      const fakePnpm = path.join(fakeBinaryDirectory, "pnpm");
+      fs.writeFileSync(fakePnpm, "#!/usr/bin/env bash\nexit 99\n");
+      fs.chmodSync(fakePnpm, 0o755);
+
+      try {
+        const result = spawnSync(
+          path.join(REPOSITORY_ROOT, "bin", "6529"),
+          [command],
+          {
+            cwd: REPOSITORY_ROOT,
+            encoding: "utf8",
+            env: {
+              ...process.env,
+              PATH: `${fakeBinaryDirectory}:${process.env.PATH ?? ""}`,
+            },
+          }
+        );
+
+        expect(result.status).toBe(1);
+        expect(result.stderr).toContain(expectedReason);
+        expect(result.stderr).toContain("6529 ci");
+        if (command !== "install:frozen") {
+          expect(result.stderr).toContain("6529 add <package>");
+        }
+      } finally {
+        fs.rmSync(fakeBinaryDirectory, { recursive: true, force: true });
+      }
+    }
+  );
+
+  it("rejects noncanonical dependency-update aliases", () => {
+    const wrapper = fs.readFileSync(
+      path.join(REPOSITORY_ROOT, "bin", "6529"),
+      "utf8"
+    );
+
+    expect(wrapper).toContain("up|upgrade|update:all)");
+    expect(wrapper).toContain(
+      "Use \\`6529 update [package]\\` for intentional dependency updates."
+    );
   });
 
   it("keeps Codex setup non-interactive and removes captured auth", () => {
@@ -1510,7 +1597,7 @@ describe("documented private-package setup flows", () => {
     expect(setupHelper.indexOf("set +x")).toBeLessThan(
       setupHelper.indexOf("load_private_package_auth_for_codex")
     );
-    expect(setupHelper).toContain('exec "$REPO_ROOT/bin/6529" install');
+    expect(setupHelper).toContain('exec "$REPO_ROOT/bin/6529" ci');
     expect(setupHelper).not.toContain("add-generic-password");
     expect(authHelper).toContain(
       'PRIVATE_GITHUB_PACKAGES_KEYCHAIN_SERVICE="6529seize-frontend-github-packages"'
@@ -1574,13 +1661,13 @@ describe("documented private-package setup flows", () => {
     expect(authPreflightIndex).toBeLessThan(envWriteIndex);
     expect(authPreflightIndex).toBeLessThan(dependencyInstallIndex);
     expect(setupScript).toContain(
-      'NODE_AUTH_TOKEN="$package_auth_token" ./bin/6529 install:frozen'
+      'NODE_AUTH_TOKEN="$package_auth_token" ./bin/6529 ci'
     );
     expect(localTokenUnsetIndex).toBeGreaterThan(dependencyInstallIndex);
     expect(localTokenUnsetIndex).toBeLessThan(buildIndex);
     expect(localTokenUnsetIndex).toBeLessThan(startIndex);
     expect(setupScript).toContain('rm -rf "$REPO_ROOT/node_modules"');
-    expect(setupScript).toContain("./bin/6529 install:frozen");
+    expect(setupScript).toContain("./bin/6529 ci");
     expect(setupScript).not.toContain("gh auth token");
   });
 
@@ -1685,7 +1772,7 @@ describe("documented private-package setup flows", () => {
       '--seize-secure-repository-root "$WORKTREE_PATH" \\'
     );
     expect(worktreeScript).toContain(
-      '--seize-secure-pnpm-binary "$TRUSTED_PNPM_BINARY" -- install'
+      '--seize-secure-pnpm-binary "$TRUSTED_PNPM_BINARY" -- install --frozen-lockfile'
     );
     expect(worktreeScript).not.toContain(
       'NODE_AUTH_TOKEN="$PACKAGE_AUTH_TOKEN" 6529'
@@ -1704,7 +1791,7 @@ describe("documented private-package setup flows", () => {
         "utf8"
       );
       const authIndex = documentation.indexOf("NODE_AUTH_TOKEN");
-      const installIndex = documentation.indexOf("6529 install");
+      const installIndex = documentation.indexOf("6529 ci");
 
       expect(authIndex).toBeGreaterThanOrEqual(0);
       expect(authIndex).toBeLessThan(installIndex);
@@ -1890,7 +1977,7 @@ describe("GitHub Actions package access", () => {
 
       for (const [jobName, job] of Object.entries(workflow.jobs ?? {})) {
         const frozenInstallSteps = (job.steps ?? []).filter((step) =>
-          step.run?.includes("./bin/6529 install:frozen")
+          step.run?.includes("./bin/6529 ci")
         );
         const effectivePermissions =
           job.permissions ?? workflow.permissions ?? {};
@@ -1914,18 +2001,43 @@ describe("GitHub Actions package access", () => {
           }
         }
 
-        const reusableWorkflow = job.uses?.match(/^\.\/\.github\/workflows\/([A-Za-z0-9_-]+\.yml)$/);
+        const reusableWorkflow = job.uses?.match(
+          /^\.\/\.github\/workflows\/([A-Za-z0-9_-]+\.yml)$/
+        );
         let delegatesFrozenInstall = false;
+        let delegatedWorkflowHasPackageRead = false;
         if (reusableWorkflow) {
-          const child = parseYaml(fs.readFileSync(path.join(workflowDirectory, reusableWorkflow[1]!), "utf8"));
-          delegatesFrozenInstall = Object.values(child.jobs ?? {}).some((childJob) =>
-            ((childJob as { steps?: Array<{ run?: string }> }).steps ?? []).some((step) => step.run?.includes("./bin/6529 install:frozen"))
+          const child = parseYaml(
+            fs.readFileSync(
+              path.join(workflowDirectory, reusableWorkflow[1]!),
+              "utf8"
+            )
           );
+          delegatesFrozenInstall = Object.values(child.jobs ?? {}).some(
+            (childJob) =>
+              (
+                (childJob as { steps?: Array<{ run?: string }> }).steps ?? []
+              ).some((step) => step.run?.includes("./bin/6529 ci"))
+          );
+          delegatedWorkflowHasPackageRead = Object.values(
+            child.jobs ?? {}
+          ).some((childJob) => {
+            const childPermissions = (
+              childJob as {
+                permissions?: { packages?: string };
+              }
+            ).permissions;
+            return (
+              (childPermissions?.packages ?? child.permissions?.packages) ===
+              "read"
+            );
+          });
         }
         if (
           effectivePermissions.packages === "read" &&
           frozenInstallSteps.length === 0 &&
-          !delegatesFrozenInstall
+          !delegatesFrozenInstall &&
+          (!reusableWorkflow || delegatedWorkflowHasPackageRead)
         ) {
           throw new Error(
             `${workflowFile} job ${jobName} grants package read without a frozen install`

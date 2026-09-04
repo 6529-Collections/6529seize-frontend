@@ -13,11 +13,13 @@ The supported entrypoint is the repo-local `6529` command:
 
 ```bash
 6529 bootstrap
-6529 install
-6529 install:frozen
+6529 ci
 6529 install:prod
-6529 update
-6529 update:all
+6529 add <package>
+6529 remove <package>
+6529 update [package]
+6529 audit
+6529 audit:fix
 6529 run dev
 6529 run build
 6529 approve-builds
@@ -67,7 +69,7 @@ shell profiles, shell history, or command arguments.
 For a normal interactive package command, just use the existing wrapper:
 
 ```bash
-6529 install
+6529 ci
 ```
 
 If `NODE_AUTH_TOKEN` is not already set, `6529` asks for it with hidden input.
@@ -75,10 +77,18 @@ The token stays in memory only for that command. Empty input is rejected. CI
 and other non-interactive shells never prompt or wait; they must receive
 `NODE_AUTH_TOKEN` at runtime and fail closed when it is missing.
 
-The prompt applies only to package commands that can resolve or install
-dependencies: `install`, `i`, `ci`, `install:frozen`, `install:prod`, `add`,
-`update`, and `update:all`. It does not run for ordinary development, test,
-build, or application commands.
+The prompt applies only to package commands that can resolve, install, or audit
+dependencies: `ci`, `install:prod`, `add`, `remove`, `update`, `audit`, and
+`audit:fix`. It does not run for ordinary development, test, build, or
+application commands.
+
+`6529 ci` is the normal deterministic installation path. It runs the secure
+pnpm install with `--frozen-lockfile`, so routine setup cannot change
+`pnpm-lock.yaml`. Bare `6529 install` and `6529 i` are rejected because they
+are ambiguous between frozen setup and dependency mutation. The redundant
+`6529 install:frozen` alias is also rejected so `6529 ci` remains the single
+frozen-install vocabulary. Use `6529 add`, `6529 remove`, or `6529 update`
+when intentionally changing dependencies.
 
 ### One-time Codex worktree setup on macOS
 
@@ -100,7 +110,7 @@ command or shell history. Run the same command again to replace an expired
 token.
 
 The checked-in Codex environment setup reads this one exact Keychain item only
-for `./bin/6529 install`. It passes the token into the existing secure package
+for `./bin/6529 ci`. It passes the token into the existing secure package
 helper, then the helper process exits. The setup also removes any inherited
 `NODE_AUTH_TOKEN` before Codex captures the successful setup environment. It
 copies existing `.env.development` and `.env.production` files from the primary
@@ -150,21 +160,22 @@ verification. The helper keeps Socket's loopback proxy for every other host,
 including `registry.npmjs.org`, and keeps Socket's CA as an additional trusted
 root for those proxied requests. There is no general skip-Socket option.
 
-To apply audit fixes, use the same secure wrapper path. It prompts silently when
-the token is not already present:
+To report or apply audit fixes, use the same secure wrapper path. It prompts
+silently when the token is not already present:
 
 ```bash
-6529 update
+6529 audit
+6529 audit:fix
 ```
 
-For an intentional broader pnpm update, use:
+For an intentional dependency update, use:
 
 ```bash
-6529 update:all
+6529 update [package]
 ```
 
 Dependabot intentionally ignores the exact private package because its npm
-update job has no package credential. `6529 update:all` cannot change this
+update job has no package credential. `6529 update` cannot change this
 package: the bypass remains pinned to `0.0.3` before pnpm starts. A future
 upgrade requires a separate reviewed change that updates the policy constants,
 manifest, release-age exception, and lockfile tarball integrity together. Do
