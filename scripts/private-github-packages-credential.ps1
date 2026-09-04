@@ -18,6 +18,7 @@ using System.Text;
 public static class SeizeCredentialManager
 {
     private const uint CredentialTypeGeneric = 1;
+    // Persists across this user's logon sessions without making the credential machine-wide.
     private const uint CredentialPersistLocalMachine = 2;
     private const int ErrorNotFound = 1168;
     private const int MaximumCredentialBlobSize = 5 * 512;

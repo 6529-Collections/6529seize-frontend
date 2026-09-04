@@ -1593,6 +1593,12 @@ describe("documented private-package setup flows", () => {
     expect(windowsCredentialHelper).toContain("CredWriteW");
     expect(windowsCredentialHelper).toContain("Read-Host");
     expect(windowsCredentialHelper).toContain("-AsSecureString");
+    expect(windowsCredentialHelper).toContain(
+      "[string]::IsNullOrEmpty($token)"
+    );
+    expect(windowsCredentialHelper).toMatch(
+      /if \(\[string\]::IsNullOrEmpty\(\$token\)\) \{\s+exit 1\s+\}/
+    );
     expect(windowsCredentialHelper).not.toContain("Write-Output $token");
     expect(installIndex).toBeGreaterThanOrEqual(0);
     expect(authRemovalIndex).toBeGreaterThan(installIndex);
