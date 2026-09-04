@@ -25,6 +25,11 @@ reproducibility. The OpenAPI snapshot is stable two-space JSON and the runtime
 manifest keeps one route per line, so future contract drift is reviewable at
 path, operation, schema, and route level.
 
+The [accepted operational retirements](./public-get-compatibility-manifest.md#accepted-operational-retirements)
+record the removed deployment UI and earlier V1 operational routes. These
+explicit exceptions leave the frozen JSON evidence and every unrelated GET
+contract intact.
+
 ## Evidence Index
 
 | Deliverable | Evidence |

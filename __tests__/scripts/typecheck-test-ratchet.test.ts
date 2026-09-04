@@ -47,7 +47,7 @@ describe("test typecheck ratchet", () => {
   it.each([
     "__tests__/components/Card.test.tsx",
     "__mocks__/@/services/api/common-api.ts",
-    "ops/scripts/release-bus-status.test.ts",
+    "ops/scripts/example.test.ts",
   ])("recognizes Jest TypeScript path %s", (filePath) => {
     expect(isJestDiagnosticPath(filePath)).toBe(true);
   });
@@ -69,7 +69,7 @@ describe("test typecheck ratchet", () => {
         "__tests__/components/waves/drop/SingleWaveDrop.test.tsx"
       )
     ).toBe("__tests__/components/waves");
-    expect(diagnosticDirectory("ops/scripts/release-bus-status.test.ts")).toBe(
+    expect(diagnosticDirectory("ops/scripts/example.test.ts")).toBe(
       "ops/scripts"
     );
     expect(

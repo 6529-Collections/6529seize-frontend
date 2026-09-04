@@ -31,7 +31,7 @@ jobs:
       playwright_smoke_required: ${{ steps.plan_outputs.outputs.playwright_smoke_required }}
       playwright_critical_shell_required: ${{ steps.plan_outputs.outputs.playwright_critical_shell_required }}
       playwright_museum_required: ${{ steps.plan_outputs.outputs.playwright_museum_required }}
-      release_bus_contract_required: ${{ steps.plan_outputs.outputs.release_bus_contract_required }}
+      deployment_contract_required: ${{ steps.plan_outputs.outputs.deployment_contract_required }}
       dependency_governance_required: ${{ steps.plan_outputs.outputs.dependency_governance_required }}
       reviewbot_contract_required: ${{ steps.plan_outputs.outputs.reviewbot_contract_required }}
       agent_files_sync_required: ${{ steps.plan_outputs.outputs.agent_files_sync_required }}
@@ -522,33 +522,25 @@ jobs:
         if: matrix.lane == 'quality' && needs.plan.outputs.agent_files_sync_required == 'true'
         run: ./bin/6529 run test:no-coverage -- __tests__/scripts/sync-agent-files.test.ts
 
-      - name: Verify Release Bus v2 workflow contract
-        if: matrix.lane == 'quality' && needs.plan.outputs.release_bus_contract_required == 'true'
+      - name: Verify frontend deployment workflow contracts
+        if: matrix.lane == 'quality' && needs.plan.outputs.deployment_contract_required == 'true'
         run: |
           set -euo pipefail
           ./bin/6529 run test:no-coverage --runInBand --runTestsByPath \
             __tests__/scripts/app-pr-ci-effective-plan.test.ts \
             __tests__/scripts/ci-wave-web-validation.test.ts \
-            __tests__/scripts/pr-ci-policy-bundle.test.ts \
             __tests__/scripts/deploy-staging-artifact.test.ts \
-            __tests__/scripts/deployment-bus.test.ts \
             __tests__/scripts/e2e-packs.test.ts \
-            __tests__/scripts/manual-deploy-routing-guard.test.ts \
+            __tests__/scripts/frontend-deployment-workflows.test.ts \
             __tests__/scripts/museum-release-tier.test.ts \
             __tests__/scripts/museum-surface-registry.test.ts \
             __tests__/scripts/package-public-review-artifacts.test.ts \
             __tests__/scripts/production-build-artifact.test.ts \
-            __tests__/scripts/production-e2e-dispatch.test.ts \
+            __tests__/scripts/production-artifact-metadata.test.ts \
+            __tests__/scripts/production-artifact-verifier.test.ts \
+            __tests__/scripts/deployment-e2e-workflows.test.ts \
             __tests__/scripts/public-review-artifact-workflows.test.ts \
-            __tests__/scripts/release-bus-artifact-compatibility.test.ts \
-            __tests__/scripts/release-bus-baseline-adoption-decision.test.ts \
-            __tests__/scripts/release-bus-performance-contract.test.ts \
-            __tests__/scripts/release-bus-v2-advance-staging-ref-workflow.test.ts \
-            __tests__/scripts/release-bus-v2-compose-workflow.test.ts \
-            __tests__/scripts/release-request-preflight.test.ts \
-            __tests__/scripts/sync-e2e-manifest.test.ts \
-            __tests__/scripts/release-bus-install-dependencies.test.ts \
-            ops/scripts/release-bus-status.test.ts
+            __tests__/scripts/sync-e2e-manifest.test.ts
 
       - name: Lint changed source
         if: matrix.lane == 'quality' && needs.plan.outputs.lint_changed_required == 'true'
@@ -715,23 +707,7 @@ jobs:
           MUSEUM_RELEASE_TIER_MODE: ${{ vars.MUSEUM_RELEASE_TIER_MODE }}
         run: |
           set -euo pipefail
-          hold_state="unknown"
-          if hold_issues="$(gh issue list \
-            --repo "$GITHUB_REPOSITORY" \
-            --state open \
-            --label "release-bus-museum-hold" \
-            --limit 100 \
-            --json number 2>/dev/null)" && \
-            jq -e 'type == "array"' <<< "$hold_issues" >/dev/null
-          then
-            if [ "$(jq 'length' <<< "$hold_issues")" -eq 0 ]; then
-              hold_state="clear"
-            else
-              hold_state="active"
-            fi
-          else
-            echo "::warning::Museum hold lookup failed; retaining every Museum pack."
-          fi
+          hold_state="clear"
           mapfile -t museum_refs < <(
             git ls-remote --refs \
               https://github.com/6529-Collections/6529networkmuseum.git \
@@ -893,7 +869,7 @@ jobs:
           EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           EXPECTED_MERGE_SHA: ${{ github.sha }}
           BUILD_REQUIRED: ${{ needs.plan.outputs.build_required }}
-          RELEASE_BUS_CONTRACT_REQUIRED: ${{ needs.plan.outputs.release_bus_contract_required }}
+          DEPLOYMENT_CONTRACT_REQUIRED: ${{ needs.plan.outputs.deployment_contract_required }}
           TEST_TYPECHECK_REQUIRED: ${{ needs.plan.outputs.test_typecheck_required }}
           MUSEUM_BROWSER_REQUIRED: ${{ needs.plan.outputs.playwright_museum_required }}
         run: |
@@ -902,22 +878,13 @@ jobs:
           [[ "$EXPECTED_MERGE_SHA" =~ ^[a-f0-9]{40}$ ]]
           [[ "$EXPECTED_HEAD_SHA" =~ ^[a-f0-9]{40}$ ]]
           [[ "$BUILD_REQUIRED" =~ ^(true|false)$ ]]
-          [[ "$RELEASE_BUS_CONTRACT_REQUIRED" =~ ^(true|false)$ ]]
+          [[ "$DEPLOYMENT_CONTRACT_REQUIRED" =~ ^(true|false)$ ]]
           [[ "$TEST_TYPECHECK_REQUIRED" =~ ^(true|false)$ ]]
           [[ "$MUSEUM_BROWSER_REQUIRED" =~ ^(true|false)$ ]]
           test "$(git rev-parse HEAD)" = "$EXPECTED_MERGE_SHA"
           test "$(git rev-parse HEAD^1)" = "$EXPECTED_BASE_SHA"
-          rm -rf release-bus-v2-pr-evidence
-          mkdir -p release-bus-v2-pr-evidence
-          policy_bundle="$(node scripts/pr-ci-policy-bundle.cjs \
-            --expected-git-ref "$EXPECTED_MERGE_SHA" \
-            --output release-bus-v2-pr-evidence/policy-bundle.txt)"
-          policy_bundle_contract="$(jq -er .contract <<< "$policy_bundle")"
-          policy_bundle_digest="$(jq -er .digest <<< "$policy_bundle")"
-          policy_bundle_line_count="$(jq -er .line_count <<< "$policy_bundle")"
-          test "$policy_bundle_contract" = pr-ci-policy-bundle-v1
-          [[ "$policy_bundle_digest" =~ ^[a-f0-9]{64}$ ]]
-          [[ "$policy_bundle_line_count" =~ ^[1-9][0-9]{0,3}$ ]]
+          rm -rf exact-pr-ci-evidence
+          mkdir -p exact-pr-ci-evidence
           jq -e --arg base_sha "$EXPECTED_BASE_SHA" --arg head_sha "$EXPECTED_MERGE_SHA" '
             .contract == "museum-release-selection-v1" and
             .environment == "pr" and
@@ -949,11 +916,8 @@ jobs:
             --arg base_sha "$EXPECTED_BASE_SHA" \
             --arg merge_sha "$EXPECTED_MERGE_SHA" \
             --arg head_sha "$EXPECTED_HEAD_SHA" \
-            --arg policy_bundle_contract "$policy_bundle_contract" \
-            --arg policy_bundle_digest "$policy_bundle_digest" \
-            --argjson policy_bundle_line_count "$policy_bundle_line_count" \
             --argjson build_required "$BUILD_REQUIRED" \
-            --argjson release_bus_contract_required "$RELEASE_BUS_CONTRACT_REQUIRED" \
+            --argjson deployment_contract_required "$DEPLOYMENT_CONTRACT_REQUIRED" \
             --argjson test_typecheck_required "$TEST_TYPECHECK_REQUIRED" \
             --argjson museum_browser_required "$MUSEUM_BROWSER_REQUIRED" \
             --slurpfile museum_release_selection test-results/app-pr-ci/museum-release-selection.json \
@@ -968,39 +932,35 @@ jobs:
               head_sha:$head_sha,
               production_build_required:$build_required,
               dependency_analysis_required:true,
-              release_bus_contract_required:$release_bus_contract_required,
+              deployment_contract_required:$deployment_contract_required,
               test_typecheck_required:$test_typecheck_required,
               museum_browser_required:$museum_browser_required,
               museum_source_commit:$museum_release_selection[0].source_commit,
               museum_release_selection_digest:$museum_release_selection[0].selection_digest,
               museum_release_selection:$museum_release_selection[0],
-              policy_bundle_contract:$policy_bundle_contract,
-              policy_bundle_digest:$policy_bundle_digest,
-              policy_bundle_line_count:$policy_bundle_line_count,
               required_gates:([
                 "package-manager-discipline",
                 "dependency-analysis",
                 "reviewbot-contract",
                 "generated-agent-files",
-                "release-bus-workflow-contract-or-plan-not-required",
+                "deployment-workflow-contract-or-plan-not-required",
                 "changed-lint",
                 "changed-typecheck",
                 "test-typecheck-or-plan-not-required",
                 "related-jest-selection",
                 "production-build-or-plan-not-required",
-                "pr-ci-policy-bundle",
                 "museum-release-selection"
               ] + (if $museum_browser_required then ["museum-browser-qualification"] else [] end))
-            }' > release-bus-v2-pr-evidence/manifest.json
-          (cd release-bus-v2-pr-evidence && \
-            sha256sum ./manifest.json ./policy-bundle.txt > SHA256SUMS)
+            }' > exact-pr-ci-evidence/manifest.json
+          (cd exact-pr-ci-evidence && \
+            sha256sum ./manifest.json > SHA256SUMS)
 
       - name: Upload exact PR merge-tree CI evidence
         if: matrix.lane == 'quality'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: release-bus-v2-pr-${{ github.sha }}
-          path: release-bus-v2-pr-evidence
+          name: exact-pr-ci-${{ github.sha }}
+          path: exact-pr-ci-evidence
           if-no-files-found: error
           retention-days: 30
 
@@ -1095,23 +1055,7 @@ jobs:
           SOURCE_COMMIT: ${{ steps.museum_publication.outputs.source_commit }}
         run: |
           set -euo pipefail
-          hold_state="unknown"
-          if hold_issues="$(gh issue list \
-            --repo "$GITHUB_REPOSITORY" \
-            --state open \
-            --label "release-bus-museum-hold" \
-            --limit 100 \
-            --json number 2>/dev/null)" && \
-            jq -e 'type == "array"' <<< "$hold_issues" >/dev/null
-          then
-            if [ "$(jq 'length' <<< "$hold_issues")" -eq 0 ]; then
-              hold_state="clear"
-            else
-              hold_state="active"
-            fi
-          else
-            echo "::warning::Museum hold lookup failed; retaining every Museum pack."
-          fi
+          hold_state="clear"
           if [ "$MUSEUM_RELEASE_SELECTION_CONTROL_AVAILABLE" = true ]; then
             NODE_PATH="$GITHUB_WORKSPACE/node_modules${NODE_PATH:+:$NODE_PATH}" \
               node "$MUSEUM_RELEASE_SELECTION_TOOL" \

@@ -7,8 +7,9 @@ only after exact-head CI and review, qualify the final train in staging and
 production, then publish a technical closeout to the 6529 developer Wave.
 
 Execution began from frontend `main`
-`d448d4c282c034fa2a1d5d1d95ce90fc85561e54`. Release Bus state must be read
-fresh before every environment mutation; this file is not release authority.
+`d448d4c282c034fa2a1d5d1d95ce90fc85561e54`. Current authorized deployments
+follow `ops/docs/developer/deployment.md`; dated checkpoints below describe
+what existed when they were recorded.
 
 ## Current finding
 
@@ -47,10 +48,10 @@ generation took 5.0 minutes. The complete staging build-and-package step took
    typechecking from release builds.
 7. Move toward one runtime-configured immutable artifact promoted through
    staging and production.
-8. Restore Release Bus v2 as the sole automated mutation authority and replace
-   fixed production health sleeps with stable-state polling.
+8. Use direct GitHub Actions deployment with stable-state production health
+   polling.
 9. Deduplicate Jest selection and dependency/browser setup, and preserve the
-   restored Release Bus Next cache instead of deleting it before the build.
+   Next.js cache before the build.
 
 ## Target
 
@@ -65,7 +66,7 @@ build architecture is 40 minutes at p95.
 - runner and cache benchmark design
 - static-generation cardinality and build duplication
 - runtime-neutral artifact boundary and readiness polling
-- live Release Bus procedure and control-plane health
+- direct deployment workflow and runtime health
 
 All delegated lanes are read-only. The owning orchestrator reviews and lands
 every diff.

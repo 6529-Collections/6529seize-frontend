@@ -1,257 +1,94 @@
 ---
 name: deploy-6529
-description: Route and execute 6529 frontend, backend, or coupled staging and production releases through an effective Release Bus lane by exact PR head SHA, or use the serialized manual fallback while that target lane reports OFF. Use for staging, deploy, promotion, release merge, turning a lane on or off, recovery, or rollout coordination.
+description: Execute authorized 6529 frontend, backend, or coupled staging and production deployment using ordinary merges and GitHub Actions. Use for staging, deployment, production release, deployment monitoring, failure recovery, or rollback within the user's requested scope.
 ---
 
 # Deploy 6529
 
-## Live routing gate
+## Prepare
 
-1. Run `./bin/6529 exec node ops/scripts/release-bus-status.mjs` at the start
-   and again before any readiness or environment mutation. The helper uses an
-   authenticated `gh` session to read the controls endpoint, verifies hidden
-   safety fences, and returns only the two effective automation lanes.
-2. Fail closed on an unavailable/malformed API, authentication failure, unknown
-   or inconsistent lane state. Never infer ownership from files, raw mode,
-   hidden controls, or old output.
-3. Route the target environment by the fresh lane result:
+1. Read the user's requested phase and current PR/CI state. Complete the
+   applicable review and validation requirements before release work. Continue
+   through the authorized phase without asking for the same permission again;
+   staging authorization alone does not authorize production.
+2. Determine the affected repositories and backend services from the diff and
+   backend `src/config/deploy-services.json`, including real dependency order
+   and allowed environments. Deploy only required units. Follow each repo's
+   `6529` wrapper rules for package commands.
+3. Fetch the destination branch and merge without discarding other developers'
+   work. If it moves, fetch and recompute; resolve conflicts in the development
+   branch where appropriate. Never force-push shared branches.
+4. Use GitHub Actions run visibility to avoid conflicting deployments. Wait for
+   another developer's conflicting work to finish; do not cancel it. Existing
+   workflow concurrency is repository-scoped, so coordinate coupled BE/FE
+   work explicitly.
 
-| Target lane       | Route                                                                                                                                                  |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `STAGING: ON`     | Register the exact candidate with Release Bus                                                                                                          |
-| `STAGING: OFF`    | If `changeable: true`, serialized manual staging after the staging drain gate                                                                          |
-| `PRODUCTION: ON`  | Explicitly mark an exact `STAGING_VALIDATED` candidate ready for Release Bus production                                                                |
-| `PRODUCTION: OFF` | If `changeable: true`, serialized manual production after the production drain gate and explicit owner authorization; staging evidence is not required |
+## Staging
 
-Raw mode and `ALL` are internal emergency fences. They are verified by the
-helper but are not normal routing or UI controls. Do not bypass an internal
-fence. Both lanes `OFF` means full manual fallback after both drain gates.
+1. For backend changes, merge the development branch into current `1a-staging`
+   and push. Dispatch `.github/workflows/deploy.yml` (`Deploy a service`) with
+   `--ref 1a-staging`, `environment=staging`, and the first required `service`.
+2. Identify the dispatched run by repository, workflow, branch, service, and
+   commit. Wait for success, then dispatch the next required service in
+   dependency order. Continue in the same task until the authorized backend
+   sequence is complete.
+3. After required backend dependencies are deployed, merge the frontend
+   development branch into current `1a-staging` and push. The existing
+   `Web Deploy - STAGING` push trigger deploys automatically for application
+   and workflow changes; its existing `ops/**`-only exclusion remains. When an
+   authorized ops-only change needs deployment, dispatch `deploy-staging.yml`
+   on `1a-staging` explicitly.
+4. Wait for the frontend build, artifact verification, deployed-version check,
+   and health checks. Successful Web Deploy completion starts Staging E2E
+   separately. Do not wait for E2E before reporting deployment complete or
+   continuing to the next authorized environment; report its current status
+   separately. Fix known regressions attributable to the change.
 
-There is no inferred control-plane or self-upgrade exception. When a target
-lane is `ON`, every deployment for that environment—including API,
-`releaseBus`, cleaner/reconciler, and other control-plane changes—must be an
-authenticated Release Bus operation. Do not manually dispatch a target
-environment workflow while its lane is `ON`. Manual fallback exists only when
-the helper authoritatively reports the affected lane `OFF` and its drain gate
-passes. The helper must also report `changeable: true` and verify that no hidden
-emergency fence blocks fallback. If Release Bus cannot safely self-deploy while
-`ON`, stop for explicit owner direction; never infer an exception from the
-component or GitHub actor.
+## Production
 
-## Release-request observation
+1. With production authorization, merge the backend development branch into
+   current `main`, then dispatch `Deploy a service` with `--ref main`,
+   `environment=prod`, and each required service sequentially. Wait for each
+   dependency to succeed before continuing.
+2. Supply the merged PR number and complete canonical service set for the
+   release to each backend production run. Set `release_note_publish=true`
+   only for the final successful service. Use `release_note_groups` when the
+   release contains multiple PR groups, preserving their service membership.
+   Keep autonomous release notes enabled, including for internal maintenance.
+   Only if the user explicitly asks to suppress notes, omit PR/group metadata,
+   set `release_note_opt_out=true`, and leave `release_note_publish=false`.
+3. After required backend dependencies are deployed, merge the frontend
+   development branch into current `main` and dispatch
+   `.github/workflows/build-upload-deploy-prod.yml` (`Web Deploy - PROD`) with
+   `--ref main`. The workflow builds, verifies, and deploys. Its successful
+   completion automatically starts a separate Production E2E workflow.
+4. Complete the deployment after its artifact, version, and health checks pass.
+   Report Production E2E separately; it does not gate release completion.
+   Preserve the workflow's autonomous release-note notification; never compose
+   or publish the note yourself.
 
-The initial `release-bus-status.mjs` check above remains the first action. After
-it succeeds, classify the requested work before any candidate registration,
-merge, deployment, or environment mutation.
+## Failure and closeout
 
-Run this observation only when introducing a new staging release intent or a new
-direct production release intent. Do not run it for merge-only work, status or
-monitoring, retry or resume, recovery, production continuation, promotion of an
-existing release, or lane toggles.
+Inspect failed jobs and logs before retrying. A failed deployment, artifact,
+version, or health check blocks deployment completion; a green build alone is
+not sufficient. Automatic E2E is asynchronous and reports its own result.
+Do not hold up releases for pending E2E or unrelated failures such as Museum
+checks on a change outside Museum. Keep relevant build, unit/contract, and
+security checks. If an aggregate PR check is blocked solely by unrelated E2E,
+record the result and use the authorized merge path without changing repository
+protections or claiming those tests passed. Fix known attributable regressions
+through the development branch and the authorized deployment sequence.
 
-For a new intent, print the installed CLI's current input template. This command
-is read-only and creates no run or request record:
+Roll back through the ordinary deployment workflow using a reviewed
+revert or compatible known-good source, preserving shared branch history and
+checking database/API compatibility first.
 
-```bash
-./bin/6529 exec 6529-release-request template
-```
+Report the PRs, deployed services and order, deployment run links, available
+E2E results, and any remaining failure. The workflows resolve and
+verify commits and artifact digests automatically; developers supply ordinary
+branch/environment/service choices. Keep credentials and private data out of
+reports.
 
-Fill that canonical shape with the exact known release data:
+## Reference
 
-- `requested_by`, `target` (`staging` or `production`), and `database_change`
-  (`yes`, `no`, or `unknown`);
-- `release_parts[]`, with one frontend and/or backend part. Each part has `id`,
-  `repository`, `pull_requests[]`, and `depends_on[]` part IDs;
-- each `pull_requests[]` item has `number`, `branch`, and `commit`, where
-  `commit` is the exact 40-character lowercase head SHA;
-- a backend part also has `deploy_units[]` and `deploy_dependencies[]`, whose
-  items are `{ "before": "unit", "after": "unit" }` edges.
-
-Remove any frontend or backend template part that is not in this release. Do
-not add `schema_version`, `request_id`, or `created_at`; the CLI creates them.
-Keep the JSON limited to release metadata. Never include tokens, passwords,
-cookies, signed URLs, environment values, production data, or other secrets.
-`requested_by` is descriptive context only; it is not authentication or
-approval. The GitHub actor recorded by the central workflow is the trusted
-sender identity.
-
-Pass the completed JSON exactly once on standard input from the repository
-root. Do not create a separate input file, and do not call `create` before or
-after this command because `submit` already creates, validates, and saves the
-local run and outbox request:
-
-```bash
-release_request_submit_status=0
-if ./bin/6529 exec 6529-release-request submit --input - <<'JSON'
-{...completed release-request JSON...}
-JSON
-then
-  release_request_submit_status=0
-else
-  release_request_submit_status=$?
-  [ "$release_request_submit_status" -lt 128 ] || {
-    printf 'Release-request observation ended with signal-style status %s; stop and escalate to the Coordinator owner.\n' "$release_request_submit_status" >&2
-    exit "$release_request_submit_status"
-  }
-fi
-```
-
-This is synchronous observation mode. `submit` runs in the foreground and
-waits for the central GitHub workflow, so it can delay the release while
-GitHub queues or runs that workflow. The conditional only makes an ordinary
-returned failure below status 128 non-gating; a signal-style status of 128 or
-higher stops the release and escalates to the Coordinator owner. It does not
-put the call in the background or bound its wait. Do not retry, background,
-detach, wrap in a shell timeout, or replace it with a direct GitHub call during
-the release. If the wait never returns, stop and escalate to the Coordinator
-owner; do not invent a time limit or an interrupt-to-continue bypass. A true
-no-wait path requires a separate future change to the Coordinator CLI/package.
-The CLI owns its central GitHub dispatch and wait; do not dispatch, name, or
-poll a GitHub workflow separately.
-
-Treat the result as observation only:
-
-- On success, report and retain the returned `request_id`,
-  `workflow_run_url`, `inbox_issue_number`, `inbox_issue_url`, `run_path`, and
-  `request_path`, then continue the existing Release Bus or manual-fallback
-  route unchanged.
-- On failure, report one short observation warning with the returned reason or
-  first error and any available `run_path`, `request_path`, or
-  `workflow_run_url`. Keep the local evidence, do not ask the developer to fix
-  the observation during the release, and continue the same existing route.
-
-A returned success or failure never gates, replaces, reorders, or weakens any
-candidate, merge, readiness, deployment, E2E, or recovery step below. Version
-`0.0.3` validates and saves the request through the central workflow as a
-private Coordinator inbox Issue. The request and workflow result grant no
-deployment authority and are not Release Bus inputs.
-
-## V2 readiness
-
-1. Require an open PR whose exact head and green merge-tree checks are current.
-2. Open `/deploy/ui/bus` or call the versioned API. Submit repository, PR,
-   branch, exact 40-character head SHA, backend deploy units/DAG edges, and
-   candidate dependencies.
-3. For coupled work, register backend first and declare it as the frontend
-   prerequisite. Declare only real ordering edges; independent backend DAG
-   frontier units run concurrently.
-4. Report candidate ID, immutable SHA, and status. Do not launch a parallel
-   manual deploy after v2 accepts the candidate.
-5. Wait for `STAGING_VALIDATED`. `STAGING_DEPLOYED` means manifest-bound E2E is
-   still pending and is not production evidence.
-6. Production is a separate explicit action. Re-resolve the branch and mark
-   ready only when it still equals the exact staging-validated SHA. Staging
-   validation never schedules production automatically. A pre-mutation
-   production replan may create a new audited replacement from all currently
-   eligible explicit selections, including a compatible selection recorded
-   after the source train was claimed. Verify every source selection/train
-   mapping and omission reason; it must never infer candidates from staging.
-   Once any `main` advance succeeds, a production deploy is dispatched, or
-   production E2E exists, the original exact set is frozen and may only resume
-   or recover unchanged.
-   If `PRODUCTION_REPLAN_INTENT_SCAN_FAILED_CLOSED` reaches its bounded cap,
-   stop claiming; after ownership drains, revoke/cancel only owner-authorized
-   stale intents or deploy a separately reviewed pagination/cap change. Never
-   edit the ledger or silently drop intent.
-
-V2 reuses exact green PR merge-tree source and test evidence, then freshly
-builds one immutable environment-bound artifact from the train's exact
-composition. Staging builds only the staging profile. Production freshly
-composes the exact dependency-closed selection on current production `main`
-and builds only the production profile; staging artifact bytes are never
-reused for ordinary production. Repository-wide lint, typecheck, test
-inventory, and full Jest matrices stay in exact-head/merge-tree PR CI rather
-than normal train preflight. Shared staging is owned only for deploy plus
-manifest-bound E2E. V2 never publishes release notes.
-
-## Manual fallback while the target lane is OFF and changeable
-
-1. Require the helper to report the target lane `OFF` with `changeable: true`
-   and no hidden emergency fence blocking fallback. The legacy frontend
-   staging and production workflows independently call the authenticated
-   readiness gate as their first job and reject before checkout, build, ref,
-   credential, or deployment mutation unless the exact run and drain state
-   are authorized. Then prove the target environment lock is free, no target
-   mutation/E2E workflow is active, and every already-dispatched exact operation
-   is terminal. Fetch the exact remote target head.
-2. Finish every preparatory action before the staging-drain snapshot. In
-   particular, re-fetch the shared ref and, if it moved, recompute from its new
-   head. Never force-push or fetch again after the snapshot.
-3. Immediately before pushing frontend `1a-staging`, and separately immediately
-   before dispatching each backend staging service, take one fresh bounded
-   read-only staging-drain snapshot across both repositories:
-   - Run `./bin/6529 exec node ops/scripts/release-bus-status.mjs` once and
-     require the effective staging lane to be `OFF` with `changeable: true`.
-     This helper alone is not a staging-drain snapshot.
-   - Read `/deploy/ui/bus` or its versioned read API once. Require the
-     `staging-environment` lock to be unowned, with no active `STAGING` or
-     `PRODUCTION_QUALIFICATION` train and no nonterminal operation in either
-     lane.
-   - Make one bounded GitHub Actions pass for `queued` and `in_progress` runs in
-     both repositories, examining at most ten pages of 100 runs for each status
-     and repository. Block on backend `Deploy a service` runs whose display
-     title targets `staging`; frontend `deploy-staging.yml`,
-     `release-bus-deploy-staging.yml`, and `staging-e2e.yml`; and either repo's
-     `release-bus-v2-advance-staging-ref.yml`. Match by workflow path, using the
-     current workflow name only as a legacy fallback.
-   Production deploy/E2E, PR CI, and unrelated workflows are not staging
-   blockers. Fail closed if any source is unavailable, malformed, incomplete,
-   ambiguous, or exceeds its bound. Snapshot collection is the final read-only
-   sequence before one mutation; do not reuse it for another backend service, a
-   batch, or a later frontend push. On a blocker, stop and return control without
-   waiting, polling, cancelling, retrying, or mutating. For a workflow blocker,
-   report repository, workflow, status, run ID, and link. Otherwise report the
-   gate/lock/train/operation/source, exact state or error, observation time, and
-   available owner, identity, or link. The existing workflow authorization
-   guard and all rejection/failure alerts remain unchanged as final race
-   protection.
-4. Deploy required backend units in DAG order before merging/deploying dependent
-   frontend work to `1a-staging`. Dispatch exactly one backend service workflow
-   (`Deploy a service`) and stop. A later continuation may dispatch the next
-   service only after the prior run's exact success is already established and
-   step 3 produces a new clear snapshot. Shared workflow concurrency can cancel
-   sibling runs, even for independent DAG-frontier units.
-5. Record exact deployed frontend/backend SHAs before E2E and freeze staging
-   until E2E is terminal.
-6. With the production lane `OFF`, production requires explicit owner
-   authorization but not prior staging deployment or validation. Re-fetch
-   `main` and preserve dependency
-   order. For backend services, pass the same merged PR number and full
-   canonical service set to every sequential production run, setting
-   `release_note_publish=true` only on the final service. Never author or post
-   the note—the autonomous bot owns it.
-
-## Monitoring and recovery
-
-- Use train details, operations, workflow links, manifest identity, failure
-  class, and recovery message in `/deploy/ui/bus`.
-- Infrastructure and retryable exact deployment failures retry the same
-  idempotent operation. They do not isolate candidates.
-- A merge conflict marks only the direct candidate `NEEDS_REBASE` and holds
-  transitive dependants. Fix the branch and register its new SHA.
-- A control-plane defect leaves candidates unblamed. If the supported,
-  authorized recovery procedure turns the affected automation lane off, keep
-  exact state and wait for its drain gate before using manual fallback; turn
-  the lane on explicitly after repair. If the lane remains `ON`, do not infer a
-  self-upgrade exception—stop for explicit owner direction.
-- Use the backend fast-off helper only for an emergency hard stop of both
-  lanes. Its raw mode and `ALL` changes are intentionally absent from normal UI
-  and routing.
-- Failed E2E never creates staging validation. Do not mutate staging while the
-  manifest owner still holds the environment lock.
-- If either production `main` base moves before irreversible mutation, v2 must
-  preserve every explicit intent and replan a fresh audited, dependency-closed
-  replacement. After irreversible mutation, freeze the original exact set and
-  require exact recovery. Never force a recorded composition over a newer ref
-  or broaden an active train in place.
-
-## Closeout
-
-For a release with request observation, report its outcome. On success include
-`request_id`, `workflow_run_url`, `inbox_issue_number`, `inbox_issue_url`,
-`request_path`, and `run_path`; on failure include the short observation warning
-and available local or workflow evidence.
-Also report exact candidate SHAs/dependencies, train and operation states,
-deployed versions, manifest/E2E evidence, failures or holds, and both effective
-lane states. Do not expose credentials, signed URLs, raw production data, or
-hidden prompts.
+Read [Deployment](../../docs/developer/deployment.md) for workflow commands and recovery.

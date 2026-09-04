@@ -3,7 +3,9 @@
 import { COMMUNITY_CURATIONS_LIMIT } from "@/components/community-curations/communityCurations.constants";
 import CommunityCurationsMasonry from "@/components/community-curations/CommunityCurationsMasonry";
 import { useLayout } from "@/components/brain/my-stream/layout/LayoutContext";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useCommunityCurationsDrops } from "@/hooks/useCommunityCurationsDrops";
+import { t } from "@/i18n/messages";
 import { useCallback, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
 
@@ -137,6 +139,7 @@ export default function CommunityCurations({
   heightStyle,
   topContent,
 }: CommunityCurationsProps = {}) {
+  const locale = useBrowserLocale();
   const { waveViewStyle } = useLayout();
   const [scrollContainer, setScrollContainer] = useState<HTMLElement | null>(
     null
@@ -174,10 +177,10 @@ export default function CommunityCurations({
         <div className="tw-flex tw-flex-col tw-gap-4">
           <div className="tw-max-w-2xl">
             <h1 className="tw-mb-0 tw-text-lg tw-font-bold tw-text-white md:tw-text-xl">
-              Latest From Profile Waves
+              {t(locale, "waves.profileFeed.title")}
             </h1>
             <p className="tw-mb-0 tw-mt-1 tw-text-pretty tw-text-sm tw-text-iron-400">
-              Drops 6529 users are featuring from their own profile waves.
+              {t(locale, "waves.profileFeed.description")}
             </p>
           </div>
         </div>
@@ -187,15 +190,15 @@ export default function CommunityCurations({
 
           {!isInitialLoading && isError && (
             <CommunityCurationsEmptyState
-              title="Could not load curations"
-              description="Try refreshing this view in a moment."
+              title={t(locale, "waves.profileFeed.errorTitle")}
+              description={t(locale, "waves.profileFeed.errorDescription")}
             />
           )}
 
           {shouldShowEmptyState && (
             <CommunityCurationsEmptyState
-              title="No profile wave drops yet"
-              description="Drops will appear here when users feature them from their profile waves."
+              title={t(locale, "waves.profileFeed.emptyTitle")}
+              description={t(locale, "waves.profileFeed.emptyDescription")}
             />
           )}
 

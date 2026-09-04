@@ -162,7 +162,7 @@ const CreateDropStormParts: FC<CreateDropStormPartsProps> = ({
       </span>
       <section
         aria-labelledby={headingId}
-        className="create-drop-storm-surface -tw-mx-4 -tw-mt-2 tw-mb-3 tw-flex tw-min-h-0 tw-flex-col tw-border-b tw-border-l-2 tw-border-r-0 tw-border-t-0 tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-pb-2 tw-pl-3.5 tw-pr-4"
+        className="create-drop-storm-surface -tw-mx-4 tw-mb-3 tw-flex tw-min-h-0 tw-flex-col tw-border-b tw-border-l-2 tw-border-r-0 tw-border-t-0 tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-pb-2 tw-pl-3.5 tw-pr-4"
         style={{ borderLeftColor: "#406AFE" }}
       >
         <header className="tw-flex tw-min-w-0 tw-items-center tw-justify-between tw-gap-3 tw-px-0 tw-py-2.5 sm:tw-py-3">
@@ -201,7 +201,7 @@ const CreateDropStormParts: FC<CreateDropStormPartsProps> = ({
               type="button"
               onClick={handleDiscardTrigger}
               disabled={controlsDisabled}
-              className={`tw-inline-flex tw-h-11 tw-flex-none tw-cursor-pointer tw-items-center tw-justify-center tw-gap-1 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-2.5 tw-text-xs tw-font-medium tw-text-iron-400 tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-40 sm:tw-h-auto sm:tw-py-1.5 ${
+              className={`tw-inline-flex tw-h-8 tw-flex-none tw-cursor-pointer tw-items-center tw-justify-center tw-gap-1 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-2.5 tw-text-xs tw-font-medium tw-text-iron-400 tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-40 sm:tw-h-auto sm:tw-py-1.5 ${
                 isPristineDraft
                   ? "desktop-hover:hover:tw-bg-white/[0.035] desktop-hover:hover:tw-text-iron-200"
                   : "desktop-hover:hover:tw-bg-error/[0.06] desktop-hover:hover:tw-text-error"

@@ -25,15 +25,14 @@ jobs:
       github.event.workflow_run.head_repository.full_name == github.repository &&
       github.event.workflow_run.head_branch == 'main'
     runs-on: ubuntu-latest
-    # Remain alive beyond the Production E2E workflow's 90-minute ceiling so a
-    # terminal failure cannot strand production authority.
-    timeout-minutes: 120
+    timeout-minutes: 5
     permissions:
       actions: write
     steps:
       - name: Dispatch exact successful deploy to production E2E
         id: e2e
         env:
+          # Run the verifier from main, then check out the exact deployed source for testing.
           DEPLOY_REF: main
           DEPLOY_CONCLUSION: ${{ github.event.workflow_run.conclusion }}
           DEPLOY_HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
@@ -48,7 +47,7 @@ jobs:
           test "$DEPLOY_CONCLUSION" = success
           test "$DEPLOY_HEAD_BRANCH" = main
           test "$DEPLOY_HEAD_REPOSITORY" = "$GITHUB_REPOSITORY"
-          [[ "$DEPLOY_CREATED_AT" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9:.]+Z$ ]]
+          [[ "$DEPLOY_CREATED_AT" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}([.][0-9]+)?Z$ ]]
 
           runs_file="$(mktemp)"
           trap 'rm -f "$runs_file"' EXIT
@@ -104,7 +103,11 @@ jobs:
             "repos/${GITHUB_REPOSITORY}/actions/workflows/production-e2e.yml/dispatches" \
             --input - <<<"$dispatch_payload" || dispatch_status=$?
 
-          for _ in $(seq 1 20); do
+          if [ "$dispatch_status" -ne 0 ]; then
+            echo "::warning::Dispatch request returned gh status ${dispatch_status}; checking whether GitHub accepted it before any retry."
+          fi
+
+          for _ in $(seq 1 60); do
             observed="$(list_exact_runs)"
             observed_count="$(jq -er 'length' <<<"$observed")"
             if [ "$observed_count" -gt 1 ]; then
@@ -120,102 +123,4 @@ jobs:
             sleep 3
           done
           echo "::error::No exact automatic Production E2E run became visible after dispatch (gh status ${dispatch_status})."
-          exit 1
-
-      # The preceding step must publish run_id on every successful reuse or
-      # dispatch path; contract tests pin both output writes.
-      - name: Dispatch authority completion after exact terminal E2E
-        env:
-          DEPLOY_WORKFLOW_RUN_ID: ${{ github.event.workflow_run.id }}
-          E2E_RUN_ID: ${{ steps.e2e.outputs.run_id }}
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-          [[ "$DEPLOY_WORKFLOW_RUN_ID" =~ ^[1-9][0-9]{0,19}$ ]]
-          [[ "$E2E_RUN_ID" =~ ^[1-9][0-9]{0,19}$ ]]
-
-          run_file="$(mktemp)"
-          listing_file="$(mktemp)"
-          trap 'rm -f "$run_file" "$listing_file"' EXIT
-          terminal=false
-          for _ in $(seq 1 400); do
-            gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${E2E_RUN_ID}" > "$run_file"
-            test "$(stat -c %s "$run_file")" -le 1048576
-            jq -e \
-              --arg repository "$GITHUB_REPOSITORY" \
-              --arg run_id "$E2E_RUN_ID" \
-              --arg deploy_run_id "$DEPLOY_WORKFLOW_RUN_ID" '
-                type == "object" and
-                (.id | tostring) == $run_id and
-                .name == ("Production E2E automatic " + $deploy_run_id) and
-                .display_title == .name and
-                .path == ".github/workflows/production-e2e.yml" and
-                .event == "workflow_dispatch" and
-                .head_branch == "main" and
-                (.head_sha | test("^[a-f0-9]{40}$")) and
-                .repository.full_name == $repository and
-                .head_repository.full_name == $repository and
-                .actor.login == "github-actions[bot]" and
-                .triggering_actor.login == "github-actions[bot]" and
-                (.status | IN("queued", "in_progress", "completed"))
-              ' "$run_file" >/dev/null
-            status="$(jq -er '.status' "$run_file")"
-            if [ "$status" = completed ]; then
-              terminal=true
-              break
-            fi
-            sleep 15
-          done
-          if [ "$terminal" != true ]; then
-            echo "::error::Exact automatic Production E2E run ${E2E_RUN_ID} did not become terminal."
-            exit 1
-          fi
-
-          dispatch_started_at="$(date -u -d '5 seconds ago' +%Y-%m-%dT%H:%M:%SZ)"
-          completion_payload="$(jq -cn \
-            --arg ref main \
-            --arg terminal_run_id "$E2E_RUN_ID" \
-            '{ref:$ref,inputs:{terminal_workflow_run_id:$terminal_run_id}}')"
-          gh api \
-            --method POST \
-            "repos/${GITHUB_REPOSITORY}/actions/workflows/production-authority-complete.yml/dispatches" \
-            --input - <<<"$completion_payload"
-
-          for _ in $(seq 1 20); do
-            gh api --method GET \
-              "repos/${GITHUB_REPOSITORY}/actions/workflows/production-authority-complete.yml/runs" \
-              -f branch=main \
-              -f event=workflow_dispatch \
-              -f created=">=${dispatch_started_at}" \
-              -f per_page=100 > "$listing_file"
-            test "$(stat -c %s "$listing_file")" -le 1048576
-            completion_runs="$(jq -c \
-              --arg repository "$GITHUB_REPOSITORY" \
-              --arg title "Production authority completion [${E2E_RUN_ID}]" '
-                [.workflow_runs[] |
-                  select(
-                    .name == $title and
-                    .display_title == $title and
-                    .path == ".github/workflows/production-authority-complete.yml" and
-                    .event == "workflow_dispatch" and
-                    .head_branch == "main" and
-                    .repository.full_name == $repository and
-                    .head_repository.full_name == $repository and
-                    .actor.login == "github-actions[bot]"
-                  ) |
-                  .id] |
-                unique | sort
-              ' "$listing_file")"
-            completion_count="$(jq -er 'length' <<<"$completion_runs")"
-            if [ "$completion_count" -gt 1 ]; then
-              echo "::error::Authority completion dispatch became ambiguous for E2E ${E2E_RUN_ID}."
-              exit 1
-            fi
-            if [ "$completion_count" = 1 ]; then
-              echo "Observed exact authority completion run $(jq -er '.[0]' <<<"$completion_runs") for E2E ${E2E_RUN_ID}."
-              exit 0
-            fi
-            sleep 3
-          done
-          echo "::error::No exact authority completion run became visible for E2E ${E2E_RUN_ID}."
           exit 1

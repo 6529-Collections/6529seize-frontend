@@ -62,9 +62,8 @@ The strict publication must add these exact manifest-declared files under
 
 1. No release action remains for sweep two.
 2. Keep future Museum publication changes atomic and source-manifest bound.
-3. Repair and re-enable Release Bus automation separately; both effective lanes
-   remain deliberately OFF/changeable under the recorded manual-fallback
-   control.
+3. Use `ops/docs/developer/deployment.md` for future authorized releases;
+   deployment automation restoration is no longer a follow-up task.
 
 ## Review disposition
 

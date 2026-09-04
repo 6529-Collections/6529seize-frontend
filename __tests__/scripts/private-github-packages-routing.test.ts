@@ -114,6 +114,11 @@ const REPOSITORY_ROOT = path.resolve(__dirname, "../..");
 const TEST_TOKEN = "read-only-test-token";
 const AUTH_HELPER_RELATIVE_PATH = "scripts/private-github-packages-auth.sh";
 const AUTH_HELPER_PATH = path.join(REPOSITORY_ROOT, AUTH_HELPER_RELATIVE_PATH);
+const WINDOWS_CREDENTIAL_HELPER_PATH = path.join(
+  REPOSITORY_ROOT,
+  "scripts",
+  "private-github-packages-credential.ps1"
+);
 
 function isolatedAuthTestEnvironment(): NodeJS.ProcessEnv {
   const environment = { ...process.env };
@@ -1311,6 +1316,7 @@ describe("documented private-package setup flows", () => {
         input: `${TEST_TOKEN}\n`,
         statements: [
           "private_package_auth_is_interactive() { return 0; }",
+          "private_package_auth_stored_credential_is_available() { return 1; }",
           "set -x",
           "ensure_private_package_auth",
           'printf "auth-present=%s\\n" "${NODE_AUTH_TOKEN:+yes}"',
@@ -1328,6 +1334,7 @@ describe("documented private-package setup flows", () => {
         input: TEST_TOKEN,
         statements: [
           "private_package_auth_is_interactive() { return 0; }",
+          "private_package_auth_stored_credential_is_available() { return 1; }",
           "ensure_private_package_auth",
           'printf "auth-present=%s\\n" "${NODE_AUTH_TOKEN:+yes}"',
         ],
@@ -1343,6 +1350,7 @@ describe("documented private-package setup flows", () => {
         input: "\n",
         statements: [
           "private_package_auth_is_interactive() { return 0; }",
+          "private_package_auth_stored_credential_is_available() { return 1; }",
           "ensure_private_package_auth",
         ],
       });
@@ -1381,6 +1389,62 @@ describe("documented private-package setup flows", () => {
       expect(`${result.stdout}${result.stderr}`).not.toContain(TEST_TOKEN);
     });
 
+    it("uses a stored macOS credential without prompting", () => {
+      const result = runAuthHarness({
+        statements: [
+          "private_package_auth_is_interactive() { return 0; }",
+          "private_package_auth_keychain_is_available() { return 0; }",
+          "private_package_auth_windows_credential_is_available() { return 1; }",
+          `private_package_auth_read_keychain() { printf '%s' '${TEST_TOKEN}'; }`,
+          "set -x",
+          "ensure_private_package_auth",
+          'printf "auth-present=%s\\n" "${NODE_AUTH_TOKEN:+yes}"',
+        ],
+      });
+
+      expect(result.status).toBe(0);
+      expect(result.stdout).toBe("auth-present=yes\n");
+      expect(result.stderr).not.toContain("input hidden");
+      expect(`${result.stdout}${result.stderr}`).not.toContain(TEST_TOKEN);
+    });
+
+    it("uses a stored Windows credential without prompting", () => {
+      const result = runAuthHarness({
+        statements: [
+          "private_package_auth_is_interactive() { return 0; }",
+          "private_package_auth_keychain_is_available() { return 1; }",
+          "private_package_auth_windows_credential_is_available() { return 0; }",
+          `private_package_auth_read_windows_credential() { printf '%s' '${TEST_TOKEN}'; }`,
+          "set -x",
+          "ensure_private_package_auth",
+          'printf "auth-present=%s\\n" "${NODE_AUTH_TOKEN:+yes}"',
+        ],
+      });
+
+      expect(result.status).toBe(0);
+      expect(result.stdout).toBe("auth-present=yes\n");
+      expect(result.stderr).not.toContain("input hidden");
+      expect(`${result.stdout}${result.stderr}`).not.toContain(TEST_TOKEN);
+    });
+
+    it("falls back to the hidden prompt when no stored credential exists", () => {
+      const result = runAuthHarness({
+        input: `${TEST_TOKEN}\n`,
+        statements: [
+          "private_package_auth_is_interactive() { return 0; }",
+          "private_package_auth_stored_credential_is_available() { return 0; }",
+          "private_package_auth_read_stored_credential() { return 1; }",
+          "ensure_private_package_auth",
+          'printf "auth-present=%s\\n" "${NODE_AUTH_TOKEN:+yes}"',
+        ],
+      });
+
+      expect(result.status).toBe(0);
+      expect(result.stdout).toBe("auth-present=yes\n");
+      expect(result.stderr).toContain("input hidden");
+      expect(`${result.stdout}${result.stderr}`).not.toContain(TEST_TOKEN);
+    });
+
     it("loads the Codex token without printing it", () => {
       const result = runAuthHarness({
         statements: [
@@ -1400,6 +1464,8 @@ describe("documented private-package setup flows", () => {
     it("fails closed when the Codex Keychain item is missing", () => {
       const result = runAuthHarness({
         statements: [
+          "private_package_auth_is_macos() { return 0; }",
+          "private_package_auth_is_windows() { return 1; }",
           "private_package_auth_keychain_is_available() { return 0; }",
           "private_package_auth_read_keychain() { return 1; }",
           "load_private_package_auth_for_codex",
@@ -1516,7 +1582,24 @@ describe("documented private-package setup flows", () => {
       'PRIVATE_GITHUB_PACKAGES_KEYCHAIN_SERVICE="6529seize-frontend-github-packages"'
     );
     expect(authHelper).toContain("/usr/bin/security find-generic-password");
+    expect(authHelper).toContain("private-github-packages-credential.ps1");
     expect(authHelper).not.toContain("gh auth token");
+    const windowsCredentialHelper = fs.readFileSync(
+      WINDOWS_CREDENTIAL_HELPER_PATH,
+      "utf8"
+    );
+    expect(windowsCredentialHelper).toContain('ValidateSet("read", "store")');
+    expect(windowsCredentialHelper).toContain("CredReadW");
+    expect(windowsCredentialHelper).toContain("CredWriteW");
+    expect(windowsCredentialHelper).toContain("Read-Host");
+    expect(windowsCredentialHelper).toContain("-AsSecureString");
+    expect(windowsCredentialHelper).toContain(
+      "[string]::IsNullOrEmpty($token)"
+    );
+    expect(windowsCredentialHelper).toMatch(
+      /if \(\[string\]::IsNullOrEmpty\(\$token\)\) \{\s+exit 1\s+\}/
+    );
+    expect(windowsCredentialHelper).not.toContain("Write-Output $token");
     expect(installIndex).toBeGreaterThanOrEqual(0);
     expect(authRemovalIndex).toBeGreaterThan(installIndex);
     expect(environmentSetup).toContain("unset NODE_AUTH_TOKEN");
@@ -1869,6 +1952,7 @@ describe("GitHub Actions package access", () => {
           string,
           {
             if?: string;
+            uses?: string;
             permissions?: {
               packages?: string;
               [key: string]: string | undefined;
@@ -1889,11 +1973,7 @@ describe("GitHub Actions package access", () => {
 
       for (const [jobName, job] of Object.entries(workflow.jobs ?? {})) {
         const frozenInstallSteps = (job.steps ?? []).filter((step) =>
-          [
-            "./bin/6529 install:frozen",
-            "node scripts/release-bus-install-dependencies.cjs",
-            'node "$RELEASE_BUS_INSTALL_TOOL"',
-          ].some((command) => step.run?.includes(command))
+          step.run?.includes("./bin/6529 install:frozen")
         );
         const effectivePermissions =
           job.permissions ?? workflow.permissions ?? {};
@@ -1917,9 +1997,28 @@ describe("GitHub Actions package access", () => {
           }
         }
 
+        const reusableWorkflow = job.uses?.match(
+          /^\.\/\.github\/workflows\/([A-Za-z0-9_-]+\.yml)$/
+        );
+        let delegatesFrozenInstall = false;
+        if (reusableWorkflow) {
+          const child = parseYaml(
+            fs.readFileSync(
+              path.join(workflowDirectory, reusableWorkflow[1]!),
+              "utf8"
+            )
+          );
+          delegatesFrozenInstall = Object.values(child.jobs ?? {}).some(
+            (childJob) =>
+              (
+                (childJob as { steps?: Array<{ run?: string }> }).steps ?? []
+              ).some((step) => step.run?.includes("./bin/6529 install:frozen"))
+          );
+        }
         if (
           effectivePermissions.packages === "read" &&
-          frozenInstallSteps.length === 0
+          frozenInstallSteps.length === 0 &&
+          !delegatesFrozenInstall
         ) {
           throw new Error(
             `${workflowFile} job ${jobName} grants package read without a frozen install`
