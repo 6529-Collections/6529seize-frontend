@@ -438,10 +438,6 @@ describe("museum publication compatibility", () => {
         "MUSEUM_PUBLICATION_EXPECTED_COMMIT: ${{ steps.museum-selection.outputs.source_commit }}"
       );
       expect(workflow).toContain("museum-publication-provenance.json");
-      expect(workflow).toContain(
-        "PUBLICATION_FILE: ${{ steps.museum-publication.outputs.file }}"
-      );
-      expect(workflow).toContain(artifactPath);
       const resolveIndex = workflow.indexOf(
         "name: Resolve immutable Museum publication provenance"
       );
@@ -458,6 +454,19 @@ describe("museum publication compatibility", () => {
       expect(e2eIndex).toBeGreaterThan(resolveIndex);
       expect(preserveIndex).toBeGreaterThan(e2eIndex);
       expect(uploadIndex).toBeGreaterThan(preserveIndex);
+      const nextStepIndex = workflow.indexOf(
+        "\n      - name:",
+        uploadIndex + 1
+      );
+      const preserveBlock = workflow.slice(preserveIndex, uploadIndex);
+      const uploadBlock = workflow.slice(
+        uploadIndex,
+        nextStepIndex === -1 ? workflow.length : nextStepIndex
+      );
+      expect(preserveBlock).toContain(
+        "PUBLICATION_FILE: ${{ steps.museum-publication.outputs.file }}"
+      );
+      expect(uploadBlock).toContain(artifactPath);
     }
     expect(production).not.toContain("MUSEUM_PUBLICATION_TEST_COMMIT");
     expect(adapter).toContain(
