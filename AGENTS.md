@@ -1,86 +1,37 @@
 # AGENTS.md
 
-## Simple Release Bus v2
+## Deployment
 
-- Simple Release Bus v2 is the only automated release bus.
-- Before staging, production, promotion, or release mutation, run
-  `./bin/6529 exec node ops/scripts/release-bus-status.mjs` and follow
-  `deploy-6529`.
-- Route only from the helper's two effective lane states. When the target lane
-  is `ON`, use v2. When it is `OFF`, use serialized manual fallback only when
-  `changeable: true`, no hidden emergency fence blocks fallback, the target
-  environment lock is free, no mutation/E2E workflow is active, and every
-  already-dispatched exact operation is terminal. Both lanes `OFF` means full
-  manual fallback.
-- There is no inferred control-plane or self-upgrade exception. While a target
-  lane is `ON`, every deploy for that environment—including API,
-  `releaseBus`, cleaner/reconciler, and other control-plane changes—must go
-  through Release Bus with a valid operation identity. A manual workflow is
-  fallback only after the helper authoritatively reports the affected lane
-  `OFF` with `changeable: true`, the helper has verified that no hidden
-  emergency fence blocks fallback, and its drain gate passes. Legacy manual
-  workflows must enforce the same exact-run readiness gate before checkout,
-  build, ref, credential, or deployment mutation. If Release Bus cannot safely
-  self-deploy while `ON`, stop for explicit owner direction; never infer an
-  exception from the component or GitHub actor.
-- Staging `ON` accepts exact candidates. Production `ON` requires a separate
-  exact-SHA production action after `STAGING_VALIDATED`.
-- Raw mode and `ALL` are internal emergency fences, not normal routing or UI
-  controls. Never bypass them. Use the backend fast-off helper only for an
-  emergency hard stop.
-- In manual fallback, dispatch exactly one backend `Deploy a service` workflow
-  and stop. A later continuation may dispatch another service only after the
-  prior run's exact success is already established and a new staging-drain
-  snapshot is clear. Shared concurrency can cancel sibling service runs,
-  including independent DAG-frontier units.
-- Immediately before pushing frontend `1a-staging`, and separately immediately
-  before dispatching each backend staging service, take one fresh bounded
-  read-only staging-drain snapshot across both repositories. Finish preparatory
-  work first, including the final shared-ref fetch and any recomputation. Then
-  read each existing source once: the repo-local Release Bus status helper for
-  the effective staging lane, `/deploy/ui/bus` or its versioned read API for the
-  `staging-environment` lock plus active trains and operations, and GitHub
-  Actions for `queued` and `in_progress` runs in both repositories. Bound the
-  Actions scan to ten pages of 100 runs per status and repository; fail closed
-  if that bound or any source cannot prove current state. The status helper
-  alone is not a staging-drain snapshot.
-- A clear snapshot requires staging `OFF` with `changeable: true`, an unowned
-  staging lock, no active `STAGING` or `PRODUCTION_QUALIFICATION` train or
-  nonterminal operation, and no queued/running staging mutation or staging E2E.
-  Staging mutations include frontend/backend staging deploys and both staging-
-  ref advance workflows. Production deploy/E2E, PR CI, and unrelated workflows
-  do not block staging.
-- Snapshot collection is the final read-only sequence before one mutation; do
-  not reuse it for another service, a batch, or a later push. If blocked,
-  unavailable, incomplete, or ambiguous, stop and return control without
-  waiting, polling, cancelling, retrying, or mutating. For a workflow blocker,
-  report repository, workflow, status, run ID, and link. Otherwise report the
-  gate/lock/train/operation/source, exact state or error, observation time, and
-  available owner, identity, or link. Existing workflow authorization and all
-  rejection/failure alerts remain unchanged as final race protection.
-- For coupled work, declare backend dependencies and preserve backend-before-
-  frontend ordering. Within v2, only independent backend DAG frontier units run
-  together.
-- `STAGING_DEPLOYED` is not validation. Do not mutate staging during manifest-
-  bound E2E, and never infer production readiness from staging validation.
-- CI wave workflows send deploy/run identities, never raw drop IDs. Preserve
-  the parent deploy run ID and Release Bus train ID through WEB E2E reruns; the
-  backend alone resolves and supplies the drop `reply_to` target.
-- Keep CI wave notification jobs best effort. Roll out the backend `api`
-  receiver before frontend workflow senders. The related backend rollout also
-  updates the production-only `releaseBus` service's trusted frontend PR-CI
-  policy digest; staging notification validation needs only `api`. Automatic
-  E2E dispatchers source their called workflow from `main`, not `1a-staging`.
-  See `ops/docs/developer/ci-wave-deploy-validation-notifications.md`.
-- Normal train preflight reuses exact-head/merge-tree PR CI evidence, not
-  environment-incompatible artifact bytes. It builds only the target
-  environment profile and emits an immutable environment-bound manifest.
-  Repository-wide lint, typecheck, test inventory, and full Jest matrices
-  remain PR CI gates and must not return to the normal staging or production
-  train critical path.
-- Never cancel another actor's workflow, force-push a shared ref, or bypass exact
-  SHA/artifact checks. Never author or post release notes manually; preserve the
-  autonomous bot's complete grouping metadata and finalize signal.
+- Follow `ops/skills/deploy-6529/SKILL.md` for authorized staging and production
+  work, using ordinary Git merges and the existing GitHub Actions workflows.
+- For staging, merge the development branch into the latest `1a-staging` and
+  push. Frontend changes automatically start `Web Deploy - STAGING`; backend
+  changes require dispatching `Deploy a service` for the required services.
+- For production, merge the development branch into `main`, then dispatch
+  `Web Deploy - PROD` for frontend or `Deploy a service` with `environment=prod`
+  for backend. A staging request alone does not authorize production.
+- Run backend service deployments sequentially in dependency order. Wait for
+  each run to succeed, then continue the next service in the same task without
+  asking for repeated authorization already covered by the requested phase.
+- Deploy backend dependencies before merging or deploying dependent frontend
+  changes in each environment. Read the backend service catalog and the change
+  to determine the units and order; avoid deploying unrelated services.
+- Fetch shared refs before merging. Preserve other developers' changes, resolve
+  conflicts normally, and never force-push or overwrite a moved shared ref.
+  Do not cancel another developer's deployment; coordinate through GitHub run
+  visibility and wait when the work would conflict.
+- Complete deployments after build, artifact integrity, runtime version, and
+  health checks pass. Automatic E2E runs separately and does not hold up a
+  merge, deployment, or promotion to the next authorized environment.
+- Unrelated PR E2E failures or pending runs do not block releases. Keep relevant
+  build, unit/contract, and security checks intact; report E2E status separately.
+  Fix known regressions attributable to the change on the development branch.
+- CI wave notifications carry deploy run IDs through E2E and reruns. The
+  backend alone resolves the drop reply target; notification failures remain
+  best effort. Keep receiver and sender contracts compatible during rollout.
+- Never author or post release notes manually. Preserve the autonomous bot's
+  PR/service grouping metadata and final publication signal; use the release-note opt-out
+  only when the user explicitly requests suppressing release notes.
 
 <!-- BEGIN:nextjs-agent-rules -->
 
@@ -308,8 +259,8 @@ is available, use it; otherwise read the relevant files in
     state changes.
   - `ops/skills/sonar-guardrails/SKILL.md` for TS/JS quality-sensitive edits.
   - `ops/skills/write-skills/SKILL.md` for repo-local skill work.
-- For merge, staging, production, or release-lane work, read
-  `ops/docs/developer/simple-release-bus-v2.md` and
+- For merge, staging, or production work, read
+  `ops/docs/developer/deployment.md` and
   `ops/skills/deploy-6529/SKILL.md` before acting.
 - Operational plans, roadmaps, runbooks, workstream state, and agent process
   docs belong under `ops/`, not top-level `docs/`.

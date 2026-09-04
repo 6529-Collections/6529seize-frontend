@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       pack:
-        description: Post-deploy manifest alias; use all for the full set
+        description: Post-deploy pack alias; use all for the full set
         type: choice
         required: true
         default: all
@@ -27,412 +27,171 @@ on:
           - museum-about
           - museum-inside-system
           - museum-rights
-      release_train_id:
-        description: Release Bus train id
-        type: string
-        required: false
-      release_train_revision:
-        description: Release Bus train revision
-        type: string
-        required: false
-      operation_key:
-        description: Release Bus idempotency key
-        type: string
-        required: false
-      source_ref:
-        description: Immutable Release Bus source ref
-        type: string
-        required: false
-      expected_sha:
-        description: Immutable deployed SHA
-        type: string
-        required: false
-      release_manifest_id:
-        description: Exact Release Bus v2 manifest id
-        type: string
-        required: false
-      release_manifest_identity_sha256:
-        description: Exact Release Bus v2 manifest identity digest
-        type: string
-        required: false
-      frontend_sha: { type: string, required: false }
-      backend_sha: { type: string, required: false }
-      frontend_artifact_digest: { type: string, required: false }
-      backend_artifact_digest: { type: string, required: false }
       automatic_deploy_run_id:
-        description: Internal successful Web Deploy - STAGING run id
+        description: Successful Web Deploy - STAGING run ID; supplied automatically, required for a manual rerun
         type: string
-        required: false
+        required: true
 
 permissions:
+  actions: read
   contents: read
-  issues: read
+  packages: read
 
-run-name: Staging E2E [${{ inputs.operation_key || (inputs.automatic_deploy_run_id && 'automatic') || 'manual' }}]
+run-name: Staging E2E ${{ inputs.automatic_deploy_run_id && format('automatic {0}', inputs.automatic_deploy_run_id) || 'manual' }}
 
 concurrency:
   group: staging-e2e
-  # Staging is a single mutable environment. Release Bus v2 freezes staging
-  # during exact E2E ownership, so an older run must never be cancelled by a
-  # later dispatch.
   cancel-in-progress: false
 
 jobs:
-  baseline-adoption-decision:
-    name: Resolve pending baseline adoption
-    if: inputs.automatic_deploy_run_id != ''
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
+  staging-packs:
+    name: Staging E2E packs
+    runs-on: ${{ vars.E2E_RUNNER || vars.CI_LINUX_RUNNER || 'ubuntu-latest' }}
+    timeout-minutes: 90
     permissions:
       actions: read
       contents: read
+      packages: read
     outputs:
-      decision: ${{ steps.decision.outputs.decision }}
-      deployed_ref: ${{ steps.deploy-run.outputs.deployed_ref }}
-      deployed_sha: ${{ steps.deploy-run.outputs.deployed_sha }}
-      deploy_workflow_run_id: ${{ steps.deploy-run.outputs.deploy_workflow_run_id }}
-      manifest_ready: ${{ steps.decision.outputs.manifest_ready }}
-    steps:
-      - name: Reject mixed automatic dispatch identity
-        env:
-          AUTOMATIC_DEPLOY_RUN_ID: ${{ inputs.automatic_deploy_run_id }}
-          BACKEND_ARTIFACT_DIGEST: ${{ inputs.backend_artifact_digest }}
-          BACKEND_SHA: ${{ inputs.backend_sha }}
-          EXPECTED_SHA: ${{ inputs.expected_sha }}
-          FRONTEND_ARTIFACT_DIGEST: ${{ inputs.frontend_artifact_digest }}
-          FRONTEND_SHA: ${{ inputs.frontend_sha }}
-          MANIFEST_ID: ${{ inputs.release_manifest_id }}
-          MANIFEST_IDENTITY: ${{ inputs.release_manifest_identity_sha256 }}
-          OPERATION_KEY: ${{ inputs.operation_key }}
-          PACK: ${{ inputs.pack }}
-          SOURCE_REF: ${{ inputs.source_ref }}
-          TRAIN_ID: ${{ inputs.release_train_id }}
-          TRAIN_REVISION: ${{ inputs.release_train_revision }}
-        run: |
-          set -euo pipefail
-          [[ "$AUTOMATIC_DEPLOY_RUN_ID" =~ ^[1-9][0-9]{0,19}$ ]]
-          test "$PACK" = all
-          identity_values="$TRAIN_ID$TRAIN_REVISION$OPERATION_KEY$SOURCE_REF$EXPECTED_SHA$MANIFEST_ID$MANIFEST_IDENTITY$FRONTEND_SHA$BACKEND_SHA$FRONTEND_ARTIFACT_DIGEST$BACKEND_ARTIFACT_DIGEST"
-          test -z "$identity_values"
+      expected-sha: ${{ steps.source.outputs.sha }}
+    env:
+      SELECTED_PACK: ${{ inputs.pack || 'all' }}
 
-      - name: Resolve successful automatic deploy
-        id: deploy-run
+    steps:
+      - name: Resolve exact deployed SHA
+        id: source
         env:
           AUTOMATIC_DEPLOY_RUN_ID: ${{ inputs.automatic_deploy_run_id }}
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
+          test "$GITHUB_REF" = refs/heads/main
           [[ "$AUTOMATIC_DEPLOY_RUN_ID" =~ ^[1-9][0-9]{0,19}$ ]]
-          response_file="$(mktemp)"
-          trap 'rm -f "$response_file"' EXIT
+          gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${AUTOMATIC_DEPLOY_RUN_ID}" > "$RUNNER_TEMP/deploy-run.json"
+          deployed_sha="$(jq -er \
+            --arg repository "$GITHUB_REPOSITORY" '
+              select(
+                .path == ".github/workflows/deploy-staging.yml" and
+                (.event == "push" or .event == "workflow_dispatch") and
+                .head_branch == "1a-staging" and
+                .status == "completed" and
+                .conclusion == "success" and
+                .repository.full_name == $repository and
+                .head_repository.full_name == $repository and
+                (.run_attempt | type == "number" and . >= 1 and . <= 1000000) and
+                (.head_sha | test("^[a-f0-9]{40}$"))
+              ) | .head_sha
+            ' "$RUNNER_TEMP/deploy-run.json")"
+          deploy_run_attempt="$(jq -er '.run_attempt' "$RUNNER_TEMP/deploy-run.json")"
           gh api \
-            "repos/${GITHUB_REPOSITORY}/actions/runs/${AUTOMATIC_DEPLOY_RUN_ID}" \
-            > "$response_file"
-          jq -e \
-            --arg repository "$GITHUB_REPOSITORY" \
-            --argjson run_id "$AUTOMATIC_DEPLOY_RUN_ID" '
-              .id == $run_id and
-              .name == "Web Deploy - STAGING" and
-              .path == ".github/workflows/deploy-staging.yml" and
-              (.event == "push" or .event == "workflow_dispatch") and
+            "repos/${GITHUB_REPOSITORY}/actions/runs/${AUTOMATIC_DEPLOY_RUN_ID}/attempts/${deploy_run_attempt}/jobs?per_page=100" \
+            > "$RUNNER_TEMP/deploy-jobs.json"
+          jq -e '
+            [.jobs[] | select(
+              .name == "Deploy exact staging artifact" and
               .status == "completed" and
-              .conclusion == "success" and
-              .head_branch == "1a-staging" and
-              .repository.full_name == $repository and
-              (.head_sha | test("^[a-f0-9]{40}$"))
-            ' "$response_file" >/dev/null
-          {
-            printf 'deployed_ref=%s\n' "$(jq -r '.head_branch' "$response_file")"
-            printf 'deployed_sha=%s\n' "$(jq -r '.head_sha' "$response_file")"
-            printf 'deploy_workflow_run_id=%s\n' "$AUTOMATIC_DEPLOY_RUN_ID"
-          } >> "$GITHUB_OUTPUT"
+              .conclusion == "success"
+            )] | length == 1
+          ' "$RUNNER_TEMP/deploy-jobs.json" >/dev/null
+          echo "sha=$deployed_sha" >> "$GITHUB_OUTPUT"
 
-      - name: Check out trusted decision client
+      - name: Check out trusted version verifier
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
-          ref: ${{ github.workflow_sha }}
+          ref: main
           persist-credentials: false
+          path: .version-verifier
           sparse-checkout: |
-            bin/6529
-            package.json
-            scripts/private-github-packages-auth.sh
-            scripts/release-bus-baseline-adoption-decision.cjs
+            ops/scripts/cli-args.cjs
+            ops/scripts/verify-deployment-version.cjs
           sparse-checkout-cone-mode: false
 
-      - name: Install Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+      - name: Require the selected staging deployment to still be live
+        env:
+          EXPECTED_SHA: ${{ steps.source.outputs.sha }}
+          STAGING_AUTH: ${{ secrets.STAGING_AUTH }}
+        run: |
+          node .version-verifier/ops/scripts/verify-deployment-version.cjs \
+            --base-url https://staging.6529.io \
+            --expected-version "$EXPECTED_SHA" \
+            --attempts 1 \
+            --delay-ms 1000 \
+            --timeout-ms 10000 \
+            --output "$RUNNER_TEMP/manual-staging-version.json"
+
+      - name: Check out exact deployed source
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
-          node-version: "22.17.1"
-
-      - name: Activate pinned pnpm
-        run: |
-          corepack enable pnpm
-          corepack prepare "$(node -p 'require("./package.json").packageManager')" --activate
-
-      - name: Resolve exact automatic E2E decision
-        id: decision
-        env:
-          DEPLOYED_REF: ${{ steps.deploy-run.outputs.deployed_ref }}
-          DEPLOYED_SHA: ${{ steps.deploy-run.outputs.deployed_sha }}
-          DEPLOY_WORKFLOW_RUN_ID: ${{ steps.deploy-run.outputs.deploy_workflow_run_id }}
-          RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
-          RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
-        run: |
-          set -euo pipefail
-          if ! result="$(./bin/6529 exec node scripts/release-bus-baseline-adoption-decision.cjs)"; then
-            echo "Baseline-adoption decision client failed closed" >&2
-            exit 1
-          fi
-          case "$result" in
-            LEGACY:false)
-              printf 'decision=LEGACY\nmanifest_ready=false\n'
-              ;;
-            DEFERRED:false)
-              printf 'decision=DEFERRED\nmanifest_ready=false\n'
-              ;;
-            DEFERRED:true)
-              printf 'decision=DEFERRED\nmanifest_ready=true\n'
-              ;;
-            *)
-              echo "Baseline-adoption decision returned an invalid exact token" >&2
-              exit 1
-              ;;
-          esac >> "$GITHUB_OUTPUT"
-
-  staging-packs:
-    name: Staging E2E packs
-    needs: baseline-adoption-decision
-    # Automatic runs must resolve to a successful same-repository staging
-    # deployment. Manual and Release Bus dispatches retain their own guards.
-    if: >-
-      always() &&
-      (
-        inputs.automatic_deploy_run_id == '' ||
-        (
-          needs.baseline-adoption-decision.result == 'success' &&
-          needs.baseline-adoption-decision.outputs.decision == 'LEGACY'
-        )
-      )
-    runs-on: ubuntu-latest
-    timeout-minutes: 90
-    permissions:
-      contents: read
-      issues: read
-      packages: read
-    env:
-      PLAYWRIGHT_STAGING_ACCESS_CODE: ${{ secrets.PLAYWRIGHT_STAGING_ACCESS_CODE }}
-      SELECTED_PACK: ${{ github.event.inputs.pack || 'all' }}
-    steps:
-      - name: Reject partial Release Bus identity
-        env:
-          BACKEND_ARTIFACT_DIGEST: ${{ inputs.backend_artifact_digest }}
-          BACKEND_SHA: ${{ inputs.backend_sha }}
-          EXPECTED_SHA: ${{ inputs.expected_sha }}
-          FRONTEND_ARTIFACT_DIGEST: ${{ inputs.frontend_artifact_digest }}
-          FRONTEND_SHA: ${{ inputs.frontend_sha }}
-          MANIFEST_ID: ${{ inputs.release_manifest_id }}
-          MANIFEST_IDENTITY: ${{ inputs.release_manifest_identity_sha256 }}
-          OPERATION_KEY: ${{ inputs.operation_key }}
-          SOURCE_REF: ${{ inputs.source_ref }}
-          TRAIN_ID: ${{ inputs.release_train_id }}
-          TRAIN_REVISION: ${{ inputs.release_train_revision }}
-        run: |
-          set -euo pipefail
-          identity_values="$TRAIN_ID$TRAIN_REVISION$OPERATION_KEY$SOURCE_REF$EXPECTED_SHA$MANIFEST_ID$MANIFEST_IDENTITY$FRONTEND_SHA$BACKEND_SHA$FRONTEND_ARTIFACT_DIGEST$BACKEND_ARTIFACT_DIGEST"
-          if [ -z "$OPERATION_KEY" ]; then
-            test -z "$identity_values"
-          else
-            test -n "$TRAIN_ID"
-          fi
-
-      - name: Validate Release Bus inputs
-        if: github.event_name == 'workflow_dispatch' && inputs.operation_key != ''
-        env:
-          EXPECTED_SHA: ${{ inputs.expected_sha }}
-          FRONTEND_ARTIFACT_DIGEST: ${{ inputs.frontend_artifact_digest }}
-          FRONTEND_SHA: ${{ inputs.frontend_sha }}
-          BACKEND_ARTIFACT_DIGEST: ${{ inputs.backend_artifact_digest }}
-          BACKEND_SHA: ${{ inputs.backend_sha }}
-          MANIFEST_ID: ${{ inputs.release_manifest_id }}
-          MANIFEST_IDENTITY: ${{ inputs.release_manifest_identity_sha256 }}
-          OPERATION_KEY: ${{ inputs.operation_key }}
-          SOURCE_REF: ${{ inputs.source_ref }}
-          TRAIN_ID: ${{ inputs.release_train_id }}
-          TRAIN_REVISION: ${{ inputs.release_train_revision }}
-        run: |
-          set -euo pipefail
-          [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{40}$ ]]
-          [[ "$TRAIN_ID" =~ ^[A-Za-z0-9._-]{1,100}$ ]]
-          [[ "$TRAIN_REVISION" =~ ^([1-9][0-9]{0,8}|rollback-[1-9][0-9]{0,8})$ ]]
-          [[ "$OPERATION_KEY" =~ ^[A-Za-z0-9:._-]{1,180}$ ]]
-          [[ "$SOURCE_REF" =~ ^[A-Za-z0-9._/-]{1,255}$ ]]
-          [[ "$MANIFEST_ID" =~ ^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$ ]]
-          [[ "$MANIFEST_IDENTITY" =~ ^[a-f0-9]{64}$ ]]
-          [[ -z "$FRONTEND_SHA" || "$FRONTEND_SHA" =~ ^[a-f0-9]{40}$ ]]
-          [[ -z "$BACKEND_SHA" || "$BACKEND_SHA" =~ ^[a-f0-9]{40}$ ]]
-          [[ -z "$FRONTEND_ARTIFACT_DIGEST" || "$FRONTEND_ARTIFACT_DIGEST" =~ ^[a-f0-9]{64}$ ]]
-          [[ -z "$BACKEND_ARTIFACT_DIGEST" || "$BACKEND_ARTIFACT_DIGEST" =~ ^[a-f0-9]{64}$ ]]
-          test -n "$FRONTEND_SHA$BACKEND_SHA"
-
-      - name: Authorize Release Bus E2E operation
-        if: github.event_name == 'workflow_dispatch' && inputs.operation_key != ''
-        env:
-          EXPECTED_SHA: ${{ inputs.expected_sha }}
-          MANIFEST_IDENTITY: ${{ inputs.release_manifest_identity_sha256 }}
-          OPERATION_KEY: ${{ inputs.operation_key }}
-          RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
-          RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
-          TRAIN_ID: ${{ inputs.release_train_id }}
-        run: |
-          set -euo pipefail
-          payload="$(jq -n --arg train_id "$TRAIN_ID" --arg operation_key "$OPERATION_KEY" --arg workflow_run_id "$GITHUB_RUN_ID" --arg expected_sha "$EXPECTED_SHA" --arg artifact_digest "$MANIFEST_IDENTITY" '{train_id:$train_id,operation_key:$operation_key,workflow_run_id:$workflow_run_id,artifact_run_id:null,repository:"frontend",environment:"staging",service:null,expected_sha:$expected_sha,artifact_digest:$artifact_digest}')"
-          curl --fail-with-body --silent --show-error \
-            -H "Authorization: Bearer $RELEASE_BUS_WORKFLOW_AUTH_TOKEN" \
-            -H 'Content-Type: application/json' \
-            --data "$payload" \
-            "$RELEASE_BUS_API_URL/deploy/release-bus-v2/authorize"
-
-      # Automatic dispatch resolves the exact SHA the successful staging deploy
-      # shipped. Manual dispatch falls back to the selected ref, which may
-      # differ from staging; prefer the deploy-triggered path for SHA fidelity.
-      - name: Check out the deployed ref
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
-        with:
-          ref: ${{ inputs.expected_sha || needs.baseline-adoption-decision.outputs.deployed_sha || github.sha }}
-          fetch-depth: 2
+          ref: ${{ steps.source.outputs.sha }}
+          fetch-depth: 0
           persist-credentials: false
 
-      - name: Verify Release Bus immutable source
-        if: github.event_name == 'workflow_dispatch' && inputs.operation_key != ''
+      - name: Verify exact deployed source
         env:
-          EXPECTED_SHA: ${{ inputs.expected_sha }}
+          EXPECTED_SHA: ${{ steps.source.outputs.sha }}
         run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
 
-      - name: Check out immutable Release Bus tooling
-        # This sparse helper is trusted orchestration from the dispatch ref.
-        # The application, tests, pack manifest, and dependency lock remain in
-        # the workspace checkout above at the exact deployed SHA.
-        timeout-minutes: 2
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
-        with:
-          ref: ${{ github.sha }}
-          path: .release-bus-control
-          filter: blob:none
-          fetch-depth: 1
-          persist-credentials: false
-          sparse-checkout: |
-            scripts/release-bus-install-dependencies.cjs
-            scripts/museum-release-tier.cjs
-            scripts/museum-release-selection.cjs
-          sparse-checkout-cone-mode: false
-
-      - name: Stage immutable Release Bus E2E tooling
-        env:
-          WORKFLOW_SHA: ${{ github.sha }}
-        run: |
-          set -euo pipefail
-          [[ "$WORKFLOW_SHA" =~ ^[a-f0-9]{40}$ ]]
-          control_root="$GITHUB_WORKSPACE/.release-bus-control"
-          test "$(git -C "$control_root" rev-parse HEAD)" = "$WORKFLOW_SHA"
-          tooling="$RUNNER_TEMP/release-bus-tooling/scripts"
-          mkdir -p "$tooling" "$RUNNER_TEMP/release-bus-evidence"
-          for file in \
-            scripts/release-bus-install-dependencies.cjs \
-            scripts/museum-release-tier.cjs \
-            scripts/museum-release-selection.cjs
-          do
-            test -f "$control_root/$file"
-            install -m 0644 "$control_root/$file" "$RUNNER_TEMP/release-bus-tooling/$file"
-          done
-          {
-            echo "RELEASE_BUS_INSTALL_TOOL=$tooling/release-bus-install-dependencies.cjs"
-            echo "RELEASE_BUS_INSTALL_EVIDENCE=$RUNNER_TEMP/release-bus-evidence/dependency-install.json"
-            echo "MUSEUM_RELEASE_SELECTION_TOOL=$tooling/museum-release-selection.cjs"
-          } >> "$GITHUB_ENV"
-
       - name: Install Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
           node-version: "22.17.1"
+          package-manager-cache: false
 
       - name: Activate pinned pnpm
         run: |
           corepack enable pnpm
           corepack prepare "$(node -p 'require("./package.json").packageManager')" --activate
-          pnpm --version
-
-      - name: Restore pnpm store
-        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
-        with:
-          path: ~/.pnpm-store
-          key: ${{ runner.os }}-node22-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-node22-pnpm-
-
-      - name: Use cached pnpm store
-        run: ./bin/6529 exec pnpm config set store-dir ~/.pnpm-store
 
       - name: Install Socket Firewall
         id: socket-firewall
-        continue-on-error: true
         uses: SocketDev/action@2d3f25590c6ed6ba11a9a14c064d962a3a04698f # v1.3.1
         with:
           mode: firewall
 
-      - name: Assert npm lockfile is absent
-        run: ./bin/6529 guard:no-package-lock
-
-      - name: Install and verify frozen dependencies
-        id: dependencies
-        continue-on-error: true
+      - name: Install frozen dependencies
         env:
           NODE_AUTH_TOKEN: ${{ github.token }}
-          RELEASE_BUS_SOCKET_FIREWALL_OUTCOME: ${{ steps.socket-firewall.outcome }}
           SFW_BIN: ${{ steps.socket-firewall.outputs.firewall-path-binary }}
-        run: node "$RELEASE_BUS_INSTALL_TOOL"
+        run: ./bin/6529 install:frozen
 
-      - name: Select fail-closed Museum packs for the exact deployed range
+      - name: Select Museum packs for the deployed change
         id: museum-selection
-        if: steps.dependencies.outcome == 'success'
         env:
-          DEPLOYED_SHA: ${{ inputs.expected_sha || needs.baseline-adoption-decision.outputs.deployed_sha }}
+          DEPLOYED_SHA: ${{ steps.source.outputs.sha }}
+          DEPLOY_RUN_ID: ${{ inputs.automatic_deploy_run_id }}
           GH_TOKEN: ${{ github.token }}
-          MUSEUM_RELEASE_TIER_MODE: ${{ vars.MUSEUM_RELEASE_TIER_MODE }}
-          SELECTED_PACK: ${{ github.event.inputs.pack || 'all' }}
+          MUSEUM_RELEASE_TIER_MODE: ${{ vars.MUSEUM_RELEASE_TIER_MODE || 'tiered' }}
         run: |
           set -euo pipefail
-          head_sha="$(git rev-parse HEAD)"
+          test "$(git rev-parse HEAD)" = "$DEPLOYED_SHA"
           base_sha="museum-range-unavailable"
-          if [ "$SELECTED_PACK" = all ] && [[ "$DEPLOYED_SHA" =~ ^[a-f0-9]{40}$ ]]; then
-            # Commit divergence is an identity failure: broader tests cannot
-            # qualify a different tree from the deployed release.
-            test "$head_sha" = "$DEPLOYED_SHA"
-            if base_candidate="$(git rev-parse "${head_sha}^1" 2>/dev/null)"; then
-              base_sha="$base_candidate"
-            else
-              echo "::warning::Unable to prove the deployed parent; retaining every Museum pack."
-            fi
-          else
-            echo "::warning::No exact deployed range is available; retaining every Museum pack."
-          fi
-
-          hold_state=unknown
-          if open_holds="$(gh issue list \
-            --repo 6529-Collections/6529seize-frontend \
-            --state open \
-            --label release-bus-museum-hold \
-            --limit 100 \
-            --json number,title 2>/dev/null)"
+          current_run="$RUNNER_TEMP/museum-current-deploy.json"
+          previous_runs="$RUNNER_TEMP/museum-previous-deploys.json"
+          # This is an optional test-scope optimization. Unavailable history
+          # retains every Museum pack and never asks an operator for a SHA.
+          if gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${DEPLOY_RUN_ID}" > "$current_run" &&
+            gh api "repos/${GITHUB_REPOSITORY}/actions/workflows/deploy-staging.yml/runs?branch=1a-staging&status=completed&per_page=100" > "$previous_runs" &&
+            base_candidate="$(jq -er \
+              --arg repository "$GITHUB_REPOSITORY" \
+              --slurpfile current "$current_run" '
+                [.workflow_runs[] | select(
+                  .id != $current[0].id and
+                  .created_at < $current[0].created_at and
+                  .path == ".github/workflows/deploy-staging.yml" and
+                  .head_branch == "1a-staging" and
+                  (.event == "push" or .event == "workflow_dispatch") and
+                  .status == "completed" and .conclusion == "success" and
+                  .repository.full_name == $repository and
+                  .head_repository.full_name == $repository and
+                  (.head_sha | test("^[a-f0-9]{40}$"))
+                )] | sort_by(.created_at) | last | .head_sha // empty
+              ' "$previous_runs")" &&
+            git cat-file -e "${base_candidate}^{commit}" 2>/dev/null &&
+            git merge-base --is-ancestor "$base_candidate" "$DEPLOYED_SHA"
           then
-            if jq -e 'type == "array"' <<< "$open_holds" >/dev/null; then
-              if [ "$(jq 'length' <<< "$open_holds")" -eq 0 ]; then
-                hold_state=clear
-              else
-                hold_state=active
-              fi
-            fi
+            base_sha="$base_candidate"
           else
-            echo "::warning::Museum hold lookup failed; retaining every Museum pack."
+            echo "::warning::Previous deployed range is unavailable; retaining every Museum pack."
           fi
 
           mapfile -t museum_refs < <(
@@ -443,26 +202,21 @@ jobs:
           test "${#museum_refs[@]}" -eq 1
           read -r source_commit source_ref source_extra <<< "${museum_refs[0]}"
           test -z "${source_extra:-}"
-          test "$source_ref" = "refs/heads/main"
+          test "$source_ref" = refs/heads/main
           [[ "$source_commit" =~ ^[a-f0-9]{40}$ ]]
-
           selection_file="$RUNNER_TEMP/museum-release-selection.json"
-          NODE_PATH="$GITHUB_WORKSPACE/node_modules${NODE_PATH:+:$NODE_PATH}" \
-            node "$MUSEUM_RELEASE_SELECTION_TOOL" \
-              --base "$base_sha" \
-              --head "$head_sha" \
-              --environment staging \
-              --activation-mode "$MUSEUM_RELEASE_TIER_MODE" \
-              --hold-state "$hold_state" \
-              --repository-root "$GITHUB_WORKSPACE" \
-              --source-commit "$source_commit" \
-              --output "$selection_file"
+          ./bin/6529 exec node scripts/museum-release-selection.cjs \
+            --base "$base_sha" \
+            --head "$DEPLOYED_SHA" \
+            --environment staging \
+            --activation-mode "$MUSEUM_RELEASE_TIER_MODE" \
+            --hold-state clear \
+            --repository-root "$GITHUB_WORKSPACE" \
+            --source-commit "$source_commit" \
+            --output "$selection_file"
           jq -e --arg source_commit "$source_commit" '
             .contract == "museum-release-selection-v1" and
             .environment == "staging" and
-            (.classification.tier | IN("NONE", "P0", "P1", "P2", "P3")) and
-            (.activation.effective_mode | IN("tiered", "full")) and
-            (.activation.hold_state | IN("clear", "active", "unknown")) and
             .source_commit == $source_commit and
             (.selected_packs | type == "array") and
             (.selected_packs | all(IN("museum-data-architecture", "museum-institutional-practice", "museum-about", "museum-inside-system", "museum-rights"))) and
@@ -471,32 +225,18 @@ jobs:
           {
             echo "file=$selection_file"
             echo "selected_packs=$(jq -c .selected_packs "$selection_file")"
-            echo "tier=$(jq -r .classification.tier "$selection_file")"
-            echo "activation_mode=$(jq -r .activation.effective_mode "$selection_file")"
-            echo "hold_state=$(jq -r .activation.hold_state "$selection_file")"
             echo "source_commit=$source_commit"
           } >> "$GITHUB_OUTPUT"
-          {
-            echo "## Museum staging qualification selection"
-            echo
-            echo "Tier: $(jq -r .classification.tier "$selection_file")"
-            echo "Activation: $(jq -r .activation.effective_mode "$selection_file")"
-            echo "Hold: $(jq -r .activation.hold_state "$selection_file")"
-            echo "Catalog/control commit: $source_commit"
-            echo "Packs: $(jq -r '.selected_packs | join(", ") // "none"' "$selection_file")"
-          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Resolve immutable Museum publication provenance
         id: museum-publication
-        if: steps.dependencies.outcome == 'success'
         env:
           MUSEUM_CATALOG_COMMIT: ${{ steps.museum-selection.outputs.source_commit }}
         run: |
           set -euo pipefail
-          identity_file="$RUNNER_TEMP/museum-publication-identity.json"
+          identity_file="$RUNNER_TEMP/museum-publication-provenance.json"
           ./bin/6529 exec tsx scripts/museum-publication-compatibility.ts \
-            --source-commit "$MUSEUM_CATALOG_COMMIT" \
-            > "$identity_file"
+            --source-commit "$MUSEUM_CATALOG_COMMIT" > "$identity_file"
           jq -e --arg catalog_commit "$MUSEUM_CATALOG_COMMIT" '
             .contract == "museum-publication-compatibility-v1" and
             .source_commit == $catalog_commit and
@@ -507,40 +247,25 @@ jobs:
             .catalog_id == ("6529NM-PUBCAT-" + .publication_commit) and
             (.catalog_content_hash | test("^0x[a-f0-9]{64}$"))
           ' "$identity_file" >/dev/null
-          publication_commit="$(jq -r .publication_commit "$identity_file")"
-          echo "file=$identity_file" >> "$GITHUB_OUTPUT"
-          echo "publication_commit=$publication_commit" >> "$GITHUB_OUTPUT"
           {
-            echo "Catalog/control commit: $MUSEUM_CATALOG_COMMIT"
-            echo "Publication/source commit: $publication_commit"
-          } >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Restore Playwright browser
-        if: steps.dependencies.outcome == 'success'
-        id: playwright-cache
-        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
-        with:
-          path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-chromium-${{ hashFiles('pnpm-lock.yaml') }}
+            echo "file=$identity_file"
+            echo "publication_commit=$(jq -r .publication_commit "$identity_file")"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Install Playwright dependencies
-        if: steps.dependencies.outcome == 'success'
         id: playwright_dependencies_primary
         timeout-minutes: 3
         continue-on-error: true
         run: ./bin/6529 exec playwright install-deps chromium
 
       - name: Retry Playwright dependencies
-        if: steps.dependencies.outcome == 'success' && steps.playwright_dependencies_primary.outcome != 'success'
+        if: steps.playwright_dependencies_primary.outcome != 'success'
         id: playwright_dependencies_retry
         timeout-minutes: 3
         continue-on-error: true
         run: ./bin/6529 exec playwright install-deps chromium
 
       - name: Verify Playwright dependencies
-        if: steps.dependencies.outcome == 'success'
-        id: playwright_dependencies
-        continue-on-error: true
         env:
           PRIMARY_OUTCOME: ${{ steps.playwright_dependencies_primary.outcome }}
           RETRY_OUTCOME: ${{ steps.playwright_dependencies_retry.outcome }}
@@ -551,358 +276,64 @@ jobs:
           fi
 
       - name: Install Playwright browser
-        if: steps.dependencies.outcome == 'success' && steps.playwright_dependencies.outcome == 'success'
-        id: playwright
         timeout-minutes: 10
-        continue-on-error: true
         run: ./bin/6529 exec playwright install chromium
 
-      - name: Run staging packs against staging.6529.io
-        if: steps.dependencies.outcome == 'success' && steps.museum-publication.outcome == 'success' && steps.playwright.outcome == 'success'
-        id: e2e
-        continue-on-error: true
+      - name: Run read-only staging packs
         env:
-          MUSEUM_PUBLICATION_EXPECTED_COMMIT: ${{ steps.museum-publication.outputs.publication_commit }}
           MUSEUM_SELECTED_PACKS_JSON: ${{ steps.museum-selection.outputs.selected_packs }}
-          RELEASE_BUS_E2E_MANIFEST_ID: ${{ inputs.release_manifest_id }}
-          RELEASE_BUS_E2E_MANIFEST_IDENTITY_SHA256: ${{ inputs.release_manifest_identity_sha256 }}
-          RELEASE_BUS_E2E_SOURCE_SHA: ${{ inputs.expected_sha }}
+          MUSEUM_PUBLICATION_EXPECTED_COMMIT: ${{ steps.museum-publication.outputs.publication_commit }}
+          DEPLOYED_SHA: ${{ steps.source.outputs.sha }}
+          PLAYWRIGHT_STAGING_ACCESS_CODE: ${{ secrets.PLAYWRIGHT_STAGING_ACCESS_CODE }}
         run: |
           set -euo pipefail
           args=(
             --env staging
             --trigger post-deploy
             --artifact-root staging-e2e-artifacts
+            --parallel 3
+            --retry-failed-packs 1
           )
-          pack_exclusion_supported=false
-          if runner_capabilities="$(./bin/6529 exec node scripts/e2e-packs.cjs --capabilities 2>/dev/null)" &&
-            jq -e '
-              .contract == "release-bus-e2e-runner-capabilities.v1" and
-              .features.readonly_pack_parallelism == {
-                version: 1,
-                max_parallel: 4
-              }
-            ' <<< "$runner_capabilities" >/dev/null
-          then
-            args+=(--parallel 3)
-          fi
-          if [ -n "${runner_capabilities:-}" ] &&
-            jq -e '
-              .contract == "release-bus-e2e-runner-capabilities.v1" and
-              .features.pack_exclusion == { version: 1 }
-            ' <<< "$runner_capabilities" >/dev/null
-          then
-            pack_exclusion_supported=true
-          fi
-          if [ -n "${runner_capabilities:-}" ] &&
-            jq -e '
-              .contract == "release-bus-e2e-runner-capabilities.v1" and
-              .features.serial_failed_pack_retry == {
-                version: 2,
-                max_retries: 1,
-                policy: "transient-infrastructure-only"
-              }
-            ' <<< "$runner_capabilities" >/dev/null
-          then
-            args+=(--retry-failed-packs 1)
-            echo "SERIAL_FAILED_PACK_RETRY=true" >> "$GITHUB_ENV"
-          else
-            echo "SERIAL_FAILED_PACK_RETRY=false" >> "$GITHUB_ENV"
-          fi
-          if [ "${SELECTED_PACK:-all}" != all ]; then
+          if [ "$SELECTED_PACK" != all ]; then
             args+=(--pack "$SELECTED_PACK")
-          elif [ "$pack_exclusion_supported" = true ]; then
-            museum_pack_aliases="$(./bin/6529 exec node - <<'NODE'
-          const { PACKS } = require("./tests/packs.manifest.cjs");
-          const isMuseumPack = (pack) =>
-            pack.changeScope === "museum" || /^museum-/.test(pack.alias ?? "");
-          const aliases = PACKS.filter((pack) =>
-            pack.environments.includes("staging") &&
-            pack.triggers.includes("post-deploy") &&
-            isMuseumPack(pack)
-          ).map((pack) => pack.alias ?? pack.scriptKey);
-          if (aliases.length === 0) {
-            process.stderr.write("No staging Museum packs were identified.\n");
-            process.exit(1);
-          }
-          process.stdout.write(aliases.join("\n"));
-          NODE
-            )"
-            selected_museum_packs="$(jq -c . <<< "$MUSEUM_SELECTED_PACKS_JSON")"
-            jq -e '
-              type == "array" and
-              all(IN("museum-data-architecture", "museum-institutional-practice", "museum-about", "museum-inside-system", "museum-rights"))
-            ' <<< "$selected_museum_packs" >/dev/null
-            while IFS= read -r museum_pack_alias; do
-              if ! jq -e --arg alias "$museum_pack_alias" '. | index($alias) != null' <<< "$selected_museum_packs" >/dev/null; then
-                args+=(--exclude-pack "$museum_pack_alias")
+          else
+            for alias in museum-data-architecture museum-institutional-practice museum-about museum-inside-system museum-rights; do
+              if ! jq -e --arg alias "$alias" 'index($alias) != null' <<< "$MUSEUM_SELECTED_PACKS_JSON" >/dev/null; then
+                args+=(--exclude-pack "$alias")
               fi
-            done <<< "$museum_pack_aliases"
-          else
-            echo "::warning::Deployed E2E runner cannot exclude packs; retaining all Museum E2E packs."
-            MUSEUM_SELECTED_PACKS_JSON='["museum-data-architecture","museum-institutional-practice","museum-about","museum-inside-system","museum-rights"]'
+            done
           fi
-          echo "MUSEUM_SELECTED_PACKS_JSON=$MUSEUM_SELECTED_PACKS_JSON" >> "$GITHUB_ENV"
-          ./bin/6529 run e2e:packs -- "${args[@]}"
+          DEPLOYMENT_E2E_SOURCE_SHA="$DEPLOYED_SHA" \
+            ./bin/6529 run e2e:packs -- "${args[@]}"
 
-      - name: Stage immutable Museum provenance with staging evidence
-        id: museum-provenance-evidence
+      - name: Preserve Museum selection and publication evidence
         if: always()
         env:
-          MUSEUM_PUBLICATION_FILE: ${{ steps.museum-publication.outputs.file }}
-          MUSEUM_PUBLICATION_OUTCOME: ${{ steps.museum-publication.outcome }}
-        run: |
-          set -euo pipefail
-          test "$MUSEUM_PUBLICATION_OUTCOME" = success
-          test -f "$MUSEUM_PUBLICATION_FILE"
-          test ! -L "$MUSEUM_PUBLICATION_FILE"
-          mkdir -p staging-e2e-artifacts
-          install -m 0644 \
-            "$MUSEUM_PUBLICATION_FILE" \
-            staging-e2e-artifacts/museum-publication-provenance.json
-
-      - name: Validate exact manifest-bound E2E evidence
-        id: evidence
-        if: always() && steps.dependencies.outcome == 'success' && steps.playwright.outcome == 'success'
-        env:
-          E2E_OUTCOME: ${{ steps.e2e.outcome }}
-          EXPECTED_SHA: ${{ inputs.expected_sha }}
-          MANIFEST_ID: ${{ inputs.release_manifest_id }}
-          MANIFEST_IDENTITY: ${{ inputs.release_manifest_identity_sha256 }}
-          MUSEUM_CATALOG_COMMIT: ${{ steps.museum-selection.outputs.source_commit }}
-          MUSEUM_PROVENANCE_OUTCOME: ${{ steps.museum-provenance-evidence.outcome }}
-          MUSEUM_PUBLICATION_COMMIT: ${{ steps.museum-publication.outputs.publication_commit }}
-          MUSEUM_PUBLICATION_OUTCOME: ${{ steps.museum-publication.outcome }}
-          MUSEUM_SELECTION_FILE: ${{ steps.museum-selection.outputs.file }}
-          OPERATION_KEY: ${{ inputs.operation_key }}
-        run: |
-          set -euo pipefail
-          provenance_file='staging-e2e-artifacts/museum-publication-provenance.json'
-          test "$MUSEUM_PUBLICATION_OUTCOME" = success
-          test "$MUSEUM_PROVENANCE_OUTCOME" = success
-          test -f staging-e2e-artifacts/evidence.json
-          test -f "$provenance_file"
-          test ! -L "$provenance_file"
-          test "$(stat -c %s "$provenance_file")" -le 4096
-          jq -e \
-            --arg catalog_commit "$MUSEUM_CATALOG_COMMIT" \
-            --arg publication_commit "$MUSEUM_PUBLICATION_COMMIT" '
-              .contract == "museum-publication-compatibility-v1" and
-              .source_commit == $catalog_commit and
-              .publication_commit == $publication_commit and
-              .accepted == true and
-              .adapter_status == "current" and
-              .adapter_error_code == null and
-              .catalog_id == ("6529NM-PUBCAT-" + $publication_commit) and
-              (.catalog_content_hash | test("^0x[a-f0-9]{64}$")) and
-              ($catalog_commit | test("^[a-f0-9]{40}$")) and
-              ($publication_commit | test("^[a-f0-9]{40}$"))
-            ' "$provenance_file" >/dev/null
-          test -f "$MUSEUM_SELECTION_FILE"
-          jq -e --arg source_commit "$MUSEUM_CATALOG_COMMIT" '
-            .contract == "museum-release-selection-v1" and
-            .environment == "staging" and
-            .source_commit == $source_commit and
-            (.source_commit | test("^[a-f0-9]{40}$")) and
-            (.selected_packs | type == "array") and
-            (.selection_digest | test("^[a-f0-9]{64}$"))
-          ' "$MUSEUM_SELECTION_FILE" >/dev/null
-          test -n "${MUSEUM_RELEASE_SELECTION_TOOL:-}"
-          ./bin/6529 exec node - "$MUSEUM_SELECTION_FILE" <<'NODE'
-          const fs = require("node:fs");
-          const path = require("node:path");
-          const selection = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
-          const { verifySelectionDigest } = require(
-            path.resolve(process.env.MUSEUM_RELEASE_SELECTION_TOOL)
-          );
-          if (!verifySelectionDigest(selection)) {
-            throw new Error("Museum selection digest verification failed.");
-          }
-          NODE
-          validated_museum_packs="$(jq -c .selected_packs "$MUSEUM_SELECTION_FILE")"
-          complete_museum_packs='["museum-data-architecture","museum-institutional-practice","museum-about","museum-inside-system","museum-rights"]'
-          effective_museum_packs="${MUSEUM_SELECTED_PACKS_JSON:-}"
-          if [ "$effective_museum_packs" != "$validated_museum_packs" ] && \
-            [ "$effective_museum_packs" != "$complete_museum_packs" ]
-          then
-            echo "Museum pack inventory is not bound to the validated selection." >&2
-            exit 1
-          fi
-          export MUSEUM_SELECTED_PACKS_JSON="$effective_museum_packs"
-          expected_inventory="$(./bin/6529 exec node - <<'NODE'
-          const { PACKS } = require("./tests/packs.manifest.cjs");
-          const selected = process.env.SELECTED_PACK || "all";
-          const selectedMuseumPacks = JSON.parse(
-            process.env.MUSEUM_SELECTED_PACKS_JSON || "null"
-          );
-          if (!Array.isArray(selectedMuseumPacks)) {
-            throw new Error("Museum selection evidence is missing.");
-          }
-          const isMuseumPack = (pack) =>
-            pack.changeScope === "museum" || /^museum-/.test(pack.alias ?? "");
-          const keys = PACKS.filter((pack) =>
-            pack.environments.includes("staging") &&
-            pack.triggers.includes("post-deploy") &&
-            (!isMuseumPack(pack) || selectedMuseumPacks.includes(pack.alias ?? pack.scriptKey)) &&
-            (selected === "all" || pack.scriptKey === selected || pack.alias === selected)
-          ).map((pack) => pack.scriptKey);
-          process.stdout.write(JSON.stringify(keys));
-          NODE
-          )"
-          jq -e --argjson expected "$expected_inventory" --argjson retry "$SERIAL_FAILED_PACK_RETRY" '
-            .schema_version == "release-bus-e2e-packs.v1" and
-            .environment == "staging" and
-            .trigger == "post-deploy" and
-            (.worker_count | type == "number" and . >= 1 and . <= 3) and
-            .pack_count == ($expected | length) and
-            (.results | map(.script_key)) == $expected and
-            (.results | map(.script_key) | unique | length) == .pack_count and
-            (.results | all(.safety == "readonly")) and
-            (if $retry then
-              .serial_retry_limit == 1 and
-              (.results | all(
-                .attempt_count == (.attempts | length) and
-                .attempt_count >= 1 and .attempt_count <= 2 and
-                (.attempts | to_entries | all(.value.attempt == (.key + 1))) and
-                .status == .attempts[-1].status and
-                .failure_class == .attempts[-1].failure_class and
-                .detail == .attempts[-1].detail and
-                .artifact_path == .attempts[-1].artifact_path and
-                .duration_ms == ([.attempts[].duration_ms] | add)
-              ))
-            else
-              (.serial_retry_limit // 0) == 0
-            end) and
-            .failed_count == ([.results[] | select(.status == "failed")] | length) and
-            .infrastructure_failure_count == ([.results[] | select(.failure_class == "infrastructure")] | length)
-          ' staging-e2e-artifacts/evidence.json >/dev/null
-          if [ -n "$OPERATION_KEY" ]; then
-            jq -e --arg manifest_id "$MANIFEST_ID" --arg identity "$MANIFEST_IDENTITY" --arg source_sha "$EXPECTED_SHA" '
-              .release_binding == {
-                manifest_id:$manifest_id,
-                manifest_identity_sha256:$identity,
-                source_sha:$source_sha
-              }
-            ' staging-e2e-artifacts/evidence.json >/dev/null
-          else
-            jq -e '.release_binding == null' staging-e2e-artifacts/evidence.json >/dev/null
-          fi
-          if [ "$E2E_OUTCOME" = success ]; then
-            jq -e '
-              .failed_count == 0 and
-              .infrastructure_failure_count == 0 and
-              (.results | all(.status == "passed" and .failure_class == null))
-            ' staging-e2e-artifacts/evidence.json >/dev/null
-          fi
-
-      - name: Stage Museum selection with staging evidence
-        if: always()
-        env:
-          MUSEUM_SELECTION_FILE: ${{ steps.museum-selection.outputs.file }}
+          SELECTION_FILE: ${{ steps.museum-selection.outputs.file }}
+          PUBLICATION_FILE: ${{ steps.museum-publication.outputs.file }}
         run: |
           set -euo pipefail
           mkdir -p staging-e2e-artifacts
-          if [ -n "$MUSEUM_SELECTION_FILE" ] && [ -f "$MUSEUM_SELECTION_FILE" ]; then
-            install -m 0644 \
-              "$MUSEUM_SELECTION_FILE" \
-              staging-e2e-artifacts/museum-release-selection.json
-          fi
-      - name: Upload manifest-bound Playwright evidence
+          for evidence_file in "$SELECTION_FILE" "$PUBLICATION_FILE"; do
+            if [ -n "$evidence_file" ] && [ -f "$evidence_file" ]; then
+              install -m 0644 "$evidence_file" \
+                "staging-e2e-artifacts/$(basename "$evidence_file")"
+            fi
+          done
+
+      - name: Upload Playwright evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: staging-e2e-artifacts-${{ inputs.release_train_id || github.run_id }}
+          name: staging-e2e-artifacts-${{ github.run_id }}
           path: staging-e2e-artifacts/
           retention-days: 30
           if-no-files-found: ignore
 
-      - name: Report structured Release Bus E2E result
-        if: always() && github.event_name == 'workflow_dispatch' && inputs.operation_key != ''
-        env:
-          DEPENDENCIES_OUTCOME: ${{ steps.dependencies.outcome }}
-          E2E_OUTCOME: ${{ steps.e2e.outcome }}
-          EVIDENCE_OUTCOME: ${{ steps.evidence.outcome }}
-          MUSEUM_PROVENANCE_OUTCOME: ${{ steps.museum-provenance-evidence.outcome }}
-          MUSEUM_PUBLICATION_OUTCOME: ${{ steps.museum-publication.outcome }}
-          PLAYWRIGHT_OUTCOME: ${{ steps.playwright.outcome }}
-          RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
-          RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
-          OPERATION_KEY: ${{ inputs.operation_key }}
-          SOCKET_OUTCOME: ${{ steps.socket-firewall.outcome }}
-          TRAIN_ID: ${{ inputs.release_train_id }}
-        run: |
-          set -euo pipefail
-          status=SUCCEEDED
-          failure_class=null
-          failure_phase=null
-          retryable=false
-          if [ "$SOCKET_OUTCOME" != success ] || [ "$DEPENDENCIES_OUTCOME" != success ] || [ "$PLAYWRIGHT_OUTCOME" != success ]; then
-            status=FAILED
-            failure_class=INFRASTRUCTURE
-            failure_phase=staging_e2e_setup
-            retryable=true
-          elif [ "$MUSEUM_PUBLICATION_OUTCOME" != success ] || \
-            [ "$MUSEUM_PROVENANCE_OUTCOME" != success ]; then
-            status=FAILED
-            failure_class=CONTROL_PLANE
-            failure_phase=staging_e2e_museum_publication
-          elif [ "$EVIDENCE_OUTCOME" != success ]; then
-            status=FAILED
-            failure_class=CONTROL_PLANE
-            failure_phase=staging_e2e_evidence
-          elif [ "$E2E_OUTCOME" != success ]; then
-            status=FAILED
-            if [ -f staging-e2e-artifacts/evidence.json ] && \
-              [ "$(jq -r '.infrastructure_failure_count // 0' staging-e2e-artifacts/evidence.json)" -gt 0 ]; then
-              failure_class=INFRASTRUCTURE
-              failure_phase=staging_e2e_infrastructure
-              retryable=true
-            else
-              failure_class=E2E
-              failure_phase=staging_e2e
-            fi
-          fi
-          if [ -f staging-e2e-artifacts/evidence.json ]; then
-            evidence_digest="$(sha256sum staging-e2e-artifacts/evidence.json | cut -d' ' -f1)"
-          else
-            evidence_digest=''
-          fi
-          payload="$(jq -n --arg train_id "$TRAIN_ID" --arg operation_key "$OPERATION_KEY" --arg workflow_run_id "$GITHUB_RUN_ID" --arg status "$status" --arg failure_class "$failure_class" --arg failure_phase "$failure_phase" --argjson retryable "$retryable" --arg evidence_digest "$evidence_digest" '{train_id:$train_id,operation_key:$operation_key,workflow_run_id:$workflow_run_id,phase:"complete",status:$status,failure_class:(if $failure_class == "null" then null else $failure_class end),failure_phase:(if $failure_phase == "null" then null else $failure_phase end),retryable:$retryable,summary:{e2e_evidence_digest:(if $evidence_digest == "" then null else $evidence_digest end)},stages:[],jest:null,backend_evidence:null}')"
-          curl --fail-with-body --silent --show-error \
-            -H "Authorization: Bearer $RELEASE_BUS_WORKFLOW_AUTH_TOKEN" \
-            -H 'Content-Type: application/json' \
-            --data "$payload" \
-            "$RELEASE_BUS_API_URL/deploy/release-bus-v2/report-progress"
-
-      - name: Return staging E2E result
-        if: always()
-        env:
-          DEPENDENCIES_OUTCOME: ${{ steps.dependencies.outcome }}
-          E2E_OUTCOME: ${{ steps.e2e.outcome }}
-          EVIDENCE_OUTCOME: ${{ steps.evidence.outcome }}
-          MUSEUM_PROVENANCE_OUTCOME: ${{ steps.museum-provenance-evidence.outcome }}
-          MUSEUM_PUBLICATION_OUTCOME: ${{ steps.museum-publication.outcome }}
-          PLAYWRIGHT_OUTCOME: ${{ steps.playwright.outcome }}
-        run: |
-          test "$DEPENDENCIES_OUTCOME" = success
-          test "$MUSEUM_PUBLICATION_OUTCOME" = success
-          test "$MUSEUM_PROVENANCE_OUTCOME" = success
-          test "$PLAYWRIGHT_OUTCOME" = success
-          test "$EVIDENCE_OUTCOME" = success
-          test "$E2E_OUTCOME" = success
-
   notify-ci-wave:
     name: Notify CI wave about staging WEB validation
-    needs: [baseline-adoption-decision, staging-packs]
-    if: >-
-      ${{
-        always() &&
-        (
-          needs.staging-packs.result != 'skipped' ||
-          needs.baseline-adoption-decision.result == 'failure' ||
-          needs.baseline-adoption-decision.result == 'cancelled'
-        )
-      }}
+    needs: staging-packs
+    if: always()
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -929,8 +360,7 @@ jobs:
           CI_PIPELINES_STATUS: ${{ needs.staging-packs.result == 'success' && 'success' || 'failure' }}
           CI_PIPELINES_TITLE: ${{ needs.staging-packs.result == 'success' && 'WEB E2E passed' || 'WEB E2E failed' }}
           CI_PIPELINES_SERVICE: web
-          CI_PIPELINES_SHA: ${{ inputs.expected_sha || needs.baseline-adoption-decision.outputs.deployed_sha }}
+          CI_PIPELINES_SHA: ${{ needs.staging-packs.outputs.expected-sha }}
           CI_PIPELINES_PARENT_DEPLOY_RUN_ID: ${{ inputs.automatic_deploy_run_id }}
-          CI_PIPELINES_PARENT_RELEASE_TRAIN_ID: ${{ inputs.release_train_id }}
           CI_PIPELINES_VALIDATION_PACK: ${{ inputs.pack || 'all' }}
         run: node .ci-wave-notifier/scripts/notify-ci-wave.mjs

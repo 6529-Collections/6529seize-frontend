@@ -290,6 +290,14 @@ describe("CreateDropActions", () => {
     expect(screen.getAllByTestId("storm-button").length).toBeGreaterThan(0);
   });
 
+  it("centers the desktop action row against the input", () => {
+    render(<CreateDropActions {...defaultProps} />);
+
+    const actionSlot = screen.getByTestId("drop-actions-motion-shell").parentElement;
+    expect(actionSlot).toHaveClass("tw-self-center");
+    expect(actionSlot).not.toHaveClass("tw-self-end", "tw-mb-1");
+  });
+
   it("renders poll action for admins and toggles it", async () => {
     render(<CreateDropActions {...defaultProps} canCreatePoll={true} />);
 
@@ -321,6 +329,68 @@ describe("CreateDropActions", () => {
 
     expect(screen.queryByLabelText("Add poll")).not.toBeInTheDocument();
     expect(screen.queryByLabelText("Remove poll")).not.toBeInTheDocument();
+  });
+
+  it("uses the compact action slot to indicate an active poll", () => {
+    render(
+      <CreateDropActions
+        {...defaultProps}
+        isCompactLayout={true}
+        canCreatePoll={true}
+        isPollActive={true}
+      />
+    );
+
+    expect(screen.getByTestId("drop-actions-compact-slot")).toHaveClass(
+      "tw-size-10",
+      "desktop-hover:tw-size-9"
+    );
+    expect(
+      screen.getByTestId("drop-actions-compact-slot").querySelector("button")
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId("drop-actions-toggle-motion")
+    ).not.toBeInTheDocument();
+  });
+
+  it("keeps compact tray spacing inside its animated height", () => {
+    render(
+      <CreateDropActions
+        {...defaultProps}
+        isCompactLayout={true}
+        showOptions={true}
+      />
+    );
+
+    const tray = screen.getByTestId("drop-actions-compact-tray");
+    expect(tray).not.toHaveClass("tw-mt-2");
+    expect(tray).toHaveClass("tw-col-span-2", "tw-col-start-2");
+    expect(tray).not.toHaveClass("md:tw-col-span-1");
+    expect(tray.firstElementChild).toHaveClass("tw-h-2");
+  });
+
+  it("keeps compact controls touch sized and scales their surfaces for fine pointers", () => {
+    render(
+      <CreateDropActions
+        {...defaultProps}
+        isCompactLayout={true}
+        showOptions={true}
+      />
+    );
+
+    const toggle = screen.getByTestId("drop-actions-toggle-motion");
+    expect(toggle).toHaveClass("tw-size-10", "desktop-hover:tw-size-9");
+    expect(screen.getByTestId("drop-actions-compact-slot")).toHaveClass(
+      "tw-self-end",
+      "desktop-hover:tw-self-center"
+    );
+
+    const tray = screen.getByTestId("drop-actions-compact-tray");
+    const firstActionSurface = tray.querySelector("button > span");
+    expect(firstActionSurface).toHaveClass(
+      "tw-size-10",
+      "desktop-hover:tw-size-9"
+    );
   });
 
   it("disables the storm action while a poll is active", () => {

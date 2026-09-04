@@ -11,6 +11,11 @@ export const SUSPENDED_MODERATION_PROFILES_QUERY_KEY = [
   "suspended-profiles",
 ] as const;
 
+export const BLOCK_ACTIVITY_QUERY_KEY = [
+  QueryKey.CONTENT_MODERATION_REPORTS,
+  "block-activity",
+] as const;
+
 export const PUBLIC_PROFILE_MODERATION_STATUS_QUERY_KEY = [
   QueryKey.CONTENT_MODERATION_REPORTS,
   "public-profile-status",

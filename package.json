@@ -134,7 +134,6 @@
     "lint:diff": "node scripts/require-6529-command.cjs && bash -lc '{ git diff --name-only -z --diff-filter=ACMR HEAD -- \"*.js\" \"*.jsx\" \"*.cjs\" \"*.mjs\" \"*.ts\" \"*.tsx\" \":(exclude)generated/**\"; git ls-files --others --exclude-standard -z -- \"*.js\" \"*.jsx\" \"*.cjs\" \"*.mjs\" \"*.ts\" \"*.tsx\" \":(exclude)generated/**\"; } | xargs -0 pnpm exec eslint --config eslint.config.diff.mjs --no-warn-ignored --max-warnings=0'",
     "react-doctor:diff": "node scripts/require-6529-command.cjs && node scripts/react-doctor-diff.cjs",
     "dependency:risk-gate": "node scripts/require-6529-command.cjs && node scripts/dependency-risk-gate.cjs",
-    "deployment-bus": "node scripts/require-6529-command.cjs && node ops/scripts/deployment-bus.cjs",
     "verify:deployment-version": "node scripts/require-6529-command.cjs && node ops/scripts/verify-deployment-version.cjs",
     "testing-strategy": "node scripts/require-6529-command.cjs && node ops/scripts/testing-strategy.cjs",
     "museum:build-cardinality": "node scripts/require-6529-command.cjs && node scripts/museum-build-cardinality.cjs",

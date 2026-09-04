@@ -15,7 +15,7 @@ import UserCICAndLevel, {
 } from "@/components/user/utils/UserCICAndLevel";
 import CommonDropdownItemsMobileWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
-import WaveDropActionsMore from "@/components/waves/drops/WaveDropActionsMore";
+import WaveDropActionsOpen from "@/components/waves/drops/WaveDropActionsOpen";
 import ParticipationDropVoteDetailsTrigger from "@/components/waves/drops/participation/ratings/ParticipationDropVoteDetailsTrigger";
 import WaveDropMobileMenuCopyLink from "@/components/waves/drops/WaveDropMobileMenuCopyLink";
 import WaveDropMobileMenuOpen from "@/components/waves/drops/WaveDropMobileMenuOpen";
@@ -276,7 +276,7 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
               {!hasTouchScreen && (
                 <div className="tw-flex tw-flex-shrink-0 tw-items-center">
                   <div className="tw-h-8">
-                    <WaveDropActionsMore drop={extendedDrop} />
+                    <WaveDropActionsOpen drop={extendedDrop} />
                   </div>
                 </div>
               )}

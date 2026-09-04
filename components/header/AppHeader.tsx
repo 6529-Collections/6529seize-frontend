@@ -2,7 +2,7 @@
 
 import {
   Bars3Icon,
-  EllipsisHorizontalIcon,
+  EllipsisVerticalIcon,
   LockClosedIcon,
   PlusIcon,
 } from "@heroicons/react/24/outline";
@@ -49,6 +49,10 @@ import { getWaveDescriptionPreviewText } from "@/helpers/waves/waveDescriptionPr
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { getActiveViewFromUrl } from "../navigation/ViewContext";
 import { getActiveWaveIdFromUrl } from "@/helpers/navigation.helpers";
+import {
+  isProfilePreferencesEntry,
+  PREFERENCES_ENTRY_SOURCE_PARAM,
+} from "@/helpers/preferences-navigation";
 import {
   getAppHeaderMoreMenuItems,
   type HeaderMoreMenuItem,
@@ -397,7 +401,7 @@ const HeaderMoreMenu = ({
       trigger={
         <>
           <span className="tw-sr-only">More header actions</span>
-          <EllipsisHorizontalIcon className="tw-size-5 tw-flex-shrink-0" />
+          <EllipsisVerticalIcon className="tw-size-5 tw-flex-shrink-0" />
         </>
       }
       items={items}
@@ -541,12 +545,26 @@ export default function AppHeader() {
     activeWaveId: waveParam,
     searchParams,
   });
+  const isProfileWavesFeedView =
+    isCapacitor &&
+    pathname === "/waves" &&
+    !waveParam &&
+    searchParams.get("view") === "profile-feed";
   const showPageShareAction =
     isCapacitor &&
     !isInsideWave &&
     isPageShareSupported({ activeView, pathname, surface: "mobile" });
 
   const isProfilePage = typeof params["user"] === "string";
+  const preferencesProfileReturnTo =
+    isCapacitor &&
+    pathname === "/preferences" &&
+    isProfilePreferencesEntry(
+      searchParams.get(PREFERENCES_ENTRY_SOURCE_PARAM)
+    ) &&
+    connectedProfile?.handle
+      ? `/${encodeURIComponent(connectedProfile.handle)}`
+      : null;
   const profileCollectedReturnContext = isCapacitor
     ? getProfileCollectedTokenReturnContext({
         pathname,
@@ -557,6 +575,8 @@ export default function AppHeader() {
   const showBackButton =
     isInsideWave ||
     isCreateRoute ||
+    isProfileWavesFeedView ||
+    preferencesProfileReturnTo !== null ||
     profileCollectedReturnContext !== null ||
     (isProfilePage && canGoBack);
   const pfpImage = (
@@ -642,7 +662,11 @@ export default function AppHeader() {
           {showBackButton ? (
             <BackButton
               key={`${pathname}?${searchParams.toString()}`}
-              returnTo={profileCollectedReturnContext?.href}
+              returnTo={
+                preferencesProfileReturnTo ??
+                profileCollectedReturnContext?.href ??
+                (isProfileWavesFeedView ? "/waves" : undefined)
+              }
             />
           ) : (
             <button

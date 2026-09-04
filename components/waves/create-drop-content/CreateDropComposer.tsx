@@ -2,8 +2,6 @@ import { CHAT_LINK_RESTRICTION_MESSAGE } from "@/helpers/waves/chat-link-restric
 import { t } from "@/i18n/messages";
 import type { SupportedLocale } from "@/i18n/locales";
 import { AnimatePresence, LazyMotion, domAnimation, m } from "framer-motion";
-import MobileWrapperDialog from "../../mobile-wrapper-dialog/MobileWrapperDialog";
-import Button from "../../utils/button/Button";
 import CreateDropActions from "../CreateDropActions";
 import { CreateDropContentFiles } from "../CreateDropContentFiles";
 import CreateDropContentRequirements from "../CreateDropContentRequirements";
@@ -14,6 +12,8 @@ import CreateDropStormParts from "../CreateDropStormParts";
 import { CreateDropSubmit } from "../CreateDropSubmit";
 import SlowModeChatNotice from "../SlowModeChatNotice";
 import type { CreateDropLayoutProps } from "./CreateDropLayout";
+import CreateDropComposerSurface from "./CreateDropComposerSurface";
+import CreateDropPollDialog from "./CreateDropPollDialog";
 
 interface CreateDropComposerProps extends CreateDropLayoutProps {
   readonly initialDraftJson: string | null;
@@ -100,31 +100,39 @@ export default function CreateDropComposer({
     } else if (canAddPart || (drop?.parts.length ?? 0) === 0) {
       submitLabel = t(locale, "waves.stormComposer.addPart");
     } else {
-      submitLabel = t(locale, "waves.stormComposer.postStorm");
+      submitLabel = t(locale, "waves.stormComposer.addPart");
     }
   }
-  const postLabel = t(locale, "waves.header.postLabel.one");
   return (
     <>
-      {isStormModeActive && (
-        <CreateDropStormParts
-          parts={drop?.parts ?? []}
-          mentionedUsers={drop?.mentioned_users ?? []}
-          mentionedGroups={drop?.mentioned_groups ?? []}
-          mentionedWaves={drop?.mentioned_waves ?? []}
-          referencedNfts={drop?.referenced_nfts ?? []}
-          editingPartIndex={editingPartIndex}
-          isCompactLayout={isCompactLayout}
-          controlsDisabled={submitting}
-          canEditParts={!canAddPart && editingPartIndex === null}
-          hasCurrentDraft={hasCurrentDraft}
-          onEditPart={onEditPart}
-          onCancelPartEdit={onCancelPartEdit}
-          onMovePart={onMovePart}
-          onRemovePart={onRemovePart}
-          onDiscardStorm={onDiscardStorm}
-        />
-      )}
+      <LazyMotion features={domAnimation}>
+        <AnimatePresence initial={false}>
+          {isStormModeActive && (
+            <CreateDropComposerSurface
+              key="storm-composer-surface"
+              testId="storm-composer-surface"
+            >
+              <CreateDropStormParts
+                parts={drop?.parts ?? []}
+                mentionedUsers={drop?.mentioned_users ?? []}
+                mentionedGroups={drop?.mentioned_groups ?? []}
+                mentionedWaves={drop?.mentioned_waves ?? []}
+                referencedNfts={drop?.referenced_nfts ?? []}
+                editingPartIndex={editingPartIndex}
+                isCompactLayout={isCompactLayout}
+                controlsDisabled={submitting}
+                canEditParts={!canAddPart && editingPartIndex === null}
+                hasCurrentDraft={hasCurrentDraft}
+                onEditPart={onEditPart}
+                onCancelPartEdit={onCancelPartEdit}
+                onMovePart={onMovePart}
+                onRemovePart={onRemovePart}
+                onDiscardStorm={onDiscardStorm}
+              />
+            </CreateDropComposerSurface>
+          )}
+        </AnimatePresence>
+      </LazyMotion>
       <div
         ref={setActionsContainerRef}
         className="tw-grid tw-w-full tw-flex-none tw-grid-cols-[auto_minmax(0,1fr)_auto] tw-items-center tw-gap-x-2 lg:tw-gap-x-3"
@@ -188,14 +196,17 @@ export default function CreateDropComposer({
           validationHelperClassName="tw-col-start-2 tw-row-start-3 tw-mb-0 tw-mt-2 tw-text-[11px] tw-font-medium tw-leading-4 tw-text-amber-200/90"
           onDrop={submitWithResolvedAliases}
         />
-        <div className="tw-col-start-3 tw-row-start-2 tw-self-end md:tw-row-span-2">
+        <div
+          className={`tw-col-start-3 tw-row-start-2 tw-self-end ${
+            isCompactLayout ? "" : "md:tw-row-span-2"
+          }`}
+        >
           <CreateDropSubmit
             submitting={submitting}
             canSubmit={canSubmit}
             onDrop={submitWithResolvedAliases}
             isDropMode={isDropMode}
             label={submitLabel}
-            showLabelOnMobile={isStormModeActive}
             disabledTooltip={
               isLinksSubmitBlocked ? CHAT_LINK_RESTRICTION_MESSAGE : null
             }
@@ -224,52 +235,35 @@ export default function CreateDropComposer({
           </div>
         )}
       </div>
-      {pollDraft && !isApp && (
-        <CreateDropPoll
+      <LazyMotion features={domAnimation}>
+        <AnimatePresence initial={false}>
+          {pollDraft && !isApp && (
+            <CreateDropComposerSurface
+              key="poll-composer-surface"
+              testId="poll-composer-surface"
+            >
+              <CreateDropPoll
+                draft={pollDraft}
+                disabled={submitting}
+                validationError={pollValidationError}
+                onChange={updatePollDraft}
+                onRemove={removePoll}
+              />
+            </CreateDropComposerSurface>
+          )}
+        </AnimatePresence>
+      </LazyMotion>
+      {isApp && pollDraft && (
+        <CreateDropPollDialog
+          canSubmit={canSubmit}
           draft={pollDraft}
-          disabled={submitting}
-          validationError={pollValidationError}
+          locale={locale}
           onChange={updatePollDraft}
           onRemove={removePoll}
+          onSubmit={submitWithResolvedAliases}
+          submitting={submitting}
+          validationError={pollValidationError}
         />
-      )}
-      {isApp && pollDraft && (
-        <MobileWrapperDialog
-          title={t(locale, "waves.poll.composer.title")}
-          ariaLabel={t(locale, "waves.poll.composer.title")}
-          isOpen
-          onClose={removePoll}
-          onBack={submitting ? undefined : removePoll}
-          dismissible={!submitting}
-          noPadding
-          enableDragToClose
-          showHeaderCloseButton={false}
-          showHeaderDivider
-          surfaceClassName="tw-bg-iron-950"
-        >
-          <CreateDropPoll
-            draft={pollDraft}
-            disabled={submitting}
-            validationError={pollValidationError}
-            onChange={updatePollDraft}
-            onRemove={removePoll}
-            presentation="sheet"
-          />
-          <div className="tw-sticky tw-bottom-0 tw-z-10 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-bg-iron-950/95 tw-px-4 tw-pb-3 tw-pt-3 tw-backdrop-blur">
-            <Button
-              onClick={submitWithResolvedAliases}
-              loading={submitting}
-              disabled={!canSubmit}
-              variant="primary"
-              size="lg"
-              fullWidth
-              aria-label={submitting ? `${postLabel} in progress` : postLabel}
-              hideChildrenWhenLoading
-            >
-              {postLabel}
-            </Button>
-          </div>
-        </MobileWrapperDialog>
       )}
       {isDropMode && (
         <CreateDropContentRequirements

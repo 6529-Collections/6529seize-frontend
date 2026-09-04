@@ -819,6 +819,7 @@ export const DE_DE_MESSAGES = {
   "memes.waveFooter.quickVote.open": "Schnellvoting öffnen",
   "memes.waveFooter.uncastPower.ariaLabel":
     "Nicht vergebene Power, {power} {votingLabel} übrig, {leftThisRound}, {unrated}",
+  "memes.waveFooter.uncastPower.compactLeft": "{count} übrig",
   "memes.waveFooter.uncastPower.title": "Nicht vergebene Power",
   "memes.waveFooter.uncastPower.visibleValue": "{power} {votingLabel}",
   "memes.waveFooter.uncastPower.votes": "Stimmen",
@@ -826,6 +827,17 @@ export const DE_DE_MESSAGES = {
   ...DE_DE_DROP_REACTION_MESSAGES,
   "waves.mobile.profileFeed.title": "Profile-Waves-Feed",
   "waves.mobile.profileFeed.subtitle": "Ausgewählte Drops aus Profile-Waves",
+  "waves.header.postLabel.inProgress": "Beitrag wird veröffentlicht",
+  "waves.profileFeed.title": "Neueste Beiträge aus Profile Waves",
+  "waves.profileFeed.description":
+    "Entdecke, was die Community in Profile Waves teilt.",
+  "waves.profileFeed.errorTitle":
+    "Profilbeiträge konnten nicht geladen werden",
+  "waves.profileFeed.errorDescription":
+    "Aktualisiere diese Ansicht, um es erneut zu versuchen.",
+  "waves.profileFeed.emptyTitle": "Noch keine Profilbeiträge",
+  "waves.profileFeed.emptyDescription":
+    "Neue Beiträge aus den Profile Waves der Mitglieder erscheinen hier.",
   "waves.leaderboard.listLabel": "Leaderboard-Drops",
   "waves.leaderboard.loadingEarlier": "Frühere Drops werden geladen",
   "waves.leaderboard.previousLoadError":

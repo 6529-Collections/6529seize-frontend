@@ -824,6 +824,7 @@ export const FR_FR_MESSAGES = {
   "memes.waveFooter.quickVote.open": "Ouvrir le vote rapide",
   "memes.waveFooter.uncastPower.ariaLabel":
     "Pouvoir non utilisé, {power} {votingLabel} restants, {leftThisRound}, {unrated}",
+  "memes.waveFooter.uncastPower.compactLeft": "Encore {count}",
   "memes.waveFooter.uncastPower.title": "Pouvoir non utilisé",
   "memes.waveFooter.uncastPower.visibleValue": "{power} {votingLabel}",
   "memes.waveFooter.uncastPower.votes": "Votes",
@@ -831,6 +832,18 @@ export const FR_FR_MESSAGES = {
   ...FR_FR_DROP_REACTION_MESSAGES,
   "waves.mobile.profileFeed.title": "Flux Profile Waves",
   "waves.mobile.profileFeed.subtitle": "Drops en vedette des profile waves",
+  "waves.header.postLabel.inProgress": "Publication en cours",
+  "waves.profileFeed.title": "Dernières publications des Profile Waves",
+  "waves.profileFeed.description":
+    "Découvrez ce que la communauté partage dans les Profile Waves.",
+  "waves.profileFeed.errorTitle":
+    "Impossible de charger les publications de profil",
+  "waves.profileFeed.errorDescription":
+    "Actualisez cette vue pour réessayer.",
+  "waves.profileFeed.emptyTitle":
+    "Aucune publication de profil pour le moment",
+  "waves.profileFeed.emptyDescription":
+    "Les nouvelles publications des Profile Waves des membres apparaîtront ici.",
   "waves.leaderboard.listLabel": "Drops du classement",
   "waves.leaderboard.loadingEarlier": "Chargement des drops précédents",
   "waves.leaderboard.previousLoadError":

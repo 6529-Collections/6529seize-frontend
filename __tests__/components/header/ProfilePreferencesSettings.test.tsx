@@ -7,7 +7,7 @@ import {
   ApiProfilePreferencesNotificationLevelEnum as NotificationLevel,
 } from "@/generated/models/ApiProfilePreferences";
 import { commonApiFetch, commonApiPut } from "@/services/api/common-api";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 jest.mock("@/components/auth/Auth", () => ({ useAuth: jest.fn() }));
@@ -64,23 +64,76 @@ describe("ProfilePreferencesSettings", () => {
     expect(
       screen.getByRole("region", { name: "Notifications & messages" })
     ).toBeInTheDocument();
-    expect(
-      screen
-        .getAllByRole("heading", { level: 2 })
-        .map(({ textContent }) => textContent?.trim())
-    ).toEqual(["Notifications", "Who can start a direct message with me?"]);
-    expect(screen.getByRole("region", { name: "Notifications" })).toHaveClass(
-      "tw-pb-0",
-      "tw-pt-6"
+    const sectionHeadings = screen.getAllByRole("heading", { level: 2 });
+    expect(sectionHeadings.map(({ textContent }) => textContent?.trim())).toEqual(
+      ["Notifications", "Who can start a direct message with me?"]
+    );
+    sectionHeadings.forEach((heading) => expect(heading).toHaveClass("tw-m-0"));
+    const notificationsSection = screen.getByRole("region", {
+      name: "Notifications",
+    });
+    expect(notificationsSection).toHaveClass(
+      "tw-pt-6",
+      "sm:tw-pt-8"
+    );
+    expect(notificationsSection.nextElementSibling).toHaveClass(
+      "tw-my-10",
+      "tw-h-px",
+      "tw-bg-iron-800"
     );
     expect(
       screen.getByRole("region", {
         name: "Who can start a direct message with me?",
       })
-    ).toHaveClass("tw-pb-0", "tw-pt-6");
-    expect(
-      screen.getByRole("button", { name: "Save Changes" }).parentElement
-    ).toHaveClass("tw-pt-6");
+    ).toHaveClass("tw-pb-8", "sm:tw-pb-10");
+    const saveButton = screen.getByRole("button", { name: "Save Changes" });
+    expect(saveButton.parentElement).toHaveClass(
+      "tw-py-6",
+      "tw-mx-4",
+      "lg:tw-mx-8"
+    );
+    expect(saveButton).toHaveClass("tw-bg-primary-500", "tw-px-3.5");
+    expect(saveButton).not.toHaveClass(
+      "tw-w-full",
+      "sm:tw-w-auto",
+      "sm:tw-px-6",
+      "sm:tw-min-w-40"
+    );
+  });
+
+  it("keeps native controls and full-row labels for each option", async () => {
+    render(<ProfilePreferencesSettings />);
+
+    await screen.findByText("Subscription coverage");
+
+    const notificationGroup = screen.getByRole("group", {
+      name: "Notifications",
+    });
+    const directMessageGroup = screen.getByRole("group", {
+      name: "Who can start a direct message with me?",
+    });
+    const radios = [
+      ...within(notificationGroup).getAllByRole("radio"),
+      ...within(directMessageGroup).getAllByRole("radio"),
+    ];
+    const categoryCheckboxes = screen.getAllByRole("checkbox");
+
+    expect(radios).toHaveLength(5);
+    radios.forEach((radio) => {
+      expect(radio).toHaveClass("tw-peer", "tw-sr-only");
+      expect(radio.nextElementSibling).toHaveClass("tw-min-h-12", "tw-w-full");
+    });
+
+    expect(categoryCheckboxes).toHaveLength(6);
+    categoryCheckboxes.forEach((checkbox) => {
+      expect(checkbox).toHaveClass("tw-peer", "tw-sr-only");
+      expect(checkbox.closest("label")).toHaveClass("tw-min-h-12", "tw-w-full");
+      expect(checkbox.nextElementSibling).toHaveClass(
+        "tw-border-emerald-400/60",
+        "tw-bg-emerald-500"
+      );
+    });
+    expect(document.querySelector(".react-toggle")).not.toBeInTheDocument();
   });
 
   it("hides optional categories while preserving their saved values", async () => {

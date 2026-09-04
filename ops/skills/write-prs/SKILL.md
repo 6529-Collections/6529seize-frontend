@@ -11,10 +11,10 @@ description: Write, open, iterate, and prepare pull requests for merge or deploy
    - `review-ready`: create or update the PR and stop once available review bots and the agent are satisfied.
    - `merge`: do everything in `review-ready`, then hand off to `ops/skills/deploy-6529/SKILL.md` for merge execution when required checks and approvals allow it.
    - `staging`: hand off to `ops/skills/deploy-6529/SKILL.md` for merge,
-     staging deployment, and E2E or smoke validation. Never prepare, publish,
+     staging deployment, and health validation. Never prepare, publish,
      or trigger a release note for staging.
    - `prod`: hand off to `ops/skills/deploy-6529/SKILL.md` for production
-     deployment and production E2E or smoke validation. Never author or post a
+     deployment and health validation. Never author or post a
      release note; the existing autonomous bot owns production release notes.
 
    If the user did not explicitly request merge or deployment, stop at `review-ready`.
@@ -69,7 +69,7 @@ description: Write, open, iterate, and prepare pull requests for merge or deploy
    - In this repo, use signed commits: `git commit -s ...`.
    - Keep follow-up commits focused and give them clear messages describing the bot/user feedback addressed.
    - Push after each meaningful round of fixes so review bots evaluate the latest head.
-   - After the initial PR push, keep the agent/thread open until every tracked bot or status check triggered for that head commit reaches a terminal state.
+   - After the initial PR push, keep the agent/thread open until relevant tracked bots and status checks for that head are complete; unrelated E2E does not hold up release work.
 
 6. Iterate with available review bots:
    - Discover available bot feedback from PR comments, review comments, review threads, checks, or local repo tools.
@@ -85,7 +85,7 @@ description: Write, open, iterate, and prepare pull requests for merge or deploy
      - `security/snyk (6529)`
      - `SonarCloud Code Analysis`
    - For each tracked bot or status check, verify the latest pushed commit, capture the current state, and inspect any failure, skipped review, alert, or warning details before deciding readiness.
-   - After every follow-up commit, repeat the wait: keep the agent/thread open until all tracked bots and checks for the new head commit are done, including success, failure, skipped, or cancelled states.
+   - After every follow-up commit, repeat the wait: keep the agent/thread open until relevant tracked bots and checks for the new head are done, excluding unrelated E2E as described below.
    - Review every new bot comment or finding and make an explicit fix-or-defer decision. The default is to address it; defer only when the comment is wrong, inapplicable, duplicative, or lower value than the churn it would create, and document the rationale.
    - For local CodeRabbit review in this repo, use `6529 run cr` or the `quality:cr` scripts when they fit the change scope.
    - Treat bot findings as review input, not orders. Fix valid correctness, security, performance, test, docs, accessibility, and maintainability issues.
@@ -96,7 +96,11 @@ description: Write, open, iterate, and prepare pull requests for merge or deploy
 7. Decide readiness:
    - Agent-happy means the diff is scoped, reviewed, validates the requested behavior, and has no known unaddressed high-risk issues.
    - Bot-happy means every available review bot has no remaining blocking concerns on the latest pushed commit, or the agent has documented why a remaining item is safe to defer.
-   - Human approval and required CI still govern merge eligibility.
+   - Required approvals and relevant CI govern merge eligibility, subject to the
+     user's existing authorization. Pending or failed E2E unrelated to the change
+     does not block release work. Report it separately and use the authorized
+     merge path if it is the only cause of a blocked aggregate check; do not
+     change repository protections or claim the E2E passed.
 
 ## Validation
 
@@ -104,7 +108,7 @@ description: Write, open, iterate, and prepare pull requests for merge or deploy
 - Use `6529 run build` for build-time, generated API model, Next.js config, route, or deployment-sensitive changes.
 - Use `6529 run test:e2e` for local Playwright E2E when relevant; this repo's default Playwright config starts the app locally on port `3001`.
 - For staging or production validation, inspect the repo's current deploy and E2E configuration before running. If no target-specific E2E command exists, run the strongest available smoke checks and report the gap clearly.
-- For merge, staging, production, or release-lane work, include a deployment-bus handoff when relevant: release set, candidate SHA, included PRs, backend dependencies, validation owners, and held or blocked changes. Use `ops/docs/developer/simple-release-bus-v2.md` for the current process.
+- For authorized merge, staging, or production work, include affected PRs, backend service dependencies and order, deployment run links, validation results, and any unresolved failure. Follow `ops/docs/developer/deployment.md` and `ops/skills/deploy-6529/SKILL.md` for the direct workflow process.
 
 ## Merge And Deploy Gates
 
@@ -112,9 +116,9 @@ description: Write, open, iterate, and prepare pull requests for merge or deploy
 - Use `ops/skills/deploy-6529/SKILL.md` for actual merge execution, staging deployment, production deployment, backend deployment coordination, cross-agent coordination, and deployed-environment E2E validation.
 - Before merging, ensure the PR is agent-happy, bot-happy, required checks are passing or explained, and required approvals are present.
 - Order the final gates correctly: bring the branch up to date with `main` first, then seek the maintainer approval. The `main` ruleset requires approval of the most recent push, so a branch update resets the approval requirement to unmet and prior approvals no longer satisfy it. The approval must come from the `6529seize-maintainers` team and be submitted on behalf of that team, or the ruleset rejects it.
-- Before staging deploy, confirm the merge commit/ref, use the repo-approved staging deployment path, then validate the deployed target. In this repo, the documented fresh-clone staging refresh path is `./bin/6529 staging`.
-- Before production deploy, require successful staging validation for the same `origin/main` SHA or ordered frontend/backend release set unless the user explicitly overrides it. Use the repo-approved production deployment path and verify the deployed version or visible behavior afterward. In this repo, production deploy is the `Web Deploy - PROD` workflow in `.github/workflows/build-upload-deploy-prod.yml`, and it rejects non-`main` refs.
-- If deployment or E2E fails, hand off to `ops/skills/deploy-6529/SKILL.md` to diagnose, fix, redeploy, and rerun validation before proceeding.
+- For authorized staging deployment, merge the reviewed development branch into current `1a-staging` and push, then follow the automatic frontend deployment through artifact, version, and health checks; report separate automatic E2E without waiting for it. Complete required backend service deployments first for coupled changes.
+- Before production deployment, require successful staging deployment, artifact, version, and health checks for the same reviewed change set unless the user explicitly authorizes an override. Staging E2E does not gate production. Separate staging and main merges can produce different commit IDs; verify the reviewed changes and normal workflow/runtime results without a cross-branch baseline requirement. Merge to `main` and dispatch `Web Deploy - PROD` in `.github/workflows/build-upload-deploy-prod.yml`, which rejects non-`main` refs.
+- If deployment, artifact verification, version, or health checks fail, use `ops/skills/deploy-6529/SKILL.md` to diagnose, fix, redeploy, and recheck before proceeding. Automatic E2E reports independently; fix known attributable regressions without turning pending or unrelated E2E into a release gate.
 
 ## Anti-Patterns
 

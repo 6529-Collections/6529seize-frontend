@@ -58,31 +58,31 @@ export default function ProfileHeaderRelationshipActions({
     : undefined;
 
   return (
-    <>
-      <UserFollowBtn
-        handle={profile.handle}
-        blocked={moderationControls.isBlocked}
-        blockStateLoading={
-          moderationControls.isLoading || moderationControls.isBlocking
-        }
-        showFollowButton
-        showMuteButton={false}
-        unblockPending={moderationControls.isUnblocking}
-        onUnblock={() => moderationControls.onSelectAction("unblock")}
-        onDirectMessage={directMessageAction}
-        directMessageLoading={directMessageLoading}
-      />
-      {showActionMenu ? (
-        <ProfileBlockActionMenu
-          handle={profile.handle}
-          disabled={
-            moderationControls.isLoading || moderationControls.isActionPending
-          }
-          showPersonalActions={!moderationControls.isBlocked}
-          moderationAction={moderationAction}
-          onBlock={() => moderationControls.onSelectAction("block")}
-        />
-      ) : null}
-    </>
+    <UserFollowBtn
+      handle={profile.handle}
+      blocked={moderationControls.isBlocked}
+      blockStateLoading={
+        moderationControls.isLoading || moderationControls.isBlocking
+      }
+      showFollowButton
+      showMuteButton={false}
+      unblockPending={moderationControls.isUnblocking}
+      onUnblock={() => moderationControls.onSelectAction("unblock")}
+      onDirectMessage={directMessageAction}
+      directMessageLoading={directMessageLoading}
+      beforeFollowAction={
+        showActionMenu ? (
+          <ProfileBlockActionMenu
+            handle={profile.handle}
+            disabled={
+              moderationControls.isLoading || moderationControls.isActionPending
+            }
+            showPersonalActions={!moderationControls.isBlocked}
+            moderationAction={moderationAction}
+            onBlock={() => moderationControls.onSelectAction("block")}
+          />
+        ) : null
+      }
+    />
   );
 }

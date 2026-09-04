@@ -170,6 +170,7 @@ export default function UserPageBrainSidebar({
           "user.brain.sidebar.desktopScrollRegionLabel"
         )}
         className={`${styles["desktopScrollRegion"] ?? ""} tw-hidden tw-space-y-6 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 lg:tw-block lg:tw-max-h-[calc(100dvh-4rem)] lg:tw-overflow-y-auto lg:tw-overflow-x-hidden lg:tw-overscroll-y-contain lg:tw-pb-1 lg:tw-pr-1 lg:tw-scrollbar-thin lg:tw-scrollbar-track-transparent lg:tw-scrollbar-thumb-iron-700/70 desktop-hover:hover:lg:tw-scrollbar-thumb-iron-500`}
+        data-brain-sidebar-scroll-region
         data-testid="brain-sidebar-desktop"
         onKeyDown={handleDesktopSidebarKeyDown}
         ref={desktopSidebarRef}

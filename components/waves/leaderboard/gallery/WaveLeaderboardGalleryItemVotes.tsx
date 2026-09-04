@@ -76,7 +76,7 @@ export default function WaveLeaderboardGalleryItemVotes({
         className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-2"
       >
         <span
-          className={`tw-text-sm tw-font-semibold tw-tabular-nums ${getColorClass()}`}
+          className={`tw-text-xs tw-font-semibold tw-tabular-nums sm:tw-text-sm ${getColorClass()}`}
         >
           {formatInteger(locale, current)}
         </span>
@@ -86,6 +86,7 @@ export default function WaveLeaderboardGalleryItemVotes({
           projectedLabel={formatInteger(locale, projected)}
           subtle={variant === "subtle"}
           numberFont="sans"
+          numberSize="mobile-xs"
           numberWeight="semibold"
         />
       </div>

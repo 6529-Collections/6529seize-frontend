@@ -51,13 +51,15 @@ normal interactive install, run:
 6529 install
 ```
 
-If `NODE_AUTH_TOKEN` is not already set, the wrapper asks for it silently and
-keeps it only for that command. CI and other non-interactive shells must supply
-`NODE_AUTH_TOKEN` at runtime. Do not store it in the repository or
-package-manager configuration. See
+If `NODE_AUTH_TOKEN` is not already set, the wrapper first checks the macOS
+Keychain or Windows Credential Manager, then asks for the token with hidden
+input when no stored credential is available. A prompted token is kept only for
+that command. CI and other non-interactive shells must supply `NODE_AUTH_TOKEN`
+at runtime. Do not store it in the repository or package-manager configuration.
+See
 [pnpm and Socket Firewall](ops/docs/developer/pnpm-and-socket-firewall.md) for
-the one-time Codex Keychain setup, the exact package-routing boundary, and other
-authenticated package commands.
+the one-time credential-store setup, the exact package-routing boundary, and
+other authenticated package commands.
 
 Create a local `.env` file from [.env.sample](.env.sample), then start the app:
 

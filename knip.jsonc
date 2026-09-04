@@ -12,13 +12,13 @@
     // 2) Optionally add entries Knip can't infer from scripts/configs
     //    (Next.js entries are auto-added by the Next plugin)
     "entry": [
+      // The generated serializer catalogs the full API, including models not used by today's UI.
+      "generated/models/ObjectSerializer.ts",
       "scripts/**/*.{ts,js,cjs,mjs}",  // local CLIs used via package.json scripts
       "bin/**/*.mjs",                // repo-local Node CLIs launched from shell helpers
       "ops/skills/**/scripts/**/*.{js,cjs,mjs}", // repo-local skill CLIs invoked by SKILL.md instructions
       "ops/workstreams/**/scripts/**/*.{js,cjs,mjs}", // campaign/workstream CLIs invoked per their plan docs
-      "ops/scripts/release-bus-status.mjs", // deployment CLI invoked by deploy-6529 instructions
-      "ops/scripts/one-click-production-authority.cjs", // production workflow authority client
-      "ops/scripts/verify-production-artifact-selection.cjs", // isolated production artifact verifier
+      "ops/scripts/verify-production-artifact.cjs", // isolated production artifact verifier
       "app/**/route.{ts,tsx}",         // Next App Router route handlers (if used)
       "standalone/standalone-memes-mint/src/app/layout.tsx",
       "standalone/standalone-memes-mint/src/app/page.tsx",
@@ -93,11 +93,12 @@
       // Pure Museum change-classifier helpers are exported for their focused
       // adversarial Jest contract; Knip intentionally excludes test consumers.
       "scripts/museum-e2e-change-set.cjs": ["exports"],
-      // Production authority and artifact-selection CLIs expose pure helpers to
-      // focused adversarial Jest contracts, which are excluded from Knip's graph.
-      "ops/scripts/one-click-production-authority.cjs": ["exports"],
-      "ops/scripts/one-click-production-children.cjs": ["exports"],
-      "ops/scripts/verify-production-artifact-selection.cjs": ["exports"],
+      "scripts/museum-release-selection.cjs": ["exports"],
+      // The production artifact CLI exposes pure safety helpers to a focused
+      // adversarial Jest contract, which Knip excludes from its usage graph.
+      "ops/scripts/verify-production-artifact.cjs": ["exports"],
+      // Invoked from workflow YAML; pure helpers are exported for focused tests.
+      "ops/scripts/elastic-beanstalk-readiness.cjs": ["exports"],
       "services/api/public-review/feedback-codec.ts": ["exports", "types"],
       "services/api/public-review/ledger.ts": ["exports"],
       "services/**": ["files"],
@@ -131,7 +132,6 @@
       "coderabbit",
       // GitHub-hosted runner utility used by deployment workflows.
       "jq",
-      "sha256sum",
       // Capacitor CLI, run via npx inside the 6529-core-mobile checkout in
       // .github/workflows/device-farm-qa.yml — not a dependency of this repo.
       "cap"

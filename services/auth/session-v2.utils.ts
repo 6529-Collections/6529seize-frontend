@@ -24,8 +24,14 @@ import {
   isRateLimitError,
   type SessionRefreshFailureCooldownType,
 } from "./session-refresh-rate-limit.utils";
+import {
+  createAbortError,
+  getSessionRefreshKey,
+  isAbortError,
+  withCrossTabWebSessionRefreshLock,
+  type AuthSessionClientType,
+} from "./session-refresh-coordination.utils";
 
-type AuthSessionClientType = "web" | "native" | "desktop";
 type RefreshTokenSessionClientType = Exclude<AuthSessionClientType, "web">;
 
 interface SessionLoginRequest {
@@ -104,26 +110,6 @@ const sessionRefreshFailureCooldowns = new Map<
 export function getSessionClientType(): AuthSessionClientType {
   return Capacitor.isNativePlatform() ? "native" : "web";
 }
-
-function getSessionRefreshKey({
-  address,
-  clientType,
-}: {
-  readonly address: string;
-  readonly clientType: AuthSessionClientType;
-}): string {
-  return `${clientType}:${address.trim().toLowerCase()}`;
-}
-
-function createAbortError(): DOMException {
-  return new DOMException("Session refresh aborted", "AbortError");
-}
-
-const isAbortError = (error: unknown): boolean =>
-  typeof error === "object" &&
-  error !== null &&
-  "name" in error &&
-  error.name === "AbortError";
 
 function getActiveFailureCooldown(
   key: string
@@ -350,10 +336,12 @@ async function executeSessionRefreshV2({
   address,
   abortSignal,
   clientType,
+  refreshKey,
 }: {
   readonly address: string;
   readonly abortSignal?: AbortSignal | undefined;
   readonly clientType: AuthSessionClientType;
+  readonly refreshKey: string;
 }): Promise<SessionRefreshResponse | null> {
   if (clientType !== "web") {
     const nativeRefreshToken = await getNativeRefreshToken(address);
@@ -390,25 +378,30 @@ async function executeSessionRefreshV2({
     });
   }
 
-  return await executeSessionRefreshRequest({
-    clientType,
-    request: () =>
-      commonApiPost<
-        {
-          readonly client_type: "web";
-          readonly client_address: string;
-        },
-        SessionWebResponse
-      >({
-        endpoint: "auth/session-refresh",
-        body: {
-          client_type: "web",
-          client_address: address,
-        },
-        signal: abortSignal,
-        credentials: getSessionCredentialsMode(),
-        errorMode: "structured",
-        includeWalletAuth: false,
+  return await withCrossTabWebSessionRefreshLock({
+    refreshKey,
+    abortSignal,
+    task: async () =>
+      await executeSessionRefreshRequest({
+        clientType,
+        request: () =>
+          commonApiPost<
+            {
+              readonly client_type: "web";
+              readonly client_address: string;
+            },
+            SessionWebResponse
+          >({
+            endpoint: "auth/session-refresh",
+            body: {
+              client_type: "web",
+              client_address: address,
+            },
+            signal: abortSignal,
+            credentials: getSessionCredentialsMode(),
+            errorMode: "structured",
+            includeWalletAuth: false,
+          }),
       }),
   });
 }
@@ -523,6 +516,7 @@ export async function refreshSessionV2({
       address,
       abortSignal: abortSignal ? controller.signal : undefined,
       clientType,
+      refreshKey: key,
     }),
   };
   sessionRefreshInFlight.set(key, entry);

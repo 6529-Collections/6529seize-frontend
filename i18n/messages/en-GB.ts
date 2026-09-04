@@ -809,12 +809,22 @@ export const EN_GB_MESSAGES = {
   "memes.waveFooter.quickVote.open": "Open quick vote",
   "memes.waveFooter.uncastPower.ariaLabel":
     "Uncast Power, {power} {votingLabel} left, {leftThisRound}, {unrated}",
+  "memes.waveFooter.uncastPower.compactLeft": "{count} left",
   "memes.waveFooter.uncastPower.title": "Uncast Power",
   "memes.waveFooter.uncastPower.visibleValue": "{power} {votingLabel}",
   "memes.waveFooter.uncastPower.votes": "Votes",
   "memes.waveFooter.uncastPower.votesVisible": "votes",
   "waves.mobile.profileFeed.title": "Profile Waves Feed",
   "waves.mobile.profileFeed.subtitle": "Featured drops from profile waves",
+  "waves.header.postLabel.inProgress": "Posting",
+  "waves.profileFeed.title": "Latest From Profile Waves",
+  "waves.profileFeed.description":
+    "See what the community is sharing in Profile Waves.",
+  "waves.profileFeed.errorTitle": "Couldn’t load profile posts",
+  "waves.profileFeed.errorDescription": "Refresh this view to try again.",
+  "waves.profileFeed.emptyTitle": "No profile posts yet",
+  "waves.profileFeed.emptyDescription":
+    "New posts from members’ Profile Waves will appear here.",
   "waves.leaderboard.timeline.toggle": "Toggle decision timeline",
   "waves.leaderboard.timeline.decisionTimeline": "Decision Timeline",
   "waves.leaderboard.timeline.announcementHistory": "Announcement history",

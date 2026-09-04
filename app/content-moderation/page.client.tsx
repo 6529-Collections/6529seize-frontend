@@ -39,6 +39,7 @@ import {
 } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useMemo, useState } from "react";
 import {
   formatEvidence,
@@ -48,12 +49,56 @@ import {
   getSnapshotAssets,
   getSnapshotContent,
 } from "./content-moderation-page.helpers";
+import BlockActivityFeed from "./BlockActivityFeed";
 import ContentModerationHistory from "./ContentModerationHistory";
 import SuspendedProfileCard from "./SuspendedProfileCard";
+import ContentModerationTabs from "./ContentModerationTabs";
+import {
+  getModerationTab,
+  type ModerationTab,
+} from "./content-moderation-tabs";
 
-type ModerationTab = "OPEN" | "RESOLVED" | "SUSPENDED";
+interface ModerationDataState {
+  readonly isLoading: boolean;
+  readonly isError: boolean;
+}
 
 const MODERATION_QUEUE_PAGE_SIZE = 50;
+
+function isReportsTab(tab: ModerationTab): tab is "OPEN" | "RESOLVED" {
+  return tab === "OPEN" || tab === "RESOLVED";
+}
+
+function getModeratorPermissions(
+  access: ReturnType<typeof useContentModeratorAccess>,
+  hasModeratorIdentity: boolean,
+  fetchingProfile: boolean
+) {
+  const canModerate = access.data?.moderator === true;
+  const permissionsLoading =
+    fetchingProfile || (hasModeratorIdentity && access.isLoading);
+  return {
+    canModerate,
+    permissionsLoading,
+    moderatorContentReady:
+      hasModeratorIdentity && canModerate && !permissionsLoading,
+  };
+}
+
+function getActiveDataState(
+  tab: ModerationTab,
+  queueState: ModerationDataState,
+  suspendedState: ModerationDataState,
+  enabled: boolean
+): ModerationDataState {
+  if (!enabled || tab === "BLOCK_ACTIVITY") {
+    return { isLoading: false, isError: false };
+  }
+  if (tab === "SUSPENDED") {
+    return suspendedState;
+  }
+  return queueState;
+}
 
 function ModerationQueueCard({
   item,
@@ -492,11 +537,14 @@ function ModerationQueueCard({
 export default function ContentModerationPageClient() {
   const locale = useBrowserLocale();
   const { connectedProfile, activeProfileProxy, fetchingProfile } = useAuth();
-  const [activeTab, setActiveTab] = useState<ModerationTab>("OPEN");
+  const pathname = usePathname();
+  const activeTab = getModerationTab(pathname.split("/")[2]) ?? "OPEN";
   const accessQuery = useContentModeratorAccess();
   const hasModeratorIdentity =
     Boolean(connectedProfile?.id) && activeProfileProxy === null;
-  const canModerate = accessQuery.data?.moderator === true;
+  const { canModerate, permissionsLoading, moderatorContentReady } =
+    getModeratorPermissions(accessQuery, hasModeratorIdentity, fetchingProfile);
+  const reportsTabActive = isReportsTab(activeTab);
   const reportsView = activeTab === "RESOLVED" ? "RESOLVED" : "OPEN";
   const queueQuery = useInfiniteQuery({
     queryKey: [...MODERATION_QUEUE_QUERY_KEY, reportsView],
@@ -511,7 +559,7 @@ export default function ContentModerationPageClient() {
       lastPage.length === MODERATION_QUEUE_PAGE_SIZE
         ? lastPage.at(-1)?.cursor
         : undefined,
-    enabled: canModerate && activeTab !== "SUSPENDED",
+    enabled: moderatorContentReady && reportsTabActive,
     retry: false,
   });
   const suspendedQuery = useInfiniteQuery({
@@ -526,7 +574,7 @@ export default function ContentModerationPageClient() {
       lastPage.length === MODERATION_QUEUE_PAGE_SIZE
         ? lastPage.at(-1)?.cursor
         : undefined,
-    enabled: canModerate && activeTab === "SUSPENDED",
+    enabled: moderatorContentReady && activeTab === "SUSPENDED",
     retry: false,
   });
   const queueItems = useMemo(
@@ -537,46 +585,14 @@ export default function ContentModerationPageClient() {
     () => suspendedQuery.data?.pages.flat() ?? [],
     [suspendedQuery.data]
   );
-  const permissionsLoading =
-    fetchingProfile || (hasModeratorIdentity && accessQuery.isLoading);
-  const activeDataLoading =
-    activeTab === "SUSPENDED" ? suspendedQuery.isLoading : queueQuery.isLoading;
-  const activeDataError =
-    activeTab === "SUSPENDED" ? suspendedQuery.isError : queueQuery.isError;
-  const tabs: ReadonlyArray<{
-    readonly id: ModerationTab;
-    readonly label: string;
-    readonly compactLabel: string;
-    readonly count: number;
-  }> = [
-    {
-      id: "OPEN",
-      label: t(locale, "contentModeration.moderator.tabs.open"),
-      compactLabel: t(locale, "contentModeration.moderator.tabs.openCompact"),
-      count: accessQuery.data?.open_report_count ?? 0,
-    },
-    {
-      id: "RESOLVED",
-      label: t(locale, "contentModeration.moderator.tabs.resolved"),
-      compactLabel: t(
-        locale,
-        "contentModeration.moderator.tabs.resolvedCompact"
-      ),
-      count: accessQuery.data?.resolved_report_count ?? 0,
-    },
-    {
-      id: "SUSPENDED",
-      label: t(locale, "contentModeration.moderator.tabs.suspended"),
-      compactLabel: t(
-        locale,
-        "contentModeration.moderator.tabs.suspendedCompact"
-      ),
-      count: accessQuery.data?.suspended_profile_count ?? 0,
-    },
-  ];
-
+  const activeDataState = getActiveDataState(
+    activeTab,
+    queueQuery,
+    suspendedQuery,
+    moderatorContentReady
+  );
   return (
-    <main className="tailwind-scope tw-min-h-dvh tw-w-full tw-bg-black tw-px-4 tw-py-8 sm:tw-px-6 sm:tw-py-12">
+    <main className="tailwind-scope tw-min-h-dvh tw-w-full tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-800 tw-bg-black tw-px-4 tw-py-8 sm:tw-px-6 sm:tw-py-12 lg:tw-px-8">
       <h1 className="tw-m-0 tw-text-2xl tw-font-semibold tw-tracking-tight tw-text-iron-50 sm:tw-text-3xl">
         {t(locale, "contentModeration.moderator.title")}
       </h1>
@@ -593,120 +609,63 @@ export default function ContentModerationPageClient() {
         (!hasModeratorIdentity || (accessQuery.isSuccess && !canModerate)) && (
           <ContentModerationNoAccess locale={locale} />
         )}
-      {!permissionsLoading && canModerate && (
-        <>
-          <div
-            role="tablist"
-            aria-label={t(locale, "contentModeration.moderator.tabs.label")}
-            className="tw-mt-8 tw-flex tw-flex-nowrap tw-gap-0 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 sm:tw-flex-wrap sm:tw-gap-2"
-          >
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                role="tab"
-                aria-selected={activeTab === tab.id}
-                aria-label={`${tab.label} (${formatInteger(locale, tab.count)})`}
-                onClick={() => setActiveTab(tab.id)}
-                className={`tw-min-w-0 tw-flex-1 tw-cursor-pointer tw-whitespace-nowrap tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-bg-transparent tw-px-1 tw-py-3 tw-text-sm tw-font-semibold focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 sm:tw-flex-none sm:tw-px-3 ${
-                  activeTab === tab.id
-                    ? "tw-border-primary-400 tw-text-iron-50"
-                    : "tw-border-transparent tw-text-iron-400 hover:tw-text-iron-100"
-                }`}
-              >
-                <span aria-hidden="true" className="sm:tw-hidden">
-                  {tab.compactLabel}
-                </span>
-                <span aria-hidden="true" className="tw-hidden sm:tw-inline">
-                  {tab.label}
-                </span>
-                <span
-                  aria-hidden="true"
-                  className="tw-ml-1.5 tw-rounded-full tw-bg-iron-800 tw-px-1.5 tw-py-0.5 tw-text-xs tw-text-iron-200 sm:tw-ml-2 sm:tw-px-2"
-                >
-                  {formatInteger(locale, tab.count)}
-                </span>
-              </button>
-            ))}
-          </div>
-          {activeDataLoading && (
-            <output className="tw-mb-0 tw-mt-8 tw-text-sm tw-text-iron-400">
-              {t(locale, "contentModeration.moderator.loading")}
-            </output>
-          )}
-        </>
+      {moderatorContentReady && (
+        <ContentModerationTabs
+          activeTab={activeTab}
+          openCount={accessQuery.data?.open_report_count ?? 0}
+          resolvedCount={accessQuery.data?.resolved_report_count ?? 0}
+          suspendedCount={accessQuery.data?.suspended_profile_count ?? 0}
+        />
       )}
-      {(accessQuery.isError || activeDataError) && (
-        <p role="alert" className="tw-mb-0 tw-mt-8 tw-text-sm tw-text-red">
-          {t(locale, "contentModeration.moderator.loadError")}
-        </p>
-      )}
-      {canModerate &&
-        activeTab !== "SUSPENDED" &&
-        queueItems.length === 0 &&
-        !queueQuery.isLoading && (
-          <p className="tw-mb-0 tw-mt-8 tw-text-sm tw-text-iron-400">
-            {t(
-              locale,
-              activeTab === "OPEN"
-                ? "contentModeration.moderator.empty"
-                : "contentModeration.moderator.emptyResolved"
-            )}
-          </p>
+      <div
+        id="moderation-tabpanel"
+        role={moderatorContentReady ? "tabpanel" : undefined}
+        aria-labelledby={
+          moderatorContentReady ? `moderation-tab-${activeTab}` : undefined
+        }
+        tabIndex={moderatorContentReady ? 0 : undefined}
+        className="focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400"
+      >
+        {moderatorContentReady && activeDataState.isLoading && (
+          <output className="tw-mb-0 tw-mt-8 tw-text-sm tw-text-iron-400">
+            {t(locale, "contentModeration.moderator.loading")}
+          </output>
         )}
-      {canModerate && activeTab !== "SUSPENDED" && queueItems.length > 0 && (
-        <div className="tw-mt-8 tw-space-y-5">
-          {queueItems.map((item) => (
-            <ModerationQueueCard key={item.id} item={item} />
-          ))}
-          {queueQuery.hasNextPage && (
-            <div className="tw-flex tw-justify-center tw-pt-2">
-              <button
-                type="button"
-                disabled={queueQuery.isFetchingNextPage}
-                onClick={() => void queueQuery.fetchNextPage()}
-                className="tw-cursor-pointer tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-iron-200 hover:tw-bg-iron-800 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 disabled:tw-cursor-default disabled:tw-opacity-50"
-              >
-                {t(
-                  locale,
-                  queueQuery.isFetchingNextPage
-                    ? "contentModeration.moderator.loadingMore"
-                    : "contentModeration.moderator.loadMore"
-                )}
-              </button>
-            </div>
+        {hasModeratorIdentity &&
+          (accessQuery.isError || activeDataState.isError) && (
+            <p role="alert" className="tw-mb-0 tw-mt-8 tw-text-sm tw-text-red">
+              {t(locale, "contentModeration.moderator.loadError")}
+            </p>
           )}
-        </div>
-      )}
-      {canModerate &&
-        activeTab === "SUSPENDED" &&
-        suspendedProfiles.length === 0 &&
-        !suspendedQuery.isLoading && (
-          <p className="tw-mb-0 tw-mt-8 tw-text-sm tw-text-iron-400">
-            {t(locale, "contentModeration.moderator.emptySuspended")}
-          </p>
-        )}
-      {canModerate &&
-        activeTab === "SUSPENDED" &&
-        suspendedProfiles.length > 0 && (
-          <div className="tw-mt-8 tw-space-y-3">
-            {suspendedProfiles.map((profile) => (
-              <SuspendedProfileCard
-                key={profile.profile_id}
-                profile={profile}
-              />
+        {moderatorContentReady &&
+          reportsTabActive &&
+          queueItems.length === 0 &&
+          !queueQuery.isLoading && (
+            <p className="tw-mb-0 tw-mt-8 tw-text-sm tw-text-iron-400">
+              {t(
+                locale,
+                activeTab === "OPEN"
+                  ? "contentModeration.moderator.empty"
+                  : "contentModeration.moderator.emptyResolved"
+              )}
+            </p>
+          )}
+        {moderatorContentReady && reportsTabActive && queueItems.length > 0 && (
+          <div className="tw-mt-8 tw-space-y-5">
+            {queueItems.map((item) => (
+              <ModerationQueueCard key={item.id} item={item} />
             ))}
-            {suspendedQuery.hasNextPage && (
+            {queueQuery.hasNextPage && (
               <div className="tw-flex tw-justify-center tw-pt-2">
                 <button
                   type="button"
-                  disabled={suspendedQuery.isFetchingNextPage}
-                  onClick={() => void suspendedQuery.fetchNextPage()}
-                  className="tw-cursor-pointer tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-iron-200 hover:tw-bg-iron-800 disabled:tw-cursor-default disabled:tw-opacity-50"
+                  disabled={queueQuery.isFetchingNextPage}
+                  onClick={() => void queueQuery.fetchNextPage()}
+                  className="tw-cursor-pointer tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-iron-200 hover:tw-bg-iron-800 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 disabled:tw-cursor-default disabled:tw-opacity-50"
                 >
                   {t(
                     locale,
-                    suspendedQuery.isFetchingNextPage
+                    queueQuery.isFetchingNextPage
                       ? "contentModeration.moderator.loadingMore"
                       : "contentModeration.moderator.loadMore"
                   )}
@@ -715,6 +674,47 @@ export default function ContentModerationPageClient() {
             )}
           </div>
         )}
+        {moderatorContentReady &&
+          activeTab === "SUSPENDED" &&
+          suspendedProfiles.length === 0 &&
+          !suspendedQuery.isLoading && (
+            <p className="tw-mb-0 tw-mt-8 tw-text-sm tw-text-iron-400">
+              {t(locale, "contentModeration.moderator.emptySuspended")}
+            </p>
+          )}
+        {moderatorContentReady && activeTab === "BLOCK_ACTIVITY" && (
+          <BlockActivityFeed enabled={moderatorContentReady} />
+        )}
+        {moderatorContentReady &&
+          activeTab === "SUSPENDED" &&
+          suspendedProfiles.length > 0 && (
+            <div className="tw-mt-8 tw-space-y-3">
+              {suspendedProfiles.map((profile) => (
+                <SuspendedProfileCard
+                  key={profile.profile_id}
+                  profile={profile}
+                />
+              ))}
+              {suspendedQuery.hasNextPage && (
+                <div className="tw-flex tw-justify-center tw-pt-2">
+                  <button
+                    type="button"
+                    disabled={suspendedQuery.isFetchingNextPage}
+                    onClick={() => void suspendedQuery.fetchNextPage()}
+                    className="tw-cursor-pointer tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-iron-200 hover:tw-bg-iron-800 disabled:tw-cursor-default disabled:tw-opacity-50"
+                  >
+                    {t(
+                      locale,
+                      suspendedQuery.isFetchingNextPage
+                        ? "contentModeration.moderator.loadingMore"
+                        : "contentModeration.moderator.loadMore"
+                    )}
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+      </div>
     </main>
   );
 }

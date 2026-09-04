@@ -28,18 +28,17 @@ const REQUIRED_BASE_CHECKS = [
   "reviewbot_contract",
   "agent_files_sync",
 ];
-const RELEASE_BUS_CONTRACT_PATTERNS = [
+const DEPLOYMENT_CONTRACT_PATTERNS = [
   /^\.github\/workflows\//u,
-  /^ops\/deployment-bus\//u,
+  /^ops\/docs\/developer\/(?:artifact-portability-migration|frontend-deployment|production-artifact-verifier)\.md$/u,
+  /^ops\/skills\/deploy-6529\//u,
   /^ops\/testing-strategy\/museum-/u,
-  /^ops\/scripts\/(?:artifact-portability(?:-[A-Za-z0-9]+)*|deployment-bus|deploy-staging-artifact|release-bus-status|verify-deployment-version)\./u,
-  /^scripts\/(?:app-pr-ci-effective-plan|e2e-packs|museum-|pr-ci-policy-bundle|release-bus-|sync-e2e-manifest)/u,
+  /^ops\/scripts\/(?:artifact-portability(?:-[A-Za-z0-9]+)*|deploy-staging-artifact|verify-deployment-version)\./u,
+  /^scripts\/(?:app-pr-ci-effective-plan|e2e-packs|museum-|sync-e2e-manifest)/u,
   /^tests\/packs\.manifest\.cjs$/u,
   /^components\/museum\/MuseumNetworkProposition\.tsx$/u,
   /^__tests__\/components\/museum\/MuseumNetworkProposition\.test\.tsx$/u,
-  /^ops\/docs\/developer\/simple-release-bus-v2\.md$/u,
-  /^ops\/skills\/deploy-6529\/SKILL\.md$/u,
-  /^__tests__\/scripts\/(?:app-pr-ci-effective-plan|deployment-bus|e2e-packs|manual-deploy-routing-guard|museum-|pr-ci-policy-bundle|release-bus-|release-request-preflight|sync-e2e-manifest)/u,
+  /^__tests__\/scripts\/(?:app-pr-ci-effective-plan|deploy-staging-artifact|deployment-e2e-workflows|e2e-packs|frontend-deployment-workflows|museum-|production-|sync-e2e-manifest)/u,
   /^(?:package\.json|pnpm-lock\.yaml|pnpm-workspace\.yaml)$/u,
 ];
 function check(required, reason) {
@@ -82,8 +81,8 @@ function applyEffectiveAppPrCiPlan(plan) {
     files.some(
       (file) => isTestFile(file) || TEST_TYPECHECK_CONFIG_FILES.has(file)
     );
-  const releaseBusContract = files.some((file) =>
-    RELEASE_BUS_CONTRACT_PATTERNS.some((pattern) => pattern.test(file))
+  const deploymentContract = files.some((file) =>
+    DEPLOYMENT_CONTRACT_PATTERNS.some((pattern) => pattern.test(file))
   );
   // Keep App PR lane activation at least as broad as the tier classifier.
   // P1/P2 surface work and P3 policy/control-plane work must receive the
@@ -103,11 +102,11 @@ function applyEffectiveAppPrCiPlan(plan) {
           ? baseChecks.install.reason
           : "Repository-wide Knip runs for every pull request."
     ),
-    release_bus_contract: check(
-      releaseBusContract,
-      releaseBusContract
-        ? "Release, deployment, workflow, or E2E policy files changed and need the Release Bus contract suite."
-        : "No Release Bus or deployment policy files changed."
+    deployment_contract: check(
+      deploymentContract,
+      deploymentContract
+        ? "Deployment, workflow, artifact, or E2E policy files changed and need the frontend deployment contract suite."
+        : "No frontend deployment or E2E policy files changed."
     ),
     test_typecheck: check(
       testTypecheck,
