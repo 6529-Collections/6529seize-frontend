@@ -293,22 +293,18 @@ export function StreamArtworkConceptPreview() {
         </ol>
       </nav>
 
-      <p
-        className="tw-mb-0 tw-px-5 tw-pt-5 tw-font-mono tw-text-[0.64rem] tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-primary-300 sm:tw-px-7 lg:tw-px-8"
-        role="status"
-      >
+      <output className="tw-mb-0 tw-block tw-px-5 tw-pt-5 tw-font-mono tw-text-[0.64rem] tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-primary-300 sm:tw-px-7 lg:tw-px-8">
         {t(DEFAULT_LOCALE, "publicReview.conceptPreview.stepStatus", {
           current: formatInteger(DEFAULT_LOCALE, activeStepIndex + 1),
           heading: t(DEFAULT_LOCALE, activeStep.headingKey),
           total: formatInteger(DEFAULT_LOCALE, PREVIEW_STEPS.length),
         })}
-      </p>
+      </output>
 
       <section
         aria-label={t(DEFAULT_LOCALE, activeStep.headingKey)}
         className="tw-grid @3xl:tw-grid-cols-[minmax(0,1.04fr)_minmax(20rem,0.96fr)]"
         id="stream-concept-preview-view"
-        role="region"
       >
         <ArtworkVisual />
         <div className="tw-flex tw-min-w-0 tw-flex-col tw-p-5 sm:tw-p-7 lg:tw-p-8">
