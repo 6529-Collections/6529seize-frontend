@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 
+import { usePublicReviewFeedbackPanelCoordination } from "@/components/public-review/PublicReviewReadingLayout";
 import { formatInteger, formatNumber, formatPercent } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
@@ -225,6 +226,8 @@ function PreviewView({ stepId }: { readonly stepId: PreviewStepId }) {
 
 export function StreamArtworkConceptPreview() {
   const [activeStepIndex, setActiveStepIndex] = useState(0);
+  const stepButtonRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const feedbackPanel = usePublicReviewFeedbackPanelCoordination();
   const activeStep = PREVIEW_STEPS[activeStepIndex] ?? PREVIEW_STEPS[0];
   const previousStep = PREVIEW_STEPS[activeStepIndex - 1];
   const nextStep = PREVIEW_STEPS[activeStepIndex + 1];
@@ -274,6 +277,9 @@ export function StreamArtworkConceptPreview() {
                       : "tw-border-white/[0.06] tw-bg-white/[0.02] tw-text-iron-400 desktop-hover:hover:tw-border-white/15 desktop-hover:hover:tw-bg-white/[0.05] desktop-hover:hover:tw-text-iron-100"
                   }`}
                   onClick={() => setActiveStepIndex(index)}
+                  ref={(element) => {
+                    stepButtonRefs.current[index] = element;
+                  }}
                   type="button"
                 >
                   <span className="tw-font-mono tw-text-[0.62rem] tw-text-primary-300">
@@ -298,7 +304,7 @@ export function StreamArtworkConceptPreview() {
         })}
       </p>
 
-      <div
+      <section
         aria-label={t(DEFAULT_LOCALE, activeStep.headingKey)}
         className="tw-grid @3xl:tw-grid-cols-[minmax(0,1.04fr)_minmax(20rem,0.96fr)]"
         id="stream-concept-preview-view"
@@ -313,9 +319,11 @@ export function StreamArtworkConceptPreview() {
             {previousStep ? (
               <button
                 className="tw-min-h-11 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-transparent tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-300 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-300 desktop-hover:hover:tw-border-white/20 desktop-hover:hover:tw-text-white motion-reduce:tw-transition-none"
-                onClick={() =>
-                  setActiveStepIndex((currentIndex) => currentIndex - 1)
-                }
+                onClick={() => {
+                  const targetIndex = activeStepIndex - 1;
+                  setActiveStepIndex(targetIndex);
+                  stepButtonRefs.current[targetIndex]?.focus();
+                }}
                 type="button"
               >
                 {t(DEFAULT_LOCALE, "publicReview.conceptPreview.back", {
@@ -328,9 +336,11 @@ export function StreamArtworkConceptPreview() {
             {nextStep ? (
               <button
                 className="tw-min-h-11 tw-rounded-lg tw-border tw-border-solid tw-border-primary-400/45 tw-bg-primary-500/10 tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-primary-300 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-300 desktop-hover:hover:tw-bg-primary-500/20 motion-reduce:tw-transition-none"
-                onClick={() =>
-                  setActiveStepIndex((currentIndex) => currentIndex + 1)
-                }
+                onClick={() => {
+                  const targetIndex = activeStepIndex + 1;
+                  setActiveStepIndex(targetIndex);
+                  stepButtonRefs.current[targetIndex]?.focus();
+                }}
                 type="button"
               >
                 {t(DEFAULT_LOCALE, "publicReview.conceptPreview.next", {
@@ -340,7 +350,7 @@ export function StreamArtworkConceptPreview() {
             ) : null}
           </div>
         </div>
-      </div>
+      </section>
 
       <section
         aria-labelledby="stream-concept-preview-feedback-heading"
@@ -361,6 +371,7 @@ export function StreamArtworkConceptPreview() {
         <a
           className="tw-mt-5 tw-inline-flex tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-lg tw-text-sm tw-font-semibold tw-text-primary-300 tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-300 desktop-hover:hover:tw-text-white"
           href="#public-review-feedback"
+          onClick={() => feedbackPanel.open()}
         >
           {t(DEFAULT_LOCALE, "publicReview.conceptPreview.feedback.action")}
           <span aria-hidden="true">→</span>

@@ -61,9 +61,10 @@ describe("StreamArtworkConceptPreview", () => {
       within(collectorView).queryByRole("button", { name: /Buy/ })
     ).not.toBeInTheDocument();
 
-    await user.click(
+    await user.click(screen.getByRole("button", { name: "Next: History" }));
+    expect(
       within(viewNavigation).getByRole("button", { name: /History/ })
-    );
+    ).toHaveFocus();
     const historyView = screen.getByRole("region", {
       name: "The history stays clear",
     });
