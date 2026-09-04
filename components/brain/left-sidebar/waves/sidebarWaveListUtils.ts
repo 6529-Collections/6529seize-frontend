@@ -132,3 +132,30 @@ export const groupSidebarWavesForView = ({
         isAnnouncementsWave,
         waves,
       });
+
+export const prioritizeActiveWaveContainer = (
+  waves: readonly MinimalWave[],
+  activeContainerWaveId: string | null | undefined
+): readonly MinimalWave[] => {
+  if (!activeContainerWaveId) {
+    return waves;
+  }
+
+  const activeContainerIndex = waves.findIndex(
+    (wave) => wave.id === activeContainerWaveId
+  );
+  if (activeContainerIndex <= 0) {
+    return waves;
+  }
+
+  const activeContainer = waves[activeContainerIndex];
+  if (!activeContainer) {
+    return waves;
+  }
+
+  return [
+    activeContainer,
+    ...waves.slice(0, activeContainerIndex),
+    ...waves.slice(activeContainerIndex + 1),
+  ];
+};

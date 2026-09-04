@@ -62,6 +62,7 @@ import {
   useHeaderActiveWave,
 } from "./app-header-wave-preview";
 import WaveHeaderRestrictionButton from "@/components/waves/header/WaveHeaderRestrictionButton";
+import WaveParentNavigation from "@/components/waves/header/WaveParentNavigation";
 import MainStageNominationPopover from "@/components/brain/my-stream/tabs/MainStageNominationPopover";
 import { useProfileDoubleActivate } from "./useProfileDoubleActivate";
 
@@ -259,25 +260,31 @@ const HeaderTitleContent = ({
       ) : (
         <>
           {wavePicture}
-          {activeWave !== null && !isDm && previewText !== null ? (
-            <WaveDescriptionPopover
-              wave={activeWave}
-              align="left"
-              ariaLabel="Show wave description"
-              triggerClassName="tw-flex tw-min-w-0 tw-flex-col tw-items-start tw-border-0 tw-bg-transparent tw-p-0 tw-text-left"
-            >
-              <span className="tw-w-full tw-truncate tw-text-sm tw-font-semibold">
+          <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-items-start">
+            <WaveParentNavigation
+              parentWave={activeWave?.parent_wave}
+              variant="compact-header"
+            />
+            {activeWave !== null && !isDm && previewText !== null ? (
+              <WaveDescriptionPopover
+                wave={activeWave}
+                align="left"
+                ariaLabel="Show wave description"
+                triggerClassName="tw-flex tw-w-full tw-min-w-0 tw-flex-col tw-items-start tw-border-0 tw-bg-transparent tw-p-0 tw-text-left"
+              >
+                <span className="tw-w-full tw-truncate tw-text-sm tw-font-semibold">
+                  {displayWave.name}
+                </span>
+                <span className="tw-hidden tw-w-full tw-truncate tw-text-xs tw-font-normal tw-text-iron-400 sm:tw-block">
+                  {previewText}
+                </span>
+              </WaveDescriptionPopover>
+            ) : (
+              <span className="tw-w-full tw-min-w-0 tw-truncate tw-text-sm tw-font-semibold">
                 {displayWave.name}
               </span>
-              <span className="tw-hidden tw-w-full tw-truncate tw-text-xs tw-font-normal tw-text-iron-400 sm:tw-block">
-                {previewText}
-              </span>
-            </WaveDescriptionPopover>
-          ) : (
-            <span className="tw-min-w-0 tw-truncate tw-text-sm tw-font-semibold">
-              {displayWave.name}
-            </span>
-          )}
+            )}
+          </div>
         </>
       )}
     </div>

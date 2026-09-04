@@ -182,6 +182,33 @@ const createLegacyApiWave = (id: string, latestDropTimestamp: number) =>
     subscribed_actions: [],
   }) as any;
 
+const createApiWaveOverview = (id: string, latestDropTimestamp: number) =>
+  ({
+    id,
+    name: id,
+    created_at: 0,
+    pfp: null,
+    creator: {},
+    contributors: [],
+    has_competition: true,
+    is_dm_wave: false,
+    parent_wave: null,
+    has_subwaves: true,
+    description_drop: { contents: null, media: [] },
+    total_drops_count: 0,
+    is_private: false,
+    last_drop_time: latestDropTimestamp,
+    context_profile_context: {
+      first_unread_drop_serial_no: null,
+      followed_subwaves_count: 0,
+      muted: false,
+      pinned: false,
+      subscribed: false,
+      subwave_unread_drops: 0,
+      unread_drops: 0,
+    },
+  }) as any;
+
 const dmWave = createSidebarWave({
   id: "1",
   latestDropTimestamp: 50,
@@ -1231,6 +1258,123 @@ test("starts without subwave queries, then appends subwaves for loaded parents",
   expect(result.current.waves.map((wave: any) => wave.id)).toEqual([
     "parent",
     "child",
+  ]);
+});
+
+test("surfaces a direct-linked root wave outside the loaded overview", () => {
+  const activeWave = createLegacyApiWave("direct-root", 500);
+  useWavesV2Mock.mockReturnValue({
+    waves: [],
+    isFetching: false,
+    isFetchingNextPage: false,
+    hasNextPage: false,
+    fetchNextPage: jest.fn(),
+    status: "success",
+    refetch: jest.fn(),
+  });
+  usePinnedWavesServerMock.mockReturnValue({
+    pinnedIds: [],
+    pinnedWaves: [],
+    pinWave: jest.fn(),
+    unpinWave: jest.fn(),
+    isLoading: false,
+    isError: false,
+    refetch: jest.fn(),
+  });
+
+  const { result } = renderHook(() => useWavesList({ activeWave }), {
+    wrapper,
+  });
+
+  expect(result.current.waves).toHaveLength(1);
+  expect(result.current.waves[0]).toMatchObject({
+    id: "direct-root",
+    isInAllWaves: true,
+    isPinned: false,
+    parentWaveId: null,
+    sidebarSection: "all",
+    subscribed: false,
+  });
+});
+
+test("surfaces and loads a direct-linked subwave under its parent in Joined", () => {
+  useShowFollowingWavesMock.mockReturnValue([true]);
+  const parentWave = createApiWaveOverview("direct-parent", 400);
+  const activeSubwave = {
+    ...createLegacyApiWave("direct-child", 500),
+    parent_wave: parentWave,
+  };
+  const childWave = {
+    ...createSidebarWave({
+      id: "direct-child",
+      latestDropTimestamp: 500,
+      subscribed: false,
+    }),
+    parentWaveId: "direct-parent",
+  };
+  useWavesV2Mock.mockReturnValue({
+    waves: [],
+    isFetching: false,
+    isFetchingNextPage: false,
+    hasNextPage: false,
+    fetchNextPage: jest.fn(),
+    status: "success",
+    refetch: jest.fn(),
+  });
+  usePinnedWavesServerMock.mockReturnValue({
+    pinnedIds: [],
+    pinnedWaves: [],
+    pinWave: jest.fn(),
+    unpinWave: jest.fn(),
+    isLoading: false,
+    isError: false,
+    refetch: jest.fn(),
+  });
+  useWaveSubwavesMapMock.mockImplementation(
+    ({ parentWaveIds }: { readonly parentWaveIds: readonly string[] }) => ({
+      subwaves: parentWaveIds.includes("direct-parent") ? [childWave] : [],
+      subwavesByParentId: new Map(
+        parentWaveIds.includes("direct-parent")
+          ? [["direct-parent", { subwaves: [childWave], isFetching: false }]]
+          : []
+      ),
+      isFetching: false,
+      refetch: jest.fn(),
+    })
+  );
+
+  const { result } = renderHook(
+    () => useWavesList({ activeWave: activeSubwave }),
+    { wrapper }
+  );
+
+  expect(result.current.waves).toHaveLength(2);
+  expect(result.current.waves).toEqual([
+    expect.objectContaining({
+      id: "direct-parent",
+      hasSubwaves: true,
+      isInAllWaves: true,
+      parentWaveId: null,
+      subscribed: false,
+    }),
+    expect.objectContaining({
+      id: "direct-child",
+      parentWaveId: "direct-parent",
+      subscribed: false,
+    }),
+  ]);
+
+  act(() => {
+    result.current.loadSubwavesForParent("direct-parent");
+  });
+
+  expect(useWaveSubwavesMapMock).toHaveBeenLastCalledWith({
+    parentWaveIds: ["direct-parent"],
+    viewerIdentityKey: "0xabc:primary",
+  });
+  expect(result.current.waves.map((wave: any) => wave.id)).toEqual([
+    "direct-parent",
+    "direct-child",
   ]);
 });
 

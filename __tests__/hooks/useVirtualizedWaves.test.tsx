@@ -83,6 +83,50 @@ describe("useVirtualizedWaves", () => {
     ]);
   });
 
+  it("scrolls a requested row into the nearest visible position", () => {
+    const scrollContainer = document.createElement("div");
+    Object.defineProperty(scrollContainer, "clientHeight", { value: 100 });
+    const scrollTo = jest.fn(({ top }: { readonly top: number }) => {
+      scrollContainer.scrollTop = top;
+    });
+    Object.defineProperty(scrollContainer, "scrollTo", { value: scrollTo });
+    const listContainer = document.createElement("div");
+    Object.defineProperty(listContainer, "offsetTop", { value: 20 });
+    const scrollRef = {
+      current: scrollContainer,
+    } as React.RefObject<HTMLDivElement>;
+    const listRef = {
+      current: listContainer,
+    } as React.RefObject<HTMLDivElement>;
+
+    const { result } = renderHook(
+      () =>
+        useVirtualizedWaves({
+          items: Array.from({ length: 10 }, (_, index) => index),
+          key: "reveal-row",
+          scrollContainerRef: scrollRef,
+          listContainerRef: listRef,
+          rowHeight: 50,
+          overscan: 0,
+        }),
+      { wrapper }
+    );
+    scrollTo.mockClear();
+
+    act(() => {
+      expect(result.current.scrollToIndex(3)).toBe(true);
+    });
+
+    expect(scrollTo).toHaveBeenCalledWith({ top: 120 });
+    expect(scrollContainer.scrollTop).toBe(120);
+
+    scrollTo.mockClear();
+    act(() => {
+      expect(result.current.scrollToIndex(2)).toBe(true);
+    });
+    expect(scrollTo).not.toHaveBeenCalled();
+  });
+
   it("binds scrolling when the scroll container ref is assigned after mount", () => {
     jest.useFakeTimers();
     const originalRequestAnimationFrame = globalThis.requestAnimationFrame;

@@ -805,7 +805,10 @@
         "On desktop with no selected Wave, /waves shows the latest posts from members' effective public Profile Wave curations, newest first.",
         "Each latest-profile-post card identifies the author, posting time, and originating Profile Wave; curated replies can also appear. On small screens, the default /waves view remains a Wave navigator.",
         "In Worth Checking Out, each avatar and its overlaid score shield form one wave navigation link; hovering or focusing the combined link shows score details.",
-        "Every Worth Checking Out recommendation also appears in All at its recent-activity position; Joined includes only waves the user has joined."
+        "Every Worth Checking Out recommendation also appears in All at its recent-activity position; Joined normally includes only waves the user has joined.",
+        "A Wave opened from a direct link remains visible and highlighted in the left sidebar even when it is not followed, pinned, or present in the loaded overview; this temporary route context does not join or pin it.",
+        "When a direct link opens a subwave, the sidebar surfaces its visible parent, loads and expands the subwave list, reveals the selected child row, and keeps that parent tree ahead of paginated activity rows so every sibling remains reachable.",
+        "An active subwave header shows an up-left arrow and a linked parent wave name; selecting that name opens the parent wave."
       ],
       "canonical_path": "/waves",
       "related_paths": [

@@ -146,6 +146,7 @@ beforeEach(() => {
       { index: 2, start: 102, size: 1 },
     ],
     totalHeight: 103,
+    scrollToIndex: jest.fn(() => true),
   });
 });
 
@@ -187,6 +188,7 @@ it("renders announcement, highly rated preview, pinned, and one filterable botto
       { index: 3, start: 186, size: 1 },
     ],
     totalHeight: 187,
+    scrollToIndex: jest.fn(() => true),
   });
 
   renderWebWaves({ sentinelRef });
@@ -200,10 +202,7 @@ it("renders announcement, highly rated preview, pinned, and one filterable botto
     name: "Discover Waves",
   });
   expect(discoverWavesLink).toHaveAttribute("href", "/discover");
-  expect(discoverWavesLink).toHaveClass(
-    "tw-text-[13px]",
-    "tw-font-medium"
-  );
+  expect(discoverWavesLink).toHaveClass("tw-text-[13px]", "tw-font-medium");
   expect(discoverWavesLink.querySelector("svg")).toBeNull();
   expect(screen.getByTestId("waves-filter-toggle")).toBeInTheDocument();
   expect(screen.getByLabelText("Announcement waves")).toBeInTheDocument();
@@ -299,7 +298,9 @@ it("keeps discovery-only worth checking out waves out of Joined", () => {
     ],
   });
 
-  expect(screen.getByTestId("preview-avatar-recommendation")).toBeInTheDocument();
+  expect(
+    screen.getByTestId("preview-avatar-recommendation")
+  ).toBeInTheDocument();
   expect(screen.getByLabelText("Following waves list")).toBeInTheDocument();
   expect(screen.queryByTestId("wave-recommendation")).toBeNull();
   expect(screen.getByTestId("wave-joined-wave")).toBeInTheDocument();
@@ -832,6 +833,93 @@ it("auto-expands the parent for the active subwave", () => {
     })
   ).toHaveAttribute("aria-expanded", "true");
   expect(screen.getByTestId("wave-child")).toBeInTheDocument();
+});
+
+it("keeps the active parent tree ahead of newly paginated roots", async () => {
+  mockUseMyStream.mockReturnValue({
+    activeWave: { id: "child", parentWaveId: "parent", set: jest.fn() },
+    waves: {
+      loadSubwavesForParent,
+      prefetchSubwavesForParent,
+      loadingSubwaveParentIds: [],
+    },
+  });
+  const parent = createMockMinimalWave({
+    id: "parent",
+    hasSubwaves: true,
+    sidebarActivityTimestamp: 10,
+  });
+  const child = createMockMinimalWave({
+    id: "child",
+    parentWaveId: "parent",
+    sidebarActivityTimestamp: 20,
+  });
+  const recent = createMockMinimalWave({
+    id: "recent",
+    sidebarActivityTimestamp: 300,
+  });
+  const newlyPaginated = createMockMinimalWave({
+    id: "newly-paginated",
+    sidebarActivityTimestamp: 200,
+  });
+
+  const { rerender } = renderWebWaves({
+    waves: [recent, parent, child],
+  });
+
+  expect(
+    mockUseVirtualizedWaves.mock.calls
+      .at(-1)?.[0]
+      .items.slice(0, 3)
+      .map((row: any) => row.key)
+  ).toEqual(["parent", "parent:subwaves-toggle", "parent:child"]);
+
+  rerender(
+    <WebUnifiedWavesListWaves
+      waves={[recent, newlyPaginated, parent, child]}
+      onHover={jest.fn()}
+      scrollContainerRef={scrollRef}
+      sentinelRef={React.createRef<HTMLDivElement>()}
+    />
+  );
+  await flushAnimatedSidebarRows();
+
+  expect(
+    mockUseVirtualizedWaves.mock.calls
+      .at(-1)?.[0]
+      .items.slice(0, 3)
+      .map((row: any) => row.key)
+  ).toEqual(["parent", "parent:subwaves-toggle", "parent:child"]);
+});
+
+it("keeps active root waves in normal activity order", () => {
+  mockUseMyStream.mockReturnValue({
+    activeWave: { id: "older", parentWaveId: null, set: jest.fn() },
+    waves: {
+      loadSubwavesForParent,
+      prefetchSubwavesForParent,
+      loadingSubwaveParentIds: [],
+    },
+  });
+
+  renderWebWaves({
+    waves: [
+      createMockMinimalWave({
+        id: "older",
+        sidebarActivityTimestamp: 10,
+      }),
+      createMockMinimalWave({
+        id: "recent",
+        sidebarActivityTimestamp: 300,
+      }),
+    ],
+  });
+
+  expect(
+    mockUseVirtualizedWaves.mock.calls
+      .at(-1)?.[0]
+      .items.map((row: any) => row.key)
+  ).toEqual(["recent", "older"]);
 });
 
 it("loads a direct active subwave parent before showing it expanded", async () => {

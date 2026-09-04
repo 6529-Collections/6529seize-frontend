@@ -427,8 +427,9 @@ describe("MyStreamProvider resume sync", () => {
   });
 
   it("handles active wave data without metrics", () => {
+    const activeWave = { id: "wave-1" };
     useWaveByIdMock.mockReturnValue({
-      wave: { id: "wave-1" },
+      wave: activeWave,
       isLoading: false,
       isFetching: false,
     });
@@ -440,6 +441,26 @@ describe("MyStreamProvider resume sync", () => {
         </MyStreamProvider>
       );
     }).not.toThrow();
+    expect(useWavesListMock).toHaveBeenLastCalledWith({
+      activeWave,
+      enabled: true,
+    });
+  });
+
+  it("does not surface placeholder data from the previously active wave", () => {
+    useWaveByIdMock.mockReturnValue({
+      wave: { id: "wave-before-navigation" },
+      isLoading: false,
+      isFetching: true,
+    });
+
+    render(
+      <MyStreamProvider>
+        <div />
+      </MyStreamProvider>
+    );
+
+    expect(useWavesListMock).toHaveBeenLastCalledWith({ enabled: true });
   });
 
   it("treats a null pathname as a non-messages route", () => {
