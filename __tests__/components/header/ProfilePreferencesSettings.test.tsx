@@ -64,11 +64,11 @@ describe("ProfilePreferencesSettings", () => {
     expect(
       screen.getByRole("region", { name: "Notifications & messages" })
     ).toBeInTheDocument();
-    expect(
-      screen
-        .getAllByRole("heading", { level: 2 })
-        .map(({ textContent }) => textContent?.trim())
-    ).toEqual(["Notifications", "Who can start a direct message with me?"]);
+    const sectionHeadings = screen.getAllByRole("heading", { level: 2 });
+    expect(sectionHeadings.map(({ textContent }) => textContent?.trim())).toEqual(
+      ["Notifications", "Who can start a direct message with me?"]
+    );
+    sectionHeadings.forEach((heading) => expect(heading).toHaveClass("tw-m-0"));
     const notificationsSection = screen.getByRole("region", {
       name: "Notifications",
     });

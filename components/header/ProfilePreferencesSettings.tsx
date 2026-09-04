@@ -258,11 +258,11 @@ function ProfilePreferencesForm({
         >
           <h2
             id="profile-preferences-notifications-heading"
-            className="tw-text-lg tw-font-medium tw-text-iron-100"
+            className="tw-m-0 tw-text-lg tw-font-medium tw-text-iron-100"
           >
             {t(locale, "profilePreferences.notifications.heading")}
           </h2>
-          <p className="tw-mt-1 tw-text-sm tw-text-iron-400">
+          <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-text-iron-400">
             {t(locale, "profilePreferences.notifications.description")}
           </p>
           <fieldset className="tw-m-0 tw-mt-6 tw-min-w-0 tw-border-0 tw-p-0">
@@ -363,7 +363,7 @@ function ProfilePreferencesForm({
               )}
             </AnimatePresence>
           </LazyMotion>
-          <p className="tw-mt-4 tw-px-4 tw-text-xs tw-leading-5 tw-text-iron-500">
+          <p className="tw-mb-0 tw-mt-4 tw-px-4 tw-text-xs tw-leading-5 tw-text-iron-500">
             {t(locale, "profilePreferences.notifications.deviceNote")}
           </p>
         </section>
@@ -376,11 +376,11 @@ function ProfilePreferencesForm({
         >
           <h2
             id="profile-preferences-dm-heading"
-            className="tw-text-lg tw-font-medium tw-text-iron-100"
+            className="tw-m-0 tw-text-lg tw-font-medium tw-text-iron-100"
           >
             {t(locale, "profilePreferences.dm.heading")}
           </h2>
-          <p className="tw-mt-1 tw-text-sm tw-text-iron-400">
+          <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-text-iron-400">
             {t(locale, "profilePreferences.dm.description")}
           </p>
           <fieldset className="tw-m-0 tw-mt-6 tw-min-w-0 tw-border-0 tw-p-0">
