@@ -168,6 +168,8 @@ Guardrails added
 6. CI now uses the `6529` wrapper for repo orchestration.
 7. Production deploy bundles a standalone runtime so EB does not need npm install.
 8. Documentation now points developers to the secure install path.
+9. Unsupported wrapper commands fail closed; package scripts require
+   `6529 run <script>`.
 
 Socket Firewall Free enforcement limits
 ---------------------------------------

@@ -216,7 +216,7 @@ jobs:
           mode: firewall
 
       - name: Assert npm lockfile is absent
-        run: ./bin/6529 guard:no-package-lock
+        run: ./bin/6529 run guard:no-package-lock
 
       - name: Install frozen dependencies
         env:
@@ -225,7 +225,7 @@ jobs:
         run: ./bin/6529 ci
 
       - name: Lint package.json versions
-        run: ./bin/6529 lint:package-json
+        run: ./bin/6529 run lint:package-json
 
       - name: Build exact production bytes
         env:

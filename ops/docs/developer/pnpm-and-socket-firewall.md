@@ -28,7 +28,9 @@ The supported entrypoint is the repo-local `6529` command:
 6529 run lint
 ```
 
-Plain `pnpm install` and direct package-manager script execution are intentionally rejected by the repo guard. Use `6529 run <script>` for package.json scripts.
+Plain `pnpm install`, direct package-manager script execution, and unsupported
+wrapper commands are intentionally rejected by the repo guard. Use
+`6529 run <script>` for package.json scripts.
 
 If you use the repo's `.envrc`, the local `bin/` directory is added to `PATH`
 so the `6529` shorthand commands above work directly inside the repository.

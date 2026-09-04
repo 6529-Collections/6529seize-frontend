@@ -1577,6 +1577,8 @@ describe("documented private-package setup flows", () => {
     expect(wrapper).toContain('-- update "$@"');
     expect(wrapper).toContain('-- audit "$@"');
     expect(wrapper).toContain('-- audit --fix "$@"');
+    expect(wrapper).toContain('exec "$REAL_PNPM" approve-builds "$@"');
+    expect(wrapper).not.toContain('exec "$REAL_PNPM" "$command_name" "$@"');
     expect(packageJson.scripts).not.toHaveProperty("install:secure");
     expect(packageJson.scripts).not.toHaveProperty("install:secure:frozen");
     expect(packageJson.scripts).not.toHaveProperty("install:secure:prod");
@@ -1675,6 +1677,38 @@ describe("documented private-package setup flows", () => {
     expect(wrapper).toContain(
       "Use \\`6529 update [package]\\` for intentional dependency updates."
     );
+  });
+
+  it("fails closed instead of forwarding unsupported wrapper commands", () => {
+    const fakeBinaryDirectory = fs.mkdtempSync(
+      path.join(os.tmpdir(), "frontend-package-command-")
+    );
+    const fakePnpm = path.join(fakeBinaryDirectory, "pnpm");
+    fs.writeFileSync(fakePnpm, "#!/usr/bin/env bash\nexit 99\n");
+    fs.chmodSync(fakePnpm, 0o755);
+
+    try {
+      const result = spawnSync(
+        path.join(REPOSITORY_ROOT, "bin", "6529"),
+        ["unknown-command"],
+        {
+          cwd: REPOSITORY_ROOT,
+          encoding: "utf8",
+          env: {
+            ...process.env,
+            PATH: `${fakeBinaryDirectory}:${process.env["PATH"] ?? ""}`,
+          },
+        }
+      );
+
+      expect(result.status).toBe(1);
+      expect(result.stderr).toContain(
+        "Unsupported 6529 command: unknown-command"
+      );
+      expect(result.stderr).toContain("6529 run dev");
+    } finally {
+      fs.rmSync(fakeBinaryDirectory, { recursive: true, force: true });
+    }
   });
 
   it("keeps Codex setup non-interactive and removes captured auth", () => {

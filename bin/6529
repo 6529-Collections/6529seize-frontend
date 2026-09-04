@@ -12,9 +12,7 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 # shellcheck source=../scripts/private-github-packages-auth.sh
 source "$REPO_ROOT/scripts/private-github-packages-auth.sh"
 
-command_name="${1:-}"
-
-if [[ -z "$command_name" ]]; then
+print_usage() {
   cat <<'EOF'
 Usage:
   6529 <command> [args...]
@@ -38,9 +36,13 @@ Common commands:
   6529 run start       -> pnpm run start
   6529 run test        -> pnpm run test
   6529 run lint        -> pnpm run lint
-
-Anything else is forwarded to pnpm unchanged.
 EOF
+}
+
+command_name="${1:-}"
+
+if [[ -z "$command_name" ]]; then
+  print_usage
   exit 1
 fi
 
@@ -49,6 +51,10 @@ shift
 case "$command_name" in
   bootstrap)
     exec bash "$REPO_ROOT/scripts/bootstrap-6529-command.sh" "$@"
+    ;;
+  help|-h|--help)
+    print_usage
+    exit 0
     ;;
   env)
     exec node "$REPO_ROOT/scripts/env-target.cjs" "$@"
@@ -155,6 +161,9 @@ case "$command_name" in
     exec node "$REPO_ROOT/scripts/run-secure-pnpm.cjs" \
       --seize-secure-pnpm-binary "$REAL_PNPM" -- audit --fix "$@"
     ;;
+  approve-builds)
+    exec "$REAL_PNPM" approve-builds "$@"
+    ;;
   prune:prod)
     exec "$REAL_PNPM" run prune:prod "$@"
     ;;
@@ -165,6 +174,8 @@ case "$command_name" in
     exec "$REAL_PNPM" exec "$@"
     ;;
   *)
-    exec "$REAL_PNPM" "$command_name" "$@"
+    echo "Unsupported 6529 command: $command_name" >&2
+    print_usage >&2
+    exit 1
     ;;
 esac

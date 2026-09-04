@@ -111,6 +111,8 @@ Important notes:
 This repository intentionally routes project commands through `6529`.
 Do not use plain `pnpm install`, `pnpm dev`, or `npm run ...`; the scripts are
 guarded so dependency installs and package scripts use the expected secure path.
+Unsupported wrapper commands fail closed; use `6529 run <script>` for
+package.json scripts.
 
 Common commands:
 

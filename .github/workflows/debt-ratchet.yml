@@ -52,7 +52,7 @@ jobs:
           mode: firewall
 
       - name: Assert npm lockfile is absent
-        run: ./bin/6529 guard:no-package-lock
+        run: ./bin/6529 run guard:no-package-lock
 
       # The AST-based any_casts scanner uses the repo-pinned TypeScript parser,
       # so this standalone required check installs dependencies before running.

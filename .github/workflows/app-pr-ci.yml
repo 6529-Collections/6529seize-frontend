@@ -343,7 +343,7 @@ jobs:
           mode: firewall
 
       - name: Assert npm lockfile is absent
-        run: ./bin/6529 guard:no-package-lock
+        run: ./bin/6529 run guard:no-package-lock
 
       - name: Install dependencies
         env:
@@ -489,7 +489,7 @@ jobs:
           mode: firewall
 
       - name: Assert npm lockfile is absent
-        run: ./bin/6529 guard:no-package-lock
+        run: ./bin/6529 run guard:no-package-lock
 
       - name: Install dependencies
         env:
@@ -503,7 +503,7 @@ jobs:
 
       - name: Lint package.json versions
         if: matrix.lane == 'quality' && needs.plan.outputs.dependency_governance_required == 'true'
-        run: ./bin/6529 lint:package-json
+        run: ./bin/6529 run lint:package-json
 
       - name: Classify dependency risk
         if: matrix.lane == 'quality' && needs.plan.outputs.dependency_governance_required == 'true'
