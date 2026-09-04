@@ -70,17 +70,19 @@ describe("ProfilePreferencesSettings", () => {
         .map(({ textContent }) => textContent?.trim())
     ).toEqual(["Notifications", "Who can start a direct message with me?"]);
     expect(screen.getByRole("region", { name: "Notifications" })).toHaveClass(
-      "tw-pb-0",
-      "tw-pt-6"
+      "tw-pb-8",
+      "tw-pt-6",
+      "sm:tw-pb-10",
+      "sm:tw-pt-8"
     );
     expect(
       screen.getByRole("region", {
         name: "Who can start a direct message with me?",
       })
-    ).toHaveClass("tw-pb-0", "tw-pt-6");
+    ).toHaveClass("tw-pb-8", "tw-pt-8", "sm:tw-pb-10", "sm:tw-pt-10");
     expect(
       screen.getByRole("button", { name: "Save Changes" }).parentElement
-    ).toHaveClass("tw-pt-6");
+    ).toHaveClass("tw-py-6", "lg:tw-px-8");
   });
 
   it("keeps native controls and full-row labels for each option", async () => {

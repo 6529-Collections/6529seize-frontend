@@ -50,8 +50,7 @@ const NOTIFICATION_LEVELS = [
   NotificationLevel.EssentialOnly,
 ] as const;
 
-const OPTION_GROUP_CLASSES =
-  "tw-divide-y tw-divide-white/5 tw-overflow-hidden tw-rounded-lg tw-bg-white/[0.025] tw-ring-1 tw-ring-inset tw-ring-white/10";
+const OPTION_GROUP_CLASSES = "tw-space-y-3";
 
 function PreferenceRadioOption({
   name,
@@ -69,7 +68,7 @@ function PreferenceRadioOption({
   readonly onChange: () => void;
 }) {
   return (
-    <label className="tw-group tw-relative tw-flex tw-w-full tw-cursor-pointer">
+    <label className="tw-group tw-relative tw-flex tw-w-full tw-cursor-pointer tw-rounded-lg">
       <input
         type="radio"
         name={name}
@@ -80,29 +79,39 @@ function PreferenceRadioOption({
         className="tw-peer tw-sr-only"
       />
       <span
-        className={`tw-flex tw-min-h-12 tw-w-full tw-items-start tw-gap-3 tw-px-3 tw-py-3 tw-transition-colors tw-duration-200 peer-focus-visible:tw-ring-2 peer-focus-visible:tw-ring-inset peer-focus-visible:tw-ring-primary-400 peer-disabled:tw-cursor-not-allowed peer-disabled:tw-opacity-50 desktop-hover:hover:tw-bg-white/[0.035] motion-reduce:tw-transition-none ${
-          checked ? "tw-bg-primary-500/[0.04]" : ""
+        className={`tw-flex tw-min-h-12 tw-w-full tw-items-start tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-px-4 tw-py-3.5 tw-shadow-sm tw-shadow-black/10 tw-transition-colors tw-duration-200 peer-focus-visible:tw-ring-2 peer-focus-visible:tw-ring-primary-400 peer-focus-visible:tw-ring-offset-2 peer-focus-visible:tw-ring-offset-iron-950 peer-disabled:tw-cursor-not-allowed peer-disabled:tw-opacity-50 motion-reduce:tw-transition-none ${
+          checked
+            ? "tw-border-primary-500 tw-bg-primary-500/10"
+            : "tw-border-iron-800 tw-bg-iron-900/40 desktop-hover:hover:tw-border-iron-700 desktop-hover:hover:tw-bg-iron-900/60"
         }`}
       >
         <span
           aria-hidden="true"
           className={`tw-mt-0.5 tw-flex tw-size-4 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-transition-colors tw-duration-200 motion-reduce:tw-transition-none ${
             checked
-              ? "tw-border-primary-400 tw-bg-primary-500/10"
-              : "tw-border-iron-600 tw-bg-transparent group-hover:tw-border-iron-500"
+              ? "tw-border-primary-500 tw-bg-primary-500"
+              : "tw-border-iron-500 tw-bg-transparent group-hover:tw-border-iron-400"
           }`}
         >
           <span
-            className={`tw-size-2 tw-rounded-full tw-bg-primary-400 tw-transition-transform tw-duration-200 motion-reduce:tw-transition-none ${
+            className={`tw-size-1.5 tw-rounded-full tw-bg-white tw-transition-transform tw-duration-200 motion-reduce:tw-transition-none ${
               checked ? "tw-scale-100" : "tw-scale-0"
             }`}
           />
         </span>
         <span className="tw-min-w-0">
-          <span className="tw-block tw-text-sm tw-font-medium tw-text-iron-100">
+          <span
+            className={`tw-block tw-text-sm tw-font-medium ${
+              checked ? "tw-text-iron-50" : "tw-text-iron-200"
+            }`}
+          >
             {label}
           </span>
-          <span className="tw-mt-0.5 tw-block tw-text-xs tw-leading-5 tw-text-iron-400">
+          <span
+            className={`tw-mt-0.5 tw-block tw-text-xs tw-leading-5 ${
+              checked ? "tw-text-primary-200" : "tw-text-iron-400"
+            }`}
+          >
             {description}
           </span>
         </span>
@@ -242,21 +251,21 @@ function ProfilePreferencesForm({
 
   return (
     <div className="tw-flex tw-flex-col">
-      <div className="tw-divide-y tw-divide-iron-800 tw-px-4 sm:tw-px-6">
+      <div className="tw-divide-y tw-divide-iron-800 tw-px-4 sm:tw-px-6 lg:tw-px-8">
         <section
           aria-labelledby="profile-preferences-notifications-heading"
-          className="tw-pb-0 tw-pt-6"
+          className="tw-pb-8 tw-pt-6 sm:tw-pb-10 sm:tw-pt-8"
         >
           <h2
             id="profile-preferences-notifications-heading"
-            className="tw-text-base tw-font-semibold tw-text-iron-100"
+            className="tw-text-lg tw-font-medium tw-text-iron-100"
           >
             {t(locale, "profilePreferences.notifications.heading")}
           </h2>
           <p className="tw-mt-1 tw-text-sm tw-text-iron-400">
             {t(locale, "profilePreferences.notifications.description")}
           </p>
-          <fieldset className="tw-m-0 tw-mt-4 tw-min-w-0 tw-border-0 tw-p-0">
+          <fieldset className="tw-m-0 tw-mt-6 tw-min-w-0 tw-border-0 tw-p-0">
             <legend className="tw-sr-only">
               {t(locale, "profilePreferences.notifications.heading")}
             </legend>
@@ -309,12 +318,12 @@ function ProfilePreferencesForm({
                   }}
                   className="tw-overflow-hidden"
                 >
-                  <div className={`tw-mt-4 ${OPTION_GROUP_CLASSES}`}>
+                  <div className={`tw-mt-6 ${OPTION_GROUP_CLASSES}`}>
                     {CATEGORY_KEYS.map((key) => (
                       <label
                         key={key}
                         htmlFor={`profile-notification-${key}`}
-                        className="tw-group tw-relative tw-flex tw-min-h-12 tw-w-full tw-cursor-pointer tw-items-center tw-justify-between tw-gap-4 tw-px-3 tw-py-2.5 tw-transition-colors tw-duration-200 desktop-hover:hover:tw-bg-white/[0.035] motion-reduce:tw-transition-none"
+                        className="tw-group tw-relative tw-flex tw-min-h-12 tw-w-full tw-cursor-pointer tw-items-center tw-justify-between tw-gap-4 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900/40 tw-px-4 tw-py-3 tw-shadow-sm tw-shadow-black/10 tw-transition-colors tw-duration-200 desktop-hover:hover:tw-border-iron-700 desktop-hover:hover:tw-bg-iron-900/60 motion-reduce:tw-transition-none"
                       >
                         <span className="tw-min-w-0 tw-text-sm tw-text-iron-200">
                           {t(
@@ -333,16 +342,16 @@ function ProfilePreferencesForm({
                         />
                         <span
                           aria-hidden="true"
-                          className={`tw-relative tw-flex tw-h-5 tw-w-9 tw-flex-shrink-0 tw-items-center tw-rounded-full tw-border tw-border-solid tw-p-0.5 tw-transition-colors tw-duration-200 peer-focus-visible:tw-ring-2 peer-focus-visible:tw-ring-primary-400 peer-focus-visible:tw-ring-offset-2 peer-focus-visible:tw-ring-offset-iron-950 peer-disabled:tw-opacity-50 motion-reduce:tw-transition-none ${
+                          className={`tw-relative tw-flex tw-h-6 tw-w-11 tw-flex-shrink-0 tw-items-center tw-rounded-full tw-border tw-border-solid tw-p-0.5 tw-transition-colors tw-duration-200 peer-focus-visible:tw-ring-2 peer-focus-visible:tw-ring-primary-400 peer-focus-visible:tw-ring-offset-2 peer-focus-visible:tw-ring-offset-iron-950 peer-disabled:tw-opacity-50 motion-reduce:tw-transition-none ${
                             current.notifications[key]
                               ? "tw-border-primary-400/60 tw-bg-primary-500"
                               : "tw-border-iron-600 tw-bg-iron-700"
                           }`}
                         >
                           <span
-                            className={`tw-size-4 tw-rounded-full tw-bg-iron-50 tw-shadow-sm tw-transition-transform tw-duration-200 motion-reduce:tw-transition-none ${
+                            className={`tw-size-5 tw-rounded-full tw-bg-iron-50 tw-shadow-sm tw-transition-transform tw-duration-200 motion-reduce:tw-transition-none ${
                               current.notifications[key]
-                                ? "tw-translate-x-4"
+                                ? "tw-translate-x-5"
                                 : "tw-translate-x-0"
                             }`}
                           />
@@ -354,25 +363,25 @@ function ProfilePreferencesForm({
               )}
             </AnimatePresence>
           </LazyMotion>
-          <p className="tw-mt-3 tw-text-xs tw-leading-5 tw-text-iron-500">
+          <p className="tw-mt-4 tw-text-xs tw-leading-5 tw-text-iron-500">
             {t(locale, "profilePreferences.notifications.deviceNote")}
           </p>
         </section>
 
         <section
           aria-labelledby="profile-preferences-dm-heading"
-          className="tw-pb-0 tw-pt-6"
+          className="tw-pb-8 tw-pt-8 sm:tw-pb-10 sm:tw-pt-10"
         >
           <h2
             id="profile-preferences-dm-heading"
-            className="tw-text-base tw-font-semibold tw-text-iron-100"
+            className="tw-text-lg tw-font-medium tw-text-iron-100"
           >
             {t(locale, "profilePreferences.dm.heading")}
           </h2>
           <p className="tw-mt-1 tw-text-sm tw-text-iron-400">
             {t(locale, "profilePreferences.dm.description")}
           </p>
-          <fieldset className="tw-m-0 tw-mt-4 tw-min-w-0 tw-border-0 tw-p-0">
+          <fieldset className="tw-m-0 tw-mt-6 tw-min-w-0 tw-border-0 tw-p-0">
             <legend className="tw-sr-only">
               {t(locale, "profilePreferences.dm.heading")}
             </legend>
@@ -407,7 +416,7 @@ function ProfilePreferencesForm({
           </fieldset>
         </section>
       </div>
-      <div className="tw-flex tw-justify-end tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-4 tw-pb-4 tw-pt-6 sm:tw-px-6 sm:tw-pb-5">
+      <div className="tw-flex tw-justify-end tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-4 tw-py-6 sm:tw-px-6 lg:tw-px-8">
         <Button
           type="button"
           onClick={() => void save()}
@@ -415,7 +424,7 @@ function ProfilePreferencesForm({
           loading={isSaving}
           variant="action"
           size="md"
-          className="tw-w-full sm:tw-w-auto sm:tw-min-w-40"
+          className="tw-w-full sm:tw-w-auto sm:tw-min-w-40 sm:tw-px-6"
         >
           {isSaving
             ? t(locale, "profilePreferences.saving")
