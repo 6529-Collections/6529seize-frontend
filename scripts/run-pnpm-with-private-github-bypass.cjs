@@ -37,6 +37,7 @@ const TOKEN_FREE_REBUILD_ARGUMENTS = ["rebuild", "--pending"];
 const LOCKFILE_ONLY_COMMANDS = new Set([
   "add",
   "install",
+  "remove",
   "update",
 ]);
 

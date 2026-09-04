@@ -1001,7 +1001,7 @@ describe("host-specific Socket Firewall routing", () => {
     expect(JSON.stringify(consoleError.mock.calls)).not.toContain(TEST_TOKEN);
   });
 
-  it("routes dependency removal without auth before the frozen fetch", () => {
+  it("resolves dependency removal without auth before the frozen fetch", () => {
     const spawn = jest.fn(() => ({ status: 0 }));
 
     expect(
@@ -1017,7 +1017,7 @@ describe("host-specific Socket Firewall routing", () => {
     >;
 
     expect(spawnCalls.map((call) => call[1])).toEqual([
-      ["remove", "public-package"],
+      ["remove", "public-package", "--lockfile-only"],
       routing.TOKEN_FREE_LOCKFILE_ARGUMENTS,
       routing.AUTHENTICATED_FROZEN_INSTALL_ARGUMENTS,
       routing.TOKEN_FREE_REBUILD_ARGUMENTS,
