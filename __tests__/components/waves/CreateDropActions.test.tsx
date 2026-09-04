@@ -334,7 +334,8 @@ describe("CreateDropActions", () => {
     );
 
     expect(screen.getByTestId("drop-actions-compact-slot")).toHaveClass(
-      "tw-size-10"
+      "tw-size-10",
+      "desktop-hover:tw-size-9"
     );
     expect(
       screen.getByTestId("drop-actions-compact-slot").querySelector("button")
@@ -355,7 +356,33 @@ describe("CreateDropActions", () => {
 
     const tray = screen.getByTestId("drop-actions-compact-tray");
     expect(tray).not.toHaveClass("tw-mt-2");
+    expect(tray).toHaveClass("tw-col-span-2", "tw-col-start-2");
+    expect(tray).not.toHaveClass("md:tw-col-span-1");
     expect(tray.firstElementChild).toHaveClass("tw-h-2");
+  });
+
+  it("keeps compact controls touch sized and scales their surfaces for fine pointers", () => {
+    render(
+      <CreateDropActions
+        {...defaultProps}
+        isCompactLayout={true}
+        showOptions={true}
+      />
+    );
+
+    const toggle = screen.getByTestId("drop-actions-toggle-motion");
+    expect(toggle).toHaveClass("tw-size-10", "desktop-hover:tw-size-9");
+    expect(screen.getByTestId("drop-actions-compact-slot")).toHaveClass(
+      "tw-self-end",
+      "desktop-hover:tw-self-center"
+    );
+
+    const tray = screen.getByTestId("drop-actions-compact-tray");
+    const firstActionSurface = tray.querySelector("button > span");
+    expect(firstActionSurface).toHaveClass(
+      "tw-size-10",
+      "desktop-hover:tw-size-9"
+    );
   });
 
   it("disables the storm action while a poll is active", () => {

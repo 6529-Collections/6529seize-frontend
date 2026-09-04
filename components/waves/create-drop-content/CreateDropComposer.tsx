@@ -196,7 +196,11 @@ export default function CreateDropComposer({
           validationHelperClassName="tw-col-start-2 tw-row-start-3 tw-mb-0 tw-mt-2 tw-text-[11px] tw-font-medium tw-leading-4 tw-text-amber-200/90"
           onDrop={submitWithResolvedAliases}
         />
-        <div className="tw-col-start-3 tw-row-start-2 tw-self-end md:tw-row-span-2">
+        <div
+          className={`tw-col-start-3 tw-row-start-2 tw-self-end ${
+            isCompactLayout ? "" : "md:tw-row-span-2"
+          }`}
+        >
           <CreateDropSubmit
             submitting={submitting}
             canSubmit={canSubmit}
