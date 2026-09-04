@@ -124,23 +124,31 @@ const DirectMessagesList: React.FC<DirectMessagesListProps> = ({
 
   return (
     <div className="tw-mb-4">
-      <div className="tw-h-full tw-rounded-xl tw-bg-iron-950 tw-py-4 tw-ring-1 tw-ring-inset tw-ring-iron-800">
+      <div
+        className={
+          isApp
+            ? "tw-h-full tw-bg-transparent tw-py-1"
+            : "tw-h-full tw-rounded-xl tw-bg-iron-950 tw-py-4 tw-ring-1 tw-ring-inset tw-ring-iron-800"
+        }
+      >
         {!isApp && (
           <div className="tw-mb-4 tw-px-4">
             <BrainLeftSidebarCreateADirectMessageButton />
           </div>
         )}
 
-        <UnifiedWavesListWaves
-          ref={listRef}
-          waves={wavesWithPinned}
-          onHover={registerWave}
-          hideToggle
-          hidePin
-          hideHeaders
-          scrollContainerRef={scrollContainerRef}
-          isDirectMessage
-        />
+        {hasDirectMessages && (
+          <UnifiedWavesListWaves
+            ref={listRef}
+            waves={wavesWithPinned}
+            onHover={registerWave}
+            hideToggle
+            hidePin
+            hideHeaders
+            scrollContainerRef={scrollContainerRef}
+            isDirectMessage
+          />
+        )}
 
         <UnifiedWavesListLoader
           isFetching={isFetching && list.length === 0}

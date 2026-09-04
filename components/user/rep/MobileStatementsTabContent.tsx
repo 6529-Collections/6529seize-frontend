@@ -22,7 +22,7 @@ export default function MobileStatementsTabContent({
           name: possessionName,
         })}
       </h2>
-      <div className="tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.08] tw-bg-[#0f1014]">
+      <div className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06]">
         <UserPageIdentityStatements
           profile={profile}
           headerAction={

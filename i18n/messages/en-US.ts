@@ -2063,6 +2063,8 @@ const WAVE_REP_ACTION_MESSAGES = objectMessages("waves.rep.action", {
 } as const);
 
 const WAVE_REP_MODAL_MESSAGES = objectMessages("waves.rep.modal", {
+  title: "Rate Wave REP",
+  closeAriaLabel: "Close Wave REP dialog",
   remove: "Remove",
   removeAriaLabel: "Remove Wave REP",
   noAvailableCredit:

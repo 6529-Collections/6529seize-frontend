@@ -164,7 +164,7 @@ export default function WaveHeaderTrustStats({
             <dt className="tw-order-2 tw-truncate tw-text-[10px] tw-font-normal tw-leading-[13px] tw-tracking-[0.04em] tw-text-iron-500">
               {stat.label}
             </dt>
-            <dd className="tw-order-1 tw-m-0 tw-flex tw-min-w-0 tw-items-center tw-gap-x-[5px] tw-text-sm tw-font-medium tw-leading-5 tw-tracking-[-0.025em] tw-tabular-nums tw-text-iron-50">
+            <dd className="tw-order-1 tw-m-0 tw-flex tw-min-w-0 tw-items-center tw-gap-x-[5px] tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-50">
               <Icon
                 aria-hidden="true"
                 className={`tw-size-[13px] tw-flex-shrink-0 ${stat.iconClassName}`}
