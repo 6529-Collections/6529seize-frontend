@@ -33,19 +33,24 @@ const PublicReviewCommentPanelOpenContext = createContext(true);
 const PublicReviewFeedbackPanelCoordinationContext = createContext({
   close: (): void => undefined,
   isOpen: false,
+  open: (): void => undefined,
 });
 
+/** Returns whether the public review feedback panel is currently open. */
 export function usePublicReviewCommentPanelOpen(): boolean {
   return useContext(PublicReviewCommentPanelOpenContext);
 }
 
+/** Returns shared controls for the public review feedback panel. */
 export function usePublicReviewFeedbackPanelCoordination(): {
   readonly close: () => void;
   readonly isOpen: boolean;
+  readonly open: () => void;
 } {
   return useContext(PublicReviewFeedbackPanelCoordinationContext);
 }
 
+/** Lays out review content beside its coordinated feedback panel. */
 export function PublicReviewReadingLayout({
   content,
   feedbackAvailable,
@@ -70,9 +75,13 @@ export function PublicReviewReadingLayout({
   const closePanel = useCallback((): void => {
     setIsPanelOpen(false);
   }, []);
+  const openPanel = useCallback((): void => {
+    setFocusRequest((request) => request + 1);
+    setIsPanelOpen(true);
+  }, []);
   const feedbackPanelCoordination = useMemo(
-    () => ({ close: closePanel, isOpen: isPanelOpen }),
-    [closePanel, isPanelOpen]
+    () => ({ close: closePanel, isOpen: isPanelOpen, open: openPanel }),
+    [closePanel, isPanelOpen, openPanel]
   );
 
   useLayoutEffect(() => {
@@ -136,8 +145,7 @@ export function PublicReviewReadingLayout({
       if (window.location.hash !== `#${COMMENT_PANEL_ID}`) {
         return;
       }
-      setFocusRequest((request) => request + 1);
-      setIsPanelOpen(true);
+      openPanel();
     };
 
     const revealTimer = window.setTimeout(revealHashTarget, 0);
@@ -146,14 +154,14 @@ export function PublicReviewReadingLayout({
       window.clearTimeout(revealTimer);
       window.removeEventListener("hashchange", revealHashTarget);
     };
-  }, [feedbackAvailable]);
+  }, [feedbackAvailable, openPanel]);
 
   const feedbackToggle = feedbackAvailable ? (
     <button
       aria-controls={COMMENT_PANEL_ID}
       aria-expanded={isPanelOpen}
       className="tw-group/feedback-toggle tw-inline-flex tw-min-h-11 tw-flex-none tw-items-center tw-gap-1.5 tw-border-0 tw-bg-transparent tw-px-0 tw-text-xs tw-font-semibold tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-4 focus-visible:tw-outline-white sm:tw-gap-2"
-      onClick={() => (isPanelOpen ? closePanel() : setIsPanelOpen(true))}
+      onClick={() => (isPanelOpen ? closePanel() : openPanel())}
       type="button"
     >
       {isPanelOpen ? (
@@ -182,11 +190,7 @@ export function PublicReviewReadingLayout({
     <div className="tw-relative tw-flex tw-min-h-16 tw-items-center tw-gap-2 tw-px-3 sm:tw-gap-4 sm:tw-px-7 lg:tw-px-10">
       {hasMobileNavigation ? (
         <div className="tw-min-w-0 tw-flex-none lg:tw-hidden">
-          <PublicReviewFeedbackPanelCoordinationContext.Provider
-            value={feedbackPanelCoordination}
-          >
-            {mobileNavigation}
-          </PublicReviewFeedbackPanelCoordinationContext.Provider>
+          {mobileNavigation}
         </div>
       ) : null}
       <div
@@ -283,35 +287,39 @@ export function PublicReviewReadingLayout({
       : null;
 
   return (
-    <section className="tw-min-w-0 tw-@container" ref={layoutRef}>
-      <div className="tw-sticky tw-top-[env(safe-area-inset-top,0px)] tw-z-30 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.07] tw-bg-[#0D0D0F]/95 tw-backdrop-blur-xl">
-        {toolbarRow}
-      </div>
-
-      <div
-        className={`tw-grid tw-min-w-0 ${
-          isPanelOpen ? "@[760px]:tw-grid-cols-[minmax(0,1fr)_20rem]" : ""
-        }`}
-      >
-        <div className="tw-order-2 tw-min-w-0 @[760px]:tw-order-1">
-          {content}
+    <PublicReviewFeedbackPanelCoordinationContext.Provider
+      value={feedbackPanelCoordination}
+    >
+      <section className="tw-min-w-0 tw-@container" ref={layoutRef}>
+        <div className="tw-sticky tw-top-[env(safe-area-inset-top,0px)] tw-z-30 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.07] tw-bg-[#0D0D0F]/95 tw-backdrop-blur-xl">
+          {toolbarRow}
         </div>
 
-        {overlayIsOpen ? null : (
-          <aside
-            id={COMMENT_PANEL_ID}
-            aria-labelledby={COMMENT_PANEL_HEADING_ID}
-            className={`tw-order-1 tw-scroll-mt-[calc(5rem+env(safe-area-inset-top,0px))] tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.08] tw-bg-iron-950 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-inset focus:tw-ring-primary-400 @[760px]:tw-sticky @[760px]:tw-top-[calc(4rem+env(safe-area-inset-top,0px))] @[760px]:tw-order-2 @[760px]:tw-h-[calc(100dvh-4rem-env(safe-area-inset-top,0px)-env(safe-area-inset-bottom,0px))] @[760px]:tw-overflow-hidden @[760px]:tw-border-b-0 @[760px]:tw-border-l ${
-              inlinePanelIsVisible ? "tw-block" : "tw-hidden"
-            }`}
-            hidden={!inlinePanelIsVisible}
-            tabIndex={-1}
-          >
-            {panelContents(false)}
-          </aside>
-        )}
-      </div>
-      {overlayPanel}
-    </section>
+        <div
+          className={`tw-grid tw-min-w-0 ${
+            isPanelOpen ? "@[760px]:tw-grid-cols-[minmax(0,1fr)_20rem]" : ""
+          }`}
+        >
+          <div className="tw-order-2 tw-min-w-0 @[760px]:tw-order-1">
+            {content}
+          </div>
+
+          {overlayIsOpen ? null : (
+            <aside
+              id={COMMENT_PANEL_ID}
+              aria-labelledby={COMMENT_PANEL_HEADING_ID}
+              className={`tw-order-1 tw-scroll-mt-[calc(5rem+env(safe-area-inset-top,0px))] tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.08] tw-bg-iron-950 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-inset focus:tw-ring-primary-400 @[760px]:tw-sticky @[760px]:tw-top-[calc(4rem+env(safe-area-inset-top,0px))] @[760px]:tw-order-2 @[760px]:tw-h-[calc(100dvh-4rem-env(safe-area-inset-top,0px)-env(safe-area-inset-bottom,0px))] @[760px]:tw-overflow-hidden @[760px]:tw-border-b-0 @[760px]:tw-border-l ${
+                inlinePanelIsVisible ? "tw-block" : "tw-hidden"
+              }`}
+              hidden={!inlinePanelIsVisible}
+              tabIndex={-1}
+            >
+              {panelContents(false)}
+            </aside>
+          )}
+        </div>
+        {overlayPanel}
+      </section>
+    </PublicReviewFeedbackPanelCoordinationContext.Provider>
   );
 }

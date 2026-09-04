@@ -19,6 +19,15 @@ describe("StreamReviewOverviewGuide", () => {
       screen.queryByText(/Stream is a proposed system/)
     ).not.toBeInTheDocument();
     expect(
+      screen.getByRole("heading", { name: "Follow one artwork" })
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { name: "See a Stream artwork" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByText("Nothing here buys, signs, uploads, or saves anything.")
+    ).toBeInTheDocument();
+    expect(
       screen.getByRole("heading", {
         name: "A Stream artwork is more than the media you see",
       })
