@@ -48,7 +48,6 @@ describe("frontend CI wave WEB E2E lifecycle", () => {
 
   it("posts the staging deploy before automatic E2E and preserves its reply identity", () => {
     const deployment = job(stagingDeploy, "notify-staging-outcome");
-    const automaticE2e = job(stagingDeploy, "automatic-staging-e2e");
     const success = step(deployment, "Notify CI wave about success");
 
     expect(deployment.needs).toEqual([
@@ -59,41 +58,21 @@ describe("frontend CI wave WEB E2E lifecycle", () => {
       CI_PIPELINES_ALERT_TYPE: "deploy",
       CI_PIPELINES_TITLE: "WEB deploy complete",
     });
-    expect(automaticE2e.needs).toEqual([
-      "deploy-staging",
-      "notify-staging-outcome",
-    ]);
-    expect(automaticE2e.with?.["parent_deploy_run_id"]).toBe(
-      "${{ github.run_id }}"
-    );
-    expect(automaticE2e.secrets).toMatchObject({
-      CI_PIPELINES_ALERT_SECRET: "${{ secrets.CI_PIPELINES_ALERT_SECRET }}",
-    });
   });
 
   it("posts the production deploy before automatic E2E and preserves its reply identity", () => {
     const deployment = job(productionDeploy, "notify-production-deployment");
-    const automaticE2e = job(productionDeploy, "automatic-production-e2e");
     const success = step(deployment, "Notify CI wave about success");
 
     expect(deployment.needs).toEqual([
       "build-production-artifact",
+      "resolve-production-artifact",
       "verify-production-artifact",
       "build-upload-deploy",
     ]);
     expect(success.env).toMatchObject({
       CI_PIPELINES_ALERT_TYPE: "deploy",
       CI_PIPELINES_TITLE: "WEB deploy complete",
-    });
-    expect(automaticE2e.needs).toEqual([
-      "build-upload-deploy",
-      "notify-production-deployment",
-    ]);
-    expect(automaticE2e.with?.["parent_deploy_run_id"]).toBe(
-      "${{ github.run_id }}"
-    );
-    expect(automaticE2e.secrets).toMatchObject({
-      CI_PIPELINES_ALERT_SECRET: "${{ secrets.CI_PIPELINES_ALERT_SECRET }}",
     });
   });
 
@@ -116,7 +95,7 @@ describe("frontend CI wave WEB E2E lifecycle", () => {
         CI_PIPELINES_VALIDATION_PACK:
           environment === "staging" ? "${{ inputs.pack || 'all' }}" : pack,
         CI_PIPELINES_PARENT_DEPLOY_RUN_ID:
-          "${{ inputs.parent_deploy_run_id || inputs.automatic_deploy_run_id }}",
+          "${{ inputs.automatic_deploy_run_id }}",
       });
       expect(post.env?.["CI_PIPELINES_TITLE"]).toContain("WEB E2E passed");
       expect(JSON.stringify(parsed)).not.toContain("release_validation");

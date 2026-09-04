@@ -55,52 +55,19 @@ ssr_client_secret="$(printf '%s' "$SSR_CLIENT_SECRET_B64" | base64 -d)"
 }
 
 release_root="$REPO_DIR/.deploy"
-# Compatibility for hosts deployed before the runtime-directory rename. Keep the
-# live directory in place: PM2 and rollback releases can still hold its absolute
-# paths, and old deployment scripts must continue to open the same lock inode.
-legacy_release_root="$REPO_DIR/.release-bus"
-lock_root="$release_root"
-if [[ -e "$legacy_release_root" || -L "$legacy_release_root" ]]; then
-  [[ -d "$legacy_release_root" ]] || {
-    echo "Refusing to adopt an invalid previous staging runtime directory." >&2
-    exit 1
-  }
-  if [[ ! -e "$release_root" && ! -L "$release_root" ]]; then
-    [[ ! -L "$legacy_release_root" ]] || {
-      echo "Refusing to adopt an unexpected staging runtime symlink." >&2
-      exit 1
-    }
-    lock_root="$legacy_release_root"
-  elif [[ ! "$release_root" -ef "$legacy_release_root" ]]; then
-    echo "Refusing to deploy with separate staging runtime directories and locks." >&2
-    exit 1
-  fi
-fi
 if [[ -L "$release_root" ]]; then
-  [[ "$(readlink "$release_root")" == "$legacy_release_root" && \
-    -d "$legacy_release_root" && ! -L "$legacy_release_root" ]] || {
-    echo "Refusing to use an unexpected staging runtime symlink." >&2
-    exit 1
-  }
+  echo "Refusing to use a staging runtime symlink." >&2
+  exit 1
 elif [[ -e "$release_root" && ! -d "$release_root" ]]; then
   echo "Refusing to replace a non-directory staging runtime path." >&2
   exit 1
 fi
-install -d -o "$RUN_AS" -g "$RUN_AS" "$lock_root"
-touch "$lock_root/deploy.lock"
-chown "$RUN_AS:$RUN_AS" "$lock_root/deploy.lock"
-exec 9>"$lock_root/deploy.lock"
+install -d -o "$RUN_AS" -g "$RUN_AS" "$release_root"
+touch "$release_root/deploy.lock"
+chown "$RUN_AS:$RUN_AS" "$release_root/deploy.lock"
+exec 9>"$release_root/deploy.lock"
 flock -n 9 || {
   echo "Another instance-local staging deployment is active." >&2
-  exit 1
-}
-# Adopt only while holding the shared lock, so simultaneous new/old deployments
-# cannot create independent roots or race the compatibility symlink creation.
-if [[ ! -e "$release_root" && ! -L "$release_root" ]]; then
-  ln -s "$legacy_release_root" "$release_root"
-fi
-[[ "$release_root" -ef "$lock_root" ]] || {
-  echo "The staging runtime directory moved while acquiring its lock." >&2
   exit 1
 }
 physical_release_root="$(readlink -f "$release_root")"

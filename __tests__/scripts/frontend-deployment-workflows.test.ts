@@ -37,9 +37,12 @@ describe("frontend deployment workflow contract", () => {
       "build-upload-deploy-prod.yml",
       "deploy-staging.yml",
       "production-artifact-verifier.yml",
+      "production-artifact-metadata.yml",
       "production-build-artifact.yml",
       "production-e2e.yml",
       "staging-e2e.yml",
+      "staging-e2e-dispatch.yml",
+      "production-e2e-dispatch.yml",
     ];
     const forbidden =
       /release[-_ ]bus|deployment[-_ ]bus|operation_id|authority\/|authority completion/i;
@@ -61,68 +64,43 @@ describe("frontend deployment workflow contract", () => {
     );
   });
 
-  it("holds each environment lock through its matching automatic E2E", () => {
-    const staging = readWorkflow("deploy-staging.yml").workflow;
-    const stagingE2e = readWorkflow("staging-e2e.yml");
-    const production = readWorkflow("build-upload-deploy-prod.yml").workflow;
-    const productionE2e = readWorkflow("production-e2e.yml");
-
-    expect(staging.jobs["automatic-staging-e2e"]).toMatchObject({
-      needs: ["deploy-staging", "notify-staging-outcome"],
-      uses: "./.github/workflows/staging-e2e.yml",
-      with: {
-        pack: "all",
-        trusted_deployed_sha: "${{ github.sha }}",
-        parent_deploy_run_id: "${{ github.run_id }}",
-      },
-    });
-    expect(production.jobs["automatic-production-e2e"]).toMatchObject({
-      needs: ["build-upload-deploy", "notify-production-deployment"],
-      uses: "./.github/workflows/production-e2e.yml",
-      with: {
-        trusted_deployed_sha: "${{ github.sha }}",
-        parent_deploy_run_id: "${{ github.run_id }}",
-      },
-    });
-
-    for (const e2e of [stagingE2e, productionE2e]) {
+  it.each([
+    ["staging", "deploy-staging.yml", "Web Deploy - STAGING", "1a-staging"],
+    ["production", "build-upload-deploy-prod.yml", "Web Deploy - PROD", "main"],
+  ])(
+    "finishes the %s deployment before starting separate automatic E2E",
+    (environment, file, name, branch) => {
+      const deploy = readWorkflow(file).workflow;
+      const e2e = readWorkflow(`${environment}-e2e.yml`).workflow;
+      const dispatcher = readWorkflow(
+        `${environment}-e2e-dispatch.yml`
+      ).workflow;
+      expect(deploy.jobs[`automatic-${environment}-e2e`]).toBeUndefined();
       expect(
-        e2e.workflow.on.workflow_call.inputs.trusted_deployed_sha.required
-      ).toBe(true);
-      expect(
-        e2e.workflow.on.workflow_dispatch.inputs.automatic_deploy_run_id
-          .required
+        Object.values(deploy.jobs).some((job) =>
+          (job as { uses?: string }).uses?.endsWith("-e2e.yml")
+        )
       ).toBe(false);
-      expect(
-        e2e.workflow.on.workflow_dispatch.inputs.target_sha
-      ).toBeUndefined();
-      expect(e2e.source).not.toContain("MANUAL_TARGET_SHA");
+      expect(e2e.on.workflow_call).toBeUndefined();
+      expect(e2e.concurrency.group).toBe(`${environment}-e2e`);
+      expect(dispatcher.on.workflow_run).toEqual({
+        workflows: [name],
+        types: ["completed"],
+        branches: [branch],
+      });
+      expect(dispatcher.jobs["dispatch-successful-deploy"].if).toContain(
+        "conclusion == 'success'"
+      );
+      expect(dispatcher.jobs["dispatch-successful-deploy"].if).toContain(
+        "head_repository.full_name == github.repository"
+      );
+      expect(e2e.on.workflow_dispatch.inputs.target_sha).toBeUndefined();
     }
-
-    expect(stagingE2e.workflow.concurrency.group).toContain("staging-e2e");
-    expect(stagingE2e.workflow.concurrency.group).toContain("staging-deploy");
-    expect(productionE2e.workflow.concurrency.group).toContain(
-      "production-e2e"
-    );
-    expect(productionE2e.workflow.concurrency.group).toContain(
-      "web-deploy-prod"
-    );
-    expect(
-      fs.existsSync(
-        path.join(ROOT, ".github", "workflows", "staging-e2e-dispatch.yml")
-      )
-    ).toBe(false);
-    expect(
-      fs.existsSync(
-        path.join(ROOT, ".github", "workflows", "production-e2e-dispatch.yml")
-      )
-    ).toBe(false);
-  });
+  );
 
   it("notifies staging deployment before automatic E2E", () => {
     const staging = readWorkflow("deploy-staging.yml").workflow;
     const finalizer = staging.jobs["notify-staging-outcome"];
-    const automaticE2e = staging.jobs["automatic-staging-e2e"];
     const requiredJobs = ["build-staging-artifact", "deploy-staging"];
     const failure = finalizer.steps.find(
       (step: { name?: string }) => step.name === "Notify CI wave about failure"
@@ -137,22 +115,18 @@ describe("frontend deployment workflow contract", () => {
       expect(failure.if).toContain(`needs.${job}.result != 'success'`);
       expect(success.if).toContain(`needs.${job}.result == 'success'`);
     }
-    expect(automaticE2e.needs).toEqual([
-      "deploy-staging",
-      "notify-staging-outcome",
-    ]);
   });
 
   it("publishes production release notes after deploy before CI-wave E2E", () => {
     const production = readWorkflow("build-upload-deploy-prod.yml").workflow;
     const deployment = production.jobs["notify-production-deployment"];
-    const automaticE2e = production.jobs["automatic-production-e2e"];
     const deploymentSuccess = deployment.steps.find(
       (step: { name?: string }) => step.name === "Notify CI wave about success"
     );
 
     expect(deployment.needs).toEqual([
       "build-production-artifact",
+      "resolve-production-artifact",
       "verify-production-artifact",
       "build-upload-deploy",
     ]);
@@ -161,10 +135,6 @@ describe("frontend deployment workflow contract", () => {
       "ops/release-notes/release-notes.prompt.md"
     );
     expect(deploymentSuccess.env.CI_PIPELINES_ALERT_TYPE).toBe("deploy");
-    expect(automaticE2e.needs).toEqual([
-      "build-upload-deploy",
-      "notify-production-deployment",
-    ]);
     expect(production.jobs).not.toHaveProperty("notify-production-validation");
   });
 
