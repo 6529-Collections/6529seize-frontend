@@ -100,7 +100,7 @@ export default function CreateDropComposer({
     } else if (canAddPart || (drop?.parts.length ?? 0) === 0) {
       submitLabel = t(locale, "waves.stormComposer.addPart");
     } else {
-      submitLabel = t(locale, "waves.stormComposer.postStorm");
+      submitLabel = t(locale, "waves.stormComposer.addPart");
     }
   }
   return (
