@@ -121,16 +121,19 @@ jest.mock("@/components/user/utils/UserFollowBtn", () => ({
     onUnblock,
     showFollowButton = true,
     showMuteButton = true,
+    beforeFollowAction,
   }: {
     readonly onDirectMessage?: (() => void) | undefined;
     readonly blocked?: boolean | undefined;
     readonly onUnblock?: (() => void) | undefined;
     readonly showFollowButton?: boolean | undefined;
     readonly showMuteButton?: boolean | undefined;
+    readonly beforeFollowAction?: React.ReactNode | undefined;
   }) => (
     <div data-testid="profile-actions">
       {onDirectMessage ? <button type="button">Direct Message</button> : null}
       {showMuteButton ? <button type="button">Mute</button> : null}
+      {beforeFollowAction}
       {showFollowButton ? (
         <button
           type="button"
@@ -562,7 +565,10 @@ describe("UserPageHeader", () => {
       );
     });
     preferencesButtons.forEach((preferencesButton) => {
-      expect(preferencesButton).toHaveAttribute("href", "/preferences");
+      expect(preferencesButton).toHaveAttribute(
+        "href",
+        "/preferences?from=profile"
+      );
     });
   });
 
@@ -586,7 +592,10 @@ describe("UserPageHeader", () => {
     screen
       .getAllByRole("link", { name: "Preferences" })
       .forEach((preferencesLink) => {
-        expect(preferencesLink).toHaveAttribute("href", "/preferences");
+        expect(preferencesLink).toHaveAttribute(
+          "href",
+          "/preferences?from=profile"
+        );
       });
   });
 
