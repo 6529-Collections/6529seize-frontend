@@ -340,7 +340,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   }, []);
   const composerContainerClassName = isApp
     ? "tw-mt-auto tw-bg-iron-950"
-    : "tw-mt-auto tw-bg-iron-950 tw-pb-[max(env(safe-area-inset-bottom,0px),0.5rem)] lg:tw-pb-0";
+    : "tw-mt-auto tw-bg-iron-950 tw-pb-[env(safe-area-inset-bottom,0px)]";
   const composerContainerStyle = useMemo<React.CSSProperties | undefined>(
     () =>
       isApp
