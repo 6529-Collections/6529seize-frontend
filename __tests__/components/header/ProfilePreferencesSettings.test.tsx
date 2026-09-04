@@ -82,7 +82,7 @@ describe("ProfilePreferencesSettings", () => {
     ).toHaveClass("tw-pb-8", "tw-pt-8", "sm:tw-pb-10", "sm:tw-pt-10");
     expect(
       screen.getByRole("button", { name: "Save Changes" }).parentElement
-    ).toHaveClass("tw-py-6", "lg:tw-px-8");
+    ).toHaveClass("tw-py-6", "tw-mx-4", "lg:tw-mx-8");
   });
 
   it("keeps native controls and full-row labels for each option", async () => {
