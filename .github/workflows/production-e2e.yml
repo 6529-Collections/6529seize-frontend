@@ -3,271 +3,168 @@ name: Production E2E
 on:
   workflow_dispatch:
     inputs:
-      release_train_id: { type: string, required: false }
-      release_train_revision: { type: string, required: false }
-      operation_key: { type: string, required: false }
-      source_ref: { type: string, required: false }
-      expected_sha: { type: string, required: false }
-      release_manifest_id: { type: string, required: false }
-      release_manifest_identity_sha256: { type: string, required: false }
-      frontend_sha: { type: string, required: false, default: "" }
-      backend_sha: { type: string, required: false, default: "" }
-      frontend_artifact_digest: { type: string, required: false, default: "" }
-      backend_artifact_digest: { type: string, required: false, default: "" }
-      automatic_deploy_run_id: { type: string, required: false, default: "" }
+      automatic_deploy_run_id:
+        description: Successful Web Deploy - PROD run ID; supplied automatically, required for a manual rerun
+        type: string
+        required: true
 
 permissions:
+  actions: read
   contents: read
+  packages: read
 
-run-name: Production E2E ${{ inputs.release_train_id || (inputs.automatic_deploy_run_id && format('automatic {0}', inputs.automatic_deploy_run_id)) || 'manual' }}
+run-name: Production E2E ${{ inputs.automatic_deploy_run_id && format('automatic {0}', inputs.automatic_deploy_run_id) || 'manual' }}
 
 concurrency:
   group: production-e2e
-  # Production read-only validation owns its lane independently. Never cancel
-  # a manifest-bound run or share staging/ALL ownership.
   cancel-in-progress: false
 
 jobs:
   readonly:
+    name: Production read-only E2E packs
     runs-on: ${{ vars.E2E_RUNNER || vars.CI_LINUX_RUNNER || 'ubuntu-latest' }}
     timeout-minutes: 90
-    outputs:
-      dependencies-outcome: ${{ steps.dependencies.outcome }}
-      e2e-outcome: ${{ steps.e2e.outcome }}
-      evidence-upload-outcome: ${{ steps.evidence-upload.outcome }}
-      expected-sha: ${{ inputs.expected_sha || steps.automatic-deploy.outputs.deployed-sha }}
-      museum-provenance-outcome: ${{ steps.museum-provenance-evidence.outcome }}
-      museum-publication-outcome: ${{ steps.museum-publication.outcome }}
-      playwright-outcome: ${{ steps.playwright.outcome }}
-      selection-outcome: ${{ steps.museum-selection.outcome }}
-      selection-upload-outcome: ${{ steps.museum-selection-upload.outcome }}
-      socket-outcome: ${{ steps.socket-firewall.outcome }}
     permissions:
       actions: read
       contents: read
-      issues: read
       packages: read
-    steps:
-      - name: Reject mixed automatic dispatch identity
-        if: inputs.automatic_deploy_run_id != ''
-        env:
-          AUTOMATIC_DEPLOY_RUN_ID: ${{ inputs.automatic_deploy_run_id }}
-          BACKEND_ARTIFACT_DIGEST: ${{ inputs.backend_artifact_digest }}
-          BACKEND_SHA: ${{ inputs.backend_sha }}
-          EXPECTED_SHA: ${{ inputs.expected_sha }}
-          FRONTEND_ARTIFACT_DIGEST: ${{ inputs.frontend_artifact_digest }}
-          FRONTEND_SHA: ${{ inputs.frontend_sha }}
-          MANIFEST_ID: ${{ inputs.release_manifest_id }}
-          MANIFEST_IDENTITY: ${{ inputs.release_manifest_identity_sha256 }}
-          OPERATION_KEY: ${{ inputs.operation_key }}
-          SOURCE_REF: ${{ inputs.source_ref }}
-          TRAIN_ID: ${{ inputs.release_train_id }}
-          TRAIN_REVISION: ${{ inputs.release_train_revision }}
-        run: |
-          set -euo pipefail
-          [[ "$AUTOMATIC_DEPLOY_RUN_ID" =~ ^[1-9][0-9]{0,19}$ ]]
-          identity_values="$TRAIN_ID$TRAIN_REVISION$OPERATION_KEY$SOURCE_REF$EXPECTED_SHA$MANIFEST_ID$MANIFEST_IDENTITY$FRONTEND_SHA$BACKEND_SHA$FRONTEND_ARTIFACT_DIGEST$BACKEND_ARTIFACT_DIGEST"
-          test -z "$identity_values"
+    outputs:
+      expected-sha: ${{ steps.source.outputs.sha }}
 
-      - name: Resolve successful automatic production deploy
-        id: automatic-deploy
-        if: inputs.automatic_deploy_run_id != ''
+    steps:
+      - name: Resolve exact deployed SHA
+        id: source
         env:
           AUTOMATIC_DEPLOY_RUN_ID: ${{ inputs.automatic_deploy_run_id }}
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
+          test "$GITHUB_REF" = refs/heads/main
           [[ "$AUTOMATIC_DEPLOY_RUN_ID" =~ ^[1-9][0-9]{0,19}$ ]]
-          response_file="$(mktemp)"
-          runs_file=''
-          trap 'rm -f "$response_file"; if [ -n "$runs_file" ]; then rm -f "$runs_file"; fi' EXIT
+          gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${AUTOMATIC_DEPLOY_RUN_ID}" > "$RUNNER_TEMP/deploy-run.json"
+          deployed_sha="$(jq -er \
+            --arg repository "$GITHUB_REPOSITORY" '
+              select(
+                .path == ".github/workflows/build-upload-deploy-prod.yml" and
+                .event == "workflow_dispatch" and
+                .head_branch == "main" and
+                .status == "completed" and
+                .conclusion == "success" and
+                .repository.full_name == $repository and
+                .head_repository.full_name == $repository and
+                (.run_attempt | type == "number" and . >= 1 and . <= 1000000) and
+                (.head_sha | test("^[a-f0-9]{40}$"))
+              ) | .head_sha
+            ' "$RUNNER_TEMP/deploy-run.json")"
+          deploy_run_attempt="$(jq -er '.run_attempt' "$RUNNER_TEMP/deploy-run.json")"
           gh api \
-            "repos/${GITHUB_REPOSITORY}/actions/runs/${AUTOMATIC_DEPLOY_RUN_ID}" \
-            > "$response_file"
-          jq -e \
-            --arg repository "$GITHUB_REPOSITORY" \
-            --argjson run_id "$AUTOMATIC_DEPLOY_RUN_ID" '
-              .id == $run_id and
-              .name == ("Production deploy " + .head_sha + " [frontend-prod-" + ($run_id | tostring) + "]") and
-              .display_title == .name and
-              .path == ".github/workflows/build-upload-deploy-prod.yml" and
-              .event == "workflow_dispatch" and
+            "repos/${GITHUB_REPOSITORY}/actions/runs/${AUTOMATIC_DEPLOY_RUN_ID}/attempts/${deploy_run_attempt}/jobs?per_page=100" \
+            > "$RUNNER_TEMP/deploy-jobs.json"
+          jq -e '
+            [.jobs[] | select(
+              .name == "Deploy verified production artifact" and
               .status == "completed" and
-              .conclusion == "success" and
-              .head_branch == "main" and
-              .repository.full_name == $repository and
-              .head_repository.full_name == $repository and
-              (.head_sha | test("^[a-f0-9]{40}$")) and
-              (.run_attempt | type == "number" and . >= 1 and . <= 1000000)
-            ' "$response_file" >/dev/null
-          echo "deployed-sha=$(jq -r .head_sha "$response_file")" >> "$GITHUB_OUTPUT"
-          started_at="$(jq -er .run_started_at "$response_file")"
-          runs_file="$(mktemp)"
-          gh api \
-            "repos/${GITHUB_REPOSITORY}/actions/workflows/build-upload-deploy-prod.yml/runs?status=completed&branch=main&event=workflow_dispatch&per_page=100" \
-            > "$runs_file"
-          previous_sha="$(jq -r \
-            --argjson current_run_id "$AUTOMATIC_DEPLOY_RUN_ID" \
-            --arg repository "$GITHUB_REPOSITORY" \
-            --arg started_at "$started_at" '
-              [.workflow_runs[] |
-                select(
-                  .id != $current_run_id and
-                  .name == ("Production deploy " + .head_sha + " [frontend-prod-" + (.id | tostring) + "]") and
-                  .display_title == .name and
-                  .path == ".github/workflows/build-upload-deploy-prod.yml" and
-                  .event == "workflow_dispatch" and
-                  .status == "completed" and
-                  .conclusion == "success" and
-                  .head_branch == "main" and
-                  .repository.full_name == $repository and
-                  .head_repository.full_name == $repository and
-                  .run_started_at < $started_at and
-                  (.head_sha | test("^[a-f0-9]{40}$")) and
-                  (.run_attempt | type == "number" and . >= 1 and . <= 1000000)
-                )] |
-              sort_by(.run_started_at) |
-              last |
-              .head_sha // empty
-            ' "$runs_file")"
-          if [[ "$previous_sha" =~ ^[a-f0-9]{40}$ ]]; then
-            echo "previous_deployed_sha=$previous_sha" >> "$GITHUB_OUTPUT"
-          else
-            echo "::warning::No prior successful production deployment could be proven; Museum E2E will be retained."
-            echo "previous_deployed_sha=" >> "$GITHUB_OUTPUT"
-          fi
+              .conclusion == "success"
+            )] | length == 1
+          ' "$RUNNER_TEMP/deploy-jobs.json" >/dev/null
+          echo "sha=$deployed_sha" >> "$GITHUB_OUTPUT"
 
-      - name: Validate and authorize immutable inputs
-        if: inputs.automatic_deploy_run_id == ''
-        env:
-          EXPECTED_SHA: ${{ inputs.expected_sha }}
-          FRONTEND_ARTIFACT_DIGEST: ${{ inputs.frontend_artifact_digest }}
-          FRONTEND_SHA: ${{ inputs.frontend_sha }}
-          BACKEND_ARTIFACT_DIGEST: ${{ inputs.backend_artifact_digest }}
-          BACKEND_SHA: ${{ inputs.backend_sha }}
-          MANIFEST_ID: ${{ inputs.release_manifest_id }}
-          MANIFEST_IDENTITY: ${{ inputs.release_manifest_identity_sha256 }}
-          OPERATION_KEY: ${{ inputs.operation_key }}
-          RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
-          RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
-          SOURCE_REF: ${{ inputs.source_ref }}
-          TRAIN_ID: ${{ inputs.release_train_id }}
-          TRAIN_REVISION: ${{ inputs.release_train_revision }}
-        run: |
-          set -euo pipefail
-          [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{40}$ ]]
-          [[ "$TRAIN_ID" =~ ^[A-Za-z0-9._-]{1,100}$ ]]
-          [[ "$TRAIN_REVISION" =~ ^([1-9][0-9]{0,8}|rollback-[1-9][0-9]{0,8})$ ]]
-          [[ "$OPERATION_KEY" =~ ^[A-Za-z0-9:._-]{1,180}$ ]]
-          [[ "$SOURCE_REF" =~ ^[A-Za-z0-9._/-]{1,255}$ ]]
-          [[ "$MANIFEST_ID" =~ ^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$ ]]
-          [[ "$MANIFEST_IDENTITY" =~ ^[a-f0-9]{64}$ ]]
-          [[ -z "$FRONTEND_SHA" || "$FRONTEND_SHA" =~ ^[a-f0-9]{40}$ ]]
-          [[ -z "$BACKEND_SHA" || "$BACKEND_SHA" =~ ^[a-f0-9]{40}$ ]]
-          [[ -z "$FRONTEND_ARTIFACT_DIGEST" || "$FRONTEND_ARTIFACT_DIGEST" =~ ^[a-f0-9]{64}$ ]]
-          [[ -z "$BACKEND_ARTIFACT_DIGEST" || "$BACKEND_ARTIFACT_DIGEST" =~ ^[a-f0-9]{64}$ ]]
-          test -n "$FRONTEND_SHA$BACKEND_SHA"
-          payload="$(jq -n --arg train_id "$TRAIN_ID" --arg operation_key "$OPERATION_KEY" --arg workflow_run_id "$GITHUB_RUN_ID" --arg expected_sha "$EXPECTED_SHA" --arg artifact_digest "$MANIFEST_IDENTITY" '{train_id:$train_id,operation_key:$operation_key,workflow_run_id:$workflow_run_id,artifact_run_id:null,repository:"frontend",environment:"prod",service:null,expected_sha:$expected_sha,artifact_digest:$artifact_digest}')"
-          curl --fail-with-body --silent --show-error \
-            -H "Authorization: Bearer $RELEASE_BUS_WORKFLOW_AUTH_TOKEN" \
-            -H 'Content-Type: application/json' \
-            --data "$payload" \
-            "$RELEASE_BUS_API_URL/deploy/release-bus-v2/authorize"
-      - name: Check out exact production SHA
-        # workflow_dispatch itself is trusted orchestration from the selected
-        # default-branch ref. All pack code, the pack manifest, dependencies,
-        # and evidence below come from this independently read-back deployed
-        # SHA, so a later main advance cannot change the tested inventory.
+      - name: Check out trusted version verifier
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
-          ref: ${{ inputs.expected_sha || steps.automatic-deploy.outputs.deployed-sha }}
+          ref: main
           persist-credentials: false
-      - name: Verify immutable source
+          path: .version-verifier
+          sparse-checkout: |
+            ops/scripts/cli-args.cjs
+            ops/scripts/verify-deployment-version.cjs
+          sparse-checkout-cone-mode: false
+
+      - name: Require the selected production deployment to still be live
         env:
-          EXPECTED_SHA: ${{ inputs.expected_sha || steps.automatic-deploy.outputs.deployed-sha }}
+          EXPECTED_SHA: ${{ steps.source.outputs.sha }}
+        run: |
+          node .version-verifier/ops/scripts/verify-deployment-version.cjs \
+            --base-url https://6529.io \
+            --expected-version "$EXPECTED_SHA" \
+            --attempts 1 \
+            --delay-ms 1000 \
+            --timeout-ms 10000 \
+            --output "$RUNNER_TEMP/manual-production-version.json"
+
+      - name: Check out exact deployed source
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          ref: ${{ steps.source.outputs.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Verify exact deployed source
+        env:
+          EXPECTED_SHA: ${{ steps.source.outputs.sha }}
         run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
       - name: Install Node.js
         uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
-        with: { node-version: "22.17.1" }
-      # Select and upload the Museum control record before any deployed
-      # package manager, dependency lifecycle, or E2E process executes. The
-      # v4 artifact is immutable and is independently verified on a new runner.
-      - name: Require an unused Museum selection control path
-        run: test ! -e .release-bus-control
-      - name: Check out immutable Release Bus Museum selection tooling
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
-          ref: ${{ github.workflow_sha }}
-          path: .release-bus-control
-          filter: blob:none
-          fetch-depth: 1
-          persist-credentials: false
-          sparse-checkout: |
-            scripts/museum-release-tier.cjs
-            scripts/museum-release-selection.cjs
-          sparse-checkout-cone-mode: false
-      - name: Verify immutable Museum selection tooling
-        env:
-          WORKFLOW_SHA: ${{ github.workflow_sha }}
+          node-version: "22.17.1"
+          package-manager-cache: false
+
+      - name: Activate pinned pnpm
         run: |
-          set -euo pipefail
-          [[ "$WORKFLOW_SHA" =~ ^[a-f0-9]{40}$ ]]
-          test "$(git -C .release-bus-control rev-parse HEAD)" = "$WORKFLOW_SHA"
-          if ! control_status="$(git -C .release-bus-control status --porcelain=v1 --untracked-files=all)"; then
-            echo "::error::Unable to verify the Museum selection control working tree."
-            exit 1
-          fi
-          test -z "$control_status"
-          test -f .release-bus-control/scripts/museum-release-tier.cjs
-          test -f .release-bus-control/scripts/museum-release-selection.cjs
-      - name: Select fail-closed Museum packs for the exact deployed range
+          corepack enable pnpm
+          corepack prepare "$(node -p 'require("./package.json").packageManager')" --activate
+
+      - name: Install Socket Firewall
+        id: socket-firewall
+        uses: SocketDev/action@2d3f25590c6ed6ba11a9a14c064d962a3a04698f # v1.3.1
+        with:
+          mode: firewall
+
+      - name: Install frozen dependencies
+        env:
+          NODE_AUTH_TOKEN: ${{ github.token }}
+          SFW_BIN: ${{ steps.socket-firewall.outputs.firewall-path-binary }}
+        run: ./bin/6529 install:frozen
+
+      - name: Select Museum packs for the deployed change
         id: museum-selection
         env:
-          BASE_SHA: ${{ steps.automatic-deploy.outputs.previous_deployed_sha }}
-          DEPLOYED_SHA: ${{ inputs.expected_sha || steps.automatic-deploy.outputs.deployed-sha }}
+          DEPLOYED_SHA: ${{ steps.source.outputs.sha }}
+          DEPLOY_RUN_ID: ${{ inputs.automatic_deploy_run_id }}
           GH_TOKEN: ${{ github.token }}
-          MUSEUM_RELEASE_TIER_MODE: ${{ vars.MUSEUM_RELEASE_TIER_MODE }}
+          MUSEUM_RELEASE_TIER_MODE: ${{ vars.MUSEUM_RELEASE_TIER_MODE || 'tiered' }}
         run: |
           set -euo pipefail
-          head_sha="$(git rev-parse HEAD)"
+          test "$(git rev-parse HEAD)" = "$DEPLOYED_SHA"
           base_sha="museum-range-unavailable"
-          if [[ "$BASE_SHA" =~ ^[a-f0-9]{40}$ ]] &&
-            [[ "$DEPLOYED_SHA" =~ ^[a-f0-9]{40}$ ]]
+          current_run="$RUNNER_TEMP/museum-current-deploy.json"
+          previous_runs="$RUNNER_TEMP/museum-previous-deploys.json"
+          # This is an optional test-scope optimization. Unavailable history
+          # retains every Museum pack and never asks an operator for a SHA.
+          if gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${DEPLOY_RUN_ID}" > "$current_run" &&
+            gh api "repos/${GITHUB_REPOSITORY}/actions/workflows/build-upload-deploy-prod.yml/runs?branch=main&status=completed&per_page=100" > "$previous_runs" &&
+            base_candidate="$(jq -er \
+              --arg repository "$GITHUB_REPOSITORY" \
+              --slurpfile current "$current_run" '
+                [.workflow_runs[] | select(
+                  .id != $current[0].id and
+                  .created_at < $current[0].created_at and
+                  .path == ".github/workflows/build-upload-deploy-prod.yml" and
+                  .head_branch == "main" and
+                  (.event == "push" or .event == "workflow_dispatch") and
+                  .status == "completed" and .conclusion == "success" and
+                  .repository.full_name == $repository and
+                  .head_repository.full_name == $repository and
+                  (.head_sha | test("^[a-f0-9]{40}$"))
+                )] | sort_by(.created_at) | last | .head_sha // empty
+              ' "$previous_runs")" &&
+            git cat-file -e "${base_candidate}^{commit}" 2>/dev/null &&
+            git merge-base --is-ancestor "$base_candidate" "$DEPLOYED_SHA"
           then
-            # Commit divergence is an identity failure: broader tests cannot
-            # qualify a different tree from the deployed release.
-            test "$head_sha" = "$DEPLOYED_SHA"
-            base_available=true
-            if ! git cat-file -e "${BASE_SHA}^{commit}" 2>/dev/null &&
-              ! git fetch --no-tags --depth=1 origin "$BASE_SHA"
-            then
-              base_available=false
-              echo "::warning::Unable to fetch the prior production tree; retaining every Museum pack."
-            fi
-            if [ "$base_available" = true ]; then
-              base_sha="$BASE_SHA"
-            fi
+            base_sha="$base_candidate"
           else
-            echo "::warning::No exact deployed range is available; retaining every Museum pack."
-          fi
-
-          hold_state=unknown
-          if open_holds="$(gh issue list \
-            --repo 6529-Collections/6529seize-frontend \
-            --state open \
-            --label release-bus-museum-hold \
-            --limit 100 \
-            --json number,title 2>/dev/null)"
-          then
-            if jq -e 'type == "array"' <<< "$open_holds" >/dev/null; then
-              if [ "$(jq 'length' <<< "$open_holds")" -eq 0 ]; then
-                hold_state=clear
-              else
-                hold_state=active
-              fi
-            fi
-          else
-            echo "::warning::Museum hold lookup failed; retaining every Museum pack."
+            echo "::warning::Previous deployed range is unavailable; retaining every Museum pack."
           fi
 
           mapfile -t museum_refs < <(
@@ -278,25 +175,21 @@ jobs:
           test "${#museum_refs[@]}" -eq 1
           read -r source_commit source_ref source_extra <<< "${museum_refs[0]}"
           test -z "${source_extra:-}"
-          test "$source_ref" = "refs/heads/main"
+          test "$source_ref" = refs/heads/main
           [[ "$source_commit" =~ ^[a-f0-9]{40}$ ]]
-
           selection_file="$RUNNER_TEMP/museum-release-selection.json"
-          node .release-bus-control/scripts/museum-release-selection.cjs \
+          ./bin/6529 exec node scripts/museum-release-selection.cjs \
             --base "$base_sha" \
-            --head "$head_sha" \
+            --head "$DEPLOYED_SHA" \
             --environment production \
             --activation-mode "$MUSEUM_RELEASE_TIER_MODE" \
-            --hold-state "$hold_state" \
+            --hold-state clear \
             --repository-root "$GITHUB_WORKSPACE" \
             --source-commit "$source_commit" \
             --output "$selection_file"
           jq -e --arg source_commit "$source_commit" '
             .contract == "museum-release-selection-v1" and
             .environment == "production" and
-            (.classification.tier | IN("NONE", "P0", "P1", "P2", "P3")) and
-            (.activation.effective_mode | IN("tiered", "full")) and
-            (.activation.hold_state | IN("clear", "active", "unknown")) and
             .source_commit == $source_commit and
             (.selected_packs | type == "array") and
             (.selected_packs | all(IN("museum-data-architecture", "museum-institutional-practice", "museum-about", "museum-inside-system", "museum-rights"))) and
@@ -305,65 +198,18 @@ jobs:
           {
             echo "file=$selection_file"
             echo "selected_packs=$(jq -c .selected_packs "$selection_file")"
-            echo "tier=$(jq -r .classification.tier "$selection_file")"
-            echo "activation_mode=$(jq -r .activation.effective_mode "$selection_file")"
-            echo "hold_state=$(jq -r .activation.hold_state "$selection_file")"
             echo "source_commit=$source_commit"
           } >> "$GITHUB_OUTPUT"
-          {
-            echo "## Museum production qualification selection"
-            echo
-            echo "Tier: $(jq -r .classification.tier "$selection_file")"
-            echo "Activation: $(jq -r .activation.effective_mode "$selection_file")"
-            echo "Hold: $(jq -r .activation.hold_state "$selection_file")"
-            echo "Catalog/control commit: $source_commit"
-            echo "Packs: $(jq -r '.selected_packs | join(", ") // "none"' "$selection_file")"
-          } >> "$GITHUB_STEP_SUMMARY"
-      - name: Upload immutable Museum selection evidence
-        id: museum-selection-upload
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        with:
-          name: production-e2e-selection-${{ inputs.release_train_id || inputs.automatic_deploy_run_id || github.run_id }}
-          path: ${{ steps.museum-selection.outputs.file }}
-          retention-days: 30
-          if-no-files-found: error
-      - name: Activate pinned pnpm
-        run: |
-          corepack enable pnpm
-          corepack prepare "$(node -p 'require("./package.json").packageManager')" --activate
-      - name: Restore pnpm store
-        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
-        with:
-          path: ~/.pnpm-store
-          key: ${{ runner.os }}-node22-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-node22-pnpm-
-      - name: Use cached pnpm store
-        run: ./bin/6529 exec pnpm config set store-dir ~/.pnpm-store
-      - name: Install Socket Firewall
-        id: socket-firewall
-        continue-on-error: true
-        uses: SocketDev/action@2d3f25590c6ed6ba11a9a14c064d962a3a04698f # v1.3.1
-        with: { mode: firewall }
-      - name: Install frozen dependencies
-        id: dependencies
-        if: steps.socket-firewall.outcome == 'success'
-        continue-on-error: true
-        env:
-          NODE_AUTH_TOKEN: ${{ github.token }}
-          SFW_BIN: ${{ steps.socket-firewall.outputs.firewall-path-binary }}
-        run: ./bin/6529 install:frozen
+
       - name: Resolve immutable Museum publication provenance
         id: museum-publication
-        if: steps.dependencies.outcome == 'success'
         env:
           MUSEUM_CATALOG_COMMIT: ${{ steps.museum-selection.outputs.source_commit }}
         run: |
           set -euo pipefail
-          identity_file="$RUNNER_TEMP/museum-publication-identity.json"
+          identity_file="$RUNNER_TEMP/museum-publication-provenance.json"
           ./bin/6529 exec tsx scripts/museum-publication-compatibility.ts \
-            --source-commit "$MUSEUM_CATALOG_COMMIT" \
-            > "$identity_file"
+            --source-commit "$MUSEUM_CATALOG_COMMIT" > "$identity_file"
           jq -e --arg catalog_commit "$MUSEUM_CATALOG_COMMIT" '
             .contract == "museum-publication-compatibility-v1" and
             .source_commit == $catalog_commit and
@@ -374,38 +220,25 @@ jobs:
             .catalog_id == ("6529NM-PUBCAT-" + .publication_commit) and
             (.catalog_content_hash | test("^0x[a-f0-9]{64}$"))
           ' "$identity_file" >/dev/null
-          publication_commit="$(jq -r .publication_commit "$identity_file")"
-          echo "file=$identity_file" >> "$GITHUB_OUTPUT"
-          echo "publication_commit=$publication_commit" >> "$GITHUB_OUTPUT"
           {
-            echo "Catalog/control commit: $MUSEUM_CATALOG_COMMIT"
-            echo "Publication/source commit: $publication_commit"
-          } >> "$GITHUB_STEP_SUMMARY"
-      - name: Restore Playwright browser
-        if: steps.dependencies.outcome == 'success'
-        id: playwright-cache
-        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
-        with:
-          path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-chromium-${{ hashFiles('pnpm-lock.yaml') }}
+            echo "file=$identity_file"
+            echo "publication_commit=$(jq -r .publication_commit "$identity_file")"
+          } >> "$GITHUB_OUTPUT"
+
       - name: Install Playwright dependencies
-        if: steps.dependencies.outcome == 'success'
         id: playwright_dependencies_primary
         timeout-minutes: 3
         continue-on-error: true
         run: ./bin/6529 exec playwright install-deps chromium
 
       - name: Retry Playwright dependencies
-        if: steps.dependencies.outcome == 'success' && steps.playwright_dependencies_primary.outcome != 'success'
+        if: steps.playwright_dependencies_primary.outcome != 'success'
         id: playwright_dependencies_retry
         timeout-minutes: 3
         continue-on-error: true
         run: ./bin/6529 exec playwright install-deps chromium
 
       - name: Verify Playwright dependencies
-        if: steps.dependencies.outcome == 'success'
-        id: playwright_dependencies
-        continue-on-error: true
         env:
           PRIMARY_OUTCOME: ${{ steps.playwright_dependencies_primary.outcome }}
           RETRY_OUTCOME: ${{ steps.playwright_dependencies_retry.outcome }}
@@ -416,634 +249,58 @@ jobs:
           fi
 
       - name: Install Playwright browser
-        id: playwright
-        if: steps.dependencies.outcome == 'success' && steps.playwright_dependencies.outcome == 'success'
         timeout-minutes: 10
-        continue-on-error: true
         run: ./bin/6529 exec playwright install chromium
-      - name: Run production-safe read-only packs
-        id: e2e
-        if: steps.museum-publication.outcome == 'success' && steps.playwright.outcome == 'success'
-        continue-on-error: true
+
+      - name: Run read-only production packs
         env:
-          MUSEUM_PUBLICATION_EXPECTED_COMMIT: ${{ steps.museum-publication.outputs.publication_commit }}
           MUSEUM_SELECTED_PACKS_JSON: ${{ steps.museum-selection.outputs.selected_packs }}
-          RELEASE_BUS_E2E_MANIFEST_ID: ${{ inputs.release_manifest_id }}
-          RELEASE_BUS_E2E_MANIFEST_IDENTITY_SHA256: ${{ inputs.release_manifest_identity_sha256 }}
-          RELEASE_BUS_E2E_SOURCE_SHA: ${{ inputs.expected_sha }}
+          MUSEUM_PUBLICATION_EXPECTED_COMMIT: ${{ steps.museum-publication.outputs.publication_commit }}
+          DEPLOYED_SHA: ${{ steps.source.outputs.sha }}
         run: |
           set -euo pipefail
           args=(
             --env production
             --trigger post-deploy
             --artifact-root production-e2e-artifacts
+            --parallel 3
+            --retry-failed-packs 1
           )
-          if runner_capabilities="$(./bin/6529 exec node scripts/e2e-packs.cjs --capabilities 2>/dev/null)" &&
-            jq -e '
-              .contract == "release-bus-e2e-runner-capabilities.v1" and
-              .features.readonly_pack_parallelism == {
-                version: 1,
-                max_parallel: 4
-              } and
-              .features.pack_exclusion == { version: 1 }
-            ' <<< "$runner_capabilities" >/dev/null
-          then
-            args+=(--parallel 3)
-            museum_pack_aliases="$(./bin/6529 exec node - <<'NODE'
-          const { PACKS } = require("./tests/packs.manifest.cjs");
-          const isMuseumPack = (pack) =>
-            pack.changeScope === "museum" || /^museum-/.test(pack.alias ?? "");
-          const aliases = PACKS.filter((pack) =>
-            pack.environments.includes("production") &&
-            pack.triggers.includes("post-deploy") &&
-            isMuseumPack(pack)
-          ).map((pack) => pack.alias ?? pack.scriptKey);
-          if (aliases.length === 0) {
-            process.stderr.write("No production Museum packs were identified.\n");
-            process.exit(1);
-          }
-          process.stdout.write(aliases.join("\n"));
-          NODE
-            )"
-            selected_museum_packs="$(jq -c . <<< "$MUSEUM_SELECTED_PACKS_JSON")"
-            jq -e '
-              type == "array" and
-              all(IN("museum-data-architecture", "museum-institutional-practice", "museum-about", "museum-inside-system", "museum-rights"))
-            ' <<< "$selected_museum_packs" >/dev/null
-            while IFS= read -r museum_pack_alias; do
-              if ! jq -e --arg alias "$museum_pack_alias" '. | index($alias) != null' <<< "$selected_museum_packs" >/dev/null; then
-                args+=(--exclude-pack "$museum_pack_alias")
-              fi
-            done <<< "$museum_pack_aliases"
-          else
-            echo "::warning::Deployed E2E runner cannot exclude packs; retaining all Museum E2E packs."
-            MUSEUM_SELECTED_PACKS_JSON='["museum-data-architecture","museum-institutional-practice","museum-about","museum-inside-system","museum-rights"]'
-          fi
-          if [ -n "${runner_capabilities:-}" ] &&
-            jq -e '
-              .contract == "release-bus-e2e-runner-capabilities.v1" and
-              .features.serial_failed_pack_retry == {
-                version: 2,
-                max_retries: 1,
-                policy: "transient-infrastructure-only"
-              }
-            ' <<< "$runner_capabilities" >/dev/null
-          then
-            args+=(--retry-failed-packs 1)
-            echo "SERIAL_FAILED_PACK_RETRY=true" >> "$GITHUB_ENV"
-          else
-            echo "SERIAL_FAILED_PACK_RETRY=false" >> "$GITHUB_ENV"
-          fi
-          echo "MUSEUM_SELECTED_PACKS_JSON=$MUSEUM_SELECTED_PACKS_JSON" >> "$GITHUB_ENV"
-          ./bin/6529 run e2e:packs -- "${args[@]}"
-      - name: Stage and validate immutable Museum provenance evidence
-        id: museum-provenance-evidence
+          for alias in museum-data-architecture museum-institutional-practice museum-about museum-inside-system museum-rights; do
+            if ! jq -e --arg alias "$alias" 'index($alias) != null' <<< "$MUSEUM_SELECTED_PACKS_JSON" >/dev/null; then
+              args+=(--exclude-pack "$alias")
+            fi
+          done
+          DEPLOYMENT_E2E_SOURCE_SHA="$DEPLOYED_SHA" \
+            ./bin/6529 run e2e:packs -- "${args[@]}"
+
+      - name: Preserve Museum selection and publication evidence
         if: always()
         env:
-          MUSEUM_CATALOG_COMMIT: ${{ steps.museum-selection.outputs.source_commit }}
-          MUSEUM_PUBLICATION_COMMIT: ${{ steps.museum-publication.outputs.publication_commit }}
-          MUSEUM_PUBLICATION_FILE: ${{ steps.museum-publication.outputs.file }}
-          MUSEUM_PUBLICATION_OUTCOME: ${{ steps.museum-publication.outcome }}
+          SELECTION_FILE: ${{ steps.museum-selection.outputs.file }}
+          PUBLICATION_FILE: ${{ steps.museum-publication.outputs.file }}
         run: |
           set -euo pipefail
-          test "$MUSEUM_PUBLICATION_OUTCOME" = success
-          test -f "$MUSEUM_PUBLICATION_FILE"
-          test ! -L "$MUSEUM_PUBLICATION_FILE"
           mkdir -p production-e2e-artifacts
-          provenance_file='production-e2e-artifacts/museum-publication-provenance.json'
-          install -m 0644 "$MUSEUM_PUBLICATION_FILE" "$provenance_file"
-          test "$(stat -c %s "$provenance_file")" -le 4096
-          jq -e \
-            --arg catalog_commit "$MUSEUM_CATALOG_COMMIT" \
-            --arg publication_commit "$MUSEUM_PUBLICATION_COMMIT" '
-              .contract == "museum-publication-compatibility-v1" and
-              .source_commit == $catalog_commit and
-              .publication_commit == $publication_commit and
-              .accepted == true and
-              .adapter_status == "current" and
-              .adapter_error_code == null and
-              .catalog_id == ("6529NM-PUBCAT-" + $publication_commit) and
-              (.catalog_content_hash | test("^0x[a-f0-9]{64}$")) and
-              ($catalog_commit | test("^[a-f0-9]{40}$")) and
-              ($publication_commit | test("^[a-f0-9]{40}$"))
-            ' "$provenance_file" >/dev/null
-      - name: Upload manifest-bound Playwright evidence
-        id: evidence-upload
+          for evidence_file in "$SELECTION_FILE" "$PUBLICATION_FILE"; do
+            if [ -n "$evidence_file" ] && [ -f "$evidence_file" ]; then
+              install -m 0644 "$evidence_file" \
+                "production-e2e-artifacts/$(basename "$evidence_file")"
+            fi
+          done
+
+      - name: Upload Playwright evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: production-e2e-artifacts-${{ inputs.release_train_id || inputs.automatic_deploy_run_id || github.run_id }}
+          name: production-e2e-artifacts-${{ github.run_id }}
           path: production-e2e-artifacts/
           retention-days: 30
           if-no-files-found: ignore
-      - name: Upload exact automatic authority evidence
-        id: authority-evidence-upload
-        if: always() && inputs.automatic_deploy_run_id != '' && steps.e2e.outcome == 'success' && steps.museum-provenance-evidence.outcome == 'success'
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        with:
-          name: production-authority-evidence-${{ inputs.automatic_deploy_run_id }}
-          path: production-e2e-artifacts/evidence.json
-          retention-days: 30
-          if-no-files-found: error
-      - name: Return production E2E result
-        if: always()
-        env:
-          SOCKET_OUTCOME: ${{ steps.socket-firewall.outcome }}
-          DEPENDENCIES_OUTCOME: ${{ steps.dependencies.outcome }}
-          PLAYWRIGHT_OUTCOME: ${{ steps.playwright.outcome }}
-          E2E_OUTCOME: ${{ steps.e2e.outcome }}
-          MUSEUM_PROVENANCE_OUTCOME: ${{ steps.museum-provenance-evidence.outcome }}
-          MUSEUM_PUBLICATION_OUTCOME: ${{ steps.museum-publication.outcome }}
-        run: |
-          test "$SOCKET_OUTCOME" = success
-          test "$DEPENDENCIES_OUTCOME" = success
-          test "$MUSEUM_PUBLICATION_OUTCOME" = success
-          test "$MUSEUM_PROVENANCE_OUTCOME" = success
-          test "$PLAYWRIGHT_OUTCOME" = success
-          test "$E2E_OUTCOME" = success
-
-  verify-evidence:
-    name: Verify production evidence on isolated runner
-    if: always()
-    needs: readonly
-    # This job intentionally ignores configurable/self-hosted runner labels.
-    # No deployed source, dependency lifecycle, or E2E process runs here.
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    permissions:
-      actions: read
-      contents: read
-    steps:
-      - name: Resolve isolated verifier release identity
-        id: release-identity
-        continue-on-error: true
-        env:
-          AUTOMATIC_DEPLOY_RUN_ID: ${{ inputs.automatic_deploy_run_id }}
-          EXPECTED_SHA: ${{ inputs.expected_sha }}
-          GH_TOKEN: ${{ github.token }}
-          MANIFEST_ID: ${{ inputs.release_manifest_id }}
-          MANIFEST_IDENTITY: ${{ inputs.release_manifest_identity_sha256 }}
-          READONLY_EXPECTED_SHA: ${{ needs.readonly.outputs.expected-sha }}
-        run: |
-          set -euo pipefail
-          if [ -n "$AUTOMATIC_DEPLOY_RUN_ID" ]; then
-            [[ "$AUTOMATIC_DEPLOY_RUN_ID" =~ ^[1-9][0-9]{0,19}$ ]]
-            test -z "$EXPECTED_SHA$MANIFEST_ID$MANIFEST_IDENTITY"
-            response_file="$(mktemp)"
-            trap 'rm -f "$response_file"' EXIT
-            gh api \
-              "repos/${GITHUB_REPOSITORY}/actions/runs/${AUTOMATIC_DEPLOY_RUN_ID}" \
-              > "$response_file"
-            jq -e \
-              --arg repository "$GITHUB_REPOSITORY" \
-              --argjson run_id "$AUTOMATIC_DEPLOY_RUN_ID" '
-                .id == $run_id and
-                .name == ("Production deploy " + .head_sha + " [frontend-prod-" + ($run_id | tostring) + "]") and
-                .display_title == .name and
-                .path == ".github/workflows/build-upload-deploy-prod.yml" and
-                .event == "workflow_dispatch" and
-                .status == "completed" and
-                .conclusion == "success" and
-                .head_branch == "main" and
-                .repository.full_name == $repository and
-                .head_repository.full_name == $repository and
-                (.head_sha | test("^[a-f0-9]{40}$")) and
-                (.run_attempt | type == "number" and . >= 1 and . <= 1000000)
-              ' "$response_file" >/dev/null
-            resolved_sha="$(jq -r .head_sha "$response_file")"
-            echo "deploy-run-attempt=$(jq -er '.run_attempt | numbers' "$response_file")" >> "$GITHUB_OUTPUT"
-          else
-            [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{40}$ ]]
-            [[ "$MANIFEST_ID" =~ ^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$ ]]
-            [[ "$MANIFEST_IDENTITY" =~ ^[a-f0-9]{64}$ ]]
-            resolved_sha="$EXPECTED_SHA"
-          fi
-          test "$resolved_sha" = "$READONLY_EXPECTED_SHA"
-          echo "expected-sha=$resolved_sha" >> "$GITHUB_OUTPUT"
-
-      - name: Install trusted verifier Node.js
-        id: verifier-node
-        if: always() && steps.release-identity.outcome == 'success'
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
-        with: { node-version: "22.17.1" }
-
-      - name: Require an unused isolated verifier path
-        id: verifier-path
-        if: always() && steps.verifier-node.outcome == 'success'
-        run: test ! -e .release-bus-verifier
-
-      - name: Check out immutable isolated verifier tooling
-        id: verifier-checkout
-        if: always() && steps.verifier-path.outcome == 'success'
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
-        with:
-          ref: ${{ github.workflow_sha }}
-          path: .release-bus-verifier
-          filter: blob:none
-          fetch-depth: 1
-          persist-credentials: false
-          sparse-checkout: |
-            scripts/museum-release-tier.cjs
-            scripts/museum-release-selection.cjs
-            tests/packs.manifest.cjs
-          sparse-checkout-cone-mode: false
-
-      - name: Verify immutable isolated verifier tooling
-        id: verifier-tooling
-        if: always() && steps.verifier-checkout.outcome == 'success'
-        env:
-          WORKFLOW_SHA: ${{ github.workflow_sha }}
-        run: |
-          set -euo pipefail
-          [[ "$WORKFLOW_SHA" =~ ^[a-f0-9]{40}$ ]]
-          test "$(git -C .release-bus-verifier rev-parse HEAD)" = "$WORKFLOW_SHA"
-          if ! control_status="$(git -C .release-bus-verifier status --porcelain=v1 --untracked-files=all)"; then
-            echo "::error::Unable to verify the isolated E2E verifier working tree."
-            exit 1
-          fi
-          test -z "$control_status"
-          test -f .release-bus-verifier/scripts/museum-release-tier.cjs
-          test -f .release-bus-verifier/scripts/museum-release-selection.cjs
-          test -f .release-bus-verifier/tests/packs.manifest.cjs
-
-      - name: Download untrusted production E2E evidence
-        id: evidence-download
-        if: always()
-        continue-on-error: true
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
-        with:
-          name: production-e2e-artifacts-${{ inputs.release_train_id || inputs.automatic_deploy_run_id || github.run_id }}
-          path: isolated-production-e2e-artifacts
-
-      - name: Download immutable Museum selection evidence
-        id: selection-download
-        if: always()
-        continue-on-error: true
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
-        with:
-          name: production-e2e-selection-${{ inputs.release_train_id || inputs.automatic_deploy_run_id || github.run_id }}
-          path: isolated-production-e2e-selection
-
-      - name: Validate production E2E evidence on isolated runner
-        id: isolated-evidence
-        if: always() && needs.readonly.result == 'success' && steps.release-identity.outcome == 'success' && steps.verifier-tooling.outcome == 'success' && steps.evidence-download.outcome == 'success' && steps.selection-download.outcome == 'success'
-        continue-on-error: true
-        env:
-          AUTOMATIC_DEPLOY_RUN_ID: ${{ inputs.automatic_deploy_run_id }}
-          EXPECTED_SHA: ${{ steps.release-identity.outputs.expected-sha }}
-          MANIFEST_ID: ${{ inputs.release_manifest_id }}
-          MANIFEST_IDENTITY: ${{ inputs.release_manifest_identity_sha256 }}
-          MUSEUM_RELEASE_SELECTION_TOOL: .release-bus-verifier/scripts/museum-release-selection.cjs
-          PACK_MANIFEST: .release-bus-verifier/tests/packs.manifest.cjs
-        run: |
-          set -euo pipefail
-          evidence_file='isolated-production-e2e-artifacts/evidence.json'
-          provenance_file='isolated-production-e2e-artifacts/museum-publication-provenance.json'
-          selection_file='isolated-production-e2e-selection/museum-release-selection.json'
-          test -f "$evidence_file"
-          test ! -L "$evidence_file"
-          test -f "$provenance_file"
-          test ! -L "$provenance_file"
-          test -f "$selection_file"
-          test ! -L "$selection_file"
-          test "$(find isolated-production-e2e-selection -mindepth 1 | wc -l)" -eq 1
-          test "$(stat -c %s "$selection_file")" -le 1048576
-          test "$(stat -c %s "$evidence_file")" -le 16777216
-          test "$(stat -c %s "$provenance_file")" -le 4096
-          jq -e '
-            .contract == "museum-release-selection-v1" and
-            .environment == "production" and
-            (.source_commit | test("^[a-f0-9]{40}$")) and
-            (.selected_packs | type == "array") and
-            (.selected_packs | all(IN("museum-data-architecture", "museum-institutional-practice", "museum-about", "museum-inside-system", "museum-rights"))) and
-            (.selected_packs | unique | length) == (.selected_packs | length) and
-            (.selection_digest | test("^[a-f0-9]{64}$"))
-          ' "$selection_file" >/dev/null
-          jq -e --slurpfile selection "$selection_file" '
-            .contract == "museum-publication-compatibility-v1" and
-            .source_commit == $selection[0].source_commit and
-            (.source_commit | test("^[a-f0-9]{40}$")) and
-            (.publication_commit | test("^[a-f0-9]{40}$")) and
-            .accepted == true and
-            .adapter_status == "current" and
-            .adapter_error_code == null and
-            .catalog_id == ("6529NM-PUBCAT-" + .publication_commit) and
-            (.catalog_content_hash | test("^0x[a-f0-9]{64}$"))
-          ' "$provenance_file" >/dev/null
-          node - "$selection_file" <<'NODE'
-          const fs = require("node:fs");
-          const path = require("node:path");
-          const selection = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
-          const { verifySelectionDigest } = require(
-            path.resolve(process.env.MUSEUM_RELEASE_SELECTION_TOOL)
-          );
-          if (!verifySelectionDigest(selection)) {
-            throw new Error("Museum selection digest verification failed.");
-          }
-          NODE
-          inventories="$(node - "$selection_file" <<'NODE'
-          const fs = require("node:fs");
-          const path = require("node:path");
-          const selection = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
-          const { PACKS } = require(path.resolve(process.env.PACK_MANIFEST));
-          const eligible = PACKS.filter(
-            (pack) =>
-              pack.environments.includes("production") &&
-              pack.triggers.includes("post-deploy")
-          );
-          const isMuseumPack = (pack) =>
-            pack.changeScope === "museum" || /^museum-/.test(pack.alias ?? "");
-          const inventory = (selectedMuseumPacks) =>
-            eligible
-              .filter(
-                (pack) =>
-                  !isMuseumPack(pack) ||
-                  selectedMuseumPacks.includes(pack.alias ?? pack.scriptKey)
-              )
-              .map((pack) => pack.scriptKey);
-          const completeMuseumPacks = eligible
-            .filter(isMuseumPack)
-            .map((pack) => pack.alias ?? pack.scriptKey);
-          process.stdout.write(
-            JSON.stringify({
-              complete: inventory(completeMuseumPacks),
-              selected: inventory(selection.selected_packs),
-            })
-          );
-          NODE
-          )"
-          selected_inventory="$(jq -c .selected <<< "$inventories")"
-          complete_inventory="$(jq -c .complete <<< "$inventories")"
-          jq -e \
-            --argjson selected "$selected_inventory" \
-            --argjson complete "$complete_inventory" '
-              (.results | map(.script_key)) as $actual |
-              (.serial_retry_limit // 0) as $retry_limit |
-              .schema_version == "release-bus-e2e-packs.v1" and
-              .environment == "production" and
-              .trigger == "post-deploy" and
-              (.worker_count | type == "number" and . >= 1 and . <= 3) and
-              ($retry_limit == 0 or $retry_limit == 1) and
-              .pack_count == ($actual | length) and
-              ($actual == $selected or $actual == $complete) and
-              ($actual | unique | length) == .pack_count and
-              (.results | all(.safety == "readonly")) and
-              (.results | all(
-                .attempt_count == (.attempts | length) and
-                .attempt_count >= 1 and .attempt_count <= ($retry_limit + 1) and
-                (.attempts | to_entries | all(.value.attempt == (.key + 1))) and
-                .status == .attempts[-1].status and
-                .failure_class == .attempts[-1].failure_class and
-                .detail == .attempts[-1].detail and
-                .artifact_path == .attempts[-1].artifact_path and
-                .duration_ms == ([.attempts[].duration_ms] | add)
-              )) and
-              .failed_count == 0 and
-              .infrastructure_failure_count == 0 and
-              (.results | all(.status == "passed" and .failure_class == null))
-            ' "$evidence_file" >/dev/null
-          if [ -n "$AUTOMATIC_DEPLOY_RUN_ID" ]; then
-            test -z "$MANIFEST_ID$MANIFEST_IDENTITY"
-            jq -e '.release_binding == null' "$evidence_file" >/dev/null
-          else
-            jq -e \
-              --arg manifest_id "$MANIFEST_ID" \
-              --arg identity "$MANIFEST_IDENTITY" \
-              --arg source_sha "$EXPECTED_SHA" '
-                .release_binding == {
-                  manifest_id:$manifest_id,
-                  manifest_identity_sha256:$identity,
-                  source_sha:$source_sha
-                }
-              ' "$evidence_file" >/dev/null
-          fi
-
-      - name: Write automatic production qualification record
-        id: qualification-record
-        if: >-
-          always() && inputs.automatic_deploy_run_id != '' &&
-          steps.release-identity.outcome == 'success' &&
-          steps.evidence-download.outcome == 'success' &&
-          steps.selection-download.outcome == 'success' &&
-          steps.isolated-evidence.outcome == 'success'
-        env:
-          AUTOMATIC_DEPLOY_RUN_ID: ${{ inputs.automatic_deploy_run_id }}
-          DEPLOY_RUN_ATTEMPT: ${{ steps.release-identity.outputs.deploy-run-attempt }}
-          EXPECTED_SHA: ${{ steps.release-identity.outputs.expected-sha }}
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-          [[ "$AUTOMATIC_DEPLOY_RUN_ID" =~ ^[1-9][0-9]{0,19}$ ]]
-          [[ "$DEPLOY_RUN_ATTEMPT" =~ ^[1-9][0-9]{0,6}$ ]]
-          [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{40}$ ]]
-
-          qualification_dir='automatic-production-qualification'
-          mkdir -p "$qualification_dir"
-          operation_dir="$(mktemp -d)"
-          trap 'rm -rf "$operation_dir"' EXIT
-          listing_file="$operation_dir/artifacts.json"
-          gh api \
-            "repos/${GITHUB_REPOSITORY}/actions/runs/${AUTOMATIC_DEPLOY_RUN_ID}/artifacts?per_page=100" \
-            > "$listing_file"
-          jq -e \
-            --arg name "one-click-production-operation-${AUTOMATIC_DEPLOY_RUN_ID}" \
-            --arg run_id "$AUTOMATIC_DEPLOY_RUN_ID" '
-              type == "object" and
-              (.total_count | type == "number" and . <= 100) and
-              (.artifacts | type == "array") and
-              ([.artifacts[] | select(.name == $name)] | length == 1) and
-              ([.artifacts[] | select(.name == $name)][0] |
-                .expired == false and
-                (.id | tostring | test("^[1-9][0-9]{0,19}$")) and
-                ((.workflow_run.id | tostring) == $run_id) and
-                (.size_in_bytes | type == "number" and . > 0 and . <= 1048576) and
-                (.digest == null or (.digest | type == "string" and test("^sha256:[a-f0-9]{64}$"))))
-            ' "$listing_file" >/dev/null
-          jq -e --arg name "one-click-production-operation-${AUTOMATIC_DEPLOY_RUN_ID}" \
-            '[.artifacts[] | select(.name == $name)][0]' "$listing_file" > "$operation_dir/record.json"
-          operation_id="$(jq -er '.id | tostring' "$operation_dir/record.json")"
-          declared_size="$(jq -er '.size_in_bytes | numbers' "$operation_dir/record.json")"
-          declared_digest="$(jq -r '.digest // empty' "$operation_dir/record.json")"
-          gh api \
-            --header 'Accept: application/vnd.github+json' \
-            "repos/${GITHUB_REPOSITORY}/actions/artifacts/${operation_id}/zip" > "$operation_dir/operation.zip"
-          test "$(stat -c %s "$operation_dir/operation.zip")" = "$declared_size"
-          test "$(stat -c %s "$operation_dir/operation.zip")" -le 1048576
-          if [ -n "$declared_digest" ]; then
-            test "$declared_digest" = "sha256:$(sha256sum "$operation_dir/operation.zip" | cut -d' ' -f1)"
-          fi
-          python3 - "$operation_dir/operation.zip" "$operation_dir/operation.json" <<'PY'
-          import os
-          import stat
-          import sys
-          import zipfile
-          from pathlib import Path
-
-          archive_path = Path(sys.argv[1])
-          output_path = Path(sys.argv[2])
-          with zipfile.ZipFile(archive_path) as archive:
-              members = archive.infolist()
-              if len(members) != 1 or members[0].filename != "operation.json":
-                  raise SystemExit("operation artifact has an unexpected member set")
-              member = members[0]
-              if member.is_dir() or member.file_size > 65536:
-                  raise SystemExit("operation evidence is invalid or too large")
-              file_type = stat.S_IFMT(member.external_attr >> 16)
-              if file_type in (stat.S_IFLNK, stat.S_IFDIR):
-                  raise SystemExit("operation evidence is a link or directory")
-              data = archive.read(member)
-          flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL
-          with os.fdopen(os.open(output_path, flags, 0o600), "wb") as output:
-              output.write(data)
-          PY
-          test -f "$operation_dir/operation.json"
-          test ! -L "$operation_dir/operation.json"
-          artifact_selection_digest="$(jq -er \
-            --arg deploy_run_id "$AUTOMATIC_DEPLOY_RUN_ID" \
-            --arg deploy_attempt "$DEPLOY_RUN_ATTEMPT" \
-            --arg target_sha "$EXPECTED_SHA" '
-              if type == "object" and
-                .contract == "one-click-production-operation-v1" and
-                .operation_id == ("frontend-prod-" + $deploy_run_id) and
-                .controller_identity == "frontend-production-workflow" and
-                .repository == "frontend" and
-                .environment == "prod" and
-                .service == "frontend" and
-                .target_sha == $target_sha and
-                (.selection_digest | type == "string" and test("^[a-f0-9]{64}$")) and
-                (.workflow_run_id | tostring) == $deploy_run_id and
-                (.workflow_run_attempt | tostring) == $deploy_attempt
-              then .selection_digest
-              else error("operation evidence identity mismatch")
-              end
-            ' "$operation_dir/operation.json")"
-          evidence_digest="$(sha256sum isolated-production-e2e-artifacts/evidence.json | cut -d' ' -f1)"
-          jq -n \
-            --arg contract "one-click-production-qualification-v1" \
-            --arg deploy_run_id "$AUTOMATIC_DEPLOY_RUN_ID" \
-            --argjson deploy_run_attempt "$DEPLOY_RUN_ATTEMPT" \
-            --arg target_sha "$EXPECTED_SHA" \
-            --arg e2e_run_id "$GITHUB_RUN_ID" \
-            --argjson e2e_run_attempt "$GITHUB_RUN_ATTEMPT" \
-            --arg artifact_selection_digest "$artifact_selection_digest" \
-            --arg evidence_digest "$evidence_digest" \
-            '{contract:$contract,deploy_run_id:$deploy_run_id,deploy_run_attempt:$deploy_run_attempt,target_sha:$target_sha,e2e_run_id:$e2e_run_id,e2e_run_attempt:$e2e_run_attempt,artifact_selection_digest:$artifact_selection_digest,evidence_digest:$evidence_digest}' \
-            > "$qualification_dir/qualification.json"
-          jq -e type "$qualification_dir/qualification.json" >/dev/null
-
-      - name: Upload automatic production qualification record
-        if: >-
-          always() && inputs.automatic_deploy_run_id != '' &&
-          steps.qualification-record.outcome == 'success'
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        with:
-          name: production-e2e-qualification-${{ inputs.automatic_deploy_run_id }}-a${{ github.run_attempt }}
-          path: automatic-production-qualification/qualification.json
-          retention-days: 30
-          if-no-files-found: error
-
-      - name: Report structured Release Bus E2E result
-        if: always() && inputs.operation_key != ''
-        env:
-          EVIDENCE_DOWNLOAD_OUTCOME: ${{ steps.evidence-download.outcome }}
-          IDENTITY_OUTCOME: ${{ steps.release-identity.outcome }}
-          ISOLATED_EVIDENCE_OUTCOME: ${{ steps.isolated-evidence.outcome }}
-          OPERATION_KEY: ${{ inputs.operation_key }}
-          READONLY_DEPENDENCIES_OUTCOME: ${{ needs.readonly.outputs.dependencies-outcome }}
-          READONLY_E2E_OUTCOME: ${{ needs.readonly.outputs.e2e-outcome }}
-          READONLY_EVIDENCE_UPLOAD_OUTCOME: ${{ needs.readonly.outputs.evidence-upload-outcome }}
-          READONLY_MUSEUM_PROVENANCE_OUTCOME: ${{ needs.readonly.outputs.museum-provenance-outcome }}
-          READONLY_MUSEUM_PUBLICATION_OUTCOME: ${{ needs.readonly.outputs.museum-publication-outcome }}
-          READONLY_PLAYWRIGHT_OUTCOME: ${{ needs.readonly.outputs.playwright-outcome }}
-          READONLY_RESULT: ${{ needs.readonly.result }}
-          READONLY_SELECTION_OUTCOME: ${{ needs.readonly.outputs.selection-outcome }}
-          READONLY_SELECTION_UPLOAD_OUTCOME: ${{ needs.readonly.outputs.selection-upload-outcome }}
-          READONLY_SOCKET_OUTCOME: ${{ needs.readonly.outputs.socket-outcome }}
-          RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
-          RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
-          SELECTION_DOWNLOAD_OUTCOME: ${{ steps.selection-download.outcome }}
-          TRAIN_ID: ${{ inputs.release_train_id }}
-          VERIFIER_TOOLING_OUTCOME: ${{ steps.verifier-tooling.outcome }}
-        run: |
-          set -euo pipefail
-          status=SUCCEEDED
-          failure_class=null
-          failure_phase=null
-          retryable=false
-          evidence_file='isolated-production-e2e-artifacts/evidence.json'
-          if [ "$READONLY_RESULT" != success ]; then
-            status=FAILED
-            if [ "$READONLY_SELECTION_OUTCOME" != success ] || \
-              [ "$READONLY_SELECTION_UPLOAD_OUTCOME" != success ]; then
-              failure_class=CONTROL_PLANE
-              failure_phase=production_e2e_selection
-            elif [ "$READONLY_MUSEUM_PUBLICATION_OUTCOME" != success ] || \
-              [ "$READONLY_MUSEUM_PROVENANCE_OUTCOME" != success ]; then
-              failure_class=CONTROL_PLANE
-              failure_phase=production_e2e_museum_publication
-            elif [ "$READONLY_SOCKET_OUTCOME" != success ] || \
-              [ "$READONLY_DEPENDENCIES_OUTCOME" != success ] || \
-              [ "$READONLY_PLAYWRIGHT_OUTCOME" != success ]; then
-              failure_class=INFRASTRUCTURE
-              failure_phase=production_e2e_setup
-              retryable=true
-            elif [ "$READONLY_E2E_OUTCOME" != success ] && \
-              [ -f "$evidence_file" ] && \
-              [ "$(jq -r '.infrastructure_failure_count // 0' "$evidence_file")" -gt 0 ]; then
-              failure_class=INFRASTRUCTURE
-              failure_phase=production_e2e_infrastructure
-              retryable=true
-            elif [ "$READONLY_E2E_OUTCOME" != success ]; then
-              failure_class=E2E
-              failure_phase=production_e2e
-            elif [ "$READONLY_EVIDENCE_UPLOAD_OUTCOME" != success ]; then
-              failure_class=CONTROL_PLANE
-              failure_phase=production_e2e_evidence
-            else
-              failure_class=CONTROL_PLANE
-              failure_phase=production_e2e_control
-            fi
-          elif [ "$IDENTITY_OUTCOME" != success ] || \
-            [ "$VERIFIER_TOOLING_OUTCOME" != success ] || \
-            [ "$EVIDENCE_DOWNLOAD_OUTCOME" != success ] || \
-            [ "$SELECTION_DOWNLOAD_OUTCOME" != success ] || \
-            [ "$ISOLATED_EVIDENCE_OUTCOME" != success ]; then
-            status=FAILED
-            failure_class=CONTROL_PLANE
-            failure_phase=production_e2e_evidence
-          fi
-          if [ -f "$evidence_file" ]; then
-            evidence_digest="$(sha256sum "$evidence_file" | cut -d' ' -f1)"
-          else
-            evidence_digest=''
-          fi
-          payload="$(jq -n --arg train_id "$TRAIN_ID" --arg operation_key "$OPERATION_KEY" --arg workflow_run_id "$GITHUB_RUN_ID" --arg status "$status" --arg failure_class "$failure_class" --arg failure_phase "$failure_phase" --argjson retryable "$retryable" --arg evidence_digest "$evidence_digest" '{train_id:$train_id,operation_key:$operation_key,workflow_run_id:$workflow_run_id,phase:"complete",status:$status,failure_class:(if $failure_class == "null" then null else $failure_class end),failure_phase:(if $failure_phase == "null" then null else $failure_phase end),retryable:$retryable,summary:{e2e_evidence_digest:(if $evidence_digest == "" then null else $evidence_digest end)},stages:[],jest:null,backend_evidence:null}')"
-          curl --fail-with-body --silent --show-error \
-            -H "Authorization: Bearer $RELEASE_BUS_WORKFLOW_AUTH_TOKEN" \
-            -H 'Content-Type: application/json' \
-            --data "$payload" \
-            "$RELEASE_BUS_API_URL/deploy/release-bus-v2/report-progress"
-
-      - name: Return isolated production E2E result
-        if: always()
-        env:
-          EVIDENCE_DOWNLOAD_OUTCOME: ${{ steps.evidence-download.outcome }}
-          IDENTITY_OUTCOME: ${{ steps.release-identity.outcome }}
-          ISOLATED_EVIDENCE_OUTCOME: ${{ steps.isolated-evidence.outcome }}
-          READONLY_RESULT: ${{ needs.readonly.result }}
-          SELECTION_DOWNLOAD_OUTCOME: ${{ steps.selection-download.outcome }}
-          VERIFIER_TOOLING_OUTCOME: ${{ steps.verifier-tooling.outcome }}
-        run: |
-          test "$READONLY_RESULT" = success
-          test "$IDENTITY_OUTCOME" = success
-          test "$VERIFIER_TOOLING_OUTCOME" = success
-          test "$EVIDENCE_DOWNLOAD_OUTCOME" = success
-          test "$SELECTION_DOWNLOAD_OUTCOME" = success
-          test "$ISOLATED_EVIDENCE_OUTCOME" = success
 
   notify-ci-wave:
     name: Notify CI wave about production WEB validation
-    needs: [readonly, verify-evidence]
+    needs: readonly
     if: always()
     runs-on: ubuntu-latest
     permissions:
@@ -1068,11 +325,10 @@ jobs:
           CI_PIPELINES_ALERT_API_AUTH: ${{ secrets.CI_PIPELINES_ALERT_API_AUTH }}
           CI_PIPELINES_ALERT_TYPE: web_e2e
           CI_PIPELINES_TARGET_ENV: production
-          CI_PIPELINES_STATUS: ${{ needs.verify-evidence.result == 'success' && 'success' || 'failure' }}
-          CI_PIPELINES_TITLE: ${{ needs.verify-evidence.result == 'success' && 'WEB E2E passed' || 'WEB E2E failed' }}
+          CI_PIPELINES_STATUS: ${{ needs.readonly.result == 'success' && 'success' || 'failure' }}
+          CI_PIPELINES_TITLE: ${{ needs.readonly.result == 'success' && 'WEB E2E passed' || 'WEB E2E failed' }}
           CI_PIPELINES_SERVICE: web
           CI_PIPELINES_SHA: ${{ needs.readonly.outputs.expected-sha }}
           CI_PIPELINES_PARENT_DEPLOY_RUN_ID: ${{ inputs.automatic_deploy_run_id }}
-          CI_PIPELINES_PARENT_RELEASE_TRAIN_ID: ${{ inputs.release_train_id }}
           CI_PIPELINES_VALIDATION_PACK: all
         run: node .ci-wave-notifier/scripts/notify-ci-wave.mjs

@@ -1869,6 +1869,7 @@ describe("GitHub Actions package access", () => {
           string,
           {
             if?: string;
+            uses?: string;
             permissions?: {
               packages?: string;
               [key: string]: string | undefined;
@@ -1889,11 +1890,7 @@ describe("GitHub Actions package access", () => {
 
       for (const [jobName, job] of Object.entries(workflow.jobs ?? {})) {
         const frozenInstallSteps = (job.steps ?? []).filter((step) =>
-          [
-            "./bin/6529 install:frozen",
-            "node scripts/release-bus-install-dependencies.cjs",
-            'node "$RELEASE_BUS_INSTALL_TOOL"',
-          ].some((command) => step.run?.includes(command))
+          step.run?.includes("./bin/6529 install:frozen")
         );
         const effectivePermissions =
           job.permissions ?? workflow.permissions ?? {};
@@ -1917,9 +1914,18 @@ describe("GitHub Actions package access", () => {
           }
         }
 
+        const reusableWorkflow = job.uses?.match(/^\.\/\.github\/workflows\/([A-Za-z0-9_-]+\.yml)$/);
+        let delegatesFrozenInstall = false;
+        if (reusableWorkflow) {
+          const child = parseYaml(fs.readFileSync(path.join(workflowDirectory, reusableWorkflow[1]!), "utf8"));
+          delegatesFrozenInstall = Object.values(child.jobs ?? {}).some((childJob) =>
+            ((childJob as { steps?: Array<{ run?: string }> }).steps ?? []).some((step) => step.run?.includes("./bin/6529 install:frozen"))
+          );
+        }
         if (
           effectivePermissions.packages === "read" &&
-          frozenInstallSteps.length === 0
+          frozenInstallSteps.length === 0 &&
+          !delegatesFrozenInstall
         ) {
           throw new Error(
             `${workflowFile} job ${jobName} grants package read without a frozen install`

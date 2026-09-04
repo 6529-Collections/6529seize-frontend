@@ -8,7 +8,7 @@ changes the baseline or the per-file scanner output.
 Current interim floors:
 
 - Production `any_casts` = 23.
-- Test `test_generic_any` = 127.
+- Test `test_generic_any` = 125.
 
 Both nonzero floors are burn-down inventories, not accepted exceptions.
 
@@ -39,7 +39,8 @@ production files:
 
 ## Test generic-argument burn-down inventory
 
-The test-only counter finds 127 generic-argument `any` keywords in 43 files.
+After retiring the dependency-installer test, this recorded inventory contains
+125 generic-argument `any` keywords in 42 files.
 It intentionally does not absorb unrelated direct test annotations or casts
 into this bounded workstream.
 
@@ -57,7 +58,6 @@ into this bounded workstream.
 | `__tests__/components/groups/page/create/config/nfts/GroupCreateNftSearchItems.test.tsx`                                             |     2 |
 | `__tests__/components/waves/discovery/DiscoverWaveExplorer.test.tsx`                                                                 |     2 |
 | `__tests__/contexts/wave/hooks/useWaveMessagesStore.test.ts`                                                                         |     2 |
-| `__tests__/scripts/release-bus-install-dependencies.test.ts`                                                                         |     2 |
 | `__tests__/app/api/open-graph.ens.test.ts`                                                                                           |     1 |
 | `__tests__/components/CreateDropWrapper.test.tsx`                                                                                    |     1 |
 | `__tests__/components/about/AboutPrimaryAddress.test.tsx`                                                                            |     1 |

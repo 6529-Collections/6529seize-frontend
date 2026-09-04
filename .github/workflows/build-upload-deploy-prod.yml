@@ -2,11 +2,19 @@ name: Web Deploy - PROD
 
 on:
   workflow_dispatch:
+    inputs:
+      release_note_opt_out:
+        description: Suppress autonomous release notes only when explicitly requested by the user
+        type: boolean
+        required: false
+        default: false
 
-run-name: Production deploy ${{ github.sha }} [frontend-prod-${{ github.run_id }}]
+run-name: Production deploy ${{ github.sha }}
 
 permissions:
+  actions: read
   contents: read
+  packages: read
 
 concurrency:
   group: web-deploy-prod
@@ -18,402 +26,118 @@ env:
   AWS_REGION: "us-east-1"
   BEANSTALK_APP_NAME: "seize app"
   BEANSTALK_ENV_NAME: "seizeapp-env-node22"
-  API_ENDPOINT: "https://api.6529.io"
-  WS_ENDPOINT: "wss://ws.6529.io"
-  ALLOWLIST_API_ENDPOINT: "https://allowlist-api.6529.io"
-  BASE_ENDPOINT: "https://6529.io"
-  NEXTGEN_CHAIN_ID: "1"
-  MOBILE_APP_SCHEME: "mobile6529"
-  CORE_SCHEME: "core6529"
-  IPFS_API_ENDPOINT: "https://api-ipfs.6529.io"
-  IPFS_GATEWAY_ENDPOINT: "https://ipfs.6529.io"
-  ASSETS_FROM_S3: "true"
   ANNOUNCED_VERSION_OBJECT_KEY: "web_build/current-production-version.json"
   ANNOUNCED_VERSION_ENDPOINT: "https://dnclu2fna0b2b.cloudfront.net/web_build/current-production-version.json"
 
 jobs:
-  acquire-production-authority:
-    name: Acquire exact production authority
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    permissions: {}
-
-    steps:
-      - name: Atomically acquire and bind production authority
-        env:
-          RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
-          RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
-        run: |
-          set -euo pipefail
-
-          test -n "$RELEASE_BUS_API_URL" || {
-            echo "::error::Release Bus API URL is unavailable; refusing production deployment."
-            exit 1
-          }
-          test -n "$RELEASE_BUS_WORKFLOW_AUTH_TOKEN" || {
-            echo "::error::Release Bus workflow credential is unavailable; refusing production deployment."
-            exit 1
-          }
-          test "$GITHUB_REF" = refs/heads/main || {
-            echo "::error::Production deploys must run from the protected main branch."
-            exit 1
-          }
-          [[ "$GITHUB_RUN_ID" =~ ^[1-9][0-9]{0,19}$ ]] || {
-            echo "::error::GitHub run identity is malformed; refusing manual production deployment."
-            exit 1
-          }
-          [[ "$GITHUB_RUN_ATTEMPT" =~ ^[1-9][0-9]{0,8}$ ]] || {
-            echo "::error::GitHub run attempt is malformed; refusing manual production deployment."
-            exit 1
-          }
-          [[ "$GITHUB_REF_NAME" =~ ^[A-Za-z0-9._/-]{1,255}$ ]] || {
-            echo "::error::GitHub source ref is malformed; refusing manual production deployment."
-            exit 1
-          }
-          [[ "$GITHUB_SHA" =~ ^[a-f0-9]{40}$ ]] || {
-            echo "::error::GitHub source SHA is malformed; refusing manual production deployment."
-            exit 1
-          }
-          operation_id="frontend-prod-${GITHUB_RUN_ID}"
-
-          payload="$(
-            jq -n \
-              --arg operation_id "$operation_id" \
-              --arg controller_identity frontend-production-workflow \
-              --arg repository frontend \
-              --arg environment prod \
-              --arg service frontend \
-              --arg workflow_run_id "$GITHUB_RUN_ID" \
-              --argjson workflow_run_attempt "$GITHUB_RUN_ATTEMPT" \
-              --arg target_sha "$GITHUB_SHA" \
-              '{operation_id:$operation_id,controller_identity:$controller_identity,repository:$repository,environment:$environment,service:$service,target_sha:$target_sha,selection_digest:null,workflow_run_id:$workflow_run_id,workflow_run_attempt:$workflow_run_attempt}'
-          )"
-          response_file="$(mktemp)"
-          trap 'rm -f "$response_file"' EXIT
-          if ! http_status="$(
-            curl --silent --show-error \
-              --retry 4 --retry-all-errors --retry-delay 2 --retry-max-time 180 \
-              --connect-timeout 10 \
-              --max-time 30 \
-              --output "$response_file" \
-              --write-out '%{http_code}' \
-              -H "Authorization: Bearer $RELEASE_BUS_WORKFLOW_AUTH_TOKEN" \
-              -H 'Content-Type: application/json' \
-              --data "$payload" \
-              "$RELEASE_BUS_API_URL/deploy/release-bus-v2/production-authority/acquire-bind"
-          )"; then
-            echo "::error::Production authority is unavailable; refusing deployment."
-            exit 1
-          fi
-          if [ "$http_status" != 200 ]; then
-            reason="$(jq -r '.reason_code // "UNKNOWN"' "$response_file" 2>/dev/null || printf UNKNOWN)"
-            echo "::error::Production authority was rejected with HTTP $http_status ($reason)."
-            exit 1
-          fi
-          if ! jq -e \
-            --arg operation_id "$operation_id" \
-            --arg controller_identity frontend-production-workflow \
-            --arg repository frontend \
-            --arg environment prod \
-            --arg service frontend \
-            --arg workflow_run_id "$GITHUB_RUN_ID" \
-            --arg workflow_run_attempt "$GITHUB_RUN_ATTEMPT" \
-            --arg target_sha "$GITHUB_SHA" \
-            'type == "object" and
-             .authorized == true and
-             .bound == true and
-             .status == "BOUND" and
-             (keys == ["authorized","bound","control_epoch","controller_identity","environment","hard_expires_at","lease_expires_at","lock_row_version","operation_id","repository","reused","selection_digest","service","status","target_sha","workflow_run_attempt","workflow_run_id"]) and
-             .operation_id == $operation_id and
-             .controller_identity == $controller_identity and
-             .repository == $repository and
-             .environment == $environment and
-             .service == $service and
-             (.workflow_run_id | tostring) == $workflow_run_id and
-             (.workflow_run_attempt | tostring) == $workflow_run_attempt and
-             .target_sha == $target_sha and
-             .selection_digest == null and
-             (.reused | type == "boolean") and
-             (.lease_expires_at | type == "number") and
-             (.hard_expires_at | type == "number") and
-             (.lock_row_version | type == "number" and . >= 1) and
-             (.control_epoch | type == "object")' \
-            "$response_file" >/dev/null; then
-            echo "::error::Release Bus returned malformed or mismatched authority evidence; refusing deployment."
-            exit 1
-          fi
+  build-production-artifact:
+    name: Build exact production artifact
+    uses: ./.github/workflows/production-build-artifact.yml
+    with:
+      target_sha: ${{ github.sha }}
+    secrets:
+      ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
+      AWS_RUM_APP_ID: ${{ secrets.AWS_RUM_APP_ID }}
+      AWS_RUM_REGION: ${{ secrets.AWS_RUM_REGION }}
+      AWS_RUM_SAMPLE_RATE: ${{ secrets.AWS_RUM_SAMPLE_RATE }}
+      GIPHY_API_KEY: ${{ secrets.GIPHY_API_KEY }}
+      NEXT_PUBLIC_MIXPANEL_TOKEN: ${{ secrets.NEXT_PUBLIC_MIXPANEL_TOKEN }}
+      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+      SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
 
   resolve-production-artifact:
-    name: Resolve and verify exact production artifact
-    needs: acquire-production-authority
-    runs-on: ubuntu-latest
-    timeout-minutes: 75
+    name: Resolve production artifact metadata
+    needs: build-production-artifact
+    uses: ./.github/workflows/production-artifact-metadata.yml
+
+  verify-production-artifact:
+    name: Verify exact production artifact
     permissions:
-      actions: write
+      actions: read
       contents: read
-    outputs:
-      artifact-api-digest: ${{ steps.children.outputs.artifact_api_digest }}
-      artifact-id: ${{ steps.children.outputs.artifact_id }}
-      artifact-name: ${{ steps.children.outputs.artifact_name }}
-      artifact-run-attempt: ${{ steps.children.outputs.builder_run_attempt }}
-      artifact-run-id: ${{ steps.children.outputs.builder_run_id }}
-      selection-artifact-api-digest: ${{ steps.children.outputs.selection_artifact_api_digest }}
-      selection-artifact-id: ${{ steps.children.outputs.selection_artifact_id }}
-      selection-artifact-name: ${{ steps.children.outputs.selection_artifact_name }}
-      selection-artifact-run-attempt: ${{ steps.children.outputs.selection_artifact_run_attempt }}
-      selection-artifact-run-id: ${{ steps.children.outputs.selection_artifact_run_id }}
-      selection-digest: ${{ steps.children.outputs.selection_digest }}
-
-    steps:
-      - name: Check out immutable child controller
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
-        with:
-          ref: ${{ github.workflow_sha }}
-          persist-credentials: false
-          sparse-checkout: |
-            ops/scripts/one-click-production-children.cjs
-            ops/scripts/run-one-click-production-children.cjs
-          sparse-checkout-cone-mode: false
-
-      - name: Resolve operation-bound builder and verifier
-        id: children
-        env:
-          GH_TOKEN: ${{ github.token }}
-          OPERATION_ID: frontend-prod-${{ github.run_id }}
-          PARENT_RUN_ATTEMPT: ${{ github.run_attempt }}
-          PARENT_RUN_ID: ${{ github.run_id }}
-          TARGET_SHA: ${{ github.sha }}
-        run: |
-          set -euo pipefail
-          node ops/scripts/run-one-click-production-children.cjs \
-            --repository "$GITHUB_REPOSITORY" \
-            --target-sha "$TARGET_SHA" \
-            --operation-id "$OPERATION_ID" \
-            --parent-run-id "$PARENT_RUN_ID" \
-            --parent-run-attempt "$PARENT_RUN_ATTEMPT" \
-            --github-output "$GITHUB_OUTPUT"
+    needs: resolve-production-artifact
+    uses: ./.github/workflows/production-artifact-verifier.yml
+    with:
+      target_sha: ${{ github.sha }}
+      artifact_run_id: ${{ github.run_id }}
+      artifact_run_attempt: ${{ needs.resolve-production-artifact.outputs.producer_run_attempt }}
+      artifact_id: ${{ needs.resolve-production-artifact.outputs.artifact_id }}
+      artifact_digest: ${{ needs.resolve-production-artifact.outputs.artifact_digest }}
+      artifact_name: production-frontend-${{ github.sha }}-${{ github.run_id }}
+      artifact_workflow_sha: ${{ github.sha }}
 
   build-upload-deploy:
-    needs: [acquire-production-authority, resolve-production-artifact]
-    runs-on: ${{ vars.PRODUCTION_BUILD_RUNNER || vars.CI_BUILD_RUNNER || 'ubuntu-latest' }}
+    name: Deploy verified production artifact
+    needs:
+      [
+        build-production-artifact,
+        resolve-production-artifact,
+        verify-production-artifact,
+      ]
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
     permissions:
       actions: read
       contents: read
       deployments: write
     environment: production
-    outputs:
-      authorized-selection-digest: ${{ steps.reauthorize.outputs.selection-digest }}
 
     steps:
-      - name: Checkout code
+      - name: Checkout exact production SHA
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           ref: ${{ github.sha }}
+          fetch-depth: 0
           persist-credentials: false
 
-      - name: Create deployment bus manifest
+      - name: Require the canonical production entry point
         run: |
           set -euo pipefail
+          test "$GITHUB_REF" = refs/heads/main
+          [[ "$COMMIT_SHA" =~ ^[a-f0-9]{40}$ ]]
+          test "$(git rev-parse HEAD)" = "$COMMIT_SHA"
 
-          node ops/scripts/deployment-bus.cjs create-manifest \
-            --environment production \
-            --production-candidate-sha "${COMMIT_SHA}" \
-            --production-eligible true \
-            --required-packs "playwright:core-smoke,playwright:surface-matrix,playwright:wcag-i18n" \
-            --release-captain "github-actions/${{ github.actor }}" \
-            --status queued \
-            --phase queued \
-            --message "Production deployment queued for ${COMMIT_SHA}" \
-            --workflow-run-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
-            --output deployment-bus-manifest.json
+      - name: Download exact production artifact
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: production-frontend-${{ github.sha }}-${{ github.run_id }}
+          path: production-artifact
 
-      - name: Create GitHub deployment record
-        id: deployment-record
+      - name: Independently verify selected production bytes
         env:
-          GITHUB_TOKEN: ${{ github.token }}
+          ARTIFACT_NAME: production-frontend-${{ github.sha }}-${{ github.run_id }}
+          PRODUCER_RUN_ATTEMPT: ${{ needs.resolve-production-artifact.outputs.producer_run_attempt }}
+          PRODUCER_RUN_ID: ${{ github.run_id }}
+          VERIFIER_PACKAGE_SHA256: ${{ needs.verify-production-artifact.outputs.package_sha256 }}
+          WORKFLOW_SHA: ${{ github.sha }}
         run: |
           set -euo pipefail
-
-          deployment_id="$(node ops/scripts/deployment-bus.cjs github-create-deployment \
-            --file deployment-bus-manifest.json \
-            --ref "${COMMIT_SHA}" \
-            --environment production \
-            --task deploy:production \
-            --description "Production deployment bus ${COMMIT_SHA}")"
-          echo "deployment_id=$deployment_id" >> "$GITHUB_OUTPUT"
-
-      - name: Mark production deployment queued
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-
-          node ops/scripts/deployment-bus.cjs github-create-status \
-            --deployment-id "${{ steps.deployment-record.outputs.deployment_id }}" \
-            --state queued \
-            --description "Production deployment bus queued" \
-            --environment-url "https://6529.io" \
-            --log-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-
-      - name: Download immutable production artifact selection
-        env:
-          GH_TOKEN: ${{ github.token }}
-          SELECTION_ARTIFACT_ID: ${{ needs.resolve-production-artifact.outputs.selection-artifact-id }}
-          SELECTION_ARTIFACT_RUN_ATTEMPT: ${{ needs.resolve-production-artifact.outputs.selection-artifact-run-attempt }}
-          SELECTION_ARTIFACT_RUN_ID: ${{ needs.resolve-production-artifact.outputs.selection-artifact-run-id }}
-        run: |
-          set -euo pipefail
-          rm -rf .one-click-production/selection
-          mkdir -p .one-click-production/selection
-          gh api \
-            "repos/${GITHUB_REPOSITORY}/actions/runs/${SELECTION_ARTIFACT_RUN_ID}/attempts/${SELECTION_ARTIFACT_RUN_ATTEMPT}" \
-            > .one-click-production/selection-run.json
-          gh api \
-            "repos/${GITHUB_REPOSITORY}/actions/artifacts/${SELECTION_ARTIFACT_ID}" \
-            > .one-click-production/selection-artifact.json
-          gh api \
-            "repos/${GITHUB_REPOSITORY}/actions/artifacts/${SELECTION_ARTIFACT_ID}/zip" \
-            > .one-click-production/selection.zip
-          test "$(stat -c%s .one-click-production/selection.zip)" -le 2097152
-          unzip -Z1 .one-click-production/selection.zip \
-            > .one-click-production/selection-members.txt
-          node ops/scripts/verify-production-artifact-selection.cjs \
-            validate-selection-archive-members \
-            --archive-members .one-click-production/selection-members.txt >/dev/null
-          unzip -q .one-click-production/selection.zip \
-            -d .one-click-production/selection
-
-      - name: Verify immutable production artifact selection
-        id: verified-selection
-        env:
-          ARTIFACT_API_DIGEST: ${{ needs.resolve-production-artifact.outputs.artifact-api-digest }}
-          ARTIFACT_ID: ${{ needs.resolve-production-artifact.outputs.artifact-id }}
-          ARTIFACT_NAME: ${{ needs.resolve-production-artifact.outputs.artifact-name }}
-          ARTIFACT_RUN_ATTEMPT: ${{ needs.resolve-production-artifact.outputs.artifact-run-attempt }}
-          ARTIFACT_RUN_ID: ${{ needs.resolve-production-artifact.outputs.artifact-run-id }}
-          EXPECTED_SELECTION_DIGEST: ${{ needs.resolve-production-artifact.outputs.selection-digest }}
-          OPERATION_ID: frontend-prod-${{ github.run_id }}
-          SELECTION_ARTIFACT_API_DIGEST: ${{ needs.resolve-production-artifact.outputs.selection-artifact-api-digest }}
-          SELECTION_ARTIFACT_ID: ${{ needs.resolve-production-artifact.outputs.selection-artifact-id }}
-          SELECTION_ARTIFACT_NAME: ${{ needs.resolve-production-artifact.outputs.selection-artifact-name }}
-          SELECTION_ARTIFACT_RUN_ATTEMPT: ${{ needs.resolve-production-artifact.outputs.selection-artifact-run-attempt }}
-          SELECTION_ARTIFACT_RUN_ID: ${{ needs.resolve-production-artifact.outputs.selection-artifact-run-id }}
-          TARGET_SHA: ${{ github.sha }}
-        run: |
-          set -euo pipefail
-          node ops/scripts/verify-production-artifact-selection.cjs verify-selection \
-            --expected-target-sha "$TARGET_SHA" \
-            --expected-operation-id "$OPERATION_ID" \
-            --expected-artifact-run-id "$ARTIFACT_RUN_ID" \
-            --expected-artifact-run-attempt "$ARTIFACT_RUN_ATTEMPT" \
-            --expected-artifact-id "$ARTIFACT_ID" \
-            --expected-artifact-name "$ARTIFACT_NAME" \
-            --expected-artifact-api-digest "$ARTIFACT_API_DIGEST" \
-            --selection-artifact-run-id "$SELECTION_ARTIFACT_RUN_ID" \
-            --selection-artifact-run-attempt "$SELECTION_ARTIFACT_RUN_ATTEMPT" \
-            --selection-artifact-id "$SELECTION_ARTIFACT_ID" \
-            --selection-artifact-name "$SELECTION_ARTIFACT_NAME" \
-            --expected-selection-artifact-digest "$SELECTION_ARTIFACT_API_DIGEST" \
-            --selection-artifact-metadata .one-click-production/selection-artifact.json \
-            --selection-run-metadata .one-click-production/selection-run.json \
-            --selection-archive .one-click-production/selection.zip \
-            --selection-root .one-click-production/selection \
-            --repository "$GITHUB_REPOSITORY" \
-            > .one-click-production/verified-selection.json
-          selection_digest="$(jq -er .selection_digest .one-click-production/verified-selection.json)"
-          test "$selection_digest" = "$EXPECTED_SELECTION_DIGEST"
-          echo "selection-digest=$selection_digest" >> "$GITHUB_OUTPUT"
-
-      - name: Download exact selected production artifact
-        env:
-          ARTIFACT_ID: ${{ needs.resolve-production-artifact.outputs.artifact-id }}
-          ARTIFACT_RUN_ATTEMPT: ${{ needs.resolve-production-artifact.outputs.artifact-run-attempt }}
-          ARTIFACT_RUN_ID: ${{ needs.resolve-production-artifact.outputs.artifact-run-id }}
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-          rm -rf production-artifact
-          mkdir -p production-artifact
-          gh api \
-            "repos/${GITHUB_REPOSITORY}/actions/runs/${ARTIFACT_RUN_ID}/attempts/${ARTIFACT_RUN_ATTEMPT}" \
-            > .one-click-production/artifact-run.json
-          gh api \
-            "repos/${GITHUB_REPOSITORY}/actions/artifacts/${ARTIFACT_ID}" \
-            > .one-click-production/artifact.json
-          gh api \
-            "repos/${GITHUB_REPOSITORY}/actions/artifacts/${ARTIFACT_ID}/zip" \
-            > .one-click-production/artifact.zip
-          # Allow bounded zip-container overhead above the 500 MiB package limit.
-          test "$(stat -c%s .one-click-production/artifact.zip)" -le $((550 * 1024 * 1024))
-          unzip -Z1 .one-click-production/artifact.zip \
-            > .one-click-production/artifact-members.txt
-          node ops/scripts/verify-production-artifact-selection.cjs \
-            validate-archive-members \
-            --archive-members .one-click-production/artifact-members.txt >/dev/null
-          unzip -q .one-click-production/artifact.zip -d production-artifact
-
-      - name: Verify selected production artifact
-        env:
-          ARTIFACT_API_DIGEST: ${{ needs.resolve-production-artifact.outputs.artifact-api-digest }}
-          ARTIFACT_ID: ${{ needs.resolve-production-artifact.outputs.artifact-id }}
-          ARTIFACT_NAME: ${{ needs.resolve-production-artifact.outputs.artifact-name }}
-          ARTIFACT_RUN_ATTEMPT: ${{ needs.resolve-production-artifact.outputs.artifact-run-attempt }}
-          ARTIFACT_RUN_ID: ${{ needs.resolve-production-artifact.outputs.artifact-run-id }}
-          OPERATION_ID: frontend-prod-${{ github.run_id }}
-          TARGET_SHA: ${{ github.sha }}
-        run: |
-          set -euo pipefail
-          node ops/scripts/verify-production-artifact-selection.cjs \
-            validate-extracted-artifact --artifact-root production-artifact >/dev/null
           (cd production-artifact && sha256sum -c SHA256SUMS)
-          test "$(sha256sum .one-click-production/artifact.zip | cut -d' ' -f1)" = "${ARTIFACT_API_DIGEST#sha256:}"
+          unzip -t production-artifact/target/package.zip >/dev/null
           jq -e \
-            --arg artifact_api_digest "$ARTIFACT_API_DIGEST" \
-            --arg artifact_id "$ARTIFACT_ID" \
             --arg artifact_name "$ARTIFACT_NAME" \
-            --arg artifact_run_id "$ARTIFACT_RUN_ID" \
-            '.id == ($artifact_id | tonumber) and
-             .name == $artifact_name and
-             .expired == false and
-             .digest == $artifact_api_digest and
-             (.workflow_run.id | tostring) == $artifact_run_id' \
-            .one-click-production/artifact.json >/dev/null
-          jq -e \
-            --arg repository "$GITHUB_REPOSITORY" \
-            --arg title "Build production artifact ${TARGET_SHA} [${OPERATION_ID}]" \
-            --arg run_id "$ARTIFACT_RUN_ID" \
-            --argjson run_attempt "$ARTIFACT_RUN_ATTEMPT" \
-            --arg workflow_sha "$(jq -r .artifact_workflow_sha .one-click-production/verified-selection.json)" \
-            '.id == ($run_id | tonumber) and
-             .run_attempt == $run_attempt and
-             .path == ".github/workflows/production-build-artifact.yml" and
-             .display_title == $title and
-             .event == "workflow_dispatch" and
-             .head_branch == "main" and
-             .head_sha == $workflow_sha and
-             .status == "completed" and .conclusion == "success" and
-             .repository.full_name == $repository and
-             .head_repository.full_name == $repository' \
-            .one-click-production/artifact-run.json >/dev/null
-          jq -e \
-            --arg operation_id "$OPERATION_ID" \
-            --arg target_sha "$TARGET_SHA" \
-            --arg run_id "$ARTIFACT_RUN_ID" \
-            --argjson run_attempt "$ARTIFACT_RUN_ATTEMPT" \
-            --arg selection_package "$(jq -r .package_sha256 .one-click-production/verified-selection.json)" \
-            '.schema_version == 2 and
-             .artifact_contract == "production-prebuild-v2" and
-             .repository == "frontend" and .environment == "production" and
-             .target_sha == $target_sha and .source_sha == $target_sha and
-             .operation_id == $operation_id and
-             (.workflow_run_id | tostring) == $run_id and
-             .run_attempt == $run_attempt and
-             .package_sha256 == $selection_package' \
-            production-artifact/manifest.json >/dev/null
+            --arg run_id "$PRODUCER_RUN_ID" \
+            --argjson run_attempt "$PRODUCER_RUN_ATTEMPT" \
+            --arg target_sha "$COMMIT_SHA" \
+            --arg workflow_sha "$WORKFLOW_SHA" '
+              .schema_version == 1 and
+              .artifact_contract == "production-deployment-v1" and
+              .repository == "frontend" and
+              .environment == "production" and
+              .artifact_name == $artifact_name and
+              .target_sha == $target_sha and
+              .source_sha == $target_sha and
+              .workflow_sha == $workflow_sha and
+              (.workflow_run_id | tostring) == $run_id and
+              .run_attempt == $run_attempt and
+              (.protected_main_sha | test("^[a-f0-9]{40}$")) and
+              (.package_sha256 | test("^[a-f0-9]{64}$"))
+            ' production-artifact/manifest.json >/dev/null
           package_digest="$(sha256sum production-artifact/target/package.zip | cut -d' ' -f1)"
-          test "$package_digest" = "$(jq -r .package_sha256 .one-click-production/verified-selection.json)"
+          test "$package_digest" = "$VERIFIER_PACKAGE_SHA256"
+          test "$package_digest" = "$(jq -r .package_sha256 production-artifact/manifest.json)"
           jq -e \
-            --arg source_sha "$TARGET_SHA" \
+            --arg source_sha "$COMMIT_SHA" \
             --arg package_sha256 "$package_digest" '
               .schema_version == "artifact-portability.v1" and
               .contract == "artifact-portability-v1" and
@@ -425,173 +149,75 @@ jobs:
               .portability.reuse_authorized == false and
               .portability.promotion_authorized == false
             ' production-artifact/artifact-portability.json >/dev/null
-          test "$(stat -c%s production-artifact/target/package.zip)" -le $((500 * 1024 * 1024))
 
-      - name: Create production operation evidence
-        env:
-          ARTIFACT_API_DIGEST: ${{ needs.resolve-production-artifact.outputs.artifact-api-digest }}
-          ARTIFACT_ID: ${{ needs.resolve-production-artifact.outputs.artifact-id }}
-          ARTIFACT_NAME: ${{ needs.resolve-production-artifact.outputs.artifact-name }}
-          ARTIFACT_RUN_ATTEMPT: ${{ needs.resolve-production-artifact.outputs.artifact-run-attempt }}
-          ARTIFACT_RUN_ID: ${{ needs.resolve-production-artifact.outputs.artifact-run-id }}
-          SELECTION_ARTIFACT_API_DIGEST: ${{ needs.resolve-production-artifact.outputs.selection-artifact-api-digest }}
-          SELECTION_ARTIFACT_ID: ${{ needs.resolve-production-artifact.outputs.selection-artifact-id }}
-          SELECTION_ARTIFACT_NAME: ${{ needs.resolve-production-artifact.outputs.selection-artifact-name }}
-          SELECTION_ARTIFACT_RUN_ATTEMPT: ${{ needs.resolve-production-artifact.outputs.selection-artifact-run-attempt }}
-          SELECTION_ARTIFACT_RUN_ID: ${{ needs.resolve-production-artifact.outputs.selection-artifact-run-id }}
-          SELECTION_DIGEST: ${{ steps.verified-selection.outputs.selection-digest }}
-        run: |
-          set -euo pipefail
-          mkdir -p one-click-production-operation
-          jq -n \
-            --arg contract one-click-production-operation-v1 \
-            --arg operation_id "frontend-prod-${GITHUB_RUN_ID}" \
-            --arg controller_identity frontend-production-workflow \
-            --arg repository frontend \
-            --arg environment prod \
-            --arg service frontend \
-            --arg target_sha "$GITHUB_SHA" \
-            --arg selection_digest "$SELECTION_DIGEST" \
-            --arg workflow_run_id "$GITHUB_RUN_ID" \
-            --argjson workflow_run_attempt "$GITHUB_RUN_ATTEMPT" \
-            --arg artifact_run_id "$ARTIFACT_RUN_ID" \
-            --argjson artifact_run_attempt "$ARTIFACT_RUN_ATTEMPT" \
-            --arg artifact_id "$ARTIFACT_ID" \
-            --arg artifact_name "$ARTIFACT_NAME" \
-            --arg artifact_api_digest "$ARTIFACT_API_DIGEST" \
-            --arg selection_artifact_run_id "$SELECTION_ARTIFACT_RUN_ID" \
-            --argjson selection_artifact_run_attempt "$SELECTION_ARTIFACT_RUN_ATTEMPT" \
-            --arg selection_artifact_id "$SELECTION_ARTIFACT_ID" \
-            --arg selection_artifact_name "$SELECTION_ARTIFACT_NAME" \
-            --arg selection_artifact_api_digest "$SELECTION_ARTIFACT_API_DIGEST" \
-            '{contract:$contract,operation_id:$operation_id,controller_identity:$controller_identity,repository:$repository,environment:$environment,service:$service,target_sha:$target_sha,selection_digest:$selection_digest,workflow_run_id:$workflow_run_id,workflow_run_attempt:$workflow_run_attempt,artifact:{run_id:$artifact_run_id,run_attempt:$artifact_run_attempt,id:$artifact_id,name:$artifact_name,api_digest:$artifact_api_digest},selection_artifact:{run_id:$selection_artifact_run_id,run_attempt:$selection_artifact_run_attempt,id:$selection_artifact_id,name:$selection_artifact_name,api_digest:$selection_artifact_api_digest}}' \
-            > one-click-production-operation/operation.json
-
-      - name: Upload production operation evidence
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        with:
-          name: one-click-production-operation-${{ github.run_id }}
-          path: one-click-production-operation/operation.json
-          if-no-files-found: error
-          retention-days: 30
-
-      - name: Reauthorize exact production mutation
-        id: reauthorize
-        env:
-          RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
-          RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
-          SELECTION_DIGEST: ${{ steps.verified-selection.outputs.selection-digest }}
-        run: |
-          set -euo pipefail
-          request_file="$(mktemp)"
-          response_file="$(mktemp)"
-          trap 'rm -f "$request_file" "$response_file"' EXIT
-          node ops/scripts/one-click-production-authority.cjs reauthorize \
-            --parent-run-id "$GITHUB_RUN_ID" \
-            --target-sha "$GITHUB_SHA" \
-            --workflow-run-id "$GITHUB_RUN_ID" \
-            --workflow-run-attempt "$GITHUB_RUN_ATTEMPT" \
-            --selection-digest "$SELECTION_DIGEST" \
-            > "$request_file"
-          http_status="$(curl --silent --show-error \
-            --retry 4 --retry-all-errors --retry-delay 2 --retry-max-time 180 \
-            --connect-timeout 10 --max-time 30 \
-            --output "$response_file" --write-out '%{http_code}' \
-            -H "Authorization: Bearer $RELEASE_BUS_WORKFLOW_AUTH_TOKEN" \
-            -H 'Content-Type: application/json' --data-binary "@$request_file" \
-            "$RELEASE_BUS_API_URL/deploy/release-bus-v2/production-authority/reauthorize")"
-          test "$http_status" = 200 || {
-            reason="$(jq -r '.reason_code // "UNKNOWN"' "$response_file" 2>/dev/null || printf UNKNOWN)"
-            echo "::error::Production reauthorization failed with HTTP $http_status ($reason)."
-            exit 1
-          }
-          control_epoch="$(jq -cer '.control_epoch | select(type == "object")' "$response_file")"
-          lock_row_version="$(jq -er '.lock_row_version | numbers | select(. >= 1)' "$response_file")"
-          node ops/scripts/one-click-production-authority.cjs \
-            validate-response reauthorize \
-            --request-file "$request_file" \
-            --parent-run-id "$GITHUB_RUN_ID" \
-            --target-sha "$GITHUB_SHA" \
-            --workflow-run-id "$GITHUB_RUN_ID" \
-            --workflow-run-attempt "$GITHUB_RUN_ATTEMPT" \
-            --expected-selection-digest "$SELECTION_DIGEST" \
-            --expected-status BOUND \
-            --expected-authorized true \
-            --expected-bound true \
-            --expected-control-epoch-json "$control_epoch" \
-            --expected-lock-row-version "$lock_row_version" \
-            --response-file "$response_file"
-          echo "selection-digest=$SELECTION_DIGEST" >> "$GITHUB_OUTPUT"
-
-      - name: Configure AWS Credentials
+      - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b # v6.2.0
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Upload assets to S3
+      - name: Refuse stale main or production downgrade
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin main
+          current_main_sha="$(git rev-parse origin/main)"
+          if ! git merge-base --is-ancestor "$COMMIT_SHA" "$current_main_sha"; then
+            echo "::error::Selected production SHA $COMMIT_SHA is no longer in current main history at $current_main_sha."
+            exit 1
+          fi
+
+          current_version="$(aws elasticbeanstalk describe-environments \
+            --environment-names "$BEANSTALK_ENV_NAME" \
+            --query 'Environments[0].VersionLabel' \
+            --output text)"
+          if ! [[ "$current_version" =~ ^[a-f0-9]{40}$ ]]; then
+            echo "::error::Current production version '$current_version' is not an exact commit SHA; refusing deployment."
+            exit 1
+          fi
+          git cat-file -e "${current_version}^{commit}"
+          if ! git merge-base --is-ancestor "$current_version" "$COMMIT_SHA"; then
+            echo "::error::Target $COMMIT_SHA is older than or unrelated to deployed production $current_version; refusing downgrade."
+            exit 1
+          fi
+          echo "Production $current_version can advance safely to $COMMIT_SHA."
+
+      - name: Upload verified assets to S3
         run: aws s3 sync production-artifact/target "s3://${AWS_BUCKET}/web_build/${COMMIT_SHA}/"
 
       - name: Get commit message
-        run: printf 'COMMIT_MESSAGE=%s\n' "$(git show -s --format=%s)" >> "$GITHUB_ENV"
+        run: printf 'COMMIT_MESSAGE=%s\n' "$(git show -s --format=%s "$COMMIT_SHA")" >> "$GITHUB_ENV"
 
-      - name: Mark production deployment in progress
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
+      - name: Ensure Elastic Beanstalk application version
         run: |
           set -euo pipefail
-
-          node ops/scripts/deployment-bus.cjs github-create-status \
-            --deployment-id "${{ steps.deployment-record.outputs.deployment_id }}" \
-            --state in_progress \
-            --description "Production Elastic Beanstalk deployment starting" \
-            --environment-url "https://6529.io" \
-            --log-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-
-      - name: Ensure ElasticBeanstalk Application Version
-        run: |
-          set -euo pipefail
-
-          SOURCE_BUNDLE_KEY="web_build/${COMMIT_SHA}/package.zip"
-
-          create_application_version() {
-            aws elasticbeanstalk create-application-version \
-              --application-name "${BEANSTALK_APP_NAME}" \
-              --source-bundle "S3Bucket=${AWS_BUCKET},S3Key=${SOURCE_BUNDLE_KEY}" \
-              --version-label "${COMMIT_SHA}" \
-              --description "${COMMIT_MESSAGE}"
-          }
-
-          APPLICATION_VERSION_JSON=$(aws elasticbeanstalk describe-application-versions \
-            --application-name "${BEANSTALK_APP_NAME}" \
-            --version-labels "${COMMIT_SHA}" \
-            --output json)
-          VERSION_COUNT=$(jq '.ApplicationVersions | length' <<< "$APPLICATION_VERSION_JSON")
-
-          case "$VERSION_COUNT" in
+          source_bundle_key="web_build/${COMMIT_SHA}/package.zip"
+          application_version_json="$(aws elasticbeanstalk describe-application-versions \
+            --application-name "$BEANSTALK_APP_NAME" \
+            --version-labels "$COMMIT_SHA" \
+            --output json)"
+          version_count="$(jq '.ApplicationVersions | length' <<< "$application_version_json")"
+          case "$version_count" in
             0)
-              echo "Creating Elastic Beanstalk application version ${COMMIT_SHA}."
-              create_application_version
+              aws elasticbeanstalk create-application-version \
+                --application-name "$BEANSTALK_APP_NAME" \
+                --source-bundle "S3Bucket=${AWS_BUCKET},S3Key=${source_bundle_key}" \
+                --version-label "$COMMIT_SHA" \
+                --description "$COMMIT_MESSAGE"
               ;;
             1)
-              EXISTING_BUCKET=$(jq -r '.ApplicationVersions[0].SourceBundle.S3Bucket // ""' <<< "$APPLICATION_VERSION_JSON")
-              EXISTING_KEY=$(jq -r '.ApplicationVersions[0].SourceBundle.S3Key // ""' <<< "$APPLICATION_VERSION_JSON")
-
-              if [ "$EXISTING_BUCKET" = "$AWS_BUCKET" ] && [ "$EXISTING_KEY" = "$SOURCE_BUNDLE_KEY" ]; then
-                echo "Elastic Beanstalk application version ${COMMIT_SHA} already exists with the expected source bundle; reusing it."
-              else
-                echo "::error::Elastic Beanstalk application version ${COMMIT_SHA} already exists with unexpected source s3://${EXISTING_BUCKET}/${EXISTING_KEY}; expected s3://${AWS_BUCKET}/${SOURCE_BUNDLE_KEY}. Refusing to replace an unexpected production version label automatically."
-                exit 1
-              fi
+              existing_bucket="$(jq -r '.ApplicationVersions[0].SourceBundle.S3Bucket // ""' <<< "$application_version_json")"
+              existing_key="$(jq -r '.ApplicationVersions[0].SourceBundle.S3Key // ""' <<< "$application_version_json")"
+              test "$existing_bucket" = "$AWS_BUCKET"
+              test "$existing_key" = "$source_bundle_key"
               ;;
             *)
-              echo "::error::Expected at most one Elastic Beanstalk application version for ${COMMIT_SHA}, found ${VERSION_COUNT}."
+              echo "::error::Expected at most one Elastic Beanstalk version for $COMMIT_SHA, found $version_count."
               exit 1
               ;;
           esac
 
-      - name: Deploy new Version to ElasticBeanstalk with Runtime Environment Variables
+      - name: Deploy new version to Elastic Beanstalk
         env:
           SSR_CLIENT_ID: ${{ secrets.SSR_CLIENT_ID }}
           SSR_CLIENT_SECRET: ${{ secrets.SSR_CLIENT_SECRET }}
@@ -600,47 +226,42 @@ jobs:
           PUBLIC_REVIEW_DISCUSSION_DESTINATIONS: ${{ secrets.PUBLIC_REVIEW_PRODUCTION_DISCUSSION_DESTINATIONS }}
         run: |
           set -euo pipefail
-
           jq -e '
             type == "object" and
             keys == ["production"] and
             (.production | type == "object") and
             (.production["stream-review"] | type == "string" and test("^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"))
-          ' <<<"$PUBLIC_REVIEW_DISCUSSION_DESTINATIONS" >/dev/null
-
-          option_settings="$(
-            jq -cn \
-              --arg ssr_client_id "$SSR_CLIENT_ID" \
-              --arg ssr_client_secret "$SSR_CLIENT_SECRET" \
-              --arg alchemy_api_key "$ALCHEMY_API_KEY" \
-              --arg github_link_status_preview_token "$GITHUB_LINK_STATUS_PREVIEW_TOKEN" \
-              --arg public_review_discussion_destinations "$PUBLIC_REVIEW_DISCUSSION_DESTINATIONS" \
-              '[
+          ' <<< "$PUBLIC_REVIEW_DISCUSSION_DESTINATIONS" >/dev/null
+          option_settings="$(jq -cn \
+            --arg ssr_client_id "$SSR_CLIENT_ID" \
+            --arg ssr_client_secret "$SSR_CLIENT_SECRET" \
+            --arg alchemy_api_key "$ALCHEMY_API_KEY" \
+            --arg github_link_status_preview_token "$GITHUB_LINK_STATUS_PREVIEW_TOKEN" \
+            --arg public_review_discussion_destinations "$PUBLIC_REVIEW_DISCUSSION_DESTINATIONS" '
+              [
                 {Namespace:"aws:elasticbeanstalk:application:environment",OptionName:"SSR_CLIENT_ID",Value:$ssr_client_id},
                 {Namespace:"aws:elasticbeanstalk:application:environment",OptionName:"SSR_CLIENT_SECRET",Value:$ssr_client_secret},
                 {Namespace:"aws:elasticbeanstalk:application:environment",OptionName:"ALCHEMY_API_KEY",Value:$alchemy_api_key},
                 {Namespace:"aws:elasticbeanstalk:application:environment",OptionName:"GITHUB_LINK_STATUS_PREVIEW_TOKEN",Value:$github_link_status_preview_token},
                 {Namespace:"aws:elasticbeanstalk:application:environment",OptionName:"PUBLIC_REVIEW_DISCUSSION_DESTINATIONS",Value:$public_review_discussion_destinations},
                 {Namespace:"aws:elasticbeanstalk:application:environment",OptionName:"SENTRY_SERVER_INSTRUMENTATION",Value:"false"}
-              ]'
-          )"
-
+              ]')"
           aws elasticbeanstalk update-environment \
-            --application-name "${{ env.BEANSTALK_APP_NAME }}" \
-            --environment-name "${{ env.BEANSTALK_ENV_NAME }}" \
-            --version-label "${{ env.COMMIT_SHA }}" \
+            --application-name "$BEANSTALK_APP_NAME" \
+            --environment-name "$BEANSTALK_ENV_NAME" \
+            --version-label "$COMMIT_SHA" \
             --option-settings "$option_settings"
 
-      - name: Check Elastic Beanstalk health and readiness (adaptive exact-version poll)
+      - name: Check Elastic Beanstalk health and readiness
         run: |
           set -euo pipefail
           node ops/scripts/elastic-beanstalk-readiness.cjs \
-            --environment-name "${BEANSTALK_ENV_NAME}" \
-            --expected-version "${COMMIT_SHA}" \
+            --environment-name "$BEANSTALK_ENV_NAME" \
+            --expected-version "$COMMIT_SHA" \
             --timeout-seconds 1320 \
             --output elastic-beanstalk-readiness.json
 
-      - name: Upload durable Elastic Beanstalk readiness evidence
+      - name: Upload Elastic Beanstalk readiness evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
@@ -649,203 +270,80 @@ jobs:
           if-no-files-found: error
           retention-days: 90
 
-      - name: Validate Deployment
-        run: |
-          DEPLOYED_BEANSTALK_VERSION=$(aws elasticbeanstalk describe-environments \
-            --environment-names "${BEANSTALK_ENV_NAME}" \
-            --query 'Environments[0].VersionLabel' \
-            --output text)
-          echo "Current deployed version is $DEPLOYED_BEANSTALK_VERSION"
-          if [ "$DEPLOYED_BEANSTALK_VERSION" != "${{ env.COMMIT_SHA }}" ]; then
-            echo "Deployed version does not match the commit SHA."
-            exit 1
-          else
-            echo "Deployed version valid!"
-          fi
-
-      - name: Verify production HTTP version
+      - name: Verify exact deployed version
         run: |
           set -euo pipefail
-
+          deployed_version="$(aws elasticbeanstalk describe-environments \
+            --environment-names "$BEANSTALK_ENV_NAME" \
+            --query 'Environments[0].VersionLabel' \
+            --output text)"
+          test "$deployed_version" = "$COMMIT_SHA"
           node ops/scripts/verify-deployment-version.cjs \
             --base-url https://6529.io \
-            --expected-version "${COMMIT_SHA}" \
+            --expected-version "$COMMIT_SHA" \
             --attempts 12 \
             --required-matches 3 \
             --delay-ms 10000 \
             --timeout-ms 10000 \
             --output deployment-version-evidence.json
 
-          node ops/scripts/deployment-bus.cjs record-post-deploy-watch \
-            --file deployment-bus-manifest.json \
-            --status in_progress \
-            --observed-duration-minutes 0 \
-            --checkpoint http-version-match \
-            --checkpoint-status passed \
-            --evidence "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
-            --notes "GET /api/version matched the production commit SHA."
-
       - name: Publish announced production version
         env:
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           set -euo pipefail
+          current_version="$(aws elasticbeanstalk describe-environments \
+            --environment-names "$BEANSTALK_ENV_NAME" \
+            --query 'Environments[0].VersionLabel' \
+            --output text)"
+          if [ "$current_version" != "$COMMIT_SHA" ]; then
+            echo "::error::Production advanced to $current_version before the version announcement; refusing to overwrite it with $COMMIT_SHA."
+            exit 1
+          fi
 
           announcement_file="current-production-version.json"
           published_at="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
-          announced_version_cdn_host="$(node -e 'process.stdout.write(new URL(process.env.ANNOUNCED_VERSION_ENDPOINT).hostname)')"
-
-          # The app only treats this announcement as newer when published_at is after VERSION_BUILD_TIMESTAMP.
-          cat > "$announcement_file" <<JSON
-          {
-            "schema_version": "frontend-announced-version.v1",
-            "environment": "production",
-            "version": "${COMMIT_SHA}",
-            "ready": true,
-            "published_at": "${published_at}",
-            "workflow_run_url": "${RUN_URL}"
-          }
-          JSON
-
+          announced_host="$(node -e 'process.stdout.write(new URL(process.env.ANNOUNCED_VERSION_ENDPOINT).hostname)')"
+          jq -n \
+            --arg version "$COMMIT_SHA" \
+            --arg published_at "$published_at" \
+            --arg workflow_run_url "$RUN_URL" \
+            '{schema_version:"frontend-announced-version.v1",environment:"production",version:$version,ready:true,published_at:$published_at,workflow_run_url:$workflow_run_url}' \
+            > "$announcement_file"
           aws s3 cp "$announcement_file" "s3://${AWS_BUCKET}/${ANNOUNCED_VERSION_OBJECT_KEY}" \
             --cache-control "no-store, max-age=0, must-revalidate" \
             --content-type "application/json"
-
-          if distribution_id="$(aws cloudfront list-distributions \
-            --query "DistributionList.Items[?DomainName=='${announced_version_cdn_host}'].Id | [0]" \
-            --output text 2>/tmp/announced-version-cloudfront-error)"; then
-            if [ -n "$distribution_id" ] && [ "$distribution_id" != "None" ]; then
-              if aws cloudfront create-invalidation \
-                --distribution-id "$distribution_id" \
-                --paths "/${ANNOUNCED_VERSION_OBJECT_KEY}"; then
-                echo "Requested CloudFront invalidation for /${ANNOUNCED_VERSION_OBJECT_KEY}."
-              else
-                echo "::warning::Could not invalidate /${ANNOUNCED_VERSION_OBJECT_KEY}; announced version may update after the CDN cache expires."
-              fi
-            else
-              echo "::warning::Could not find the asset CloudFront distribution for ${announced_version_cdn_host}; announced version may update after the CDN cache expires."
-            fi
-          else
-            echo "::warning::Could not list CloudFront distributions for announced version invalidation."
-            cat /tmp/announced-version-cloudfront-error || true
+          distribution_id="$(aws cloudfront list-distributions \
+            --query "DistributionList.Items[?DomainName=='${announced_host}' || contains(Aliases.Items || \`[]\`, '${announced_host}')].Id | [0]" \
+            --output text)"
+          if [ -n "$distribution_id" ] && [ "$distribution_id" != None ]; then
+            aws cloudfront create-invalidation \
+              --distribution-id "$distribution_id" \
+              --paths "/${ANNOUNCED_VERSION_OBJECT_KEY}" || true
           fi
 
-      - name: Upload durable production version evidence
-        id: durable-version-evidence
-        continue-on-error: true
-        env:
-          DEPLOYMENT_ARTIFACT_S3_PREFIX: ${{ vars.DEPLOYMENT_ARTIFACT_S3_PREFIX || 's3://6529reviewbot-prod-artifacts/frontend-deployment/' }}
-        run: |
-          set -euo pipefail
-
-          node ops/scripts/deployment-bus.cjs upload-validation-artifact \
-            --file deployment-bus-manifest.json \
-            --pack deployment:http-version \
-            --status passed \
-            --source-file deployment-version-evidence.json \
-            --artifact-name deployment-version-evidence.json \
-            --s3-prefix "${DEPLOYMENT_ARTIFACT_S3_PREFIX}" \
-            --retention-policy standard-90-days \
-            --run-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
-            --notes "Durable production GET /api/version evidence."
-
-      - name: Warn if durable production evidence upload failed
-        if: steps.durable-version-evidence.outcome == 'failure'
-        run: |
-          echo "::warning::Durable production version evidence upload failed. The deployment can continue, but release readiness remains incomplete until artifact storage/IAM is fixed and evidence is recorded."
-
-      - name: Mark production deployment terminal
-        if: always() && steps.deployment-record.outputs.deployment_id != ''
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-          JOB_STATUS: ${{ job.status }}
-        run: |
-          set -euo pipefail
-
-          case "$JOB_STATUS" in
-            success)
-              state="success"
-              manifest_status="deploy_verified"
-              description="Production deployment verified"
-              ;;
-            cancelled)
-              state="error"
-              manifest_status="cancelled"
-              description="Production deployment cancelled before verification"
-              ;;
-            *)
-              state="failure"
-              manifest_status="failed"
-              description="Production deployment failed before verification"
-              ;;
-          esac
-
-          node ops/scripts/deployment-bus.cjs heartbeat-manifest \
-            --file deployment-bus-manifest.json \
-            --status "$manifest_status" \
-            --phase terminal \
-            --message "$description"
-
-          node ops/scripts/deployment-bus.cjs github-create-status \
-            --deployment-id "${{ steps.deployment-record.outputs.deployment_id }}" \
-            --state "$state" \
-            --description "$description" \
-            --environment-url "https://6529.io" \
-            --log-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-
-      - name: Record production post-deploy watch checkpoint
-        if: always() && hashFiles('deployment-bus-manifest.json') != ''
-        env:
-          JOB_STATUS: ${{ job.status }}
-        run: |
-          set -euo pipefail
-
-          if [ "$JOB_STATUS" = "success" ]; then
-            watch_status="in_progress"
-            checkpoint_status="passed"
-            observed_minutes="0"
-            notes="Elastic Beanstalk health/readiness and deployed version validation passed; release-captain post-deploy watch still needs deployed-environment validation evidence."
-          else
-            watch_status="failed"
-            checkpoint_status="failed"
-            observed_minutes="0"
-            notes="Production workflow did not complete deploy verification successfully."
-          fi
-
-          node ops/scripts/deployment-bus.cjs record-post-deploy-watch \
-            --file deployment-bus-manifest.json \
-            --status "$watch_status" \
-            --observed-duration-minutes "$observed_minutes" \
-            --checkpoint eb-version-health \
-            --checkpoint-status "$checkpoint_status" \
-            --evidence "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
-            --notes "$notes"
-
-      - name: Create production release report
-        if: always()
-        run: |
-          if [ -f deployment-bus-manifest.json ]; then
-            node ops/scripts/deployment-bus.cjs release-report \
-              --file deployment-bus-manifest.json \
-              --output deployment-release-report.md
-          else
-            echo "No deployment-bus-manifest.json was created; skipping release report."
-          fi
-
-      - name: Upload deployment bus manifest
+      - name: Upload exact production version evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: deployment-bus-production-${{ env.COMMIT_SHA || github.run_id }}
-          path: |
-            deployment-bus-manifest.json
-            deployment-release-report.md
-            deployment-version-evidence.json
+          name: production-version-evidence-${{ github.run_id }}
+          path: deployment-version-evidence.json
           if-no-files-found: ignore
           retention-days: 90
 
+  notify-production-deployment:
+    name: Notify production deployment outcome
+    if: always()
+    needs:
+      - build-production-artifact
+      - resolve-production-artifact
+      - verify-production-artifact
+      - build-upload-deploy
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
       - name: Check out CI wave notifier
-        if: always()
         continue-on-error: true
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
@@ -855,20 +353,13 @@ jobs:
           sparse-checkout: scripts/notify-ci-wave.mjs
           sparse-checkout-cone-mode: false
 
-      - name: Notify about failure
-        uses: sarisia/actions-status-discord@eb045afee445dc055c18d3d90bd0f244fd062708 # v1
-        if: failure()
-        continue-on-error: true
-        env:
-          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-        with:
-          title: "Seize PROD WEB DEPLOY: CI pipeline is broken!!!"
-          description: ${{ env.COMMIT_SHA }} - ${{ env.COMMIT_MESSAGE }}
-          content: "<@&1162355330798325861>"
-          color: 0xff0000
-
       - name: Notify CI wave about failure
-        if: failure() && hashFiles('.ci-wave-notifier/scripts/notify-ci-wave.mjs') != ''
+        if: >-
+          (needs.build-production-artifact.result != 'success' ||
+          needs.resolve-production-artifact.result != 'success' ||
+          needs.verify-production-artifact.result != 'success' ||
+          needs.build-upload-deploy.result != 'success') &&
+          hashFiles('.ci-wave-notifier/scripts/notify-ci-wave.mjs') != ''
         continue-on-error: true
         env:
           CI_PIPELINES_ALERT_URL: ${{ vars.CI_PIPELINES_ALERT_URL }}
@@ -883,19 +374,13 @@ jobs:
           CI_PIPELINES_SHA: ${{ github.sha }}
         run: node .ci-wave-notifier/scripts/notify-ci-wave.mjs
 
-      - name: Notify about success
-        uses: sarisia/actions-status-discord@eb045afee445dc055c18d3d90bd0f244fd062708 # v1
-        if: success()
-        continue-on-error: true
-        env:
-          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-        with:
-          title: "Seize PROD WEB DEPLOY: CI pipeline complete"
-          description: ${{ env.COMMIT_SHA }} - ${{ env.COMMIT_MESSAGE }}
-          color: 0x00ff00
-
       - name: Notify CI wave about success
-        if: success() && hashFiles('.ci-wave-notifier/scripts/notify-ci-wave.mjs') != ''
+        if: >-
+          needs.build-production-artifact.result == 'success' &&
+          needs.resolve-production-artifact.result == 'success' &&
+          needs.verify-production-artifact.result == 'success' &&
+          needs.build-upload-deploy.result == 'success' &&
+          hashFiles('.ci-wave-notifier/scripts/notify-ci-wave.mjs') != ''
         continue-on-error: true
         env:
           CI_PIPELINES_ALERT_URL: ${{ vars.CI_PIPELINES_ALERT_URL }}
@@ -909,61 +394,5 @@ jobs:
           CI_PIPELINES_SERVICE: web
           CI_PIPELINES_SHA: ${{ github.sha }}
           CI_RELEASE_NOTES_PROMPT_PATH: ops/release-notes/release-notes.prompt.md
-        run: node .ci-wave-notifier/scripts/notify-ci-wave.mjs
-
-  notify-production-prerequisite-failure:
-    name: Notify about production prerequisite failure
-    needs:
-      - acquire-production-authority
-      - resolve-production-artifact
-      - build-upload-deploy
-    if: >-
-      ${{
-        always() &&
-        needs.build-upload-deploy.result == 'skipped' &&
-        (
-          needs.acquire-production-authority.result == 'failure' ||
-          needs.resolve-production-artifact.result == 'failure'
-        )
-      }}
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-
-    steps:
-      - name: Notify about prerequisite failure
-        continue-on-error: true
-        uses: sarisia/actions-status-discord@eb045afee445dc055c18d3d90bd0f244fd062708 # v1
-        env:
-          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-        with:
-          title: "Seize PROD WEB DEPLOY: CI pipeline is broken!!!"
-          description: ${{ github.sha }} - A production deployment prerequisite failed before build/upload/deploy.
-          content: "<@&1162355330798325861>"
-          color: 0xff0000
-
-      - name: Check out CI wave notifier
-        continue-on-error: true
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
-        with:
-          ref: ${{ github.workflow_sha }}
-          persist-credentials: false
-          path: .ci-wave-notifier
-          sparse-checkout: scripts/notify-ci-wave.mjs
-          sparse-checkout-cone-mode: false
-
-      - name: Notify CI wave about prerequisite failure
-        if: always() && hashFiles('.ci-wave-notifier/scripts/notify-ci-wave.mjs') != ''
-        continue-on-error: true
-        env:
-          CI_PIPELINES_ALERT_URL: ${{ vars.CI_PIPELINES_ALERT_URL }}
-          CI_PIPELINES_ALERT_SECRET: ${{ secrets.CI_PIPELINES_ALERT_SECRET }}
-          CI_PIPELINES_ALERT_API_AUTH: ${{ secrets.CI_PIPELINES_ALERT_API_AUTH }}
-          CI_PIPELINES_ALERT_TYPE: deploy
-          CI_PIPELINES_TARGET_ENV: production
-          CI_PIPELINES_STATUS: failure
-          CI_PIPELINES_TITLE: "WEB deploy failed"
-          CI_PIPELINES_ENVIRONMENT: production
-          CI_PIPELINES_SERVICE: web
-          CI_PIPELINES_SHA: ${{ github.sha }}
+          CI_RELEASE_NOTE_OPT_OUT: ${{ inputs.release_note_opt_out }}
         run: node .ci-wave-notifier/scripts/notify-ci-wave.mjs

@@ -45,14 +45,13 @@ const MUSEUM_FILES = new Set([
 ]);
 const POLICY_PATTERNS = Object.freeze([
   /^\.github\/workflows\//u,
-  /^ops\/deployment-bus\//u,
   /^ops\/testing-strategy\/museum-/u,
-  /^ops\/scripts\/(?:artifact-portability|deployment-bus|release-bus|testing-strategy)/u,
-  /^scripts\/(?:app-pr-ci-effective-plan|e2e-packs|museum-|pr-ci-policy-bundle|release-bus-|sync-e2e-manifest)/u,
+  /^ops\/scripts\/(?:artifact-portability|testing-strategy|verify-production-artifact)/u,
+  /^scripts\/(?:app-pr-ci-effective-plan|e2e-packs|museum-|sync-e2e-manifest)/u,
   /^tests\/packs\.manifest\.cjs$/u,
   /^tests\/museum\//u,
   /^__tests__\/lib\/museum\/publication\/corpusContracts\.test\.ts$/u,
-  /^__tests__\/scripts\/(?:app-pr-ci-effective-plan|e2e-packs|museum-|pr-ci-policy-bundle|release-bus-|sync-e2e-manifest)/u,
+  /^__tests__\/scripts\/(?:app-pr-ci-effective-plan|deployment-e2e|e2e-packs|frontend-deployment|museum-|production-artifact|production-build|production-e2e|sync-e2e-manifest)/u,
   /^(?:package\.json|pnpm-lock\.yaml|pnpm-workspace\.yaml)$/u,
 ]);
 const INTEGRITY_PATTERNS = Object.freeze([
