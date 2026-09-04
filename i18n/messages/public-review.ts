@@ -10,6 +10,7 @@ import { PUBLIC_REVIEW_FREEZING_FINALITY_MESSAGES } from "@/i18n/messages/public
 import { PUBLIC_REVIEW_REVENUE_SPLITS_MESSAGES } from "@/i18n/messages/public-review-revenue-splits";
 import { PUBLIC_REVIEW_RANDOMNESS_MESSAGES } from "@/i18n/messages/public-review-randomness";
 import { PUBLIC_REVIEW_METADATA_MESSAGES } from "@/i18n/messages/public-review-metadata";
+import { PUBLIC_REVIEW_STREAM_CONCEPT_PREVIEW_MESSAGES } from "@/i18n/messages/public-review-stream-concept-preview";
 
 export const PUBLIC_REVIEW_MESSAGES = {
   "navigation.nfts.theMemes": "The Memes",
@@ -177,6 +178,7 @@ export const PUBLIC_REVIEW_MESSAGES = {
   "publicReview.overviewGuide.audiences.auditors.description":
     "Start with known limits, test evidence, and the risks that still block release.",
   "publicReview.overviewGuide.startPage": "Start with {page}",
+  ...PUBLIC_REVIEW_STREAM_CONCEPT_PREVIEW_MESSAGES,
   ...PUBLIC_REVIEW_ARTISTS_AND_ROLES_MESSAGES,
   ...PUBLIC_REVIEW_ARTWORK_LIFECYCLE_MESSAGES,
   ...PUBLIC_REVIEW_FREEZING_FINALITY_MESSAGES,
