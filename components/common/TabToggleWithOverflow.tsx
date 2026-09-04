@@ -39,7 +39,7 @@ const getTabStateClassName = ({
 }): string => {
   if (isCompactPills) {
     return isActive
-      ? "tw-bg-white/[0.08] tw-font-medium tw-text-iron-50"
+      ? "tw-bg-white/[0.08] tw-font-semibold tw-text-iron-50"
       : "tw-bg-transparent tw-font-medium tw-text-iron-500 active:tw-bg-white/[0.06] desktop-hover:hover:tw-bg-white/[0.04] desktop-hover:hover:tw-text-iron-200";
   }
 

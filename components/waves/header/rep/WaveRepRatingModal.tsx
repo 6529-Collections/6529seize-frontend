@@ -225,10 +225,13 @@ export default function WaveRepRatingModal({
 
   return (
     <MobileWrapperDialog
-      title="Rate Wave REP"
+      title={t(WAVE_REP_MODAL_LOCALE, "waves.rep.modal.title")}
       isOpen
       onClose={onClose}
-      closeLabel="Close Wave REP dialog"
+      closeLabel={t(
+        WAVE_REP_MODAL_LOCALE,
+        "waves.rep.modal.closeAriaLabel"
+      )}
       tabletModal
       showScrollbar
       enableDragToClose
@@ -237,7 +240,9 @@ export default function WaveRepRatingModal({
       headerClassName="tw-mb-4 tw-pt-2 md:tw-pt-0"
     >
       <div ref={contentRef} className="tw-px-4 sm:tw-px-6">
-        <p className="tw-mb-0 tw-text-sm tw-text-iron-500">{wave.name}</p>
+        <p className="tw-mb-0 tw-break-words tw-text-sm tw-text-iron-500">
+          {wave.name}
+        </p>
         <form onSubmit={onSubmit} className="tw-mt-5">
           <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-1.5 tw-text-xs tw-font-medium tw-text-iron-500">
             <span>
