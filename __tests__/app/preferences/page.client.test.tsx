@@ -52,7 +52,9 @@ describe("PreferencesPageClient", () => {
     expect(notificationsTab).toHaveAttribute("aria-current", "page");
     expect(notificationsTab).toHaveClass(
       "tw-border-b-2",
-      "tw-border-primary-400"
+      "tw-border-primary-400",
+      "tw-pb-3",
+      "tw-pt-2"
     );
     expect(screen.getByText("Notification settings panel")).toBeVisible();
     expect(container.querySelector("main")).toHaveClass("tw-min-h-dvh");
