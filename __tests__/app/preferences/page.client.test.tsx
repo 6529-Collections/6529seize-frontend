@@ -53,9 +53,12 @@ describe("PreferencesPageClient", () => {
     expect(notificationsTab).toHaveClass(
       "tw-border-b-2",
       "tw-border-primary-400",
-      "tw-pb-3",
-      "tw-pt-2"
+      "tw-px-1",
+      "tw-py-4"
     );
+    expect(
+      screen.getByRole("navigation", { name: "Preference sections" })
+    ).toHaveClass("tw-gap-x-3", "lg:tw-gap-x-4");
     expect(screen.getByText("Notification settings panel")).toBeVisible();
     expect(container.querySelector("main")).toHaveClass("tw-min-h-dvh");
   });
