@@ -70,7 +70,7 @@ The runtime `NODE_AUTH_TOKEN` needs read-only GitHub Packages access. For a
 normal interactive install, simply run:
 
 ```bash
-6529 install
+6529 ci
 ```
 
 If `NODE_AUTH_TOKEN` is not already set, the wrapper first checks the macOS
@@ -111,15 +111,19 @@ Important notes:
 This repository intentionally routes project commands through `6529`.
 Do not use plain `pnpm install`, `pnpm dev`, or `npm run ...`; the scripts are
 guarded so dependency installs and package scripts use the expected secure path.
+Unsupported wrapper commands fail closed; use `6529 run <script>` for
+package.json scripts.
 
 Common commands:
 
 ```bash
-6529 install
-6529 install:frozen
+6529 ci
 6529 add <package>
 6529 add -D <package>
-6529 update
+6529 remove <package>
+6529 update [package]
+6529 audit
+6529 audit:fix
 6529 run dev
 6529 run build
 6529 run test

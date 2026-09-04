@@ -20,7 +20,13 @@ const AUTH_KEY = `//${ALLOWED_REGISTRY_HOST}/:_authToken`;
 const SECURE_REPOSITORY_ROOT_ARGUMENT = "--seize-secure-repository-root";
 const SECURE_PNPM_BINARY_ARGUMENT = "--seize-secure-pnpm-binary";
 const REQUIRED_LOCKFILE_PRIVATE_SCOPE_REFERENCE_COUNT = 4;
-const ALLOWED_PNPM_COMMANDS = new Set(["add", "audit", "install", "update"]);
+const ALLOWED_PNPM_COMMANDS = new Set([
+  "add",
+  "audit",
+  "install",
+  "remove",
+  "update",
+]);
 const FORBIDDEN_NPMRC_CONFIG_NAMES = new Set([
   "alwaysauth",
   "ca",
@@ -978,7 +984,7 @@ function forbiddenProjectLocationOptionName(argument) {
 function validatePnpmArguments(args) {
   if (!ALLOWED_PNPM_COMMANDS.has(args[0])) {
     throw policyError(
-      "only install, add, update, and audit may use authenticated package routing"
+      "only install, add, remove, update, and audit may use authenticated package routing"
     );
   }
 
