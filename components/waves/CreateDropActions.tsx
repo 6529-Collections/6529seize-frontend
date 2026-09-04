@@ -340,8 +340,21 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
         <div className="tw-contents">
           {isCompactLayout ? (
             <>
-              {!isPollActive && (
-                <div className="tw-col-start-1 tw-row-start-2 tw-mb-0.5 tw-self-end">
+              <div
+                data-testid="drop-actions-compact-slot"
+                className="tw-col-start-1 tw-row-start-2 tw-mb-0.5 tw-size-10 tw-self-end"
+              >
+                {isPollActive ? (
+                  <span
+                    aria-hidden="true"
+                    className="tw-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-primary-400/20 tw-bg-primary-500/10 tw-text-primary-300"
+                  >
+                    <ChartBarIcon
+                      className="tw-size-5"
+                      aria-hidden="true"
+                    />
+                  </span>
+                ) : (
                   <motion.button
                     data-testid="drop-actions-toggle-motion"
                     type="button"
@@ -363,8 +376,8 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                       className="tw-size-4"
                     />
                   </motion.button>
-                </div>
-              )}
+                )}
+              </div>
               <AnimatePresence initial={false}>
                 {showOptions && !isPollActive && (
                   <motion.div
@@ -374,8 +387,9 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                     {...compactTrayMotionProps}
                     role="group"
                     aria-label={actionsLabel}
-                    className="tw-col-span-2 tw-col-start-2 tw-row-start-3 tw-mt-2 tw-overflow-hidden md:tw-col-span-1 md:tw-col-start-2"
+                    className="tw-col-span-2 tw-col-start-2 tw-row-start-3 tw-overflow-hidden md:tw-col-span-1 md:tw-col-start-2"
                   >
+                    <div aria-hidden="true" className="tw-h-2" />
                     <div className="tw-rounded-2xl tw-border tw-border-white/10 tw-bg-iron-950/95 tw-p-2 tw-pl-0 tw-shadow-[0_12px_32px_rgba(0,0,0,0.28)]">
                       <div className="tw-flex tw-flex-wrap tw-items-start tw-justify-start tw-gap-6">
                         {isDropMode && (
