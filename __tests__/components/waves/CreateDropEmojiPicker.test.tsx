@@ -30,13 +30,16 @@ jest.mock("@emoji-mart/react", () => ({
   default: ({
     onEmojiSelect,
     autoFocus,
+    dynamicWidth,
   }: {
     onEmojiSelect: (emoji: any) => void;
     autoFocus?: boolean;
+    dynamicWidth?: boolean;
   }) => (
     <button
       data-testid="picker"
       data-auto-focus={String(autoFocus)}
+      data-dynamic-width={String(dynamicWidth)}
       onClick={() => onEmojiSelect({ native: "😊", id: "smile" })}
     >
       Pick Emoji
@@ -145,6 +148,8 @@ describe("CreateDropEmojiPicker", () => {
       expect(wrapper.style.position).toBe("absolute");
       expect(wrapper.style.top).toBe("8px");
       expect(wrapper.style.left).toBe("8px");
+      expect(wrapper.style.width).toBe("352px");
+      expect(wrapper.style.height).toBe("435px");
       expect(wrapper.style.zIndex).toBe("1000");
     });
 
@@ -269,7 +274,16 @@ describe("CreateDropEmojiPicker", () => {
     expect(picker.parentElement?.style.position).toBe("absolute");
   });
 
-  it("keeps the anchored picker inside the viewport", async () => {
+  it("fits the anchored picker inside a 320px viewport", async () => {
+    Object.defineProperty(window, "innerWidth", {
+      configurable: true,
+      value: 320,
+    });
+    Object.defineProperty(window, "innerHeight", {
+      configurable: true,
+      value: 400,
+    });
+
     render(<CreateDropEmojiPicker />);
     const toggleButton = screen.getByRole("button", { hidden: true });
 
@@ -286,8 +300,11 @@ describe("CreateDropEmojiPicker", () => {
     const picker = await screen.findByTestId("picker");
 
     await waitFor(() => {
-      expect(picker.parentElement?.style.top).toBe("325px");
-      expect(picker.parentElement?.style.left).toBe("664px");
+      expect(picker.parentElement?.style.top).toBe("8px");
+      expect(picker.parentElement?.style.left).toBe("8px");
+      expect(picker.parentElement?.style.width).toBe("304px");
+      expect(picker.parentElement?.style.height).toBe("384px");
+      expect(picker).toHaveAttribute("data-dynamic-width", "true");
     });
   });
 

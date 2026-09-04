@@ -21,11 +21,13 @@ interface EmojiMartPickerProps {
   readonly categories: string[];
   readonly categoryIcons: Record<string, { src: string }>;
   readonly autoFocus?: boolean | undefined;
+  readonly dynamicWidth?: boolean | undefined;
 }
 
 interface LazyEmojiPickerProps {
   readonly onEmojiSelect: (emoji: EmojiPickerSelection) => void;
   readonly autoFocus?: boolean | undefined;
+  readonly dynamicWidth?: boolean | undefined;
 }
 
 type EmojiMartPickerComponent = ComponentType<EmojiMartPickerProps>;
@@ -54,6 +56,7 @@ const loadEmojiMartPicker = async (): Promise<EmojiMartPickerComponent> => {
 export default function LazyEmojiPicker({
   onEmojiSelect,
   autoFocus,
+  dynamicWidth,
 }: LazyEmojiPickerProps) {
   const {
     categories,
@@ -122,6 +125,7 @@ export default function LazyEmojiPicker({
       categories={categories}
       categoryIcons={categoryIcons}
       autoFocus={autoFocus}
+      dynamicWidth={dynamicWidth}
     />
   );
 }
