@@ -51,8 +51,8 @@ function MobileTabButton({
     ? `${activeStyles.button} ${activeStyles.pressed}`
     : "tw-bg-transparent active:tw-bg-white/[0.06] desktop-hover:hover:tw-bg-white/[0.03]";
   const labelColorClasses = isSelected
-    ? activeStyles.label
-    : "tw-text-iron-400";
+    ? `${activeStyles.label} tw-font-bold`
+    : "tw-font-semibold tw-text-iron-400";
   const valueColorClasses = isSelected ? "tw-text-white" : "tw-text-iron-300";
 
   return (
@@ -63,12 +63,12 @@ function MobileTabButton({
       className={`tw-relative tw-flex tw-min-h-16 tw-min-w-0 tw-cursor-pointer tw-touch-manipulation tw-flex-col tw-items-center tw-justify-center tw-gap-1 tw-border-b-0 tw-border-l tw-border-r-0 tw-border-t-0 tw-border-solid tw-border-white/[0.06] tw-px-2 tw-py-2.5 tw-text-center tw-transition-colors tw-duration-150 first:tw-border-l-0 focus-visible:tw-z-10 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-2px] focus-visible:tw-outline-primary-300 motion-reduce:tw-transition-none ${buttonStateClasses}`}
     >
       <span
-        className={`tw-max-w-full tw-whitespace-nowrap tw-text-lg tw-font-semibold tw-leading-none tw-tracking-tight tw-transition-colors tw-duration-150 motion-reduce:tw-transition-none ${valueColorClasses}`}
+        className={`tw-block tw-w-full tw-max-w-full tw-truncate tw-text-lg tw-font-semibold tw-leading-none tw-tracking-tight tw-transition-colors tw-duration-150 motion-reduce:tw-transition-none ${valueColorClasses}`}
       >
         {value}
       </span>
       <span
-        className={`tw-flex tw-max-w-full tw-items-center tw-justify-center tw-text-[0.625rem] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-normal min-[360px]:tw-text-[0.6875rem] min-[360px]:tw-tracking-wider ${labelColorClasses}`}
+        className={`tw-block tw-w-full tw-max-w-full tw-truncate tw-text-[0.625rem] tw-uppercase tw-leading-4 tw-tracking-normal min-[360px]:tw-text-[0.6875rem] min-[360px]:tw-tracking-wider ${labelColorClasses}`}
       >
         {label}
       </span>
