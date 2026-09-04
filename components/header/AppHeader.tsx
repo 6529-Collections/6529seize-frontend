@@ -2,7 +2,7 @@
 
 import {
   Bars3Icon,
-  EllipsisHorizontalIcon,
+  EllipsisVerticalIcon,
   LockClosedIcon,
   PlusIcon,
 } from "@heroicons/react/24/outline";
@@ -49,6 +49,10 @@ import { getWaveDescriptionPreviewText } from "@/helpers/waves/waveDescriptionPr
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { getActiveViewFromUrl } from "../navigation/ViewContext";
 import { getActiveWaveIdFromUrl } from "@/helpers/navigation.helpers";
+import {
+  isProfilePreferencesEntry,
+  PREFERENCES_ENTRY_SOURCE_PARAM,
+} from "@/helpers/preferences-navigation";
 import {
   getAppHeaderMoreMenuItems,
   type HeaderMoreMenuItem,
@@ -397,7 +401,7 @@ const HeaderMoreMenu = ({
       trigger={
         <>
           <span className="tw-sr-only">More header actions</span>
-          <EllipsisHorizontalIcon className="tw-size-5 tw-flex-shrink-0" />
+          <EllipsisVerticalIcon className="tw-size-5 tw-flex-shrink-0" />
         </>
       }
       items={items}
@@ -553,7 +557,12 @@ export default function AppHeader() {
 
   const isProfilePage = typeof params["user"] === "string";
   const preferencesProfileReturnTo =
-    isCapacitor && pathname === "/preferences" && connectedProfile?.handle
+    isCapacitor &&
+    pathname === "/preferences" &&
+    isProfilePreferencesEntry(
+      searchParams.get(PREFERENCES_ENTRY_SOURCE_PARAM)
+    ) &&
+    connectedProfile?.handle
       ? `/${encodeURIComponent(connectedProfile.handle)}`
       : null;
   const profileCollectedReturnContext = isCapacitor

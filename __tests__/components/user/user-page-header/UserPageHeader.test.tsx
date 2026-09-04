@@ -562,7 +562,10 @@ describe("UserPageHeader", () => {
       );
     });
     preferencesButtons.forEach((preferencesButton) => {
-      expect(preferencesButton).toHaveAttribute("href", "/preferences");
+      expect(preferencesButton).toHaveAttribute(
+        "href",
+        "/preferences?from=profile"
+      );
     });
   });
 
@@ -586,7 +589,10 @@ describe("UserPageHeader", () => {
     screen
       .getAllByRole("link", { name: "Preferences" })
       .forEach((preferencesLink) => {
-        expect(preferencesLink).toHaveAttribute("href", "/preferences");
+        expect(preferencesLink).toHaveAttribute(
+          "href",
+          "/preferences?from=profile"
+        );
       });
   });
 

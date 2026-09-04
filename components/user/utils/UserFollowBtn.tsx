@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useRef, useState } from "react";
+import { useContext, useRef, useState, type ReactNode } from "react";
 import {
   QueryKey,
   ReactQueryWrapperContext,
@@ -129,6 +129,7 @@ export default function UserFollowBtn({
   blockStateLoading = false,
   unblockPending = false,
   onUnblock,
+  beforeFollowAction,
 }: {
   readonly handle: string;
   readonly size?: UserFollowBtnSize | undefined;
@@ -140,6 +141,7 @@ export default function UserFollowBtn({
   readonly blockStateLoading?: boolean | undefined;
   readonly unblockPending?: boolean | undefined;
   readonly onUnblock?: (() => void) | undefined;
+  readonly beforeFollowAction?: ReactNode | undefined;
 }) {
   const { onIdentityFollowChange } = useContext(ReactQueryWrapperContext);
   const { setToast, requestAuth } = useContext(AuthContext);
@@ -318,6 +320,7 @@ export default function UserFollowBtn({
           iconClassName={DIRECT_MESSAGE_ICON_CLASSES[size]}
         />
       )}
+      {beforeFollowAction}
       {showFollowButton ? (
         <Button
           onClick={onFollow}

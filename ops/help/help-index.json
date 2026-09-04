@@ -4762,12 +4762,13 @@
         "Direct messages still arrive in Essential only mode, but their optional alerts are paused.",
         "Device push settings remain separate, and a suppressed in-app notification cannot trigger a push.",
         "Profile Preferences is available from the app sidebar, the desktop profile menu, and the Preferences action in the authenticated user's own profile header.",
-        "From Preferences, desktop users can select Back to profile, while mobile-app users use the standard app-header back arrow; both return to the active profile."
+        "When Preferences is opened from the active profile, desktop users can select Back to profile and mobile-app users can use the standard app-header back arrow. Sidebar, desktop profile-menu, and direct entries omit that profile-return control."
       ],
       "canonical_path": "/notifications",
       "related_paths": ["/messages", "/notifications"],
       "tags": ["profile", "privacy", "direct messages", "notifications"],
       "source_refs": [
+        "components/header/AppHeader.tsx",
         "components/header/ProfilePreferencesSettings.tsx",
         "components/user/user-page-header/UserPageHeaderClient.tsx",
         "ops/docs/notifications/feature-profile-preferences.md",

@@ -19,6 +19,11 @@ action sits in the far-right owner area on desktop. Touch-first and phone
 layouts place an icon-only action beside **Edit profile**; smaller
 fine-pointer layouts place the labeled action beside the identity.
 
+Only the profile-header entry carries profile-return context. It shows **Back
+to profile** on desktop and the standard app-header back arrow in the native
+app. Sidebar, desktop profile-menu, and direct entries omit that return
+control.
+
 The profile-header action is hidden while an active profile proxy is in use.
 
 ## User Journey
@@ -26,8 +31,9 @@ The profile-header action is hidden while an active profile proxy is in use.
 1. Open your own profile and select **Preferences**.
 2. Choose **Notifications & messages**, **Blocked Profiles**, or **Reports**.
 3. Review or change the available settings for the active profile.
-4. Return to the active profile with **Back to profile** on desktop or the
-   standard back arrow in the mobile app header.
+4. When Preferences was opened from the profile header, return to the active
+   profile with **Back to profile** on desktop or the standard back arrow in
+   the mobile app header.
 
 ## Common Scenarios
 
@@ -93,8 +99,9 @@ If Preferences opens without profile-scoped controls, confirm that the intended
 profile is active and authenticated. Create the profile first when prompted,
 then reopen Preferences.
 
-The return control always targets the active profile, so it remains useful when
-`/preferences` was opened directly rather than through browser history.
+The return control appears only when Preferences was opened from the active
+profile and always targets that profile. Direct, sidebar, and desktop
+profile-menu entries omit it and rely on the standard shell navigation.
 
 ## Limitations / Notes
 

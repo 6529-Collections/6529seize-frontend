@@ -13,6 +13,8 @@ to the Waves list.
 - Create routes: `/waves/create`, `/messages/create`.
 - Active wave routes: `/waves/{waveId}` and `/messages/{waveId}`.
 - Legacy `/waves?wave={waveId}` links are normalized to `/waves/{waveId}`.
+- Preferences at `/preferences?from=profile` when opened from the active
+  profile.
 - Profile routes (`/{user}` and tabs) only when in-app history can go back.
 
 ## Entry Points
@@ -22,6 +24,7 @@ to the Waves list.
   right swipe from the left edge of the main content.
 - Open a route with `?drop={dropId}`.
 - Open `/waves/create` or `/messages/create`.
+- Open Preferences from the active profile's **Preferences** action.
 - Open a profile route after moving from another app route.
 
 ## User Journey
@@ -29,12 +32,14 @@ to the Waves list.
 1. Header shows `Back` only when at least one condition is true:
    - active wave context exists,
    - route is `/waves/create` or `/messages/create`,
+   - Preferences includes its explicit profile-entry context,
    - route is a profile page and in-app history can go back.
 2. User taps `Back`. In a native-app standard wave, the user can instead swipe
    right from the left edge of the main content.
 3. The app applies the first match in this order:
    - `/waves/create` -> replace to `/waves`
    - `/messages/create` -> replace to `/messages`
+   - profile-origin Preferences -> return to the active profile
    - `drop` query exists -> remove only `drop`, keep path and other query params
    - active wave context -> clear active wave state and return to `/waves` or
      `/messages`
@@ -45,6 +50,8 @@ to the Waves list.
 
 - Leave create flow: `Back` from `/waves/create` or `/messages/create` returns
   to the matching list route.
+- Return from Preferences: when it was opened from the active profile, `Back`
+  returns to that profile.
 - Close focused drop: if `?drop=` exists, `Back` removes only `drop`.
 - Leave thread: `Back` clears active thread state and returns to section root.
 - Leave a standard wave in the native app: an edge swipe right clears the
@@ -62,6 +69,8 @@ to the Waves list.
   or horizontally scrollable content do not trigger Back.
 - Profile routes hide `Back` when there is no valid in-app target (for example
   direct entry or same-profile-only browsing).
+- Preferences hides `Back` when opened from the sidebar or directly, because
+  those entries do not carry profile-return context.
 - If active wave metadata is missing, the app clears wave state and routes to
   `/waves` or `/messages`, preserving non-`wave` query params.
 

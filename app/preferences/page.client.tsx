@@ -8,6 +8,10 @@ import ReportsPreferencesSettings from "@/components/preferences/ReportsPreferen
 import UserSetUpProfileCta from "@/components/user/utils/set-up-profile/UserSetUpProfileCta";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useCapacitor from "@/hooks/useCapacitor";
+import {
+  getPreferencesHref,
+  type PreferencesRouteTab,
+} from "@/helpers/preferences-navigation";
 import { t } from "@/i18n/messages";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
@@ -16,7 +20,7 @@ export type PreferencesTab = "notifications" | "blocked-profiles" | "reports";
 
 const TABS: ReadonlyArray<{
   readonly id: PreferencesTab;
-  readonly href: string;
+  readonly routeTab: PreferencesRouteTab | undefined;
   readonly labelKey:
     | "preferences.tabs.notifications"
     | "preferences.tabs.blockedProfiles"
@@ -24,25 +28,27 @@ const TABS: ReadonlyArray<{
 }> = [
   {
     id: "notifications",
-    href: "/preferences",
+    routeTab: undefined,
     labelKey: "preferences.tabs.notifications",
   },
   {
     id: "blocked-profiles",
-    href: "/preferences?tab=blocked-profiles",
+    routeTab: "blocked-profiles",
     labelKey: "preferences.tabs.blockedProfiles",
   },
   {
     id: "reports",
-    href: "/preferences?tab=reports",
+    routeTab: "reports",
     labelKey: "preferences.tabs.reports",
   },
 ];
 
 export default function PreferencesPageClient({
   activeTab,
+  returnToProfile = false,
 }: {
   readonly activeTab: PreferencesTab;
+  readonly returnToProfile?: boolean | undefined;
 }) {
   const locale = useBrowserLocale();
   const { isCapacitor } = useCapacitor();
@@ -65,7 +71,7 @@ export default function PreferencesPageClient({
     <main className="tailwind-scope tw-min-h-dvh tw-bg-black tw-px-4 tw-py-8 sm:tw-px-6 sm:tw-py-12">
       <div className="tw-mx-auto tw-w-full tw-max-w-5xl">
         <div>
-          {!isCapacitor && profileHref && (
+          {!isCapacitor && returnToProfile && profileHref && (
             <Link
               href={profileHref}
               className="tw-group -tw-ml-2 tw-mb-4 tw-inline-flex tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-md tw-px-2 tw-text-sm tw-font-medium tw-text-iron-300 tw-no-underline tw-transition-colors desktop-hover:hover:tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
@@ -94,7 +100,10 @@ export default function PreferencesPageClient({
             return (
               <Link
                 key={tab.id}
-                href={tab.href}
+                href={getPreferencesHref({
+                  tab: tab.routeTab,
+                  fromProfile: returnToProfile,
+                })}
                 aria-current={isActive ? "page" : undefined}
                 className={`tw-relative tw-px-3 tw-pb-3 tw-pt-2 tw-text-sm tw-font-semibold tw-no-underline tw-transition-colors focus-visible:tw-rounded focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 ${
                   isActive
