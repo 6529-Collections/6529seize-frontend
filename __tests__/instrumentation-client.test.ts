@@ -539,11 +539,14 @@ describe("instrumentation-client", () => {
     },
   });
 
-  const createDropReactionNetworkEvent = (eventId: string) => ({
+  const createDropReactionNetworkEvent = (
+    eventId: string,
+    errorKind = "network"
+  ) => ({
     event_id: eventId,
     level: "warning",
     message: "",
-    fingerprint: ["drop-reaction", "network"],
+    fingerprint: ["drop-reaction", errorKind],
     exception: {
       values: [
         {
@@ -559,7 +562,7 @@ describe("instrumentation-client", () => {
     tags: {
       feature: "drop-reaction",
       operation: "reaction-request",
-      error_kind: "network",
+      error_kind: errorKind,
       url: "/waves/private-wave-id",
     },
     request: {
@@ -660,7 +663,7 @@ describe("instrumentation-client", () => {
         data: {
           action: "add",
           endpoint_family: "drop_reaction",
-          error_kind: "network",
+          error_kind: errorKind,
           method: "POST",
           mutation_sequence: 1,
           route_family: "/waves/[wave]",
@@ -4116,6 +4119,30 @@ describe("instrumentation-client", () => {
     });
 
     expect(result).toBeNull();
+  });
+
+  it("keeps a reaction timeout warning outside the network sampler", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createDropReactionNetworkEvent(
+      "reaction-timeout-event",
+      "timeout"
+    );
+
+    const result = beforeSend(event, {
+      originalException: new Error(dropReactionRequestFailedMessage),
+    });
+
+    expect(result).not.toBeNull();
+    expect(result?.tags).toEqual(
+      expect.objectContaining({
+        feature: "drop-reaction",
+        operation: "reaction-request",
+        error_kind: "timeout",
+      })
+    );
+    expect(result?.tags?.["network_failure_kind"]).toBeUndefined();
+    expect(result?.tags?.["network_noise_sampled"]).toBeUndefined();
+    expect(result?.fingerprint).toEqual(["drop-reaction", "timeout"]);
   });
 
   it("keeps and tags a sampled-in concurrent synthetic drop-reaction transport warning", () => {
