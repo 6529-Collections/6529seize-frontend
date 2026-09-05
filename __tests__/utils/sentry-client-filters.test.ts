@@ -28,6 +28,7 @@ import {
   shouldFilterPoperBlockerOrphanFetchRejection,
   shouldFilterExpectedWaveRequestReplacementAbort,
   shouldFilterRabbyChromeUserRejectedRequest,
+  shouldFilterRabbyMobileAndroidJavaBridgePostMessageError,
   shouldFilterRabbyMobileRainbowKitNotFoundError,
   shouldFilterRabbyMobileUserRejectedRequest,
   shouldFilterSentryRouteParameterizationError,
@@ -164,6 +165,15 @@ type InstagramPageHideBridgeEventOptions = {
   includeAdditionalException?: boolean | undefined;
   extra?: Record<string, unknown> | undefined;
 };
+type RabbyMobileAndroidJavaBridgeEventOptions = {
+  exceptionType?: string | undefined;
+  message?: string | undefined;
+  userAgent?: string | undefined;
+  mechanismType?: string | undefined;
+  handled?: boolean | undefined;
+  frames?: SentryStackFrame[] | undefined;
+  additionalException?: SentryExceptionValue | undefined;
+};
 
 type ExpectedWaveReplacementAbortOverrides = {
   exception?: Partial<SentryExceptionValue> | undefined;
@@ -260,6 +270,8 @@ describe("sentry-client-filters", () => {
     "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 RabbyMobile/1.0 RabbyMobileIOS/1.0 Mobile/15E148";
   const rabbyMobileAndroidUserAgent =
     "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 RabbyMobile/0.6.78 RabbyMobileAndroid/0.6.78 Mobile Safari/537.36";
+  const rabbyMobileAndroidJavaBridgePostMessageErrorMessage =
+    "Error invoking postMessage: Java bridge method invocation error";
   const braveWalletUserAgent =
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.1 Safari/605.1.15 Brave";
   const rainbowKitNotFoundMessage = "not found rainbowkit";
@@ -2238,11 +2250,13 @@ describe("sentry-client-filters", () => {
     ...overrides,
   });
 
-  const createObservedRabbyRainbowKitRawFrames = () => [
+  const createObservedRabbyRainbowKitRawFrames = (
+    wrapperFunction = "n"
+  ) => [
     {
       filename: "app:///_next/static/chunks/observed-rabby-webview.js",
       abs_path: "app:///_next/static/chunks/observed-rabby-webview.js",
-      function: "n",
+      function: wrapperFunction,
       in_app: true,
     },
     {
@@ -2254,7 +2268,8 @@ describe("sentry-client-filters", () => {
   ];
 
   const createRabbyMobileRainbowKitNotFoundEvent = (
-    overrides: TestSentryClientEventOverrides = {}
+    overrides: TestSentryClientEventOverrides = {},
+    wrapperFunction = "n"
   ): TestSentryClientEvent =>
     ({
       event_id: "rabby-mobile-rainbowkit-not-found",
@@ -2269,13 +2284,88 @@ describe("sentry-client-filters", () => {
               handled: false,
             },
             stacktrace: {
-              frames: createObservedRabbyRainbowKitRawFrames(),
+              frames: createObservedRabbyRainbowKitRawFrames(wrapperFunction),
             },
           },
         ],
       },
       ...overrides,
     }) as TestSentryClientEvent;
+
+  const createObservedRabbyAndroidJavaBridgeFrames = (): SentryStackFrame[] => [
+    {
+      filename: "app:///_next/static/chunks/observed-rabby-webview.js",
+      abs_path: "app:///_next/static/chunks/observed-rabby-webview.js",
+      function: "r",
+      lineno: 7,
+      colno: 6173,
+      in_app: true,
+    },
+    {
+      filename: "<anonymous>",
+      abs_path: "<anonymous>",
+      function: "?",
+      lineno: 140,
+      colno: 7,
+      in_app: true,
+    },
+    {
+      filename: "<anonymous>",
+      abs_path: "<anonymous>",
+      function: "__rabby__updateUrl",
+      lineno: 115,
+      colno: 12,
+      in_app: true,
+    },
+    {
+      filename: "<anonymous>",
+      abs_path: "<anonymous>",
+      function: "window.__RABBY_WEBVIEW_BRIDGE_POSTER__",
+      lineno: 74,
+      colno: 35,
+      in_app: true,
+    },
+    {
+      filename: "<anonymous>",
+      abs_path: "<anonymous>",
+      function: "Proxy.myPostMessage",
+      lineno: 28,
+      colno: 12,
+      in_app: true,
+    },
+  ];
+
+  const createRabbyMobileAndroidJavaBridgePostMessageEvent = ({
+    exceptionType = "Error",
+    message = rabbyMobileAndroidJavaBridgePostMessageErrorMessage,
+    userAgent = rabbyMobileAndroidUserAgent,
+    mechanismType = "auto.browser.browserapierrors.setTimeout",
+    handled = false,
+    frames = createObservedRabbyAndroidJavaBridgeFrames(),
+    additionalException,
+  }: RabbyMobileAndroidJavaBridgeEventOptions = {}): TestSentryClientEvent => ({
+    event_id: "rabby-mobile-android-java-bridge-post-message",
+    transaction: "/the-memes",
+    request: {
+      headers: {
+        "User-Agent": userAgent,
+      },
+    },
+    exception: {
+      values: [
+        {
+          type: exceptionType,
+          value: message,
+          mechanism: {
+            type: mechanismType,
+            handled,
+          },
+          stacktrace: { frames },
+        },
+        ...(additionalException ? [additionalException] : []),
+      ],
+    },
+  });
 
   const createThirdPartyTelemetryNetworkErrorEvent = (
     overrides: TestSentryClientEventOverrides = {}
@@ -8829,16 +8919,34 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(true);
   });
 
-  it("filters the observed raw RainbowKit lookup error without wallet context", () => {
+  it("filters the exact RabbyMobile Android Java bridge postMessage error", () => {
     // Arrange
-    const event = createRabbyMobileRainbowKitNotFoundEvent();
+    const event = createRabbyMobileAndroidJavaBridgePostMessageEvent();
 
     // Act
-    const result = shouldFilterRabbyMobileRainbowKitNotFoundError(event);
+    const result =
+      shouldFilterRabbyMobileAndroidJavaBridgePostMessageError(event);
 
     // Assert
     expect(result).toBe(true);
   });
+
+  it.each(["n", "r"])(
+    "filters the observed raw RainbowKit lookup error with the %s wrapper",
+    (wrapperFunction) => {
+      // Arrange
+      const event = createRabbyMobileRainbowKitNotFoundEvent(
+        {},
+        wrapperFunction
+      );
+
+      // Act
+      const result = shouldFilterRabbyMobileRainbowKitNotFoundError(event);
+
+      // Assert
+      expect(result).toBe(true);
+    }
+  );
 
   it("keeps symbolicated RainbowKit lookup errors without the raw signature", () => {
     // Arrange
@@ -10398,6 +10506,144 @@ describe("sentry-client-filters", () => {
 
     // Act
     const result = shouldFilterRabbyMobileUserRejectedRequest(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it.each([
+    {
+      caseName: "a different exception type",
+      event: createRabbyMobileAndroidJavaBridgePostMessageEvent({
+        exceptionType: "TypeError",
+      }),
+    },
+    {
+      caseName: "a different message",
+      event: createRabbyMobileAndroidJavaBridgePostMessageEvent({
+        message: "Error invoking postMessage: bridge unavailable",
+      }),
+    },
+    {
+      caseName: "a non-Rabby user agent",
+      event: createRabbyMobileAndroidJavaBridgePostMessageEvent({
+        userAgent: "Mozilla/5.0 (Linux; Android 14) Chrome/137.0.0.0",
+      }),
+    },
+    {
+      caseName: "a RabbyMobile iOS user agent",
+      event: createRabbyMobileAndroidJavaBridgePostMessageEvent({
+        userAgent: rabbyMobileUserAgent,
+      }),
+    },
+    {
+      caseName: "a different mechanism",
+      event: createRabbyMobileAndroidJavaBridgePostMessageEvent({
+        mechanismType: "auto.browser.global_handlers.onerror",
+      }),
+    },
+    {
+      caseName: "a handled mechanism",
+      event: createRabbyMobileAndroidJavaBridgePostMessageEvent({
+        handled: true,
+      }),
+    },
+    {
+      caseName: "a different raw wrapper function",
+      event: createRabbyMobileAndroidJavaBridgePostMessageEvent({
+        frames: createObservedRabbyAndroidJavaBridgeFrames().map(
+          (frame, index) =>
+            index === 0 ? { ...frame, function: "n" } : frame
+        ),
+      }),
+    },
+    {
+      caseName: "a missing frame",
+      event: createRabbyMobileAndroidJavaBridgePostMessageEvent({
+        frames: createObservedRabbyAndroidJavaBridgeFrames().slice(1),
+      }),
+    },
+    {
+      caseName: "reordered frames",
+      event: createRabbyMobileAndroidJavaBridgePostMessageEvent({
+        frames: createObservedRabbyAndroidJavaBridgeFrames().reverse(),
+      }),
+    },
+    {
+      caseName: "a changed injected function",
+      event: createRabbyMobileAndroidJavaBridgePostMessageEvent({
+        frames: createObservedRabbyAndroidJavaBridgeFrames().map(
+          (frame, index) =>
+            index === 2 ? { ...frame, function: "__rabby__refreshUrl" } : frame
+        ),
+      }),
+    },
+    {
+      caseName: "a missing anonymous-frame function sentinel",
+      event: createRabbyMobileAndroidJavaBridgePostMessageEvent({
+        frames: createObservedRabbyAndroidJavaBridgeFrames().map(
+          (frame, index) =>
+            index === 1 ? { ...frame, function: undefined } : frame
+        ),
+      }),
+    },
+    {
+      caseName: "an additional exception",
+      event: createRabbyMobileAndroidJavaBridgePostMessageEvent({
+        additionalException: {
+          type: "Error",
+          value: "Application failure",
+        },
+      }),
+    },
+    {
+      caseName: "an app-owned source frame",
+      event: createRabbyMobileAndroidJavaBridgePostMessageEvent({
+        frames: [
+          ...createObservedRabbyAndroidJavaBridgeFrames(),
+          {
+            filename: "app:///components/providers/WagmiSetup.tsx",
+            function: "initializeWallet",
+            in_app: true,
+          },
+        ],
+      }),
+    },
+  ])(
+    "does not filter the RabbyMobile Android Java bridge error with $caseName",
+    ({ event }) => {
+      // Act
+      const result =
+        shouldFilterRabbyMobileAndroidJavaBridgePostMessageError(event);
+
+      // Assert
+      expect(result).toBe(false);
+    }
+  );
+
+  it("does not filter the RabbyMobile Android Java bridge error with an app-owned hint stack", () => {
+    // Arrange
+    const event = createRabbyMobileAndroidJavaBridgePostMessageEvent();
+    const appError = new Error("Application failure");
+    appError.stack =
+      "Error: Application failure\n    at initializeWallet (app:///components/providers/WagmiSetup.tsx:1:1)";
+
+    // Act
+    const result = shouldFilterRabbyMobileAndroidJavaBridgePostMessageError(
+      event,
+      { originalException: appError }
+    );
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter RainbowKit lookup errors with another raw wrapper function", () => {
+    // Arrange
+    const event = createRabbyMobileRainbowKitNotFoundEvent({}, "x");
+
+    // Act
+    const result = shouldFilterRabbyMobileRainbowKitNotFoundError(event);
 
     // Assert
     expect(result).toBe(false);

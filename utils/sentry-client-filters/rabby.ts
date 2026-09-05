@@ -9,6 +9,7 @@ import {
   rabbyMobileUserRejectedCode,
   rabbyMobileUserRejectedMessage,
   rabbyMobileUserRejectedStackPattern,
+  RABBY_MOBILE_ANDROID_USER_AGENT_TOKEN,
   RABBY_MOBILE_RAINBOWKIT_NOT_FOUND_MESSAGE,
   RABBY_MOBILE_USER_AGENT_TOKEN,
 } from "./constants";
@@ -20,6 +21,7 @@ import type {
 import {
   getContextString,
   getEventMessage,
+  getFramePaths,
   getHintExceptionMessage,
   getHintExceptionStack,
   getNumericValue,
@@ -28,10 +30,27 @@ import {
   getSerializedObjectRejection,
   getStringValue,
 } from "./value-utils";
-import { hasAppOwnedStackEvidence } from "./app-frame-utils";
+import {
+  hasAppOwnedSourceEvidence,
+  hasAppOwnedStackEvidence,
+} from "./app-frame-utils";
 import { hasBrowserUnhandledRejectionMechanism } from "./walletlink-websocket";
 
-const rabbyRainbowKitRawChunkPathPrefix = "app:///_next/static/chunks/";
+const rabbyRawChunkPathPrefix = "app:///_next/static/chunks/";
+const rabbyRawWrapperFunctions = new Set(["n", "r"]);
+const rabbyAndroidRawWrapperFunction = "r";
+const rabbyAndroidJavaBridgeErrorMessage =
+  "Error invoking postMessage: Java bridge method invocation error";
+const browserSetTimeoutMechanismType =
+  "auto.browser.browserapierrors.setTimeout";
+const anonymousFramePath = "<anonymous>";
+const sentryUnknownFunction = "?";
+const rabbyAndroidInjectedFrameFunctions = [
+  sentryUnknownFunction,
+  "__rabby__updateUrl",
+  "window.__RABBY_WEBVIEW_BRIDGE_POSTER__",
+  "Proxy.myPostMessage",
+] as const;
 const stackFrameLocationSuffixPattern = /:\d+:\d+\)$/;
 
 function matchesStackPattern(
@@ -92,10 +111,14 @@ function hasExactRabbyChromeUserRejectedStack(
   );
 }
 
-function isObservedRabbyRainbowKitRawChunkFrame(
+function isObservedRabbyRawChunkFrame(
   frame: SentryStackFrame | undefined
 ): boolean {
-  if (frame?.in_app !== true || frame.function !== "n") {
+  if (
+    frame?.in_app !== true ||
+    !frame.function ||
+    !rabbyRawWrapperFunctions.has(frame.function)
+  ) {
     return false;
   }
 
@@ -106,9 +129,57 @@ function isObservedRabbyRainbowKitRawChunkFrame(
     paths.length > 0 &&
     paths.every(
       (path) =>
-        path.startsWith(rabbyRainbowKitRawChunkPathPrefix) &&
+        path.startsWith(rabbyRawChunkPathPrefix) &&
         path.endsWith(".js")
     )
+  );
+}
+
+function hasOnlyFramePath(
+  frame: SentryStackFrame | undefined,
+  expectedPath: string
+): boolean {
+  if (!frame) {
+    return false;
+  }
+
+  const paths = getFramePaths(frame);
+  return paths.length > 0 && paths.every((path) => path === expectedPath);
+}
+
+function isObservedRabbyAndroidRawChunkFrame(
+  frame: SentryStackFrame | undefined
+): boolean {
+  return (
+    frame?.function === rabbyAndroidRawWrapperFunction &&
+    isObservedRabbyRawChunkFrame(frame)
+  );
+}
+
+function isObservedRabbyAndroidInjectedFrame(
+  frame: SentryStackFrame | undefined,
+  expectedFunction: string
+): boolean {
+  return (
+    frame?.in_app === true &&
+    frame.function === expectedFunction &&
+    hasOnlyFramePath(frame, anonymousFramePath)
+  );
+}
+
+function hasObservedRabbyAndroidJavaBridgeFrames(
+  frames: SentryStackFrame[] | undefined
+): boolean {
+  if (
+    !Array.isArray(frames) ||
+    frames.length !== rabbyAndroidInjectedFrameFunctions.length + 1 ||
+    !isObservedRabbyAndroidRawChunkFrame(frames[0])
+  ) {
+    return false;
+  }
+
+  return rabbyAndroidInjectedFrameFunctions.every((functionName, index) =>
+    isObservedRabbyAndroidInjectedFrame(frames[index + 1], functionName)
   );
 }
 
@@ -133,7 +204,7 @@ function hasObservedRabbyRainbowKitRawFrames(
   return (
     Array.isArray(frames) &&
     frames.length === 2 &&
-    isObservedRabbyRainbowKitRawChunkFrame(frames[0]) &&
+    isObservedRabbyRawChunkFrame(frames[0]) &&
     isObservedRabbyRainbowKitNativePromiseFrame(frames[1])
   );
 }
@@ -186,6 +257,21 @@ function hasRabbyMobileContext(event: SentryClientEvent): boolean {
     (candidate) =>
       typeof candidate === "string" &&
       candidate.toLowerCase().includes(RABBY_MOBILE_USER_AGENT_TOKEN)
+  );
+}
+
+function hasRabbyMobileAndroidContext(event: SentryClientEvent): boolean {
+  const candidates = [
+    getRequestHeaderString(event, "user-agent"),
+    getRuntimeUserAgentString(),
+    getStringValue(event.tags?.["user_agent"]),
+    getStringValue(event.tags?.["userAgent"]),
+  ];
+
+  return candidates.some(
+    (candidate) =>
+      typeof candidate === "string" &&
+      candidate.toLowerCase().includes(RABBY_MOBILE_ANDROID_USER_AGENT_TOKEN)
   );
 }
 
@@ -280,4 +366,28 @@ export function shouldFilterRabbyMobileRainbowKitNotFoundError(
   }
 
   return hasObservedRabbyRainbowKitRawFrames(value.stacktrace?.frames);
+}
+
+export function shouldFilterRabbyMobileAndroidJavaBridgePostMessageError(
+  event: SentryClientEvent,
+  hint?: SentryEventHint
+): boolean {
+  const values = event.exception?.values;
+  if (!Array.isArray(values) || values.length !== 1) {
+    return false;
+  }
+
+  const [value] = values;
+  if (
+    value?.type !== "Error" ||
+    value.value !== rabbyAndroidJavaBridgeErrorMessage ||
+    value.mechanism?.type !== browserSetTimeoutMechanismType ||
+    value.mechanism.handled !== false ||
+    !hasRabbyMobileAndroidContext(event) ||
+    hasAppOwnedSourceEvidence(event, value, hint)
+  ) {
+    return false;
+  }
+
+  return hasObservedRabbyAndroidJavaBridgeFrames(value.stacktrace?.frames);
 }
