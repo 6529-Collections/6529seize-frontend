@@ -19,7 +19,6 @@ import type {
 } from "./types";
 import {
   getContextString,
-  getEventMessage,
   getHintExceptionMessage,
   getHintExceptionStack,
   getNumericValue,
@@ -33,6 +32,9 @@ import { hasBrowserUnhandledRejectionMechanism } from "./walletlink-websocket";
 
 const rabbyRainbowKitRawChunkPathPrefix = "app:///_next/static/chunks/";
 const stackFrameLocationSuffixPattern = /:\d+:\d+\)$/;
+// Rabby's native iOS bundle path contains the shared `app/` source token.
+const rabbyMobileIosBundleStackPathPattern =
+  /\/RabbyMobile\.app\/main\.jsbundle(?=:)/gi;
 
 function matchesStackPattern(
   value: string | undefined,
@@ -57,6 +59,25 @@ function hasRabbyMobileUserRejectedStack(
   return [serializedStack, getHintExceptionStack(hint)].some((stack) =>
     matchesStackPattern(stack, rabbyMobileUserRejectedStackPattern)
   );
+}
+
+function omitRabbyMobileIosBundlePathFromAppEvidence(
+  stack: string | undefined
+): string | undefined {
+  return stack?.replace(
+    rabbyMobileIosBundleStackPathPattern,
+    "/rabby-mobile-ios-bundle"
+  );
+}
+
+function hasRabbyMobileAppOwnedStackEvidence(
+  event: SentryClientEvent,
+  serializedStack: string | undefined,
+  hint?: SentryEventHint
+): boolean {
+  return [serializedStack, getHintExceptionStack(hint)]
+    .map(omitRabbyMobileIosBundlePathFromAppEvidence)
+    .some((stack) => hasAppOwnedStackEvidence(event, stack));
 }
 
 function isRabbyChromeContentScriptFrame(stackLine: string): boolean {
@@ -218,7 +239,7 @@ export function shouldFilterRabbyMobileUserRejectedRequest(
   event: SentryClientEvent,
   hint?: SentryEventHint
 ): boolean {
-  if (getEventMessage(event) !== objectCapturedPromiseRejectionMessage) {
+  if (!hasSingleFramelessBrowserUnhandledRejection(event)) {
     return false;
   }
 
@@ -249,7 +270,7 @@ export function shouldFilterRabbyMobileUserRejectedRequest(
     return false;
   }
 
-  return !hasAppOwnedStackEvidence(event, stack, hint);
+  return !hasRabbyMobileAppOwnedStackEvidence(event, stack, hint);
 }
 
 export function shouldFilterRabbyMobileRainbowKitNotFoundError(

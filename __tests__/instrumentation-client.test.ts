@@ -58,6 +58,13 @@ describe("instrumentation-client", () => {
     "    at Object.userRejectedRequest (chrome-extension://acmacodkjbdgmoleebolmdjonilkdbch/content-script.js:423:124412)",
     "    at h.dispose (chrome-extension://acmacodkjbdgmoleebolmdjonilkdbch/content-script.js:423:297934)",
   ].join("\n");
+  const rabbyMobileIosUserRejectedStack = [
+    "Error: Not Allowed",
+    "    at EthereumProviderError (address at /vendor/container/RabbyMobile.app/main.jsbundle:1:100)",
+    "    at userRejectedRequest (address at /vendor/container/RabbyMobile.app/main.jsbundle:1:200)",
+  ].join("\n");
+  const rabbyMobileUserAgent =
+    "Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 RabbyMobile/1.0 RabbyMobileIOS/1.0 Mobile/15E148";
   const reactDomInsertBeforeMessage =
     "Failed to execute 'insertBefore' on 'Node': The node before which the new node is to be inserted is not a child of this node.";
   const gifPickerTenorUndefinedTagsMessage =
@@ -515,6 +522,36 @@ describe("instrumentation-client", () => {
       __serialized__: {
         code: 4001,
         message: "User rejected the request.",
+        stack: serializedStack,
+      },
+    },
+  });
+
+  const createRabbyMobileIosUserRejectedEvent = (
+    serializedStack = rabbyMobileIosUserRejectedStack
+  ) => ({
+    event_id: "rabby-mobile-ios-user-rejected",
+    exception: {
+      values: [
+        {
+          type: "UnhandledRejection",
+          value: objectCapturedPromiseRejectionMessage,
+          mechanism: {
+            type: browserUnhandledRejectionMechanismType,
+            handled: false,
+          },
+        },
+      ],
+    },
+    request: {
+      headers: {
+        "User-Agent": rabbyMobileUserAgent,
+      },
+    },
+    extra: {
+      __serialized__: {
+        code: 4001,
+        message: "Not Allowed",
         stack: serializedStack,
       },
     },
@@ -1438,6 +1475,29 @@ describe("instrumentation-client", () => {
     const result = beforeSend(event);
 
     expect(result).toBeNull();
+  });
+
+  it("drops the production-shaped RabbyMobile iOS user rejection", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createRabbyMobileIosUserRejectedEvent();
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
+  it("keeps the RabbyMobile iOS rejection with a later app-owned serialized frame", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createRabbyMobileIosUserRejectedEvent(
+      [
+        rabbyMobileIosUserRejectedStack,
+        "    at signDrop (app:///hooks/drops/useDropSignature.ts:1:1)",
+      ].join("\n")
+    );
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
   });
 
   it("keeps Rabby Chrome user rejections with app-owned frames", () => {
