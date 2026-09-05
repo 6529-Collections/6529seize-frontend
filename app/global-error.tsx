@@ -3,9 +3,8 @@
 import ErrorComponent from "@/components/error/Error";
 import styles from "@/styles/Home.module.css";
 import { extractErrorDetails } from "@/utils/error-extractor";
-import * as Sentry from "@sentry/nextjs";
+import { captureNextjsGlobalError } from "@/utils/monitoring/nextjsRscError";
 import { useEffect } from "react";
-import { publicEnv } from "@/config/env";
 
 type GlobalErrorProps = {
   readonly error: Error & { digest?: string | undefined };
@@ -14,8 +13,7 @@ type GlobalErrorProps = {
 
 export default function GlobalError({ error, reset }: GlobalErrorProps) {
   useEffect(() => {
-    if (!publicEnv.SENTRY_DSN) return;
-    Sentry.captureException(error);
+    captureNextjsGlobalError(error);
   }, [error]);
   const errorDetails = extractErrorDetails(error, "GLOBAL_ERROR");
 
