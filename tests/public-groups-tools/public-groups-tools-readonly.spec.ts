@@ -74,6 +74,16 @@ function resolveApiEndpoint(baseURL: string): string {
   return process.env["API_ENDPOINT"] || "http://localhost:3000";
 }
 
+async function getStagingApiHeaders(
+  page: Page
+): Promise<Record<string, string>> {
+  const apiAuth = (await page.context().cookies()).find(
+    (cookie) => cookie.name === "x-6529-auth"
+  )?.value;
+
+  return apiAuth ? { "x-6529-auth": apiAuth } : {};
+}
+
 test.describe("Public tools, calendar, and removed Groups route coverage @surface @medium @large @readonly", () => {
   test("renders the Tools index with grouped utility links", async ({
     page,
@@ -144,7 +154,8 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
     // Resolve a real group id read-only so the deep-link behavior remains
     // portable across local, staging, and production data sets.
     const groupsResponse = await page.request.get(
-      `${resolveApiEndpoint(baseURL ?? "http://localhost:3001")}/api/groups`
+      `${resolveApiEndpoint(baseURL ?? "http://localhost:3001")}/api/groups`,
+      { headers: await getStagingApiHeaders(page) }
     );
     expect(groupsResponse.ok()).toBe(true);
     const groupsPayload = (await groupsResponse.json()) as
