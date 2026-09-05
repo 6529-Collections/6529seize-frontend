@@ -13,7 +13,7 @@ describe("CreateWaveInlineGroupHeader", () => {
       />
     );
 
-    const currentGroup = screen.getByText("Current group").parentElement;
+    const currentGroup = screen.getByText("Before editing").parentElement;
     expect(currentGroup).not.toBeNull();
     expect(
       within(currentGroup!).queryByText("Randomly generated group name")
@@ -33,7 +33,7 @@ describe("CreateWaveInlineGroupHeader", () => {
       />
     );
 
-    expect(screen.queryByText("Current group")).not.toBeInTheDocument();
+    expect(screen.queryByText("Before editing")).not.toBeInTheDocument();
     expect(screen.getByText("Public")).toBeInTheDocument();
   });
 });

@@ -504,8 +504,12 @@ export const ES_ES_MESSAGES = {
   "waves.create.groups.title": "Acceso",
   "waves.create.groups.description":
     "Elige quién puede acceder, participar y gestionar esta Wave.",
-  "waves.create.groups.viewGroupName": "Visibilidad",
+  "waves.create.groups.viewGroupName": "Quién puede acceder a esta Wave",
+  "waves.create.groups.accessHelper":
+    "De forma predeterminada, todas las personas con acceso pueden participar. Solo tú puedes administrar la Wave.",
+  "waves.create.groups.customizePermissions": "Personalizar otros permisos",
   "waves.create.groups.adminGroupName": "Administradores",
+  "waves.create.groups.currentGroup": "Antes de editar",
   "waves.create.groups.currentGroupWithName": "Grupo actual: {name}",
   "waves.create.groups.dialog.addTitle": "Añadir grupo",
   "waves.create.groups.dialog.changeTitle": "Cambiar grupo",
@@ -554,6 +558,11 @@ export const ES_ES_MESSAGES = {
   "waves.create.groups.editAccess.confirmUseVisibility":
     "Usar criterios de visibilidad",
   "waves.create.groups.actions.editCriteria": "Editar criterios",
+  "waves.create.groups.actions.edit": "Editar",
+  "waves.create.groups.actions.matchWaveAccess": "Igualar al acceso de la wave",
+  "waves.create.groups.draft.saveChanges": "Guardar cambios",
+  "waves.create.groups.draft.afterEditing": "Después de editar",
+  "waves.create.groups.rules.configured": "Configurado",
   "waves.create.groups.inlineIdentities.modeLabel":
     "Tratamiento de identidades",
   "waves.create.groups.inlineIdentities.included.label": "Incluidas",

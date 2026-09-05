@@ -65,6 +65,10 @@ interface ModerationDataState {
 
 const MODERATION_QUEUE_PAGE_SIZE = 50;
 
+function normalizePathname(pathname: string | null): string {
+  return pathname ?? "";
+}
+
 function isReportsTab(tab: ModerationTab): tab is "OPEN" | "RESOLVED" {
   return tab === "OPEN" || tab === "RESOLVED";
 }
@@ -538,7 +542,8 @@ export default function ContentModerationPageClient() {
   const locale = useBrowserLocale();
   const { connectedProfile, activeProfileProxy, fetchingProfile } = useAuth();
   const pathname = usePathname();
-  const activeTab = getModerationTab(pathname.split("/")[2]) ?? "OPEN";
+  const activeTab =
+    getModerationTab(normalizePathname(pathname).split("/")[2]) ?? "OPEN";
   const accessQuery = useContentModeratorAccess();
   const hasModeratorIdentity =
     Boolean(connectedProfile?.id) && activeProfileProxy === null;

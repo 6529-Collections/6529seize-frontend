@@ -5,8 +5,8 @@ Parent: [Network Index](README.md)
 ## Overview
 
 `/network` is the main Network identities leaderboard. It supports sorting,
-on-the-fly criteria-based group filtering, saved-group filtering, pagination,
-and profile links.
+on-the-fly criteria-based group filtering, deep-linked saved scopes,
+pagination, and profile links.
 
 ## Location in the Site
 
@@ -29,9 +29,9 @@ and profile links.
 
 ## Controls and URL State
 
-- `Filter` opens the same criteria builder used by Wave group assignment.
-  Criteria creation is open by default. `Choose group` provides the secondary
-  path for searching and applying an existing saved group.
+- `Filter` opens the shared criteria builder with criteria creation open by
+  default. The Network version omits `Choose group` and `Hide criteria and
+  members`.
 - Applying new criteria creates a saved group and immediately uses it as the
   Network scope. Choosing `All Network members` clears the group scope.
 - When a signed-in user has an active Network scope with at least one
@@ -54,8 +54,7 @@ and profile links.
 1. Open `/network`.
 2. (Optional) open `Filter` and build a group with identities, Level, TDH,
    NIC, REP, required NFTs, collection access, or an xTDH grant.
-3. Select `Create and use new group` to save and apply the criteria, or select
-   `Choose group` to apply an existing saved group.
+3. Select `Create and use new group` to save and apply the criteria.
 4. (Optional) use the REP or NIC criteria action in the selected-group summary
    to grant credits to every matching member.
 5. Sort by `Level`, `TDH`, `xTDH`, `REP`, or `NIC`.
@@ -111,8 +110,8 @@ and profile links.
 ## Limitations / Notes
 
 - The community leaderboard query size is fixed to `50` rows per page.
-- Browsing and choosing an existing group remains available without creating a
-  group. Creating a criteria-based filter requires wallet authentication.
+- An existing saved scope can be restored through a supported `group` deep
+  link. Creating a criteria-based filter requires wallet authentication.
 - Group-scope lifecycle across Network routes is documented here:
   [Network Group Scope Flow](flow-network-group-scope.md).
 

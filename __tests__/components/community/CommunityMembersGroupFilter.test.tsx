@@ -119,6 +119,8 @@ describe("CommunityMembersGroupFilter", () => {
         startMode: "criteria",
         allowGroupClear: true,
         defaultLabel: "All Network members",
+        showChooseGroup: false,
+        showPrivacyControl: false,
       })
     );
   });
