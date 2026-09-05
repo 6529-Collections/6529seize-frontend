@@ -83,6 +83,8 @@ export const publicEnvSchema = z.object({
   DEV_MODE_QUORUM_WAVE_ID: z.string().optional(),
   DEV_MODE_WALLET_ADDRESS: z.string().optional(),
   MOBILE_APP_SCHEME: z.string().optional(),
+  // Comma-separated list of exact callback URIs for the /auth-bridge page
+  NEXT_PUBLIC_AUTH_BRIDGE_ALLOWLIST: z.string().optional(),
   NEXTGEN_CHAIN_ID: z.coerce.number().int().positive().optional(),
   USE_DEV_AUTH: z.string().optional(),
 
