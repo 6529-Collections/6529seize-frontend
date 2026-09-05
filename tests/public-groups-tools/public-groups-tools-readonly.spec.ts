@@ -74,12 +74,14 @@ function resolveApiEndpoint(baseURL: string): string {
   return process.env["API_ENDPOINT"] || "http://localhost:3000";
 }
 
-async function getStagingApiHeaders(page: Page) {
+async function getStagingApiHeaders(
+  page: Page
+): Promise<Record<string, string>> {
   const apiAuth = (await page.context().cookies()).find(
     (cookie) => cookie.name === "x-6529-auth"
   )?.value;
 
-  return apiAuth ? { "x-6529-auth": apiAuth } : undefined;
+  return apiAuth ? { "x-6529-auth": apiAuth } : {};
 }
 
 test.describe("Public tools, calendar, and removed Groups route coverage @surface @medium @large @readonly", () => {
