@@ -1,3 +1,4 @@
+import noiseFilterFixtures from "@/__tests__/fixtures/sentry-noise-filter-hardening.json";
 import {
   createLatestReactDomRawFrames,
   createObservedReactDomRawInsertBeforeFrames,
@@ -388,6 +389,36 @@ describe("sentry-client-filters", () => {
     "Network request failed. Please check your connection and try again. (/api/dm-drops/unread)";
   const webkitExtensionMessagingTabNotFoundMessage =
     "Invalid call to runtime.sendMessage(). Tab not found.";
+  const browserExtensionSendMessageErrorMessage =
+    "Cannot read properties of undefined (reading 'sendMessage')";
+  const browserExtensionSendMessageFixtureValue =
+    noiseFilterFixtures.threeV.exception.values[0];
+  const browserExtensionSendMessageRawFrames: SentryStackFrame[] =
+    browserExtensionSendMessageFixtureValue.stacktrace.frames;
+
+  const createBrowserExtensionSendMessageEvent = (
+    valueOverrides: Partial<SentryExceptionValue> = {},
+    eventOverrides: TestSentryClientEventOverrides = {}
+  ): TestSentryClientEvent => ({
+    ...noiseFilterFixtures.threeV,
+    ...eventOverrides,
+    exception: {
+      values: [
+        {
+          ...browserExtensionSendMessageFixtureValue,
+          ...valueOverrides,
+        },
+      ],
+    },
+  });
+
+  const overrideBrowserExtensionSendMessageFrame = (
+    frameIndex: number,
+    frameOverrides: Partial<SentryStackFrame>
+  ): SentryStackFrame[] =>
+    browserExtensionSendMessageRawFrames.map((frame, index) =>
+      index === frameIndex ? { ...frame, ...frameOverrides } : frame
+    );
 
   const buildSpan = (
     overrides: TestSentryTransactionSpanOverrides = {}
@@ -10004,6 +10035,248 @@ describe("sentry-client-filters", () => {
         },
       ],
     };
+
+    // Act
+    const result = shouldFilterBrowserExtensionSendMessageError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("filters the exact pre-symbolication browser-extension sendMessage stack", () => {
+    // Arrange
+    const event = createBrowserExtensionSendMessageEvent();
+
+    // Act
+    const result = shouldFilterBrowserExtensionSendMessageError(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it.each([
+    ["the older three-line wrapper", 3],
+    ["the older seven-line wrapper", 7],
+  ])("filters %s from the verified cohort", (_, wrapperLine) => {
+    // Arrange
+    const [wrapperFrame, injectedFrame] = browserExtensionSendMessageRawFrames;
+    const event = createBrowserExtensionSendMessageEvent({
+      stacktrace: {
+        frames: [
+          {
+            ...wrapperFrame,
+            function: "n",
+            lineno: wrapperLine,
+            colno: 4853,
+          },
+          {
+            ...injectedFrame,
+            colno: 84027,
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterBrowserExtensionSendMessageError(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it("continues filtering the server-symbolicated sendMessage stack", () => {
+    // Arrange
+    const [, injectedFrame] = browserExtensionSendMessageRawFrames;
+    const event = createBrowserExtensionSendMessageEvent({
+      stacktrace: {
+        frames: [
+          {
+            filename:
+              "node_modules/.pnpm/@sentry+browser@10.45.0/node_modules/@sentry/browser/src/helpers.ts",
+            function: "n",
+            lineno: 111,
+            colno: 58,
+            in_app: false,
+          },
+          injectedFrame,
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterBrowserExtensionSendMessageError(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it.each([
+    [
+      "an extra frame",
+      [
+        ...browserExtensionSendMessageRawFrames,
+        {
+          filename: "app:///services/messaging/sendMessage.ts",
+          function: "sendMessage",
+          in_app: true,
+        },
+      ],
+    ],
+    [
+      "reversed frame order",
+      [...browserExtensionSendMessageRawFrames].reverse(),
+    ],
+    [
+      "a changed wrapper function",
+      overrideBrowserExtensionSendMessageFrame(0, { function: "x" }),
+    ],
+    [
+      "a changed wrapper line",
+      overrideBrowserExtensionSendMessageFrame(0, { lineno: 8 }),
+    ],
+    [
+      "a changed wrapper column",
+      overrideBrowserExtensionSendMessageFrame(0, { colno: 6174 }),
+    ],
+    [
+      "an app-owned wrapper path",
+      overrideBrowserExtensionSendMessageFrame(0, {
+        filename: "app:///services/messaging/sendMessage.ts",
+        abs_path: "app:///services/messaging/sendMessage.ts",
+      }),
+    ],
+    [
+      "a changed injected function",
+      overrideBrowserExtensionSendMessageFrame(1, { function: "sendMessage" }),
+    ],
+    [
+      "a changed injected line",
+      overrideBrowserExtensionSendMessageFrame(1, { lineno: 3 }),
+    ],
+    [
+      "a changed injected column",
+      overrideBrowserExtensionSendMessageFrame(1, { colno: 84148 }),
+    ],
+    [
+      "a changed injected path",
+      overrideBrowserExtensionSendMessageFrame(1, {
+        filename: "app:///injectedScript.bundle-copy.js",
+        abs_path: "app:///injectedScript.bundle-copy.js",
+      }),
+    ],
+  ])("does not filter the raw sendMessage near miss with %s", (_, frames) => {
+    // Arrange
+    const event = createBrowserExtensionSendMessageEvent({
+      stacktrace: { frames },
+    });
+
+    // Act
+    const result = shouldFilterBrowserExtensionSendMessageError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it.each([
+    [
+      "a changed message",
+      { value: "Cannot read properties of undefined (reading 'sendMessages')" },
+    ],
+    [
+      "a different mechanism",
+      {
+        mechanism: {
+          type: "auto.browser.global_handlers.onerror",
+          handled: false,
+        },
+      },
+    ],
+    [
+      "a handled mechanism",
+      {
+        mechanism: {
+          type: "auto.browser.global_handlers.onunhandledrejection",
+          handled: true,
+        },
+      },
+    ],
+  ])(
+    "does not filter the raw sendMessage near miss with %s",
+    (_, overrides) => {
+      // Arrange
+      const event = createBrowserExtensionSendMessageEvent(overrides);
+
+      // Act
+      const result = shouldFilterBrowserExtensionSendMessageError(event);
+
+      // Assert
+      expect(result).toBe(false);
+    }
+  );
+
+  it("does not filter a raw sendMessage event with another exception", () => {
+    // Arrange
+    const event = createBrowserExtensionSendMessageEvent();
+    event.exception = {
+      values: [
+        ...(event.exception?.values ?? []),
+        {
+          type: "TypeError",
+          value: "App-owned failure",
+          stacktrace: {
+            frames: [
+              {
+                filename: "app:///services/messaging/sendMessage.ts",
+                function: "sendMessage",
+                in_app: true,
+              },
+            ],
+          },
+        },
+      ],
+    };
+
+    // Act
+    const result = shouldFilterBrowserExtensionSendMessageError(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter raw sendMessage events with app-owned original stacks", () => {
+    // Arrange
+    const event = createBrowserExtensionSendMessageEvent();
+    const error = new Error(browserExtensionSendMessageErrorMessage);
+    error.stack = [
+      `Error: ${browserExtensionSendMessageErrorMessage}`,
+      "    at sendMessage (app:///services/messaging/sendMessage.ts:10:1)",
+    ].join("\n");
+
+    // Act
+    const result = shouldFilterBrowserExtensionSendMessageError(event, {
+      originalException: error,
+    });
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter raw sendMessage events with app-owned serialized stacks", () => {
+    // Arrange
+    const event = createBrowserExtensionSendMessageEvent(
+      {},
+      {
+        extra: {
+          __serialized__: {
+            message: browserExtensionSendMessageErrorMessage,
+            stack: [
+              `Error: ${browserExtensionSendMessageErrorMessage}`,
+              "    at sendMessage (app:///services/messaging/sendMessage.ts:10:1)",
+            ].join("\n"),
+          },
+        },
+      }
+    );
 
     // Act
     const result = shouldFilterBrowserExtensionSendMessageError(event);
