@@ -11,7 +11,9 @@ describe('formatHelpers', () => {
   });
 
   it('formats bytes', () => {
-    expect(formatFileSize(1024 * 1024)).toBe('1 MB');
+    expect(formatFileSize(1_000_000)).toBe('1 MB');
+    expect(formatFileSize(250_000_000)).toBe('250 MB');
+    expect(formatFileSize(262_144_000)).toBe('262.14 MB');
   });
 
   it('returns browser specific message', () => {

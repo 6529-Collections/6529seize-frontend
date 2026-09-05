@@ -3197,6 +3197,9 @@
         "started",
         "proxy",
         "preview",
+        "250 mb",
+        "glb",
+        "gltf",
         "quick",
         "vote",
         "additional",
@@ -3210,6 +3213,8 @@
         "In the Artwork step, Continue remains available before required fields are complete, except while an interactive artwork hash is being verified; selecting Continue turns every missing or invalid field and the missing media control red, shows inline recovery messages, and focuses the first missing item in form order.",
         "On larger viewports the artwork remains visible while the metadata form scrolls independently. On smaller viewports the complete form scrolls as one page, focused text fields move into view when the software keyboard opens, and the native modal shrinks to keep its action bar above the keyboard.",
         "On The Memes Main Stage, the desktop How to Submit control and native app lock both open Unlock submissions with the current 50,000 MemesNominee REP requirement, live progress, and a Get nominated action.",
+        "Main Stage file uploads accept PNG, JPG/JPEG, GIF, MP4/MOV, and binary GLB models up to 250 MB (250,000,000 bytes); the upload area shows Max 250 MB beside the format badges; JSON .gltf files are not accepted, and the service verifies the stored file size when the submission is created.",
+        "An oversized file, unsupported format, or invalid GLB shows an inline error immediately without Try Again. Use Select Art or drag and drop another file into the upload area to replace the rejected file.",
         "Use the wave composer and Memes-specific submission surfaces when participating in Memes waves."
       ],
       "canonical_path": "/waves",
@@ -7162,7 +7167,9 @@
       "facts": [
         "Drop Forge craft claims live under /drop-forge/craft.",
         "Craft claim detail pages use /drop-forge/craft/{id}.",
-        "Craft claims are distinct from launch claims."
+        "Craft claims are distinct from launch claims.",
+        "A winning submission only creates a craft claim after successful media inspection and validation of the computed details. Zero-byte files, empty SHA-256 digests, non-positive image/video dimensions, or video without positive duration and codecs cannot become valid computed media details. The binary media limit is 250 MB (250,000,000 bytes). Editable draft fields may still be incomplete; HTML details are format-only, and GLB does not require video-only details.",
+        "GLB binary contents are checked server-side during inspection and before animation publication; renaming another file to .glb does not make it valid. This does not guarantee scene rendering or availability of external resources. Correct invalid or oversized media before retrying publication."
       ],
       "canonical_path": "/drop-forge/craft",
       "related_paths": ["/drop-forge", "/drop-forge/launch"],
