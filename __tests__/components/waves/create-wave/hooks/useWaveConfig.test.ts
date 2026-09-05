@@ -847,6 +847,46 @@ describe("useWaveConfig", () => {
       });
     });
 
+    it("keeps a batched divergent privilege independent after making access public", () => {
+      const { result } = renderHook(() => useWaveConfig());
+      const chatOverride = { ...mockGroup, id: "chat-override" };
+      const replacementGroup = { ...mockGroup, id: "group-replacement" };
+
+      act(() => {
+        result.current.setOverview({
+          ...result.current.config.overview,
+          type: ApiWaveType.Rank,
+        });
+      });
+      act(() => {
+        result.current.onGroupSelect({
+          group: mockGroup,
+          groupType: CreateWaveGroupConfigType.CAN_VIEW,
+        });
+        result.current.onGroupSelect({
+          group: chatOverride,
+          groupType: CreateWaveGroupConfigType.CAN_CHAT,
+        });
+        result.current.onGroupSelect({
+          group: null,
+          groupType: CreateWaveGroupConfigType.CAN_VIEW,
+          syncPrivilegeGroups: false,
+          syncMatchingViewGroups: true,
+        });
+      });
+      act(() => {
+        result.current.onGroupSelect({
+          group: replacementGroup,
+          groupType: CreateWaveGroupConfigType.CAN_VIEW,
+        });
+      });
+
+      expect(result.current.config.groups.canView).toBe("group-replacement");
+      expect(result.current.config.groups.canChat).toBe("chat-override");
+      expect(result.current.config.groups.canDrop).toBe("group-replacement");
+      expect(result.current.config.groups.canVote).toBe("group-replacement");
+    });
+
     it("matches a privilege to access and resumes default synchronization", () => {
       const { result } = renderHook(() => useWaveConfig());
       const chatOverride = { ...mockGroup, id: "chat-override" };

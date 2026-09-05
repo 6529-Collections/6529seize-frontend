@@ -35,6 +35,58 @@ interface EndDateConfig {
 
 type PrivilegeGroupKey = "canDrop" | "canVote" | "canChat";
 
+const getPrivilegeGroupKeys = (
+  waveType: ApiWaveType
+): readonly PrivilegeGroupKey[] =>
+  waveType === ApiWaveType.Chat
+    ? ["canChat"]
+    : ["canChat", "canDrop", "canVote"];
+
+const updateManualPrivilegeSelections = ({
+  groups,
+  manuallySelected,
+  privilegeGroups,
+  syncMatchingViewGroups,
+  syncPrivilegeGroups,
+}: {
+  readonly groups: CreateWaveConfig["groups"];
+  readonly manuallySelected: Set<PrivilegeGroupKey>;
+  readonly privilegeGroups: readonly PrivilegeGroupKey[];
+  readonly syncMatchingViewGroups: boolean;
+  readonly syncPrivilegeGroups: boolean;
+}) => {
+  if (syncMatchingViewGroups) {
+    for (const privilegeGroup of privilegeGroups) {
+      if (groups[privilegeGroup] === groups.canView) {
+        manuallySelected.delete(privilegeGroup);
+      } else {
+        manuallySelected.add(privilegeGroup);
+      }
+    }
+    return;
+  }
+  if (!syncPrivilegeGroups) {
+    for (const privilegeGroup of privilegeGroups) {
+      manuallySelected.add(privilegeGroup);
+    }
+  }
+};
+
+const getMatchingPrivilegeUpdates = ({
+  groups,
+  nextGroupId,
+  privilegeGroups,
+}: {
+  readonly groups: CreateWaveConfig["groups"];
+  readonly nextGroupId: string | null;
+  readonly privilegeGroups: readonly PrivilegeGroupKey[];
+}): Partial<CreateWaveConfig["groups"]> =>
+  Object.fromEntries(
+    privilegeGroups
+      .filter((privilegeGroup) => groups[privilegeGroup] === groups.canView)
+      .map((privilegeGroup) => [privilegeGroup, nextGroupId])
+  );
+
 const getPrivilegeGroupDefaults = ({
   groupId,
   waveType,
@@ -408,49 +460,27 @@ export function useWaveConfig() {
     }
     switch (groupType) {
       case CreateWaveGroupConfigType.CAN_VIEW:
-        if (syncMatchingViewGroups) {
-          const currentViewGroup = config.groups.canView;
-          const privilegeGroups: readonly PrivilegeGroupKey[] =
-            config.overview.type === ApiWaveType.Chat
-              ? ["canChat"]
-              : ["canChat", "canDrop", "canVote"];
-          for (const privilegeGroup of privilegeGroups) {
-            if (config.groups[privilegeGroup] === currentViewGroup) {
-              manuallySelectedPrivilegeGroups.current.delete(privilegeGroup);
-            } else {
-              manuallySelectedPrivilegeGroups.current.add(privilegeGroup);
-            }
-          }
-        } else if (!syncPrivilegeGroups) {
-          manuallySelectedPrivilegeGroups.current.add("canChat");
-          if (config.overview.type !== ApiWaveType.Chat) {
-            manuallySelectedPrivilegeGroups.current.add("canDrop");
-            manuallySelectedPrivilegeGroups.current.add("canVote");
-          }
-        }
         setConfig((prev) => {
           const nextGroupId = group?.id ?? null;
+          const privilegeGroups = getPrivilegeGroupKeys(prev.overview.type);
+          updateManualPrivilegeSelections({
+            groups: prev.groups,
+            manuallySelected: manuallySelectedPrivilegeGroups.current,
+            privilegeGroups,
+            syncMatchingViewGroups,
+            syncPrivilegeGroups,
+          });
           let privilegeUpdates: {
             canChat?: string | null;
             canDrop?: string | null;
             canVote?: string | null;
           } = {};
           if (syncMatchingViewGroups) {
-            if (prev.groups.canChat === prev.groups.canView) {
-              privilegeUpdates.canChat = nextGroupId;
-            }
-            if (
-              prev.overview.type !== ApiWaveType.Chat &&
-              prev.groups.canDrop === prev.groups.canView
-            ) {
-              privilegeUpdates.canDrop = nextGroupId;
-            }
-            if (
-              prev.overview.type !== ApiWaveType.Chat &&
-              prev.groups.canVote === prev.groups.canView
-            ) {
-              privilegeUpdates.canVote = nextGroupId;
-            }
+            privilegeUpdates = getMatchingPrivilegeUpdates({
+              groups: prev.groups,
+              nextGroupId,
+              privilegeGroups,
+            });
           } else if (syncPrivilegeGroups) {
             privilegeUpdates = getPrivilegeGroupDefaults({
               groupId: nextGroupId,
