@@ -7,8 +7,8 @@ Parent: [Network Index](README.md)
 `/network` and `/network/activity` share one active group scope.
 `/network` owns scope controls (`Filter`).
 `/network/activity` can use active scope, but has no scope controls.
-Saved-group search and criteria-based group creation both happen inside the
-`/network` filter. There is no standalone Network Groups page.
+Criteria-based group creation happens inside the `/network` filter. There is
+no standalone Network Groups page.
 
 ## Location in the Site
 
@@ -17,12 +17,11 @@ Saved-group search and criteria-based group creation both happen inside the
   - `/network?page=1&group={groupId}`
   - `/network?group={groupId}`
   - `/network/activity?group={groupId}`
-- Scope controls: `/network` -> `Filter` -> criteria builder or `Choose group`
+- Scope controls: `/network` -> `Filter` -> criteria builder
 
 ## Entry Points
 
-- Open `/network`, build criteria in `Filter`, or select `Choose group` and
-  choose a saved group.
+- Open `/network` and build criteria in `Filter`.
 - Open a deep link with `group={groupId}`.
 - Open `/network/activity` after scope is already active.
 
@@ -38,7 +37,8 @@ Saved-group search and criteria-based group creation both happen inside the
 ## User Journey
 
 1. Open `/network` and select `Filter`.
-2. Build and save criteria, or select `Choose group` and choose a saved group.
+2. Build and save criteria. Network's criteria editor does not offer saved-group
+   search or the `Hide criteria and members` setting.
 3. `/network` applies the selected scope and stores its group id in the URL.
    Group links shared from supported app surfaces can also open
    `/network?group={groupId}` directly.
@@ -53,7 +53,7 @@ Saved-group search and criteria-based group creation both happen inside the
    default Network member view.
 7. Open `/network/activity` to view activity under the same scope.
 8. Return to `/network`, open `Filter`, then create another criteria-based
-   group, choose a saved group, or select `All Network members` to clear scope.
+   group. Use `Clear selected group` outside the filter to clear scope.
 
 ## Common Scenarios
 

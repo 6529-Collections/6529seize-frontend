@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
@@ -183,6 +183,8 @@ function renderDialogPanel({
   membersRoleLabel,
   defaultMembersPreviewTarget,
   includedIdentity = null,
+  showChooseGroup = true,
+  showPrivacyControl = true,
 }: {
   readonly onChange?: jest.Mock;
   readonly onCreateGroup?: jest.Mock;
@@ -194,6 +196,8 @@ function renderDialogPanel({
   readonly membersRoleLabel?: string | undefined;
   readonly defaultMembersPreviewTarget?: GroupMembersPreviewTarget | undefined;
   readonly includedIdentity?: CommunityMemberMinimal | null;
+  readonly showChooseGroup?: boolean;
+  readonly showPrivacyControl?: boolean;
 } = {}) {
   const initialSelectedGroup = selectedGroup;
 
@@ -215,6 +219,8 @@ function renderDialogPanel({
         membersRoleLabel={membersRoleLabel}
         defaultMembersPreviewTarget={defaultMembersPreviewTarget}
         defaultIncludedIdentity={includedIdentity}
+        showChooseGroup={showChooseGroup}
+        showPrivacyControl={showPrivacyControl}
         onChange={(group) => {
           setCurrentGroup(group);
           onChange(group);
@@ -252,6 +258,30 @@ describe("GroupAssignmentPanel shared layout", () => {
     expect(screen.queryByRole("tab")).not.toBeInTheDocument();
   });
 
+  it("can hide Network-only controls without adopting wave editor actions", () => {
+    renderDialogPanel({
+      startMode: "criteria",
+      showChooseGroup: false,
+      showPrivacyControl: false,
+    });
+
+    expect(
+      screen.getByRole("button", { name: "Edit criteria" })
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Choose group" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("switch", { name: "Hide criteria and members" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Create and use new group" })
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Cancel" })
+    ).not.toBeInTheDocument();
+  });
+
   it("includes the editor by default when starting criteria from Public", async () => {
     const user = userEvent.setup();
     const onCreateGroup = jest.fn().mockResolvedValue(createdGroup);
@@ -276,7 +306,7 @@ describe("GroupAssignmentPanel shared layout", () => {
     });
   });
 
-  it("labels an actual selected group as the current group", () => {
+  it("does not show the before-editing title outside edit mode", () => {
     renderDialogPanel({
       selectedGroup: {
         id: "group-1",
@@ -284,7 +314,7 @@ describe("GroupAssignmentPanel shared layout", () => {
       } as ApiGroupFull,
     });
 
-    expect(screen.getByText("Current group")).toBeInTheDocument();
+    expect(screen.queryByText("Before editing")).not.toBeInTheDocument();
     expect(screen.getAllByText("Existing Group").length).toBeGreaterThan(0);
   });
 
@@ -515,7 +545,7 @@ describe("GroupAssignmentPanel shared layout", () => {
 
     await user.click(screen.getByRole("button", { name: "Rep" }));
     await user.click(screen.getByRole("button", { name: "set rep min" }));
-    await user.click(screen.getByRole("button", { name: "Preview matches" }));
+    await user.click(screen.getByRole("button", { name: "View members" }));
 
     expect(screen.getByTestId("members-preview-dialog")).toHaveTextContent(
       "draft:REP at least 5"
@@ -529,9 +559,7 @@ describe("GroupAssignmentPanel shared layout", () => {
       selectedGroup: { id: "group-1", name: "Existing Group" } as ApiGroupFull,
     });
 
-    const currentGroup = screen.getByText("Current group").parentElement;
-    expect(currentGroup).not.toBeNull();
-    expect(within(currentGroup!).queryByText("Existing Group")).toBeNull();
+    expect(screen.queryByText("Before editing")).not.toBeInTheDocument();
     expect(mockPreviewTriggerProps?.target).toMatchObject({
       kind: "saved",
       group: { id: "group-1", name: "Existing Group" },

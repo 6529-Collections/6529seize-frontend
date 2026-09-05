@@ -57,6 +57,33 @@ async function expectSubscriptionsSettled(page: Page) {
   });
 }
 
+function resolveApiEndpoint(baseURL: string): string {
+  const appUrl = new URL(baseURL);
+  if (process.env["PLAYWRIGHT_COMPOSER_SANDBOX"] === "1") {
+    const sandboxPort =
+      process.env["PLAYWRIGHT_COMPOSER_SANDBOX_API_PORT"] ||
+      String(Number(appUrl.port || "3001") + 1000);
+    return `http://127.0.0.1:${sandboxPort}`;
+  }
+  if (appUrl.hostname === "staging.6529.io") {
+    return "https://api.staging.6529.io";
+  }
+  if (appUrl.hostname === "6529.io" || appUrl.hostname === "www.6529.io") {
+    return "https://api.6529.io";
+  }
+  return process.env["API_ENDPOINT"] || "http://localhost:3000";
+}
+
+async function getStagingApiHeaders(
+  page: Page
+): Promise<Record<string, string>> {
+  const apiAuth = (await page.context().cookies()).find(
+    (cookie) => cookie.name === "x-6529-auth"
+  )?.value;
+
+  return apiAuth ? { "x-6529-auth": apiAuth } : {};
+}
+
 test.describe("Public tools, calendar, and removed Groups route coverage @surface @medium @large @readonly", () => {
   test("renders the Tools index with grouped utility links", async ({
     page,
@@ -105,41 +132,32 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
     });
   }
 
-  test("activates and clears a network group filter through the active-group state", async ({
+  test("uses a criteria-only network filter and restores deep-linked groups", async ({
+    baseURL,
     page,
   }) => {
     await gotoReady(page, "/network");
 
     await openGroupFilters(page);
-    const chooseGroupButton = page
-      .getByRole("button", { name: "Choose group" })
-      .filter({ visible: true });
-    await expect(chooseGroupButton).toBeVisible({ timeout: 30000 });
-    await chooseGroupButton.click();
+    await expect(
+      page
+        .getByRole("button", { name: "Edit criteria" })
+        .filter({ visible: true })
+    ).toBeVisible({ timeout: 30000 });
+    await expect(
+      page
+        .getByRole("button", { name: "Choose group" })
+        .filter({ visible: true })
+    ).toHaveCount(0);
+    await expect(page.getByText("Hide criteria and members")).toHaveCount(0);
 
-    const groupSearch = page
-      .getByRole("combobox", { name: /Search groups/i })
-      .filter({ visible: true });
-    await expect(groupSearch).toBeVisible();
-
-    // Resolve a real group id from the saved-group search's unfiltered request
-    // so the test stays portable across local, staging, and production data
-    // sets. The criteria builder opens by default, so the request starts only
-    // after switching to Choose group and focusing its search field.
-    const groupsResponsePromise = page.waitForResponse(
-      (response) => {
-        const responseUrl = new URL(response.url());
-        return (
-          response.request().method() === "GET" &&
-          /\/groups\/?$/.test(responseUrl.pathname) &&
-          !responseUrl.searchParams.has("group_name") &&
-          response.ok()
-        );
-      },
-      { timeout: 30000 }
+    // Resolve a real group id read-only so the deep-link behavior remains
+    // portable across local, staging, and production data sets.
+    const groupsResponse = await page.request.get(
+      `${resolveApiEndpoint(baseURL ?? "http://localhost:3001")}/api/groups`,
+      { headers: await getStagingApiHeaders(page) }
     );
-    await groupSearch.focus();
-    const groupsResponse = await groupsResponsePromise;
+    expect(groupsResponse.ok()).toBe(true);
     const groupsPayload = (await groupsResponse.json()) as
       | { readonly id?: string; readonly name?: string }[]
       | { readonly data?: { readonly id?: string; readonly name?: string }[] };

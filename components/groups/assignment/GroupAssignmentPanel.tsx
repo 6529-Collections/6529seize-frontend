@@ -31,6 +31,13 @@ type GroupAssignmentPanelStartMode = "actions" | "existing" | "criteria";
 
 type GroupAssignmentPanelProps = CreateWaveGroupInlinePanelProps & {
   readonly startMode?: GroupAssignmentPanelStartMode;
+  readonly showChooseGroup?: boolean;
+  readonly showPrivacyControl?: boolean;
+  readonly isWaveAccessEditor?: boolean;
+  readonly showMakeWavePublic?: boolean;
+  readonly onMakeWavePublic?: (() => void) | undefined;
+  readonly showMatchWaveAccess?: boolean;
+  readonly onMatchWaveAccess?: (() => void) | undefined;
 };
 
 function DraftPrivacyControl({
@@ -86,16 +93,16 @@ type GroupAssignmentPanelState = ReturnType<
 >;
 
 interface GroupAssignmentPanelViewProps {
+  readonly draftMembersPreview: ReactNode;
   readonly membersDialog: ReactNode;
-  readonly onPreviewDraft: () => void;
   readonly panelProps: GroupAssignmentPanelProps;
   readonly panelState: GroupAssignmentPanelState;
   readonly savedMembersPreview: ReactNode;
 }
 
 function SharedGroupAssignmentPanel({
+  draftMembersPreview,
   membersDialog,
-  onPreviewDraft,
   panelProps,
   panelState,
   savedMembersPreview,
@@ -105,14 +112,19 @@ function SharedGroupAssignmentPanel({
     defaultLabel,
     disabled = false,
     selectedGroup,
-    membersRoleLabel,
+    showChooseGroup = true,
+    showPrivacyControl = true,
+    isWaveAccessEditor = false,
+    showMakeWavePublic = false,
+    onMakeWavePublic,
+    showMatchWaveAccess = false,
+    onMatchWaveAccess,
   } = panelProps;
   const {
     addExcludedIdentity,
     addIdentity,
     canCreateDraft,
     canReplaceCriteria,
-    canResetDraft,
     currentGroupLabel,
     displayedBuilder,
     draftSummary,
@@ -151,9 +163,11 @@ function SharedGroupAssignmentPanel({
           <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-4 lg:tw-flex-row lg:tw-items-start lg:tw-justify-between">
             <CreateWaveInlineGroupHeader
               currentGroupLabel={currentGroupLabel}
-              showCurrentGroupTitle={selectedGroup !== null}
-              unsavedGroupDescription={unsavedGroupDescription}
-              unsavedGroupSummary={unsavedGroupSummary}
+              showCurrentGroupTitle={isCriteriaReplacementActive}
+              unsavedGroupDescription={
+                showChooseGroup ? unsavedGroupDescription : null
+              }
+              unsavedGroupSummary={showChooseGroup ? unsavedGroupSummary : null}
               membersPreview={savedMembersPreview}
             />
             <CreateWaveInlineGroupActions
@@ -161,27 +175,28 @@ function SharedGroupAssignmentPanel({
               criteriaDisabled={!canReplaceCriteria}
               criteriaActive={isCriteriaReplacementActive}
               searchActive={isSearchPanel}
-              onReplaceCriteria={onReplaceCriteria}
+              showChooseGroup={showChooseGroup}
+              isWaveAccessEditor={isWaveAccessEditor}
+              showMakeWavePublic={showMakeWavePublic}
+              onMakeWavePublic={onMakeWavePublic}
+              showMatchWaveAccess={showMatchWaveAccess}
+              onMatchWaveAccess={onMatchWaveAccess}
+              onReplaceCriteria={
+                isCriteriaReplacementActive && isWaveAccessEditor
+                  ? onClearAll
+                  : onReplaceCriteria
+              }
               onUseExistingGroup={() => togglePanel("search", isSearchPanel)}
             />
           </div>
 
-          {isCriteriaReplacementActive && !isSearchPanel ? (
-            <DraftPrivacyControl
-              disabled={disabled}
-              isPrivate={displayedBuilder.draft.is_private}
-              onChange={(isPrivate) =>
-                setDraft({
-                  ...displayedBuilder.draft,
-                  is_private: isPrivate,
-                })
-              }
-            />
-          ) : null}
-
           {displayedBuilder.panel === "identity" ? (
-            <CreateWaveInlineGroupExpandedPanel onCancel={returnToCriteria}>
+            <CreateWaveInlineGroupExpandedPanel
+              onCancel={returnToCriteria}
+              showCancel={!isWaveAccessEditor}
+            >
               <CreateWaveInlineGroupIdentityEditorPanel
+                draft={displayedBuilder.draft}
                 disabled={disabled}
                 onIdentityToggle={returnToCriteria}
                 onRuleToggle={toggleRule}
@@ -208,6 +223,7 @@ function SharedGroupAssignmentPanel({
               showCancel={false}
             >
               <CreateWaveInlineGroupRuleList
+                draft={displayedBuilder.draft}
                 disabled={disabled}
                 onIdentityOpen={() => togglePanel("identity", false)}
                 onRuleOpen={openRule}
@@ -217,9 +233,13 @@ function SharedGroupAssignmentPanel({
 
           {displayedBuilder.panel === "rule-editor" &&
           displayedBuilder.activeRule !== null ? (
-            <CreateWaveInlineGroupExpandedPanel onCancel={returnToCriteria}>
+            <CreateWaveInlineGroupExpandedPanel
+              onCancel={returnToCriteria}
+              showCancel={!isWaveAccessEditor}
+            >
               <CreateWaveInlineGroupRuleEditorPanel
                 activeRule={displayedBuilder.activeRule}
+                draft={displayedBuilder.draft}
                 disabled={disabled}
                 onIdentityToggle={() => togglePanel("identity", false)}
                 onRuleToggle={toggleRule}
@@ -253,14 +273,28 @@ function SharedGroupAssignmentPanel({
             <CreateWaveInlineGroupDraftSummary
               draftSummary={draftSummary}
               isValid={isDraftValid}
-              canResetDraft={canResetDraft}
               canCreateDraft={canCreateDraft}
               isCreating={isCreating}
-              canPreviewDraft={isDraftValid && !disabled && !isCreating}
               forceVisible={isCriteriaReplacementActive}
-              onClearAll={onClearAll}
+              saveChangesLabel={isWaveAccessEditor}
+              draftMembersPreview={draftMembersPreview}
+              privacyControl={
+                showPrivacyControl &&
+                isCriteriaReplacementActive &&
+                !isSearchPanel ? (
+                  <DraftPrivacyControl
+                    disabled={disabled}
+                    isPrivate={displayedBuilder.draft.is_private}
+                    onChange={(isPrivate) =>
+                      setDraft({
+                        ...displayedBuilder.draft,
+                        is_private: isPrivate,
+                      })
+                    }
+                  />
+                ) : undefined
+              }
               onCreateAndUse={onCreateAndUse}
-              onPreviewDraft={membersRoleLabel ? onPreviewDraft : undefined}
             />
           ) : null}
         </div>
@@ -296,19 +330,25 @@ export default function GroupAssignmentPanel(props: GroupAssignmentPanelProps) {
         onOpen={() => setPreviewTarget(currentMembersTarget)}
       />
     ) : null;
-  const openDraftPreview = () => {
-    if (draftSummary === null || !isDraftValid) {
-      return;
-    }
-    setPreviewTarget({
-      kind: "draft",
-      group: displayedBuilder.draft.group,
-      name:
-        props.suggestedName.trim() ||
-        t(locale, "waves.create.groups.defaultGroupName"),
-      summary: draftSummary,
-    });
-  };
+  const draftMembersTarget: GroupMembersPreviewTarget | null =
+    draftSummary !== null && isDraftValid
+      ? {
+          kind: "draft",
+          group: displayedBuilder.draft.group,
+          name:
+            props.suggestedName.trim() ||
+            t(locale, "waves.create.groups.defaultGroupName"),
+          summary: draftSummary,
+        }
+      : null;
+  const draftMembersPreview =
+    membersRoleLabel && draftMembersTarget ? (
+      <GroupMembersPreviewTrigger
+        target={draftMembersTarget}
+        disabled={disabled || panelState.isCreating}
+        onOpen={() => setPreviewTarget(draftMembersTarget)}
+      />
+    ) : null;
   const membersDialog =
     membersRoleLabel && previewTarget ? (
       <GroupMembersPreviewDialog
@@ -319,8 +359,8 @@ export default function GroupAssignmentPanel(props: GroupAssignmentPanelProps) {
       />
     ) : null;
   const viewProps: GroupAssignmentPanelViewProps = {
+    draftMembersPreview,
     membersDialog,
-    onPreviewDraft: openDraftPreview,
     panelProps: props,
     panelState,
     savedMembersPreview,

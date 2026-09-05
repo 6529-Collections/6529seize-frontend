@@ -10,6 +10,7 @@ export default function CreateWaveAdvancedSection({
   summary,
   isCustomized,
   hasError,
+  defaultOpen = false,
   variant = "default",
   children,
 }: {
@@ -17,12 +18,13 @@ export default function CreateWaveAdvancedSection({
   readonly summary?: string;
   readonly isCustomized: boolean;
   readonly hasError: boolean;
+  readonly defaultOpen?: boolean | undefined;
   readonly variant?: "default" | "filled";
   readonly children: ReactNode;
 }) {
   const locale = useBrowserLocale();
   const contentId = useId();
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(defaultOpen);
   const [previousHasError, setPreviousHasError] = useState(false);
 
   // Validation must reveal hidden controls before the parent flow focuses the

@@ -10,6 +10,13 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 const TDH_VIEW_PARAM = "tdh_view";
+const EMPTY_SEARCH_PARAMS = new URLSearchParams();
+
+function normalizeSearchParams(
+  searchParams: Pick<URLSearchParams, "get" | "toString"> | null
+): Pick<URLSearchParams, "get" | "toString"> {
+  return searchParams ?? EMPTY_SEARCH_PARAMS;
+}
 
 function getTdhViewFromSearchParams(
   searchParams: Pick<URLSearchParams, "get">
@@ -65,10 +72,11 @@ export default function CommunityNerdPageClient({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const effectiveSearchParams = normalizeSearchParams(searchParams);
   const [focus, setFocus] = useState<LeaderboardFocus>(() =>
     getFocusFromPathname(pathname, initialFocus)
   );
-  const tdhView = getTdhViewFromSearchParams(searchParams);
+  const tdhView = getTdhViewFromSearchParams(effectiveSearchParams);
 
   useEffect(() => {
     setFocus(getFocusFromPathname(pathname, initialFocus));
@@ -79,14 +87,17 @@ export default function CommunityNerdPageClient({
     globalThis.history.replaceState(
       null,
       "",
-      getNextUrl(getFocusPath(newFocus), tdhView, searchParams)
+      getNextUrl(getFocusPath(newFocus), tdhView, effectiveSearchParams)
     );
   };
 
   const handleSetTdhView = (newTdhView: ApiConsolidatedTdhView) => {
-    router.replace(getNextUrl(getFocusPath(focus), newTdhView, searchParams), {
-      scroll: false,
-    });
+    router.replace(
+      getNextUrl(getFocusPath(focus), newTdhView, effectiveSearchParams),
+      {
+        scroll: false,
+      }
+    );
   };
 
   return (

@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import Button from "@/components/utils/button/Button";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -5,28 +6,35 @@ import { t } from "@/i18n/messages";
 export default function CreateWaveInlineGroupDraftSummary({
   draftSummary,
   isValid,
-  canResetDraft,
   canCreateDraft,
   isCreating,
-  canPreviewDraft = false,
   forceVisible = false,
-  onClearAll,
+  saveChangesLabel = false,
+  privacyControl,
+  draftMembersPreview,
   onCreateAndUse,
-  onPreviewDraft,
 }: {
   readonly draftSummary: string | null;
   readonly isValid: boolean;
-  readonly canResetDraft: boolean;
   readonly canCreateDraft: boolean;
   readonly isCreating: boolean;
-  readonly canPreviewDraft?: boolean | undefined;
   readonly forceVisible?: boolean | undefined;
-  readonly onClearAll: () => void;
+  readonly saveChangesLabel?: boolean | undefined;
+  readonly privacyControl?: ReactNode | undefined;
+  readonly draftMembersPreview?: ReactNode | undefined;
   readonly onCreateAndUse: () => void;
-  readonly onPreviewDraft?: (() => void) | undefined;
 }) {
   const locale = useBrowserLocale();
   const showDraftActions = forceVisible || draftSummary !== null;
+  const hasDraftMembersPreview =
+    draftMembersPreview !== undefined && draftMembersPreview !== null;
+  let submitLabel = t(locale, "waves.create.groups.draft.createAndUse");
+  if (saveChangesLabel) {
+    submitLabel = t(locale, "waves.create.groups.draft.saveChanges");
+  }
+  if (isCreating) {
+    submitLabel = t(locale, "waves.create.groups.draft.creating");
+  }
 
   if (!showDraftActions) {
     return null;
@@ -44,35 +52,22 @@ export default function CreateWaveInlineGroupDraftSummary({
           </span>
         </p>
       )}
-      <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
-        <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-1">
-          <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-300">
-            {t(locale, "waves.create.groups.draft.createTitle")}
+      <div className="tw-flex tw-flex-col tw-gap-4">
+        <div className="tw-flex tw-w-fit tw-max-w-full tw-flex-col tw-items-start tw-gap-0.5 tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.04] tw-px-3 tw-py-2 md:tw-max-w-sm">
+          <p className="tw-m-0 tw-flex-shrink-0 tw-text-[0.6875rem] tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
+            {t(locale, "waves.create.groups.draft.afterEditing")}
           </p>
-          <p className="tw-m-0 tw-text-xs tw-font-medium tw-text-iron-500">
-            {draftSummary ??
-              t(locale, "waves.create.groups.members.noCriteria")}
-          </p>
+          {hasDraftMembersPreview ? (
+            <div className="tw-mt-1.5">{draftMembersPreview}</div>
+          ) : (
+            <p className="tw-m-0 tw-max-w-full tw-text-left tw-text-sm tw-font-semibold tw-text-iron-100">
+              {draftSummary ??
+                t(locale, "waves.create.groups.members.noCriteria")}
+            </p>
+          )}
         </div>
-        <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-end tw-gap-2">
-          {onPreviewDraft ? (
-            <Button
-              variant="tertiary"
-              size="md"
-              disabled={!canPreviewDraft}
-              onClick={onPreviewDraft}
-            >
-              {t(locale, "waves.create.groups.members.previewDraft")}
-            </Button>
-          ) : null}
-          <Button
-            variant="secondary"
-            size="md"
-            disabled={!canResetDraft}
-            onClick={onClearAll}
-          >
-            {t(locale, "waves.create.groups.draft.discard")}
-          </Button>
+        {privacyControl}
+        <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-end tw-gap-2 tw-self-start">
           <Button
             variant="action"
             size="md"
@@ -80,9 +75,7 @@ export default function CreateWaveInlineGroupDraftSummary({
             loading={isCreating}
             onClick={onCreateAndUse}
           >
-            {isCreating
-              ? t(locale, "waves.create.groups.draft.creating")
-              : t(locale, "waves.create.groups.draft.createAndUse")}
+            {submitLabel}
           </Button>
         </div>
       </div>

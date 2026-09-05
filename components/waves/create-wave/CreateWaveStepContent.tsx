@@ -66,6 +66,7 @@ export default function CreateWaveStepContent({
     setDropsAdminCanDelete,
     onOutcomeTypeChange,
     onGroupSelect,
+    onGroupMatchView,
     onVotingTypeChange,
     onCategoryChange,
     onProfileIdChange,
@@ -112,6 +113,7 @@ export default function CreateWaveStepContent({
           adminCanDeleteDrops={config.drops.adminCanDeleteDrops}
           setChatEnabled={onChatEnabledChange}
           onGroupSelect={onGroupSelect}
+          onGroupMatchView={onGroupMatchView}
           onCriteriaReplacementChange={onCriteriaReplacementChange}
           onGroupResolutionChange={onGroupResolutionChange}
           onInlineGroupCreate={onInlineGroupCreate}
