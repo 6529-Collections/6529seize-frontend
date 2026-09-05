@@ -187,7 +187,7 @@
       ],
       "facts": [
         "Groups are reusable community/member sets used across app workflows such as waves.",
-        "On Network, open Filter and then Choose group to search for and apply a saved group.",
+        "On Network, open Filter to create and apply a criteria-based group. The Network filter does not offer Choose group.",
         "Criteria-based groups are created inline from workflows such as Network filtering and Wave setup; there is no standalone Network Groups page.",
         "A profile's Groups tab remains available at /{user}/groups."
       ],

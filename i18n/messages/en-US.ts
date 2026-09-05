@@ -1262,9 +1262,9 @@ const WAVE_CREATE_GROUPS_MESSAGES = objectMessages("waves.create.groups", {
   adminGroupName: "Admins",
   accessHelper:
     "By default, everyone with access can participate. Only you can administer the wave.",
-  customizePermissions: "Customize permissions",
+  customizePermissions: "Customize other permissions",
   selectedGroup: "Selected group",
-  currentGroup: "Current group",
+  currentGroup: "Before editing",
   currentGroupWithName: "Current group: {name}",
   unsavedGroup: "Unsaved group",
   groupSource: "Group source",
@@ -1318,6 +1318,8 @@ const WAVE_CREATE_GROUPS_MESSAGES = objectMessages("waves.create.groups", {
   "editAccess.confirmMakePublic": "Make public",
   "editAccess.confirmUseVisibility": "Use visibility criteria",
   "actions.editCriteria": "Edit criteria",
+  "actions.edit": "Edit",
+  "actions.matchWaveAccess": "Match wave access",
   "actions.chooseGroup": "Choose group",
   "draft.notReadyTitle": "Not ready yet.",
   "draft.notReadyDescription":
@@ -1326,6 +1328,9 @@ const WAVE_CREATE_GROUPS_MESSAGES = objectMessages("waves.create.groups", {
   "draft.discard": "Discard draft",
   "draft.creating": "Creating group...",
   "draft.createAndUse": "Create and use new group",
+  "draft.saveChanges": "Save changes",
+  "draft.afterEditing": "After editing",
+  "rules.configured": "Configured",
   "validation.checking": "Checking group access…",
   "validation.unavailableTitle": "Couldn't verify group access.",
   "validation.unavailable":

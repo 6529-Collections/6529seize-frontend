@@ -53,6 +53,9 @@ export default function CreateWaveGroup({
   onCriteriaReplacementChange,
   onGroupResolutionChange,
   onInlineGroupCreate,
+  onMakeWavePublic,
+  showMatchWaveAccess = false,
+  onMatchWaveAccess,
   groupsCache,
   groups,
   setDropsAdminCanDelete,
@@ -70,6 +73,9 @@ export default function CreateWaveGroup({
   readonly onInlineGroupCreate: (
     payload: ApiCreateGroup
   ) => Promise<ApiGroupFull | null>;
+  readonly onMakeWavePublic?: (() => void) | undefined;
+  readonly showMatchWaveAccess?: boolean | undefined;
+  readonly onMatchWaveAccess?: (() => void) | undefined;
   readonly groupsCache: Record<string, ApiGroupFull>;
   readonly groups: WaveGroupsConfig;
   readonly setDropsAdminCanDelete: (adminCanDeleteDrops: boolean) => void;
@@ -287,7 +293,7 @@ export default function CreateWaveGroup({
       </div>
 
       <CreateWaveGroupInlinePanel
-        key={inputDisabled ? "disabled" : "enabled"}
+        key={`${inputDisabled ? "disabled" : "enabled"}-${selectedGroupId ?? "everyone"}`}
         suggestedName={suggestedName}
         defaultLabel={defaultLabel}
         disabled={inputDisabled}
@@ -297,6 +303,21 @@ export default function CreateWaveGroup({
         membersRoleLabel={groupLabel}
         defaultMembersPreviewTarget={defaultMembersPreviewTarget}
         defaultIncludedIdentity={defaultIncludedIdentity}
+        showMakeWavePublic={
+          groupType === CreateWaveGroupConfigType.CAN_VIEW &&
+          selectedGroupId !== null
+        }
+        onMakeWavePublic={() => {
+          onCriteriaReplacementChange(false);
+          onGroupResolutionChange(false);
+          onMakeWavePublic?.();
+        }}
+        showMatchWaveAccess={showMatchWaveAccess}
+        onMatchWaveAccess={() => {
+          onCriteriaReplacementChange(false);
+          onGroupResolutionChange(false);
+          onMatchWaveAccess?.();
+        }}
         onCriteriaReplacementChange={onCriteriaReplacementChange}
         onChange={onSelectedGroupChange}
         onCreateGroup={onInlineGroupCreate}

@@ -109,7 +109,7 @@ export const CREATE_WAVE_STEPS_LABELS: Record<
 > = {
   [ApiWaveType.Chat]: {
     [CreateWaveStep.OVERVIEW]: "Overview",
-    [CreateWaveStep.GROUPS]: "Groups",
+    [CreateWaveStep.GROUPS]: "Access",
     [CreateWaveStep.DATES]: "Schedule",
     [CreateWaveStep.DROPS]: "Drops",
     [CreateWaveStep.RULES]: "Rules",
@@ -120,7 +120,7 @@ export const CREATE_WAVE_STEPS_LABELS: Record<
   },
   [ApiWaveType.Rank]: {
     [CreateWaveStep.OVERVIEW]: "Overview",
-    [CreateWaveStep.GROUPS]: "Groups",
+    [CreateWaveStep.GROUPS]: "Access",
     [CreateWaveStep.DATES]: "Schedule",
     [CreateWaveStep.DROPS]: "Drops",
     [CreateWaveStep.RULES]: "Rules",
@@ -131,7 +131,7 @@ export const CREATE_WAVE_STEPS_LABELS: Record<
   },
   [ApiWaveType.Approve]: {
     [CreateWaveStep.OVERVIEW]: "Overview",
-    [CreateWaveStep.GROUPS]: "Groups",
+    [CreateWaveStep.GROUPS]: "Access",
     [CreateWaveStep.DATES]: "Schedule",
     [CreateWaveStep.DROPS]: "Drops",
     [CreateWaveStep.RULES]: "Rules",
@@ -173,9 +173,9 @@ export const CREATE_WAVE_NONE_GROUP_LABELS: Record<
   CreateWaveGroupConfigType,
   string
 > = {
-  [CreateWaveGroupConfigType.CAN_VIEW]: "Public",
-  [CreateWaveGroupConfigType.CAN_DROP]: "Public",
-  [CreateWaveGroupConfigType.CAN_VOTE]: "Public",
-  [CreateWaveGroupConfigType.CAN_CHAT]: "Public",
+  [CreateWaveGroupConfigType.CAN_VIEW]: "Everyone",
+  [CreateWaveGroupConfigType.CAN_DROP]: "Everyone",
+  [CreateWaveGroupConfigType.CAN_VOTE]: "Everyone",
+  [CreateWaveGroupConfigType.CAN_CHAT]: "Everyone",
   [CreateWaveGroupConfigType.ADMIN]: "Only me",
 };

@@ -29,11 +29,20 @@ const ROLE_BY_GROUP_TYPE: Partial<
   [CreateWaveGroupConfigType.ADMIN]: ApiWaveGroupRole.Admin,
 };
 
+const MATCHABLE_GROUP_KEY_BY_TYPE: Partial<
+  Record<CreateWaveGroupConfigType, "canChat" | "canDrop" | "canVote">
+> = {
+  [CreateWaveGroupConfigType.CAN_CHAT]: "canChat",
+  [CreateWaveGroupConfigType.CAN_DROP]: "canDrop",
+  [CreateWaveGroupConfigType.CAN_VOTE]: "canVote",
+};
+
 export default function CreateWaveGroups({
   waveName,
   waveType,
   groups,
   onGroupSelect,
+  onGroupMatchView,
   onCriteriaReplacementChange,
   onGroupResolutionChange,
   onInlineGroupCreate,
@@ -52,7 +61,10 @@ export default function CreateWaveGroups({
   readonly onGroupSelect: (param: {
     group: ApiGroupFull | null;
     groupType: CreateWaveGroupConfigType;
+    syncPrivilegeGroups?: boolean;
+    syncMatchingViewGroups?: boolean;
   }) => void;
+  readonly onGroupMatchView: (groupType: CreateWaveGroupConfigType) => void;
   readonly onCriteriaReplacementChange: (
     groupType: CreateWaveGroupConfigType,
     active: boolean
@@ -103,6 +115,10 @@ export default function CreateWaveGroups({
   const hasCustomPermissionsError = customizableGroupTypes.some(
     (groupType) => getErrorMessage(groupType) !== null
   );
+  const differsFromViewGroup = (groupType: CreateWaveGroupConfigType) => {
+    const groupKey = MATCHABLE_GROUP_KEY_BY_TYPE[groupType];
+    return groupKey !== undefined && groups[groupKey] !== groups.canView;
+  };
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-y-6">
@@ -154,6 +170,14 @@ export default function CreateWaveGroups({
           onGroupResolutionChange(CreateWaveGroupConfigType.CAN_VIEW, active)
         }
         onInlineGroupCreate={onInlineGroupCreate}
+        onMakeWavePublic={() =>
+          onGroupSelect({
+            group: null,
+            groupType: CreateWaveGroupConfigType.CAN_VIEW,
+            syncPrivilegeGroups: false,
+            syncMatchingViewGroups: true,
+          })
+        }
         setDropsAdminCanDelete={setDropsAdminCanDelete}
         errorMessage={getErrorMessage(CreateWaveGroupConfigType.CAN_VIEW)}
       />
@@ -161,6 +185,7 @@ export default function CreateWaveGroups({
         title={t(locale, "waves.create.groups.customizePermissions")}
         isCustomized={hasCustomPermissions}
         hasError={hasCustomPermissionsError}
+        defaultOpen={hasCustomPermissions}
         variant="filled"
       >
         <div className="tw-flex tw-flex-col tw-gap-y-6 tw-p-4">
@@ -183,6 +208,8 @@ export default function CreateWaveGroups({
                 onGroupResolutionChange(groupType, active)
               }
               onInlineGroupCreate={onInlineGroupCreate}
+              showMatchWaveAccess={differsFromViewGroup(groupType)}
+              onMatchWaveAccess={() => onGroupMatchView(groupType)}
               setDropsAdminCanDelete={setDropsAdminCanDelete}
               errorMessage={getErrorMessage(groupType)}
             />

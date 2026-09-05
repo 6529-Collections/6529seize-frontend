@@ -518,8 +518,9 @@ export const EN_GB_MESSAGES = {
   "waves.create.groups.viewGroupName": "Who can access this wave",
   "waves.create.groups.accessHelper":
     "By default, everyone with access can participate. Only you can administer the wave.",
-  "waves.create.groups.customizePermissions": "Customise permissions",
+  "waves.create.groups.customizePermissions": "Customise other permissions",
   "waves.create.groups.adminGroupName": "Admins",
+  "waves.create.groups.currentGroup": "Before editing",
   "waves.create.groups.currentGroupWithName": "Current group: {name}",
   "waves.create.groups.dialog.addTitle": "Add group",
   "waves.create.groups.dialog.changeTitle": "Change group",
@@ -565,6 +566,11 @@ export const EN_GB_MESSAGES = {
   "waves.create.groups.editAccess.confirmUseVisibility":
     "Use visibility criteria",
   "waves.create.groups.actions.editCriteria": "Edit criteria",
+  "waves.create.groups.actions.edit": "Edit",
+  "waves.create.groups.actions.matchWaveAccess": "Match wave access",
+  "waves.create.groups.draft.saveChanges": "Save changes",
+  "waves.create.groups.draft.afterEditing": "After editing",
+  "waves.create.groups.rules.configured": "Configured",
   "waves.create.groups.inlineIdentities.modeLabel": "Identity treatment",
   "waves.create.groups.inlineIdentities.included.label": "Included",
   "waves.create.groups.inlineIdentities.included.searchLabel":

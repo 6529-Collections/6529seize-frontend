@@ -77,6 +77,8 @@ describe("CreateWaveGroup", () => {
   const mockOnGroupSelect = jest.fn();
   const mockOnCriteriaReplacementChange = jest.fn();
   const mockOnGroupResolutionChange = jest.fn();
+  const mockOnMakeWavePublic = jest.fn();
+  const mockOnMatchWaveAccess = jest.fn();
   const mockSetChatEnabled = jest.fn();
   const mockSetDropsAdminCanDelete = jest.fn();
   const mockOnInlineGroupCreate = jest.fn();
@@ -139,6 +141,8 @@ describe("CreateWaveGroup", () => {
     onCriteriaReplacementChange: mockOnCriteriaReplacementChange,
     onGroupResolutionChange: mockOnGroupResolutionChange,
     onInlineGroupCreate: mockOnInlineGroupCreate,
+    onMakeWavePublic: mockOnMakeWavePublic,
+    onMatchWaveAccess: mockOnMatchWaveAccess,
     groupsCache: {},
     groups: defaultGroups,
     setDropsAdminCanDelete: mockSetDropsAdminCanDelete,
@@ -270,7 +274,7 @@ describe("CreateWaveGroup", () => {
     renderComponent();
 
     expect(inlinePanelProps?.suggestedName).toBe("Test Wave Who can drop");
-    expect(inlinePanelProps?.defaultLabel).toBe("Public");
+    expect(inlinePanelProps?.defaultLabel).toBe("Everyone");
     inlinePanelProps?.onChange(exampleGroup);
     expect(mockOnGroupResolutionChange).toHaveBeenCalledWith(false);
     expect(mockOnGroupSelect).toHaveBeenCalledWith(exampleGroup);
@@ -332,6 +336,37 @@ describe("CreateWaveGroup", () => {
     });
 
     expect(inlinePanelProps?.disabled).toBe(true);
+  });
+
+  it("offers Make wave public only for restricted wave access", () => {
+    renderComponent({
+      groupType: CreateWaveGroupConfigType.CAN_VIEW,
+      groups: { ...defaultGroups, canView: exampleGroup.id },
+      groupsCache: { [exampleGroup.id]: exampleGroup },
+    });
+
+    expect(inlinePanelProps?.showMakeWavePublic).toBe(true);
+    inlinePanelProps?.onMakeWavePublic?.();
+    expect(mockOnCriteriaReplacementChange).toHaveBeenCalledWith(false);
+    expect(mockOnGroupResolutionChange).toHaveBeenCalledWith(false);
+    expect(mockOnMakeWavePublic).toHaveBeenCalledTimes(1);
+
+    renderComponent({
+      groupType: CreateWaveGroupConfigType.CAN_CHAT,
+      groups: { ...defaultGroups, canChat: exampleGroup.id },
+      groupsCache: { [exampleGroup.id]: exampleGroup },
+    });
+    expect(inlinePanelProps?.showMakeWavePublic).toBe(false);
+  });
+
+  it("forwards the one-click match action and clears transient editor state", () => {
+    renderComponent({ showMatchWaveAccess: true });
+
+    expect(inlinePanelProps?.showMatchWaveAccess).toBe(true);
+    inlinePanelProps?.onMatchWaveAccess?.();
+    expect(mockOnCriteriaReplacementChange).toHaveBeenCalledWith(false);
+    expect(mockOnGroupResolutionChange).toHaveBeenCalledWith(false);
+    expect(mockOnMatchWaveAccess).toHaveBeenCalledTimes(1);
   });
 
   it("blocks continuation and offers retry when a draft group cannot be restored", async () => {

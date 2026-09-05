@@ -391,9 +391,13 @@ export function useWaveConfig() {
   const onGroupSelect = ({
     group,
     groupType,
+    syncPrivilegeGroups = true,
+    syncMatchingViewGroups = false,
   }: {
     readonly group: ApiGroupFull | null;
     readonly groupType: CreateWaveGroupConfigType;
+    readonly syncPrivilegeGroups?: boolean;
+    readonly syncMatchingViewGroups?: boolean;
   }) => {
     setGroupValidationErrorVisible(false);
     if (group) {
@@ -404,18 +408,66 @@ export function useWaveConfig() {
     }
     switch (groupType) {
       case CreateWaveGroupConfigType.CAN_VIEW:
-        setConfig((prev) => ({
-          ...prev,
-          groups: {
-            ...prev.groups,
-            canView: group?.id ?? null,
-            ...getPrivilegeGroupDefaults({
-              groupId: group?.id ?? null,
+        if (syncMatchingViewGroups) {
+          const currentViewGroup = config.groups.canView;
+          const privilegeGroups: readonly PrivilegeGroupKey[] =
+            config.overview.type === ApiWaveType.Chat
+              ? ["canChat"]
+              : ["canChat", "canDrop", "canVote"];
+          for (const privilegeGroup of privilegeGroups) {
+            if (config.groups[privilegeGroup] === currentViewGroup) {
+              manuallySelectedPrivilegeGroups.current.delete(privilegeGroup);
+            } else {
+              manuallySelectedPrivilegeGroups.current.add(privilegeGroup);
+            }
+          }
+        } else if (!syncPrivilegeGroups) {
+          manuallySelectedPrivilegeGroups.current.add("canChat");
+          if (config.overview.type !== ApiWaveType.Chat) {
+            manuallySelectedPrivilegeGroups.current.add("canDrop");
+            manuallySelectedPrivilegeGroups.current.add("canVote");
+          }
+        }
+        setConfig((prev) => {
+          const nextGroupId = group?.id ?? null;
+          let privilegeUpdates: {
+            canChat?: string | null;
+            canDrop?: string | null;
+            canVote?: string | null;
+          } = {};
+          if (syncMatchingViewGroups) {
+            if (prev.groups.canChat === prev.groups.canView) {
+              privilegeUpdates.canChat = nextGroupId;
+            }
+            if (
+              prev.overview.type !== ApiWaveType.Chat &&
+              prev.groups.canDrop === prev.groups.canView
+            ) {
+              privilegeUpdates.canDrop = nextGroupId;
+            }
+            if (
+              prev.overview.type !== ApiWaveType.Chat &&
+              prev.groups.canVote === prev.groups.canView
+            ) {
+              privilegeUpdates.canVote = nextGroupId;
+            }
+          } else if (syncPrivilegeGroups) {
+            privilegeUpdates = getPrivilegeGroupDefaults({
+              groupId: nextGroupId,
               waveType: prev.overview.type,
               manuallySelected: manuallySelectedPrivilegeGroups.current,
-            }),
-          },
-        }));
+            });
+          }
+
+          return {
+            ...prev,
+            groups: {
+              ...prev.groups,
+              canView: nextGroupId,
+              ...privilegeUpdates,
+            },
+          };
+        });
         break;
       case CreateWaveGroupConfigType.CAN_DROP:
         manuallySelectedPrivilegeGroups.current.add("canDrop");
@@ -455,6 +507,38 @@ export function useWaveConfig() {
             admin: group?.id ?? null,
           },
         }));
+        break;
+      default:
+        assertUnreachable(groupType);
+    }
+  };
+
+  const onGroupMatchView = (groupType: CreateWaveGroupConfigType) => {
+    setGroupValidationErrorVisible(false);
+    switch (groupType) {
+      case CreateWaveGroupConfigType.CAN_CHAT:
+        manuallySelectedPrivilegeGroups.current.delete("canChat");
+        setConfig((prev) => ({
+          ...prev,
+          groups: { ...prev.groups, canChat: prev.groups.canView },
+        }));
+        break;
+      case CreateWaveGroupConfigType.CAN_DROP:
+        manuallySelectedPrivilegeGroups.current.delete("canDrop");
+        setConfig((prev) => ({
+          ...prev,
+          groups: { ...prev.groups, canDrop: prev.groups.canView },
+        }));
+        break;
+      case CreateWaveGroupConfigType.CAN_VOTE:
+        manuallySelectedPrivilegeGroups.current.delete("canVote");
+        setConfig((prev) => ({
+          ...prev,
+          groups: { ...prev.groups, canVote: prev.groups.canView },
+        }));
+        break;
+      case CreateWaveGroupConfigType.CAN_VIEW:
+      case CreateWaveGroupConfigType.ADMIN:
         break;
       default:
         assertUnreachable(groupType);
@@ -635,6 +719,7 @@ export function useWaveConfig() {
     onOutcomeTypeChange,
     // Group handling
     onGroupSelect,
+    onGroupMatchView,
     // Voting
     onVotingTypeChange,
     onCategoryChange,

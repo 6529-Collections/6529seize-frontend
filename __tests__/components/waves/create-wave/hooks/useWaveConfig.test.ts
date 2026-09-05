@@ -704,7 +704,7 @@ describe("useWaveConfig", () => {
       });
     });
 
-    it("preserves a manually selected Public privilege", () => {
+    it("preserves a manually selected Everyone privilege", () => {
       const { result } = renderHook(() => useWaveConfig());
 
       act(() => {
@@ -780,7 +780,7 @@ describe("useWaveConfig", () => {
       });
     });
 
-    it("returns linked privilege groups to Public when access becomes Public", () => {
+    it("returns linked privilege groups to Everyone when access becomes Everyone", () => {
       const { result } = renderHook(() => useWaveConfig());
 
       act(() => {
@@ -807,6 +807,76 @@ describe("useWaveConfig", () => {
         canVote: null,
         canChat: null,
       });
+    });
+
+    it("makes only privilege groups matching access public", () => {
+      const { result } = renderHook(() => useWaveConfig());
+      const chatOverride = { ...mockGroup, id: "chat-override" };
+
+      act(() => {
+        result.current.setOverview({
+          ...result.current.config.overview,
+          type: ApiWaveType.Rank,
+        });
+      });
+      act(() => {
+        result.current.onGroupSelect({
+          group: mockGroup,
+          groupType: CreateWaveGroupConfigType.CAN_VIEW,
+        });
+        result.current.onGroupSelect({
+          group: chatOverride,
+          groupType: CreateWaveGroupConfigType.CAN_CHAT,
+        });
+      });
+      act(() => {
+        result.current.onGroupSelect({
+          group: null,
+          groupType: CreateWaveGroupConfigType.CAN_VIEW,
+          syncPrivilegeGroups: false,
+          syncMatchingViewGroups: true,
+        });
+      });
+
+      expect(result.current.config.groups).toEqual({
+        admin: null,
+        canView: null,
+        canDrop: null,
+        canVote: null,
+        canChat: "chat-override",
+      });
+    });
+
+    it("matches a privilege to access and resumes default synchronization", () => {
+      const { result } = renderHook(() => useWaveConfig());
+      const chatOverride = { ...mockGroup, id: "chat-override" };
+      const replacementGroup = { ...mockGroup, id: "group-replacement" };
+
+      act(() => {
+        result.current.onGroupSelect({
+          group: mockGroup,
+          groupType: CreateWaveGroupConfigType.CAN_VIEW,
+        });
+        result.current.onGroupSelect({
+          group: chatOverride,
+          groupType: CreateWaveGroupConfigType.CAN_CHAT,
+        });
+      });
+      act(() => {
+        result.current.onGroupMatchView(CreateWaveGroupConfigType.CAN_CHAT);
+      });
+
+      expect(result.current.config.groups.canChat).toBe("group-123");
+
+      act(() => {
+        result.current.onGroupSelect({
+          group: replacementGroup,
+          groupType: CreateWaveGroupConfigType.CAN_VIEW,
+        });
+      });
+
+      expect(result.current.config.groups.canView).toBe("group-replacement");
+      expect(result.current.config.groups.canChat).toBe("group-replacement");
     });
 
     it("should update canDrop group", () => {

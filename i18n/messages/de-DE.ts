@@ -510,8 +510,9 @@ export const DE_DE_MESSAGES = {
   "waves.create.groups.viewGroupName": "Wer auf diese Wave zugreifen kann",
   "waves.create.groups.accessHelper":
     "Standardmäßig können alle Personen mit Zugriff teilnehmen. Nur du kannst die Wave verwalten.",
-  "waves.create.groups.customizePermissions": "Berechtigungen anpassen",
+  "waves.create.groups.customizePermissions": "Weitere Berechtigungen anpassen",
   "waves.create.groups.adminGroupName": "Administratoren",
+  "waves.create.groups.currentGroup": "Vor der Bearbeitung",
   "waves.create.groups.currentGroupWithName": "Aktuelle Gruppe: {name}",
   "waves.create.groups.dialog.addTitle": "Gruppe hinzufügen",
   "waves.create.groups.dialog.changeTitle": "Gruppe ändern",
@@ -562,6 +563,11 @@ export const DE_DE_MESSAGES = {
   "waves.create.groups.editAccess.confirmUseVisibility":
     "Sichtbarkeitskriterien verwenden",
   "waves.create.groups.actions.editCriteria": "Kriterien bearbeiten",
+  "waves.create.groups.actions.edit": "Bearbeiten",
+  "waves.create.groups.actions.matchWaveAccess": "An Wave-Zugriff anpassen",
+  "waves.create.groups.draft.saveChanges": "Änderungen speichern",
+  "waves.create.groups.draft.afterEditing": "Nach der Bearbeitung",
+  "waves.create.groups.rules.configured": "Konfiguriert",
   "waves.create.groups.inlineIdentities.modeLabel":
     "Behandlung von Identitäten",
   "waves.create.groups.inlineIdentities.included.label": "Eingeschlossen",
