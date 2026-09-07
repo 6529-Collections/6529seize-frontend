@@ -1,6 +1,5 @@
 "use client";
 
-import PrimaryButton from "@/components/utils/button/PrimaryButton";
 import SecondaryButton from "@/components/utils/button/SecondaryButton";
 import { motion } from "framer-motion";
 import { useMemo, type FC } from "react";
@@ -22,6 +21,10 @@ import {
   type MetadataValueLengthStatus,
 } from "../utils/submissionMetadata";
 import { validateTokenIdFormat } from "../utils/tokenParsing";
+import type { MemesSubmissionIdentity } from "../hooks/useMemesSubmissionIdentity";
+import { SubmissionActionButton } from "../ui/SubmissionActionButton";
+import { SubmissionIdentityPanel } from "../ui/SubmissionIdentityPanel";
+import type { SubmissionPhase } from "../ui/SubmissionProgress";
 
 interface AdditionalInfoStepProps {
   readonly traits: TraitsData;
@@ -47,7 +50,10 @@ interface AdditionalInfoStepProps {
   readonly onBack: () => void;
   readonly onPreview: () => void;
   readonly onSubmit: () => void;
+  readonly identity: MemesSubmissionIdentity;
   readonly isSubmitting: boolean;
+  readonly submissionPhase: SubmissionPhase;
+  readonly uploadProgress: number;
   readonly submitLabel?: string | undefined;
 }
 
@@ -75,7 +81,10 @@ const AdditionalInfoStep: FC<AdditionalInfoStepProps> = ({
   onBack,
   onPreview,
   onSubmit,
+  identity,
   isSubmitting,
+  submissionPhase,
+  uploadProgress,
   submitLabel = "Submit Artwork",
 }) => {
   const metadataLengthValidation = useMemo(
@@ -280,30 +289,35 @@ const AdditionalInfoStep: FC<AdditionalInfoStepProps> = ({
       </div>
 
       <div className="tw-mt-auto tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-py-3">
-        <div className="tw-mx-auto tw-grid tw-w-full tw-max-w-4xl tw-grid-cols-2 tw-gap-2 tw-px-4 sm:tw-flex sm:tw-items-center sm:tw-justify-between md:tw-px-8">
-          <SecondaryButton
-            onClicked={onBack}
-            disabled={isSubmitting}
-            className="tw-w-full sm:tw-w-auto"
-          >
-            Back
-          </SecondaryButton>
-          <div className="tw-contents sm:tw-flex sm:tw-items-center sm:tw-gap-2">
+        <div className="tw-mx-auto tw-w-full tw-max-w-4xl tw-space-y-3 tw-px-4 md:tw-px-8">
+          <SubmissionIdentityPanel identity={identity} />
+          <div className="tw-grid tw-grid-cols-2 tw-gap-2 sm:tw-flex sm:tw-items-center sm:tw-justify-between">
             <SecondaryButton
-              onClicked={onPreview}
-              disabled={!formValid || isSubmitting}
+              onClicked={onBack}
+              disabled={isSubmitting}
               className="tw-w-full sm:tw-w-auto"
             >
-              Preview
+              Back
             </SecondaryButton>
-            <PrimaryButton
-              onClicked={onSubmit}
-              disabled={!formValid}
-              loading={isSubmitting}
-              className="tw-col-span-2 tw-w-full sm:tw-w-auto"
-            >
-              {submitLabel}
-            </PrimaryButton>
+            <div className="tw-contents sm:tw-flex sm:tw-items-center sm:tw-gap-2">
+              <SecondaryButton
+                onClicked={onPreview}
+                disabled={!formValid || isSubmitting}
+                className="tw-w-full sm:tw-w-auto"
+              >
+                Preview
+              </SecondaryButton>
+              <SubmissionActionButton
+                identity={identity}
+                isFormValid={formValid}
+                isSubmitting={isSubmitting}
+                submissionPhase={submissionPhase}
+                uploadProgress={uploadProgress}
+                submitLabel={submitLabel}
+                onSubmit={onSubmit}
+                className="tw-col-span-2 tw-w-full sm:tw-w-auto"
+              />
+            </div>
           </div>
         </div>
       </div>

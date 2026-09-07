@@ -1,10 +1,13 @@
 "use client";
 
 import SecondaryButton from "@/components/utils/button/SecondaryButton";
-import PrimaryButton from "@/components/utils/button/PrimaryButton";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { motion } from "framer-motion";
 import { useCallback } from "react";
+import type { MemesSubmissionIdentity } from "../hooks/useMemesSubmissionIdentity";
+import { SubmissionActionButton } from "../ui/SubmissionActionButton";
+import { SubmissionIdentityPanel } from "../ui/SubmissionIdentityPanel";
+import type { SubmissionPhase } from "../ui/SubmissionProgress";
 import { PreviewLeaderboardGalleryCase } from "./components/PreviewLeaderboardGalleryCase";
 import { PreviewLeaderboardListCase } from "./components/PreviewLeaderboardListCase";
 
@@ -12,7 +15,10 @@ interface MemesSubmissionPreviewScreenProps {
   readonly previewDrop: ExtendedDrop;
   readonly onBackToEdit: () => void;
   readonly onSubmit: () => void;
+  readonly identity: MemesSubmissionIdentity;
   readonly isSubmitting: boolean;
+  readonly submissionPhase: SubmissionPhase;
+  readonly uploadProgress: number;
   readonly submitLabel?: string | undefined;
 }
 
@@ -20,7 +26,10 @@ export function MemesSubmissionPreviewScreen({
   previewDrop,
   onBackToEdit,
   onSubmit,
+  identity,
   isSubmitting,
+  submissionPhase,
+  uploadProgress,
   submitLabel = "Submit Artwork",
 }: MemesSubmissionPreviewScreenProps) {
   const onDropClick = useCallback((_drop: ExtendedDrop) => {}, []);
@@ -53,22 +62,27 @@ export function MemesSubmissionPreviewScreen({
         />
       </div>
 
-      <div className="tw-mt-auto tw-grid tw-gap-2 tw-border-t tw-border-iron-800 tw-px-4 tw-pt-6 sm:tw-flex sm:tw-items-center sm:tw-justify-between">
-        <SecondaryButton
-          onClicked={onBackToEdit}
-          disabled={isSubmitting}
-          className="tw-w-full sm:tw-w-auto"
-        >
-          Back to Edit
-        </SecondaryButton>
-        <PrimaryButton
-          onClicked={onSubmit}
-          disabled={false}
-          loading={isSubmitting}
-          className="tw-w-full sm:tw-w-auto"
-        >
-          {submitLabel}
-        </PrimaryButton>
+      <div className="tw-mt-auto tw-space-y-3 tw-border-t tw-border-iron-800 tw-px-4 tw-pt-6">
+        <SubmissionIdentityPanel identity={identity} />
+        <div className="tw-grid tw-gap-2 sm:tw-flex sm:tw-items-center sm:tw-justify-between">
+          <SecondaryButton
+            onClicked={onBackToEdit}
+            disabled={isSubmitting}
+            className="tw-w-full sm:tw-w-auto"
+          >
+            Back to Edit
+          </SecondaryButton>
+          <SubmissionActionButton
+            identity={identity}
+            isFormValid={true}
+            isSubmitting={isSubmitting}
+            submissionPhase={submissionPhase}
+            uploadProgress={uploadProgress}
+            submitLabel={submitLabel}
+            onSubmit={onSubmit}
+            className="tw-w-full sm:tw-w-auto"
+          />
+        </div>
       </div>
     </motion.div>
   );
