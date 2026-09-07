@@ -35,6 +35,7 @@ const FORBIDDEN_OPTION_NAMES = new Set([
   "configdir",
   "dir",
   "filter",
+  "filterprod",
   "g",
   "global",
   "globalconfig",

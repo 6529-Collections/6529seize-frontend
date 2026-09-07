@@ -60,7 +60,13 @@ describe("public Coordinator package policy", () => {
     expect(() => policy.validateArguments(["install", "--registry=x"])).toThrow(
       "pnpm option is not allowed"
     );
-    for (const option of ["-C", "-g", "-w", "--filter=app"]) {
+    for (const option of [
+      "-C",
+      "-g",
+      "-w",
+      "--filter=app",
+      "--filter-prod=app",
+    ]) {
       expect(() => policy.validateArguments(["install", option])).toThrow(
         "pnpm option is not allowed"
       );
