@@ -1,6 +1,7 @@
 import type { QueryClient } from "@tanstack/react-query";
 import type { ApiAttachment } from "@/generated/models/ApiAttachment";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiDropV2View } from "@/services/api/drop-v2-view.types";
 import { reconcileDropAuthenticatedPollVote } from "@/helpers/waves/poll-vote-reconciliation";
 import { QueryKey } from "../ReactQueryWrapper";
 import {
@@ -68,13 +69,14 @@ function isMatchingDrop(
 interface DropReplacementOptions {
   readonly mergeWithExisting?: boolean;
   readonly preferExistingPollVote?: boolean;
+  readonly clearLargestVote?: boolean;
 }
 
 function replaceMatchingDrop(
   value: Record<string, unknown>,
   drop: ApiDrop,
   options: DropReplacementOptions
-): ApiDrop {
+): ApiDropV2View {
   const dropWithFinalizedAttachments = reconcileFinalizedDropAttachments(
     drop,
     value
@@ -90,7 +92,7 @@ function replaceMatchingDrop(
           preferExistingVote: preferExistingPollVote,
         });
 
-  return {
+  const updatedDrop: ApiDropV2View = {
     ...reconciledDrop,
     ...(value["type"] !== undefined && { type: value["type"] }),
     ...(value["stableKey"] !== undefined && {
@@ -99,6 +101,16 @@ function replaceMatchingDrop(
     ...(value["stableHash"] !== undefined && {
       stableHash: value["stableHash"],
     }),
+  };
+  if (!options.clearLargestVote || !updatedDrop.submission_context) {
+    return updatedDrop;
+  }
+
+  const voting = { ...updatedDrop.submission_context.voting };
+  delete voting.largest_vote;
+  return {
+    ...updatedDrop,
+    submission_context: { ...updatedDrop.submission_context, voting },
   };
 }
 

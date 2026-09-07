@@ -11,10 +11,15 @@
  * Do not edit the class manually.
  */
 
+import { ApiDropVoter } from '../models/ApiDropVoter';
 import { ApiSubmissionDropVotingContextProfileContext } from '../models/ApiSubmissionDropVotingContextProfileContext';
 import { HttpFile } from '../http/http';
 
 export class ApiSubmissionDropVoting {
+    /**
+    * Largest absolute current individual allocation, retaining its sign. Equal magnitudes are resolved by voter ID ascending. Included in leaderboard responses for participatory RANK drops when a nonzero vote is available; otherwise omitted. Not a vote change or a time-weighted contribution.
+    */
+    'largest_vote'?: ApiDropVoter;
     'is_open': boolean;
     'context_profile_context'?: ApiSubmissionDropVotingContextProfileContext;
     'total_votes_given': number;
@@ -28,6 +33,12 @@ export class ApiSubmissionDropVoting {
     static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
+        {
+            "name": "largest_vote",
+            "baseName": "largest_vote",
+            "type": "ApiDropVoter",
+            "format": ""
+        },
         {
             "name": "is_open",
             "baseName": "is_open",

@@ -4135,6 +4135,39 @@ paths:
                 $ref: "#/components/schemas/ApiDropAndWave"
         "404":
           description: Drop not found
+  /v2/drops/{id}/vote-summary:
+    get:
+      tags:
+        - DropsV2
+      summary: Get the current vote allocation summary for a drop.
+      description: >-
+        Returns complete signed totals and at most three individual allocations
+        per direction for a visible participatory RANK drop. The optional
+        distribution is omitted for unsupported or moderated drops and when
+        there are no nonzero allocations. This read-only summary does not
+        represent vote changes or a time-weighted leaderboard score.
+      operationId: getDropV2VoteSummaryById
+      x-6529-router:
+        enabled: true
+        auth: optional
+        handler:
+          import: "@/api/drops/get-drop-vote-summary.handler"
+          name: handleGetDropV2VoteSummaryById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Current allocation summary, when available.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDropVoteSummary"
+        "404":
+          description: Drop not found
   /v2/drops/{id}/replies:
     get:
       tags:
@@ -17714,6 +17747,40 @@ components:
         time:
           type: number
           format: int64
+    ApiDropVoteDistribution:
+      type: object
+      description: >-
+        Current individual vote allocations for a participatory drop in a RANK
+        wave. These are not vote changes or time-weighted leaderboard scores.
+        Totals include every nonzero vote; each list contains at most the three
+        largest allocations in its direction, ordered by absolute magnitude
+        descending and voter ID ascending for ties. The difference between a
+        side total and its listed votes is the unlisted remainder.
+      required:
+        - positive_total
+        - negative_total
+        - positive_votes
+        - negative_votes
+      properties:
+        positive_total:
+          type: integer
+          format: int64
+          minimum: 0
+        negative_total:
+          type: integer
+          format: int64
+          maximum: 0
+          description: Signed sum of all negative current allocations.
+        positive_votes:
+          type: array
+          maxItems: 3
+          items:
+            $ref: "#/components/schemas/ApiDropVoter"
+        negative_votes:
+          type: array
+          maxItems: 3
+          items:
+            $ref: "#/components/schemas/ApiDropVoter"
     ApiDropVoteEditLog:
       type: object
       required:
@@ -17758,6 +17825,13 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiDropVoter"
+    ApiDropVoteSummary:
+      type: object
+      properties:
+        vote_distribution:
+          description: Omission does not imply that both vote totals are zero.
+          allOf:
+            - $ref: "#/components/schemas/ApiDropVoteDistribution"
     ApiDropWinningContext:
       type: object
       required:
@@ -22306,6 +22380,15 @@ components:
         - voters_count
         - place
       properties:
+        largest_vote:
+          description: >-
+            Largest absolute current individual allocation, retaining its sign.
+            Equal magnitudes are resolved by voter ID ascending. Included in
+            leaderboard responses for participatory RANK drops when a nonzero
+            vote is available; otherwise omitted. Not a vote change or a
+            time-weighted contribution.
+          allOf:
+            - $ref: "#/components/schemas/ApiDropVoter"
         is_open:
           type: boolean
         context_profile_context:

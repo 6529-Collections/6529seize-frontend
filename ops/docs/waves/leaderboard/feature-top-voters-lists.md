@@ -3,10 +3,13 @@
 ## Overview
 
 Rank-wave voter rankings appear in two places:
+
 - wave-level `Voters` tab in the right sidebar
 - drop-level `Top voters` section in non-chat single-drop views
 
 Both lists use descending absolute vote totals and load `20` rows per page.
+Leaderboard cards can also show a signed `Largest vote` without opening either
+list.
 
 ## Location in the Site
 
@@ -35,12 +38,26 @@ Both lists use descending absolute vote totals and load `20` rows per page.
 4. Reach the list end to request the next page.
 5. New rows append until there is no next page.
 
+### Largest Vote on a Card
+
+- Participatory drops in rank waves can show `Largest vote`, a voter profile
+  link, and a compact signed amount on standard leaderboard, memes list, and
+  gallery cards.
+- The amount is that voter's current allocation on this drop. `+` means a
+  positive vote and `−` means a negative vote. It is not their latest vote
+  change or their vote total across the wave.
+- Largest means greatest size in either direction: a `−11M` allocation is
+  larger than a `+7M` allocation for this highlight. It does not identify the
+  strongest supporter unless the selected vote is positive.
+- Open the drop for separate positive and negative highlights and the
+  [current vote distribution](../drop-actions/feature-vote-summary-and-modal.md).
+
 ## Common Scenarios
 
 - The sidebar `Voters` tab ranks voters across the whole wave.
 - Single-drop `Top voters` ranks voters for that one drop.
 - Single-drop `Top voters` starts collapsed and expands on demand.
-- Drop-level voter data can start loading before the section is expanded.
+- Drop-level voter data is requested when `Top voters` is expanded.
 - A thin loading bar appears while more rows are loading.
 - Empty states show `Be the First to Make a Vote` with scope-specific guidance:
   - wave scope: `Vote on drops to see voter rankings appear here.`
@@ -57,6 +74,12 @@ Both lists use descending absolute vote totals and load `20` rows per page.
 - Positive-only voters show only the green marker; mixed voters can show both
   green and red markers.
 - Without a signed-in profile handle, voter rows can stay empty.
+- Card highlights are optional and omitted for winners, chat and approve
+  waves, and when no summary is available. A missing highlight does not prove
+  that the drop has no votes or no negative votes.
+- After you edit or reset a vote, that drop's card highlight is cleared until
+  the leaderboard's next normal refresh. Voting does not force the leaderboard
+  to reload or reorder.
 
 ## Failure and Recovery
 
@@ -72,6 +95,8 @@ Both lists use descending absolute vote totals and load `20` rows per page.
 - These surfaces do not expose user sorting or filtering controls.
 - Data requests require a signed-in profile handle.
 - Wave-level and drop-level voter rankings are separate scopes.
+- `Top voters` keeps its absolute totals, colored markers, tooltips, and
+  ordering. The signed card highlight is separate from those rows.
 
 ## Related Pages
 

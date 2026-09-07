@@ -7,6 +7,9 @@ optional projected total, wave credit label (`TDH`, `XTDH`, `TDH + XTDH`, or
 `Rep`), and a `Vote` action when voting is visible. Selecting `Vote` opens
 `Vote for this artwork` with the shared vote-entry form.
 
+Participatory drops in rank waves can also show a separate current-vote
+distribution with signed positive and negative highlights.
+
 ## Location in the Site
 
 - Non-chat single-drop overlays in thread contexts:
@@ -37,6 +40,29 @@ optional projected total, wave credit label (`TDH`, `XTDH`, `TDH + XTDH`, or
 5. Submit button transitions `Vote` -> loading -> `Voted`.
 6. After success, voting closes and the same drop detail stays open.
 
+### Read the Current Vote Distribution
+
+1. Review the ribbon beside `−` and `+` and the `Largest negative vote` and
+   `Largest positive vote` labels below it. Each available label identifies
+   one voter and their signed current allocation on this drop.
+2. Select the ribbon or highlights to expand the breakdown. Keyboard users can
+   focus this control and use `Enter` or `Space`.
+3. Read `Negative total` and `Positive total` as the complete signed totals of
+   current allocations in each direction. For example, `−11M` and `+27M` give
+   a raw net allocation of `+16M`.
+4. Each direction lists up to its three largest individual allocations with
+   exact amounts and profile links. `Others` combines the remaining
+   allocations on that side; it is an amount, not a voter count.
+
+The ribbon's negative and positive widths reflect the amounts on each side,
+before they offset each other. Individual segments show the highlighted
+voters, with a striped `Others` segment when there is a remainder.
+
+These figures describe current allocations, not vote-edit history. In a wave
+with time weighting, their raw net can differ from the calculated score and
+projection in the existing `TDH Total` strip. That strip, its credit label,
+ranking, and voting rules retain their usual meaning.
+
 ## Common Scenarios
 
 - Eligible viewers vote directly from single-drop detail.
@@ -47,6 +73,13 @@ optional projected total, wave credit label (`TDH`, `XTDH`, `TDH + XTDH`, or
 - Default single-drop panels use centered modal overlay on all screen sizes.
 - Memes single-drop panels use bottom sheet on small screens and centered modal
   on larger screens.
+- The distribution's largest positive and negative votes remain visible while
+  its detailed breakdown is collapsed. The separate `Top voters` section can
+  remain closed.
+- After you change or reset a vote, an open drop's distribution refreshes.
+- While the drop is open, relevant real-time drop and vote updates also request
+  a fresh distribution. Closely spaced updates are grouped, so the summary may
+  take a moment to catch up.
 
 ## Edge Cases
 
@@ -62,6 +95,13 @@ optional projected total, wave credit label (`TDH`, `XTDH`, `TDH + XTDH`, or
 - Desktop modal restores focus to the previously focused element on close.
 - In app mode, modal renders inline and does not mutate `document.body`
   overflow.
+- Current-vote distribution is limited to participatory rank-wave drops. It is
+  omitted for winners and for chat or approve waves, even where those views
+  have other voting information.
+- If only one direction has votes, only that direction has a largest-voter
+  highlight and breakdown. No opposing voter is invented for an empty side.
+- Missing or unavailable distribution data hides this optional section. Its
+  absence does not mean all votes are zero or that no negative votes exist.
 
 ## Failure and Recovery
 
@@ -69,6 +109,8 @@ optional projected total, wave credit label (`TDH`, `XTDH`, `TDH + XTDH`, or
   stays open.
 - If vote submit request fails, voting stays open and an error toast is shown.
 - Closing voting only closes the voting surface; single-drop view stays open.
+- If the optional distribution cannot be loaded, the drop and its normal
+  voting controls remain usable. Refresh the page to request current data.
 
 ## Limitations / Notes
 
@@ -80,6 +122,12 @@ optional projected total, wave credit label (`TDH`, `XTDH`, `TDH + XTDH`, or
   [Wave Top Voters Lists](../leaderboard/feature-top-voters-lists.md).
 - Summary strip does not show `Voting Starts In` or `Voting Ends In`
   countdown text.
+- Distribution summaries do not change `Top voters` pagination, absolute
+  totals, markers, or sorting. They do not change vote amounts, credit limits,
+  eligibility, time weighting, or leaderboard ranking.
+- The distribution loads separately from the drop. Reopening detail can reuse
+  a result for up to `60` seconds unless a vote update requests fresh data.
+  There is no periodic polling, and the summary is not a live activity log.
 
 ## Related Pages
 

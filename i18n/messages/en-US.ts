@@ -684,6 +684,21 @@ const WAVE_VOTE_MESSAGES = objectMessages("waves.vote", {
   increaseLabel: "Increase vote",
 } as const);
 
+const WAVE_VOTE_INSIGHTS_MESSAGES = objectMessages("waves.voteInsights", {
+  localPreview: "Local preview · real votes",
+  largestVote: "Largest vote",
+  currentVotes: "Current votes",
+  largestPositive: "Largest positive vote",
+  largestNegative: "Largest negative vote",
+  others: "Others",
+  positiveTotal: "Positive total",
+  negativeTotal: "Negative total",
+  allocationExplanation:
+    "Current individual vote allocations, not vote changes or the time-weighted score.",
+  voteByName: "{name}: {vote} {unit}",
+  largestVoteByName: "Largest vote by {name}: {vote} {unit}",
+} as const);
+
 const WAVE_POLL_MESSAGES = objectMessages("waves.poll", {
   "actions.viewResults": "View results",
   "actions.vote": "Vote",
@@ -3636,6 +3651,7 @@ export const EN_US_MESSAGES = {
   ...WAVE_VOTE_RATIONALE_MESSAGES,
   ...WAVE_VOTE_MODE_MESSAGES,
   ...WAVE_VOTE_MESSAGES,
+  ...WAVE_VOTE_INSIGHTS_MESSAGES,
   ...WAVE_POLL_MESSAGES,
   ...WAVE_SUBMISSION_BUTTON_LABEL_MESSAGES,
   ...TRANSFER_MESSAGES,
