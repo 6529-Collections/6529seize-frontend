@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import CreateWaveGroup from "@/components/waves/create-wave/groups/CreateWaveGroup";
@@ -9,6 +9,7 @@ import { CreateWaveGroupConfigType } from "@/types/waves.types";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { commonApiFetch } from "@/services/api/common-api";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 
 type InlinePanelProps = React.ComponentProps<typeof CreateWaveGroupInlinePanel>;
 
@@ -269,6 +270,86 @@ describe("CreateWaveGroup", () => {
       })
     );
   });
+
+  it.each(["saved group", "public"])(
+    "keeps Next enabled after switching to %s cancels the previous group's refresh",
+    async (selection) => {
+      let refreshSignal: AbortSignal | undefined;
+      mockedCommonApiFetch
+        .mockResolvedValueOnce(exampleGroup)
+        .mockImplementation(
+          ({ signal }) =>
+            new Promise((_resolve, reject) => {
+              refreshSignal = signal;
+              signal?.addEventListener("abort", () => {
+                reject(new DOMException("Request aborted", "AbortError"));
+              });
+            })
+        );
+      const queryClient = new QueryClient({
+        defaultOptions: { queries: { retry: false } },
+      });
+      const savedGroup = { ...exampleGroup, id: "saved-group" };
+
+      function ControlledGroup() {
+        const [selectedGroup, setSelectedGroup] =
+          React.useState<ApiGroupFull | null>(null);
+        const [groupId, setGroupId] = React.useState<string | null>(
+          exampleGroup.id
+        );
+        const [isUnresolved, setIsUnresolved] = React.useState(false);
+
+        return (
+          <>
+            <CreateWaveGroup
+              {...defaultProps}
+              groupType={CreateWaveGroupConfigType.CAN_VIEW}
+              groups={{ ...defaultGroups, canView: groupId }}
+              groupsCache={
+                selectedGroup ? { [selectedGroup.id]: selectedGroup } : {}
+              }
+              onGroupResolutionChange={setIsUnresolved}
+              onGroupSelect={(group) => {
+                setSelectedGroup(group);
+                setGroupId(group?.id ?? null);
+              }}
+            />
+            <button disabled={isUnresolved}>Next</button>
+          </>
+        );
+      }
+
+      render(
+        <QueryClientProvider client={queryClient}>
+          <ControlledGroup />
+        </QueryClientProvider>
+      );
+      await waitFor(() => {
+        expect(screen.getByTestId("inline-panel")).toHaveTextContent(
+          exampleGroup.name
+        );
+        expect(screen.getByRole("button", { name: "Next" })).toBeEnabled();
+      });
+
+      // Publishing an edited group invalidates the inherited group's query.
+      await act(async () => {
+        void queryClient.invalidateQueries({ queryKey: [QueryKey.GROUPS] });
+      });
+      await waitFor(() =>
+        expect(screen.getByRole("button", { name: "Next" })).toBeDisabled()
+      );
+      await act(async () => {
+        await inlinePanelProps?.onChange(
+          selection === "saved group" ? savedGroup : null
+        );
+      });
+
+      expect(refreshSignal?.aborted).toBe(true);
+      await waitFor(() =>
+        expect(screen.getByRole("button", { name: "Next" })).toBeEnabled()
+      );
+    }
+  );
 
   it("passes the suggested group name and simplified callbacks to the inline panel", () => {
     renderComponent();

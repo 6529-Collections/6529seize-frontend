@@ -10,6 +10,7 @@ import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { createWaveMetadata } from "@/services/api/waves-v2-api";
 import type { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import type { CreateDropConfig } from "@/entities/IDrop";
 import type { CreateWaveConfig } from "@/types/waves.types";
 import { useRouter } from "next/navigation";
 import { hasPendingInlineImageUploadDrop } from "@/helpers/waves/inline-image-upload.helpers";
@@ -26,6 +27,7 @@ import {
 } from "../services/waveGroupService";
 import { getWaveGroupValidationRequest } from "@/helpers/waves/wave-group-validation.helpers";
 import { validateWaveGroups } from "@/services/api/wave-group-validation-api";
+import { useSubwaveAccessConfirmation } from "@/components/waves/hooks/useSubwaveAccessConfirmation";
 
 interface UseCreateWaveSubmissionParams {
   readonly config: CreateWaveConfig;
@@ -95,6 +97,7 @@ export function useCreateWaveSubmission({
   const router = useRouter();
   const { isApp } = useDeviceInfo();
   const locale = useBrowserLocale();
+  const subwaveAccessConfirmation = useSubwaveAccessConfirmation();
   const { requestAuth, setToast, connectedProfile } = useContext(AuthContext);
   const { waitAndInvalidateDrops, onWaveCreated, onGroupCreate } = useContext(
     ReactQueryWrapperContext
@@ -193,6 +196,23 @@ export function useCreateWaveSubmission({
     return result.group;
   };
 
+  const getDescriptionForReview = (): CreateDropConfig | null => {
+    const drop = descriptionRef.current?.getDropSnapshot() ?? null;
+    if (drop === null || drop.parts.length === 0) {
+      setShowDropError(true);
+      return null;
+    }
+    if (hasPendingInlineImageUploadDrop(drop)) {
+      setToast({
+        message: t(locale, "waves.create.review.uploadsPending"),
+        type: "error",
+      });
+      return null;
+    }
+    setShowDropError(false);
+    return drop;
+  };
+
   const onComplete = async (): Promise<void> => {
     if (submissionInProgressRef.current) {
       return;
@@ -209,18 +229,8 @@ export function useCreateWaveSubmission({
         return;
       }
 
-      const drop = descriptionRef.current?.getDropSnapshot() ?? null;
-      if (drop === null || drop.parts.length === 0) {
-        finishSubmitting();
-        setShowDropError(true);
-        return;
-      }
-
-      if (hasPendingInlineImageUploadDrop(drop)) {
-        setToast({
-          message: "Wait for image uploads to finish.",
-          type: "error",
-        });
+      const drop = getDescriptionForReview();
+      if (!drop) {
         finishSubmitting();
         return;
       }
@@ -265,6 +275,16 @@ export function useCreateWaveSubmission({
           finishSubmitting();
           return;
         }
+      }
+
+      const parentAccessConfirmed =
+        await subwaveAccessConfirmation.confirmSubwaveAccess({
+          parentWaveId,
+          viewGroupId: config.groups.canView,
+        });
+      if (!parentAccessConfirmed) {
+        finishSubmitting();
+        return;
       }
 
       const adminGroupId = await getAdminGroupId({
@@ -328,5 +348,7 @@ export function useCreateWaveSubmission({
     onHaveDropToSubmitChange,
     onInlineGroupCreate,
     onComplete,
+    getDescriptionForReview,
+    subwaveAccessConfirmation,
   };
 }

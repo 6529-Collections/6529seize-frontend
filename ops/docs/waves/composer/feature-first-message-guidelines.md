@@ -79,5 +79,5 @@ participation drop in the wave.
 
 - [Wave Composer Index](README.md)
 - [Wave Participation Flow](../flow-wave-participation.md)
-- [Wave Creation Rules Step](../create/feature-rules-step.md)
+- [Wave Creation Guidelines Step](../create/feature-rules-step.md)
 - [Wave Chat Composer Availability](../chat/feature-chat-composer-availability.md)
