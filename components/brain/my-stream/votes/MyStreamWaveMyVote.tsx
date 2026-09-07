@@ -7,10 +7,13 @@ import UserCICAndLevel, {
 } from "@/components/user/utils/UserCICAndLevel";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import { SingleWaveDropPosition } from "@/components/waves/drop/SingleWaveDropPosition";
-import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { ImageScale } from "@/helpers/image.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { getDropPreviewImageUrl } from "@/helpers/waves/drop.helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { formatInteger } from "@/i18n/format";
+import { t } from "@/i18n/messages";
+import Image from "next/image";
 import Link from "next/link";
 import React, { useMemo } from "react";
 import { Tooltip } from "react-tooltip";
@@ -143,6 +146,8 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
   isVotingClosed = false,
   winningThreshold,
 }) => {
+  const locale = useBrowserLocale();
+  const dropTitle = drop.title ?? t(locale, "waves.leaderboard.grid.untitled");
   const { isCurationWave } = useSeizeSettings();
   const artWork = drop.parts.at(0)?.media.at(0);
   const previewImageUrl = useMemo(
@@ -161,21 +166,48 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
     artWork?.mime_type ?? curationPreviewMedia?.mimeType ?? DEFAULT_MIME_TYPE;
   const badgeMimeType = artWork?.mime_type ?? curationPreviewMedia?.mimeType;
   const isSelected = !isVotingClosed && isChecked;
+  const selectionInputId = `my-vote-reset-selection-${drop.id}`;
 
-  const handleClick = () => {
+  const handleOpenDrop = () => {
     if (window.getSelection()?.toString()) {
       return;
     }
     onDropClick(drop);
   };
 
+  const handleRowClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    const target = event.target;
+    if (
+      event.defaultPrevented ||
+      !(target instanceof Element) ||
+      !event.currentTarget.contains(target)
+    ) {
+      return;
+    }
+
+    const control = target.closest(
+      "a, button, input, select, textarea, label, [role='button'], [role='link'], [role='checkbox'], [role='dialog'], [tabindex], [contenteditable='true'], [data-vote-controls]"
+    );
+    if (control && control !== event.currentTarget) {
+      return;
+    }
+
+    handleOpenDrop();
+  };
+
+  const handleRowKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.target === event.currentTarget && event.key === "Enter") {
+      event.preventDefault();
+      handleOpenDrop();
+    }
+  };
+
   const handleExplainVote = (voteTotal: number, voteChange: number) => {
     onExplainVote?.(drop, voteTotal, voteChange);
   };
 
-  const handleCheckboxClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (isVotingClosed) {
+  const handleSelectionChange = () => {
+    if (isVotingClosed || isResetting) {
       return;
     }
 
@@ -186,34 +218,62 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
 
   return (
     <div
-      key={drop.id}
-      className={`tw-cursor-pointer tw-rounded-xl tw-border tw-border-solid tw-bg-iron-950 tw-px-5 tw-py-4 tw-shadow-md tw-transition-all tw-duration-300 desktop-hover:hover:tw-shadow-lg ${
+      role="link"
+      tabIndex={0}
+      aria-label={t(locale, "waves.leaderboard.grid.openNamed", {
+        title: dropTitle,
+      })}
+      onClick={handleRowClick}
+      onKeyDown={handleRowKeyDown}
+      className={`tw-cursor-pointer tw-px-2 tw-py-5 tw-transition-colors tw-duration-200 tw-@container/my-vote focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-2px] focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none sm:tw-px-4 sm:tw-py-6 ${
         isSelected
-          ? "tw-border-primary-400"
-          : "tw-border-iron-800 desktop-hover:hover:tw-border-iron-700"
+          ? "tw-bg-primary-500/10"
+          : "tw-bg-transparent"
       }`}
-      onClick={handleClick}
     >
-      <div className="tw-flex tw-flex-col tw-gap-4 md:tw-flex-row">
-        {!isVotingClosed && (
-          <div
-            className="tw-mr-1 tw-flex-shrink-0 tw-self-start"
-            onClick={handleCheckboxClick}
-          >
-            <div
-              className={`tw-flex tw-size-5 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid ${
-                isSelected
-                  ? "tw-border-primary-400 tw-bg-primary-400/20"
-                  : "tw-border-iron-600 tw-bg-iron-800"
-              } tw-cursor-pointer tw-shadow-sm tw-transition-all tw-duration-200 hover:tw-shadow-md`}
+      <div
+        className={`tw-grid tw-grid-cols-[28px_96px_minmax(0,1fr)] tw-gap-x-2 tw-gap-y-4 @[16rem]/my-vote:tw-grid-cols-[28px_64px_minmax(0,1fr)] @[36rem]/my-vote:tw-grid-cols-[28px_96px_minmax(0,1fr)] @[36rem]/my-vote:tw-gap-x-4 @[36rem]/my-vote:tw-gap-y-3 ${
+          isVotingClosed
+            ? ""
+            : "@[46rem]/my-vote:tw-grid-cols-[28px_96px_minmax(0,1fr)_18rem]"
+        }`}
+      >
+        <div className="tw-flex tw-h-24 tw-items-center tw-justify-center @[16rem]/my-vote:tw-h-16 @[36rem]/my-vote:tw-row-span-2 @[36rem]/my-vote:tw-h-24">
+          {!isVotingClosed ? (
+            <label
+              htmlFor={selectionInputId}
+              className="tw-relative tw-flex tw-size-11 tw-flex-shrink-0 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-lg"
             >
-              {isSelected && (
+              <input
+                id={selectionInputId}
+                type="checkbox"
+                checked={isSelected}
+                onChange={handleSelectionChange}
+                disabled={isResetting}
+                className="tw-peer tw-absolute tw-inset-0 tw-m-0 tw-cursor-pointer tw-opacity-0 disabled:tw-cursor-not-allowed"
+              />
+              <span className="tw-sr-only">
+                {t(
+                  locale,
+                  isSelected
+                    ? "waves.myVotes.deselectForReset"
+                    : "waves.myVotes.selectForReset",
+                  { title: dropTitle }
+                )}
+              </span>
+              <span
+                aria-hidden="true"
+                className={`tw-flex tw-size-5 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-transition-colors tw-duration-200 peer-focus-visible:tw-outline peer-focus-visible:tw-outline-2 peer-focus-visible:tw-outline-offset-2 peer-focus-visible:tw-outline-primary-400 peer-disabled:tw-opacity-50 motion-reduce:tw-transition-none ${
+                  isSelected
+                    ? "tw-border-primary-500 tw-bg-primary-500 tw-text-white"
+                    : "tw-border-iron-500 tw-bg-transparent tw-text-transparent"
+                }`}
+              >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 24 24"
                   fill="currentColor"
-                  aria-hidden="true"
-                  className="tw-size-4 tw-text-primary-400"
+                  className="tw-size-4"
                 >
                   <path
                     fillRule="evenodd"
@@ -221,14 +281,25 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
                     clipRule="evenodd"
                   />
                 </svg>
-              )}
-            </div>
-          </div>
-        )}
+              </span>
+            </label>
+          ) : (
+            <span aria-hidden="true" className="tw-size-11" />
+          )}
+        </div>
 
-        <div className="tw-relative tw-h-56 tw-w-full tw-flex-shrink-0 tw-overflow-hidden tw-bg-iron-800 md:tw-size-[106px] md:tw-min-h-[106px] md:tw-min-w-[106px]">
-          <div className="tw-relative tw-flex tw-h-full tw-w-full tw-transform tw-items-center tw-justify-center tw-duration-300 tw-ease-out desktop-hover:hover:tw-scale-105">
-            <div className="tw-absolute tw-inset-0 tw-z-[1]">
+        <div className="tw-relative tw-size-24 @[16rem]/my-vote:tw-size-16 @[36rem]/my-vote:tw-row-span-2 @[36rem]/my-vote:tw-size-24">
+          <button
+            type="button"
+            onClick={handleOpenDrop}
+            aria-label={t(locale, "waves.leaderboard.grid.openNamed", {
+              title: dropTitle,
+            })}
+            className={`tw-relative tw-block tw-size-full tw-overflow-hidden tw-border-0 tw-p-0 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 ${
+              resolvedMediaUrl ? "tw-bg-black" : "tw-bg-iron-800"
+            }`}
+          >
+            <span className="tw-absolute tw-inset-0 tw-z-[1] tw-block">
               {resolvedMediaUrl && (
                 <MediaDisplay
                   media_mime_type={resolvedMediaMimeType}
@@ -238,32 +309,37 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
                   disableMediaInteraction={true}
                 />
               )}
-            </div>
-          </div>
+            </span>
+          </button>
         </div>
 
-        <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col">
-          <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-3">
-            <div className="tw-flex tw-items-center tw-gap-x-2">
-              <MediaTypeBadge
-                mimeType={badgeMimeType}
-                dropId={drop.id}
-                size="sm"
-              />
-              <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50">
-                {drop.title}
-              </h3>
-            </div>
-            {typeof drop.rank === "number" && (
-              <SingleWaveDropPosition rank={drop.rank} />
-            )}
+        <div className="tw-col-span-3 tw-row-start-2 tw-flex tw-min-w-0 tw-flex-col @[16rem]/my-vote:tw-col-span-1 @[16rem]/my-vote:tw-col-start-3 @[16rem]/my-vote:tw-row-start-1">
+          <div className="tw-flex tw-min-w-0 tw-items-start tw-gap-2">
+            <MediaTypeBadge
+              mimeType={badgeMimeType}
+              dropId={drop.id}
+              size="xs"
+              className="tw-size-6 tw-justify-center"
+            />
+            <h3 className="tw-m-0 tw-flex tw-min-h-6 tw-min-w-0 tw-flex-1 tw-items-center">
+              <button
+                type="button"
+                onClick={handleOpenDrop}
+                className="tw-max-w-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-50 tw-transition-colors tw-duration-200 [overflow-wrap:anywhere] focus-visible:tw-rounded-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-primary-300 motion-reduce:tw-transition-none"
+              >
+                {dropTitle}
+              </button>
+            </h3>
           </div>
-          <div className="tw-mt-4 tw-flex tw-items-center tw-gap-2">
+          <div className="tw-mt-3 tw-flex tw-min-w-0 tw-items-center tw-gap-2">
             <div className="tw-relative tw-size-6 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-white/10">
               {drop.author.pfp ? (
-                <img
+                <Image
                   src={drop.author.pfp}
-                  alt="Profile"
+                  alt=""
+                  width={24}
+                  height={24}
+                  unoptimized
                   className="tw-h-full tw-w-full tw-bg-iron-800 tw-object-contain"
                 />
               ) : (
@@ -283,9 +359,9 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
                     "_blank"
                   );
                 }}
-                className="tw-truncate tw-text-md tw-font-medium tw-text-iron-200 tw-no-underline tw-transition-colors tw-duration-200 desktop-hover:hover:tw-text-opacity-80 desktop-hover:hover:tw-underline"
+                className="tw-min-w-0 tw-text-sm tw-font-semibold tw-leading-5 tw-tracking-identity tw-text-white tw-no-underline tw-transition-colors tw-duration-200 [overflow-wrap:anywhere] desktop-hover:hover:tw-underline motion-reduce:tw-transition-none"
               >
-                {drop.author.handle}
+                {drop.author.handle ?? drop.author.primary_address}
               </Link>
             </UserProfileTooltipWrapper>
             <UserCICAndLevel
@@ -293,78 +369,99 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
               size={UserCICAndLevelSize.SMALL}
             />
           </div>
-          <div className="tw-mt-3.5 tw-flex tw-flex-col tw-justify-between tw-gap-4 xl:tw-mt-3 xl:tw-flex-row">
-            <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-6 sm:tw-justify-start">
-              <div onClick={(e) => e.stopPropagation()}>
-                <MyStreamWaveMyVoteVotes
-                  drop={drop}
-                  winningThreshold={winningThreshold}
-                />
-              </div>
-              <div className="tw-flex tw-items-center tw-gap-2">
-                <div className="tw-hidden tw-items-center -tw-space-x-2 sm:tw-flex">
-                  {drop.top_raters.slice(0, 3).map((voter) => (
-                    <React.Fragment
-                      key={voter.profile.id || voter.profile.primary_address}
+        </div>
+
+        <div className="tw-col-span-3 tw-row-start-3 tw-flex tw-min-h-6 tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2 @[16rem]/my-vote:tw-row-start-2 @[36rem]/my-vote:tw-col-span-1 @[36rem]/my-vote:tw-col-start-3 @[36rem]/my-vote:tw-self-start @[46rem]/my-vote:tw-min-h-8">
+          <MyStreamWaveMyVoteVotes
+            drop={drop}
+            winningThreshold={winningThreshold}
+          />
+          <div className="tw-flex tw-items-center tw-gap-2">
+            {drop.top_raters.length > 0 && (
+              <div className="tw-flex tw-items-center -tw-space-x-2">
+                {drop.top_raters.slice(0, 3).map((voter) => (
+                  <React.Fragment
+                    key={voter.profile.id || voter.profile.primary_address}
+                  >
+                    <Link
+                      href={`/${voter.profile.handle ?? voter.profile.primary_address}`}
+                      data-tooltip-id={`my-vote-voter-${drop.id}-${voter.profile.handle ?? voter.profile.primary_address}`}
+                      aria-label={t(locale, "waves.myVotes.voterAvatar", {
+                        profile:
+                          voter.profile.handle ?? voter.profile.primary_address,
+                      })}
+                      className="tw-rounded-md focus-visible:tw-relative focus-visible:tw-z-10 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
                     >
-                      <Link
-                        href={`/${voter.profile.handle ?? voter.profile.primary_address}`}
-                        onClick={(e) => e.stopPropagation()}
-                        data-tooltip-id={`my-vote-voter-${drop.id}-${voter.profile.handle ?? voter.profile.primary_address}`}
-                      >
-                        {voter.profile.pfp ? (
-                          <img
-                            className="tw-h-6 tw-w-6 tw-rounded-md tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800 tw-object-contain"
-                            src={voter.profile.pfp}
-                            alt="Recent voter"
-                          />
-                        ) : (
-                          <div className="tw-h-6 tw-w-6 tw-rounded-md tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800" />
-                        )}
-                      </Link>
-                      <Tooltip
-                        id={`my-vote-voter-${drop.id}-${voter.profile.handle ?? voter.profile.primary_address}`}
-                        place="top"
-                        offset={8}
-                        opacity={1}
-                        style={{
-                          padding: "4px 8px",
-                          background: "#37373E",
-                          color: "white",
-                          fontSize: "13px",
-                          fontWeight: 500,
-                          borderRadius: "6px",
-                          boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
-                          zIndex: 99999,
-                          pointerEvents: "none",
-                        }}
-                      >
-                        {voter.profile.handle ?? voter.profile.primary_address}{" "}
-                        - {formatNumberWithCommas(voter.rating)}
-                      </Tooltip>
-                    </React.Fragment>
-                  ))}
-                </div>
-                <span className="tw-text-sm tw-font-semibold tw-text-iron-200">
-                  {formatNumberWithCommas(drop.raters_count)}{" "}
-                  <span className="tw-font-normal tw-text-iron-500">
-                    {drop.raters_count === 1 ? "voter" : "voters"}
-                  </span>
-                </span>
-              </div>
-            </div>
-            {!isVotingClosed && (
-              <div onClick={(e) => e.stopPropagation()}>
-                <MyStreamWaveMyVoteInput
-                  drop={drop}
-                  isResetting={isResetting}
-                  isVotingClosed={isVotingClosed}
-                  onExplainVote={onExplainVote ? handleExplainVote : undefined}
-                />
+                      {voter.profile.pfp ? (
+                        <Image
+                          className="tw-size-6 tw-rounded-md tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800 tw-object-contain"
+                          src={voter.profile.pfp}
+                          width={24}
+                          height={24}
+                          unoptimized
+                          alt={t(locale, "waves.myVotes.voterAvatar", {
+                            profile:
+                              voter.profile.handle ??
+                              voter.profile.primary_address,
+                          })}
+                        />
+                      ) : (
+                        <div className="tw-size-6 tw-rounded-md tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800" />
+                      )}
+                    </Link>
+                    <Tooltip
+                      id={`my-vote-voter-${drop.id}-${voter.profile.handle ?? voter.profile.primary_address}`}
+                      place="top"
+                      offset={8}
+                      opacity={1}
+                      style={{
+                        padding: "4px 8px",
+                        background: "#37373E",
+                        color: "white",
+                        fontSize: "13px",
+                        fontWeight: 500,
+                        borderRadius: "6px",
+                        boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+                        zIndex: 99999,
+                        pointerEvents: "none",
+                      }}
+                    >
+                      {voter.profile.handle ?? voter.profile.primary_address} -{" "}
+                      {formatInteger(locale, voter.rating)}
+                    </Tooltip>
+                  </React.Fragment>
+                ))}
               </div>
             )}
+            <span className="tw-whitespace-nowrap tw-text-sm tw-leading-6 tw-text-iron-400">
+              <span className="tw-font-semibold tw-text-iron-300">
+                {formatInteger(locale, drop.raters_count)}
+              </span>{" "}
+              {t(
+                locale,
+                drop.raters_count === 1
+                  ? "waves.myVotes.voter.one"
+                  : "waves.myVotes.voter.other"
+              )}
+            </span>
           </div>
+          {typeof drop.rank === "number" && (
+            <SingleWaveDropPosition
+              rank={drop.rank}
+              variant="simple"
+              size="sm"
+            />
+          )}
         </div>
+
+        {!isVotingClosed && (
+          <MyStreamWaveMyVoteInput
+            drop={drop}
+            isResetting={isResetting}
+            isVotingClosed={isVotingClosed}
+            onExplainVote={onExplainVote ? handleExplainVote : undefined}
+          />
+        )}
       </div>
     </div>
   );

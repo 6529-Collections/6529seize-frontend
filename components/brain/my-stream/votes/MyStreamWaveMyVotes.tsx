@@ -20,6 +20,7 @@ import PrivilegedDropCreator, {
 import { ActiveDropAction } from "@/types/dropInteractionTypes";
 import { getVoteRationaleReplyMarkdown } from "@/helpers/waves/vote-rationale.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
 interface MyStreamWaveMyVotesProps {
   readonly wave: ApiWave;
@@ -156,17 +157,17 @@ const MyStreamWaveMyVotes: React.FC<MyStreamWaveMyVotesProps> = ({
 
   return (
     <div
-      className="tw-space-y-4 tw-overflow-y-auto tw-px-2 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 hover:tw-scrollbar-thumb-iron-300 sm:tw-px-4 lg:tw-space-y-6"
+      className="tw-space-y-4 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 hover:tw-scrollbar-thumb-iron-300 lg:tw-space-y-6"
       style={myVotesViewStyle}
     >
       {drops.length === 0 && !isFetching ? (
-        <div className="tw-mt-10">
+        <div className="tw-mt-10 tw-px-2 sm:tw-px-4">
           <p className="tw-text-center tw-text-sm tw-text-iron-500">
-            You haven&apos;t voted on any submissions in this wave yet.
+            {t(locale, "waves.myVotes.empty")}
           </p>
         </div>
       ) : (
-        <div className="tw-mt-4 tw-space-y-4">
+        <div className="tw-mt-4">
           {!isVotingControlsLocked && (
             <MyStreamWaveMyVotesReset
               waveId={wave.id}
@@ -184,9 +185,12 @@ const MyStreamWaveMyVotes: React.FC<MyStreamWaveMyVotesProps> = ({
               onResettingChange={setIsResettingVotes}
             />
           )}
-          <div className="tw-space-y-2">
+          <div>
             {drops.map((drop) => (
-              <React.Fragment key={drop.id}>
+              <div
+                key={drop.id}
+                className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-800"
+              >
                 <MyStreamWaveMyVote
                   drop={drop}
                   onDropClick={onDropClick}
@@ -200,7 +204,7 @@ const MyStreamWaveMyVotes: React.FC<MyStreamWaveMyVotesProps> = ({
                   onToggleCheck={handleToggleCheck}
                 />
                 {voteRationaleReply?.drop.id === drop.id && (
-                  <div className="tw-rounded-xl tw-border tw-border-solid tw-border-primary-400/30 tw-bg-iron-950 tw-px-4 tw-py-3">
+                  <div className="tw-mx-2 tw-mb-6 tw-rounded-xl tw-border tw-border-solid tw-border-primary-400/30 tw-bg-iron-950 tw-px-4 tw-py-3 sm:tw-mx-4">
                     <PrivilegedDropCreator
                       activeDrop={{
                         action: ActiveDropAction.REPLY,
@@ -218,7 +222,7 @@ const MyStreamWaveMyVotes: React.FC<MyStreamWaveMyVotesProps> = ({
                     />
                   </div>
                 )}
-              </React.Fragment>
+              </div>
             ))}
             {isFetchingNextPage && <WaveLeaderboardLoadingBar />}
             <div ref={intersectionElementRef}></div>

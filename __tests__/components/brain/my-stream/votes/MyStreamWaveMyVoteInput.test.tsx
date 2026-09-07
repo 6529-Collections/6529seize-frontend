@@ -265,6 +265,22 @@ describe("MyStreamWaveMyVoteInput", () => {
     expect(mutateAsync).toHaveBeenCalledWith({ rate: 10, previousRate: 0 });
   });
 
+  it("clamps large pasted values without reinterpreting scientific notation", () => {
+    render(<MyStreamWaveMyVoteInput drop={drop} />, { wrapper });
+    const input = screen.getByRole("textbox");
+
+    fireEvent.change(input, {
+      target: { value: "1000000000000000000000" },
+    });
+
+    expect(input).toHaveValue("10");
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Max for wave is 10 TDH."
+    );
+    expect(auth.requestAuth).not.toHaveBeenCalled();
+    expect(mutateAsync).not.toHaveBeenCalled();
+  });
+
   it("does not submit when voting is closed", () => {
     render(<MyStreamWaveMyVoteInput drop={drop} isVotingClosed={true} />, {
       wrapper,
