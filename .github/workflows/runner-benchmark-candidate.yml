@@ -411,7 +411,7 @@ jobs:
         run: |
           set -euo pipefail
           test "$(pnpm --version)" = "10.33.0"
-          ./bin/6529 install:frozen
+          ./bin/6529 ci
 
       - name: Finish dependency timing
         if: always()

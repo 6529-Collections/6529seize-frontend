@@ -267,7 +267,7 @@ export const createInlineGroupBuilderStateFromSavedGroup = ({
     ),
     includedWalletSources,
     excludedWalletSources,
-    panel: "rule-list",
+    panel: "identity",
     activeRule: null,
     criteriaReplacementActive: true,
   };

@@ -33,6 +33,8 @@ export default function GroupAssignmentDialog({
   paused = false,
   disabled = false,
   allowGroupClear = true,
+  showChooseGroup = true,
+  isWaveAccessEditor = false,
   onRetry,
   onClose,
   onChange,
@@ -55,6 +57,8 @@ export default function GroupAssignmentDialog({
   readonly paused?: boolean | undefined;
   readonly disabled?: boolean;
   readonly allowGroupClear?: boolean;
+  readonly showChooseGroup?: boolean;
+  readonly isWaveAccessEditor?: boolean;
   readonly onRetry?: (() => void) | undefined;
   readonly onClose: () => void;
   readonly onChange: (
@@ -107,6 +111,8 @@ export default function GroupAssignmentDialog({
       membersRoleLabel={membersRoleLabel}
       selectedGroupCriteriaStatus={selectedGroupCriteriaStatus}
       allowGroupClear={allowGroupClear}
+      showChooseGroup={showChooseGroup}
+      isWaveAccessEditor={isWaveAccessEditor}
       collapseOnClickAway={false}
       startMode={startMode}
       onChange={onChange}

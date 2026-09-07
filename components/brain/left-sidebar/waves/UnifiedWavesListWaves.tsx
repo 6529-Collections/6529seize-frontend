@@ -30,6 +30,7 @@ import { usePrefetchWaveData } from "@/hooks/usePrefetchWaveData";
 import { useLoadActiveSidebarParentSubwaves } from "@/hooks/useLoadActiveSidebarParentSubwaves";
 import { useLoadPersistedExpandedSubwaves } from "@/hooks/useLoadPersistedExpandedSubwaves";
 import { useActiveSubwaveParentHint } from "@/hooks/useActiveSubwaveParentHint";
+import { useRevealActiveSidebarWave } from "@/hooks/useRevealActiveSidebarWave";
 import { getWaveHomeRoute, getWaveRoute } from "@/helpers/navigation.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import {
@@ -44,6 +45,7 @@ import {
 import {
   groupSidebarWavesForView,
   isValidSidebarWave,
+  prioritizeActiveWaveContainer,
   validateSidebarWaveDetailed,
 } from "./sidebarWaveListUtils";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
@@ -240,7 +242,16 @@ const UnifiedWavesListWaves = forwardRef<
       () => getRows(pinnedWaves),
       [pinnedWaves, getRows]
     );
-    const allRows = useMemo(() => getRows(allWaves), [allWaves, getRows]);
+    const allRows = useMemo(
+      () =>
+        getRows(
+          prioritizeActiveWaveContainer(
+            allWaves,
+            isDirectMessage ? null : effectiveActiveParentWaveId
+          )
+        ),
+      [allWaves, effectiveActiveParentWaveId, getRows, isDirectMessage]
+    );
     const animatedAnnouncementRows =
       useAnimatedSidebarWaveRows(announcementRows);
     const animatedHighlyRatedRows = useAnimatedSidebarWaveRows(highlyRatedRows);
@@ -382,6 +393,22 @@ const UnifiedWavesListWaves = forwardRef<
       listContainerRef,
       rowHeight: getSidebarRowHeight,
       overscan: VIRTUALIZATION_OVERSCAN,
+    });
+    const revealStaticRows = useMemo(
+      () => [
+        animatedAnnouncementRows,
+        animatedHighlyRatedRows,
+        animatedPinnedRows,
+      ],
+      [animatedAnnouncementRows, animatedHighlyRatedRows, animatedPinnedRows]
+    );
+    useRevealActiveSidebarWave({
+      activeParentWaveId: effectiveActiveParentWaveId,
+      activeWaveId,
+      scrollContainerRef,
+      scrollToVirtualIndex: virtual.scrollToIndex,
+      staticRows: revealStaticRows,
+      virtualRows: virtualizedRows,
     });
 
     const renderWaveRow = (

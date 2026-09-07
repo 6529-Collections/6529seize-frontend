@@ -3,7 +3,7 @@
 ## Overview
 
 Use `Outcomes` to define winner rewards in `Rank` and `Approve` wave creation.
-You must save at least one outcome before `Next` can move to `Description`.
+You must save at least one outcome before `Next` can move to `Guidelines`.
 
 Outcome type, reward configuration, and outcome visibility stay visible.
 The optional Approve winner limit is in the named `Winner limits` expandable.
@@ -17,8 +17,8 @@ The optional Approve winner limit is in the named `Winner limits` expandable.
 
 ## Step Path
 
-- Scheduled `Rank`: `Overview -> Groups -> Schedule -> Drops -> Rules -> Voting -> Outcomes -> Description`
-- `Approve`: `Overview -> Groups -> Schedule -> Drops -> Rules -> Voting -> Outcomes -> Description`
+- Scheduled `Rank`: `Setup -> Access -> Schedule -> Drops -> Voting -> Outcomes -> Guidelines -> Description -> Overview`
+- `Approve`: `Setup -> Access -> Schedule -> Drops -> Voting -> Outcomes -> Guidelines -> Description -> Overview`
 
 `Perpetual Ranking` skips this step because its live leaderboard is the outcome
 and it never announces winners.
@@ -51,16 +51,18 @@ and it never announces winners.
 3. Fill the selected form.
 4. Click `Save` to add a row, or `Cancel` to discard draft edits.
 5. Repeat to add more outcomes.
-6. Choose whether to `Show outcomes` after creation.
+6. Choose whether to `Show outcomes menu section` after creation. This controls the
+   Outcomes tab and reward details on leaderboard and winner cards. Rewards
+   still apply when hidden.
 7. For `Approve`, open `Winner limits` and optionally set `Max Winners`; blank
    means unlimited.
-8. Click `Next` to continue to `Description`.
+8. Click `Next` to continue to `Guidelines`, followed by `Description`.
 
 ## Common Scenarios
 
 - Mix outcome types in one wave (for example manual + rep).
 - Add multiple winner rows for `Rep` or `NIC`.
-- Return from `Description` to `Outcomes` and adjust rewards before submit.
+- Return from `Guidelines` to `Outcomes` and adjust rewards before submit.
 - Open-ended approval: when both wave end and max winners are blank, the visible
   warning explains that the wave will run indefinitely.
 
@@ -76,7 +78,7 @@ and it never announces winners.
 - Changing selected type while editing drops unsaved form values.
 - Saved `Manual` and `Rep` rows can be removed.
 - Saved `NIC` rows show a remove icon, but it currently does not remove the row.
-- `Show outcomes` defaults on. `Max Winners` defaults blank.
+- `Show outcomes menu section` defaults on. `Max Winners` defaults blank.
 - A non-default `Max Winners` value shows `Customized` on the collapsed
   `Winner limits` disclosure.
 
@@ -97,7 +99,7 @@ and it never announces winners.
 
 - [Wave Creation Index](README.md)
 - [Wave Create Modal Entry Points](feature-modal-entry-points.md)
-- [Wave Creation Rules Step](feature-rules-step.md)
+- [Wave Creation Guidelines Step](feature-rules-step.md)
 - [Wave Creation Voting Configuration](feature-voting-step.md)
 - [Wave Creation Description Step](feature-description-step.md)
 - [Wave Outcome Lists](../feature-outcome-lists.md)

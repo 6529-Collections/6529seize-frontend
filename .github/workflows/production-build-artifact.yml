@@ -216,16 +216,16 @@ jobs:
           mode: firewall
 
       - name: Assert npm lockfile is absent
-        run: ./bin/6529 guard:no-package-lock
+        run: ./bin/6529 run guard:no-package-lock
 
       - name: Install frozen dependencies
         env:
           NODE_AUTH_TOKEN: ${{ github.token }}
           SFW_BIN: ${{ steps.socket-firewall.outputs.firewall-path-binary }}
-        run: ./bin/6529 install:frozen
+        run: ./bin/6529 ci
 
       - name: Lint package.json versions
-        run: ./bin/6529 lint:package-json
+        run: ./bin/6529 run lint:package-json
 
       - name: Build exact production bytes
         env:

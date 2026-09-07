@@ -515,8 +515,7 @@ const PROFILE_WAVE_FEED_MESSAGES = objectMessages("waves.profileFeed", {
   errorTitle: "Couldn’t load profile posts",
   errorDescription: "Refresh this view to try again.",
   emptyTitle: "No profile posts yet",
-  emptyDescription:
-    "New posts from members’ Profile Waves will appear here.",
+  emptyDescription: "New posts from members’ Profile Waves will appear here.",
 } as const);
 
 const WAVE_LEADERBOARD_MESSAGES = objectMessages("waves.leaderboard", {
@@ -1233,6 +1232,10 @@ const WAVE_HEADER_MESSAGES = objectMessages("waves.header", {
   ownerOptionsDelete: "Delete",
   ownerOptionsOpenLabel: "Open options",
   ownerOptionsTitle: "Wave options",
+  "parentNavigation.linkAriaLabel": "Subwave of {parentWaveName}",
+  "parentNavigation.linkTitle": "Open parent wave: {parentWaveName}",
+  "parentNavigation.regionLabel": "Wave hierarchy",
+  "parentNavigation.relationshipLabel": "Subwave of",
   pictureEditCancel: "Cancel",
   pictureEditDescription: "Choose a new image up to 10 MB.",
   pictureEditLabel: "Edit wave picture",
@@ -1296,12 +1299,13 @@ const WAVE_NOTIFICATION_SETTINGS_MESSAGES = namespaceMessages(
 const WAVE_CREATE_GROUPS_MESSAGES = objectMessages("waves.create.groups", {
   title: "Access",
   description: "Choose who can access, participate in, and manage this wave.",
-  viewGroupName: "Visibility",
+  viewGroupName: "Who can access this wave",
   adminGroupName: "Admins",
   accessHelper:
-    "The {viewGroupName} group controls who can access this wave. Your followers who can view the wave may be notified when it is created.",
+    "By default, everyone with access can participate. Only you can administer the wave.",
+  customizePermissions: "Customize other permissions",
   selectedGroup: "Selected group",
-  currentGroup: "Current group",
+  currentGroup: "Before editing",
   currentGroupWithName: "Current group: {name}",
   unsavedGroup: "Unsaved group",
   groupSource: "Group source",
@@ -1355,6 +1359,8 @@ const WAVE_CREATE_GROUPS_MESSAGES = objectMessages("waves.create.groups", {
   "editAccess.confirmMakePublic": "Make public",
   "editAccess.confirmUseVisibility": "Use visibility criteria",
   "actions.editCriteria": "Edit criteria",
+  "actions.edit": "Edit",
+  "actions.matchWaveAccess": "Match wave access",
   "actions.chooseGroup": "Choose group",
   "draft.notReadyTitle": "Not ready yet.",
   "draft.notReadyDescription":
@@ -1363,6 +1369,9 @@ const WAVE_CREATE_GROUPS_MESSAGES = objectMessages("waves.create.groups", {
   "draft.discard": "Discard draft",
   "draft.creating": "Creating group...",
   "draft.createAndUse": "Create and use new group",
+  "draft.saveChanges": "Save changes",
+  "draft.afterEditing": "After editing",
+  "rules.configured": "Configured",
   "validation.checking": "Checking group access…",
   "validation.unavailableTitle": "Couldn't verify group access.",
   "validation.unavailable":
@@ -1637,6 +1646,7 @@ const WAVE_CREATE_ACTIONS_MESSAGES = objectMessages("waves.create.actions", {
 } as const);
 
 const WAVE_CREATE_DIALOG_MESSAGES = objectMessages("waves.create.dialog", {
+  subwaveOfTitle: 'Create subwave of "{parentWaveName}"',
   profileRequiredConfirm: "Go to Identity",
   profileRequiredDescription: "Set up your profile before creating a Wave.",
   profileRequiredTitle: "Create your profile first",
@@ -1652,6 +1662,12 @@ const WAVE_CREATE_ADVANCED_MESSAGES = objectMessages("waves.create.advanced", {
 } as const);
 
 const WAVE_CREATE_OVERVIEW_MESSAGES = objectMessages("waves.create.overview", {
+  typeRequired: "Please choose a wave type to continue.",
+  subwaveTypeRequired: "Please choose a subwave type to continue.",
+  type: "Wave Type",
+  subwaveType: "Subwave Type",
+  subwavePicture: "Subwave Profile Picture",
+  subwaveName: "Subwave Name",
   title: "Create Wave",
   name: "Wave Name",
   picture: "Wave Profile Picture",
@@ -1695,7 +1711,9 @@ const WAVE_CREATE_OUTCOMES_MESSAGES = objectMessages("waves.create.outcomes", {
   rankAdvancedSummary: "Outcome visibility",
   approveAdvancedSummary: "Winner limits",
   chooseType: "Choose outcome type",
-  showOutcomes: "Show outcomes",
+  showOutcomes: "Show outcomes menu section",
+  showOutcomesDescription:
+    "Shows the Outcomes tab and reward details on leaderboard and winner cards. Rewards still apply when hidden.",
   nicPositiveError: "NIC must be a positive number",
   repPositiveError: "Rep must be a positive number",
   "perpetual.title": "Outcome is leaderboard position",
@@ -1713,12 +1731,13 @@ const WAVE_CREATE_OUTCOMES_MESSAGES = objectMessages("waves.create.outcomes", {
 } as const);
 
 const WAVE_CREATE_RULES_MESSAGES = objectMessages("waves.create.rules", {
-  title: "Rules",
+  title: "Guidelines",
   advancedSummary: "Wave guidelines and acceptance",
   chatAdvancedSummary: "Wave guidelines",
-  guidelinesFieldLabel: "Wave guidelines",
-  guidelinesDescription: "These guidelines are shown in wave rules panel",
-  guidelinesPlaceholder: "Add optional wave guidelines...",
+  guidelinesFieldLabel: "Chat guidelines",
+  guidelinesDescription:
+    "These guidelines will be shown to user when they send their first chat message",
+  guidelinesPlaceholder: "Add chat guidelines...",
   guidelinesSettingsLabel: "Guidelines",
   guidelinesSettingsEditLabel: "Edit guidelines",
   guidelinesSettingsAdded: "Added",
@@ -1729,12 +1748,12 @@ const WAVE_CREATE_RULES_MESSAGES = objectMessages("waves.create.rules", {
   guidelinesSaveErrorTitle: "Couldn't save these guidelines.",
   guidelinesSaveErrorDescription: PLEASE_TRY_AGAIN,
   acceptanceTitle: "Rules that require acceptance",
-  acceptanceToggle: "Require acceptance",
   acceptanceDescription:
-    "Use this only for custom creator rules that participants must accept and sign before submitting.",
+    "Participants must accept these rules and sign with their wallet before submitting.",
   acceptancePlaceholder:
     "Enter rules participants must accept before submitting...",
-  acceptanceHelper: "Participants will sign these rules with their wallet",
+  acceptanceHelper: "Leave empty if no rules require signing.",
+  acceptanceCharacterCount: "Characters: {count}",
 } as const);
 
 const WAVE_CREATE_VOTING_MESSAGES = objectMessages("waves.create.voting", {
@@ -1777,6 +1796,26 @@ const WAVE_CREATE_VOTING_MESSAGES = objectMessages("waves.create.voting", {
 
 const WAVE_CREATE_DROPDOWN_MESSAGES = objectMessages("waves.create.dropdown", {
   currentValue: "Current value: {value}",
+} as const);
+
+const WAVE_CREATE_REVIEW_MESSAGES = objectMessages("waves.create.review", {
+  title: "Overview",
+  description:
+    "Review your wave before creating it. Use Previous or the completed steps to make changes.",
+  submit: "Confirm and create",
+  uploadsPending: "Wait for image uploads to finish.",
+  setup: "Setup",
+  name: "Name",
+  parent: "Parent wave",
+  picture: "Wave profile picture",
+  manual: "Manual",
+  outcomeType: "Outcome type",
+  reward: "Reward",
+  category: "Category",
+  total: "Total",
+  winner: "Winner {position}",
+  perApprovedDrop: "Per approved drop",
+  outcome: "Outcome {number}",
 } as const);
 
 const WAVE_CREATE_PROGRESS_MESSAGES = objectMessages("waves.create.progress", {
@@ -3615,6 +3654,13 @@ export const EN_US_MESSAGES = {
   ...WAVE_CREATE_ADVANCED_MESSAGES,
   ...WAVE_CREATE_OVERVIEW_MESSAGES,
   ...WAVE_CREATE_GROUPS_MESSAGES,
+  "waves.subwaves.accessWarning.title": "Parent wave restrictions apply",
+  "waves.subwaves.accessWarning.message":
+    "Some members of this group cannot access the parent wave, so they will not be able to open this subwave. You can still use this group.",
+  "waves.subwaves.accessWarning.continue": "Continue anyway",
+  "waves.subwaves.accessWarning.back": "Go back",
+  "waves.subwaves.accessWarning.checkFailed":
+    "Couldn't check parent wave access. Please try again.",
   ...WAVE_CREATE_DATES_MESSAGES,
   ...WAVE_CREATE_RANK_MODE_MESSAGES,
   ...WAVE_CREATE_DROPS_MESSAGES,
@@ -3623,6 +3669,7 @@ export const EN_US_MESSAGES = {
   ...WAVE_CREATE_VOTING_MESSAGES,
   ...WAVE_CREATE_DROPDOWN_MESSAGES,
   ...WAVE_CREATE_PROGRESS_MESSAGES,
+  ...WAVE_CREATE_REVIEW_MESSAGES,
   ...WAVE_CREATE_DESCRIPTION_MESSAGES,
   ...WAVE_LEADERBOARD_PHASE_MESSAGES,
   ...WAVE_RULES_SCHEDULE_MESSAGES,

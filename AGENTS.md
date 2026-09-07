@@ -119,8 +119,11 @@ find the correct source of truth.
 All project commands must go through the repo-local `6529` wrapper.
 
 - Fresh shell setup: `./bin/6529 bootstrap` when needed.
-- Install dependencies: `6529 install`.
+- Install dependencies: `6529 ci`.
 - Add dependencies: `6529 add <package>` or `6529 add -D <package>`.
+- Remove dependencies: `6529 remove <package>`.
+- Update dependencies: `6529 update [package]`.
+- Audit dependencies: `6529 audit` or `6529 audit:fix`.
 - Run app: `6529 run dev`. The default local app port is `3001`.
 - Run scripts: `6529 run <script>`.
 - Do not use plain `pnpm install`, `pnpm dev`, `npm run ...`,

@@ -30,7 +30,10 @@ interface UseVirtualizedWavesOptions<T> {
 const restoreScrollPosition = (element: HTMLElement, top: number) => {
   if (typeof element.scrollTo === "function") {
     element.scrollTo({ top });
+    return;
   }
+
+  element.scrollTop = top;
 };
 
 const readVirtualLayout = (
@@ -184,6 +187,44 @@ export function useVirtualizedWaves<T>({
     () => measureRows(items, rowHeight),
     [items, rowHeight]
   );
+  const scrollToIndex = useCallback(
+    (index: number): boolean => {
+      const scrollContainer = scrollContainerRef.current;
+      const listContainer = listContainerRef.current;
+      const measurement = measurements[index];
+      const viewportHeight = scrollContainer?.clientHeight ?? 0;
+
+      if (
+        scrollContainer === null ||
+        listContainer === null ||
+        measurement === undefined ||
+        viewportHeight <= 0
+      ) {
+        return false;
+      }
+
+      const targetStart = listContainer.offsetTop + measurement.start;
+      const targetEnd = targetStart + measurement.size;
+      const viewportStart = scrollContainer.scrollTop;
+      const viewportEnd = viewportStart + viewportHeight;
+      let nextScrollTop: number | null = null;
+
+      if (targetStart < viewportStart) {
+        nextScrollTop = targetStart;
+      } else if (targetEnd > viewportEnd) {
+        nextScrollTop = Math.max(0, targetEnd - viewportHeight);
+      }
+
+      if (nextScrollTop !== null) {
+        restoreScrollPosition(scrollContainer, nextScrollTop);
+        setScrollOffset(nextScrollTop);
+        setPosition(key, nextScrollTop);
+      }
+
+      return true;
+    },
+    [key, listContainerRef, measurements, scrollContainerRef, setPosition]
+  );
   const visibleStart = Math.max(scrollOffset - layout.listOffset, 0);
   const visibleEnd = scrollOffset + layout.viewportHeight - layout.listOffset;
   const firstVisibleIndex = measurements.findIndex(
@@ -225,5 +266,6 @@ export function useVirtualizedWaves<T>({
     virtualItems,
     totalHeight,
     sentinelRef,
+    scrollToIndex,
   };
 }

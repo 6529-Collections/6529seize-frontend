@@ -13,7 +13,7 @@ instead of this host-provisioning script.
 
 - Ensures **Node ≥ 20** (keeps 21/22 if present)
 - Activates the repo-pinned **pnpm** version with **Corepack**
-- Installs **Socket Firewall** and uses `6529 install:frozen`
+- Installs **Socket Firewall** and uses `6529 ci`
 - Installs **PM2**
 - Prompts you and writes **.env** **before** any build (no `.env.sample` used)
 - Installs deps, **builds**, and **starts** the app with PM2 on the standalone runtime path (default port **3001**)

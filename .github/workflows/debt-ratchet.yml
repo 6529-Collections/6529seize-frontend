@@ -52,7 +52,7 @@ jobs:
           mode: firewall
 
       - name: Assert npm lockfile is absent
-        run: ./bin/6529 guard:no-package-lock
+        run: ./bin/6529 run guard:no-package-lock
 
       # The AST-based any_casts scanner uses the repo-pinned TypeScript parser,
       # so this standalone required check installs dependencies before running.
@@ -60,7 +60,7 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ github.token }}
           SFW_BIN: ${{ steps.socket_firewall.outputs.firewall-path-binary }}
-        run: ./bin/6529 install:frozen
+        run: ./bin/6529 ci
 
       - name: Check debt counters against baseline
         run: node scripts/debt-ratchet.cjs

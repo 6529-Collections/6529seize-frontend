@@ -1,8 +1,8 @@
-# Wave Creation Overview Step
+# Wave Creation Setup Step
 
 ## Overview
 
-`Overview` is the first step in wave creation.
+`Setup` is the first step in wave creation.
 Set the wave name, optional image, and wave type before moving to later steps.
 
 ## Location in the Site
@@ -11,17 +11,21 @@ Set the wave name, optional image, and wave type before moving to later steps.
 - Desktop create-wave modal mode: `?create=wave` on supported waves and
   messages routes
   - route ownership: [Wave Create Modal Entry Points](feature-modal-entry-points.md)
-- Step label: `Overview`
-- Content heading: `Create Wave`
+- Step label: `Setup`
+- Content heading: `Create Wave` for a standalone wave.
+- For a subwave, both the modal header and Setup heading say
+  `Create subwave of "parent wave name"`. The fields are labeled
+  `Subwave Name`, `Subwave Profile Picture`, and `Subwave Type`.
+- The `Saved Drafts` list is hidden during subwave creation.
 - Create form renders only when a connected profile is available.
 
 ## Step Paths
 
-- `Chat`: `Overview` -> `Groups` -> `Rules` -> `Description`
-- `Rank`: `Overview` -> `Groups` -> `Schedule` -> `Drops` -> `Rules` ->
-  `Voting` -> `Outcomes` -> `Description`
-- `Approve`: `Overview` -> `Groups` -> `Schedule` -> `Drops` -> `Rules` ->
-  `Voting` -> `Outcomes` -> `Description`
+- `Chat`: `Setup` -> `Access` -> `Guidelines` -> `Description` -> `Overview`
+- `Rank`: `Setup` -> `Access` -> `Schedule` -> `Drops` -> `Voting` -> `Outcomes` ->
+  `Guidelines` -> `Description` -> `Overview`
+- `Approve`: `Setup` -> `Access` -> `Schedule` -> `Drops` -> `Voting` -> `Outcomes` ->
+  `Guidelines` -> `Description` -> `Overview`
 
 ## What You Can Set
 
@@ -59,13 +63,13 @@ Set the wave name, optional image, and wave type before moving to later steps.
 
 ## Navigation Behavior
 
-- `Overview` always opens first.
-- `Next` moves to `Groups` when overview validation passes.
+- `Setup` always opens first.
+- `Next` moves to `Access` when overview validation passes.
 - `Next` stays enabled; validation runs when clicked.
-- `Previous` is not shown on `Overview`.
+- `Previous` is not shown on `Setup`.
 - On large screens, the step rail can reopen completed steps, including
-  `Overview`.
-- On smaller screens, use `Previous` from later steps to return to `Overview`.
+  `Setup`.
+- On smaller screens, use `Previous` from later steps to return to `Setup`.
 
 ## Validation and State Rules
 
@@ -99,15 +103,17 @@ Set the wave name, optional image, and wave type before moving to later steps.
 
 ## Limitations / Notes
 
-- This page documents wave-creation `Overview` only.
+- This page documents wave-creation `Setup` only.
 - Direct-message creation is documented separately.
 
 ## Related Pages
 
+- [Final Overview](feature-final-overview-step.md)
+
 - [Wave Creation Index](README.md)
 - [Wave Create Modal Entry Points](feature-modal-entry-points.md)
 - [Wave Creation Group Access and Permissions](feature-groups-step.md)
-- [Wave Creation Rules Step](feature-rules-step.md)
+- [Wave Creation Guidelines Step](feature-rules-step.md)
 - [Wave Creation Description Step](feature-description-step.md)
 - [Summary Proposal Cards](../drop-actions/feature-proposal-cards.md)
 - [Docs Home](../../README.md)

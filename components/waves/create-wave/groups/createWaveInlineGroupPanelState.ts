@@ -99,7 +99,7 @@ export function startCriteriaReplacement(
 ): CreateWaveInlineGroupBuilderState {
   return {
     ...current,
-    panel: PANEL_RULE_LIST,
+    panel: PANEL_IDENTITY,
     activeRule: null,
     criteriaReplacementActive: true,
   };

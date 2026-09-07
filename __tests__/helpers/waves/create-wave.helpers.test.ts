@@ -100,13 +100,13 @@ describe("create-wave.helpers", () => {
           step: CreateWaveStep.DROPS,
           waveType: ApiWaveType.Approve,
         })
-      ).toBe(CreateWaveStep.RULES);
+      ).toBe(CreateWaveStep.VOTING);
       expect(
         getCreateWaveNextStep({
           step: CreateWaveStep.RULES,
           waveType: ApiWaveType.Approve,
         })
-      ).toBe(CreateWaveStep.VOTING);
+      ).toBe(CreateWaveStep.DESCRIPTION);
       expect(
         getCreateWaveNextStep({
           step: CreateWaveStep.VOTING,
@@ -118,7 +118,7 @@ describe("create-wave.helpers", () => {
           step: CreateWaveStep.DESCRIPTION,
           waveType: ApiWaveType.Rank,
         })
-      ).toBeNull();
+      ).toBe(CreateWaveStep.REVIEW);
     });
 
     it("skips the outcomes step for perpetual rank waves", () => {
@@ -128,7 +128,7 @@ describe("create-wave.helpers", () => {
           waveType: ApiWaveType.Rank,
           ongoingRanking: true,
         })
-      ).toBe(CreateWaveStep.DESCRIPTION);
+      ).toBe(CreateWaveStep.RULES);
       expect(
         getCreateWaveNextStep({
           step: CreateWaveStep.VOTING,
@@ -146,14 +146,14 @@ describe("create-wave.helpers", () => {
       ).toBe(CreateWaveStep.OUTCOMES);
       expect(
         getCreateWavePreviousStep({
-          step: CreateWaveStep.DESCRIPTION,
+          step: CreateWaveStep.RULES,
           waveType: ApiWaveType.Rank,
           ongoingRanking: true,
         })
       ).toBe(CreateWaveStep.VOTING);
       expect(
         getCreateWavePreviousStep({
-          step: CreateWaveStep.DESCRIPTION,
+          step: CreateWaveStep.RULES,
           waveType: ApiWaveType.Rank,
           ongoingRanking: false,
         })
@@ -182,6 +182,31 @@ describe("create-wave.helpers", () => {
     });
   });
 
+  it.each([
+    [ApiWaveType.Chat, false],
+    [ApiWaveType.Rank, false],
+    [ApiWaveType.Rank, true],
+    [ApiWaveType.Approve, false],
+  ] as const)(
+    "places Guidelines before Description with matching forward and backward navigation for %s (perpetual=%s)",
+    (waveType, ongoingRanking) => {
+      const steps = getCreateWaveMainSteps({ waveType, ongoingRanking });
+      expect(steps.slice(-3)).toEqual([
+        CreateWaveStep.RULES,
+        CreateWaveStep.DESCRIPTION,
+        CreateWaveStep.REVIEW,
+      ]);
+      for (const [index, step] of steps.entries()) {
+        expect(getCreateWaveNextStep({ step, waveType, ongoingRanking })).toBe(
+          steps[index + 1] ?? null
+        );
+        expect(
+          getCreateWavePreviousStep({ step, waveType, ongoingRanking })
+        ).toBe(steps[index - 1] ?? null);
+      }
+    }
+  );
+
   describe("getCreateWavePreviousStep", () => {
     it("returns expected previous steps based on wave type", () => {
       expect(
@@ -201,7 +226,7 @@ describe("create-wave.helpers", () => {
           step: CreateWaveStep.VOTING,
           waveType: ApiWaveType.Approve,
         })
-      ).toBe(CreateWaveStep.RULES);
+      ).toBe(CreateWaveStep.DROPS);
       expect(
         getCreateWavePreviousStep({
           step: CreateWaveStep.OUTCOMES,

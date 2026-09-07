@@ -13,4 +13,4 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 source "$SCRIPT_DIR/private-github-packages-auth.sh"
 
 load_private_package_auth_for_codex
-exec "$REPO_ROOT/bin/6529" install
+exec "$REPO_ROOT/bin/6529" ci

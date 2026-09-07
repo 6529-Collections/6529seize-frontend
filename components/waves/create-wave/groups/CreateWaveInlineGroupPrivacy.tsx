@@ -54,7 +54,9 @@ export default function CreateWaveInlineGroupPrivacy({
       </span>
       <label
         htmlFor={inputId}
-        className={disabled ? "tw-cursor-not-allowed" : "tw-cursor-pointer"}
+        className={`tw-flex tw-min-h-6 tw-items-center ${
+          disabled ? "tw-cursor-not-allowed" : "tw-cursor-pointer"
+        }`}
       >
         <input
           id={inputId}

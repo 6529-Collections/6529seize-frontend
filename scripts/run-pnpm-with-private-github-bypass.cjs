@@ -34,7 +34,12 @@ const NPM_GLOBAL_CONFIG_ENVIRONMENT_VARIABLE = "npm_config_npm_globalconfig";
 const AUTHENTICATED_FROZEN_INSTALL_ARGUMENTS = ["install", "--frozen-lockfile"];
 const TOKEN_FREE_LOCKFILE_ARGUMENTS = ["install", "--lockfile-only"];
 const TOKEN_FREE_REBUILD_ARGUMENTS = ["rebuild", "--pending"];
-const LOCKFILE_ONLY_COMMANDS = new Set(["add", "install", "update"]);
+const LOCKFILE_ONLY_COMMANDS = new Set([
+  "add",
+  "install",
+  "remove",
+  "update",
+]);
 
 function parseNoProxy(value) {
   if (!value) {

@@ -11,6 +11,14 @@ import type { MessageKey } from "@/i18n/messages/en-US";
 const RETRY_LABEL = "Erneut versuchen";
 
 export const DE_DE_MESSAGES = {
+  "waves.subwaves.accessWarning.title":
+    "Die Einschränkungen der übergeordneten Wave gelten",
+  "waves.subwaves.accessWarning.message":
+    "Einige Mitglieder dieser Gruppe haben keinen Zugriff auf die übergeordnete Wave und können diese Subwave daher nicht öffnen. Du kannst diese Gruppe trotzdem verwenden.",
+  "waves.subwaves.accessWarning.continue": "Trotzdem fortfahren",
+  "waves.subwaves.accessWarning.back": "Zurück",
+  "waves.subwaves.accessWarning.checkFailed":
+    "Der Zugriff auf die übergeordnete Wave konnte nicht geprüft werden. Bitte versuche es erneut.",
   "network.groupInspection.bulkRep":
     "Allen Profilen, die den Kriterien entsprechen, REP geben",
   "network.groupInspection.bulkNic":
@@ -487,6 +495,50 @@ export const DE_DE_MESSAGES = {
   "waves.gifPicker.unavailable.hint":
     "Du kannst stattdessen eine GIF-Datei hochladen.",
   "common.close": "Schliessen",
+  "waves.create.dialog.subwaveOfTitle":
+    "Subwave von „{parentWaveName}“ erstellen",
+  "waves.create.overview.subwaveName": "Subwave-Name",
+  "waves.create.overview.subwavePicture": "Subwave-Profilbild",
+  "waves.create.overview.subwaveType": "Subwave-Typ",
+  "waves.create.overview.type": "Wave-Typ",
+  "waves.create.overview.subwaveTypeRequired":
+    "Bitte wähle einen Subwave-Typ aus, um fortzufahren.",
+  "waves.create.overview.typeRequired":
+    "Bitte wähle einen Wave-Typ aus, um fortzufahren.",
+  "waves.create.outcomes.showOutcomes": "Menübereich Ergebnisse anzeigen",
+  "waves.create.outcomes.showOutcomesDescription":
+    "Zeigt den Tab Ergebnisse und die Belohnungsdetails auf Ranglisten- und Gewinnerkarten. Belohnungen gelten auch dann, wenn sie ausgeblendet sind.",
+  "waves.create.rules.title": "Richtlinien",
+  "waves.create.rules.guidelinesFieldLabel": "Chat-Richtlinien",
+  "waves.create.rules.guidelinesDescription":
+    "Diese Richtlinien werden Nutzern angezeigt, wenn sie ihre erste Chatnachricht senden.",
+  "waves.create.rules.guidelinesPlaceholder": "Chat-Richtlinien hinzufügen...",
+  "waves.create.rules.acceptanceTitle": "Regeln, denen zugestimmt werden muss",
+  "waves.create.rules.acceptanceDescription":
+    "Teilnehmende müssen diesen Regeln zustimmen und sie vor dem Einreichen mit ihrer Wallet signieren.",
+  "waves.create.rules.acceptancePlaceholder":
+    "Gib die Regeln ein, denen Teilnehmende vor dem Einreichen zustimmen müssen...",
+  "waves.create.rules.acceptanceHelper":
+    "Leer lassen, wenn keine Regeln eine Signatur erfordern.",
+  "waves.create.rules.acceptanceCharacterCount": "Zeichen: {count}",
+  "waves.create.review.title": "Übersicht",
+  "waves.create.review.description":
+    "Prüfe deine Wave vor dem Erstellen. Über Zurück oder die abgeschlossenen Schritte kannst du Änderungen vornehmen.",
+  "waves.create.review.submit": "Bestätigen und erstellen",
+  "waves.create.review.uploadsPending":
+    "Warte, bis die Bilder vollständig hochgeladen sind.",
+  "waves.create.review.setup": "Einrichtung",
+  "waves.create.review.name": "Name",
+  "waves.create.review.parent": "Übergeordnete Wave",
+  "waves.create.review.picture": "Wave-Profilbild",
+  "waves.create.review.manual": "Manuell",
+  "waves.create.review.outcomeType": "Ergebnistyp",
+  "waves.create.review.reward": "Belohnung",
+  "waves.create.review.category": "Kategorie",
+  "waves.create.review.total": "Gesamt",
+  "waves.create.review.winner": "Gewinner {position}",
+  "waves.create.review.perApprovedDrop": "Pro genehmigtem Drop",
+  "waves.create.review.outcome": "Ergebnis {number}",
   "waves.create.dialog.subwaveTitle": "Subwave erstellen",
   "waves.create.dialog.waveTitle": "Wave erstellen",
   "waves.create.actions.cancel": "Abbrechen",
@@ -507,8 +559,12 @@ export const DE_DE_MESSAGES = {
   "waves.create.groups.title": "Zugriff",
   "waves.create.groups.description":
     "Lege fest, wer auf diese Wave zugreifen, teilnehmen und sie verwalten kann.",
-  "waves.create.groups.viewGroupName": "Sichtbarkeit",
+  "waves.create.groups.viewGroupName": "Wer auf diese Wave zugreifen kann",
+  "waves.create.groups.accessHelper":
+    "Standardmäßig können alle Personen mit Zugriff teilnehmen. Nur du kannst die Wave verwalten.",
+  "waves.create.groups.customizePermissions": "Weitere Berechtigungen anpassen",
   "waves.create.groups.adminGroupName": "Administratoren",
+  "waves.create.groups.currentGroup": "Vor der Bearbeitung",
   "waves.create.groups.currentGroupWithName": "Aktuelle Gruppe: {name}",
   "waves.create.groups.dialog.addTitle": "Gruppe hinzufügen",
   "waves.create.groups.dialog.changeTitle": "Gruppe ändern",
@@ -559,6 +615,11 @@ export const DE_DE_MESSAGES = {
   "waves.create.groups.editAccess.confirmUseVisibility":
     "Sichtbarkeitskriterien verwenden",
   "waves.create.groups.actions.editCriteria": "Kriterien bearbeiten",
+  "waves.create.groups.actions.edit": "Bearbeiten",
+  "waves.create.groups.actions.matchWaveAccess": "An Wave-Zugriff anpassen",
+  "waves.create.groups.draft.saveChanges": "Änderungen speichern",
+  "waves.create.groups.draft.afterEditing": "Nach der Bearbeitung",
+  "waves.create.groups.rules.configured": "Konfiguriert",
   "waves.create.groups.inlineIdentities.modeLabel":
     "Behandlung von Identitäten",
   "waves.create.groups.inlineIdentities.included.label": "Eingeschlossen",
@@ -831,8 +892,7 @@ export const DE_DE_MESSAGES = {
   "waves.profileFeed.title": "Neueste Beiträge aus Profile Waves",
   "waves.profileFeed.description":
     "Entdecke, was die Community in Profile Waves teilt.",
-  "waves.profileFeed.errorTitle":
-    "Profilbeiträge konnten nicht geladen werden",
+  "waves.profileFeed.errorTitle": "Profilbeiträge konnten nicht geladen werden",
   "waves.profileFeed.errorDescription":
     "Aktualisiere diese Ansicht, um es erneut zu versuchen.",
   "waves.profileFeed.emptyTitle": "Noch keine Profilbeiträge",

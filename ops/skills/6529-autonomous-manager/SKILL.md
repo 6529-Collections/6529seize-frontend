@@ -39,7 +39,7 @@ Before planning or editing, read only the context that matters:
 
 - Use the repo-local `6529` wrapper for project commands.
 - Do not run plain `pnpm install`, `pnpm dev`, `npm run ...`, `npx react-doctor`, or direct package scripts outside the wrapper.
-- Install with `6529 install`; add dependencies with `6529 add <package>` or `6529 add -D <package>`.
+- Install with `6529 ci`; add dependencies with `6529 add <package>` or `6529 add -D <package>`.
 - Run the app with `6529 run dev`; the default local app port is `3001`.
 - Before committing, verify the Git identity and use `git commit -s ...`. Do not sign off for another person.
 - Keep generated files in sync by regenerating from source instead of hand-editing generated outputs.
