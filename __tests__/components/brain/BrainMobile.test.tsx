@@ -26,6 +26,15 @@ let mockSearchParams = new URLSearchParams();
 let mockPathname = "/";
 const mockPush = jest.fn();
 const mockReplace = jest.fn();
+let mockCurrentWaveView: { waveId: string; view: BrainView } | null = null;
+const mockRememberWaveView = jest.fn();
+
+jest.mock("@/contexts/NavigationHistoryContext", () => ({
+  useNavigationHistoryContext: () => ({
+    currentWaveView: mockCurrentWaveView,
+    rememberWaveView: mockRememberWaveView,
+  }),
+}));
 
 jest.mock("next/navigation", () => ({
   useRouter: () => ({ push: mockPush, replace: mockReplace }),
@@ -331,6 +340,7 @@ describe("BrainMobile", () => {
     mockPathname = "/";
     mockPush.mockClear();
     mockReplace.mockClear();
+    mockCurrentWaveView = null;
     dropData = null;
     waveData = null;
     isApp = true;
@@ -680,6 +690,48 @@ describe("BrainMobile", () => {
       expect(screen.getByText("child")).toBeInTheDocument();
     });
   });
+
+  it("records native tab selection and restores the matching history entry", async () => {
+    mockPathname = "/waves/1";
+    waveData = createWave(false);
+    const { unmount } = render(<BrainMobile>child</BrainMobile>);
+
+    await waitFor(() => expect(screen.getByTestId("tabs")).toBeInTheDocument());
+    act(() => {
+      latestTabsProps.onViewChange(BrainView.LEADERBOARD);
+    });
+    expect(mockRememberWaveView).toHaveBeenCalledWith({
+      waveId: "1",
+      view: BrainView.LEADERBOARD,
+    });
+    unmount();
+
+    mockCurrentWaveView = { waveId: "1", view: BrainView.LEADERBOARD };
+    render(<BrainMobile>child</BrainMobile>);
+
+    expect(await screen.findByTestId("leaderboard")).toBeInTheDocument();
+  });
+
+  it.each([
+    { app: true, rememberedWaveId: "2" },
+    { app: false, rememberedWaveId: "1" },
+  ])(
+    "ignores history tabs for app=$app remembered wave=$rememberedWaveId",
+    async ({ app, rememberedWaveId }) => {
+      isApp = app;
+      mockPathname = "/waves/1";
+      waveData = createWave(false);
+      mockCurrentWaveView = {
+        waveId: rememberedWaveId,
+        view: BrainView.LEADERBOARD,
+      };
+      render(<BrainMobile>child</BrainMobile>);
+
+      expect(await screen.findByText("child")).toBeInTheDocument();
+      expect(screen.queryByTestId("leaderboard")).toBeNull();
+      expect(mockRememberWaveView).not.toHaveBeenCalled();
+    }
+  );
 
   it("keeps the selected shell tab when web create modal query changes", async () => {
     isApp = false;

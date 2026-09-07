@@ -93,6 +93,26 @@ describe("MediaDisplayVideo", () => {
     ).toBeNull();
   });
 
+  it("does not expose playback controls or handle preview taps in inert mode", async () => {
+    const user = userEvent.setup();
+    const { container } = render(
+      <MediaDisplayVideo src="foo.mp4" isInertPreview />
+    );
+    const video = container.querySelector("video") as HTMLVideoElement;
+    Object.defineProperty(video, "paused", {
+      configurable: true,
+      get: () => false,
+    });
+    const playCalls = playMock.mock.calls.length;
+    const pauseCalls = pauseMock.mock.calls.length;
+
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+    await user.click(video);
+
+    expect(playMock).toHaveBeenCalledTimes(playCalls);
+    expect(pauseMock).toHaveBeenCalledTimes(pauseCalls);
+  });
+
   it("always shows inline video media actions when controls are shown", () => {
     render(<MediaDisplayVideo src="foo.mp4" showControls />);
 

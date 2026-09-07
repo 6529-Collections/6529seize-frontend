@@ -2,6 +2,7 @@ import React from "react";
 import { render, screen } from "@testing-library/react";
 import { WaveLeaderboardIdentity } from "@/components/waves/leaderboard/identity/WaveLeaderboardIdentity";
 import { ApiWaveParticipationSubmissionStrategyType } from "@/generated/models/ApiWaveParticipationSubmissionStrategyType";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 
 jest.mock(
   "@/components/waves/drops/participation/ParticipationIdentityProfileCard",
@@ -98,6 +99,48 @@ describe("WaveLeaderboardIdentity", () => {
     expect(
       screen.getByTestId("wave-leaderboard-identity-summary")
     ).toBeInTheDocument();
+  });
+
+  it("keeps condensed identity content readable without profile navigation", () => {
+    render(
+      <WaveLeaderboardIdentity
+        drop={
+          {
+            id: "d1",
+            wave: {
+              submission_type:
+                ApiWaveParticipationSubmissionStrategyType.Identity,
+            },
+            metadata: [
+              {
+                data_key: "identity",
+                data_value: "0xabc",
+                resolved_profile: {
+                  ...resolvedProfile,
+                  pfp: "https://example.com/avatar.png",
+                  bio: "Identity bio",
+                  top_rep_categories: [{ category: "Art", rep: 12 }],
+                },
+              },
+            ],
+          } as ExtendedDrop
+        }
+        variant="condensed"
+        disableNavigation
+      />
+    );
+
+    expect(screen.queryByRole("link")).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("img", { name: "alice avatar" })
+    ).toBeInTheDocument();
+    for (const text of ["alice", "0xabc", "7", "Identity bio", "Art"]) {
+      expect(screen.getByText(text)).toBeInTheDocument();
+      expect(screen.getByText(text).closest("[inert]")).toBeNull();
+    }
+    expect(screen.getByTestId("identity-badges").parentElement).toHaveAttribute(
+      "inert"
+    );
   });
 
   it("renders a plain fallback when the identity is unresolved", () => {
