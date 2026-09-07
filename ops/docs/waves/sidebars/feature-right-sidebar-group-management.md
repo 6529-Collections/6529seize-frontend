@@ -88,6 +88,13 @@ Users can:
 
 ## Edge Cases
 
+- Subwave groups can differ from their parent's groups. Before saving a group
+  with members outside the parent's audience, a warning explains that those
+  members cannot open the subwave. Select `Continue anyway` to save the chosen
+  group or `Go back` to keep editing. Groups fully covered by the parent's
+  audience need no warning, even when the group itself is different.
+- Parent visibility can change while subwaves exist. Opening a subwave always
+  requires access to both waves.
 - Chat waves show only `Visibility`, `Chat access`, and `Admins`.
 - `Chat access` controls who can chat only when chat is enabled; it does not
   show whether chat is currently enabled or disabled.

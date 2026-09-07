@@ -9,6 +9,14 @@ import stormComposerFrMessages from "@/i18n/messages/stormComposer.fr-FR.json";
 import type { MessageKey } from "@/i18n/messages/en-US";
 
 export const FR_FR_MESSAGES = {
+  "waves.subwaves.accessWarning.title":
+    "Les restrictions de la wave parente s’appliquent",
+  "waves.subwaves.accessWarning.message":
+    "Certains membres de ce groupe n’ont pas accès à la wave parente et ne pourront donc pas ouvrir cette sous-wave. Vous pouvez quand même utiliser ce groupe.",
+  "waves.subwaves.accessWarning.continue": "Continuer quand même",
+  "waves.subwaves.accessWarning.back": "Retour",
+  "waves.subwaves.accessWarning.checkFailed":
+    "Impossible de vérifier l’accès à la wave parente. Veuillez réessayer.",
   "network.groupInspection.bulkRep":
     "Donner du REP à tous les profils correspondant aux critères",
   "network.groupInspection.bulkNic":

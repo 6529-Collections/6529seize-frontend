@@ -15,6 +15,7 @@ interface MobileWrapperConfirmationDialogProps {
   readonly isConfirming?: boolean | undefined;
   readonly confirmDisabled?: boolean | undefined;
   readonly confirmVariant?: ButtonVariant | undefined;
+  readonly zIndexClassName?: string | undefined;
 }
 
 export default function MobileWrapperConfirmationDialog({
@@ -28,6 +29,7 @@ export default function MobileWrapperConfirmationDialog({
   isConfirming = false,
   confirmDisabled = false,
   confirmVariant = "primary",
+  zIndexClassName,
 }: MobileWrapperConfirmationDialogProps) {
   return (
     <MobileWrapperDialog
@@ -36,6 +38,7 @@ export default function MobileWrapperConfirmationDialog({
       onClose={onClose}
       tabletModal
       maxWidthClass="md:tw-max-w-lg"
+      zIndexClassName={zIndexClassName}
     >
       <div className="tw-px-4 sm:tw-px-6">
         <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-400">

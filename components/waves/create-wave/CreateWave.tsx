@@ -25,6 +25,7 @@ import { useCreateWaveSubmission } from "./hooks/useCreateWaveSubmission";
 import useKeyboardFocusScroll from "./hooks/useKeyboardFocusScroll";
 import { useSubwaveWaveConfig } from "./hooks/useSubwaveWaveConfig";
 import CreateWaveDraftsSection from "./overview/CreateWaveDraftsSection";
+import SubwaveAccessWarningDialog from "@/components/waves/groups/SubwaveAccessWarningDialog";
 
 export default function CreateWave({
   profile,
@@ -139,6 +140,7 @@ export default function CreateWave({
     onHaveDropToSubmitChange,
     onInlineGroupCreate,
     onComplete,
+    subwaveAccessConfirmation,
   } = useCreateWaveSubmission({
     config,
     descriptionRef,
@@ -245,6 +247,10 @@ export default function CreateWave({
           />
         </CreateWaveLayout>
       </CreateWaveFlow>
+      <SubwaveAccessWarningDialog
+        isOpen={subwaveAccessConfirmation.isOpen}
+        onDecision={subwaveAccessConfirmation.onDecision}
+      />
     </div>
   );
 }

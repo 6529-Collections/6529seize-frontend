@@ -9,6 +9,14 @@ import stormComposerEsMessages from "@/i18n/messages/stormComposer.es-ES.json";
 import type { MessageKey } from "@/i18n/messages/en-US";
 
 export const ES_ES_MESSAGES = {
+  "waves.subwaves.accessWarning.title":
+    "Se aplican las restricciones de la wave principal",
+  "waves.subwaves.accessWarning.message":
+    "Algunos miembros de este grupo no tienen acceso a la wave principal, por lo que no podrán abrir esta subwave. Puedes usar este grupo de todos modos.",
+  "waves.subwaves.accessWarning.continue": "Continuar de todos modos",
+  "waves.subwaves.accessWarning.back": "Volver",
+  "waves.subwaves.accessWarning.checkFailed":
+    "No se pudo comprobar el acceso a la wave principal. Inténtalo de nuevo.",
   "network.groupInspection.bulkRep":
     "Dar REP a todos los perfiles que cumplen los criterios",
   "network.groupInspection.bulkNic":

@@ -2425,7 +2425,8 @@
       "facts": [
         "Eligible admins can open the + menu in a root wave's tab row and select New subwave on web or in the app.",
         "New subwave is hidden in direct messages, inside an existing subwave, while using a profile proxy, when the parent has no reusable admin group, or when the profile cannot administer the parent.",
-        "A new subwave starts with the parent wave's exact access group. Chat and, for Rank and Approve waves, submission and voting default to that same group. A public parent's subwaves start public. Changing the wave type restores these defaults, and subwave access must match the parent when submitted.",
+        "A new subwave starts with the parent wave's exact access group. Chat and, for Rank and Approve waves, submission and voting default to that same group. A public parent's subwaves start public. Changing the wave type restores these defaults, but inherited groups are editable and do not have to match the parent's groups.",
+        "When creating a subwave or editing its groups, a group with members outside the parent's audience triggers a warning before saving. Continue anyway saves the chosen group; Go back keeps the form open. Different groups fully covered by the parent's audience need no warning. Members must have access to both the subwave and its parent, even if the subwave itself is public. Parent visibility can change while subwaves exist.",
         "A new subwave starts with the parent wave's admin group, and the creator can choose a different existing admin group in the Groups step before submitting."
       ],
       "canonical_path": "/waves",

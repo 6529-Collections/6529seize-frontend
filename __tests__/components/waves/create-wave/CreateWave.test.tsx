@@ -15,6 +15,28 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { CreateWaveStep } from "@/types/waves.types";
+import { hasSubwaveMembersOutsideParent } from "@/services/api/subwave-access-api";
+
+jest.mock("@/services/api/subwave-access-api", () => ({
+  hasSubwaveMembersOutsideParent: jest.fn().mockResolvedValue(false),
+}));
+
+jest.mock("@/components/waves/groups/SubwaveAccessWarningDialog", () => ({
+  __esModule: true,
+  default: ({
+    isOpen,
+    onDecision,
+  }: {
+    isOpen: boolean;
+    onDecision: (confirmed: boolean) => void;
+  }) =>
+    isOpen ? (
+      <div role="dialog" aria-label="Parent wave restrictions apply">
+        <button onClick={() => onDecision(true)}>Continue anyway</button>
+        <button onClick={() => onDecision(false)}>Go back</button>
+      </div>
+    ) : null,
+}));
 
 jest.mock("@/components/waves/create-wave/CreateWaveFlow", () => {
   return {
@@ -379,6 +401,7 @@ describe("CreateWave", () => {
       submit: jest.fn(),
     });
     mockAuthContext.requestAuth.mockResolvedValue({ success: true });
+    jest.mocked(hasSubwaveMembersOutsideParent).mockResolvedValue(false);
 
     // Mock URL.createObjectURL
     global.URL.createObjectURL = jest.fn(() => "mocked-object-url");
@@ -628,6 +651,41 @@ describe("CreateWave", () => {
       expect(mockedGetAdminGroupId).not.toHaveBeenCalled();
       expect(mockAddWaveMutation.mutateAsync).not.toHaveBeenCalled();
     });
+
+    it.each([true, false])(
+      "respects the parent access warning decision: %s",
+      async (confirmed) => {
+        jest.mocked(hasSubwaveMembersOutsideParent).mockResolvedValue(true);
+        mockedUseWaveConfig.mockReturnValue({
+          ...mockWaveConfig,
+          step: CreateWaveStep.DESCRIPTION,
+        });
+        renderCreateWave({ parentWaveId: "parent-wave" });
+        fireEvent.click(screen.getByRole("button", { name: /complete/i }));
+
+        await screen.findByRole("dialog", {
+          name: "Parent wave restrictions apply",
+        });
+        expect(mockAddWaveMutation.mutateAsync).not.toHaveBeenCalled();
+        fireEvent.click(
+          screen.getByRole("button", {
+            name: confirmed ? "Continue anyway" : "Go back",
+          })
+        );
+
+        if (confirmed) {
+          await waitFor(() =>
+            expect(mockAddWaveMutation.mutateAsync).toHaveBeenCalledTimes(1)
+          );
+        } else {
+          await waitFor(() =>
+            expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+          );
+          expect(mockAddWaveMutation.mutateAsync).not.toHaveBeenCalled();
+          expect(mockedGetAdminGroupId).not.toHaveBeenCalled();
+        }
+      }
+    );
 
     it("passes parent wave id into submitted subwave body", async () => {
       const configOnDescriptionStep = {

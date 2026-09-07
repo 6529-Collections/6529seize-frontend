@@ -50,7 +50,15 @@ user-reachable for `Chat`, `Rank`, and `Approve` waves.
   group. Chat and, for `Rank` and `Approve`, submission and voting start with
   that same access group. A public parent's subwaves start with `Everyone`.
 - Changing the wave type resets access and participation to these defaults.
-  A subwave's access group must match its parent's when submitted.
+- The inherited subwave groups are editable. Subwave access does not have to
+  match the parent's group.
+- Before creating a subwave, the app checks whether its access group includes
+  anyone outside the parent's audience. If it does, a warning explains that
+  those members cannot open the subwave. `Continue anyway` creates it with the
+  chosen group; `Go back` keeps the draft open. A different group whose members
+  can all access the parent needs no warning, nor does a public parent.
+- Members need access to both the subwave and its parent. Making a subwave
+  public does not bypass a restricted parent.
 
 ## Editing Criteria
 

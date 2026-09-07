@@ -11,6 +11,14 @@ import type { MessageKey } from "@/i18n/messages/en-US";
 const RETRY_LABEL = "Erneut versuchen";
 
 export const DE_DE_MESSAGES = {
+  "waves.subwaves.accessWarning.title":
+    "Die Einschränkungen der übergeordneten Wave gelten",
+  "waves.subwaves.accessWarning.message":
+    "Einige Mitglieder dieser Gruppe haben keinen Zugriff auf die übergeordnete Wave und können diese Subwave daher nicht öffnen. Du kannst diese Gruppe trotzdem verwenden.",
+  "waves.subwaves.accessWarning.continue": "Trotzdem fortfahren",
+  "waves.subwaves.accessWarning.back": "Zurück",
+  "waves.subwaves.accessWarning.checkFailed":
+    "Der Zugriff auf die übergeordnete Wave konnte nicht geprüft werden. Bitte versuche es erneut.",
   "network.groupInspection.bulkRep":
     "Allen Profilen, die den Kriterien entsprechen, REP geben",
   "network.groupInspection.bulkNic":

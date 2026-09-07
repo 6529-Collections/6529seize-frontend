@@ -26,6 +26,7 @@ import {
 } from "../services/waveGroupService";
 import { getWaveGroupValidationRequest } from "@/helpers/waves/wave-group-validation.helpers";
 import { validateWaveGroups } from "@/services/api/wave-group-validation-api";
+import { useSubwaveAccessConfirmation } from "@/components/waves/hooks/useSubwaveAccessConfirmation";
 
 interface UseCreateWaveSubmissionParams {
   readonly config: CreateWaveConfig;
@@ -95,6 +96,7 @@ export function useCreateWaveSubmission({
   const router = useRouter();
   const { isApp } = useDeviceInfo();
   const locale = useBrowserLocale();
+  const subwaveAccessConfirmation = useSubwaveAccessConfirmation();
   const { requestAuth, setToast, connectedProfile } = useContext(AuthContext);
   const { waitAndInvalidateDrops, onWaveCreated, onGroupCreate } = useContext(
     ReactQueryWrapperContext
@@ -267,6 +269,16 @@ export function useCreateWaveSubmission({
         }
       }
 
+      const parentAccessConfirmed =
+        await subwaveAccessConfirmation.confirmSubwaveAccess({
+          parentWaveId,
+          viewGroupId: config.groups.canView,
+        });
+      if (!parentAccessConfirmed) {
+        finishSubmitting();
+        return;
+      }
+
       const adminGroupId = await getAdminGroupId({
         adminGroupId: configuredAdminGroupId,
         primaryWallet: connectedProfile?.primary_wallet,
@@ -328,5 +340,6 @@ export function useCreateWaveSubmission({
     onHaveDropToSubmitChange,
     onInlineGroupCreate,
     onComplete,
+    subwaveAccessConfirmation,
   };
 }
