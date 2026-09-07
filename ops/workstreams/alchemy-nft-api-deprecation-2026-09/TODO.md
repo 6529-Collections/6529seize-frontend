@@ -63,9 +63,12 @@ The affected call path is:
     cannot implement keyword search.
 - [ ] Confirm whether the picker should show an explicit "enter a contract
   address" state or retain search suggestions from a new source.
-- [ ] Define spam filtering for the chosen path. Exact-address metadata exposes
-  a single contract's inline spam state; it does not reproduce a filtered list
-  of search results.
+- [ ] Define spam filtering for the chosen path. V3 `getContractMetadata`
+  returns one contract but does not include Alchemy's documented `isSpam` or
+  `spamClassifications` fields. If address-only lookup must preserve spam
+  rejection, call V3 `isSpamContract` separately; otherwise document the
+  intentional filtering change. Neither option reproduces a filtered result
+  list.
 
 ### 2. Remove the deprecated frontend call path
 
@@ -126,7 +129,10 @@ The affected call path is:
 - Existing `getContractMetadata` calls match the recommended V3 endpoint and
   pass `contractAddress`. The normalization layer already tolerates the
   observed `openSeaMetadata`/`openseaMetadata` casing variants and reads
-  collection name, floor price, imagery, and spam metadata used by the UI.
+  collection name, floor price, and imagery. It can normalize spam fields from
+  responses that contain them, but `getContractMetadata` does not document
+  those fields and the current normalizer defaults missing spam data to
+  non-spam; this cannot be treated as a spam check.
 - Existing ownership checks match Alchemy's recommended pattern: V3
   `getNFTsForOwner` plus a contract-address filter. Pagination is already
   implemented for the server helper.
