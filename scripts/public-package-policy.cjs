@@ -277,9 +277,7 @@ function validateWorkspace(text) {
     if (
       selector === "<<" ||
       /^[&*!]/.test(version) ||
-      !/^[A-Za-z0-9_.@/+<>=~^|*\- ]+(?:>[A-Za-z0-9_.@/+<>=~^|*\- ]+)*$/.test(
-        selector
-      ) ||
+      !/^[A-Za-z0-9_.@/+<>=~^|*\- ]+$/.test(selector) ||
       !/^(?:\$[A-Za-z0-9_.@/+\-]+|[0-9A-Za-z.*<>=~^|+\- ]+)$/.test(
         version
       )
