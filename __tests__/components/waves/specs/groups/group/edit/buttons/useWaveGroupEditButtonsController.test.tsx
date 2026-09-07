@@ -195,6 +195,10 @@ describe("useWaveGroupEditButtonsController", () => {
       chat_group_id: "chat-group",
     });
     expect(onWaveCreated).toHaveBeenCalledTimes(1);
+    expect(hasSubwaveMembersOutsideParent).toHaveBeenCalledWith(
+      { parentWaveId: undefined, viewGroupId: null },
+      expect.any(AbortSignal)
+    );
   });
 
   it("keeps the editor flow open when authentication fails", async () => {

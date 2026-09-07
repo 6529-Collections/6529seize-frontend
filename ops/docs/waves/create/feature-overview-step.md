@@ -21,10 +21,10 @@ Set the wave name, optional image, and wave type before moving to later steps.
 
 ## Step Paths
 
-- `Chat`: `Setup` -> `Groups` -> `Guidelines` -> `Description` -> `Overview`
-- `Rank`: `Setup` -> `Groups` -> `Schedule` -> `Drops` -> `Voting` -> `Outcomes` ->
+- `Chat`: `Setup` -> `Access` -> `Guidelines` -> `Description` -> `Overview`
+- `Rank`: `Setup` -> `Access` -> `Schedule` -> `Drops` -> `Voting` -> `Outcomes` ->
   `Guidelines` -> `Description` -> `Overview`
-- `Approve`: `Setup` -> `Groups` -> `Schedule` -> `Drops` -> `Voting` -> `Outcomes` ->
+- `Approve`: `Setup` -> `Access` -> `Schedule` -> `Drops` -> `Voting` -> `Outcomes` ->
   `Guidelines` -> `Description` -> `Overview`
 
 ## What You Can Set
@@ -64,7 +64,7 @@ Set the wave name, optional image, and wave type before moving to later steps.
 ## Navigation Behavior
 
 - `Setup` always opens first.
-- `Next` moves to `Groups` when overview validation passes.
+- `Next` moves to `Access` when overview validation passes.
 - `Next` stays enabled; validation runs when clicked.
 - `Previous` is not shown on `Setup`.
 - On large screens, the step rail can reopen completed steps, including

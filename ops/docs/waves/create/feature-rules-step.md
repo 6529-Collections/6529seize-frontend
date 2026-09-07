@@ -20,9 +20,9 @@ configuration summary is in the final [Overview step](feature-final-overview-ste
 
 ## Step Path
 
-- `Chat`: `Setup -> Groups -> Guidelines -> Description -> Overview`
-- `Rank`: `Setup -> Groups -> Schedule -> Drops -> Voting -> Outcomes -> Guidelines -> Description -> Overview`
-- `Approve`: `Setup -> Groups -> Schedule -> Drops -> Voting -> Outcomes -> Guidelines -> Description -> Overview`
+- `Chat`: `Setup -> Access -> Guidelines -> Description -> Overview`
+- `Rank`: `Setup -> Access -> Schedule -> Drops -> Voting -> Outcomes -> Guidelines -> Description -> Overview`
+- `Approve`: `Setup -> Access -> Schedule -> Drops -> Voting -> Outcomes -> Guidelines -> Description -> Overview`
 
 ## Chat Guidelines
 

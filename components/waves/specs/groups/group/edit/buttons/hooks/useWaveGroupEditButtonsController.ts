@@ -129,7 +129,7 @@ export const useWaveGroupEditButtonsController = ({
       try {
         const parentAccessConfirmed = await confirmSubwaveAccess({
           parentWaveId: wave.parent_wave?.id,
-          viewGroupId: scopedGroupId,
+          viewGroupId: body.visibility.scope.group_id,
         });
         if (!parentAccessConfirmed) {
           setMutating(false);

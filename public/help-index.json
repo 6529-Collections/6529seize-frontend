@@ -2424,7 +2424,7 @@
         "Subwave creation shows Create subwave of the parent wave name in both the modal header and Setup heading. Its first-step labels are Subwave Name, Subwave Profile Picture, and Subwave Type. Saved Drafts is hidden during subwave creation.",
         "A new subwave starts with the parent wave's exact access group. Chat and, for Rank and Approve waves, submission and voting default to that same group. A public parent's subwaves start public. Changing the wave type restores these defaults, but inherited groups are editable and do not have to match the parent's groups.",
         "When creating a subwave or editing its groups, a group with members outside the parent's audience triggers a warning before saving. Continue anyway saves the chosen group; Go back keeps the form open. Different groups fully covered by the parent's audience need no warning. Members must have access to both the subwave and its parent, even if the subwave itself is public. Parent visibility can change while subwaves exist.",
-        "A new subwave starts with the parent wave's admin group, and the creator can choose a different existing admin group in the Groups step before submitting."
+        "A new subwave starts with the parent wave's admin group, and the creator can choose a different existing admin group in the Access step before submitting."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves"],
@@ -2740,7 +2740,7 @@
         "mobile"
       ],
       "facts": [
-        "Guidelines is for editing optional chat guidelines. Acceptance-required rules are configured in Drops under Submission requirements. The read-only configuration summary is in the final Overview after Description. Overview shows access, schedules, submissions, voting, approval settings, detailed outcomes, author rules and guidelines, and the description. Confirm and create submits only from this last step. Previous returns to Description without clearing text or attachments.",
+        "Guidelines is for editing optional chat guidelines. Acceptance-required rules are configured in Drops under Submission requirements. The read-only configuration summary is in the final Overview after Description. Overview shows access, schedules, submissions, voting, approval settings, detailed outcomes, acceptance-required rules and guidelines, and the description. Confirm and create submits only from this last step. Previous returns to Description without clearing text or attachments.",
         "Guidelines is directly before Description for every wave type. Chat enters it after Access, Perpetual Ranking after Voting, and scheduled Rank and Approve after Outcomes.",
         "Generated rules summarize the wave setup. Chat rules focus on wave type, access, and chat settings; Rank and Approve rules also include timing, submissions, voting, approval, and outcome visibility.",
         "Creators use the Chat guidelines section and Add chat guidelines... textbox to add guidelines. The subtitle explains that users see them when sending their first chat message. Guidelines are saved as wave metadata and also shown under Guidelines in the wave rules panel.",

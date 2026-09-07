@@ -14,12 +14,12 @@ Write the first wave drop here, then click `Next` to review the full wave.
 
 ## Step Paths
 
-- `Chat`: `Setup` -> `Groups` -> `Guidelines` -> `Description` -> `Overview`
-- Scheduled `Rank`: `Setup` -> `Groups` -> `Schedule` -> `Drops` -> `Voting` -> `Outcomes` ->
+- `Chat`: `Setup` -> `Access` -> `Guidelines` -> `Description` -> `Overview`
+- Scheduled `Rank`: `Setup` -> `Access` -> `Schedule` -> `Drops` -> `Voting` -> `Outcomes` ->
   `Guidelines` -> `Description` -> `Overview`
-- `Perpetual Ranking`: `Setup` -> `Groups` -> `Schedule` -> `Drops` -> `Voting` ->
+- `Perpetual Ranking`: `Setup` -> `Access` -> `Schedule` -> `Drops` -> `Voting` ->
   `Guidelines` -> `Description` -> `Overview`
-- `Approve`: `Setup` -> `Groups` -> `Schedule` -> `Drops` -> `Voting` -> `Outcomes` ->
+- `Approve`: `Setup` -> `Access` -> `Schedule` -> `Drops` -> `Voting` -> `Outcomes` ->
   `Guidelines` -> `Description` -> `Overview`
 
 ## What You Can Add
@@ -82,7 +82,7 @@ Write the first wave drop here, then click `Next` to review the full wave.
 
 - [Wave Creation Index](README.md)
 - [Wave Create Modal Entry Points](feature-modal-entry-points.md)
-- [Wave Creation Overview Step](feature-overview-step.md)
+- [Wave Creation Setup Step](feature-overview-step.md)
 - [Wave Creation Guidelines Step](feature-rules-step.md)
 - [Wave Creation Outcomes Setup](feature-outcomes-step.md)
 - [Wave Drop Composer Metadata Submissions](../composer/feature-metadata-submissions.md)

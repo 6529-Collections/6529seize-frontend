@@ -20,7 +20,7 @@ in expandable sections named for those controls.
 ## Entry Points
 
 - Start a `Rank` or `Approve` create flow and continue
-  `Setup -> Groups -> Schedule`.
+  `Setup -> Access -> Schedule`.
 - Use `Back` from `Drops`, `Guidelines`, `Voting`, `Outcomes`, or `Description`.
 - On large screens, use the step rail to return to `Schedule` after you have
   moved past it.

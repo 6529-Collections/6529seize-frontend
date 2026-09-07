@@ -49,10 +49,10 @@ Use this area to create:
   8. [Wave Creation Description Step](feature-description-step.md)
   9. [Final Overview](feature-final-overview-step.md)
 - Step path by wave type:
-  - `Chat`: `Setup -> Groups -> Guidelines -> Description -> Overview`
-  - Scheduled `Rank`: `Setup -> Groups -> Schedule -> Drops -> Voting -> Outcomes -> Guidelines -> Description -> Overview`
-  - `Perpetual Ranking`: `Setup -> Groups -> Schedule -> Drops -> Voting -> Guidelines -> Description -> Overview`
-  - `Approve`: `Setup -> Groups -> Schedule -> Drops -> Voting -> Outcomes -> Guidelines -> Description -> Overview`
+  - `Chat`: `Setup -> Access -> Guidelines -> Description -> Overview`
+  - Scheduled `Rank`: `Setup -> Access -> Schedule -> Drops -> Voting -> Outcomes -> Guidelines -> Description -> Overview`
+  - `Perpetual Ranking`: `Setup -> Access -> Schedule -> Drops -> Voting -> Guidelines -> Description -> Overview`
+  - `Approve`: `Setup -> Access -> Schedule -> Drops -> Voting -> Outcomes -> Guidelines -> Description -> Overview`
 
 The default path keeps the decisions most creators need visible. Less common
 customization is available from expandable sections named for their contents,

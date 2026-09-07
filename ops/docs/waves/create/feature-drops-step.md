@@ -28,7 +28,7 @@ The section is always visible and has no expand/collapse control.
 ## Entry Points
 
 - Follow the `Rank` or `Approve` path:
-  `Setup -> Groups -> Schedule -> Drops`.
+  `Setup -> Access -> Schedule -> Drops`.
 - Use `Back` from `Voting` to return in one step.
 - On large screens, use the step rail after you move past `Drops`.
 

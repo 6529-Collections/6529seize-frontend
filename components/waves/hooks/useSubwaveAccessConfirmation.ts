@@ -31,7 +31,8 @@ export function useSubwaveAccessConfirmation() {
 
   const confirmSubwaveAccess = useCallback((check: SubwaveAccessCheck) => {
     if (pendingCheck.current) {
-      return pendingArgs.current?.parentWaveId === check.parentWaveId &&
+      return pendingArgs.current !== null &&
+        pendingArgs.current.parentWaveId === check.parentWaveId &&
         pendingArgs.current.viewGroupId === check.viewGroupId
         ? pendingCheck.current
         : Promise.resolve(false);
