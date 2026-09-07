@@ -187,6 +187,23 @@ describe("public Coordinator package policy", () => {
     expect(() => policy.validatePackageJson(JSON.stringify(manifest))).toThrow(
       "may exist only in devDependencies"
     );
+
+    delete manifest.peerDependencies;
+    const manifestWithPnpm = {
+      ...manifest,
+      pnpm: { configDependencies: { "hook-package": "1.0.0" } },
+    };
+    expect(() =>
+      policy.validatePackageJson(JSON.stringify(manifestWithPnpm))
+    ).toThrow("package.json pnpm settings are not allowed");
+
+    const manifestWithDependenciesMeta = {
+      ...manifest,
+      dependenciesMeta: { "unreviewed-package": { built: true } },
+    };
+    expect(() =>
+      policy.validatePackageJson(JSON.stringify(manifestWithDependenciesMeta))
+    ).toThrow("package.json dependency build settings are not allowed");
   });
 
   it("rejects changes to the reviewed age exception", () => {
@@ -214,6 +231,21 @@ describe("public Coordinator package policy", () => {
     expect(() =>
       policy.validateWorkspace(`${workspace}\nglobalPnpmfile: ./hook.cjs\n`)
     ).toThrow("setting is not allowed: globalPnpmfile");
+    for (const setting of [
+      "configDependencies:\n  hook-package: 1.0.0",
+      "dangerouslyAllowAllBuilds: true",
+      "onlyBuiltDependencies:\n  - unreviewed-package",
+      "ignoredBuiltDependencies:\n  - unreviewed-package",
+    ]) {
+      expect(() =>
+        policy.validateWorkspace(`${workspace}\n${setting}\n`)
+      ).toThrow("setting is not allowed");
+    }
+    expect(() =>
+      policy.validateWorkspace(
+        workspace.replace("  sharp: true", "  unreviewed-package: true")
+      )
+    ).toThrow("allowBuilds must contain only approved packages");
     expect(() =>
       policy.validateWorkspace(
         workspace.replace(

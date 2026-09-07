@@ -7,6 +7,19 @@ const RELEASE_PACKAGE = "@6529-collections/release-request";
 const RELEASE_VERSION = "0.0.4";
 const RELEASE_INTEGRITY =
   "sha512-rbGE0a3zlYUQlkg43/1TWAysNLksw0eaewywxDi6IoiucWgsZyEOrmbctBRWeDxLNAU3VypzrjyIGkjZ8ediiQ==";
+const ALLOWED_BUILD_DEPENDENCIES = new Set([
+  "@nestjs/core",
+  "@openapitools/openapi-generator-cli",
+  "@parcel/watcher",
+  "@reown/appkit",
+  "@sentry/cli",
+  "bufferutil",
+  "esbuild",
+  "keccak",
+  "sharp",
+  "unrs-resolver",
+  "utf-8-validate",
+]);
 const SECURE_REPOSITORY_ROOT_ARGUMENT = "--seize-secure-repository-root";
 const SECURE_PNPM_BINARY_ARGUMENT = "--seize-secure-pnpm-binary";
 const ALLOWED_COMMANDS = new Set([
@@ -165,6 +178,12 @@ function validatePackageJson(text) {
       throw policyError(`${RELEASE_PACKAGE} may exist only in devDependencies`);
     }
   }
+  if (manifest.pnpm !== undefined) {
+    throw policyError("package.json pnpm settings are not allowed");
+  }
+  if (manifest.dependenciesMeta !== undefined) {
+    throw policyError("package.json dependency build settings are not allowed");
+  }
 }
 
 function validateWorkspace(text) {
@@ -199,7 +218,13 @@ function validateWorkspace(text) {
       name.includes("strictssl") ||
       name.includes("cafile") ||
       name.includes("pnpmfile") ||
-      name === "hooks";
+      name === "hooks" ||
+      name === "configdependencies" ||
+      name === "dangerouslyallowallbuilds" ||
+      name === "onlybuiltdependencies" ||
+      name === "onlybuiltdependenciesfile" ||
+      name === "neverbuiltdependencies" ||
+      name === "ignoredbuiltdependencies";
     if (containsCredentialNetworkOrHookOverride) {
       throw policyError(`pnpm-workspace.yaml setting is not allowed: ${key}`);
     }
@@ -223,6 +248,36 @@ function validateWorkspace(text) {
     throw policyError(
       `minimumReleaseAgeExclude must contain only ${RELEASE_PACKAGE}`
     );
+  }
+
+  const allowBuildsBlock = text.match(
+    /^allowBuilds:\s*(?:\r?\n|$)((?:(?:[ \t]+[^\r\n]*|[ \t]*)\r?\n?)*)/m
+  );
+  const allowedBuilds = new Set();
+  for (const line of (allowBuildsBlock?.[1] ?? "").split(/\r?\n/)) {
+    const trimmedLine = line.trim();
+    if (trimmedLine === "" || trimmedLine.startsWith("#")) {
+      continue;
+    }
+    const entry = trimmedLine.match(
+      /^(?:"([^"\r\n]+)"|'([^'\r\n]+)'|([A-Za-z0-9_.@/+\-]+))\s*:\s*true\s*$/
+    );
+    if (!entry) {
+      throw policyError("allowBuilds must contain only approved packages");
+    }
+    const packageName = entry[1] ?? entry[2] ?? entry[3];
+    if (allowedBuilds.has(packageName)) {
+      throw policyError(`duplicate allowBuilds package: ${packageName}`);
+    }
+    allowedBuilds.add(packageName);
+  }
+  if (
+    allowedBuilds.size !== ALLOWED_BUILD_DEPENDENCIES.size ||
+    [...ALLOWED_BUILD_DEPENDENCIES].some(
+      (packageName) => !allowedBuilds.has(packageName)
+    )
+  ) {
+    throw policyError("allowBuilds must contain only approved packages");
   }
 }
 
