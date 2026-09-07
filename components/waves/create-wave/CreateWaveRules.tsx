@@ -1,93 +1,25 @@
 "use client";
 
-import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
-import { ApiWaveType } from "@/generated/models/ApiWaveType";
-import {
-  WAVE_CUSTOM_RULES_MAX_LENGTH,
-  normalizeWaveCustomRules,
-} from "@/helpers/waves/wave-metadata.helpers";
-import { buildWaveRules } from "@/helpers/waves/wave-rules.helpers";
+import { WAVE_CUSTOM_RULES_MAX_LENGTH } from "@/helpers/waves/wave-metadata.helpers";
 import type { CreateWaveConfig } from "@/types/waves.types";
-import { useMemo } from "react";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
-import CreateWaveTermsOfService from "./drops/terms/CreateWaveTermsOfService";
-import WaveRulesPanel from "../specs/WaveRulesPanel";
 import CreateWaveStepHeader from "./utils/CreateWaveStepHeader";
 import { CREATE_WAVE_FORM_STYLES } from "./utils/createWaveFormStyles";
-import CreateWaveAdvancedSection from "./utils/CreateWaveAdvancedSection";
-import CreateWaveRulesGroupMembers from "./rules/CreateWaveRulesGroupMembers";
-import type { WaveRuleRow } from "@/helpers/waves/wave-rules.shared";
-import { useAuth } from "@/components/auth/Auth";
-import { getOnlyMeGroupDescription } from "./services/waveGroupService";
 
 interface CreateWaveRulesProps {
   readonly config: CreateWaveConfig;
-  readonly groupsCache: Readonly<Record<string, ApiGroupFull>>;
   readonly setDisplay: (display: CreateWaveConfig["display"]) => void;
-  readonly setDrops: (drops: CreateWaveConfig["drops"]) => void;
 }
 
 export default function CreateWaveRules({
   config,
-  groupsCache,
   setDisplay,
-  setDrops,
 }: CreateWaveRulesProps) {
   const locale = useBrowserLocale();
-  const { connectedProfile } = useAuth();
-  const rules = useMemo(
-    () =>
-      buildWaveRules({
-        config,
-        groupsCache,
-      }),
-    [config, groupsCache]
-  );
-
   const customRules = config.display.customRules ?? "";
   const customRulesHelpId = "create-wave-custom-rules-help";
   const customRulesCounterId = "create-wave-custom-rules-counter";
-  const supportsAcceptanceRules = config.overview.type !== ApiWaveType.Chat;
-  const hasCustomRules = Boolean(normalizeWaveCustomRules(customRules));
-  const hasBindingRules = Boolean(normalizeWaveCustomRules(config.drops.terms));
-  const groupIdsByRuleId: Readonly<Record<string, string | null>> = {
-    "can-view": config.groups.canView,
-    "can-drop": config.groups.canDrop,
-    "can-vote": config.groups.canVote,
-    "chat-access": config.groups.canChat,
-    admin: config.groups.admin,
-  };
-
-  const renderRuleValue = (row: WaveRuleRow) => {
-    const groupId = groupIdsByRuleId[row.id];
-    if (row.id === "admin" && !groupId && connectedProfile?.primary_wallet) {
-      return (
-        <CreateWaveRulesGroupMembers
-          target={{
-            kind: "draft",
-            group: getOnlyMeGroupDescription(connectedProfile.primary_wallet),
-            name: row.value,
-            summary: row.value,
-          }}
-          roleLabel={row.label}
-        />
-      );
-    }
-
-    if (!groupId) {
-      return undefined;
-    }
-
-    return (
-      <CreateWaveRulesGroupMembers
-        groupId={groupId}
-        cachedGroup={groupsCache[groupId]}
-        roleLabel={row.label}
-      />
-    );
-  };
-
   const setDisplayRules = (value: string) => {
     setDisplay({
       ...config.display,
@@ -95,39 +27,21 @@ export default function CreateWaveRules({
     });
   };
 
-  const setBindingRules = (terms: string | null) => {
-    const normalizedTerms = normalizeWaveCustomRules(terms);
-    setDrops({
-      ...config.drops,
-      terms,
-      signatureRequired: Boolean(normalizedTerms),
-    });
-  };
-
   return (
     <div className="tw-flex tw-flex-col tw-gap-y-6">
       <CreateWaveStepHeader title={t(locale, "waves.create.rules.title")} />
 
-      <WaveRulesPanel
-        rules={rules}
-        showCustomRules={false}
-        showTitle={false}
-        variant="form"
-        renderRowValue={renderRuleValue}
-      />
-
-      <CreateWaveAdvancedSection
-        title={t(
-          locale,
-          supportsAcceptanceRules
-            ? "waves.create.rules.advancedSummary"
-            : "waves.create.rules.chatAdvancedSummary"
-        )}
-        isCustomized={hasCustomRules || hasBindingRules}
-        hasError={false}
-        variant="filled"
+      <section
+        aria-labelledby="create-wave-guidelines-title"
+        className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900/60"
       >
-        <div className="tw-space-y-6 tw-p-5">
+        <h3
+          id="create-wave-guidelines-title"
+          className={`${CREATE_WAVE_FORM_STYLES.sectionTitle} tw-px-5 tw-py-4`}
+        >
+          {t(locale, "waves.create.rules.guidelinesFieldLabel")}
+        </h3>
+        <div className="tw-space-y-6 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-p-5">
           <section>
             <div className="tw-space-y-3">
               <div>
@@ -168,28 +82,8 @@ export default function CreateWaveRules({
               </div>
             </div>
           </section>
-
-          {supportsAcceptanceRules && (
-            <section className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-pt-6">
-              <CreateWaveTermsOfService
-                terms={config.drops.terms}
-                setTerms={setBindingRules}
-                title={t(locale, "waves.create.rules.acceptanceTitle")}
-                toggleLabel={t(locale, "waves.create.rules.acceptanceToggle")}
-                description={t(
-                  locale,
-                  "waves.create.rules.acceptanceDescription"
-                )}
-                placeholder={t(
-                  locale,
-                  "waves.create.rules.acceptancePlaceholder"
-                )}
-                helperText={t(locale, "waves.create.rules.acceptanceHelper")}
-              />
-            </section>
-          )}
         </div>
-      </CreateWaveAdvancedSection>
+      </section>
     </div>
   );
 }

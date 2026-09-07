@@ -24,13 +24,13 @@ behavior tuning are in an expandable section named for those controls.
 
 ## Step Path
 
-- Scheduled `Rank`: `Overview -> Groups -> Schedule -> Drops -> Rules -> Voting -> Outcomes -> Description`
-- `Perpetual Ranking`: `Overview -> Groups -> Schedule -> Drops -> Rules -> Voting -> Description`
-- `Approve`: `Overview -> Groups -> Schedule -> Drops -> Rules -> Voting -> Outcomes -> Description`
+- Scheduled `Rank`: `Setup -> Access -> Schedule -> Drops -> Voting -> Outcomes -> Guidelines -> Description -> Overview`
+- `Perpetual Ranking`: `Setup -> Access -> Schedule -> Drops -> Voting -> Guidelines -> Description -> Overview`
+- `Approve`: `Setup -> Access -> Schedule -> Drops -> Voting -> Outcomes -> Guidelines -> Description -> Overview`
 
 ## Navigation Behavior
 
-- Enter `Voting` from `Rules`.
+- Enter `Voting` from `Drops`.
 - `Back` from `Outcomes` returns to `Voting`.
 - `Next` stays enabled; validation runs when clicked.
 - On large screens, the step rail can reopen completed steps only.
@@ -57,7 +57,7 @@ behavior tuning are in an expandable section named for those controls.
 9. For `Approve` waves, choose `No hold` or `Require hold time`.
 10. If hold time is required, set `Minimum time above threshold` in `Minutes` or
    `Hours`.
-11. Click `Next` to continue to `Outcomes`, or to `Description` for
+11. Click `Next` to continue to `Outcomes`, or to `Guidelines` for
     `Perpetual Ranking`.
 
 ## Validation and State Rules
@@ -95,7 +95,7 @@ behavior tuning are in an expandable section named for those controls.
 - If time-weighted interval validation appears, set a value in range and retry.
 - If hold-time validation appears, set a whole positive minute/hour value,
   choose `No hold`, or extend the approve-wave end date.
-- If submit fails later in `Description`, keep voting settings and retry submit.
+- If submit fails later in the final `Overview`, keep voting settings and retry submit.
 - A validation error inside the collapsed optional section reopens it as
   disclosure as `Needs attention`, focuses the invalid control, and exposes its
   error message.
@@ -113,11 +113,11 @@ behavior tuning are in an expandable section named for those controls.
 
 - [Wave Creation Index](README.md)
 - [Wave Create Modal Entry Points](feature-modal-entry-points.md)
-- [Wave Creation Overview Step](feature-overview-step.md)
+- [Wave Creation Setup Step](feature-overview-step.md)
 - [Wave Creation Group Access and Permissions](feature-groups-step.md)
 - [Wave Creation Schedule](feature-dates-step.md)
 - [Wave Creation Drop Settings](feature-drops-step.md)
-- [Wave Creation Rules Step](feature-rules-step.md)
+- [Wave Creation Guidelines Step](feature-rules-step.md)
 - [Wave Creation Outcomes Step](feature-outcomes-step.md)
 - [Wave Drop Vote Slider](../drop-actions/feature-vote-slider.md)
 - [Wave Drop Vote Summary and Modal](../drop-actions/feature-vote-summary-and-modal.md)

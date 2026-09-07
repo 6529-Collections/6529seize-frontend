@@ -1,42 +1,37 @@
-import type { ReactNode, RefObject } from "react";
+import type { ReactNode } from "react";
+import type { CreateDropConfig } from "@/entities/IDrop";
 import type { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
-import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { CreateWaveStep } from "@/types/waves.types";
 import type { CreateWaveGroupConfigType } from "@/types/waves.types";
 import CreateWaveDates from "./dates/CreateWaveDates";
-import type { CreateWaveDescriptionHandles } from "./description/CreateWaveDescription";
-import CreateWaveDescription from "./description/CreateWaveDescription";
 import CreateWaveDrops from "./drops/CreateWaveDrops";
 import CreateWaveGroups from "./groups/CreateWaveGroups";
 import type { useWaveConfig } from "./hooks/useWaveConfig";
 import CreateWaveOutcomes from "./outcomes/CreateWaveOutcomes";
 import CreateWaveOverview from "./overview/CreateWaveOverview";
 import CreateWaveRules from "./CreateWaveRules";
+import CreateWaveReview from "./review/CreateWaveReview";
 import CreateWaveVoting from "./voting/CreateWaveVoting";
 
 type WaveConfigController = ReturnType<typeof useWaveConfig>;
 
 export default function CreateWaveStepContent({
   controller,
-  profile,
-  descriptionRef,
-  submitting,
-  showDropError,
   overviewLeading,
-  onHaveDropToSubmitChange,
+  isSubwave = false,
+  parentWaveName,
+  descriptionSnapshot,
   onCriteriaReplacementChange,
   onGroupResolutionChange,
   onInlineGroupCreate,
 }: {
   readonly controller: WaveConfigController;
-  readonly profile: ApiIdentity;
-  readonly descriptionRef: RefObject<CreateWaveDescriptionHandles | null>;
-  readonly submitting: boolean;
-  readonly showDropError: boolean;
   /** Rendered above the Overview step's fields (e.g. saved drafts). */
   readonly overviewLeading?: ReactNode;
-  readonly onHaveDropToSubmitChange: (haveDrop: boolean) => void;
+  readonly isSubwave?: boolean;
+  readonly parentWaveName?: string | null | undefined;
+  readonly descriptionSnapshot: CreateDropConfig | null;
   readonly onCriteriaReplacementChange: (
     groupType: CreateWaveGroupConfigType,
     active: boolean
@@ -88,6 +83,8 @@ export default function CreateWaveStepContent({
           {overviewLeading}
           <CreateWaveOverview
             overview={config.overview}
+            isSubwave={isSubwave}
+            parentWaveName={parentWaveName}
             display={config.display}
             errors={errors}
             ongoingRanking={config.dates.ongoingRanking ?? false}
@@ -140,14 +137,7 @@ export default function CreateWaveStepContent({
         />
       );
     case CreateWaveStep.RULES:
-      return (
-        <CreateWaveRules
-          config={config}
-          groupsCache={groupsCache}
-          setDisplay={setDisplay}
-          setDrops={setDrops}
-        />
-      );
+      return <CreateWaveRules config={config} setDisplay={setDisplay} />;
     case CreateWaveStep.VOTING:
       return (
         <CreateWaveVoting
@@ -197,21 +187,14 @@ export default function CreateWaveStepContent({
         />
       );
     case CreateWaveStep.DESCRIPTION:
+      return null;
+    case CreateWaveStep.REVIEW:
       return (
-        <CreateWaveDescription
-          ref={descriptionRef}
-          profile={profile}
-          submitting={submitting}
-          showDropError={showDropError}
-          visibilityGroupId={config.groups.canView}
-          wave={{
-            name: config.overview.name,
-            image: config.overview.image
-              ? URL.createObjectURL(config.overview.image)
-              : null,
-            id: null,
-          }}
-          onHaveDropToSubmitChange={onHaveDropToSubmitChange}
+        <CreateWaveReview
+          config={config}
+          groupsCache={groupsCache}
+          description={descriptionSnapshot}
+          parentWaveName={parentWaveName}
         />
       );
   }

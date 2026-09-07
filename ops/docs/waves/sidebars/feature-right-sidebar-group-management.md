@@ -45,7 +45,7 @@ Users can:
 5. Return with normal browser back navigation when finished inspecting.
 6. Editors can select a Configuration access-row gear to open the group editor
    directly. There is no intermediate action menu.
-7. The modal renders the same criteria editor used during wave creation,
+7. The modal opens on `Identities` in the same criteria editor used during wave creation,
    including the privacy row, configured criteria chips, matching
    `Before editing` and `After editing` summaries, and `Save changes`. Wave
    access editors do not offer `Choose group`. The
@@ -88,6 +88,13 @@ Users can:
 
 ## Edge Cases
 
+- Subwave groups can differ from their parent's groups. Before saving a group
+  with members outside the parent's audience, a warning explains that those
+  members cannot open the subwave. Select `Continue anyway` to save the chosen
+  group or `Go back` to keep editing. Groups fully covered by the parent's
+  audience need no warning, even when the group itself is different.
+- Parent visibility can change while subwaves exist. Opening a subwave always
+  requires access to both waves.
 - Chat waves show only `Visibility`, `Chat access`, and `Admins`.
 - `Chat access` controls who can chat only when chat is enabled; it does not
   show whether chat is currently enabled or disabled.

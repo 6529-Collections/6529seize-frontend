@@ -1,4 +1,6 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
+import { useState } from "react";
+import type { CreateWaveDropsConfig } from "@/types/waves.types";
 import userEvent from "@testing-library/user-event";
 import CreateWaveDrops from "@/components/waves/create-wave/drops/CreateWaveDrops";
 import { ApiWaveParticipationSubmissionStrategyType } from "@/generated/models/ApiWaveParticipationSubmissionStrategyType";
@@ -42,6 +44,28 @@ jest.mock(
   )
 );
 
+const getDrops = (terms: string | null = null): CreateWaveDropsConfig => ({
+  noOfApplicationsAllowedPerParticipant: null,
+  requiredTypes: [],
+  requiredMetadata: [],
+  submissionStrategy: null,
+  terms,
+  signatureRequired: Boolean(terms),
+  adminCanDeleteDrops: false,
+});
+
+function StatefulDrops({ waveType }: { readonly waveType: ApiWaveType }) {
+  const [drops, setDrops] = useState(() => getDrops());
+  return (
+    <CreateWaveDrops
+      waveType={waveType}
+      drops={drops}
+      errors={[]}
+      setDrops={setDrops}
+    />
+  );
+}
+
 describe("CreateWaveDrops", () => {
   it("updates drops config based on user input", async () => {
     const user = userEvent.setup();
@@ -49,21 +73,10 @@ describe("CreateWaveDrops", () => {
     render(
       <CreateWaveDrops
         waveType={ApiWaveType.Rank}
-        drops={{
-          noOfApplicationsAllowedPerParticipant: null,
-          requiredTypes: [],
-          requiredMetadata: [],
-          submissionStrategy: null,
-          terms: null,
-          signatureRequired: false,
-          adminCanDeleteDrops: false,
-        }}
+        drops={getDrops()}
         errors={[]}
         setDrops={setDrops}
       />
-    );
-    await user.click(
-      screen.getByRole("button", { name: "Submission requirements" })
     );
     await user.type(
       screen.getByLabelText(/Max simultaneous submissions/i),
@@ -91,5 +104,69 @@ describe("CreateWaveDrops", () => {
     expect(setDrops).toHaveBeenLastCalledWith(
       expect.objectContaining({ requiredMetadata: [{ foo: "bar" }] })
     );
+  });
+
+  it.each([ApiWaveType.Rank, ApiWaveType.Approve])(
+    "shows submission requirements immediately and keeps signing rules editable for %s",
+    (waveType) => {
+      render(<StatefulDrops waveType={waveType} />);
+      expect(
+        screen.getByRole("heading", { name: "Submission requirements" })
+      ).toBeVisible();
+      expect(
+        screen.queryByRole("button", { name: /Submission requirements/ })
+      ).not.toBeInTheDocument();
+      expect(screen.getByTestId("types")).toBeVisible();
+      expect(screen.getByTestId("metadata")).toBeVisible();
+      expect(
+        screen.getByRole("textbox", { name: "Max simultaneous submissions" })
+      ).toBeVisible();
+      const rules = screen.getByRole("textbox", {
+        name: "Rules that require acceptance",
+      });
+      expect(rules).toBeVisible();
+      fireEvent.change(rules, { target: { value: "Binding rule" } });
+      expect(rules).toHaveValue("Binding rule");
+      fireEvent.change(rules, { target: { value: "" } });
+      expect(rules).toBeVisible();
+      expect(rules).toHaveValue("");
+    }
+  );
+
+  it.each([
+    ["Binding rule", true],
+    ["", false],
+    ["  \n  ", false],
+  ] as const)(
+    "sets signing from entered rules (%j)",
+    (terms, signatureRequired) => {
+      const setDrops = jest.fn();
+      const drops = getDrops("Restored rules");
+      render(
+        <CreateWaveDrops
+          waveType={ApiWaveType.Rank}
+          drops={drops}
+          errors={[]}
+          setDrops={setDrops}
+        />
+      );
+      const rules = screen.getByRole("textbox", {
+        name: "Rules that require acceptance",
+      });
+      expect(rules).toHaveValue("Restored rules");
+      fireEvent.change(rules, { target: { value: terms } });
+      expect(setDrops).toHaveBeenCalledWith({
+        ...drops,
+        terms,
+        signatureRequired,
+      });
+    }
+  );
+
+  it("does not offer signing rules for Chat waves", () => {
+    render(<StatefulDrops waveType={ApiWaveType.Chat} />);
+    expect(
+      screen.queryByRole("textbox", { name: "Rules that require acceptance" })
+    ).toBeNull();
   });
 });

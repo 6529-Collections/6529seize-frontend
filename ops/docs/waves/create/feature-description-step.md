@@ -2,8 +2,8 @@
 
 ## Overview
 
-`Description` is the last step in wave creation.
-You write the first wave drop here, then click `Complete`.
+`Description` is the step before the final read-only Overview.
+Write the first wave drop here, then click `Next` to review the full wave.
 
 ## Location in the Site
 
@@ -14,13 +14,13 @@ You write the first wave drop here, then click `Complete`.
 
 ## Step Paths
 
-- `Chat`: `Overview` -> `Groups` -> `Rules` -> `Description`
-- Scheduled `Rank`: `Overview` -> `Groups` -> `Schedule` -> `Drops` -> `Rules` ->
-  `Voting` -> `Outcomes` -> `Description`
-- `Perpetual Ranking`: `Overview` -> `Groups` -> `Schedule` -> `Drops` ->
-  `Rules` -> `Voting` -> `Description`
-- `Approve`: `Overview` -> `Groups` -> `Schedule` -> `Drops` -> `Rules` ->
-  `Voting` -> `Outcomes` -> `Description`
+- `Chat`: `Setup` -> `Access` -> `Guidelines` -> `Description` -> `Overview`
+- Scheduled `Rank`: `Setup` -> `Access` -> `Schedule` -> `Drops` -> `Voting` -> `Outcomes` ->
+  `Guidelines` -> `Description` -> `Overview`
+- `Perpetual Ranking`: `Setup` -> `Access` -> `Schedule` -> `Drops` -> `Voting` ->
+  `Guidelines` -> `Description` -> `Overview`
+- `Approve`: `Setup` -> `Access` -> `Schedule` -> `Drops` -> `Voting` -> `Outcomes` ->
+  `Guidelines` -> `Description` -> `Overview`
 
 ## What You Can Add
 
@@ -39,7 +39,7 @@ You write the first wave drop here, then click `Complete`.
 
 1. Open `Description`.
 2. Add the wave description drop (body, optional title, optional media).
-3. Click `Complete`.
+3. Click `Next` to open the final Overview, then `Confirm and create`.
 4. Pass auth checks if prompted:
    - no wallet: toast `Please connect your wallet`
    - invalid or expired auth: `Sign Authentication Request` modal
@@ -50,39 +50,40 @@ You write the first wave drop here, then click `Complete`.
 
 ## Edge Cases
 
-- `Complete` is disabled only while submit is in progress.
-- Empty description content blocks submit and shows the editor content error
-  state.
+- `Confirm and create` is disabled only while submit is in progress.
+- Empty description content blocks `Next` and shows the editor content error
+  state. Pending inline image uploads must finish before reviewing.
 - Title input stops accepting characters after `250`.
 - If admin-group setup fails (for example no primary wallet or group API
-  failure), submit stops on `Description`.
+  failure), submit stops on `Overview`.
 
 ## Failure and Recovery
 
-- If auth is rejected or canceled, complete auth and click `Complete` again.
+- If auth is rejected or canceled, complete auth and click `Confirm and create` again.
 - If wave create API submit fails, an error toast appears and current edits
-  stay in place; retry from `Description`.
-- If media upload fails before API submit, this flow can remain in a loading
-  state without a dedicated upload toast; recover by refreshing or reopening
-  create-wave, then retry submit.
+  stay in place; retry from `Overview`.
+- If media upload fails, return to Description to correct the media and retry.
 - If admin-group setup fails, fix wallet/group prerequisites and retry.
 
 ## Limitations / Notes
 
-- No separate review step exists after `Description`.
+- The final `Overview` follows Description. Moving to it and back preserves
+  the editor, title, media, and attachments within the open wizard.
 - `Description` is always a core editor and has no optional-settings
   disclosure.
 - `Description` has no standalone step-validation rules in create-step
   validation.
-- `Complete` submits prior step config and the description drop in one
+- `Confirm and create` submits prior step config and the description drop in one
   create-wave request.
 
 ## Related Pages
 
+- [Final Overview](feature-final-overview-step.md)
+
 - [Wave Creation Index](README.md)
 - [Wave Create Modal Entry Points](feature-modal-entry-points.md)
-- [Wave Creation Overview Step](feature-overview-step.md)
-- [Wave Creation Rules Step](feature-rules-step.md)
+- [Wave Creation Setup Step](feature-overview-step.md)
+- [Wave Creation Guidelines Step](feature-rules-step.md)
 - [Wave Creation Outcomes Setup](feature-outcomes-step.md)
 - [Wave Drop Composer Metadata Submissions](../composer/feature-metadata-submissions.md)
 - [Wave Participation Flow](../flow-wave-participation.md)

@@ -35,29 +35,32 @@ Use this area to create:
 
 - Entry points: [Wave Create Modal Entry Points](feature-modal-entry-points.md)
 - Step pages:
-  1. [Wave Creation Overview Step](feature-overview-step.md)
+  1. [Wave Creation Setup Step](feature-overview-step.md)
   2. [Wave Creation Group Access and Permissions](feature-groups-step.md)
   3. [Wave Creation Schedule](feature-dates-step.md) (`Rank` and
      `Approve`)
   4. [Wave Creation Drop Settings](feature-drops-step.md) (`Rank` and
      `Approve`)
-  5. [Wave Creation Rules Step](feature-rules-step.md)
-  6. [Wave Creation Voting Configuration](feature-voting-step.md) (`Rank` and
+  5. [Wave Creation Voting Configuration](feature-voting-step.md) (`Rank` and
      `Approve`)
-  7. [Wave Creation Outcomes Step](feature-outcomes-step.md) (`Rank` and
+  6. [Wave Creation Outcomes Step](feature-outcomes-step.md) (`Rank` and
      `Approve`)
+  7. [Wave Creation Guidelines Step](feature-rules-step.md)
   8. [Wave Creation Description Step](feature-description-step.md)
+  9. [Final Overview](feature-final-overview-step.md)
 - Step path by wave type:
-  - `Chat`: `Overview -> Groups -> Rules -> Description`
-  - Scheduled `Rank`: `Overview -> Groups -> Schedule -> Drops -> Rules -> Voting -> Outcomes -> Description`
-  - `Perpetual Ranking`: `Overview -> Groups -> Schedule -> Drops -> Rules -> Voting -> Description`
-  - `Approve`: `Overview -> Groups -> Schedule -> Drops -> Rules -> Voting -> Outcomes -> Description`
+  - `Chat`: `Setup -> Access -> Guidelines -> Description -> Overview`
+  - Scheduled `Rank`: `Setup -> Access -> Schedule -> Drops -> Voting -> Outcomes -> Guidelines -> Description -> Overview`
+  - `Perpetual Ranking`: `Setup -> Access -> Schedule -> Drops -> Voting -> Guidelines -> Description -> Overview`
+  - `Approve`: `Setup -> Access -> Schedule -> Drops -> Voting -> Outcomes -> Guidelines -> Description -> Overview`
 
 The default path keeps the decisions most creators need visible. Less common
 customization is available from expandable sections named for their contents,
-such as `Submission requirements` or `Vote limits and behavior`. A section
-shows `Customized` when saved or restored values differ from the defaults and
-opens as `Needs attention` when a hidden field fails validation.
+such as `Vote limits and behavior`. An expandable section shows `Customized`
+when saved or restored values differ from the defaults and opens as
+`Needs attention` when a hidden field fails validation.
+
+`Submission requirements` stays open, with all its controls visible.
 
 ### Direct-Message Journey
 
