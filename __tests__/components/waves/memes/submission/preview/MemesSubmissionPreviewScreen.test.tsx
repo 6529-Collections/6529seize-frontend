@@ -39,6 +39,16 @@ jest.mock("@/components/utils/button/PrimaryButton", () => (props: any) => (
 
 describe("MemesSubmissionPreviewScreen", () => {
   const previewDrop = { id: "drop-1" } as any;
+  const identity = {
+    status: "eligible",
+    profile: { id: "profile-a", handle: "alice", display: "Alice" },
+    address: "0x1234567890123456789012345678901234567890",
+    walletName: "MetaMask",
+    canSubmit: true,
+    connectWallet: jest.fn(),
+    verifyProfile: jest.fn(),
+    retryEligibility: jest.fn(),
+  } as any;
 
   it("renders isolated preview cases in the expected order", () => {
     render(
@@ -46,7 +56,10 @@ describe("MemesSubmissionPreviewScreen", () => {
         previewDrop={previewDrop}
         onBackToEdit={jest.fn()}
         onSubmit={jest.fn()}
+        identity={identity}
         isSubmitting={false}
+        submissionPhase="idle"
+        uploadProgress={0}
       />
     );
 
@@ -77,7 +90,10 @@ describe("MemesSubmissionPreviewScreen", () => {
         previewDrop={previewDrop}
         onBackToEdit={onBackToEdit}
         onSubmit={onSubmit}
+        identity={identity}
         isSubmitting={false}
+        submissionPhase="idle"
+        uploadProgress={0}
       />
     );
 

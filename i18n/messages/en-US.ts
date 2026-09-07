@@ -474,6 +474,58 @@ const MEMES_QUICK_VOTE_MESSAGES = objectMessages("memes.quickVote", {
 const MEMES_SUBMISSION_MESSAGES = objectMessages("memes.submission", {
   "media.missingUpload": "Select artwork or choose Interactive HTML.",
   "media.missingInteractive": "Enter a valid hash or choose Upload File.",
+  "identity.connectPrompt":
+    "Connect a wallet to confirm the profile submitting this artwork.",
+  "identity.unknownProfile": "Unknown profile",
+  "identity.submittingAs": "Submitting as",
+  "identity.wallet": "Wallet",
+  "identity.eligible": "Eligible to submit",
+  "identity.loadingProfile": "Loading the connected profile…",
+  "identity.needsProfile":
+    "This wallet does not have a profile that can submit artwork.",
+  "identity.needsAuth": "Verify this profile before checking eligibility.",
+  "identity.verifyingProfile": "Verifying the connected profile…",
+  "identity.checking": "Checking this profile's eligibility…",
+  "identity.checkError":
+    "We couldn't verify this profile's eligibility. Try again before submitting.",
+  "identity.ineligible":
+    "This profile is not eligible to submit to this collection.",
+  "identity.limitReached":
+    "This profile has reached its submission limit for this collection.",
+  "identity.notStarted": "Submissions are not open yet.",
+  "identity.ended": "Submissions are closed.",
+  "identity.changedBeforeSubmit":
+    "The active wallet changed. Confirm the submitting profile and try again.",
+  "identity.connectErrorTitle": "Couldn't open wallet connection.",
+  "identity.connectErrorDescription": "Please try again.",
+  "action.connectWallet": "Connect Wallet",
+  "action.submitArtwork": "Submit Artwork",
+  "action.submitNewVersion": "Submit New Version",
+  "action.back": "Back",
+  "action.backToEdit": "Back to Edit",
+  "action.preview": "Preview",
+  "action.connecting": "Connecting…",
+  "action.loadingProfile": "Loading Profile…",
+  "action.verifyProfile": "Verify Profile",
+  "action.verifyingProfile": "Verifying Profile…",
+  "action.checkingEligibility": "Checking Eligibility…",
+  "action.retryEligibility": "Retry Eligibility Check",
+  "action.switchWallet": "Switch Wallet",
+  "action.submissionsNotOpen": "Submissions Not Open",
+  "action.submissionsClosed": "Submissions Closed",
+  "action.uploading": "Uploading {progress}%",
+  "action.signing": "Check Wallet to Sign…",
+  "action.submitting": "Submitting…",
+  "action.submitted": "Submitted",
+  "shell.submitTitle": "Submit Work to The Memes",
+  "shell.resubmitTitle": "Resubmit Work to The Memes",
+  "shell.resubmissionDescription":
+    "Resubmitting creates a new submission with this data, then asks you to confirm deleting the original.",
+  "preview.title": "Submission Preview",
+  "preview.description":
+    "Read-only preview of how your submission may appear in different views.",
+  "additionalInfo.description":
+    "Complete the following details for distribution and storytelling purposes.",
 } as const);
 
 const MEMES_WAVE_FOOTER_MESSAGES = objectMessages("memes.waveFooter", {

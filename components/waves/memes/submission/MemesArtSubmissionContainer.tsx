@@ -6,6 +6,10 @@ import useKeyboardFocusScroll from "@/components/waves/create-wave/hooks/useKeyb
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
+import { getAuthStateFingerprint } from "@/services/auth/auth-token-fingerprint";
+import { getAuthJwt, getWalletAddress } from "@/services/auth/auth.utils";
 import type { FC, ReactNode } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MemesArtSubmissionShell } from "./MemesArtSubmissionShell";
@@ -14,6 +18,7 @@ import { ResubmitAcknowledgement } from "./ResubmitAcknowledgement";
 import { ResubmitDeleteConfirmation } from "./ResubmitDeleteConfirmation";
 import { useArtworkSubmissionForm } from "./hooks/useArtworkSubmissionForm";
 import { useArtworkSubmissionMutation } from "./hooks/useArtworkSubmissionMutation";
+import { useMemesSubmissionIdentity } from "./hooks/useMemesSubmissionIdentity";
 import { useResubmissionDelete } from "./hooks/useResubmissionDelete";
 import type { SubmissionPhase } from "./ui/SubmissionProgress";
 import { buildPreviewDrop } from "./utils/buildPreviewDrop";
@@ -52,15 +57,19 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
     [sourceDrop]
   );
   const isResubmission = Boolean(sourceDrop);
-  const submitLabel = isResubmission ? "Submit New Version" : "Submit Artwork";
   const [hasAcknowledgedResubmission, setHasAcknowledgedResubmission] =
     useState(!isResubmission);
 
   // Use the form hook to manage all state
   const form = useArtworkSubmissionForm(initialDraft);
   const { handleBackToArtwork, setAdditionalMedia } = form;
-  const { connectedProfile } = useAuth();
-  const { isSafeWallet, address } = useSeizeConnectContext();
+  const { connectedProfile, setToast } = useAuth();
+  const { isSafeWallet } = useSeizeConnectContext();
+  const identity = useMemesSubmissionIdentity(wave);
+  const locale = useBrowserLocale();
+  const submitLabel = isResubmission
+    ? t(locale, "memes.submission.action.submitNewVersion")
+    : t(locale, "memes.submission.action.submitArtwork");
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [previewDrop, setPreviewDrop] = useState<ExtendedDrop | null>(null);
 
@@ -129,12 +138,8 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
   }, []);
 
   const handleOpenPreview = useCallback(() => {
-    const {
-      imageUrl,
-      traits,
-      operationalData,
-      isAdditionalActionPromised,
-    } = form.getSubmissionData();
+    const { imageUrl, traits, operationalData, isAdditionalActionPromised } =
+      form.getSubmissionData();
     const media = form.getMediaSelection();
 
     setPreviewDrop(
@@ -170,6 +175,24 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
 
   // Handle final submission
   const handleSubmit = useCallback(async () => {
+    const signerAddress = identity.address;
+    const authWalletAddress = getWalletAddress();
+    if (
+      !identity.canSubmit ||
+      !signerAddress ||
+      authWalletAddress?.toLowerCase() !== signerAddress.toLowerCase()
+    ) {
+      setToast({
+        message: t(locale, "memes.submission.identity.changedBeforeSubmit"),
+        type: "error",
+      });
+      return null;
+    }
+    const expectedAuthStateFingerprint = getAuthStateFingerprint({
+      walletAddress: authWalletAddress,
+      jwt: getAuthJwt(),
+    });
+
     // Get submission data including all traits
     const { traits, operationalData, isAdditionalActionPromised } =
       form.getSubmissionData();
@@ -199,10 +222,15 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
           waveId: wave.id,
           termsOfService: wave.participation.terms,
         },
-        address ?? "",
+        signerAddress,
         isSafeWallet,
         {
           onPhaseChange: handlePhaseChange,
+          expectedAuthStateFingerprint,
+          identityChangedMessage: t(
+            locale,
+            "memes.submission.identity.changedBeforeSubmit"
+          ),
         }
       );
       return onSubmitted(result);
@@ -224,10 +252,15 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
         waveId: wave.id,
         termsOfService: wave.participation.terms,
       },
-      address ?? "",
+      signerAddress,
       isSafeWallet,
       {
         onPhaseChange: handlePhaseChange,
+        expectedAuthStateFingerprint,
+        identityChangedMessage: t(
+          locale,
+          "memes.submission.identity.changedBeforeSubmit"
+        ),
       }
     );
     return onSubmitted(result);
@@ -236,8 +269,11 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
     handlePhaseChange,
     handleResubmissionSubmitted,
     isResubmission,
-    address,
+    identity.address,
+    identity.canSubmit,
     isSafeWallet,
+    locale,
+    setToast,
     submitArtwork,
     wave.id,
     wave.participation.terms,
@@ -253,7 +289,7 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
 
   const shellDescription =
     isResubmission && hasAcknowledgedResubmission && !replacementDrop
-      ? "Resubmitting creates a new submission with this data, then asks you to confirm deleting the original."
+      ? t(locale, "memes.submission.shell.resubmissionDescription")
       : undefined;
 
   let submissionContent: ReactNode;
@@ -288,6 +324,7 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
         uploadProgress={uploadProgress}
         submissionError={submissionError}
         submitLabel={submitLabel}
+        identity={identity}
         onClose={onClose}
         onBackToEdit={handleBackToEdit}
         onBackFromAdditionalInfo={handleBackFromAdditionalInfo}
@@ -305,8 +342,8 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
       <MemesArtSubmissionShell
         title={
           isResubmission
-            ? "Resubmit Work to The Memes"
-            : "Submit Work to The Memes"
+            ? t(locale, "memes.submission.shell.resubmitTitle")
+            : t(locale, "memes.submission.shell.submitTitle")
         }
         description={shellDescription}
         onClose={onClose}

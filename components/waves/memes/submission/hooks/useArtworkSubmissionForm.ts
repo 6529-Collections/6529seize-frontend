@@ -6,7 +6,7 @@ import type { CicStatement } from "@/entities/IProfile";
 import { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
 import { commonApiFetch } from "@/services/api/common-api";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo, useReducer } from "react";
+import { useCallback, useMemo, useReducer } from "react";
 import type { MemesSubmissionInitialDraft } from "../utils/submissionDraft";
 import {
   createInitialState,
@@ -80,6 +80,17 @@ export function useArtworkSubmissionForm(
     shouldApplyProfileDefaults: !isDraftInitialized,
   });
   const mediaControls = useArtworkSubmissionMediaControls({ state, dispatch });
+  const traits = useMemo(
+    () =>
+      profileHandle
+        ? { ...state.traits, seizeArtistProfile: profileHandle }
+        : state.traits,
+    [profileHandle, state.traits]
+  );
+  const getSubmissionData = useCallback(
+    () => ({ ...formActions.getSubmissionData(), traits }),
+    [formActions, traits]
+  );
 
   return {
     currentStep: state.currentStep,
@@ -111,7 +122,7 @@ export function useArtworkSubmissionForm(
     clearExternalMedia: mediaControls.clearExternalMedia,
     handleFileSelect: mediaControls.handleFileSelect,
 
-    traits: state.traits,
+    traits,
     setTraits: formActions.setTraits,
     updateTraitField: formActions.updateTraitField,
     isAdditionalActionPromised: state.isAdditionalActionPromised,
@@ -125,7 +136,7 @@ export function useArtworkSubmissionForm(
     setCommentary: formActions.setCommentary,
     setAboutArtist: formActions.setAboutArtist,
 
-    getSubmissionData: formActions.getSubmissionData,
+    getSubmissionData,
     getMediaSelection: formActions.getMediaSelection,
   };
 }
