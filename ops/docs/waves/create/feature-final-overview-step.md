@@ -14,7 +14,7 @@ moving backward and forward within the open wizard.
 ## Configuration Summary
 
 The summary includes the wave name and picture, parent wave name for subwaves,
-and everything previously summarized in Rules:
+and the following settings:
 
 - Wave type and access groups, with member inspection for restricted groups.
 - Submission and voting schedules and winner announcement timing.
@@ -47,5 +47,5 @@ be edited on this step.
 
 - [Wave Creation Index](README.md)
 - [Setup](feature-overview-step.md)
-- [Rules](feature-rules-step.md)
+- [Guidelines](feature-rules-step.md)
 - [Description](feature-description-step.md)

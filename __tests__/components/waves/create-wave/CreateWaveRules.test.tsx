@@ -83,7 +83,7 @@ describe("CreateWaveRules", () => {
     );
 
     expect(
-      screen.getByRole("heading", { level: 2, name: "Rules" })
+      screen.getByRole("heading", { level: 2, name: "Guidelines" })
     ).toBeVisible();
     expect(screen.queryByTestId("rules-panel")).not.toBeInTheDocument();
     expect(screen.queryByText("Automatic rules")).not.toBeInTheDocument();

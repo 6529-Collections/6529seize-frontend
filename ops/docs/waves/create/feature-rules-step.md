@@ -1,8 +1,8 @@
-# Wave Creation Rules Step
+# Wave Creation Guidelines Step
 
 ## Overview
 
-Use `Rules` to add optional wave guidelines and, for Rank and Approve waves,
+Use `Guidelines` to add optional wave guidelines and, for Rank and Approve waves,
 rules that participants must accept. The fields are always visible, with no
 expand/collapse control. The read-only configuration summary is
 in the final [Overview step](feature-final-overview-step.md).
@@ -15,14 +15,14 @@ in the final [Overview step](feature-final-overview-step.md).
   - `/waves/{waveId}`
   - `/messages`
   - `/messages/{waveId}`
-- Step label: `Rules`
+- Step label: `Guidelines`
 - User-reachable in `Chat`, `Rank`, and `Approve` creation
 
 ## Step Path
 
-- `Chat`: `Setup -> Groups -> Rules -> Description -> Overview`
-- `Rank`: `Setup -> Groups -> Schedule -> Drops -> Rules -> Voting -> Outcomes -> Description -> Overview`
-- `Approve`: `Setup -> Groups -> Schedule -> Drops -> Rules -> Voting -> Outcomes -> Description -> Overview`
+- `Chat`: `Setup -> Groups -> Guidelines -> Description -> Overview`
+- `Rank`: `Setup -> Groups -> Schedule -> Drops -> Guidelines -> Voting -> Outcomes -> Description -> Overview`
+- `Approve`: `Setup -> Groups -> Schedule -> Drops -> Guidelines -> Voting -> Outcomes -> Description -> Overview`
 
 ## Wave Guidelines
 
@@ -41,7 +41,7 @@ submission step.
 ## User Journey
 
 1. Complete `Groups` for `Chat`, or `Drops` for `Rank` and `Approve`.
-2. Open `Rules`.
+2. Open `Guidelines`.
 3. Optionally enter wave guidelines in the visible field.
 4. For `Rank` and `Approve`, optionally enter rules participants must accept
    and sign before submitting. This textbox is always visible. Leave it empty

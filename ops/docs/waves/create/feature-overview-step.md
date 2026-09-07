@@ -21,10 +21,10 @@ Set the wave name, optional image, and wave type before moving to later steps.
 
 ## Step Paths
 
-- `Chat`: `Setup` -> `Groups` -> `Rules` -> `Description` -> `Overview`
-- `Rank`: `Setup` -> `Groups` -> `Schedule` -> `Drops` -> `Rules` ->
+- `Chat`: `Setup` -> `Groups` -> `Guidelines` -> `Description` -> `Overview`
+- `Rank`: `Setup` -> `Groups` -> `Schedule` -> `Drops` -> `Guidelines` ->
   `Voting` -> `Outcomes` -> `Description` -> `Overview`
-- `Approve`: `Setup` -> `Groups` -> `Schedule` -> `Drops` -> `Rules` ->
+- `Approve`: `Setup` -> `Groups` -> `Schedule` -> `Drops` -> `Guidelines` ->
   `Voting` -> `Outcomes` -> `Description` -> `Overview`
 
 ## What You Can Set
@@ -113,7 +113,7 @@ Set the wave name, optional image, and wave type before moving to later steps.
 - [Wave Creation Index](README.md)
 - [Wave Create Modal Entry Points](feature-modal-entry-points.md)
 - [Wave Creation Group Access and Permissions](feature-groups-step.md)
-- [Wave Creation Rules Step](feature-rules-step.md)
+- [Wave Creation Guidelines Step](feature-rules-step.md)
 - [Wave Creation Description Step](feature-description-step.md)
 - [Summary Proposal Cards](../drop-actions/feature-proposal-cards.md)
 - [Docs Home](../../README.md)

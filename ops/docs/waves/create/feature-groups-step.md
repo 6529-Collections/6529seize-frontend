@@ -15,10 +15,10 @@ user-reachable for `Chat`, `Rank`, and `Approve` waves.
 
 ## Step Paths
 
-- `Chat`: `Setup` -> `Access` -> `Rules` -> `Description` -> `Overview`
-- `Rank`: `Setup` -> `Access` -> `Schedule` -> `Drops` -> `Rules` ->
+- `Chat`: `Setup` -> `Access` -> `Guidelines` -> `Description` -> `Overview`
+- `Rank`: `Setup` -> `Access` -> `Schedule` -> `Drops` -> `Guidelines` ->
   `Voting` -> `Outcomes` -> `Description` -> `Overview`
-- `Approve`: `Setup` -> `Access` -> `Schedule` -> `Drops` -> `Rules` ->
+- `Approve`: `Setup` -> `Access` -> `Schedule` -> `Drops` -> `Guidelines` ->
   `Voting` -> `Outcomes` -> `Description` -> `Overview`
 
 ## Entry Points
@@ -145,7 +145,7 @@ user-reachable for `Chat`, `Rank`, and `Approve` waves.
 - [Wave Creation Setup Step](feature-overview-step.md)
 - [Wave Creation Schedule](feature-dates-step.md)
 - [Wave Creation Drop Settings](feature-drops-step.md)
-- [Wave Creation Rules Step](feature-rules-step.md)
+- [Wave Creation Guidelines Step](feature-rules-step.md)
 - [Wave Creation Description Step](feature-description-step.md)
 - [Wave Right Sidebar Group and Curation Management](../sidebars/feature-right-sidebar-group-management.md)
 - [Network Group Scope Flow](../../network/flow-network-group-scope.md)

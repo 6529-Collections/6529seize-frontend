@@ -510,6 +510,7 @@ export const FR_FR_MESSAGES = {
     "Veuillez choisir un type de sous-wave pour continuer.",
   "waves.create.overview.typeRequired":
     "Veuillez choisir un type de wave pour continuer.",
+  "waves.create.rules.title": "Directives",
   "waves.create.rules.guidelinesFieldLabel": "Directives de la Wave",
   "waves.create.rules.guidelinesDescription":
     "Ces directives seront affichées aux utilisateurs lorsqu’ils enverront leur premier message dans le chat.",

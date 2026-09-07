@@ -505,6 +505,7 @@ export const DE_DE_MESSAGES = {
     "Bitte wähle einen Subwave-Typ aus, um fortzufahren.",
   "waves.create.overview.typeRequired":
     "Bitte wähle einen Wave-Typ aus, um fortzufahren.",
+  "waves.create.rules.title": "Richtlinien",
   "waves.create.rules.guidelinesFieldLabel": "Wave-Richtlinien",
   "waves.create.rules.guidelinesDescription":
     "Diese Richtlinien werden Nutzern angezeigt, wenn sie ihre erste Chatnachricht senden.",

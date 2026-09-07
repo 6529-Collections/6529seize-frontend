@@ -17,8 +17,8 @@ The optional Approve winner limit is in the named `Winner limits` expandable.
 
 ## Step Path
 
-- Scheduled `Rank`: `Setup -> Groups -> Schedule -> Drops -> Rules -> Voting -> Outcomes -> Description -> Overview`
-- `Approve`: `Setup -> Groups -> Schedule -> Drops -> Rules -> Voting -> Outcomes -> Description -> Overview`
+- Scheduled `Rank`: `Setup -> Groups -> Schedule -> Drops -> Guidelines -> Voting -> Outcomes -> Description -> Overview`
+- `Approve`: `Setup -> Groups -> Schedule -> Drops -> Guidelines -> Voting -> Outcomes -> Description -> Overview`
 
 `Perpetual Ranking` skips this step because its live leaderboard is the outcome
 and it never announces winners.
@@ -97,7 +97,7 @@ and it never announces winners.
 
 - [Wave Creation Index](README.md)
 - [Wave Create Modal Entry Points](feature-modal-entry-points.md)
-- [Wave Creation Rules Step](feature-rules-step.md)
+- [Wave Creation Guidelines Step](feature-rules-step.md)
 - [Wave Creation Voting Configuration](feature-voting-step.md)
 - [Wave Creation Description Step](feature-description-step.md)
 - [Wave Outcome Lists](../feature-outcome-lists.md)

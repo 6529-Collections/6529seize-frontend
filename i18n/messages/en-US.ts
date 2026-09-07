@@ -1688,7 +1688,7 @@ const WAVE_CREATE_OUTCOMES_MESSAGES = objectMessages("waves.create.outcomes", {
 } as const);
 
 const WAVE_CREATE_RULES_MESSAGES = objectMessages("waves.create.rules", {
-  title: "Rules",
+  title: "Guidelines",
   advancedSummary: "Wave guidelines and acceptance",
   chatAdvancedSummary: "Wave guidelines",
   guidelinesFieldLabel: "Wave guidelines",

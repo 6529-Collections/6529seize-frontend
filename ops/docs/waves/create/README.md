@@ -41,7 +41,7 @@ Use this area to create:
      `Approve`)
   4. [Wave Creation Drop Settings](feature-drops-step.md) (`Rank` and
      `Approve`)
-  5. [Wave Creation Rules Step](feature-rules-step.md)
+  5. [Wave Creation Guidelines Step](feature-rules-step.md)
   6. [Wave Creation Voting Configuration](feature-voting-step.md) (`Rank` and
      `Approve`)
   7. [Wave Creation Outcomes Step](feature-outcomes-step.md) (`Rank` and
@@ -49,10 +49,10 @@ Use this area to create:
   8. [Wave Creation Description Step](feature-description-step.md)
   9. [Final Overview](feature-final-overview-step.md)
 - Step path by wave type:
-  - `Chat`: `Setup -> Groups -> Rules -> Description -> Overview`
-  - Scheduled `Rank`: `Setup -> Groups -> Schedule -> Drops -> Rules -> Voting -> Outcomes -> Description -> Overview`
-  - `Perpetual Ranking`: `Setup -> Groups -> Schedule -> Drops -> Rules -> Voting -> Description -> Overview`
-  - `Approve`: `Setup -> Groups -> Schedule -> Drops -> Rules -> Voting -> Outcomes -> Description -> Overview`
+  - `Chat`: `Setup -> Groups -> Guidelines -> Description -> Overview`
+  - Scheduled `Rank`: `Setup -> Groups -> Schedule -> Drops -> Guidelines -> Voting -> Outcomes -> Description -> Overview`
+  - `Perpetual Ranking`: `Setup -> Groups -> Schedule -> Drops -> Guidelines -> Voting -> Description -> Overview`
+  - `Approve`: `Setup -> Groups -> Schedule -> Drops -> Guidelines -> Voting -> Outcomes -> Description -> Overview`
 
 The default path keeps the decisions most creators need visible. Less common
 customization is available from expandable sections named for their contents,

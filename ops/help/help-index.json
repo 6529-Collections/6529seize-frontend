@@ -2522,10 +2522,10 @@
         "Wave creation verifies the final access groups again after authentication and before creating a personal group for the Admins scope or the Wave.",
         "New inline groups include the connected creator by default, even when the group otherwise contains only rules; choosing a saved group preserves the saved group's membership instead.",
         "Inline identity groups warn when the connected creator is excluded, because excluding yourself from a view group can prevent you from opening the created wave.",
-        "All wave types include Rules; Rank and Approve also include Schedule, Drops, and Voting. Scheduled Rank and Approve include Outcomes, while Perpetual Ranking skips Outcomes.",
+        "All wave types include Guidelines; Rank and Approve also include Schedule, Drops, and Voting. Scheduled Rank and Approve include Outcomes, while Perpetual Ranking skips Outcomes.",
         "Schedule keeps Submissions Open, Voting Opens, and applicable first-announcement controls visible under Opening dates. Winner schedule or Wave end reveals secondary controls; Perpetual Ranking has no Schedule optional section.",
         "Drops keeps submission type visible and puts optional controls under Submission requirements.",
-        "Rules always shows Wave guidelines and, for Rank and Approve, the Rules that require acceptance textbox. There is no expand/collapse control or acceptance toggle: entering rules requires a wallet signature before submitting, while leaving the field empty or clearing it removes that requirement. The generated configuration summary appears in the final read-only Overview.",
+        "Guidelines always shows Wave guidelines and, for Rank and Approve, the Rules that require acceptance textbox. There is no expand/collapse control or acceptance toggle: entering rules requires a wallet signature before submitting, while leaving the field empty or clearing it removes that requirement. The generated configuration summary appears in the final read-only Overview.",
         "Voting keeps the power model, scope, required Rep or Memes details, and Approve threshold visible; named Vote limits sections contain negative-vote behavior, time weighting, and Approve hold timing.",
         "Outcomes keeps outcome selection, reward configuration, and Show outcomes visible; Approve waves place the optional maximum winner count under Winner limits.",
         "In Description, individual @ mention suggestions follow the draft wave's Visibility group; private drafts suggest only eligible profiles.",
@@ -2562,7 +2562,7 @@
       ],
       "facts": [
         "Chat waves are conversation-focused waves.",
-        "Chat wave creation uses Setup, Access, Rules, Description, and final Overview steps.",
+        "Chat wave creation uses Setup, Access, Guidelines, Description, and final Overview steps.",
         "Use Chat when the wave does not need ranking or approval mechanics."
       ],
       "canonical_path": "/waves?create=wave",
@@ -2591,7 +2591,7 @@
       "facts": [
         "Rank waves collect drops and allow participants to vote/rank them according to configured rules.",
         "On the Setup step, rank waves choose between Announce Winners (scheduled winner announcements) and Perpetual Ranking (a continuous leaderboard with no winners and no end date).",
-        "Rank wave setup includes Setup, Access, Schedule, Drops, Rules, Voting, Description, and final Overview; Announce Winners waves also configure an Outcomes step, which Perpetual Ranking waves skip.",
+        "Rank wave setup includes Setup, Access, Schedule, Drops, Guidelines, Voting, Description, and final Overview; Announce Winners waves also configure an Outcomes step, which Perpetual Ranking waves skip.",
         "Rank wave rules are visible in the desktop right sidebar and mobile About information path.",
         "Leaderboards, winners, and voting state are part of rank-wave participation; perpetual ranking waves keep a live leaderboard but never announce winners or award outcomes."
       ],
@@ -2620,7 +2620,7 @@
       ],
       "facts": [
         "Approve waves use approval-oriented voting rather than a plain chat flow.",
-        "Approve wave setup includes Setup, Access, Schedule, Drops, Rules, Voting, Outcomes, Description, and final Overview.",
+        "Approve wave setup includes Setup, Access, Schedule, Drops, Guidelines, Voting, Outcomes, Description, and final Overview.",
         "Approve wave rules are visible in the desktop right sidebar and mobile About information path.",
         "Use Approve when the wave is intended to accept or reject submissions."
       ],
@@ -2743,8 +2743,8 @@
         "mobile"
       ],
       "facts": [
-        "Rules is for editing optional guidelines and acceptance-required rules. The read-only configuration summary is in the final Overview after Description. Overview shows access, schedules, submissions, voting, approval settings, detailed outcomes, author rules and guidelines, and the description. Confirm and create submits only from this last step. Previous returns to Description without clearing text or attachments.",
-        "All wave creation includes a Rules step. Chat enters Rules after Groups and then goes to Description; Rank and Approve enter Rules after Drops and then go to Voting.",
+        "Guidelines is for editing optional guidelines and acceptance-required rules. The read-only configuration summary is in the final Overview after Description. Overview shows access, schedules, submissions, voting, approval settings, detailed outcomes, author rules and guidelines, and the description. Confirm and create submits only from this last step. Previous returns to Description without clearing text or attachments.",
+        "All wave creation includes a Guidelines step. Chat enters Guidelines after Access and then goes to Description; Rank and Approve enter Guidelines after Drops and then go to Voting.",
         "Generated rules summarize the wave setup. Chat rules focus on wave type, access, and chat settings; Rank and Approve rules also include timing, submissions, voting, approval, and outcome visibility.",
         "Creators use the Wave guidelines section and Add wave guidelines... textbox to add guidelines. The subtitle explains that users see them when sending their first chat message. Guidelines are saved as wave metadata and also shown under Guidelines in the wave rules panel.",
         "When a wave has guidelines, a profile with no prior chat messages or participation drops in that wave reviews them before its first chat message is sent. Agree sends the pending message; Decline keeps the draft and shows the guidelines again on the next attempt.",

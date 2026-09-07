@@ -511,6 +511,7 @@ export const EN_GB_MESSAGES = {
     "Please choose a subwave type to continue.",
   "waves.create.overview.typeRequired":
     "Please choose a wave type to continue.",
+  "waves.create.rules.title": "Guidelines",
   "waves.create.rules.guidelinesFieldLabel": "Wave guidelines",
   "waves.create.rules.guidelinesDescription":
     "These guidelines will be shown to user when they send their first chat message",

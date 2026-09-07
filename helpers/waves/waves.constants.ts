@@ -117,7 +117,7 @@ export const CREATE_WAVE_STEPS_LABELS: Record<
     [CreateWaveStep.GROUPS]: "Access",
     [CreateWaveStep.DATES]: "Schedule",
     [CreateWaveStep.DROPS]: "Drops",
-    [CreateWaveStep.RULES]: "Rules",
+    [CreateWaveStep.RULES]: "Guidelines",
     [CreateWaveStep.VOTING]: "Rating",
     [CreateWaveStep.APPROVAL]: "Approval",
     [CreateWaveStep.OUTCOMES]: "Outcomes",
@@ -129,7 +129,7 @@ export const CREATE_WAVE_STEPS_LABELS: Record<
     [CreateWaveStep.GROUPS]: "Access",
     [CreateWaveStep.DATES]: "Schedule",
     [CreateWaveStep.DROPS]: "Drops",
-    [CreateWaveStep.RULES]: "Rules",
+    [CreateWaveStep.RULES]: "Guidelines",
     [CreateWaveStep.VOTING]: "Voting",
     [CreateWaveStep.APPROVAL]: "Approval",
     [CreateWaveStep.OUTCOMES]: "Outcomes",
@@ -141,7 +141,7 @@ export const CREATE_WAVE_STEPS_LABELS: Record<
     [CreateWaveStep.GROUPS]: "Access",
     [CreateWaveStep.DATES]: "Schedule",
     [CreateWaveStep.DROPS]: "Drops",
-    [CreateWaveStep.RULES]: "Rules",
+    [CreateWaveStep.RULES]: "Guidelines",
     [CreateWaveStep.VOTING]: "Voting",
     [CreateWaveStep.APPROVAL]: "Approval",
     [CreateWaveStep.OUTCOMES]: "Outcomes",
@@ -164,6 +164,9 @@ export const getCreateWaveStepLabel = ({
   }
   if (step === CreateWaveStep.REVIEW) {
     return t(locale, "waves.create.review.title");
+  }
+  if (step === CreateWaveStep.RULES) {
+    return t(locale, "waves.create.rules.title");
   }
   return CREATE_WAVE_STEPS_LABELS[waveType][step];
 };

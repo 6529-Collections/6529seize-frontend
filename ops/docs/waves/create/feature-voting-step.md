@@ -24,13 +24,13 @@ behavior tuning are in an expandable section named for those controls.
 
 ## Step Path
 
-- Scheduled `Rank`: `Setup -> Groups -> Schedule -> Drops -> Rules -> Voting -> Outcomes -> Description -> Overview`
-- `Perpetual Ranking`: `Setup -> Groups -> Schedule -> Drops -> Rules -> Voting -> Description -> Overview`
-- `Approve`: `Setup -> Groups -> Schedule -> Drops -> Rules -> Voting -> Outcomes -> Description -> Overview`
+- Scheduled `Rank`: `Setup -> Groups -> Schedule -> Drops -> Guidelines -> Voting -> Outcomes -> Description -> Overview`
+- `Perpetual Ranking`: `Setup -> Groups -> Schedule -> Drops -> Guidelines -> Voting -> Description -> Overview`
+- `Approve`: `Setup -> Groups -> Schedule -> Drops -> Guidelines -> Voting -> Outcomes -> Description -> Overview`
 
 ## Navigation Behavior
 
-- Enter `Voting` from `Rules`.
+- Enter `Voting` from `Guidelines`.
 - `Back` from `Outcomes` returns to `Voting`.
 - `Next` stays enabled; validation runs when clicked.
 - On large screens, the step rail can reopen completed steps only.
@@ -117,7 +117,7 @@ behavior tuning are in an expandable section named for those controls.
 - [Wave Creation Group Access and Permissions](feature-groups-step.md)
 - [Wave Creation Schedule](feature-dates-step.md)
 - [Wave Creation Drop Settings](feature-drops-step.md)
-- [Wave Creation Rules Step](feature-rules-step.md)
+- [Wave Creation Guidelines Step](feature-rules-step.md)
 - [Wave Creation Outcomes Step](feature-outcomes-step.md)
 - [Wave Drop Vote Slider](../drop-actions/feature-vote-slider.md)
 - [Wave Drop Vote Summary and Modal](../drop-actions/feature-vote-summary-and-modal.md)
