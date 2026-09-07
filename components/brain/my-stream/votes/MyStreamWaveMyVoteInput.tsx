@@ -91,10 +91,10 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
     : { nextCurrentVoteValue: currentVoteValue, nextMaxRating: maxRating };
   const liveCurrentVoteValueString = String(liveCurrentVoteValue);
   const voteSourceKey = `${drop.id}:${liveCurrentVoteValue}:${minRating}:${liveMaxRating}`;
-  const voteValue =
+  const { value: voteValue, limitMessage: activeVoteLimitMessage } =
     voteDraftState?.sourceKey === voteSourceKey
-      ? voteDraftState.value
-      : liveCurrentVoteValueString;
+      ? { value: voteDraftState.value, limitMessage: voteLimitMessage }
+      : { value: liveCurrentVoteValueString, limitMessage: null };
   const parsedVoteValue = Number.parseInt(voteValue, 10);
   const hasValidVoteValue = !Number.isNaN(parsedVoteValue);
   const isVoteValueOutOfRange =
@@ -146,8 +146,6 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
     return null;
   };
 
-  const activeVoteLimitMessage =
-    voteDraftState?.sourceKey === voteSourceKey ? voteLimitMessage : null;
   const displayedVoteLimitMessage =
     getVoteLimitMessage(parsedVoteValue) ?? activeVoteLimitMessage;
   const voteInputDescription = displayedVoteLimitMessage
