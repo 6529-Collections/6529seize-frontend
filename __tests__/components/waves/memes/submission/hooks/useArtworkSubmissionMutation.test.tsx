@@ -1,5 +1,7 @@
 import { AuthContext } from "@/components/auth/Auth";
 import { useArtworkSubmissionMutation } from "@/components/waves/memes/submission/hooks/useArtworkSubmissionMutation";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
+import type { TraitsData } from "@/components/waves/memes/submission/types/TraitsData";
 import { useDropSignature } from "@/hooks/drops/useDropSignature";
 import { commonApiPost } from "@/services/api/common-api";
 import { getAuthStateFingerprint } from "@/services/auth/auth-token-fingerprint";
@@ -38,7 +40,7 @@ const submissionData = {
     description: "Description",
     artist: "Alice",
     seizeArtistProfile: "alice",
-  } as any,
+  } as TraitsData,
   isAdditionalActionPromised: false,
   waveId: "wave-1",
   termsOfService: "Terms",
@@ -84,7 +86,7 @@ describe("useArtworkSubmissionMutation", () => {
       success: boolean;
       signature?: string;
     }>();
-    const post = createDeferred<any>();
+    const post = createDeferred<ApiDrop>();
     mockUseDropSignature.mockReturnValue({
       signDrop: jest.fn(() => signature.promise),
       isLoading: false,
@@ -92,8 +94,8 @@ describe("useArtworkSubmissionMutation", () => {
     mockCommonApiPost.mockReturnValue(post.promise);
     const { result, requestAuth } = setupHook();
 
-    let firstSubmission!: Promise<any>;
-    let duplicateSubmission!: Promise<any>;
+    let firstSubmission!: Promise<ApiDrop | null>;
+    let duplicateSubmission!: Promise<ApiDrop | null>;
     act(() => {
       firstSubmission = result.current.submitArtwork(
         submissionData,
@@ -127,7 +129,7 @@ describe("useArtworkSubmissionMutation", () => {
     });
 
     await act(async () => {
-      post.resolve({ id: "drop-1" });
+      post.resolve({ id: "drop-1" } as ApiDrop);
       await firstSubmission;
     });
     expect(result.current.submissionPhase).toBe("success");
@@ -135,7 +137,7 @@ describe("useArtworkSubmissionMutation", () => {
     expect(mockCommonApiPost).toHaveBeenCalledTimes(1);
   });
 
-  it("unlocks retry and enters the error phase when signing is canceled", async () => {
+  it("unlocks retry and returns to idle when signing is canceled", async () => {
     const signDrop = jest.fn(async () => ({ success: false }));
     mockUseDropSignature.mockReturnValue({ signDrop, isLoading: false });
     const { result } = setupHook();
@@ -149,7 +151,7 @@ describe("useArtworkSubmissionMutation", () => {
       );
     });
 
-    expect(result.current.submissionPhase).toBe("error");
+    expect(result.current.submissionPhase).toBe("idle");
     expect(result.current.isSubmitting).toBe(false);
 
     await act(async () => {

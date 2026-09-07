@@ -2,6 +2,8 @@
 
 import SecondaryButton from "@/components/utils/button/SecondaryButton";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { motion } from "framer-motion";
 import { useCallback } from "react";
 import type { MemesSubmissionIdentity } from "../hooks/useMemesSubmissionIdentity";
@@ -30,9 +32,12 @@ export function MemesSubmissionPreviewScreen({
   isSubmitting,
   submissionPhase,
   uploadProgress,
-  submitLabel = "Submit Artwork",
+  submitLabel,
 }: MemesSubmissionPreviewScreenProps) {
+  const locale = useBrowserLocale();
   const onDropClick = useCallback((_drop: ExtendedDrop) => {}, []);
+  const resolvedSubmitLabel =
+    submitLabel ?? t(locale, "memes.submission.action.submitArtwork");
 
   return (
     <motion.div
@@ -44,11 +49,10 @@ export function MemesSubmissionPreviewScreen({
       <div className="tw-flex-1 tw-space-y-10 tw-overflow-y-auto tw-px-4 tw-py-2 tw-pt-8 tw-scrollbar-thin tw-scrollbar-track-iron-900 tw-scrollbar-thumb-iron-700">
         <div className="tw-space-y-1">
           <h4 className="tw-mb-0 tw-text-base tw-font-semibold tw-text-iron-100">
-            Submission Preview
+            {t(locale, "memes.submission.preview.title")}
           </h4>
           <p className="tw-mb-0 tw-text-sm tw-text-iron-400">
-            Read-only preview of how your submission may appear in different
-            views.
+            {t(locale, "memes.submission.preview.description")}
           </p>
         </div>
 
@@ -70,7 +74,7 @@ export function MemesSubmissionPreviewScreen({
             disabled={isSubmitting}
             className="tw-w-full sm:tw-w-auto"
           >
-            Back to Edit
+            {t(locale, "memes.submission.action.backToEdit")}
           </SecondaryButton>
           <SubmissionActionButton
             identity={identity}
@@ -78,7 +82,7 @@ export function MemesSubmissionPreviewScreen({
             isSubmitting={isSubmitting}
             submissionPhase={submissionPhase}
             uploadProgress={uploadProgress}
-            submitLabel={submitLabel}
+            submitLabel={resolvedSubmitLabel}
             onSubmit={onSubmit}
             className="tw-w-full sm:tw-w-auto"
           />

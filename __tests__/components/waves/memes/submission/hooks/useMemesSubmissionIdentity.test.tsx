@@ -164,6 +164,7 @@ describe("useMemesSubmissionIdentity", () => {
     });
     expect(result.current.profile?.handle).toBe("bob");
     expect(result.current.canSubmit).toBe(false);
+    expect(mockUseWave).not.toHaveBeenCalledWith(undefined);
 
     await act(async () => {
       resolveEligibility?.(ineligibleWave);

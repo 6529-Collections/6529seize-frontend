@@ -107,6 +107,10 @@ On `success`, the modal auto-closes after a short delay.
   on-chain outcomes.
 - `success` only confirms app-level submit completion; downstream processing is
   outside this modal.
+- Localization fallback debt: the Memes submission identity, action, preview,
+  and shell messages currently use the `en-US` source copy for `en-GB`, `fr-FR`,
+  `es-ES`, and `de-DE`. The frontend localization owners should add partial
+  dictionaries when this submission surface reaches the next locale rollout.
 
 ## Related Pages
 

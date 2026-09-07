@@ -188,7 +188,7 @@ export function useMemesSubmissionIdentity(
   const eligibilityWave = requiresFreshEligibility
     ? refreshedEligibilityWave
     : wave;
-  const { participation } = useWave(eligibilityWave);
+  const { participation } = useWave(eligibilityWave ?? wave);
 
   const connectWallet = useCallback(async () => {
     if (isStartingConnection || seizeConnectOpen) {

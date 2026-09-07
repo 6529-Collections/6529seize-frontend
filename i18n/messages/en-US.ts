@@ -476,6 +476,7 @@ const MEMES_SUBMISSION_MESSAGES = objectMessages("memes.submission", {
   "media.missingInteractive": "Enter a valid hash or choose Upload File.",
   "identity.connectPrompt":
     "Connect a wallet to confirm the profile submitting this artwork.",
+  "identity.unknownProfile": "Unknown profile",
   "identity.submittingAs": "Submitting as",
   "identity.wallet": "Wallet",
   "identity.eligible": "Eligible to submit",
@@ -498,6 +499,11 @@ const MEMES_SUBMISSION_MESSAGES = objectMessages("memes.submission", {
   "identity.connectErrorTitle": "Couldn't open wallet connection.",
   "identity.connectErrorDescription": "Please try again.",
   "action.connectWallet": "Connect Wallet",
+  "action.submitArtwork": "Submit Artwork",
+  "action.submitNewVersion": "Submit New Version",
+  "action.back": "Back",
+  "action.backToEdit": "Back to Edit",
+  "action.preview": "Preview",
   "action.connecting": "Connecting…",
   "action.loadingProfile": "Loading Profile…",
   "action.verifyProfile": "Verify Profile",
@@ -511,6 +517,15 @@ const MEMES_SUBMISSION_MESSAGES = objectMessages("memes.submission", {
   "action.signing": "Check Wallet to Sign…",
   "action.submitting": "Submitting…",
   "action.submitted": "Submitted",
+  "shell.submitTitle": "Submit Work to The Memes",
+  "shell.resubmitTitle": "Resubmit Work to The Memes",
+  "shell.resubmissionDescription":
+    "Resubmitting creates a new submission with this data, then asks you to confirm deleting the original.",
+  "preview.title": "Submission Preview",
+  "preview.description":
+    "Read-only preview of how your submission may appear in different views.",
+  "additionalInfo.description":
+    "Complete the following details for distribution and storytelling purposes.",
 } as const);
 
 const MEMES_WAVE_FOOTER_MESSAGES = objectMessages("memes.waveFooter", {

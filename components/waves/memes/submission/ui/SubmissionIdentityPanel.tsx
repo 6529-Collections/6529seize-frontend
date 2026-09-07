@@ -51,25 +51,31 @@ export function SubmissionIdentityPanel({
 
   if (!profile || !address) {
     return (
-      <div
-        className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/60 tw-p-4"
-        aria-live="polite"
-      >
-        <p className="tw-mb-0 tw-text-sm tw-text-iron-300">
+      <div className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/60 tw-p-4">
+        <p
+          className="tw-mb-0 tw-text-sm tw-text-iron-300"
+          role="status"
+        >
           {t(locale, "memes.submission.identity.connectPrompt")}
         </p>
       </div>
     );
   }
 
-  const handle = profile.handle ?? profile.display;
-  const fallback = handle.length > 0 ? handle.charAt(0).toUpperCase() : "?";
+  const profileHandle = profile.handle?.trim() ?? "";
+  let identityName = profileHandle;
+  if (identityName.length === 0) {
+    identityName = profile.display.trim();
+  }
+  if (identityName.length === 0) {
+    identityName = t(locale, "memes.submission.identity.unknownProfile");
+  }
+  const profileLabel =
+    profileHandle.length > 0 ? `@${profileHandle}` : identityName;
+  const fallback = identityName.charAt(0).toUpperCase();
 
   return (
-    <div
-      className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/60 tw-p-4"
-      aria-live="polite"
-    >
+    <div className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/60 tw-p-4">
       <p className="tw-mb-3 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-400">
         {t(locale, "memes.submission.identity.submittingAs")}
       </p>
@@ -77,16 +83,19 @@ export function SubmissionIdentityPanel({
         <ProfileAvatar
           pfpUrl={profile.pfp}
           size={ProfileBadgeSize.MEDIUM}
-          alt={handle ? `${handle} profile picture` : undefined}
+          alt=""
           fallbackContent={
-            <span className="tw-text-sm tw-font-semibold tw-text-iron-300">
+            <span
+              className="tw-text-sm tw-font-semibold tw-text-iron-300"
+              aria-hidden="true"
+            >
               {fallback}
             </span>
           }
         />
         <div className="tw-min-w-0 tw-flex-1">
           <p className="tw-mb-0 tw-truncate tw-text-sm tw-font-semibold tw-text-iron-100">
-            {profile.handle ? `@${profile.handle}` : profile.display}
+            {profileLabel}
           </p>
           <p className="tw-mb-0 tw-text-xs tw-text-iron-400">
             {t(locale, "memes.submission.identity.wallet")}:{" "}

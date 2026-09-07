@@ -42,7 +42,7 @@ const renderAction = ({
     | "error";
   uploadProgress?: number;
 }) => {
-  render(
+  const view = render(
     <>
       <SubmissionIdentityPanel identity={identity} />
       <SubmissionActionButton
@@ -56,7 +56,7 @@ const renderAction = ({
       />
     </>
   );
-  return { onSubmit };
+  return { onSubmit, ...view };
 };
 
 describe("Memes submission identity actions", () => {
@@ -127,5 +127,26 @@ describe("Memes submission identity actions", () => {
     });
     expect(button).toBeDisabled();
     expect(button).toHaveAttribute("aria-busy", "true");
+    expect(
+      screen
+        .getAllByRole("status")
+        .some((status) => status.textContent === "Check Wallet to Sign…")
+    ).toBe(true);
+  });
+
+  it("renders an unnamed profile safely and keeps its avatar decorative", () => {
+    const identity = createIdentity({
+      profile: {
+        id: "profile-a",
+        handle: null,
+        display: "",
+        pfp: "https://example.com/avatar.png",
+      } as any,
+    });
+
+    const { container } = renderAction({ identity });
+
+    expect(screen.getByText("Unknown profile")).toBeInTheDocument();
+    expect(container.querySelector("img")).toHaveAttribute("alt", "");
   });
 });

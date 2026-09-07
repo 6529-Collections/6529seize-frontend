@@ -357,7 +357,8 @@ export function useArtworkSubmissionMutation() {
       });
 
       if (!signatureResult.success) {
-        throw new Error("Failed to sign the drop");
+        updatePhase("idle", callbacks);
+        return null;
       }
 
       // Add signature to the request

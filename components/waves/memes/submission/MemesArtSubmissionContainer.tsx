@@ -57,7 +57,6 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
     [sourceDrop]
   );
   const isResubmission = Boolean(sourceDrop);
-  const submitLabel = isResubmission ? "Submit New Version" : "Submit Artwork";
   const [hasAcknowledgedResubmission, setHasAcknowledgedResubmission] =
     useState(!isResubmission);
 
@@ -68,6 +67,9 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
   const { isSafeWallet } = useSeizeConnectContext();
   const identity = useMemesSubmissionIdentity(wave);
   const locale = useBrowserLocale();
+  const submitLabel = isResubmission
+    ? t(locale, "memes.submission.action.submitNewVersion")
+    : t(locale, "memes.submission.action.submitArtwork");
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [previewDrop, setPreviewDrop] = useState<ExtendedDrop | null>(null);
 
@@ -287,7 +289,7 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
 
   const shellDescription =
     isResubmission && hasAcknowledgedResubmission && !replacementDrop
-      ? "Resubmitting creates a new submission with this data, then asks you to confirm deleting the original."
+      ? t(locale, "memes.submission.shell.resubmissionDescription")
       : undefined;
 
   let submissionContent: ReactNode;
@@ -340,8 +342,8 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
       <MemesArtSubmissionShell
         title={
           isResubmission
-            ? "Resubmit Work to The Memes"
-            : "Submit Work to The Memes"
+            ? t(locale, "memes.submission.shell.resubmitTitle")
+            : t(locale, "memes.submission.shell.submitTitle")
         }
         description={shellDescription}
         onClose={onClose}

@@ -2,6 +2,7 @@
 
 import PrimaryButton from "@/components/utils/button/PrimaryButton";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import type { MemesSubmissionIdentity } from "../hooks/useMemesSubmissionIdentity";
 import type { SubmissionPhase } from "./SubmissionProgress";
@@ -39,7 +40,7 @@ export function SubmissionActionButton({
     switch (submissionPhase) {
       case "uploading":
         label = t(locale, "memes.submission.action.uploading", {
-          progress: Math.round(uploadProgress),
+          progress: formatInteger(locale, Math.round(uploadProgress)),
         });
         break;
       case "signing":
@@ -111,15 +112,27 @@ export function SubmissionActionButton({
     }
   }
 
+  const announcedStatus = loading || submissionPhase === "success" ? label : "";
+
   return (
-    <PrimaryButton
-      onClicked={onClicked}
-      disabled={disabled}
-      loading={loading}
-      className={className}
-      ariaLabel={label}
-    >
-      {label}
-    </PrimaryButton>
+    <>
+      <PrimaryButton
+        onClicked={onClicked}
+        disabled={disabled}
+        loading={loading}
+        className={className}
+        ariaLabel={label}
+      >
+        {label}
+      </PrimaryButton>
+      <span
+        className="tw-sr-only"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        {announcedStatus}
+      </span>
+    </>
   );
 }
