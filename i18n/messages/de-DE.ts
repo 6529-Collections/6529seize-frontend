@@ -509,10 +509,10 @@ export const DE_DE_MESSAGES = {
   "waves.create.outcomes.showOutcomesDescription":
     "Zeigt den Tab Ergebnisse und die Belohnungsdetails auf Ranglisten- und Gewinnerkarten. Belohnungen gelten auch dann, wenn sie ausgeblendet sind.",
   "waves.create.rules.title": "Richtlinien",
-  "waves.create.rules.guidelinesFieldLabel": "Wave-Richtlinien",
+  "waves.create.rules.guidelinesFieldLabel": "Chat-Richtlinien",
   "waves.create.rules.guidelinesDescription":
     "Diese Richtlinien werden Nutzern angezeigt, wenn sie ihre erste Chatnachricht senden.",
-  "waves.create.rules.guidelinesPlaceholder": "Wave-Richtlinien hinzufügen...",
+  "waves.create.rules.guidelinesPlaceholder": "Chat-Richtlinien hinzufügen...",
   "waves.create.rules.acceptanceTitle": "Regeln, denen zugestimmt werden muss",
   "waves.create.rules.acceptanceDescription":
     "Teilnehmende müssen diesen Regeln zustimmen und sie vor dem Einreichen mit ihrer Wallet signieren.",

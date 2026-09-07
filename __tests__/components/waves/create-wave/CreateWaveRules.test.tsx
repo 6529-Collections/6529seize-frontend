@@ -74,7 +74,7 @@ const getConfig = (
 
 describe("CreateWaveRules", () => {
   it.each([ApiWaveType.Chat, ApiWaveType.Rank, ApiWaveType.Approve])(
-    "shows %s wave guidelines without submission rules or a configuration summary",
+    "shows %s chat guidelines without submission rules or a configuration summary",
     (waveType) => {
       render(
         <CreateWaveRules config={getConfig(waveType)} setDisplay={jest.fn()} />
@@ -91,17 +91,17 @@ describe("CreateWaveRules", () => {
         )
       ).not.toBeInTheDocument();
       expect(
-        screen.getByRole("heading", { level: 3, name: "Wave guidelines" })
+        screen.getByRole("heading", { level: 3, name: "Chat guidelines" })
       ).toBeVisible();
       expect(
-        screen.queryByRole("button", { name: "Wave guidelines" })
+        screen.queryByRole("button", { name: "Chat guidelines" })
       ).not.toBeInTheDocument();
       expect(
         screen.queryByRole("textbox", { name: "Rules that require acceptance" })
       ).toBeNull();
 
       expect(
-        screen.getByRole("textbox", { name: "Wave guidelines" })
+        screen.getByRole("textbox", { name: "Chat guidelines" })
       ).toBeVisible();
       expect(
         screen.getByText(
@@ -109,7 +109,7 @@ describe("CreateWaveRules", () => {
         )
       ).toBeVisible();
       expect(
-        screen.getByPlaceholderText("Add wave guidelines...")
+        screen.getByPlaceholderText("Add chat guidelines...")
       ).toBeVisible();
       expect(
         screen.queryByText("Display-only creator rules")
@@ -122,7 +122,7 @@ describe("CreateWaveRules", () => {
     }
   );
 
-  it("shows restored wave guidelines immediately without a collapse control", () => {
+  it("shows restored chat guidelines immediately without a collapse control", () => {
     render(
       <CreateWaveRules
         config={getConfig(ApiWaveType.Rank, "Restored rule")}
@@ -133,11 +133,11 @@ describe("CreateWaveRules", () => {
     expect(
       screen.getByRole("heading", {
         level: 3,
-        name: "Wave guidelines",
+        name: "Chat guidelines",
       })
     ).toBeVisible();
     expect(
-      screen.queryByRole("button", { name: "Wave guidelines" })
+      screen.queryByRole("button", { name: "Chat guidelines" })
     ).not.toBeInTheDocument();
     expect(screen.getByDisplayValue("Restored rule")).toBeVisible();
   });

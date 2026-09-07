@@ -515,10 +515,10 @@ export const EN_GB_MESSAGES = {
   "waves.create.outcomes.showOutcomesDescription":
     "Shows the Outcomes tab and reward details on leaderboard and winner cards. Rewards still apply when hidden.",
   "waves.create.rules.title": "Guidelines",
-  "waves.create.rules.guidelinesFieldLabel": "Wave guidelines",
+  "waves.create.rules.guidelinesFieldLabel": "Chat guidelines",
   "waves.create.rules.guidelinesDescription":
     "These guidelines will be shown to user when they send their first chat message",
-  "waves.create.rules.guidelinesPlaceholder": "Add wave guidelines...",
+  "waves.create.rules.guidelinesPlaceholder": "Add chat guidelines...",
   "waves.create.rules.acceptanceTitle": "Rules that require acceptance",
   "waves.create.rules.acceptanceDescription":
     "Participants must accept these rules and sign with their wallet before submitting.",

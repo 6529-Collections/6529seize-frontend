@@ -87,7 +87,7 @@ The section is always visible and has no expand/collapse control.
 
 - `Chat` waves skip `Drops`.
 - Required metadata is optional.
-- Wave guidelines are configured in `Guidelines`, not `Drops`.
+- Chat guidelines are configured in `Guidelines`.
 
 Signing rules use the existing participation terms and wallet-signature flow.
 They appear in the final Overview and the wave rules panel. Wave admins can

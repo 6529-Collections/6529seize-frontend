@@ -514,11 +514,11 @@ export const FR_FR_MESSAGES = {
   "waves.create.outcomes.showOutcomesDescription":
     "Affiche l’onglet Résultats et les détails des récompenses sur les cartes du classement et des gagnants. Les récompenses restent applicables lorsqu’elles sont masquées.",
   "waves.create.rules.title": "Directives",
-  "waves.create.rules.guidelinesFieldLabel": "Directives de la Wave",
+  "waves.create.rules.guidelinesFieldLabel": "Directives du chat",
   "waves.create.rules.guidelinesDescription":
     "Ces directives seront affichées aux utilisateurs lorsqu’ils enverront leur premier message dans le chat.",
   "waves.create.rules.guidelinesPlaceholder":
-    "Ajoutez des directives pour la Wave...",
+    "Ajoutez des directives pour le chat...",
   "waves.create.rules.acceptanceTitle": "Règles à accepter",
   "waves.create.rules.acceptanceDescription":
     "Les participants doivent accepter ces règles et les signer avec leur portefeuille avant de soumettre leur contenu.",

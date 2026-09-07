@@ -1693,10 +1693,10 @@ const WAVE_CREATE_RULES_MESSAGES = objectMessages("waves.create.rules", {
   title: "Guidelines",
   advancedSummary: "Wave guidelines and acceptance",
   chatAdvancedSummary: "Wave guidelines",
-  guidelinesFieldLabel: "Wave guidelines",
+  guidelinesFieldLabel: "Chat guidelines",
   guidelinesDescription:
     "These guidelines will be shown to user when they send their first chat message",
-  guidelinesPlaceholder: "Add wave guidelines...",
+  guidelinesPlaceholder: "Add chat guidelines...",
   guidelinesSettingsLabel: "Guidelines",
   guidelinesSettingsEditLabel: "Edit guidelines",
   guidelinesSettingsAdded: "Added",

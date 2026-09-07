@@ -505,11 +505,11 @@ export const ES_ES_MESSAGES = {
   "waves.create.outcomes.showOutcomesDescription":
     "Muestra la pestaña Resultados y los detalles de las recompensas en las tarjetas de la clasificación y de los ganadores. Las recompensas se siguen aplicando aunque estén ocultas.",
   "waves.create.rules.title": "Directrices",
-  "waves.create.rules.guidelinesFieldLabel": "Directrices de la Wave",
+  "waves.create.rules.guidelinesFieldLabel": "Directrices del chat",
   "waves.create.rules.guidelinesDescription":
     "Estas directrices se mostrarán a los usuarios cuando envíen su primer mensaje de chat.",
   "waves.create.rules.guidelinesPlaceholder":
-    "Añade directrices para la Wave...",
+    "Añade directrices para el chat...",
   "waves.create.rules.acceptanceTitle": "Reglas que requieren aceptación",
   "waves.create.rules.acceptanceDescription":
     "Los participantes deben aceptar estas reglas y firmarlas con su cartera antes de enviar contenido.",
