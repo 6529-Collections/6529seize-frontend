@@ -15,6 +15,12 @@ const ALLOWED_COMMANDS = new Set([
   "remove",
   "update",
 ]);
+const PACKAGE_MUTATION_COMMANDS = new Set([
+  "add",
+  "install",
+  "remove",
+  "update",
+]);
 const FORBIDDEN_OPTION_NAMES = new Set([
   "auth",
   "authtoken",
@@ -126,11 +132,22 @@ function validateWorkspace(text) {
   if (!/^minimumReleaseAge:\s*10080\s*$/m.test(text)) {
     throw policyError("pnpm-workspace.yaml must keep the seven-day package age rule");
   }
-  if (!/^\s*-\s*["']?@6529-collections\/release-request["']?\s*$/m.test(text)) {
-    throw policyError(`${RELEASE_PACKAGE} must have the reviewed age exception`);
-  }
-  if (text.includes(`${RELEASE_PACKAGE}@`)) {
-    throw policyError("the release-request age exception must cover the package name");
+  const exceptionBlock = text.match(
+    /^minimumReleaseAgeExclude:\s*(?:\r?\n|$)((?:(?:[ \t]+[^\r\n]*|[ \t]*)\r?\n?)*)/m
+  );
+  const exceptions = (exceptionBlock?.[1] ?? "")
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => line !== "" && !line.startsWith("#"));
+  if (
+    exceptions.length !== 1 ||
+    !new RegExp(
+      `^-\\s*["']?${RELEASE_PACKAGE.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}["']?$`
+    ).test(exceptions[0])
+  ) {
+    throw policyError(
+      `minimumReleaseAgeExclude must contain only ${RELEASE_PACKAGE}`
+    );
   }
 }
 
@@ -165,7 +182,15 @@ function validateArguments(args) {
   }
   for (const argument of args.slice(1)) {
     if (
-      /(?:^|@)(?:(?:file|git\+|git|http|https|link|workspace|github|gitlab|bitbucket):|\/\/)/i.test(
+      PACKAGE_MUTATION_COMMANDS.has(args[0]) &&
+      (argument === RELEASE_PACKAGE || argument.startsWith(`${RELEASE_PACKAGE}@`))
+    ) {
+      throw policyError(
+        `${RELEASE_PACKAGE} cannot be changed by a package command`
+      );
+    }
+    if (
+      /(?:^|@)(?:(?:file|git\+|git|http|https|link|workspace|github|gitlab|bitbucket|npm):|\/\/)/i.test(
         argument
       )
     ) {

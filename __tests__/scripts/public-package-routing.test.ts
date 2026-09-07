@@ -79,6 +79,22 @@ describe("public Coordinator package policy", () => {
       policy.validateArguments(["add", "package@//packages.example/pkg.tgz"])
     ).toThrow("direct dependency source is not allowed");
     expect(() =>
+      policy.validateArguments([
+        "add",
+        `alias@npm:${policy.RELEASE_PACKAGE}@${policy.RELEASE_VERSION}`,
+      ])
+    ).toThrow("direct dependency source is not allowed");
+    for (const args of [
+      ["add", policy.RELEASE_PACKAGE],
+      ["install", `${policy.RELEASE_PACKAGE}@${policy.RELEASE_VERSION}`],
+      ["remove", policy.RELEASE_PACKAGE],
+      ["update", "--latest", `${policy.RELEASE_PACKAGE}@latest`],
+    ]) {
+      expect(() => policy.validateArguments(args)).toThrow(
+        "cannot be changed by a package command"
+      );
+    }
+    expect(() =>
       policy.validateEnvironment({
         NODE_ENV: "test",
         npm_config_registry: "https://example.com",
@@ -132,7 +148,15 @@ describe("public Coordinator package policy", () => {
           `"${policy.RELEASE_PACKAGE}@${policy.RELEASE_VERSION}"`
         )
       )
-    ).toThrow("must have the reviewed age exception");
+    ).toThrow("must contain only");
+    expect(() =>
+      policy.validateWorkspace(
+        workspace.replace(
+          `  - "${policy.RELEASE_PACKAGE}"`,
+          `  - "${policy.RELEASE_PACKAGE}"\n  - "unreviewed-package"`
+        )
+      )
+    ).toThrow("must contain only");
   });
 
   it("rejects changes to the reviewed lockfile resolution", () => {
