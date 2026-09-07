@@ -1,3 +1,4 @@
+import { ApiWaveGroupRole } from "@/generated/models/ApiWaveGroupRole";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { commonApiFetch } from "@/services/api/common-api";
 import { hasSubwaveMembersOutsideParent } from "@/services/api/subwave-access-api";
@@ -52,7 +53,10 @@ describe("subwave audience containment", () => {
     async (valid) => {
       const controller = new AbortController();
       mockFetch.mockResolvedValue(parentWave("parent-group"));
-      mockValidate.mockResolvedValue({ valid, invalid_roles: [] });
+      mockValidate.mockResolvedValue({
+        valid,
+        invalid_roles: valid ? [] : [ApiWaveGroupRole.Chat],
+      });
 
       await expect(
         hasSubwaveMembersOutsideParent(

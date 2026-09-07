@@ -1,3 +1,4 @@
+import { ApiWaveGroupRole } from "@/generated/models/ApiWaveGroupRole";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { commonApiFetch } from "@/services/api/common-api";
 import { validateWaveGroups } from "@/services/api/wave-group-validation-api";
@@ -27,11 +28,12 @@ export async function hasSubwaveMembersOutsideParent(
     return true;
   }
 
-  // The containment endpoint compares complete group audiences. Use its Chat
-  // slot for the candidate audience without checking unrelated permissions.
+  // The preview contract checks only supplied roles against View membership;
+  // unavailable groups reject instead of returning an invalid role. The backend
+  // wave-group-containment tests lock this single-Chat-role comparison.
   const result = await validateWaveGroups(
     { visibility_group_id: parentViewGroupId, chat_group_id: viewGroupId },
     signal
   );
-  return !result.valid;
+  return result.invalid_roles.includes(ApiWaveGroupRole.Chat);
 }

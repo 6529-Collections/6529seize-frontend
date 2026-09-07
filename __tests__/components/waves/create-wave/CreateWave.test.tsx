@@ -545,6 +545,24 @@ describe("CreateWave", () => {
     expect(editor).toBeVisible();
   });
 
+  it("blocks review while inline image uploads are pending", () => {
+    mockedUseWaveConfig.mockReturnValue({
+      ...mockWaveConfig,
+      step: CreateWaveStep.DESCRIPTION,
+    });
+    mockGetDropSnapshot.mockReturnValue({
+      parts: [{ content: "![Seize](loading)" }],
+    });
+    renderCreateWave();
+    fireEvent.click(screen.getByTestId("mock-next"));
+    expect(mockWaveConfig.onStep).not.toHaveBeenCalled();
+    expect(mockAuthContext.setToast).toHaveBeenCalledWith({
+      message: "Wait for image uploads to finish.",
+      type: "error",
+    });
+    expect(mockAddWaveMutation.mutateAsync).not.toHaveBeenCalled();
+  });
+
   it("blocks review when the description is empty", () => {
     mockedUseWaveConfig.mockReturnValue({
       ...mockWaveConfig,

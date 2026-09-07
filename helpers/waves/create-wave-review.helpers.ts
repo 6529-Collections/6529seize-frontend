@@ -1,5 +1,6 @@
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { formatNumber, formatPercent } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import type {
@@ -23,7 +24,8 @@ function getOutcomeSection(
   waveType: ApiWaveType,
   locale: SupportedLocale
 ): WaveRuleSection {
-  const number = new Intl.NumberFormat(locale, { maximumFractionDigits: 8 });
+  const number = (value: number) =>
+    formatNumber(locale, value, { maximumFractionDigits: 8 });
   const type =
     outcome.type === CreateWaveOutcomeType.MANUAL
       ? t(locale, "waves.create.review.manual")
@@ -56,7 +58,7 @@ function getOutcomeSection(
       rows.push({
         id: "total",
         label: t(locale, "waves.create.review.total"),
-        value: `${number.format(winners.totalAmount)} ${type}`,
+        value: `${number(winners.totalAmount)} ${type}`,
       });
     }
     const isPercentage =
@@ -69,18 +71,15 @@ function getOutcomeSection(
           position: winnerIndex + 1,
         }),
         value: isPercentage
-          ? new Intl.NumberFormat(locale, {
-              style: "percent",
-              maximumFractionDigits: 8,
-            }).format(winner.value / 100)
-          : number.format(winner.value),
+          ? formatPercent(locale, winner.value / 100, 8)
+          : number(winner.value),
       }))
     );
   } else if (!isManual && outcome.credit !== null) {
     rows.push({
       id: "credit",
       label: t(locale, "waves.create.review.perApprovedDrop"),
-      value: `${number.format(outcome.credit)} ${type}`,
+      value: `${number(outcome.credit)} ${type}`,
     });
   }
   return {

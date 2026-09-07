@@ -13,6 +13,7 @@ export function useSubwaveAccessConfirmation() {
   );
   const abortController = useRef<AbortController | null>(null);
   const pendingCheck = useRef<Promise<boolean> | null>(null);
+  const pendingArgs = useRef<SubwaveAccessCheck | null>(null);
 
   useEffect(
     () => () => {
@@ -30,11 +31,15 @@ export function useSubwaveAccessConfirmation() {
 
   const confirmSubwaveAccess = useCallback((check: SubwaveAccessCheck) => {
     if (pendingCheck.current) {
-      return pendingCheck.current;
+      return pendingArgs.current?.parentWaveId === check.parentWaveId &&
+        pendingArgs.current.viewGroupId === check.viewGroupId
+        ? pendingCheck.current
+        : Promise.resolve(false);
     }
 
     const controller = new AbortController();
     abortController.current = controller;
+    pendingArgs.current = check;
     pendingCheck.current = (async () => {
       const needsWarning = await hasSubwaveMembersOutsideParent(
         check,
@@ -52,6 +57,7 @@ export function useSubwaveAccessConfirmation() {
       });
     })().finally(() => {
       pendingCheck.current = null;
+      pendingArgs.current = null;
       abortController.current = null;
     });
 

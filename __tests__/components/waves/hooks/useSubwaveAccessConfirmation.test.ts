@@ -37,6 +37,23 @@ describe("useSubwaveAccessConfirmation", () => {
     }
   );
 
+  it("does not reuse a pending decision for a different audience", async () => {
+    mockCheck.mockResolvedValue(true);
+    const { result } = renderHook(useSubwaveAccessConfirmation);
+    let pending: Promise<boolean>;
+    act(() => {
+      pending = result.current.confirmSubwaveAccess(check);
+    });
+    await waitFor(() => expect(result.current.isOpen).toBe(true));
+    expect(result.current.confirmSubwaveAccess({ ...check })).toBe(pending!);
+    await expect(
+      result.current.confirmSubwaveAccess({ ...check, viewGroupId: "another" })
+    ).resolves.toBe(false);
+    act(() => result.current.onDecision(true));
+    await expect(pending!).resolves.toBe(true);
+    expect(mockCheck).toHaveBeenCalledTimes(1);
+  });
+
   it("cancels the pending decision on unmount", async () => {
     mockCheck.mockResolvedValue(true);
     const { result, unmount } = renderHook(useSubwaveAccessConfirmation);
