@@ -56,9 +56,11 @@ Use this area to create:
 
 The default path keeps the decisions most creators need visible. Less common
 customization is available from expandable sections named for their contents,
-such as `Submission requirements` or `Vote limits and behavior`. A section
-shows `Customized` when saved or restored values differ from the defaults and
-opens as `Needs attention` when a hidden field fails validation.
+such as `Vote limits and behavior`. An expandable section shows `Customized`
+when saved or restored values differ from the defaults and opens as
+`Needs attention` when a hidden field fails validation.
+
+`Submission requirements` stays open, with all its controls visible.
 
 ### Direct-Message Journey
 

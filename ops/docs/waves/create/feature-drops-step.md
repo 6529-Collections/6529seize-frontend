@@ -11,7 +11,8 @@ requirements:
 - rules participants must accept and sign before submitting
 
 The submission type stays visible. Optional media requirements, metadata,
-simultaneous-submission limits, and signing rules are under `Submission requirements`.
+simultaneous-submission limits, and signing rules are in `Submission requirements`.
+The section is always visible and has no expand/collapse control.
 
 ## Location in the Site
 
@@ -33,7 +34,7 @@ simultaneous-submission limits, and signing rules are under `Submission requirem
 
 ## User Journey
 
-1. Open `Submission requirements` when extra requirements are needed.
+1. Review the always-visible `Submission requirements` section.
 2. Choose one required media type:
    - `None` (default)
    - `Image`
@@ -46,9 +47,7 @@ simultaneous-submission limits, and signing rules are under `Submission requirem
 4. Optionally set `Maximum number of simultaneous submissions per participant`.
 5. Optionally enter `Rules that require acceptance`. Leave the textbox empty if
    no rules require signing. There is no separate acceptance toggle.
-6. Collapse `Submission requirements` if desired; the configured values remain in the
-   draft and the disclosure shows `Customized`.
-7. Click `Next` to continue to `Voting`.
+6. Click `Next` to continue to `Voting`.
 
 ## Common Scenarios
 
@@ -75,14 +74,12 @@ simultaneous-submission limits, and signing rules are under `Submission requirem
   - decimal input is reduced to its integer part (example: `2.5` becomes `2`).
 - Entering signing rules requires a wallet signature before submission. Clearing
   them, including whitespace-only text, removes the requirement.
-- Signing rules also mark `Submission requirements` as `Customized`. Collapsing
-  the section or visiting another step preserves the entered rules.
+- Visiting another step preserves the entered requirements and signing rules.
 
 ## Failure and Recovery
 
 - If `Next` does not advance, resolve duplicate metadata names, then retry.
-- Validation inside collapsed `Submission requirements` reopens the section and
-  exposes the invalid field.
+- Requirement fields and their validation messages remain visible.
 - If submission-limit input keeps clearing, enter a positive whole number or
   leave it blank.
 

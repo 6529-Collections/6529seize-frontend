@@ -78,9 +78,6 @@ describe("CreateWaveDrops", () => {
         setDrops={setDrops}
       />
     );
-    await user.click(
-      screen.getByRole("button", { name: "Submission requirements" })
-    );
     await user.type(
       screen.getByLabelText(/Max simultaneous submissions/i),
       "3"
@@ -110,29 +107,29 @@ describe("CreateWaveDrops", () => {
   });
 
   it.each([ApiWaveType.Rank, ApiWaveType.Approve])(
-    "keeps signing rules in Submission requirements and reflects edits in its badge for %s",
+    "shows submission requirements immediately and keeps signing rules editable for %s",
     (waveType) => {
       render(<StatefulDrops waveType={waveType} />);
-      const disclosure = screen.getByRole("button", {
-        name: "Submission requirements",
-      });
       expect(
-        screen.queryByRole("textbox", { name: "Rules that require acceptance" })
-      ).toBeNull();
-      fireEvent.click(disclosure);
+        screen.getByRole("heading", { name: "Submission requirements" })
+      ).toBeVisible();
+      expect(
+        screen.queryByRole("button", { name: /Submission requirements/ })
+      ).not.toBeInTheDocument();
+      expect(screen.getByTestId("types")).toBeVisible();
+      expect(screen.getByTestId("metadata")).toBeVisible();
+      expect(
+        screen.getByRole("textbox", { name: "Max simultaneous submissions" })
+      ).toBeVisible();
       const rules = screen.getByRole("textbox", {
         name: "Rules that require acceptance",
       });
       expect(rules).toBeVisible();
       fireEvent.change(rules, { target: { value: "Binding rule" } });
-      expect(disclosure).toHaveTextContent("Customized");
-      fireEvent.click(disclosure);
-      expect(rules).not.toBeVisible();
-      expect(disclosure).toHaveTextContent("Customized");
-      fireEvent.click(disclosure);
       expect(rules).toHaveValue("Binding rule");
       fireEvent.change(rules, { target: { value: "" } });
-      expect(disclosure).not.toHaveTextContent("Customized");
+      expect(rules).toBeVisible();
+      expect(rules).toHaveValue("");
     }
   );
 
@@ -153,10 +150,6 @@ describe("CreateWaveDrops", () => {
           setDrops={setDrops}
         />
       );
-      const disclosure = screen.getByRole("button", {
-        name: "Submission requirements Customized",
-      });
-      fireEvent.click(disclosure);
       const rules = screen.getByRole("textbox", {
         name: "Rules that require acceptance",
       });
@@ -172,9 +165,6 @@ describe("CreateWaveDrops", () => {
 
   it("does not offer signing rules for Chat waves", () => {
     render(<StatefulDrops waveType={ApiWaveType.Chat} />);
-    fireEvent.click(
-      screen.getByRole("button", { name: "Submission requirements" })
-    );
     expect(
       screen.queryByRole("textbox", { name: "Rules that require acceptance" })
     ).toBeNull();
