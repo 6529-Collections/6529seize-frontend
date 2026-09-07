@@ -128,11 +128,10 @@ Common commands:
 6529 run check:changed
 ```
 
-If pnpm reports ignored install/build scripts, run:
-
-```bash
-6529 approve-builds
-```
+If a new dependency needs an install/build script, add that package to both
+`pnpm-workspace.yaml` and `scripts/public-package-policy.cjs` in the same
+reviewed pull request. Then run `6529 ci`. There is no automatic build-approval
+command.
 
 For deeper package-manager, Socket Firewall, and deployment-wrapper details,
 read [ops/docs/developer/pnpm-and-socket-firewall.md](ops/docs/developer/pnpm-and-socket-firewall.md).

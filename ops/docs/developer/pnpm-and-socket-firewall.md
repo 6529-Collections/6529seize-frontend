@@ -22,7 +22,6 @@ The supported entrypoint is the repo-local `6529` command:
 6529 audit:fix
 6529 run dev
 6529 run build
-6529 approve-builds
 6529 staging
 6529 run test
 6529 run lint
@@ -123,11 +122,10 @@ wrapper as JavaScript:
 pm2 start bash --name=6529seize -- -lc 'cd /path/to/repo && ./bin/6529 run start:standalone'
 ```
 
-If pnpm reports ignored install/build scripts, use:
-
-```bash
-6529 approve-builds
-```
+If a new dependency needs an install/build script, add it to `allowBuilds` in
+`pnpm-workspace.yaml` and `ALLOWED_BUILD_DEPENDENCIES` in
+`scripts/public-package-policy.cjs` in the same reviewed pull request. Then run
+`6529 ci`. Build approvals are never accepted automatically.
 
 ## GitHub workflow helpers
 

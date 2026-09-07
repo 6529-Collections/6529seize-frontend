@@ -15,6 +15,13 @@ type PublicPolicy = {
 };
 
 type SecurePackageRunner = {
+  parseSecureInvocationArguments: (args: string[]) => {
+    args: string[];
+    pnpmBinary: string;
+    repositoryRoot: string;
+  };
+  quoteWindowsShellArgument: (value: string) => string;
+  resolveSfwCommand: (environment: NodeJS.ProcessEnv) => string;
   runSecurePnpm: (options: {
     args: string[];
     environment: NodeJS.ProcessEnv;
@@ -304,6 +311,27 @@ describe("public Coordinator package policy", () => {
     expect(() =>
       policy.validateWorkspace(
         workspace.replace(
+          "overrides:\n",
+          `overrides:\n  "${policy.RELEASE_PACKAGE}": "0.0.5"\n`
+        )
+      )
+    ).toThrow("cannot be changed by overrides");
+    expect(() =>
+      policy.validateWorkspace(
+        workspace.replace(
+          "overrides:\n",
+          "overrides:\n  sharp: https://example.invalid/sharp.tgz\n"
+        )
+      )
+    ).toThrow("overrides must use registry package versions only");
+    expect(() =>
+      policy.validateWorkspace(
+        workspace.replace("overrides:\n", "overrides:\n  <<: *defaults\n")
+      )
+    ).toThrow("overrides must use registry package versions only");
+    expect(() =>
+      policy.validateWorkspace(
+        workspace.replace(
           `  - "${policy.RELEASE_PACKAGE}@${policy.RELEASE_VERSION}"`,
           `  - "${policy.RELEASE_PACKAGE}@${policy.RELEASE_VERSION}"\n  - "unreviewed-package"`
         )
@@ -340,6 +368,31 @@ describe("public Coordinator package policy", () => {
         `${lockfile}\n  malicious@1.0.0:\n    resolution: {repo: https://example.com/repository.git, commit: abc123}\n`
       )
     ).toThrow("unsupported package resolution");
+    expect(() =>
+      policy.validateLockfile(
+        `${lockfile}\n  malicious@1.0.0:\n    "resolution": {integrity: sha512-safe, tarball: https://example.invalid/sharp.tgz}\n`
+      )
+    ).toThrow("unsupported package resolution");
+    expect(() =>
+      policy.validateLockfile(
+        `${lockfile}\n  malicious@1.0.0:\n    "resol\\u0075tion": {integrity: sha512-safe, tarball: https://example.invalid/sharp.tgz}\n`
+      )
+    ).toThrow("escape sequences are not supported");
+    expect(() =>
+      policy.validateLockfile(
+        `${lockfile}\n  malicious@1.0.0:\n    resolution:\n      integrity: sha512-safe\n`
+      )
+    ).toThrow("unsupported package resolution");
+    expect(() =>
+      policy.validateLockfile(
+        `${lockfile}\n  malicious@1.0.0:\n    resolution: &source {integrity: sha512-safe}\n  copy@1.0.0:\n    resolution: *source\n`
+      )
+    ).toThrow("aliases and merge keys are not supported");
+    expect(() =>
+      policy.validateLockfile(
+        `${lockfile}\n# "resolution": ignored\n# "resol\\u0075tion": ignored\n`
+      )
+    ).not.toThrow();
   });
 
   const itWithSymlinkSupport = process.platform === "win32" ? it.skip : it;
@@ -398,6 +451,32 @@ describe("public Coordinator package policy", () => {
 
       expect(() => policy.validateRepositoryFiles(temporaryRoot)).toThrow(
         ".pnpmfile.cjs is not allowed"
+      );
+    } finally {
+      fs.rmSync(temporaryRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("rejects an npm lockfile before a package command starts", () => {
+    const temporaryRoot = fs.mkdtempSync(
+      path.join(os.tmpdir(), "public-package-policy-")
+    );
+    try {
+      for (const relativePath of [
+        ".npmrc",
+        "package.json",
+        "pnpm-workspace.yaml",
+        "pnpm-lock.yaml",
+      ]) {
+        fs.copyFileSync(
+          path.join(repositoryRoot, relativePath),
+          path.join(temporaryRoot, relativePath)
+        );
+      }
+      fs.writeFileSync(path.join(temporaryRoot, "package-lock.json"), "{}\n");
+
+      expect(() => policy.validateRepositoryFiles(temporaryRoot)).toThrow(
+        "package-lock.json is not allowed"
       );
     } finally {
       fs.rmSync(temporaryRoot, { recursive: true, force: true });
@@ -482,6 +561,105 @@ describe("public Coordinator package policy", () => {
     expect(fs.existsSync(observedConfigHome as string)).toBe(false);
   });
 
+  it("keeps supported package commands and platform boundaries explicit", () => {
+    for (const args of [
+      ["install", "--frozen-lockfile"],
+      ["install", "--frozen-lockfile", "--prod"],
+      ["add", "-D", "reviewed-package@1.0.0"],
+      ["remove", "reviewed-package"],
+      ["update", "reviewed-package"],
+      ["audit"],
+      ["audit", "--fix"],
+    ]) {
+      expect(() => policy.validateArguments(args)).not.toThrow();
+    }
+
+    const invocation = runner.parseSecureInvocationArguments([
+      "--seize-secure-repository-root",
+      repositoryRoot,
+      "--seize-secure-pnpm-binary",
+      process.execPath,
+      "--",
+      "install",
+      "--frozen-lockfile",
+    ]);
+    expect(invocation).toEqual({
+      args: ["install", "--frozen-lockfile"],
+      pnpmBinary: fs.realpathSync(process.execPath),
+      repositoryRoot: fs.realpathSync(repositoryRoot),
+    });
+
+    const windowsSpawn = jest.fn(() => ({ status: 19 }));
+    expect(
+      runner.runSecurePnpm({
+        args: ["install", "--frozen-lockfile"],
+        environment: { NODE_ENV: "test", SFW_BIN: process.execPath },
+        pnpmBinary: process.execPath,
+        repositoryRoot,
+        spawn: windowsSpawn,
+        platform: "win32",
+      })
+    ).toBe(19);
+    expect(windowsSpawn).toHaveBeenCalledWith(
+      `"${process.execPath}"`,
+      [
+        `"${fs.realpathSync(process.execPath)}"`,
+        '"install"',
+        '"--frozen-lockfile"',
+      ],
+      expect.objectContaining({ shell: true })
+    );
+    expect(() => runner.quoteWindowsShellArgument("bad%PATH%")).toThrow(
+      "cannot contain shell expansion characters"
+    );
+    expect(() =>
+      runner.resolveSfwCommand({
+        NODE_ENV: "test",
+        SFW_BIN: path.join(repositoryRoot, "missing-sfw"),
+      })
+    ).toThrow("SFW_BIN does not exist");
+  });
+
+  it("rejects an invalid repository state produced by a package command", () => {
+    const temporaryRoot = fs.mkdtempSync(
+      path.join(os.tmpdir(), "public-package-policy-")
+    );
+    try {
+      for (const relativePath of [
+        ".npmrc",
+        "package.json",
+        "pnpm-workspace.yaml",
+        "pnpm-lock.yaml",
+      ]) {
+        fs.copyFileSync(
+          path.join(repositoryRoot, relativePath),
+          path.join(temporaryRoot, relativePath)
+        );
+      }
+      const spawn = jest.fn(() => {
+        fs.appendFileSync(
+          path.join(temporaryRoot, "pnpm-workspace.yaml"),
+          "\nregistry: https://example.invalid\n"
+        );
+        return { status: 0 };
+      });
+
+      expect(() =>
+        runner.runSecurePnpm({
+          args: ["update"],
+          environment: { NODE_ENV: "test", SFW_BIN: process.execPath },
+          pnpmBinary: process.execPath,
+          repositoryRoot: temporaryRoot,
+          spawn,
+          platform: process.platform,
+        })
+      ).toThrow("setting is not allowed: registry");
+      expect(spawn).toHaveBeenCalledTimes(1);
+    } finally {
+      fs.rmSync(temporaryRoot, { recursive: true, force: true });
+    }
+  });
+
   it("removes obsolete private-package helpers", () => {
     for (const relativePath of [
       "scripts/private-github-packages-auth.sh",
@@ -492,6 +670,33 @@ describe("public Coordinator package policy", () => {
       expect(fs.existsSync(path.join(repositoryRoot, relativePath))).toBe(
         false
       );
+    }
+  });
+
+  it("keeps policy loading and build approvals fail-closed", () => {
+    const policySource = fs.readFileSync(
+      path.join(repositoryRoot, "scripts/public-package-policy.cjs"),
+      "utf8"
+    );
+    const dependencies = [
+      ...policySource.matchAll(/require\("([^"]+)"\)/g),
+    ].map((match) => match[1]);
+    expect(dependencies).toEqual(["node:fs", "node:path"]);
+
+    const wrapper = fs.readFileSync(
+      path.join(repositoryRoot, "bin/6529"),
+      "utf8"
+    );
+    expect(wrapper).not.toContain('exec "$REAL_PNPM" approve-builds');
+    expect(wrapper).toContain("Build approvals require a reviewed change");
+
+    for (const relativePath of [
+      "README.md",
+      "ops/docs/developer/pnpm-and-socket-firewall.md",
+    ]) {
+      expect(
+        fs.readFileSync(path.join(repositoryRoot, relativePath), "utf8")
+      ).not.toContain("6529 approve-builds");
     }
   });
 
@@ -512,5 +717,7 @@ describe("public Coordinator package policy", () => {
     expect(codexEnvironment).toContain("unset NODE_AUTH_TOKEN NPM_TOKEN");
     expect(stagingScript).toContain("unset NODE_AUTH_TOKEN NPM_TOKEN");
     expect(ec2StagingScript).toContain("unset NODE_AUTH_TOKEN NPM_TOKEN");
+    expect(stagingScript).toContain("./bin/6529 ci");
+    expect(ec2StagingScript).toContain("./bin/6529 ci");
   });
 });

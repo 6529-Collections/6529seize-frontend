@@ -8,6 +8,7 @@ const { spawnSync } = require("node:child_process");
 const {
   SECURE_PNPM_BINARY_ARGUMENT,
   SECURE_REPOSITORY_ROOT_ARGUMENT,
+  validateRepositoryFiles,
   validateRepositoryPolicy,
 } = require("./public-package-policy.cjs");
 
@@ -147,7 +148,13 @@ function runSecurePnpm({
     throw result.error;
   }
 
-  return result.status ?? 1;
+  const status = result.status ?? 1;
+  if (status === 0) {
+    // Package commands can change package.json, the workspace file, or the
+    // lockfile. Confirm the resulting repository still obeys the same policy.
+    validateRepositoryFiles(repositoryRoot);
+  }
+  return status;
 }
 
 function parseSecureInvocationArguments(args) {

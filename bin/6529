@@ -25,7 +25,6 @@ Common commands:
   6529 audit:fix       -> apply pnpm audit fixes
   6529 run dev         -> pnpm run dev
   6529 run build       -> pnpm run build
-  6529 approve-builds  -> pnpm approve-builds
   6529 prune:prod      -> pnpm run prune:prod
   6529 staging         -> bash repo-rooted scripts/staging.sh
   6529 env status      -> show selected .env API/WS target
@@ -151,7 +150,9 @@ case "$command_name" in
       --seize-secure-pnpm-binary "$REAL_PNPM" -- audit --fix "$@"
     ;;
   approve-builds)
-    exec "$REAL_PNPM" approve-builds "$@"
+    echo "Build approvals require a reviewed change to pnpm-workspace.yaml and scripts/public-package-policy.cjs." >&2
+    echo "Add the package to allowBuilds and ALLOWED_BUILD_DEPENDENCIES, then use \`6529 ci\`." >&2
+    exit 1
     ;;
   prune:prod)
     exec "$REAL_PNPM" run prune:prod "$@"

@@ -124,6 +124,10 @@ All project commands must go through the repo-local `6529` wrapper.
 - Remove dependencies: `6529 remove <package>`.
 - Update dependencies: `6529 update [package]`.
 - Audit dependencies: `6529 audit` or `6529 audit:fix`.
+- If a dependency needs an install/build script, add it to `allowBuilds` in
+  `pnpm-workspace.yaml` and `ALLOWED_BUILD_DEPENDENCIES` in
+  `scripts/public-package-policy.cjs` in the same reviewed pull request. Do not
+  approve build scripts automatically.
 - Run app: `6529 run dev`. The default local app port is `3001`.
 - Run scripts: `6529 run <script>`.
 - Do not use plain `pnpm install`, `pnpm dev`, `npm run ...`,

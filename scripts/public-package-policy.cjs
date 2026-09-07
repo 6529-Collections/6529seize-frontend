@@ -21,6 +21,12 @@ const ALLOWED_BUILD_DEPENDENCIES = new Set([
   "unrs-resolver",
   "utf-8-validate",
 ]);
+const ALLOWED_WORKSPACE_KEYS = new Set([
+  "allowBuilds",
+  "minimumReleaseAge",
+  "minimumReleaseAgeExclude",
+  "overrides",
+]);
 const SECURE_REPOSITORY_ROOT_ARGUMENT = "--seize-secure-repository-root";
 const SECURE_PNPM_BINARY_ARGUMENT = "--seize-secure-pnpm-binary";
 const ALLOWED_COMMANDS = new Set([
@@ -168,7 +174,7 @@ function validatePackageJson(text) {
 }
 
 function validateWorkspace(text) {
-  const topLevelKeys = [];
+  const topLevelKeys = new Set();
   for (const rawLine of text.split(/\r?\n/)) {
     const trimmedLine = rawLine.trim();
     if (trimmedLine === "" || trimmedLine.startsWith("#") || /^\s/.test(rawLine)) {
@@ -186,35 +192,18 @@ function validateWorkspace(text) {
         "pnpm-workspace.yaml quoted top-level keys cannot contain escapes"
       );
     }
-    topLevelKeys.push(keyMatch[1] ?? keyMatch[2] ?? keyMatch[3]);
-  }
-  for (const key of topLevelKeys) {
-    const name = key.toLowerCase().replace(/[^a-z0-9]/g, "");
-    const containsCredentialNetworkOrHookOverride =
-      name === "auth" ||
-      name.endsWith("auth") ||
-      name.includes("authtoken") ||
-      name.includes("token") ||
-      name.includes("username") ||
-      name.includes("password") ||
-      name.includes("userconfig") ||
-      name.includes("globalconfig") ||
-      name.includes("registry") ||
-      name.includes("registries") ||
-      name.includes("proxy") ||
-      name.includes("strictssl") ||
-      name.includes("cafile") ||
-      name.includes("pnpmfile") ||
-      name === "hooks" ||
-      name === "packages" ||
-      name === "configdependencies" ||
-      name === "dangerouslyallowallbuilds" ||
-      name === "onlybuiltdependencies" ||
-      name === "onlybuiltdependenciesfile" ||
-      name === "neverbuiltdependencies" ||
-      name === "ignoredbuiltdependencies";
-    if (containsCredentialNetworkOrHookOverride) {
+    const key = keyMatch[1] ?? keyMatch[2] ?? keyMatch[3];
+    if (topLevelKeys.has(key)) {
+      throw policyError(`duplicate pnpm-workspace.yaml setting: ${key}`);
+    }
+    if (!ALLOWED_WORKSPACE_KEYS.has(key)) {
       throw policyError(`pnpm-workspace.yaml setting is not allowed: ${key}`);
+    }
+    topLevelKeys.add(key);
+  }
+  for (const requiredKey of ALLOWED_WORKSPACE_KEYS) {
+    if (!topLevelKeys.has(requiredKey)) {
+      throw policyError(`pnpm-workspace.yaml must contain ${requiredKey}`);
     }
   }
   if (!/^minimumReleaseAge:\s*10080\s*$/m.test(text)) {
@@ -267,6 +256,50 @@ function validateWorkspace(text) {
   ) {
     throw policyError("allowBuilds must contain only approved packages");
   }
+
+  const overridesBlock = text.match(
+    /^overrides:\s*(?:\r?\n|$)((?:(?:[ \t]+[^\r\n]*|[ \t]*)\r?\n?)*)/m
+  );
+  const overrides = new Map();
+  for (const line of (overridesBlock?.[1] ?? "").split(/\r?\n/)) {
+    const trimmedLine = line.trim();
+    if (trimmedLine === "" || trimmedLine.startsWith("#")) {
+      continue;
+    }
+    const entry = trimmedLine.match(
+      /^(?:"([^"\\\r\n]+)"|'([^'\\\r\n]+)'|([^:'"\\\r\n][^:\r\n]*?))\s*:\s*(?:"([^"\\\r\n]+)"|'([^'\\\r\n]+)'|([^#\r\n]+?))\s*$/
+    );
+    if (!entry) {
+      throw policyError("overrides must use simple package selectors and versions");
+    }
+    const selector = (entry[1] ?? entry[2] ?? entry[3]).trim();
+    const version = (entry[4] ?? entry[5] ?? entry[6]).trim();
+    if (
+      selector === "<<" ||
+      /^[&*!]/.test(version) ||
+      !/^[A-Za-z0-9_.@/+<>=~^|*\- ]+(?:>[A-Za-z0-9_.@/+<>=~^|*\- ]+)*$/.test(
+        selector
+      ) ||
+      !/^(?:\$[A-Za-z0-9_.@/+\-]+|[0-9A-Za-z.*<>=~^|+\- ]+)$/.test(
+        version
+      )
+    ) {
+      throw policyError("overrides must use registry package versions only");
+    }
+    if (
+      selector.includes(RELEASE_PACKAGE) ||
+      version.includes(RELEASE_PACKAGE)
+    ) {
+      throw policyError(`${RELEASE_PACKAGE} cannot be changed by overrides`);
+    }
+    if (overrides.has(selector)) {
+      throw policyError(`duplicate package override: ${selector}`);
+    }
+    overrides.set(selector, version);
+  }
+  if (overrides.size === 0) {
+    throw policyError("pnpm-workspace.yaml must contain reviewed overrides");
+  }
 }
 
 function validateLockfile(text) {
@@ -288,7 +321,20 @@ function validateLockfile(text) {
   }
   for (const rawLine of text.split(/\r?\n/)) {
     const line = rawLine.trim();
-    if (!line.startsWith("resolution:")) {
+    if (line === "" || line.startsWith("#")) {
+      continue;
+    }
+    if (line.includes("\\")) {
+      throw policyError("pnpm-lock.yaml escape sequences are not supported");
+    }
+    if (
+      /^<<\s*:/.test(line) ||
+      /:\s*[&*][A-Za-z0-9_-]+(?:\s|$)/.test(line) ||
+      /^-\s*[&*][A-Za-z0-9_-]+(?:\s|$)/.test(line)
+    ) {
+      throw policyError("pnpm-lock.yaml aliases and merge keys are not supported");
+    }
+    if (!/^(?:resolution|"resolution"|'resolution')\s*:/.test(line)) {
       continue;
     }
     const resolution = line.match(/^resolution:\s*\{([^}]*)\}\s*$/);
@@ -400,7 +446,11 @@ function validateEnvironment(environment) {
 }
 
 function validateRepositoryFiles(repositoryRoot) {
-  for (const relativePath of [".pnpmfile.cjs", ".pnpmfile.js"]) {
+  for (const relativePath of [
+    ".pnpmfile.cjs",
+    ".pnpmfile.js",
+    "package-lock.json",
+  ]) {
     try {
       fs.lstatSync(path.join(repositoryRoot, relativePath));
     } catch (error) {
