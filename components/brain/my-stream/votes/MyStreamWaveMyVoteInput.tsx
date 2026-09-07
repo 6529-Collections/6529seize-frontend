@@ -332,7 +332,7 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
         className={`tw-flex tw-min-w-0 tw-items-center tw-gap-3 tw-rounded-lg tw-bg-iron-900 tw-pr-1 tw-ring-1 tw-ring-inset tw-transition-colors tw-duration-200 focus-within:tw-ring-2 motion-reduce:tw-transition-none @[46rem]/my-vote:tw-col-start-4 @[46rem]/my-vote:tw-row-start-1 @[46rem]/my-vote:tw-self-end ${
           isVoteValueOutOfRange
             ? "tw-ring-rose-400 focus-within:!tw-ring-rose-400"
-            : "tw-ring-iron-700 focus-within:!tw-ring-primary-400 desktop-hover:hover:tw-ring-iron-600"
+            : "tw-ring-iron-700 focus-within:!tw-ring-primary-400"
         }`}
       >
         <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-2">
