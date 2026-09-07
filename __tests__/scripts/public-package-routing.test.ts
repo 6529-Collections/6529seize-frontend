@@ -400,6 +400,31 @@ describe("public Coordinator package policy", () => {
     ).not.toThrow();
   });
 
+  it("checks parsed Coordinator lockfile nodes instead of YAML block text", () => {
+    const lockfile = fs.readFileSync(
+      path.join(repositoryRoot, "pnpm-lock.yaml"),
+      "utf8"
+    );
+    const packageKey = `'${policy.RELEASE_PACKAGE}@${policy.RELEASE_VERSION}'`;
+    const tampered = lockfile
+      .replace(
+        `'${policy.RELEASE_PACKAGE}':\n        specifier: ${policy.RELEASE_VERSION}\n        version: ${policy.RELEASE_VERSION}`,
+        `'${policy.RELEASE_PACKAGE}':\n        specifier: 0.0.5\n        version: 0.0.5`
+      )
+      .replace(
+        `${packageKey}:\n    resolution: {integrity: ${policy.RELEASE_INTEGRITY}}`,
+        `${packageKey}:\n    resolution: {integrity: sha512-wrong, tarball: https://registry.npmjs.org/other/-/other-1.0.0.tgz}`
+      )
+      .replace(
+        `${packageKey}:\n    dependencies:`,
+        `${packageKey}:\n    dependencies:\n      ajv: 8.20.0\n      ajv-formats: 3.0.1(ajv@8.20.0)\n      unreviewed: 1.0.0\n\ncoordinator-importer-decoy: |-\n  '${policy.RELEASE_PACKAGE}':\n        specifier: ${policy.RELEASE_VERSION}\n        version: ${policy.RELEASE_VERSION}\ncoordinator-package-decoy: |-\n  ${packageKey}:\n    resolution: {integrity: ${policy.RELEASE_INTEGRITY}}\ncoordinator-snapshot-decoy: |-\n  ${packageKey}:\n    dependencies:`
+      );
+
+    expect(() => policy.validateLockfile(tampered)).toThrow(
+      "does not pin the reviewed public package"
+    );
+  });
+
   const itWithSymlinkSupport = process.platform === "win32" ? it.skip : it;
 
   itWithSymlinkSupport(

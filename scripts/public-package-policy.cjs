@@ -8,6 +8,10 @@ const RELEASE_VERSION = "0.0.4";
 const RELEASE_REFERENCE = `${RELEASE_PACKAGE}@${RELEASE_VERSION}`;
 const RELEASE_INTEGRITY =
   "sha512-rbGE0a3zlYUQlkg43/1TWAysNLksw0eaewywxDi6IoiucWgsZyEOrmbctBRWeDxLNAU3VypzrjyIGkjZ8ediiQ==";
+const RELEASE_DEPENDENCIES = new Map([
+  ["ajv", "8.20.0"],
+  ["ajv-formats", "3.0.1(ajv@8.20.0)"],
+]);
 const ALLOWED_BUILD_DEPENDENCIES = new Set([
   "@nestjs/core",
   "@openapitools/openapi-generator-cli",
@@ -300,18 +304,92 @@ function validateWorkspace(text) {
   }
 }
 
-function validateLockfile(text) {
-  const packageKey = `'${RELEASE_PACKAGE}@${RELEASE_VERSION}'`;
-  const requiredFragments = [
-    `'${RELEASE_PACKAGE}':\n        specifier: ${RELEASE_VERSION}\n        version: ${RELEASE_VERSION}`,
-    `${packageKey}:\n    resolution: {integrity: ${RELEASE_INTEGRITY}}`,
-    `${packageKey}:\n    dependencies:`,
-  ];
-  for (const fragment of requiredFragments) {
-    if (!text.includes(fragment)) {
-      throw policyError("pnpm-lock.yaml does not pin the reviewed public package");
+function parseSimpleYamlEntry(rawLine, indentation) {
+  if (!rawLine.startsWith(" ".repeat(indentation))) {
+    return undefined;
+  }
+  const remainder = rawLine.slice(indentation);
+  if (remainder.startsWith(" ") || remainder.startsWith("\t")) {
+    return undefined;
+  }
+  const entry = remainder.match(
+    /^(?:"([^"\\\r\n]+)"|'([^'\\\r\n]+)'|([^:#][^:\r\n]*?))\s*:\s*(.*)$/
+  );
+  if (!entry) {
+    return undefined;
+  }
+  return {
+    key: (entry[1] ?? entry[2] ?? entry[3]).trim(),
+    value: entry[4].trim(),
+  };
+}
+
+function readYamlMapping(lines, start, end, indentation) {
+  const values = new Map();
+  for (let index = start; index < end; index += 1) {
+    const rawLine = lines[index];
+    const trimmedLine = rawLine.trim();
+    if (trimmedLine === "" || trimmedLine.startsWith("#")) {
+      continue;
+    }
+    const leadingWhitespace = rawLine.match(/^[ \t]*/)?.[0] ?? "";
+    if (leadingWhitespace.includes("\t")) {
+      throw policyError("pnpm-lock.yaml tab indentation is not supported");
+    }
+    if (leadingWhitespace.length !== indentation) {
+      continue;
+    }
+    const entry = parseSimpleYamlEntry(rawLine, indentation);
+    if (!entry) {
+      throw policyError("pnpm-lock.yaml has an unsupported mapping entry");
+    }
+    if (values.has(entry.key)) {
+      throw policyError(`pnpm-lock.yaml has duplicate key: ${entry.key}`);
+    }
+    values.set(entry.key, entry.value);
+  }
+  return values;
+}
+
+function findUniqueYamlBlock(lines, start, end, indentation, key) {
+  const values = readYamlMapping(lines, start, end, indentation);
+  if (!values.has(key) || values.get(key) !== "") {
+    throw policyError("pnpm-lock.yaml does not pin the reviewed public package");
+  }
+
+  let blockStart = -1;
+  for (let index = start; index < end; index += 1) {
+    const entry = parseSimpleYamlEntry(lines[index], indentation);
+    if (entry?.key === key) {
+      blockStart = index + 1;
+      break;
     }
   }
+  if (blockStart < 0) {
+    throw policyError("pnpm-lock.yaml does not pin the reviewed public package");
+  }
+
+  let blockEnd = end;
+  for (let index = blockStart; index < end; index += 1) {
+    const rawLine = lines[index];
+    const trimmedLine = rawLine.trim();
+    if (trimmedLine === "" || trimmedLine.startsWith("#")) {
+      continue;
+    }
+    const leadingWhitespace = rawLine.match(/^[ \t]*/)?.[0] ?? "";
+    if (leadingWhitespace.includes("\t")) {
+      throw policyError("pnpm-lock.yaml tab indentation is not supported");
+    }
+    if (leadingWhitespace.length <= indentation) {
+      blockEnd = index;
+      break;
+    }
+  }
+  return { start: blockStart, end: blockEnd };
+}
+
+function validateLockfile(text) {
+  const lines = text.split(/\r?\n/);
   if (
     /(?:^|[^a-z0-9.-])npm\.pkg\.github\.com(?=[:/]|[^a-z0-9.-]|$)/i.test(text)
   ) {
@@ -371,6 +449,90 @@ function validateLockfile(text) {
     if (referencedVersion !== RELEASE_VERSION) {
       throw policyError("pnpm-lock.yaml references an unreviewed package version");
     }
+  }
+
+  const importers = findUniqueYamlBlock(lines, 0, lines.length, 0, "importers");
+  const rootImporter = findUniqueYamlBlock(
+    lines,
+    importers.start,
+    importers.end,
+    2,
+    "."
+  );
+  const devDependencies = findUniqueYamlBlock(
+    lines,
+    rootImporter.start,
+    rootImporter.end,
+    4,
+    "devDependencies"
+  );
+  const releaseImporter = findUniqueYamlBlock(
+    lines,
+    devDependencies.start,
+    devDependencies.end,
+    6,
+    RELEASE_PACKAGE
+  );
+  const importerValues = readYamlMapping(
+    lines,
+    releaseImporter.start,
+    releaseImporter.end,
+    8
+  );
+
+  const packages = findUniqueYamlBlock(lines, 0, lines.length, 0, "packages");
+  const releaseKey = `${RELEASE_PACKAGE}@${RELEASE_VERSION}`;
+  const releasePackage = findUniqueYamlBlock(
+    lines,
+    packages.start,
+    packages.end,
+    2,
+    releaseKey
+  );
+  const packageValues = readYamlMapping(
+    lines,
+    releasePackage.start,
+    releasePackage.end,
+    4
+  );
+  const expectedResolution = `{integrity: ${RELEASE_INTEGRITY}}`;
+  const expectedTarballResolution = `{integrity: ${RELEASE_INTEGRITY}, tarball: https://registry.npmjs.org/${RELEASE_PACKAGE}/-/${RELEASE_PACKAGE.split("/")[1]}-${RELEASE_VERSION}.tgz}`;
+
+  const snapshots = findUniqueYamlBlock(lines, 0, lines.length, 0, "snapshots");
+  const releaseSnapshot = findUniqueYamlBlock(
+    lines,
+    snapshots.start,
+    snapshots.end,
+    2,
+    releaseKey
+  );
+  const snapshotDependencies = findUniqueYamlBlock(
+    lines,
+    releaseSnapshot.start,
+    releaseSnapshot.end,
+    4,
+    "dependencies"
+  );
+  const snapshotValues = readYamlMapping(
+    lines,
+    snapshotDependencies.start,
+    snapshotDependencies.end,
+    6
+  );
+
+  if (
+    importerValues.size !== 2 ||
+    importerValues.get("specifier") !== RELEASE_VERSION ||
+    importerValues.get("version") !== RELEASE_VERSION ||
+    (packageValues.get("resolution") !== expectedResolution &&
+      packageValues.get("resolution") !== expectedTarballResolution) ||
+    snapshotValues.size !== RELEASE_DEPENDENCIES.size ||
+    [...RELEASE_DEPENDENCIES].some(
+      ([dependencyName, dependencyVersion]) =>
+        snapshotValues.get(dependencyName) !== dependencyVersion
+    )
+  ) {
+    throw policyError("pnpm-lock.yaml does not pin the reviewed public package");
   }
 }
 
