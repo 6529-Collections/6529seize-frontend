@@ -8,9 +8,10 @@ requirements:
 - one required media type
 - optional required metadata keys
 - optional simultaneous-submission limit
+- rules participants must accept and sign before submitting
 
-The submission type stays visible. Optional media requirements, metadata, and
-simultaneous-submission limits are under `Submission requirements`.
+The submission type stays visible. Optional media requirements, metadata,
+simultaneous-submission limits, and signing rules are under `Submission requirements`.
 
 ## Location in the Site
 
@@ -32,20 +33,22 @@ simultaneous-submission limits are under `Submission requirements`.
 
 ## User Journey
 
-1. Choose one required submission type:
+1. Open `Submission requirements` when extra requirements are needed.
+2. Choose one required media type:
    - `None` (default)
    - `Image`
    - `Audio`
    - `Video`
-2. Open `Submission requirements` only when extra requirements are needed.
 3. Optionally add required metadata rows:
    - set row type (`Text` or `Number`)
    - set metadata name
    - remove rows you do not need
 4. Optionally set `Maximum number of simultaneous submissions per participant`.
-5. Collapse `Submission requirements` if desired; the configured values remain in the
+5. Optionally enter `Rules that require acceptance`. Leave the textbox empty if
+   no rules require signing. There is no separate acceptance toggle.
+6. Collapse `Submission requirements` if desired; the configured values remain in the
    draft and the disclosure shows `Customized`.
-6. Click `Next` to continue to `Voting`.
+7. Click `Next` to continue to `Voting`.
 
 ## Common Scenarios
 
@@ -55,7 +58,9 @@ simultaneous-submission limits are under `Submission requirements`.
   added`).
 - Add metadata rules for fields every participant must provide.
 - Leave submission-limit blank for unlimited simultaneous submissions.
-- Add wave guidelines and acceptance requirements in `Guidelines`, directly before `Description`.
+- Add signing rules in `Submission requirements` when participants must accept
+  and sign custom rules before submitting.
+- Add chat guidelines in `Guidelines`, directly before `Description`.
 
 ## Edge Cases
 
@@ -68,6 +73,10 @@ simultaneous-submission limits are under `Submission requirements`.
 - Submission-limit input keeps only positive integers:
   - `0`, negative, or invalid input clears the value.
   - decimal input is reduced to its integer part (example: `2.5` becomes `2`).
+- Entering signing rules requires a wallet signature before submission. Clearing
+  them, including whitespace-only text, removes the requirement.
+- Signing rules also mark `Submission requirements` as `Customized`. Collapsing
+  the section or visiting another step preserves the entered rules.
 
 ## Failure and Recovery
 
@@ -82,6 +91,10 @@ simultaneous-submission limits are under `Submission requirements`.
 - `Chat` waves skip `Drops`.
 - Required metadata is optional.
 - Wave guidelines are configured in `Guidelines`, not `Drops`.
+
+Signing rules use the existing participation terms and wallet-signature flow.
+They appear in the final Overview and the wave rules panel. Wave admins can
+edit them later from Configuration.
 
 ## Related Pages
 

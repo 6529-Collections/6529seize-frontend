@@ -2525,7 +2525,7 @@
         "All wave types include Guidelines; Rank and Approve also include Schedule, Drops, and Voting. Scheduled Rank and Approve include Outcomes, while Perpetual Ranking skips Outcomes.",
         "Schedule keeps Submissions Open, Voting Opens, and applicable first-announcement controls visible under Opening dates. Winner schedule or Wave end reveals secondary controls; Perpetual Ranking has no Schedule optional section.",
         "Drops keeps submission type visible and puts optional controls under Submission requirements.",
-        "Guidelines always shows Wave guidelines and, for Rank and Approve, the Rules that require acceptance textbox. There is no expand/collapse control or acceptance toggle: entering rules requires a wallet signature before submitting, while leaving the field empty or clearing it removes that requirement. The generated configuration summary appears in the final read-only Overview.",
+        "Guidelines always shows the Wave guidelines textbox. For Rank and Approve, Rules that require acceptance is in Drops under Submission requirements, below the simultaneous-submission limit. Entering signing rules marks that section Customized and requires a wallet signature before submitting; leaving the textbox empty or clearing it removes that requirement. There is no acceptance toggle. The generated configuration summary appears in the final read-only Overview.",
         "Voting keeps the power model, scope, required Rep or Memes details, and Approve threshold visible; named Vote limits sections contain negative-vote behavior, time weighting, and Approve hold timing.",
         "Outcomes keeps outcome selection, reward configuration, and Show outcomes menu section visible. Show outcomes menu section controls the Outcomes tab and reward details on leaderboard and winner cards; rewards still apply when hidden. Approve waves place the optional maximum winner count under Winner limits.",
         "In Description, individual @ mention suggestions follow the draft wave's Visibility group; private drafts suggest only eligible profiles.",
@@ -2743,12 +2743,12 @@
         "mobile"
       ],
       "facts": [
-        "Guidelines is for editing optional guidelines and acceptance-required rules. The read-only configuration summary is in the final Overview after Description. Overview shows access, schedules, submissions, voting, approval settings, detailed outcomes, author rules and guidelines, and the description. Confirm and create submits only from this last step. Previous returns to Description without clearing text or attachments.",
+        "Guidelines is for editing optional chat guidelines. Acceptance-required rules are configured in Drops under Submission requirements. The read-only configuration summary is in the final Overview after Description. Overview shows access, schedules, submissions, voting, approval settings, detailed outcomes, author rules and guidelines, and the description. Confirm and create submits only from this last step. Previous returns to Description without clearing text or attachments.",
         "Guidelines is directly before Description for every wave type. Chat enters it after Access, Perpetual Ranking after Voting, and scheduled Rank and Approve after Outcomes.",
         "Generated rules summarize the wave setup. Chat rules focus on wave type, access, and chat settings; Rank and Approve rules also include timing, submissions, voting, approval, and outcome visibility.",
         "Creators use the Wave guidelines section and Add wave guidelines... textbox to add guidelines. The subtitle explains that users see them when sending their first chat message. Guidelines are saved as wave metadata and also shown under Guidelines in the wave rules panel.",
         "When a wave has guidelines, a profile with no prior chat messages or participation drops in that wave reviews them before its first chat message is sent. Agree sends the pending message; Decline keeps the draft and shows the guidelines again on the next attempt.",
-        "For Rank and Approve waves, creators can add rules that require acceptance; those use the existing participation terms and wallet-signature submit flow.",
+        "For Rank and Approve waves, creators add Rules that require acceptance in Drops under Submission requirements. The textbox sits below the simultaneous-submission limit. Entering rules requires signing; empty or whitespace-only text does not. Closing the section or navigating between steps preserves the text. These rules use the existing participation terms and wallet-signature submit flow.",
         "Wave admins can edit Wave guidelines later from Configuration. For Rank and Approve waves, admins can also edit acceptance-required rules there.",
         "Participants can review rules in Configuration in the desktop wave right sidebar or from the mobile About information path."
       ],
@@ -2757,6 +2757,7 @@
       "tags": ["waves", "rules", "chat", "rank", "approve"],
       "source_refs": [
         "ops/docs/waves/create/feature-rules-step.md",
+        "ops/docs/waves/create/feature-drops-step.md",
         "ops/docs/waves/create/feature-final-overview-step.md",
         "ops/docs/waves/composer/feature-first-message-guidelines.md",
         "ops/docs/waves/flow-wave-participation.md",

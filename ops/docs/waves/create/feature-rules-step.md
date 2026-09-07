@@ -2,10 +2,10 @@
 
 ## Overview
 
-Use `Guidelines` to add optional wave guidelines and, for Rank and Approve waves,
-rules that participants must accept. The fields are always visible, with no
-expand/collapse control. The read-only configuration summary is
-in the final [Overview step](feature-final-overview-step.md).
+Use `Guidelines` to add optional chat guidelines. The textbox is always visible,
+with no expand/collapse control. Signing rules for Rank and Approve waves are
+configured in `Drops` under `Submission requirements`. The read-only
+configuration summary is in the final [Overview step](feature-final-overview-step.md).
 
 ## Location in the Site
 
@@ -32,11 +32,9 @@ The section is titled `Wave guidelines`, with the placeholder
 `Add wave guidelines...`. Its subtitle explains that users see these guidelines
 when sending their first chat message.
 
-For `Rank` and `Approve` waves, use rules that require acceptance when
-participants must explicitly accept and sign those rules before submitting.
-These rules use the existing participation terms and wallet-signature flow.
-`Chat` waves do not show acceptance-required rules because they do not have a
-submission step.
+For rules participants must explicitly accept and sign before submitting, use
+`Submission requirements` in [Drops](feature-drops-step.md). `Chat` waves skip
+that step.
 
 ## User Journey
 
@@ -44,10 +42,7 @@ submission step.
    `Outcomes` for scheduled `Rank` and `Approve`.
 2. Open `Guidelines`.
 3. Optionally enter wave guidelines in the visible field.
-4. For `Rank` and `Approve`, optionally enter rules participants must accept
-   and sign before submitting. This textbox is always visible. Leave it empty
-   if no rules require signing.
-5. Click `Next` to continue to `Description`. Guidelines is directly before
+4. Click `Next` to continue to `Description`. Guidelines is directly before
    Description for every wave type.
 
 ## Participant Visibility
@@ -72,14 +67,9 @@ the existing submit acceptance flow.
 
 ## Edge Cases
 
-- Wave guidelines do not require a wallet signature. `Chat` does not show the
-  separate rules that require signing before participation.
-- Leaving custom-rule fields blank is valid.
+- Wave guidelines do not require a wallet signature.
+- Leaving the guidelines field blank is valid.
 - Wave guidelines are capped at `2,000` characters.
-- For `Rank` and `Approve`, clearing the acceptance-required rules textbox
-  removes the signature requirement. Whitespace-only text also counts as empty.
-- For `Rank` and `Approve`, acceptance-required rules require a wallet
-  signature only when rules text is present.
 
 ## Related Pages
 

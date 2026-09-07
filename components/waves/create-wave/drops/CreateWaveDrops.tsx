@@ -3,6 +3,7 @@
 import type { ApiWaveParticipationRequirement } from "@/generated/models/ApiWaveParticipationRequirement";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
+import { normalizeWaveCustomRules } from "@/helpers/waves/wave-metadata.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import type {
@@ -12,6 +13,7 @@ import type {
 import CreateWaveDropsMetadata from "./metadata/CreateWaveDropsMetadata";
 import CreateWaveDropsSubmissionMode from "./submission-mode/CreateWaveDropsSubmissionMode";
 import CreateWaveDropsTypes from "./types/CreateWaveDropsTypes";
+import CreateWaveTermsOfService from "./terms/CreateWaveTermsOfService";
 import CreateWaveAdvancedSection from "../utils/CreateWaveAdvancedSection";
 import CreateWaveStepHeader from "../utils/CreateWaveStepHeader";
 import { CREATE_WAVE_FORM_STYLES } from "../utils/createWaveFormStyles";
@@ -79,11 +81,20 @@ export default function CreateWaveDrops({
     });
   };
 
+  const setBindingRules = (terms: string | null) => {
+    setDrops({
+      ...drops,
+      terms,
+      signatureRequired: Boolean(normalizeWaveCustomRules(terms)),
+    });
+  };
+
   const isNotChatType = waveType !== ApiWaveType.Chat;
   const isCustomized =
     drops.requiredTypes.length > 0 ||
     drops.requiredMetadata.length > 0 ||
-    drops.noOfApplicationsAllowedPerParticipant !== null;
+    drops.noOfApplicationsAllowedPerParticipant !== null ||
+    (isNotChatType && Boolean(normalizeWaveCustomRules(drops.terms)));
   const hasAdvancedError = errors.some((error) =>
     ADVANCED_DROPS_ERRORS.has(error)
   );
@@ -159,6 +170,14 @@ export default function CreateWaveDrops({
                   "waves.create.drops.maxSimultaneousSubmissions.description"
                 )}
               </p>
+            </div>
+          )}
+          {isNotChatType && (
+            <div className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-pt-6">
+              <CreateWaveTermsOfService
+                terms={drops.terms}
+                setTerms={setBindingRules}
+              />
             </div>
           )}
         </div>

@@ -1,46 +1,29 @@
 "use client";
 
-import { ApiWaveType } from "@/generated/models/ApiWaveType";
-import {
-  WAVE_CUSTOM_RULES_MAX_LENGTH,
-  normalizeWaveCustomRules,
-} from "@/helpers/waves/wave-metadata.helpers";
+import { WAVE_CUSTOM_RULES_MAX_LENGTH } from "@/helpers/waves/wave-metadata.helpers";
 import type { CreateWaveConfig } from "@/types/waves.types";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
-import CreateWaveTermsOfService from "./drops/terms/CreateWaveTermsOfService";
 import CreateWaveStepHeader from "./utils/CreateWaveStepHeader";
 import { CREATE_WAVE_FORM_STYLES } from "./utils/createWaveFormStyles";
 
 interface CreateWaveRulesProps {
   readonly config: CreateWaveConfig;
   readonly setDisplay: (display: CreateWaveConfig["display"]) => void;
-  readonly setDrops: (drops: CreateWaveConfig["drops"]) => void;
 }
 
 export default function CreateWaveRules({
   config,
   setDisplay,
-  setDrops,
 }: CreateWaveRulesProps) {
   const locale = useBrowserLocale();
   const customRules = config.display.customRules ?? "";
   const customRulesHelpId = "create-wave-custom-rules-help";
   const customRulesCounterId = "create-wave-custom-rules-counter";
-  const supportsAcceptanceRules = config.overview.type !== ApiWaveType.Chat;
   const setDisplayRules = (value: string) => {
     setDisplay({
       ...config.display,
       customRules: value,
-    });
-  };
-
-  const setBindingRules = (terms: string | null) => {
-    const normalizedTerms = normalizeWaveCustomRules(terms);
-    setDrops({
-      ...config.drops,
-      terms,
-      signatureRequired: Boolean(normalizedTerms),
     });
   };
 
@@ -99,15 +82,6 @@ export default function CreateWaveRules({
               </div>
             </div>
           </section>
-
-          {supportsAcceptanceRules && (
-            <section className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-pt-6">
-              <CreateWaveTermsOfService
-                terms={config.drops.terms}
-                setTerms={setBindingRules}
-              />
-            </section>
-          )}
         </div>
       </section>
     </div>

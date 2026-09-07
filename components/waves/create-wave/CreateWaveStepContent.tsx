@@ -137,13 +137,7 @@ export default function CreateWaveStepContent({
         />
       );
     case CreateWaveStep.RULES:
-      return (
-        <CreateWaveRules
-          config={config}
-          setDisplay={setDisplay}
-          setDrops={setDrops}
-        />
-      );
+      return <CreateWaveRules config={config} setDisplay={setDisplay} />;
     case CreateWaveStep.VOTING:
       return (
         <CreateWaveVoting
