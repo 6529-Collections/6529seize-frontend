@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 const fs = require("node:fs");
+const os = require("node:os");
 const path = require("node:path");
 const { spawnSync } = require("node:child_process");
 
@@ -51,7 +52,7 @@ function removeEnvironmentVariableCaseInsensitive(environment, variableName) {
   }
 }
 
-function packageEnvironment(environment, repositoryRoot) {
+function packageEnvironment(environment, repositoryRoot, pnpmConfigHome) {
   const childEnvironment = {
     ...environment,
     SEIZE_SECURE_INSTALL: "1",
@@ -66,6 +67,7 @@ function packageEnvironment(environment, repositoryRoot) {
   childEnvironment.npm_config_registry = "https://registry.npmjs.org/";
   childEnvironment.npm_config_userconfig = projectNpmrc;
   childEnvironment.npm_config_globalconfig = projectNpmrc;
+  childEnvironment.XDG_CONFIG_HOME = pnpmConfigHome;
 
   return childEnvironment;
 }
@@ -88,8 +90,6 @@ function runSecurePnpm({
     environment,
     validateEnvironmentOverrides: true,
   });
-  const childEnvironment = packageEnvironment(environment, repositoryRoot);
-
   if (typeof pnpmBinary !== "string" || !path.isAbsolute(pnpmBinary)) {
     throw new Error(
       `${SECURE_PNPM_BINARY_ARGUMENT} requires an absolute pnpm path`
@@ -104,18 +104,31 @@ function runSecurePnpm({
     ? quoteWindowsShellArgument(sfwCommand)
     : sfwCommand;
   const commandArguments = [trustedPnpmBinary, ...args];
-  const result = spawn(
-    command,
-    useWindowsShell
-      ? commandArguments.map(quoteWindowsShellArgument)
-      : commandArguments,
-    {
-      cwd: repositoryRoot,
-      stdio: "inherit",
-      shell: useWindowsShell,
-      env: childEnvironment,
-    }
+  const pnpmConfigHome = fs.mkdtempSync(
+    path.join(os.tmpdir(), "6529-pnpm-config-")
   );
+  let result;
+  try {
+    const childEnvironment = packageEnvironment(
+      environment,
+      repositoryRoot,
+      pnpmConfigHome
+    );
+    result = spawn(
+      command,
+      useWindowsShell
+        ? commandArguments.map(quoteWindowsShellArgument)
+        : commandArguments,
+      {
+        cwd: repositoryRoot,
+        stdio: "inherit",
+        shell: useWindowsShell,
+        env: childEnvironment,
+      }
+    );
+  } finally {
+    fs.rmSync(pnpmConfigHome, { recursive: true, force: true });
+  }
 
   if (result.error) {
     if (result.error.code === "ENOENT") {

@@ -39,6 +39,7 @@ const FORBIDDEN_OPTION_NAMES = new Set([
   "g",
   "global",
   "globalconfig",
+  "ignoreworkspace",
   "ignorepnpmfile",
   "ignorescripts",
   "key",

@@ -66,6 +66,7 @@ describe("public Coordinator package policy", () => {
       "-w",
       "--filter=app",
       "--filter-prod=app",
+      "--ignore-workspace",
     ]) {
       expect(() => policy.validateArguments(["install", option])).toThrow(
         "pnpm option is not allowed"
@@ -252,13 +253,28 @@ describe("public Coordinator package policy", () => {
     ).toThrow("package environment override is not allowed");
     expect(rejectedSpawn).not.toHaveBeenCalled();
 
-    const spawn = jest.fn(() => ({ status: 0 }));
+    let observedConfigHome: string | undefined;
+    const spawn = jest.fn(
+      (
+        _command: string,
+        _args: string[],
+        options: { env: NodeJS.ProcessEnv }
+      ) => {
+        observedConfigHome = options.env["XDG_CONFIG_HOME"];
+        expect(observedConfigHome).toBeDefined();
+        expect(fs.statSync(observedConfigHome as string).isDirectory()).toBe(
+          true
+        );
+        return { status: 0 };
+      }
+    );
     const result = runner.runSecurePnpm({
       args: ["install", "--frozen-lockfile"],
       environment: {
         NODE_ENV: "test",
         NODE_AUTH_TOKEN: "old-github-package-token",
         NPM_TOKEN: "unrelated-npm-token",
+        XDG_CONFIG_HOME: "/tmp/untrusted-pnpm-config",
         SFW_BIN: process.execPath,
       },
       pnpmBinary: process.execPath,
@@ -287,6 +303,9 @@ describe("public Coordinator package policy", () => {
     expect(options.env["npm_config_globalconfig"]).toBe(
       path.join(repositoryRoot, ".npmrc")
     );
+    expect(options.env["XDG_CONFIG_HOME"]).toBe(observedConfigHome);
+    expect(observedConfigHome).not.toBe("/tmp/untrusted-pnpm-config");
+    expect(fs.existsSync(observedConfigHome as string)).toBe(false);
   });
 
   it("removes obsolete private-package helpers", () => {
