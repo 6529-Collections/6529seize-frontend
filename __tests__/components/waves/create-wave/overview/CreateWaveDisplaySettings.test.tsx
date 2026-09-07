@@ -250,7 +250,7 @@ describe("CreateWaveDisplaySettings", () => {
     );
 
     // The outcomes-visibility toggle lives on the Outcomes step now.
-    expect(screen.queryByText("Show outcomes")).toBeNull();
+    expect(screen.queryByText("Show outcomes menu section")).toBeNull();
     expect(screen.queryByLabelText("Approvals tab label")).toBeNull();
   });
 

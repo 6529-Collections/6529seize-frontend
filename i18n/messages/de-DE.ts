@@ -505,6 +505,9 @@ export const DE_DE_MESSAGES = {
     "Bitte wähle einen Subwave-Typ aus, um fortzufahren.",
   "waves.create.overview.typeRequired":
     "Bitte wähle einen Wave-Typ aus, um fortzufahren.",
+  "waves.create.outcomes.showOutcomes": "Menübereich Ergebnisse anzeigen",
+  "waves.create.outcomes.showOutcomesDescription":
+    "Zeigt den Tab Ergebnisse und die Belohnungsdetails auf Ranglisten- und Gewinnerkarten. Belohnungen gelten auch dann, wenn sie ausgeblendet sind.",
   "waves.create.rules.title": "Richtlinien",
   "waves.create.rules.guidelinesFieldLabel": "Wave-Richtlinien",
   "waves.create.rules.guidelinesDescription":

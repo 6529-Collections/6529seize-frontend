@@ -500,6 +500,10 @@ export const ES_ES_MESSAGES = {
   "waves.create.overview.subwaveTypeRequired":
     "Elige un tipo de subwave para continuar.",
   "waves.create.overview.typeRequired": "Elige un tipo de wave para continuar.",
+  "waves.create.outcomes.showOutcomes":
+    "Mostrar la sección Resultados del menú",
+  "waves.create.outcomes.showOutcomesDescription":
+    "Muestra la pestaña Resultados y los detalles de las recompensas en las tarjetas de la clasificación y de los ganadores. Las recompensas se siguen aplicando aunque estén ocultas.",
   "waves.create.rules.title": "Directrices",
   "waves.create.rules.guidelinesFieldLabel": "Directrices de la Wave",
   "waves.create.rules.guidelinesDescription":

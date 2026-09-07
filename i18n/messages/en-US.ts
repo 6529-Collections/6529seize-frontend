@@ -1670,7 +1670,9 @@ const WAVE_CREATE_OUTCOMES_MESSAGES = objectMessages("waves.create.outcomes", {
   rankAdvancedSummary: "Outcome visibility",
   approveAdvancedSummary: "Winner limits",
   chooseType: "Choose outcome type",
-  showOutcomes: "Show outcomes",
+  showOutcomes: "Show outcomes menu section",
+  showOutcomesDescription:
+    "Shows the Outcomes tab and reward details on leaderboard and winner cards. Rewards still apply when hidden.",
   nicPositiveError: "NIC must be a positive number",
   repPositiveError: "Rep must be a positive number",
   "perpetual.title": "Outcome is leaderboard position",

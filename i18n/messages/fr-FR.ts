@@ -510,6 +510,9 @@ export const FR_FR_MESSAGES = {
     "Veuillez choisir un type de sous-wave pour continuer.",
   "waves.create.overview.typeRequired":
     "Veuillez choisir un type de wave pour continuer.",
+  "waves.create.outcomes.showOutcomes": "Afficher la section Résultats du menu",
+  "waves.create.outcomes.showOutcomesDescription":
+    "Affiche l’onglet Résultats et les détails des récompenses sur les cartes du classement et des gagnants. Les récompenses restent applicables lorsqu’elles sont masquées.",
   "waves.create.rules.title": "Directives",
   "waves.create.rules.guidelinesFieldLabel": "Directives de la Wave",
   "waves.create.rules.guidelinesDescription":

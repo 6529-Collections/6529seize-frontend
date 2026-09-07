@@ -511,6 +511,9 @@ export const EN_GB_MESSAGES = {
     "Please choose a subwave type to continue.",
   "waves.create.overview.typeRequired":
     "Please choose a wave type to continue.",
+  "waves.create.outcomes.showOutcomes": "Show outcomes menu section",
+  "waves.create.outcomes.showOutcomesDescription":
+    "Shows the Outcomes tab and reward details on leaderboard and winner cards. Rewards still apply when hidden.",
   "waves.create.rules.title": "Guidelines",
   "waves.create.rules.guidelinesFieldLabel": "Wave guidelines",
   "waves.create.rules.guidelinesDescription":

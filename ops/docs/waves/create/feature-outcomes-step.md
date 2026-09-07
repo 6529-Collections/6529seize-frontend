@@ -51,7 +51,9 @@ and it never announces winners.
 3. Fill the selected form.
 4. Click `Save` to add a row, or `Cancel` to discard draft edits.
 5. Repeat to add more outcomes.
-6. Choose whether to `Show outcomes` after creation.
+6. Choose whether to `Show outcomes menu section` after creation. This controls the
+   Outcomes tab and reward details on leaderboard and winner cards. Rewards
+   still apply when hidden.
 7. For `Approve`, open `Winner limits` and optionally set `Max Winners`; blank
    means unlimited.
 8. Click `Next` to continue to `Description`.
@@ -76,7 +78,7 @@ and it never announces winners.
 - Changing selected type while editing drops unsaved form values.
 - Saved `Manual` and `Rep` rows can be removed.
 - Saved `NIC` rows show a remove icon, but it currently does not remove the row.
-- `Show outcomes` defaults on. `Max Winners` defaults blank.
+- `Show outcomes menu section` defaults on. `Max Winners` defaults blank.
 - A non-default `Max Winners` value shows `Customized` on the collapsed
   `Winner limits` disclosure.
 

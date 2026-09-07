@@ -2523,7 +2523,7 @@
         "Drops keeps submission type visible and puts optional controls under Submission requirements.",
         "Guidelines always shows Wave guidelines and, for Rank and Approve, the Rules that require acceptance textbox. There is no expand/collapse control or acceptance toggle: entering rules requires a wallet signature before submitting, while leaving the field empty or clearing it removes that requirement. The generated configuration summary appears in the final read-only Overview.",
         "Voting keeps the power model, scope, required Rep or Memes details, and Approve threshold visible; named Vote limits sections contain negative-vote behavior, time weighting, and Approve hold timing.",
-        "Outcomes keeps outcome selection, reward configuration, and Show outcomes visible; Approve waves place the optional maximum winner count under Winner limits.",
+        "Outcomes keeps outcome selection, reward configuration, and Show outcomes menu section visible. Show outcomes menu section controls the Outcomes tab and reward details on leaderboard and winner cards; rewards still apply when hidden. Approve waves place the optional maximum winner count under Winner limits.",
         "In Description, individual @ mention suggestions follow the draft wave's Visibility group; private drafts suggest only eligible profiles.",
         "The docs for wave creation live under ops/docs/waves/create; on web, use /waves?create=wave to open create-wave mode."
       ],
