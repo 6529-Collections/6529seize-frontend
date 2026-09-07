@@ -1,4 +1,7 @@
-import { validateFile, testVideoCompatibility } from "@/components/waves/memes/file-upload/utils/fileValidation";
+import {
+  validateFile,
+  testVideoCompatibility,
+} from "@/components/waves/memes/file-upload/utils/fileValidation";
 
 // Mock MediaError constants
 const MediaErrorMock = {
@@ -19,23 +22,25 @@ function makeFile(name: string, type: string, size = 10) {
 }
 
 describe("validateFile", () => {
-  it("rejects missing file", () => {
-    const res = validateFile(undefined as any);
+  it("rejects missing file", async () => {
+    const res = await validateFile(undefined as any);
     expect(res.valid).toBe(false);
   });
 
-  it("rejects wrong type", () => {
-    const res = validateFile(makeFile("a.txt", "text/plain"));
+  it("rejects wrong type", async () => {
+    const res = await validateFile(makeFile("a.txt", "text/plain"));
     expect(res.valid).toBe(false);
   });
 
-  it("rejects large file", () => {
-    const res = validateFile(makeFile("a.png", "image/png", 201 * 1024 * 1024));
+  it("rejects large file", async () => {
+    const res = await validateFile(
+      makeFile("a.png", "image/png", 251 * 1024 * 1024)
+    );
     expect(res.valid).toBe(false);
   });
 
-  it("accepts good image", () => {
-    const res = validateFile(makeFile("a.png", "image/png"));
+  it("accepts good image", async () => {
+    const res = await validateFile(makeFile("a.png", "image/png"));
     expect(res.valid).toBe(true);
   });
 });
