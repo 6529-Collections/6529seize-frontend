@@ -61,6 +61,8 @@ const FORBIDDEN_OPTION_NAMES = new Set([
   "prefix",
   "proxy",
   "preferoffline",
+  "r",
+  "recursive",
   "httpsproxy",
   "registry",
   "strictssl",
@@ -348,6 +350,17 @@ function validateEnvironment(environment) {
 }
 
 function validateRepositoryFiles(repositoryRoot) {
+  for (const relativePath of [".pnpmfile.cjs", ".pnpmfile.js"]) {
+    try {
+      fs.lstatSync(path.join(repositoryRoot, relativePath));
+    } catch (error) {
+      if (error && typeof error === "object" && error.code === "ENOENT") {
+        continue;
+      }
+      throw error;
+    }
+    throw policyError(`${relativePath} is not allowed`);
+  }
   validateNpmrc(readRepositoryFile(repositoryRoot, ".npmrc"));
   validatePackageJson(readRepositoryFile(repositoryRoot, "package.json"));
   validateWorkspace(readRepositoryFile(repositoryRoot, "pnpm-workspace.yaml"));

@@ -67,6 +67,8 @@ describe("public Coordinator package policy", () => {
       "--filter=app",
       "--filter-prod=app",
       "--ignore-workspace",
+      "-r",
+      "--recursive",
       "--config.dangerously-allow-all-builds=true",
       "--global-pnpmfile=hook.cjs",
     ]) {
@@ -271,6 +273,35 @@ describe("public Coordinator package policy", () => {
     }
   );
 
+  it("rejects project pnpm hook files", () => {
+    const temporaryRoot = fs.mkdtempSync(
+      path.join(os.tmpdir(), "public-package-policy-")
+    );
+    try {
+      for (const relativePath of [
+        ".npmrc",
+        "package.json",
+        "pnpm-workspace.yaml",
+        "pnpm-lock.yaml",
+      ]) {
+        fs.copyFileSync(
+          path.join(repositoryRoot, relativePath),
+          path.join(temporaryRoot, relativePath)
+        );
+      }
+      fs.writeFileSync(
+        path.join(temporaryRoot, ".pnpmfile.cjs"),
+        "module.exports = {};\n"
+      );
+
+      expect(() => policy.validateRepositoryFiles(temporaryRoot)).toThrow(
+        ".pnpmfile.cjs is not allowed"
+      );
+    } finally {
+      fs.rmSync(temporaryRoot, { recursive: true, force: true });
+    }
+  });
+
   it("runs pnpm through Socket Firewall without package tokens", () => {
     const rejectedSpawn = jest.fn(() => ({ status: 0 }));
     expect(() =>
@@ -371,8 +402,13 @@ describe("public Coordinator package policy", () => {
       path.join(repositoryRoot, "scripts/staging.sh"),
       "utf8"
     );
+    const ec2StagingScript = fs.readFileSync(
+      path.join(repositoryRoot, "dev-setup/run-staging-ec2-setup.sh"),
+      "utf8"
+    );
 
     expect(codexEnvironment).toContain("unset NODE_AUTH_TOKEN NPM_TOKEN");
     expect(stagingScript).toContain("unset NODE_AUTH_TOKEN NPM_TOKEN");
+    expect(ec2StagingScript).toContain("unset NODE_AUTH_TOKEN NPM_TOKEN");
   });
 });

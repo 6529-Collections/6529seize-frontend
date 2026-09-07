@@ -517,6 +517,9 @@ EOF
 # ---------- Main ----------
 
 main() {
+  # Private-package tokens are no longer needed and must not reach builds or PM2.
+  unset NODE_AUTH_TOKEN NPM_TOKEN
+
   # 0) Gather ALL user input up front (single interaction)
   collect_all_inputs
   create_env_file
