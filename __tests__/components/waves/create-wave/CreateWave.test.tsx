@@ -717,6 +717,61 @@ describe("CreateWave", () => {
       });
     });
 
+    it("reviews and submits the updated description after returning to edit", async () => {
+      mockedUseWaveConfig.mockReturnValue({
+        ...mockWaveConfig,
+        step: CreateWaveStep.DESCRIPTION,
+      });
+      const { rerender } = renderCreateWave();
+      fireEvent.click(screen.getByTestId("mock-next"));
+      mockedUseWaveConfig.mockReturnValue({
+        ...mockWaveConfig,
+        step: CreateWaveStep.REVIEW,
+      });
+      rerender(createWaveElement());
+      expect(screen.getByTestId("create-wave-review")).toHaveTextContent(
+        "Test content"
+      );
+      mockedUseWaveConfig.mockReturnValue({
+        ...mockWaveConfig,
+        step: CreateWaveStep.DESCRIPTION,
+      });
+      rerender(createWaveElement());
+      const updatedPart = { content: "Edited before confirming" };
+      mockGetDropSnapshot.mockReturnValue({
+        parts: [updatedPart],
+        title: "Updated",
+        referenced_nfts: [],
+        mentioned_users: [],
+        metadata: [],
+      });
+      mockedGenerateDropPart.mockResolvedValue({
+        ...updatedPart,
+        quoted_drop: null,
+        media: [],
+      });
+      fireEvent.click(screen.getByTestId("mock-next"));
+      mockedUseWaveConfig.mockReturnValue({
+        ...mockWaveConfig,
+        step: CreateWaveStep.REVIEW,
+      });
+      rerender(createWaveElement());
+      expect(screen.getByTestId("create-wave-review")).toHaveTextContent(
+        updatedPart.content
+      );
+      expect(screen.getByTestId("create-wave-description")).not.toBeVisible();
+      fireEvent.click(screen.getByRole("button", { name: /complete/i }));
+      await waitFor(() =>
+        expect(mockedGetCreateNewWaveBody).toHaveBeenCalledWith(
+          expect.objectContaining({
+            drop: expect.objectContaining({
+              parts: [expect.objectContaining(updatedPart)],
+            }),
+          })
+        )
+      );
+    });
+
     it("submits from final review while the description editor is hidden", async () => {
       const configOnReviewStep = {
         ...mockWaveConfig,
