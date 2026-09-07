@@ -619,7 +619,7 @@ describe("CreateWave", () => {
     expect(screen.getByTestId("mock-next")).toBeEnabled();
   });
 
-  it("hides acceptance rules on the chat rules step", () => {
+  it("shows chat guidelines without acceptance rules", () => {
     mockedUseWaveConfig.mockReturnValue({
       ...mockWaveConfig,
       step: CreateWaveStep.RULES,
@@ -634,17 +634,19 @@ describe("CreateWave", () => {
 
     renderCreateWave();
 
-    expect(screen.getByLabelText("Wave guidelines")).toBeInTheDocument();
+    expect(
+      screen.getByRole("textbox", { name: "Chat guidelines" })
+    ).toBeInTheDocument();
     expect(
       screen.queryByText("Rules that require acceptance")
     ).not.toBeInTheDocument();
     expect(screen.queryByText("Require acceptance")).not.toBeInTheDocument();
   });
 
-  it("shows acceptance rules on the rank rules step", () => {
+  it("shows acceptance rules in the rank submission requirements", () => {
     mockedUseWaveConfig.mockReturnValue({
       ...mockWaveConfig,
-      step: CreateWaveStep.RULES,
+      step: CreateWaveStep.DROPS,
       config: {
         ...mockWaveConfig.config,
         overview: {
@@ -659,7 +661,10 @@ describe("CreateWave", () => {
     expect(
       screen.getByText("Rules that require acceptance")
     ).toBeInTheDocument();
-    expect(screen.getByText("Require acceptance")).toBeInTheDocument();
+    expect(
+      screen.getByRole("textbox", { name: "Rules that require acceptance" })
+    ).toBeVisible();
+    expect(screen.queryByText("Require acceptance")).not.toBeInTheDocument();
   });
 
   it("shows actions component when no outcome type is selected", () => {
