@@ -23,7 +23,9 @@ const PACKAGE_MUTATION_COMMANDS = new Set([
   "remove",
   "update",
 ]);
+const FORBIDDEN_UPDATE_OPTION_NAMES = new Set(["l", "latest"]);
 const FORBIDDEN_OPTION_NAMES = new Set([
+  "allowbuilds",
   "auth",
   "authtoken",
   "ca",
@@ -33,6 +35,7 @@ const FORBIDDEN_OPTION_NAMES = new Set([
   "config",
   "configdependencies",
   "configdir",
+  "dangerouslyallowallbuilds",
   "dir",
   "filter",
   "filterprod",
@@ -42,12 +45,16 @@ const FORBIDDEN_OPTION_NAMES = new Set([
   "ignoreworkspace",
   "ignorepnpmfile",
   "ignorescripts",
+  "ignoredbuiltdependencies",
   "key",
   "lockfiledir",
   "lockfiledirectory",
   "modulesdir",
+  "neverbuiltdependencies",
   "npmglobalconfig",
   "offline",
+  "onlybuiltdependencies",
+  "onlybuiltdependenciesfile",
   "password",
   "pnpmfile",
   "prefix",
@@ -250,6 +257,9 @@ function validateArguments(args) {
       ? name.slice("config".length)
       : name;
     if (
+      (args[0] === "update" &&
+        (FORBIDDEN_UPDATE_OPTION_NAMES.has(name) ||
+          FORBIDDEN_UPDATE_OPTION_NAMES.has(unprefixedName))) ||
       FORBIDDEN_OPTION_NAMES.has(name) ||
       FORBIDDEN_OPTION_NAMES.has(unprefixedName)
     ) {

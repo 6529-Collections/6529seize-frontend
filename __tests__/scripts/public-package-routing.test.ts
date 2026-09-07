@@ -67,6 +67,7 @@ describe("public Coordinator package policy", () => {
       "--filter=app",
       "--filter-prod=app",
       "--ignore-workspace",
+      "--config.dangerously-allow-all-builds=true",
     ]) {
       expect(() => policy.validateArguments(["install", option])).toThrow(
         "pnpm option is not allowed"
@@ -111,11 +112,16 @@ describe("public Coordinator package policy", () => {
     expect(() =>
       policy.validateArguments(["add", "@reviewed-scope/package@1.2.3"])
     ).not.toThrow();
+    for (const option of ["--latest", "-L"]) {
+      expect(() => policy.validateArguments(["update", option])).toThrow(
+        "pnpm option is not allowed"
+      );
+    }
     for (const args of [
       ["add", policy.RELEASE_PACKAGE],
       ["install", `${policy.RELEASE_PACKAGE}@${policy.RELEASE_VERSION}`],
       ["remove", policy.RELEASE_PACKAGE],
-      ["update", "--latest", `${policy.RELEASE_PACKAGE}@latest`],
+      ["update", `${policy.RELEASE_PACKAGE}@latest`],
     ]) {
       expect(() => policy.validateArguments(args)).toThrow(
         "cannot be changed by a package command"
@@ -125,6 +131,12 @@ describe("public Coordinator package policy", () => {
       policy.validateEnvironment({
         NODE_ENV: "test",
         npm_config_registry: "https://example.com",
+      })
+    ).toThrow("package environment override is not allowed");
+    expect(() =>
+      policy.validateEnvironment({
+        NODE_ENV: "test",
+        npm_config_dangerously_allow_all_builds: "true",
       })
     ).toThrow("package environment override is not allowed");
     expect(() =>
@@ -320,5 +332,19 @@ describe("public Coordinator package policy", () => {
         false
       );
     }
+  });
+
+  it("clears inherited package tokens from long-lived environments", () => {
+    const codexEnvironment = fs.readFileSync(
+      path.join(repositoryRoot, ".codex/environments/environment.toml"),
+      "utf8"
+    );
+    const stagingScript = fs.readFileSync(
+      path.join(repositoryRoot, "scripts/staging.sh"),
+      "utf8"
+    );
+
+    expect(codexEnvironment).toContain("unset NODE_AUTH_TOKEN NPM_TOKEN");
+    expect(stagingScript).toContain("unset NODE_AUTH_TOKEN NPM_TOKEN");
   });
 });
