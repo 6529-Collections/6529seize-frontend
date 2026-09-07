@@ -83,7 +83,9 @@ const { useAuth } = require("@/components/auth/Auth");
 const createWave = () =>
   ({
     id: "1",
+    name: "Parent wave",
     parent_wave: null,
+    visibility: { scope: { group: null } },
     chat: { scope: { group: { is_direct_message: false } } },
     wave: {
       authenticated_user_eligible_for_admin: false,

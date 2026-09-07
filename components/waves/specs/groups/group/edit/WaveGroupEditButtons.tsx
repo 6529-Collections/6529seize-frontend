@@ -22,6 +22,7 @@ import {
   getCloneReferenceState,
   hideUnattachedClone,
 } from "./buttons/utils/waveGroupCloneRecovery";
+import SubwaveAccessWarningDialog from "@/components/waves/groups/SubwaveAccessWarningDialog";
 
 const GROUP_LABEL_KEYS = {
   VIEW: "waves.chatSettings.groups.view",
@@ -57,13 +58,14 @@ export default function WaveGroupEditButtons({
     onGroupCreate,
   });
 
-  const { mutating, updateWave } = useWaveGroupEditButtonsController({
-    wave,
-    type,
-    requestAuth,
-    setToast,
-    onWaveCreated,
-  });
+  const { mutating, updateWave, subwaveAccessConfirmation } =
+    useWaveGroupEditButtonsController({
+      wave,
+      type,
+      requestAuth,
+      setToast,
+      onWaveCreated,
+    });
 
   const handleChangeGroupOpen = useCallback(() => {
     setIsGroupChangeOpen(true);
@@ -180,6 +182,10 @@ export default function WaveGroupEditButtons({
           onCreateGroup={handleInlineGroupCreate}
         />
       )}
+      <SubwaveAccessWarningDialog
+        isOpen={subwaveAccessConfirmation.isOpen}
+        onDecision={subwaveAccessConfirmation.onDecision}
+      />
     </>
   );
 }

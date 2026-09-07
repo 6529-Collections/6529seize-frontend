@@ -156,7 +156,10 @@ describe("CreateWaveOutcomes", () => {
     const toggle = screen.getByRole("checkbox");
     expect(toggle).toBeEnabled();
     expect(toggle).toBeChecked();
-    expect(toggle).toHaveAccessibleName("Show outcomes");
+    expect(toggle).toHaveAccessibleName("Show outcomes menu section");
+    expect(toggle).toHaveAccessibleDescription(
+      "Shows the Outcomes tab and reward details on leaderboard and winner cards. Rewards still apply when hidden."
+    );
 
     fireEvent.click(toggle);
 
@@ -189,7 +192,7 @@ describe("CreateWaveOutcomes", () => {
     render(<CreateWaveOutcomes {...baseProps} waveType={ApiWaveType.Rank} />);
 
     expect(
-      screen.getByRole("checkbox", { name: "Show outcomes" })
+      screen.getByRole("checkbox", { name: "Show outcomes menu section" })
     ).toBeVisible();
     expect(
       screen.queryByRole("button", { name: /Outcome visibility/ })

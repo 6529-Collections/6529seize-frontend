@@ -1,3 +1,8 @@
+import { buildCreateWaveReview } from "@/helpers/waves/create-wave-review.helpers";
+import {
+  CreateWaveOutcomeType,
+  CreateWaveOutcomeConfigWinnersCreditValueType,
+} from "@/types/waves.types";
 import { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { ApiWaveMetadataType } from "@/generated/models/ApiWaveMetadataType";
@@ -612,4 +617,115 @@ describe("wave-rules.helpers", () => {
       valueLinkLabel: "Inspect Artists and curators group criteria and members",
     });
   });
+});
+
+describe("create-wave final review", () => {
+  it("shows rank rewards and winner percentages alongside voting and author rules", () => {
+    const config = createConfig();
+    const rules = buildCreateWaveReview({
+      config: {
+        ...config,
+        overview: { ...config.overview, type: ApiWaveType.Rank },
+        outcomes: [
+          {
+            type: CreateWaveOutcomeType.REP,
+            title: null,
+            credit: null,
+            category: "Art",
+            winnersConfig: {
+              creditValueType:
+                CreateWaveOutcomeConfigWinnersCreditValueType.PERCENTAGE,
+              totalAmount: 1000,
+              winners: [{ value: 60 }, { value: 40 }],
+            },
+          },
+        ],
+      },
+      groupsCache: {},
+      locale: "en-US",
+      parentWaveName: "Parent",
+    });
+    const rows = rules.automatic.flatMap((section) => section.rows);
+    expect(rows).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ label: "Parent wave", value: "Parent" }),
+        expect.objectContaining({ label: "Total", value: "1,000 REP" }),
+        expect.objectContaining({ label: "Winner 1", value: "60%" }),
+        expect.objectContaining({ label: "Winner 2", value: "40%" }),
+        expect.objectContaining({ id: "max-votes", value: "10" }),
+      ])
+    );
+    expect(rules.custom).toEqual({
+      display: "No AI-only submissions.",
+      binding: "Must be original.",
+      signatureRequired: true,
+    });
+  });
+
+  it("shows approve credit per approved drop and manual reward descriptions", () => {
+    const config = createConfig();
+    const rules = buildCreateWaveReview({
+      config: {
+        ...config,
+        outcomes: [
+          {
+            type: CreateWaveOutcomeType.NIC,
+            title: null,
+            category: null,
+            credit: 25,
+            winnersConfig: null,
+          },
+          {
+            type: CreateWaveOutcomeType.MANUAL,
+            title: "A signed print",
+            category: null,
+            credit: null,
+            winnersConfig: null,
+          },
+        ],
+      },
+      groupsCache: {},
+      locale: "en-US",
+    });
+    expect(rules.automatic.flatMap((section) => section.rows)).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          label: "Per approved drop",
+          value: "25 NIC",
+        }),
+        expect.objectContaining({ label: "Reward", value: "A signed print" }),
+        expect.objectContaining({ id: "approval-threshold" }),
+      ])
+    );
+  });
+
+  it.each([ApiWaveType.Chat, ApiWaveType.Rank])(
+    "omits stale outcome rewards for %s without winners",
+    (type) => {
+      const config = createConfig();
+      const rules = buildCreateWaveReview({
+        config: {
+          ...config,
+          overview: { ...config.overview, type },
+          dates: { ...config.dates, ongoingRanking: true },
+          outcomes: [
+            {
+              type: CreateWaveOutcomeType.MANUAL,
+              title: "Stale reward",
+              category: null,
+              credit: null,
+              winnersConfig: null,
+            },
+          ],
+        },
+        groupsCache: {},
+        locale: "en-US",
+      });
+      expect(
+        rules.automatic
+          .flatMap((section) => section.rows)
+          .some((row) => row.value === "Stale reward")
+      ).toBe(false);
+    }
+  );
 });

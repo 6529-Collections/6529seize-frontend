@@ -3,6 +3,7 @@
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import { getCreateSubwaveTitle } from "@/helpers/waves/create-subwave-title.helpers";
 import type { ApiIdentity } from "../../../generated/models/ApiIdentity";
 import CreateWave from "./CreateWave";
 import CreateWaveProfileRequiredModal from "./CreateWaveProfileRequiredModal";
@@ -12,7 +13,9 @@ interface CreateWaveModalProps {
   readonly onClose: () => void;
   readonly profile: ApiIdentity;
   readonly parentWaveId?: string | null | undefined;
+  readonly parentWaveName?: string | null | undefined;
   readonly parentAdminGroupId?: string | null | undefined;
+  readonly parentViewGroupId?: string | null | undefined;
 }
 
 export default function CreateWaveModal({
@@ -20,7 +23,9 @@ export default function CreateWaveModal({
   onClose,
   profile,
   parentWaveId,
+  parentWaveName,
   parentAdminGroupId,
+  parentViewGroupId,
 }: CreateWaveModalProps) {
   const locale = useBrowserLocale();
 
@@ -34,12 +39,9 @@ export default function CreateWaveModal({
     );
   }
 
-  const title = t(
-    locale,
-    parentWaveId
-      ? "waves.create.dialog.subwaveTitle"
-      : "waves.create.dialog.waveTitle"
-  );
+  const title = parentWaveId
+    ? getCreateSubwaveTitle(locale, parentWaveName)
+    : t(locale, "waves.create.dialog.waveTitle");
 
   return (
     <MobileWrapperDialog
@@ -55,7 +57,7 @@ export default function CreateWaveModal({
       zIndexClassName="tw-z-[9999]"
       showHeaderCloseButton
       headerClassName="tw-flex-shrink-0 tw-border-b tw-border-solid tw-border-x-0 tw-border-t-0 tw-border-white/[0.06] tw-py-2 md:!tw-px-8 lg:tw-py-4"
-      titleClassName="tw-m-0 !tw-text-base !tw-font-semibold tw-leading-6 tw-tracking-wide tw-text-white"
+      titleClassName="tw-m-0 tw-min-w-0 tw-break-words !tw-text-base !tw-font-semibold tw-leading-6 tw-tracking-wide tw-text-white"
       surfaceClassName="tw-border tw-border-solid tw-border-white/10 tw-bg-[#09090B] tw-shadow-[0_0_80px_rgba(0,0,0,0.8)] md:tw-max-h-[56rem] md:!tw-rounded-3xl"
     >
       <div className="tw-flex tw-min-h-0 tw-flex-1 tw-flex-col">
@@ -64,7 +66,9 @@ export default function CreateWaveModal({
           onBack={onClose}
           onSuccess={onClose}
           parentWaveId={parentWaveId}
+          parentWaveName={parentWaveName}
           parentAdminGroupId={parentAdminGroupId}
+          parentViewGroupId={parentViewGroupId}
         />
       </div>
     </MobileWrapperDialog>
