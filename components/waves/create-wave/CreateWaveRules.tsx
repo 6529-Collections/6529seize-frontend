@@ -56,12 +56,7 @@ export default function CreateWaveRules({
           id="create-wave-guidelines-title"
           className={`${CREATE_WAVE_FORM_STYLES.sectionTitle} tw-px-5 tw-py-4`}
         >
-          {t(
-            locale,
-            supportsAcceptanceRules
-              ? "waves.create.rules.advancedSummary"
-              : "waves.create.rules.chatAdvancedSummary"
-          )}
+          {t(locale, "waves.create.rules.guidelinesFieldLabel")}
         </h3>
         <div className="tw-space-y-6 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-p-5">
           <section>

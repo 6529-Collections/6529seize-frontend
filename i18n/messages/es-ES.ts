@@ -500,6 +500,11 @@ export const ES_ES_MESSAGES = {
   "waves.create.overview.subwaveTypeRequired":
     "Elige un tipo de subwave para continuar.",
   "waves.create.overview.typeRequired": "Elige un tipo de wave para continuar.",
+  "waves.create.rules.guidelinesFieldLabel": "Directrices de la Wave",
+  "waves.create.rules.guidelinesDescription":
+    "Estas directrices se mostrarán a los usuarios cuando envíen su primer mensaje de chat.",
+  "waves.create.rules.guidelinesPlaceholder":
+    "Añade directrices para la Wave...",
   "waves.create.rules.acceptanceTitle": "Reglas que requieren aceptación",
   "waves.create.rules.acceptanceDescription":
     "Los participantes deben aceptar estas reglas y firmarlas con su cartera antes de enviar contenido.",

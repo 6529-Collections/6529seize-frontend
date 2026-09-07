@@ -106,11 +106,11 @@ describe("CreateWaveRules", () => {
       screen.getByRole("textbox", { name: "Wave guidelines" })
     ).toBeVisible();
     expect(
-      screen.getByText("These guidelines are shown in wave rules panel")
+      screen.getByText(
+        "These guidelines will be shown to user when they send their first chat message"
+      )
     ).toBeVisible();
-    expect(
-      screen.getByPlaceholderText("Add optional wave guidelines...")
-    ).toBeVisible();
+    expect(screen.getByPlaceholderText("Add wave guidelines...")).toBeVisible();
     expect(
       screen.queryByText("Display-only creator rules")
     ).not.toBeInTheDocument();
@@ -186,11 +186,11 @@ describe("CreateWaveRules", () => {
     expect(
       screen.getByRole("heading", {
         level: 3,
-        name: "Wave guidelines and acceptance",
+        name: "Wave guidelines",
       })
     ).toBeVisible();
     expect(
-      screen.queryByRole("button", { name: /Wave guidelines and acceptance/ })
+      screen.queryByRole("button", { name: "Wave guidelines" })
     ).not.toBeInTheDocument();
     expect(screen.getByDisplayValue("Restored rule")).toBeVisible();
   });

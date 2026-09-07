@@ -28,6 +28,9 @@ in the final [Overview step](feature-final-overview-step.md).
 
 Use wave guidelines for wave-specific guidance that participants should see but
 do not need to sign.
+The section is titled `Wave guidelines`, with the placeholder
+`Add wave guidelines...`. Its subtitle explains that users see these guidelines
+when sending their first chat message.
 
 For `Rank` and `Approve` waves, use rules that require acceptance when
 participants must explicitly accept and sign those rules before submitting.
@@ -52,6 +55,9 @@ submission step.
 - Mobile participants see the rules panel from the wave `About` information
   path.
 - Wave guidelines appear under `Guidelines` in the rules panel.
+- Before their first chat message, profiles with no earlier chat messages or
+  participation drops in the wave review its guidelines. See
+  [First Message Guidelines](../composer/feature-first-message-guidelines.md).
 - For `Rank` and `Approve`, rules that require acceptance appear in the rules
   panel and are enforced by the existing submit terms/signature modal.
 
@@ -65,9 +71,8 @@ the existing submit acceptance flow.
 
 ## Edge Cases
 
-- `Chat` wave guidelines do not require acceptance.
-- Chat's section heading mentions only wave guidelines because Chat does
-  not support acceptance-required rules.
+- Wave guidelines do not require a wallet signature. `Chat` does not show the
+  separate rules that require signing before participation.
 - Leaving custom-rule fields blank is valid.
 - Wave guidelines are capped at `2,000` characters.
 - For `Rank` and `Approve`, clearing the acceptance-required rules textbox

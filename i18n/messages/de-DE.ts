@@ -505,6 +505,10 @@ export const DE_DE_MESSAGES = {
     "Bitte wähle einen Subwave-Typ aus, um fortzufahren.",
   "waves.create.overview.typeRequired":
     "Bitte wähle einen Wave-Typ aus, um fortzufahren.",
+  "waves.create.rules.guidelinesFieldLabel": "Wave-Richtlinien",
+  "waves.create.rules.guidelinesDescription":
+    "Diese Richtlinien werden Nutzern angezeigt, wenn sie ihre erste Chatnachricht senden.",
+  "waves.create.rules.guidelinesPlaceholder": "Wave-Richtlinien hinzufügen...",
   "waves.create.rules.acceptanceTitle": "Regeln, denen zugestimmt werden muss",
   "waves.create.rules.acceptanceDescription":
     "Teilnehmende müssen diesen Regeln zustimmen und sie vor dem Einreichen mit ihrer Wallet signieren.",
