@@ -45,7 +45,7 @@ Users can:
 5. Return with normal browser back navigation when finished inspecting.
 6. Editors can select a Configuration access-row gear to open the group editor
    directly. There is no intermediate action menu.
-7. The modal renders the same criteria editor used during wave creation,
+7. The modal opens on `Identities` in the same criteria editor used during wave creation,
    including the privacy row, configured criteria chips, matching
    `Before editing` and `After editing` summaries, and `Save changes`. Wave
    access editors do not offer `Choose group`. The

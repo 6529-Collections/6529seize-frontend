@@ -2504,7 +2504,7 @@
         "Optional sections are named for their contents instead of repeating Advanced settings. They show Customized for non-default values and open automatically when a hidden field needs attention.",
         "The Access step initially shows one Who can access this wave control. By default, that group can also chat and, for Rank and Approve waves, submit and vote; only the creator can administer the wave.",
         "Customize other permissions expands the separate chat, submission, voting, and admin group controls when a wave needs different access rules.",
-        "Each Access row offers one Edit action with a pencil icon and no Choose group action. Edit keeps Identities alongside the rule choices, supports explicitly included and excluded identities, and Next stays disabled until the pending replacement is saved or cancelled.",
+        "Each Access row offers one Edit action with a pencil icon and no Choose group action. Edit opens Identities immediately alongside the rule choices, supports explicitly included and excluded identities, and Next stays disabled until the pending replacement is saved or cancelled.",
         "The inline criteria editor includes a Hide criteria and members switch. Its tooltip explains that the criteria and member list remain visible to group members but are hidden from everyone else. The switch starts off for a new inline group, preserves the setting copied from the current assignment, and applies the current setting when Save changes is selected.",
         "The inline Identities editor can add either included or excluded identities through profile search, an authenticated EMMA allowlist, or a dragged or selected CSV file. Source wallets are normalized and deduplicated, source choices persist while the group remains an unsaved draft, and the latest include or exclude action wins when the same wallet appears on both sides.",
         "Inline group identity search ranks exact, prefix, and substring profile-handle matches before ENS-only matches, then orders each match group by profile level, highest first.",
@@ -3028,7 +3028,7 @@
       ],
       "facts": [
         "Selecting an access-row gear in Wave Configuration opens the group editor directly without an intermediate context menu.",
-        "The Configuration modal renders the same criteria editor as wave creation, including the privacy row, configured criteria chips, Before editing and After editing summaries, Cancel, and Save changes. Wave access editors do not offer Choose group. It preloads the row's rules, included and excluded identities, NFT and grant requirements, and criteria/member privacy setting.",
+        "The Configuration modal opens on Identities in the same criteria editor as wave creation, including the privacy row, configured criteria chips, Before editing and After editing summaries, Cancel, and Save changes. Wave access editors do not offer Choose group. It preloads the row's rules, included and excluded identities, NFT and grant requirements, and criteria/member privacy setting.",
         "A public access row starts a new criteria draft with the editor's primary wallet explicitly included by default; Include me can be turned off from Identities.",
         "An already restricted row keeps its saved included and excluded identities and does not add the editor automatically.",
         "Saving edited criteria creates a separate group and normally updates only the selected access row; it does not mutate the original group or other access rows that use it.",

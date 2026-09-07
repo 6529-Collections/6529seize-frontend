@@ -64,7 +64,7 @@ user-reachable for `Chat`, `Rank`, and `Approve` waves.
 
 - Every wave access row offers one `Edit` action with a pencil icon. Wave access
   editors do not offer `Choose group`.
-- `Edit` opens the full criteria builder. `Identities`, `Level`, `TDH`, `NIC`,
+- `Edit` opens the full criteria builder on `Identities`. `Level`, `TDH`, `NIC`,
   `Rep`, `Required NFTs`, `Collection Access`, and `xTDH Grant` remain directly
   available as prominent buttons.
 - The currently open criterion has a solid blue button with an underlined
