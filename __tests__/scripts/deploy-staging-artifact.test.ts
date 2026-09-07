@@ -373,11 +373,8 @@ describe("staging immutable artifact deployment", () => {
     );
 
     expect(build.needs).toBeUndefined();
-    expect(build.permissions).toEqual({
-      contents: "read",
-      packages: "read",
-    });
-    expect(installStep.env.NODE_AUTH_TOKEN).toBe("${{ github.token }}");
+    expect(build.permissions).toEqual({ contents: "read" });
+    expect(installStep.env).not.toHaveProperty("NODE_AUTH_TOKEN");
     expect(build.env.NEXTGEN_CHAIN_ID).toBe(
       "${{ vars.STAGING_NEXTGEN_CHAIN_ID || '1' }}"
     );

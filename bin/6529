@@ -9,9 +9,6 @@ export SEIZE_6529_COMMAND="1"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
-# shellcheck source=../scripts/private-github-packages-auth.sh
-source "$REPO_ROOT/scripts/private-github-packages-auth.sh"
-
 print_usage() {
   cat <<'EOF'
 Usage:
@@ -86,8 +83,7 @@ if [[ "$REAL_PNPM" != /* ]] || [[ ! -x "$REAL_PNPM" ]]; then
 fi
 
 if [[ "$command_name" == "staging" ]]; then
-  exec env SEIZE_STAGING_TRUSTED_PNPM_BINARY="$REAL_PNPM" \
-    bash "$REPO_ROOT/scripts/staging.sh" "$@"
+  exec bash "$REPO_ROOT/scripts/staging.sh" "$@"
 fi
 
 cd "$REPO_ROOT"
@@ -111,7 +107,6 @@ case "$command_name" in
       echo "\`6529 ci\` does not accept package arguments." >&2
       exit 1
     fi
-    ensure_private_package_auth
     exec node "$REPO_ROOT/scripts/run-secure-pnpm.cjs" \
       --seize-secure-pnpm-binary "$REAL_PNPM" -- install --frozen-lockfile
     ;;
@@ -120,7 +115,6 @@ case "$command_name" in
       echo "\`6529 install:prod\` does not accept package arguments." >&2
       exit 1
     fi
-    ensure_private_package_auth
     exec node "$REPO_ROOT/scripts/run-secure-pnpm.cjs" \
       --seize-secure-pnpm-binary "$REAL_PNPM" -- install --frozen-lockfile --prod
     ;;
@@ -129,7 +123,6 @@ case "$command_name" in
       echo "Usage: \`6529 add <package>\`" >&2
       exit 1
     fi
-    ensure_private_package_auth
     exec node "$REPO_ROOT/scripts/run-secure-pnpm.cjs" \
       --seize-secure-pnpm-binary "$REAL_PNPM" -- add "$@"
     ;;
@@ -138,12 +131,10 @@ case "$command_name" in
       echo "Usage: \`6529 remove <package>\`" >&2
       exit 1
     fi
-    ensure_private_package_auth
     exec node "$REPO_ROOT/scripts/run-secure-pnpm.cjs" \
       --seize-secure-pnpm-binary "$REAL_PNPM" -- remove "$@"
     ;;
   update)
-    ensure_private_package_auth
     exec node "$REPO_ROOT/scripts/run-secure-pnpm.cjs" \
       --seize-secure-pnpm-binary "$REAL_PNPM" -- update "$@"
     ;;
@@ -152,12 +143,10 @@ case "$command_name" in
     exit 1
     ;;
   audit)
-    ensure_private_package_auth
     exec node "$REPO_ROOT/scripts/run-secure-pnpm.cjs" \
       --seize-secure-pnpm-binary "$REAL_PNPM" -- audit "$@"
     ;;
   audit:fix)
-    ensure_private_package_auth
     exec node "$REPO_ROOT/scripts/run-secure-pnpm.cjs" \
       --seize-secure-pnpm-binary "$REAL_PNPM" -- audit --fix "$@"
     ;;

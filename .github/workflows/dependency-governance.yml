@@ -20,7 +20,6 @@ jobs:
     if: github.event.pull_request.head.repo.full_name == github.repository
     permissions:
       contents: read
-      packages: read
     runs-on: ubuntu-latest
 
     steps:
@@ -81,7 +80,6 @@ jobs:
         id: install
         continue-on-error: true
         env:
-          NODE_AUTH_TOKEN: ${{ github.token }}
           SFW_BIN: ${{ steps.socket_firewall.outputs.firewall-path-binary }}
         run: ./bin/6529 ci
 

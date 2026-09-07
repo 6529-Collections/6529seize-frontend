@@ -20,8 +20,4 @@ for file in .env.development .env.production; do
   fi
 done
 
-bash ./scripts/setup-codex-worktree.sh
-
-# Codex captures the successful setup environment. Remove an inherited runtime
-# credential so it is never persisted in that capture.
-unset NODE_AUTH_TOKEN'''
+bash ./scripts/setup-codex-worktree.sh'''

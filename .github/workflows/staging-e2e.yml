@@ -35,7 +35,6 @@ on:
 permissions:
   actions: read
   contents: read
-  packages: read
 
 run-name: Staging E2E ${{ inputs.automatic_deploy_run_id && format('automatic {0}', inputs.automatic_deploy_run_id) || 'manual' }}
 
@@ -51,7 +50,6 @@ jobs:
     permissions:
       actions: read
       contents: read
-      packages: read
     outputs:
       expected-sha: ${{ steps.source.outputs.sha }}
     env:
@@ -150,7 +148,6 @@ jobs:
 
       - name: Install frozen dependencies
         env:
-          NODE_AUTH_TOKEN: ${{ github.token }}
           SFW_BIN: ${{ steps.socket-firewall.outputs.firewall-path-binary }}
         run: ./bin/6529 ci
 

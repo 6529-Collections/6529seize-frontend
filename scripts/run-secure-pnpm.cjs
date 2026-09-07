@@ -8,13 +8,9 @@ const {
   SECURE_PNPM_BINARY_ARGUMENT,
   SECURE_REPOSITORY_ROOT_ARGUMENT,
   validateRepositoryPolicy,
-} = require("./private-github-packages-policy.cjs");
+} = require("./public-package-policy.cjs");
 
 const REPOSITORY_ROOT = path.resolve(__dirname, "..");
-const ROUTING_HELPER_PATH = path.join(
-  __dirname,
-  "run-pnpm-with-private-github-bypass.cjs"
-);
 
 function resolveSfwCommand(environment = process.env) {
   const configuredBinary = environment["SFW_BIN"];
@@ -47,6 +43,33 @@ function quoteWindowsShellArgument(value) {
   return `"${escapedTrailingBackslashes}"`;
 }
 
+function removeEnvironmentVariableCaseInsensitive(environment, variableName) {
+  for (const key of Object.keys(environment)) {
+    if (key.toLowerCase() === variableName.toLowerCase()) {
+      delete environment[key];
+    }
+  }
+}
+
+function packageEnvironment(environment, repositoryRoot) {
+  const childEnvironment = {
+    ...environment,
+    SEIZE_SECURE_INSTALL: "1",
+  };
+
+  // This repository resolves public packages only. Do not pass unrelated
+  // package credentials to pnpm or dependency lifecycle scripts.
+  removeEnvironmentVariableCaseInsensitive(childEnvironment, "NODE_AUTH_TOKEN");
+  removeEnvironmentVariableCaseInsensitive(childEnvironment, "NPM_TOKEN");
+
+  const projectNpmrc = path.join(repositoryRoot, ".npmrc");
+  childEnvironment.npm_config_registry = "https://registry.npmjs.org/";
+  childEnvironment.npm_config_userconfig = projectNpmrc;
+  childEnvironment.npm_config_globalconfig = projectNpmrc;
+
+  return childEnvironment;
+}
+
 function runSecurePnpm({
   args = process.argv.slice(2),
   environment = process.env,
@@ -65,6 +88,7 @@ function runSecurePnpm({
     environment,
     validateEnvironmentOverrides: true,
   });
+  const childEnvironment = packageEnvironment(environment, repositoryRoot);
 
   if (typeof pnpmBinary !== "string" || !path.isAbsolute(pnpmBinary)) {
     throw new Error(
@@ -79,16 +103,7 @@ function runSecurePnpm({
   const command = useWindowsShell
     ? quoteWindowsShellArgument(sfwCommand)
     : sfwCommand;
-  const commandArguments = [
-    process.execPath,
-    ROUTING_HELPER_PATH,
-    SECURE_REPOSITORY_ROOT_ARGUMENT,
-    repositoryRoot,
-    SECURE_PNPM_BINARY_ARGUMENT,
-    trustedPnpmBinary,
-    "--",
-    ...args,
-  ];
+  const commandArguments = [trustedPnpmBinary, ...args];
   const result = spawn(
     command,
     useWindowsShell
@@ -98,10 +113,7 @@ function runSecurePnpm({
       cwd: repositoryRoot,
       stdio: "inherit",
       shell: useWindowsShell,
-      env: {
-        ...environment,
-        SEIZE_SECURE_INSTALL: "1",
-      },
+      env: childEnvironment,
     }
   );
 
@@ -166,9 +178,10 @@ module.exports = {
   REPOSITORY_ROOT,
   SECURE_PNPM_BINARY_ARGUMENT,
   SECURE_REPOSITORY_ROOT_ARGUMENT,
-  ROUTING_HELPER_PATH,
+  packageEnvironment,
   parseSecureInvocationArguments,
   quoteWindowsShellArgument,
+  removeEnvironmentVariableCaseInsensitive,
   resolveSfwCommand,
   runSecurePnpm,
 };
