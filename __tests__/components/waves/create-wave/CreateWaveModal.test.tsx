@@ -2,6 +2,7 @@ import { render } from "@testing-library/react";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import CreateWaveModal from "@/components/waves/create-wave/CreateWaveModal";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import CreateWave from "@/components/waves/create-wave/CreateWave";
 
 jest.mock("@/hooks/useBrowserLocale", () => ({
   useBrowserLocale: () => "en-US",
@@ -9,7 +10,7 @@ jest.mock("@/hooks/useBrowserLocale", () => ({
 
 jest.mock("@/components/waves/create-wave/CreateWave", () => ({
   __esModule: true,
-  default: () => <div data-testid="create-wave" />,
+  default: jest.fn(() => <div data-testid="create-wave" />),
 }));
 
 jest.mock("@/components/mobile-wrapper-dialog/MobileWrapperDialog", () => ({
@@ -21,7 +22,35 @@ const mockedDialog = MobileWrapperDialog as jest.Mock;
 
 describe("CreateWaveModal", () => {
   beforeEach(() => {
-    mockedDialog.mockClear();
+    jest.clearAllMocks();
+  });
+
+  it("passes the parent access group to the creation form", () => {
+    render(
+      <CreateWaveModal
+        isOpen={true}
+        onClose={jest.fn()}
+        profile={{ handle: "alice" } as ApiIdentity}
+        parentWaveId="parent-wave"
+        parentWaveName="Parent Wave"
+        parentAdminGroupId="parent-admin-group"
+        parentViewGroupId="parent-view-group"
+      />
+    );
+
+    expect(mockedDialog).toHaveBeenCalledWith(
+      expect.objectContaining({ title: 'Create subwave of "Parent Wave"' }),
+      undefined
+    );
+    expect(CreateWave).toHaveBeenCalledWith(
+      expect.objectContaining({
+        parentWaveId: "parent-wave",
+        parentWaveName: "Parent Wave",
+        parentAdminGroupId: "parent-admin-group",
+        parentViewGroupId: "parent-view-group",
+      }),
+      undefined
+    );
   });
 
   it("uses a fixed app-like height with a desktop cap", () => {

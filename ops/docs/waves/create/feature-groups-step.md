@@ -15,15 +15,15 @@ user-reachable for `Chat`, `Rank`, and `Approve` waves.
 
 ## Step Paths
 
-- `Chat`: `Overview` -> `Access` -> `Rules` -> `Description`
-- `Rank`: `Overview` -> `Access` -> `Schedule` -> `Drops` -> `Rules` ->
-  `Voting` -> `Outcomes` -> `Description`
-- `Approve`: `Overview` -> `Access` -> `Schedule` -> `Drops` -> `Rules` ->
-  `Voting` -> `Outcomes` -> `Description`
+- `Chat`: `Setup` -> `Access` -> `Guidelines` -> `Description` -> `Overview`
+- `Rank`: `Setup` -> `Access` -> `Schedule` -> `Drops` -> `Voting` -> `Outcomes` ->
+  `Guidelines` -> `Description` -> `Overview`
+- `Approve`: `Setup` -> `Access` -> `Schedule` -> `Drops` -> `Voting` -> `Outcomes` ->
+  `Guidelines` -> `Description` -> `Overview`
 
 ## Entry Points
 
-- Continue from `Overview` to `Access`.
+- Continue from `Setup` to `Access`.
 - Use `Back` from later steps to return to `Access`.
 - On large screens, reopen `Access` from the step rail after moving past it.
 
@@ -44,19 +44,33 @@ user-reachable for `Chat`, `Rank`, and `Approve` waves.
 - `Enable chat` controls whether `Who can chat` is active on `Rank` and
   `Approve` waves.
 - `Allow admins to delete posts` is enabled by default.
-- Default scopes are `Everyone` for access, drop, vote, and chat, and `Only me`
-  for top-level-wave administration. Subwaves inherit the parent admin group.
+- Top-level waves default to `Everyone` for access, drop, vote, and chat, and
+  `Only me` for administration.
+- A new subwave starts with the parent wave's exact access group and admin
+  group. Chat and, for `Rank` and `Approve`, submission and voting start with
+  that same access group. A public parent's subwaves start with `Everyone`.
+- Changing the wave type resets access and participation to these defaults.
+- The inherited subwave groups are editable. Subwave access does not have to
+  match the parent's group.
+- Before creating a subwave, the app checks whether its access group includes
+  anyone outside the parent's audience. If it does, a warning explains that
+  those members cannot open the subwave. `Continue anyway` creates it with the
+  chosen group; `Go back` keeps the draft open. A different group whose members
+  can all access the parent needs no warning, nor does a public parent.
+- Members need access to both the subwave and its parent. Making a subwave
+  public does not bypass a restricted parent.
 
 ## Editing Criteria
 
 - Every wave access row offers one `Edit` action with a pencil icon. Wave access
   editors do not offer `Choose group`.
-- `Edit` opens the full criteria builder. `Identities`, `Level`, `TDH`, `NIC`,
+- `Edit` opens the full criteria builder on `Identities`. `Level`, `TDH`, `NIC`,
   `Rep`, `Required NFTs`, `Collection Access`, and `xTDH Grant` remain directly
   available as prominent buttons.
-- A blue dot and stronger button treatment identify each criterion that has a
-  value. Screen readers receive the same state as `Configured` in the button
-  name.
+- The currently open criterion has a solid blue button with an underlined
+  label. A dot identifies each criterion that has a value, whether or not it is
+  open. Screen readers receive the configured state in the button name and the
+  open state as pressed.
 - While editing, `Before editing` shows the currently applied audience,
   including `Everyone`, and `After editing` shows the proposed audience and
   readable criteria summary.
@@ -128,10 +142,10 @@ user-reachable for `Chat`, `Rank`, and `Approve` waves.
 
 - [Wave Creation Index](README.md)
 - [Waves Index](../README.md)
-- [Wave Creation Overview Step](feature-overview-step.md)
+- [Wave Creation Setup Step](feature-overview-step.md)
 - [Wave Creation Schedule](feature-dates-step.md)
 - [Wave Creation Drop Settings](feature-drops-step.md)
-- [Wave Creation Rules Step](feature-rules-step.md)
+- [Wave Creation Guidelines Step](feature-rules-step.md)
 - [Wave Creation Description Step](feature-description-step.md)
 - [Wave Right Sidebar Group and Curation Management](../sidebars/feature-right-sidebar-group-management.md)
 - [Network Group Scope Flow](../../network/flow-network-group-scope.md)

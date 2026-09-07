@@ -250,6 +250,6 @@ describe("createWaveInlineGroupBuilder", () => {
       ["0xbbb"]
     );
     expect(state.criteriaReplacementActive).toBe(true);
-    expect(state.panel).toBe("rule-list");
+    expect(state.panel).toBe("identity");
   });
 });
