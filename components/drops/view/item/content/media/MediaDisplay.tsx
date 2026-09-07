@@ -166,6 +166,7 @@ export default function MediaDisplay({
   media_mime_type,
   media_url,
   disableMediaInteraction = false,
+  isInertPreview = false,
   imageScale = ImageScale.AUTOx1080,
   previewImageUrl,
   requireInteractionToLoad = false,
@@ -176,6 +177,7 @@ export default function MediaDisplay({
   readonly media_mime_type: string;
   readonly media_url: string;
   readonly disableMediaInteraction?: boolean | undefined;
+  readonly isInertPreview?: boolean | undefined;
   readonly imageScale?: ImageScale | undefined;
   readonly previewImageUrl?: string | null | undefined;
   readonly requireInteractionToLoad?: boolean | undefined;
@@ -267,6 +269,7 @@ export default function MediaDisplay({
           src={media_url}
           mimeType={media_mime_type}
           showControls={!disableMediaInteraction}
+          isInertPreview={isInertPreview}
           fillContainer={fillVideoContainer}
         />
       );

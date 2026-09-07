@@ -11,6 +11,7 @@ import React, { useState } from "react";
 
 interface WaveDropAuthorPfpProps {
   readonly drop: ApiDrop;
+  readonly disableNavigation?: boolean;
 }
 
 type PfpLoadMode = "optimized" | "unoptimized" | "placeholder";
@@ -20,7 +21,10 @@ type PfpLoadState = {
   mode: PfpLoadMode;
 };
 
-const WaveDropAuthorPfp: React.FC<WaveDropAuthorPfpProps> = ({ drop }) => {
+const WaveDropAuthorPfp: React.FC<WaveDropAuthorPfpProps> = ({
+  drop,
+  disableNavigation = false,
+}) => {
   const compact = useCompactMode();
   const resolvedPfp = drop.author.pfp
     ? resolveIpfsUrlSync(drop.author.pfp)
@@ -72,7 +76,7 @@ const WaveDropAuthorPfp: React.FC<WaveDropAuthorPfpProps> = ({ drop }) => {
     event.stopPropagation();
   };
 
-  if (!profileHref) {
+  if (!profileHref || disableNavigation) {
     return <div className={containerClasses}>{avatarContent}</div>;
   }
 

@@ -13,6 +13,7 @@ import {
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { ViewKey } from "@/components/navigation/navTypes";
 import { useViewContext } from "@/components/navigation/ViewContext";
+import type { BrainView } from "@/components/brain/mobile/brainMobileViews";
 import {
   getActiveWaveIdFromUrl,
   getMessagePathRoute,
@@ -21,9 +22,15 @@ import {
   sameMainPath,
 } from "@/helpers/navigation.helpers";
 
+interface WaveViewSelection {
+  readonly waveId: string;
+  readonly view: BrainView;
+}
+
 interface StackRoute {
   type: "route";
   path: string;
+  waveView?: WaveViewSelection;
 }
 interface StackView {
   type: "view";
@@ -37,6 +44,8 @@ interface NavigationHistoryContextValue {
   goBack: () => void;
   goBackTo: (path: string) => void;
   pushView: (view: ViewKey) => void;
+  currentWaveView: WaveViewSelection | null;
+  rememberWaveView: (selection: WaveViewSelection) => void;
 }
 
 const Context = createContext<NavigationHistoryContextValue | undefined>(
@@ -61,6 +70,27 @@ export const NavigationHistoryProvider: React.FC<{
   const skipNext = useRef(false);
   const prevPathRef = useRef<string>("");
 
+  const [currentWaveView, setCurrentWaveView] =
+    useState<WaveViewSelection | null>(null);
+
+  const rememberWaveView = useCallback(
+    (selection: WaveViewSelection) => {
+      const entry = historyRef.current[index];
+      if (entry?.type !== "route") return;
+
+      const entryWaveId = getActiveWaveIdFromUrl({
+        pathname: entry.path,
+        searchParams: new URLSearchParams(),
+      });
+      if (entryWaveId !== selection.waveId) return;
+
+      // Keep the selected tab with this visit, not with every visit to the wave.
+      entry.waveView = selection;
+      setCurrentWaveView(selection);
+    },
+    [index]
+  );
+
   const canGoBack = useMemo(() => {
     if (index === 0) return false;
     const current = historyRef.current[index];
@@ -78,6 +108,7 @@ export const NavigationHistoryProvider: React.FC<{
   }, [index]);
 
   const pushStack = useCallback((entry: StackEntry) => {
+    setCurrentWaveView(null);
     setIndex((prev) => {
       const newHistory = [
         ...historyRef.current.slice(0, prev + 1),
@@ -93,6 +124,7 @@ export const NavigationHistoryProvider: React.FC<{
 
     if (skipNext.current) {
       skipNext.current = false;
+      prevPathRef.current = url;
       return;
     }
 
@@ -142,38 +174,40 @@ export const NavigationHistoryProvider: React.FC<{
 
   const goBack = useCallback(() => {
     if (!canGoBack) return;
-    setIndex((prev) => {
-      let targetIndex = prev - 1;
-      const current = historyRef.current[prev];
+    let targetIndex = index - 1;
+    const current = historyRef.current[index];
 
-      while (targetIndex >= 0) {
-        const entry = historyRef.current[targetIndex];
-        if (
-          entry?.type === "route" &&
-          current?.type === "route" &&
-          sameMainPath(entry.path, current.path)
-        ) {
-          targetIndex -= 1;
-          continue;
-        }
-        break;
+    while (targetIndex >= 0) {
+      const entry = historyRef.current[targetIndex];
+      if (
+        entry?.type === "route" &&
+        current?.type === "route" &&
+        sameMainPath(entry.path, current.path)
+      ) {
+        targetIndex -= 1;
+        continue;
       }
+      break;
+    }
 
-      if (targetIndex < 0) {
-        window.history.back();
-        return prev;
-      }
+    if (targetIndex < 0) {
+      window.history.back();
+      return;
+    }
 
-      const target = historyRef.current[targetIndex];
-      if (target?.type === "route") {
-        skipNext.current = true;
-        router.push(target.path);
-      } else {
-        hardBack(target!.view);
-      }
-      return targetIndex;
-    });
-  }, [canGoBack, router, hardBack]);
+    const target = historyRef.current[targetIndex];
+    historyRef.current = historyRef.current.slice(0, targetIndex + 1);
+    setCurrentWaveView(
+      target?.type === "route" ? (target.waveView ?? null) : null
+    );
+    if (target?.type === "route") {
+      skipNext.current = true;
+      router.push(target.path);
+    } else {
+      hardBack(target!.view);
+    }
+    setIndex(targetIndex);
+  }, [canGoBack, index, router, hardBack]);
 
   const goBackTo = useCallback(
     (path: string) => {
@@ -192,19 +226,32 @@ export const NavigationHistoryProvider: React.FC<{
           ...historyRef.current.slice(0, index),
           { type: "route", path },
         ];
+        setCurrentWaveView(null);
         router.replace(path);
         return;
       }
 
+      const target = historyRef.current[targetIndex];
+      setCurrentWaveView(
+        target?.type === "route" ? (target.waveView ?? null) : null
+      );
       router.push(path);
+      historyRef.current = historyRef.current.slice(0, targetIndex + 1);
       setIndex(targetIndex);
     },
     [index, router]
   );
 
   const value = useMemo(
-    () => ({ canGoBack, goBack, goBackTo, pushView }),
-    [canGoBack, goBack, goBackTo, pushView]
+    () => ({
+      canGoBack,
+      goBack,
+      goBackTo,
+      pushView,
+      currentWaveView,
+      rememberWaveView,
+    }),
+    [canGoBack, goBack, goBackTo, pushView, currentWaveView, rememberWaveView]
   );
 
   return <Context.Provider value={value}>{children}</Context.Provider>;
