@@ -69,24 +69,22 @@ function policyError(message) {
 
 function readRepositoryFile(repositoryRoot, relativePath) {
   const filePath = path.join(repositoryRoot, relativePath);
-  const pathStat = fs.lstatSync(filePath);
-  if (!pathStat.isFile() || pathStat.isSymbolicLink()) {
-    throw policyError(`${relativePath} must be a regular file`);
-  }
-
   let descriptor;
   try {
     descriptor = fs.openSync(filePath, fs.constants.O_RDONLY | NO_FOLLOW);
   } catch (error) {
-    if (error instanceof Error && "code" in error && error.code === "ELOOP") {
+    if (error && typeof error === "object" && error.code === "ELOOP") {
       throw policyError(`${relativePath} must be a regular file`);
     }
     throw error;
   }
 
   try {
+    const pathStat = fs.lstatSync(filePath);
     const openedStat = fs.fstatSync(descriptor);
     if (
+      pathStat.isSymbolicLink() ||
+      !pathStat.isFile() ||
       !openedStat.isFile() ||
       openedStat.dev !== pathStat.dev ||
       openedStat.ino !== pathStat.ino
