@@ -171,12 +171,11 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
                 : resetButtonLabel}
             </Button>
             {selectedCount > 0 && (
-              <span
-                role="status"
+              <output
                 className="tw-whitespace-nowrap tw-text-sm tw-leading-5 tw-text-iron-400"
               >
                 {selectedLabel}
-              </span>
+              </output>
             )}
           </div>
           {typeof availableVotes === "number" && (

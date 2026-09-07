@@ -40,7 +40,7 @@ const MyStreamWaveMyVoteVotes: React.FC<MyStreamWaveMyVoteVotesProps> = ({
         tooltipLabel={
           hasWinningThreshold
             ? t(locale, "waves.myVotes.votesGivenNow")
-            : undefined
+            : t(locale, "waves.myVotes.projectedAtDecision")
         }
         subtle={true}
         visualVariant="memes"

@@ -24,6 +24,7 @@ describe("MyStreamWaveMyVoteVotes", () => {
       expect.objectContaining({
         current: 5,
         projected: 6,
+        tooltipLabel: "Projected vote count at decision time",
         numberFont: "sans",
         numberWeight: "semibold",
       })

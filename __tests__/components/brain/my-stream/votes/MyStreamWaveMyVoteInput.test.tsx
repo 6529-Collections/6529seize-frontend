@@ -146,11 +146,61 @@ describe("MyStreamWaveMyVoteInput", () => {
 
     expect(input.value).toBe("-5");
     expect(submitButton).toBeDisabled();
+    expect(input).toHaveAttribute("aria-invalid", "true");
+    expect(screen.getByRole("status")).toHaveTextContent("Minimum is 0 TDH.");
+    expect(input).toHaveAccessibleDescription(
+      "Max for wave 10 Minimum is 0 TDH."
+    );
 
     fireEvent.blur(input);
     fireEvent.keyDown(input, { key: "Enter" });
 
     expect(input.value).toBe("-5");
+    expect(input).toHaveAccessibleDescription(
+      "Max for wave 10 Minimum is 0 TDH."
+    );
+    expect(auth.requestAuth).not.toHaveBeenCalled();
+    expect(mutateAsync).not.toHaveBeenCalled();
+  });
+
+  it("explains a refreshed maximum without changing the stored vote", () => {
+    const dropWithRating = {
+      ...drop,
+      context_profile_context: { rating: 8, min_rating: 0, max_rating: 10 },
+    };
+    const { rerender } = render(
+      <MyStreamWaveMyVoteInput drop={dropWithRating} />,
+      { wrapper }
+    );
+    const input = screen.getByRole("textbox");
+    expect(input).not.toHaveAttribute("aria-invalid");
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+
+    rerender(
+      <MyStreamWaveMyVoteInput
+        drop={{
+          ...dropWithRating,
+          context_profile_context: { rating: 8, min_rating: 0, max_rating: 5 },
+        }}
+      />
+    );
+
+    expect(input).toHaveValue("8");
+    expect(input).toHaveAttribute("aria-invalid", "true");
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Max for wave is 5 TDH."
+    );
+    expect(input).toHaveAccessibleDescription(
+      "Max for wave 5 Max for wave is 5 TDH."
+    );
+    expect(screen.getByRole("button", { name: "Submit vote" })).toBeDisabled();
+
+    rerender(<MyStreamWaveMyVoteInput drop={dropWithRating} />);
+
+    expect(input).toHaveValue("8");
+    expect(input).not.toHaveAttribute("aria-invalid");
+    expect(input).toHaveAccessibleDescription("Max for wave 10");
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
     expect(auth.requestAuth).not.toHaveBeenCalled();
     expect(mutateAsync).not.toHaveBeenCalled();
   });
@@ -274,6 +324,7 @@ describe("MyStreamWaveMyVoteInput", () => {
     });
 
     expect(input).toHaveValue("10");
+    expect(input).not.toHaveAttribute("aria-invalid");
     expect(screen.getByRole("status")).toHaveTextContent(
       "Max for wave is 10 TDH."
     );

@@ -687,6 +687,7 @@ const WAVE_VOTE_MESSAGES = objectMessages("waves.vote", {
 const WAVE_MY_VOTES_MESSAGES = objectMessages("waves.myVotes", {
   total: "Total",
   votesGivenNow: "Votes given now",
+  projectedAtDecision: "Projected vote count at decision time",
   yourVotes: "Your votes",
   inCredit: "in {credit}",
   vote: "Vote",

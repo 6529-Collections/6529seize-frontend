@@ -124,7 +124,7 @@ describe("MyStreamWaveMyVote", () => {
     fireEvent.keyDown(screen.getByRole("textbox", { name: "Your votes" }), {
       key: "Enter",
     });
-    fireEvent.click(screen.getByRole("button", { name: "Vote", exact: true }));
+    fireEvent.click(screen.getByRole("button", { name: "Vote" }));
     fireEvent.click(screen.getByRole("button", { name: "Explain" }));
     fireEvent.click(screen.getByText("Disabled vote"));
 

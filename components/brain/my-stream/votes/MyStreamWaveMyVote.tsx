@@ -232,13 +232,13 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
       }`}
     >
       <div
-        className={`tw-grid tw-grid-cols-[28px_96px_minmax(0,1fr)] tw-gap-x-2 tw-gap-y-4 @[16rem]/my-vote:tw-grid-cols-[28px_64px_minmax(0,1fr)] @[36rem]/my-vote:tw-grid-cols-[28px_96px_minmax(0,1fr)] @[36rem]/my-vote:tw-gap-x-4 @[36rem]/my-vote:tw-gap-y-3 ${
+        className={`tw-grid tw-grid-cols-[28px_96px_minmax(0,1fr)] tw-gap-x-2 tw-gap-y-4 sm:@[36rem]/my-vote:tw-gap-x-4 sm:@[36rem]/my-vote:tw-gap-y-3 ${
           isVotingClosed
             ? ""
             : "@[46rem]/my-vote:tw-grid-cols-[28px_96px_minmax(0,1fr)_18rem]"
         }`}
       >
-        <div className="tw-flex tw-h-24 tw-items-center tw-justify-center @[16rem]/my-vote:tw-h-16 @[36rem]/my-vote:tw-row-span-2 @[36rem]/my-vote:tw-h-24">
+        <div className="tw-flex tw-h-24 tw-items-center tw-justify-center sm:@[36rem]/my-vote:tw-row-span-2">
           {!isVotingClosed ? (
             <label
               htmlFor={selectionInputId}
@@ -288,7 +288,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
           )}
         </div>
 
-        <div className="tw-relative tw-size-24 @[16rem]/my-vote:tw-size-16 @[36rem]/my-vote:tw-row-span-2 @[36rem]/my-vote:tw-size-24">
+        <div className="tw-relative tw-size-24 sm:@[36rem]/my-vote:tw-row-span-2">
           <button
             type="button"
             onClick={handleOpenDrop}
@@ -313,7 +313,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
           </button>
         </div>
 
-        <div className="tw-col-span-3 tw-row-start-2 tw-flex tw-min-w-0 tw-flex-col @[16rem]/my-vote:tw-col-span-1 @[16rem]/my-vote:tw-col-start-3 @[16rem]/my-vote:tw-row-start-1">
+        <div className="tw-col-span-3 tw-row-start-2 tw-flex tw-min-w-0 tw-flex-col sm:@[16rem]/my-vote:tw-col-span-1 sm:@[16rem]/my-vote:tw-col-start-3 sm:@[16rem]/my-vote:tw-row-start-1">
           <div className="tw-flex tw-min-w-0 tw-items-start tw-gap-2">
             <MediaTypeBadge
               mimeType={badgeMimeType}
@@ -371,7 +371,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
           </div>
         </div>
 
-        <div className="tw-col-span-3 tw-row-start-3 tw-flex tw-min-h-6 tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2 @[16rem]/my-vote:tw-row-start-2 @[36rem]/my-vote:tw-col-span-1 @[36rem]/my-vote:tw-col-start-3 @[36rem]/my-vote:tw-self-start @[46rem]/my-vote:tw-min-h-8">
+        <div className="tw-col-span-3 tw-row-start-3 tw-flex tw-min-h-6 tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2 sm:@[16rem]/my-vote:tw-row-start-2 sm:@[36rem]/my-vote:tw-col-span-1 sm:@[36rem]/my-vote:tw-col-start-3 sm:@[36rem]/my-vote:tw-self-start @[46rem]/my-vote:tw-min-h-8">
           <MyStreamWaveMyVoteVotes
             drop={drop}
             winningThreshold={winningThreshold}

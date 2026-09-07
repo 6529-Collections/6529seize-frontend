@@ -83,12 +83,12 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
     optimisticVoteState.dropId === drop.id &&
     optimisticVoteState.baseCurrentVoteValue === currentVoteValue &&
     optimisticVoteState.baseMaxRating === maxRating;
-  const liveCurrentVoteValue = hasMatchingOptimisticState
-    ? optimisticVoteState.nextCurrentVoteValue
-    : currentVoteValue;
-  const liveMaxRating = hasMatchingOptimisticState
-    ? optimisticVoteState.nextMaxRating
-    : maxRating;
+  const {
+    nextCurrentVoteValue: liveCurrentVoteValue,
+    nextMaxRating: liveMaxRating,
+  } = hasMatchingOptimisticState
+    ? optimisticVoteState
+    : { nextCurrentVoteValue: currentVoteValue, nextMaxRating: maxRating };
   const liveCurrentVoteValueString = String(liveCurrentVoteValue);
   const voteSourceKey = `${drop.id}:${liveCurrentVoteValue}:${minRating}:${liveMaxRating}`;
   const voteValue =
@@ -98,8 +98,7 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
   const parsedVoteValue = Number.parseInt(voteValue, 10);
   const hasValidVoteValue = !Number.isNaN(parsedVoteValue);
   const isVoteValueOutOfRange =
-    hasValidVoteValue &&
-    (parsedVoteValue < minRating || parsedVoteValue > liveMaxRating);
+    parsedVoteValue < minRating || parsedVoteValue > liveMaxRating;
   const displayVoteValue =
     isVoteInputFocused ||
     voteValue === "" ||
@@ -116,9 +115,6 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
   const voteInputId = `my-vote-input-${drop.id}`;
   const maxRatingId = `${voteInputId}-max`;
   const voteLimitMessageId = `${voteInputId}-limit`;
-  const voteInputDescription = voteLimitMessage
-    ? `${maxRatingId} ${voteLimitMessageId}`
-    : maxRatingId;
 
   const setVoteDraftValue = (nextValue: string) => {
     setVoteDraftState({
@@ -149,6 +145,12 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
 
     return null;
   };
+
+  const displayedVoteLimitMessage =
+    getVoteLimitMessage(parsedVoteValue) ?? voteLimitMessage;
+  const voteInputDescription = displayedVoteLimitMessage
+    ? `${maxRatingId} ${voteLimitMessageId}`
+    : maxRatingId;
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (isVotingClosed) {
@@ -322,7 +324,7 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
   return (
     <div
       data-vote-controls
-      className="tw-col-span-3 tw-row-start-4 tw-flex tw-w-full tw-min-w-0 tw-cursor-default tw-flex-col @[16rem]/my-vote:tw-row-start-3 @[36rem]/my-vote:tw-col-span-1 @[36rem]/my-vote:tw-col-start-3 @[36rem]/my-vote:tw-max-w-72 @[46rem]/my-vote:tw-contents"
+      className="tw-col-span-3 tw-row-start-4 tw-flex tw-w-full tw-min-w-0 tw-cursor-default tw-flex-col sm:@[16rem]/my-vote:tw-row-start-3 sm:@[36rem]/my-vote:tw-col-span-1 sm:@[36rem]/my-vote:tw-col-start-3 sm:@[36rem]/my-vote:tw-max-w-72 @[46rem]/my-vote:tw-contents"
     >
       <label htmlFor={voteInputId} className="tw-sr-only">
         {t(locale, "waves.myVotes.yourVotes")}{" "}
@@ -399,14 +401,13 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
           </Button>
         )}
       </div>
-      {voteLimitMessage && (
-        <p
+      {displayedVoteLimitMessage && (
+        <output
           id={voteLimitMessageId}
-          role="status"
           className="tw-mb-0 tw-mt-2 tw-min-w-0 tw-text-sm tw-leading-5 tw-text-amber-300 @[46rem]/my-vote:tw-col-start-4 @[46rem]/my-vote:tw-row-start-3 @[46rem]/my-vote:tw-mt-0"
         >
-          {voteLimitMessage}
-        </p>
+          {displayedVoteLimitMessage}
+        </output>
       )}
     </div>
   );
