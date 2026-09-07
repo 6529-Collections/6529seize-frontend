@@ -80,7 +80,7 @@ describe("MyStreamWaveMyVote", () => {
       const onDropClick = jest.fn();
       render(<MyStreamWaveMyVote drop={drop} onDropClick={onDropClick} />);
       const targets = {
-        row: screen.getByRole("link", { name: "Open Drop Title" }),
+        row: screen.getByRole("article", { name: "Drop Title" }),
         total: screen.getByTestId("votes"),
         voters: screen.getByText("3"),
       };
@@ -97,22 +97,30 @@ describe("MyStreamWaveMyVote", () => {
     (globalThis.getSelection as any) = () => ({ toString: () => "selected" });
     render(<MyStreamWaveMyVote drop={drop} onDropClick={onDropClick} />);
 
-    fireEvent.click(screen.getByRole("link", { name: "Open Drop Title" }));
+    fireEvent.click(screen.getByRole("article", { name: "Drop Title" }));
 
     expect(onDropClick).not.toHaveBeenCalled();
   });
 
-  it("opens a focused row with Enter", async () => {
-    const user = userEvent.setup();
-    const onDropClick = jest.fn();
-    render(<MyStreamWaveMyVote drop={drop} onDropClick={onDropClick} />);
-    screen.getByRole("link", { name: "Open Drop Title" }).focus();
+  it.each(["Open Drop Title", "Drop Title"])(
+    "opens with Enter on the native %s button without a nested row link",
+    async (buttonName) => {
+      const user = userEvent.setup();
+      const onDropClick = jest.fn();
+      render(<MyStreamWaveMyVote drop={drop} onDropClick={onDropClick} />);
+      const row = screen.getByRole("article", { name: "Drop Title" });
+      expect(row).not.toHaveAttribute("tabindex");
+      expect(
+        screen.queryByRole("link", { name: "Open Drop Title" })
+      ).not.toBeInTheDocument();
+      screen.getByRole("button", { name: buttonName }).focus();
 
-    await user.keyboard("{Enter}");
+      await user.keyboard("{Enter}");
 
-    expect(onDropClick).toHaveBeenCalledTimes(1);
-    expect(onDropClick).toHaveBeenCalledWith(drop);
-  });
+      expect(onDropClick).toHaveBeenCalledTimes(1);
+      expect(onDropClick).toHaveBeenCalledWith(drop);
+    }
+  );
 
   it("keeps vote controls and their surrounding area separate from navigation", () => {
     const onDropClick = jest.fn();

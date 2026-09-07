@@ -167,6 +167,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
   const badgeMimeType = artWork?.mime_type ?? curationPreviewMedia?.mimeType;
   const isSelected = !isVotingClosed && isChecked;
   const selectionInputId = `my-vote-reset-selection-${drop.id}`;
+  const titleId = `my-vote-title-${drop.id}`;
 
   const handleOpenDrop = () => {
     if (window.getSelection()?.toString()) {
@@ -175,7 +176,9 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
     onDropClick(drop);
   };
 
-  const handleRowClick = (event: React.MouseEvent<HTMLDivElement>) => {
+  // Row clicks extend the native artwork/title buttons' pointer target.
+  // Those buttons provide keyboard activation; other controls stay independent.
+  const handleRowClick = (event: React.MouseEvent<HTMLElement>) => {
     const target = event.target;
     if (
       event.defaultPrevented ||
@@ -195,13 +198,6 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
     handleOpenDrop();
   };
 
-  const handleRowKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
-    if (event.target === event.currentTarget && event.key === "Enter") {
-      event.preventDefault();
-      handleOpenDrop();
-    }
-  };
-
   const handleExplainVote = (voteTotal: number, voteChange: number) => {
     onExplainVote?.(drop, voteTotal, voteChange);
   };
@@ -217,15 +213,10 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
   };
 
   return (
-    <div
-      role="link"
-      tabIndex={0}
-      aria-label={t(locale, "waves.leaderboard.grid.openNamed", {
-        title: dropTitle,
-      })}
+    <article
+      aria-labelledby={titleId}
       onClick={handleRowClick}
-      onKeyDown={handleRowKeyDown}
-      className={`tw-cursor-pointer tw-px-2 tw-py-5 tw-transition-colors tw-duration-200 tw-@container/my-vote focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-2px] focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none sm:tw-px-4 sm:tw-py-6 ${
+      className={`tw-cursor-pointer tw-px-2 tw-py-5 tw-transition-colors tw-duration-200 tw-@container/my-vote motion-reduce:tw-transition-none sm:tw-px-4 sm:tw-py-6 ${
         isSelected
           ? "tw-bg-primary-500/10"
           : "tw-bg-transparent"
@@ -321,7 +312,10 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
               size="xs"
               className="tw-size-6 tw-justify-center"
             />
-            <h3 className="tw-m-0 tw-flex tw-min-h-6 tw-min-w-0 tw-flex-1 tw-items-center">
+            <h3
+              id={titleId}
+              className="tw-m-0 tw-flex tw-min-h-6 tw-min-w-0 tw-flex-1 tw-items-center"
+            >
               <button
                 type="button"
                 onClick={handleOpenDrop}
@@ -463,7 +457,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
           />
         )}
       </div>
-    </div>
+    </article>
   );
 };
 

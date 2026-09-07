@@ -31,9 +31,9 @@ The tab is available only on eligible rank-wave layouts:
 3. Review each row: preview, title, rank (when available), author, total vote
    value, voter count, and your current vote input.
 4. Optional: click a row outside its controls to open that drop in the current
-   wave route. You can also focus the row and press `Enter`, or use its artwork
-   or title button. Checkboxes, vote controls, and profile links keep their own
-   actions; selecting text does not open the drop.
+   wave route. You can also use its artwork or title buttons, including with
+   `Enter` or `Space`. Checkboxes, vote controls, and profile links keep their
+   own actions; selecting text does not open the drop.
 5. Edit a vote, then submit with `Vote` or `Enter`.
 6. Optional: select `Explain` to open an inline reply composer prefilled as
    `Vote rationale (...)`.

@@ -146,8 +146,10 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
     return null;
   };
 
+  const activeVoteLimitMessage =
+    voteDraftState?.sourceKey === voteSourceKey ? voteLimitMessage : null;
   const displayedVoteLimitMessage =
-    getVoteLimitMessage(parsedVoteValue) ?? voteLimitMessage;
+    getVoteLimitMessage(parsedVoteValue) ?? activeVoteLimitMessage;
   const voteInputDescription = displayedVoteLimitMessage
     ? `${maxRatingId} ${voteLimitMessageId}`
     : maxRatingId;
