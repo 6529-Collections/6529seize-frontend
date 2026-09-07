@@ -9,6 +9,8 @@ import {
   type CSSProperties,
 } from "react";
 import { usePathname } from "next/navigation";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { getCreateSubwaveTitle } from "@/helpers/waves/create-subwave-title.helpers";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useLayout } from "@/components/brain/my-stream/layout/LayoutContext";
@@ -32,6 +34,7 @@ export default function CreateWave({
   onBack,
   onSuccess,
   parentWaveId,
+  parentWaveName,
   parentAdminGroupId,
   parentViewGroupId,
 }: {
@@ -39,9 +42,12 @@ export default function CreateWave({
   readonly onBack: () => void;
   readonly onSuccess?: (() => void) | undefined;
   readonly parentWaveId?: string | null | undefined;
+  readonly parentWaveName?: string | null | undefined;
   readonly parentAdminGroupId?: string | null | undefined;
   readonly parentViewGroupId?: string | null | undefined;
 }) {
+  const locale = useBrowserLocale();
+  const isSubwave = !!parentWaveId;
   const waveConfig = useSubwaveWaveConfig({
     parentAdminGroupId,
     parentViewGroupId,
@@ -56,6 +62,7 @@ export default function CreateWave({
     endDateConfig,
     setEndDateConfig,
   } = waveConfig;
+  const waveNameSuffix = config.overview.name ? ` "${config.overview.name}"` : "";
   const descriptionRef = useRef<CreateWaveDescriptionHandles | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [criteriaReplacementByGroup, setCriteriaReplacementByGroup] = useState<
@@ -209,9 +216,11 @@ export default function CreateWave({
       className="create-wave-flow tw-flex tw-min-h-0 tw-flex-1 tw-flex-col"
     >
       <CreateWaveFlow
-        title={`${parentWaveId ? "Create subwave" : "Create Wave"} ${
-          config.overview.name ? `"${config.overview.name}"` : ""
-        }`}
+        title={
+          isSubwave
+            ? getCreateSubwaveTitle(locale, parentWaveName)
+            : `Create Wave${waveNameSuffix}`
+        }
         onBack={onBack}
         nativeBoundedStyle={nativeBoundedStyle}
         scrollResetKey={step}
@@ -229,16 +238,20 @@ export default function CreateWave({
         >
           <CreateWaveStepContent
             controller={waveConfig}
+            isSubwave={isSubwave}
+            parentWaveName={parentWaveName}
             profile={profile}
             descriptionRef={descriptionRef}
             submitting={submitting}
             showDropError={showDropError}
             overviewLeading={
-              <CreateWaveDraftsSection
-                drafts={drafts}
-                onLoad={onLoadDraft}
-                onDelete={deleteDraft}
-              />
+              !isSubwave && (
+                <CreateWaveDraftsSection
+                  drafts={drafts}
+                  onLoad={onLoadDraft}
+                  onDelete={deleteDraft}
+                />
+              )
             }
             onHaveDropToSubmitChange={onHaveDropToSubmitChange}
             onCriteriaReplacementChange={onCriteriaReplacementChange}

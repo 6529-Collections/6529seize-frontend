@@ -12,7 +12,11 @@ Set the wave name, optional image, and wave type before moving to later steps.
   messages routes
   - route ownership: [Wave Create Modal Entry Points](feature-modal-entry-points.md)
 - Step label: `Overview`
-- Content heading: `Create Wave`
+- Content heading: `Create Wave` for a standalone wave.
+- For a subwave, both the modal header and Overview heading say
+  `Create subwave of "parent wave name"`. The fields are labeled
+  `Subwave Name`, `Subwave Profile Picture`, and `Subwave Type`.
+- The `Saved Drafts` list is hidden during subwave creation.
 - Create form renders only when a connected profile is available.
 
 ## Step Paths

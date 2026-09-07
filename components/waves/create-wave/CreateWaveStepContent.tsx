@@ -24,6 +24,8 @@ export default function CreateWaveStepContent({
   submitting,
   showDropError,
   overviewLeading,
+  isSubwave = false,
+  parentWaveName,
   onHaveDropToSubmitChange,
   onCriteriaReplacementChange,
   onGroupResolutionChange,
@@ -36,6 +38,8 @@ export default function CreateWaveStepContent({
   readonly showDropError: boolean;
   /** Rendered above the Overview step's fields (e.g. saved drafts). */
   readonly overviewLeading?: ReactNode;
+  readonly isSubwave?: boolean;
+  readonly parentWaveName?: string | null | undefined;
   readonly onHaveDropToSubmitChange: (haveDrop: boolean) => void;
   readonly onCriteriaReplacementChange: (
     groupType: CreateWaveGroupConfigType,
@@ -88,6 +92,8 @@ export default function CreateWaveStepContent({
           {overviewLeading}
           <CreateWaveOverview
             overview={config.overview}
+            isSubwave={isSubwave}
+            parentWaveName={parentWaveName}
             display={config.display}
             errors={errors}
             ongoingRanking={config.dates.ongoingRanking ?? false}

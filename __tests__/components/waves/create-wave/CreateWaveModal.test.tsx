@@ -32,14 +32,20 @@ describe("CreateWaveModal", () => {
         onClose={jest.fn()}
         profile={{ handle: "alice" } as ApiIdentity}
         parentWaveId="parent-wave"
+        parentWaveName="Parent Wave"
         parentAdminGroupId="parent-admin-group"
         parentViewGroupId="parent-view-group"
       />
     );
 
+    expect(mockedDialog).toHaveBeenCalledWith(
+      expect.objectContaining({ title: 'Create subwave of "Parent Wave"' }),
+      undefined
+    );
     expect(CreateWave).toHaveBeenCalledWith(
       expect.objectContaining({
         parentWaveId: "parent-wave",
+        parentWaveName: "Parent Wave",
         parentAdminGroupId: "parent-admin-group",
         parentViewGroupId: "parent-view-group",
       }),

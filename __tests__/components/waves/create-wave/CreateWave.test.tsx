@@ -14,6 +14,7 @@ import CreateWave from "@/components/waves/create-wave/CreateWave";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { upsertCreateWaveDraft } from "@/helpers/waves/create-wave-draft.helpers";
 import { CreateWaveStep } from "@/types/waves.types";
 import { hasSubwaveMembersOutsideParent } from "@/services/api/subwave-access-api";
 
@@ -366,6 +367,7 @@ describe("CreateWave", () => {
   const onBack = jest.fn();
 
   beforeEach(() => {
+    localStorage.clear();
     jest.clearAllMocks();
     mockGetDropSnapshot.mockReturnValue({
       parts: [{ content: "Test content" }],
@@ -409,12 +411,14 @@ describe("CreateWave", () => {
 
   type RenderCreateWaveOptions = {
     readonly parentWaveId?: string | null | undefined;
+    readonly parentWaveName?: string | null | undefined;
     readonly parentAdminGroupId?: string | null | undefined;
     readonly parentViewGroupId?: string | null | undefined;
   };
 
   const createWaveElement = ({
     parentWaveId,
+    parentWaveName,
     parentAdminGroupId,
     parentViewGroupId,
   }: RenderCreateWaveOptions = {}) => (
@@ -424,6 +428,7 @@ describe("CreateWave", () => {
           profile={mockProfile}
           onBack={onBack}
           parentWaveId={parentWaveId}
+          parentWaveName={parentWaveName}
           parentAdminGroupId={parentAdminGroupId}
           parentViewGroupId={parentViewGroupId}
         />
@@ -446,16 +451,40 @@ describe("CreateWave", () => {
   it("uses subwave title when creating under a parent wave", () => {
     renderCreateWave({
       parentWaveId: "parent-wave",
+      parentWaveName: "Parent Wave",
       parentAdminGroupId: "parent-admin-group",
       parentViewGroupId: "parent-view-group",
     });
 
     expect(screen.getByTestId("create-wave-flow-title")).toHaveTextContent(
-      'Create subwave "Test Wave"'
+      'Create subwave of "Parent Wave"'
     );
     expect(mockedUseWaveConfig).toHaveBeenCalledWith({
       initialViewGroupId: "parent-view-group",
     });
+  });
+
+  it("shows saved drafts only in standalone wave creation", () => {
+    upsertCreateWaveDraft({
+      id: "saved-wave",
+      updatedAt: Date.now(),
+      config: mockWaveConfig.config,
+      endDateConfig: { time: null, period: null },
+    });
+    const { rerender } = renderCreateWave();
+    expect(screen.getByText("Saved Drafts")).toBeInTheDocument();
+
+    rerender(
+      createWaveElement({
+        parentWaveId: "parent-wave",
+        parentWaveName: "Parent Wave",
+      })
+    );
+    expect(screen.queryByText("Saved Drafts")).not.toBeInTheDocument();
+    expect(screen.getByTestId("create-wave-overview")).toBeInTheDocument();
+
+    rerender(createWaveElement());
+    expect(screen.getByText("Saved Drafts")).toBeInTheDocument();
   });
 
   it("calls onBack when back button is clicked", () => {

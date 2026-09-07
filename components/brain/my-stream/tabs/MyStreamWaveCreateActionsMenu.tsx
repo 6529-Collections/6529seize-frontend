@@ -129,6 +129,7 @@ export default function MyStreamWaveCreateActionsMenu({
           onClose={() => setIsCreateSubwaveOpen(false)}
           profile={connectedProfile}
           parentWaveId={wave.id}
+          parentWaveName={wave.name}
           parentAdminGroupId={parentAdminGroupId}
           parentViewGroupId={wave.visibility.scope.group?.id ?? null}
         />

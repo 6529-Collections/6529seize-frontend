@@ -1605,6 +1605,7 @@ const WAVE_CREATE_ACTIONS_MESSAGES = objectMessages("waves.create.actions", {
 } as const);
 
 const WAVE_CREATE_DIALOG_MESSAGES = objectMessages("waves.create.dialog", {
+  subwaveOfTitle: 'Create subwave of "{parentWaveName}"',
   profileRequiredConfirm: "Go to Identity",
   profileRequiredDescription: "Set up your profile before creating a Wave.",
   profileRequiredTitle: "Create your profile first",
@@ -1620,6 +1621,12 @@ const WAVE_CREATE_ADVANCED_MESSAGES = objectMessages("waves.create.advanced", {
 } as const);
 
 const WAVE_CREATE_OVERVIEW_MESSAGES = objectMessages("waves.create.overview", {
+  typeRequired: "Please choose a wave type to continue.",
+  subwaveTypeRequired: "Please choose a subwave type to continue.",
+  type: "Wave Type",
+  subwaveType: "Subwave Type",
+  subwavePicture: "Subwave Profile Picture",
+  subwaveName: "Subwave Name",
   title: "Create Wave",
   name: "Wave Name",
   picture: "Wave Profile Picture",

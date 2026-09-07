@@ -67,6 +67,7 @@ const createWave = ({
 } = {}) =>
   ({
     id: "parent-wave",
+    name: "Parent Wave",
     parent_wave: parentWave,
     visibility: { scope: { group: viewGroupId ? { id: viewGroupId } : null } },
     chat: { scope: { group: { is_direct_message: false } } },
@@ -117,6 +118,7 @@ describe("MyStreamWaveCreateActionsMenu", () => {
     expect(createWaveModalMock).toHaveBeenLastCalledWith(
       expect.objectContaining({
         parentWaveId: "parent-wave",
+        parentWaveName: "Parent Wave",
         parentAdminGroupId: "parent-admin-group",
         parentViewGroupId: null,
       })

@@ -495,6 +495,16 @@ export const DE_DE_MESSAGES = {
   "waves.gifPicker.unavailable.hint":
     "Du kannst stattdessen eine GIF-Datei hochladen.",
   "common.close": "Schliessen",
+  "waves.create.dialog.subwaveOfTitle":
+    "Subwave von „{parentWaveName}“ erstellen",
+  "waves.create.overview.subwaveName": "Subwave-Name",
+  "waves.create.overview.subwavePicture": "Subwave-Profilbild",
+  "waves.create.overview.subwaveType": "Subwave-Typ",
+  "waves.create.overview.type": "Wave-Typ",
+  "waves.create.overview.subwaveTypeRequired":
+    "Bitte wähle einen Subwave-Typ aus, um fortzufahren.",
+  "waves.create.overview.typeRequired":
+    "Bitte wähle einen Wave-Typ aus, um fortzufahren.",
   "waves.create.dialog.subwaveTitle": "Subwave erstellen",
   "waves.create.dialog.waveTitle": "Wave erstellen",
   "waves.create.actions.cancel": "Abbrechen",

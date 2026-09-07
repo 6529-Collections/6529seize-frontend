@@ -14,13 +14,26 @@ beforeAll(() => {
 });
 
 describe("CreateWaveNameInput", () => {
-  it("calls onChange when typing", async () => {
-    const user = userEvent.setup();
-    const onChange = jest.fn();
-    render(<CreateWaveNameInput name="" errors={[]} onChange={onChange} />);
-    await user.type(screen.getByLabelText("Wave Name *"), "Wave");
-    expect(onChange).toHaveBeenCalled();
-  });
+  it.each([false, true])(
+    "calls onChange when typing in subwave=%s",
+    async (isSubwave) => {
+      const user = userEvent.setup();
+      const onChange = jest.fn();
+      render(
+        <CreateWaveNameInput
+          name=""
+          isSubwave={isSubwave}
+          errors={[]}
+          onChange={onChange}
+        />
+      );
+      await user.type(
+        screen.getByLabelText(isSubwave ? "Subwave Name *" : "Wave Name *"),
+        "Wave"
+      );
+      expect(onChange).toHaveBeenCalled();
+    }
+  );
 
   it("keeps the wave name label inside the input until it floats", () => {
     render(<CreateWaveNameInput name="" errors={[]} onChange={jest.fn()} />);

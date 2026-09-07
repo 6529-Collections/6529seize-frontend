@@ -502,6 +502,15 @@ export const EN_GB_MESSAGES = {
   "waves.poll.composer.validation.futureClosingTime":
     "Choose a future closing time.",
   "common.close": "Close",
+  "waves.create.dialog.subwaveOfTitle": 'Create subwave of "{parentWaveName}"',
+  "waves.create.overview.subwaveName": "Subwave Name",
+  "waves.create.overview.subwavePicture": "Subwave Profile Picture",
+  "waves.create.overview.subwaveType": "Subwave Type",
+  "waves.create.overview.type": "Wave Type",
+  "waves.create.overview.subwaveTypeRequired":
+    "Please choose a subwave type to continue.",
+  "waves.create.overview.typeRequired":
+    "Please choose a wave type to continue.",
   "waves.create.dialog.subwaveTitle": "Create subwave",
   "waves.create.dialog.waveTitle": "Create Wave",
   "waves.create.actions.cancel": "Cancel",

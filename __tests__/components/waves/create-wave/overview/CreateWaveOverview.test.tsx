@@ -80,21 +80,32 @@ describe("CreateWaveOverview", () => {
     jest.clearAllMocks();
   });
 
-  it("renders all child components correctly", () => {
+  it.each([false, true])("renders the overview for subwave=%s", (isSubwave) => {
     render(
       <CreateWaveOverview
         overview={mockOverview}
+        isSubwave={isSubwave}
+        parentWaveName="Parent Wave"
         errors={[]}
         setOverview={mockSetOverview}
       />
     );
 
     expect(
-      screen.getByRole("heading", { level: 2, name: "Create Wave" })
+      screen.getByRole("heading", {
+        level: 2,
+        name: isSubwave ? 'Create subwave of "Parent Wave"' : "Create Wave",
+      })
     ).toBeVisible();
     expect(
       screen.queryByText("Name your wave and choose how it works.")
     ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", {
+        level: 3,
+        name: isSubwave ? "Subwave Profile Picture" : "Wave Profile Picture",
+      })
+    ).toBeVisible();
     expect(screen.getByTestId("wave-name-input")).toBeInTheDocument();
     expect(screen.getByTestId("wave-image-input")).toBeInTheDocument();
     expect(screen.getByTestId("wave-type-input")).toBeInTheDocument();
