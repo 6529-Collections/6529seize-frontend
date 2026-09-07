@@ -52,12 +52,9 @@ export function SubmissionIdentityPanel({
   if (!profile || !address) {
     return (
       <div className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/60 tw-p-4">
-        <p
-          className="tw-mb-0 tw-text-sm tw-text-iron-300"
-          role="status"
-        >
+        <output className="tw-mb-0 tw-block tw-text-sm tw-text-iron-300">
           {t(locale, "memes.submission.identity.connectPrompt")}
-        </p>
+        </output>
       </div>
     );
   }
