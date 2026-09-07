@@ -217,8 +217,11 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   const { wave: activeWaveData } = useWaveById(activeWaveId, {
     enabled: Boolean(activeWaveId),
   });
+  const resolvedActiveWaveData =
+    activeWaveData?.id === activeWaveId ? activeWaveData : null;
   const mainWavesData = useWavesList({
     enabled: isMainWavesListEnabled,
+    ...(resolvedActiveWaveData ? { activeWave: resolvedActiveWaveData } : {}),
   });
   const dmWavesData = useDmWavesList({
     enabled: isDirectMessagesListEnabled,
@@ -328,8 +331,8 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     dmWavesRef.current = dmWavesHookData.waves;
   }, [wavesHookData.waves, dmWavesHookData.waves]);
 
-  const activeWaveDataId = activeWaveData?.id ?? null;
-  const activeWaveMuted = getWaveMuted(activeWaveData);
+  const activeWaveDataId = resolvedActiveWaveData?.id ?? null;
+  const activeWaveMuted = getWaveMuted(resolvedActiveWaveData);
   const isWaveMuted = useCallback(
     (waveId: string): boolean => {
       const wave = wavesRef.current.find((w) => w.id === waveId);
@@ -491,8 +494,8 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   // Create the context value using the nested structure
   const contextValue = useMemo<MyStreamContextType>(() => {
     const activeWaveParentId =
-      activeWaveData?.id === activeWaveId
-        ? (activeWaveData.parent_wave?.id ?? null)
+      resolvedActiveWaveData?.id === activeWaveId
+        ? (resolvedActiveWaveData.parent_wave?.id ?? null)
         : null;
 
     const waves: WavesContextData = {
@@ -587,7 +590,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     dmWavesHookData.restoreWaveUnreadCount,
     markDirectMessageRead,
     activeWaveId,
-    activeWaveData,
+    resolvedActiveWaveData,
     setActiveWaveAndRegister,
     requestMainWavesList,
     requestDirectMessagesList,

@@ -31,6 +31,7 @@ import { WaveTrustSignals } from "@/components/waves/WaveTrustSignals";
 import MyStreamActionTooltip from "../MyStreamActionTooltip";
 import { useSidebarState } from "../../../../hooks/useSidebarState";
 import WaveRepButton from "@/components/waves/header/rep/WaveRepButton";
+import WaveParentNavigation from "@/components/waves/header/WaveParentNavigation";
 import CompactWaveActions from "./CompactWaveActions";
 import { waveRightPanelText } from "@/helpers/waves/wave-right-panel.helpers";
 import { BRAIN_RIGHT_SIDEBAR_ID } from "@/components/brain/right-sidebar/BrainRightSidebarTypes";
@@ -181,6 +182,10 @@ function MyStreamWaveHeaderIdentity({
         />
       </div>
       <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col">
+        <WaveParentNavigation
+          parentWave={wave.parent_wave}
+          variant={isCompact ? "compact-header" : "header"}
+        />
         {showDescriptionPreview ? (
           <>
             <WaveDescriptionPopover
@@ -429,7 +434,7 @@ export default function MyStreamWaveTabsHeader({
             <button
               type="button"
               onClick={handleMobileBack}
-              className="tw-flex tw-h-9 tw-self-start tw-items-center tw-border-0 tw-bg-transparent tw-p-0 tw-px-1.5 tw-text-iron-300 tw-transition-colors hover:tw-text-iron-50 sm:-tw-ml-2.5 sm:tw-px-2.5"
+              className="tw-flex tw-h-9 tw-items-center tw-self-start tw-border-0 tw-bg-transparent tw-p-0 tw-px-1.5 tw-text-iron-300 tw-transition-colors hover:tw-text-iron-50 sm:-tw-ml-2.5 sm:tw-px-2.5"
               aria-label="Go back"
             >
               <ArrowLeftIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0 sm:tw-h-6 sm:tw-w-6" />

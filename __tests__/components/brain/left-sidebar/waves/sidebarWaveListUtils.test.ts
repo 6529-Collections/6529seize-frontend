@@ -1,5 +1,8 @@
 import { createMockMinimalWave } from "@/__tests__/utils/mockFactories";
-import { groupSidebarWaves } from "@/components/brain/left-sidebar/waves/sidebarWaveListUtils";
+import {
+  groupSidebarWaves,
+  prioritizeActiveWaveContainer,
+} from "@/components/brain/left-sidebar/waves/sidebarWaveListUtils";
 
 describe("sidebarWaveListUtils", () => {
   it("groups followed-subwave parent containers with following waves", () => {
@@ -100,5 +103,18 @@ describe("sidebarWaveListUtils", () => {
       "pinned-quality-wave",
     ]);
     expect(groups.highlyRatedWaves).toEqual([]);
+  });
+
+  it("anchors the active route container ahead of activity-sorted roots", () => {
+    const newest = createMockMinimalWave({ id: "newest" });
+    const activeParent = createMockMinimalWave({ id: "active-parent" });
+    const older = createMockMinimalWave({ id: "older" });
+
+    expect(
+      prioritizeActiveWaveContainer(
+        [newest, activeParent, older],
+        activeParent.id
+      ).map((wave) => wave.id)
+    ).toEqual(["active-parent", "newest", "older"]);
   });
 });

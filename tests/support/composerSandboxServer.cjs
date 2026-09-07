@@ -56,6 +56,7 @@ const SANDBOX_SCHEDULED_WAVE_DESCRIPTION =
   "Local-only scheduled rank wave description for Playwright.";
 const SANDBOX_SCHEDULED_OUTCOME_TITLE = "Sandbox manual outcome";
 const SANDBOX_CHAT_DROP_CONTENT = "Local-only chat drop from Playwright.";
+const SANDBOX_POLL_QUESTION = "Which sandbox option do you prefer?";
 const SANDBOX_WAVE_GUIDELINES = Array.from(
   { length: 24 },
   (_, index) =>
@@ -94,6 +95,7 @@ let sandboxDropReaction = null;
 let sandboxWaveGuidelinesEnabled = false;
 let sandboxRuleGroupSequence = 0;
 const sandboxRuleGroups = new Map();
+const sandboxRuleGroupWallets = new Map();
 const MAX_REQUEST_BODY_BYTES = 16 * 1024;
 
 function encodeJwtPart(value) {
@@ -467,6 +469,10 @@ const localDrop = {
   boosts: 0,
   is_signed: false,
   hide_link_preview: false,
+  moderation: {
+    status: "VISIBLE",
+    can_view: true,
+  },
   context_profile_context: {
     reaction: null,
     boosted: false,
@@ -527,6 +533,10 @@ const submittedChatDrop = {
   is_additional_action_promised: false,
   hide_link_preview: false,
   nft_links: [],
+  moderation: {
+    status: "VISIBLE",
+    can_view: true,
+  },
 };
 
 const submittedPollDrop = {
@@ -1069,7 +1079,10 @@ function isExpectedChatDropParts(parts, hasPoll) {
   }
 
   if (hasPoll) {
-    return parts.length === 1 && isExpectedChatDropPart(parts[0], null);
+    return (
+      parts.length === 1 &&
+      isExpectedChatDropPart(parts[0], SANDBOX_POLL_QUESTION)
+    );
   }
 
   if (parts.length === 1) {
@@ -1431,7 +1444,7 @@ function isExpectedCreateRuleGroupBody(body) {
     typeof body.name !== "string" ||
     body.name.length === 0 ||
     body.name.length > 250 ||
-    !/(?:Visibility|Who can view|Who can drop|Who can vote|Who can rate|Who can chat|Admin|Admins)$/.test(
+    !/(?:Visibility|Who can access this wave|Who can view|Who can drop|Who can vote|Who can rate|Who can chat|Admin|Admins)$/.test(
       body.name
     ) ||
     (body.is_private !== undefined && body.is_private !== false) ||
@@ -1538,6 +1551,10 @@ function createSandboxRuleGroup(body) {
   };
 
   sandboxRuleGroups.set(id, group);
+  sandboxRuleGroupWallets.set(id, {
+    included: [...(body.group.identity_addresses ?? [])],
+    excluded: [...(body.group.excluded_identity_addresses ?? [])],
+  });
   return group;
 }
 
@@ -2065,6 +2082,26 @@ function notificationWaveIdFromPath(pathname) {
   );
 }
 
+function isExpectedNotificationWaveReadBody(body) {
+  if (isEmptyRequestBody(body)) {
+    return true;
+  }
+  if (!isPlainObject(body) || body.request_dm_unread_state !== true) {
+    return false;
+  }
+
+  const expectedKeys =
+    body.read_through_serial_no === undefined
+      ? ["request_dm_unread_state"]
+      : ["read_through_serial_no", "request_dm_unread_state"];
+  return (
+    hasOnlyKeys(body, expectedKeys) &&
+    (body.read_through_serial_no === undefined ||
+      (Number.isInteger(body.read_through_serial_no) &&
+        body.read_through_serial_no >= 0))
+  );
+}
+
 function isSandboxReactionPath(pathname) {
   return pathname === `/api/drops/${SANDBOX_DROP_ID}/reaction`;
 }
@@ -2236,7 +2273,7 @@ function isKnownSandboxMutation(method, pathname, searchParams, body) {
   if (notificationWaveId) {
     return (
       sandboxNotificationWaveIds.has(notificationWaveId) &&
-      isEmptyRequestBody(body)
+      isExpectedNotificationWaveReadBody(body)
     );
   }
 
@@ -2585,6 +2622,33 @@ function handleTopCommunityMembersRead(pathname, url, res) {
   return writeJsonResponse(res, sandboxGroupMembersPage(url.searchParams));
 }
 
+function handleGroupIdentityWalletsRead(pathname, res) {
+  const match = pathname.match(
+    /^\/api\/groups\/([^/]+)\/identity_groups\/([^/]+)$/
+  );
+  if (!match) {
+    return false;
+  }
+
+  const [, groupId, identityGroupId] = match;
+  const group = getSandboxRuleGroup(groupId);
+  const wallets = sandboxRuleGroupWallets.get(groupId);
+  if (!group || !wallets) {
+    writeJson(res, 404, { error: "Sandbox identity group not found." });
+    return true;
+  }
+
+  if (group.group.identity_group_id === identityGroupId) {
+    return writeJsonResponse(res, wallets.included);
+  }
+  if (group.group.excluded_identity_group_id === identityGroupId) {
+    return writeJsonResponse(res, wallets.excluded);
+  }
+
+  writeJson(res, 404, { error: "Sandbox identity group not found." });
+  return true;
+}
+
 function handleGroupRead(pathname, res) {
   const groupId = pathname.match(/^\/api\/groups\/([^/]+)$/)?.[1] ?? null;
   if (!groupId) {
@@ -2641,6 +2705,7 @@ function handleMockApiRead(method, pathname, url, res) {
   return (
     handleCommunityMemberRead(pathname, url, res) ||
     handleTopCommunityMembersRead(pathname, url, res) ||
+    handleGroupIdentityWalletsRead(pathname, res) ||
     handleGroupRead(pathname, res) ||
     handleNotificationRead(pathname, url, res) ||
     handleExactMockApiRead(pathname, res) ||
@@ -2697,7 +2762,10 @@ const mockApiKnownPostRoutes = [
   },
   {
     matches: (pathname) => Boolean(notificationWaveIdFromPath(pathname)),
-    respond: (res) => writeEmptyResponse(res, 204),
+    respond: (res, body) =>
+      isEmptyRequestBody(body)
+        ? writeEmptyResponse(res, 204)
+        : writeJsonResponse(res, { dm_unread_state: null }),
   },
   {
     matches: isNotificationMutationPath,

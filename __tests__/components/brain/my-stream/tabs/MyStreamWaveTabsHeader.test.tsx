@@ -148,6 +148,42 @@ describe("MyStreamWaveTabsHeader", () => {
     expect(scoreActions).toHaveClass("tw-gap-1.5");
   });
 
+  it("shows a linked parent wave above a subwave title", () => {
+    render(
+      <MyStreamWaveTabsHeader
+        wave={{
+          ...wave,
+          id: "child-wave",
+          name: "CI-PRODUCTION",
+          parent_wave: {
+            id: "parent-wave",
+            name: "Follow The Repo",
+          },
+        }}
+        activeContentTab={MyStreamWaveTab.CHAT}
+        setActiveContentTab={jest.fn()}
+        onSelectCuration={jest.fn()}
+        isCompact={false}
+        showBackButton={false}
+        headerActionsTooltipId="header-actions"
+        headerClassName="tw-flex"
+        actionsClassName="tw-flex"
+      />
+    );
+
+    expect(
+      screen.getByRole("navigation", { name: "Wave hierarchy" })
+    ).toHaveTextContent(/Subwave of\s*Follow The Repo/);
+    const parentLink = screen.getByRole("link", {
+      name: "Subwave of Follow The Repo",
+    });
+    expect(parentLink).toHaveAttribute(
+      "title",
+      "Open parent wave: Follow The Repo"
+    );
+    expect(parentLink).toHaveAttribute("href", "/waves/parent-wave");
+  });
+
   it("hides score actions in the compact mobile header", () => {
     render(
       <MyStreamWaveTabsHeader

@@ -3,7 +3,7 @@
   "max_source_file_lines": 800,
   "counts": {
     "any_casts": 22,
-    "test_generic_any": 115,
+    "test_generic_any": 113,
     "todo_comments": 0,
     "oversized_files": 0,
     "legacy_wordpress_runtime": 0,

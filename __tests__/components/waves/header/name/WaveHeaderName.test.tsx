@@ -87,10 +87,14 @@ describe("WaveHeaderName", () => {
     expect(hierarchy).toBeInTheDocument();
     expect(hierarchy).toHaveTextContent(/Subwave of\s*Parent Wave/);
     expect(screen.getByText("Subwave of")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Parent Wave" })).toHaveAttribute(
-      "href",
-      "/waves/parent-wave"
+    const parentLink = screen.getByRole("link", {
+      name: "Open parent wave: Parent Wave",
+    });
+    expect(parentLink).toHaveAttribute(
+      "title",
+      "Open parent wave: Parent Wave"
     );
+    expect(parentLink).toHaveAttribute("href", "/waves/parent-wave");
     expect(screen.getAllByText("Child Wave")).toHaveLength(1);
     expect(screen.getByRole("link", { name: "Child Wave" })).toHaveAttribute(
       "href",

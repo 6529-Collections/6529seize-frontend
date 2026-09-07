@@ -98,6 +98,8 @@ export default function CommunityMembersGroupFilter({
         allowGroupClear
         collapseOnClickAway={false}
         startMode="criteria"
+        showChooseGroup={false}
+        showPrivacyControl={false}
         membersRoleLabel={t(locale, "network.groupFilter.membersRoleLabel")}
         onChange={(group) => {
           onGroupChange(group);

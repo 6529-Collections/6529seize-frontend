@@ -281,6 +281,41 @@ describe("useSidebarWaveTree", () => {
     ).toBeNull();
   });
 
+  it("ignores a persisted collapse while its subwave is active", () => {
+    globalThis.sessionStorage.setItem(
+      "sidebar-wave-tree-expansion-v1",
+      JSON.stringify({
+        expandedParentIds: ["parent"],
+        collapsedParentIds: ["parent"],
+      })
+    );
+
+    const { result } = renderHook(() =>
+      useSidebarWaveTree({
+        waves,
+        activeWaveId: "older-child",
+      })
+    );
+
+    expect(
+      getTreeRowKeys(result.current.getRows(result.current.topLevelWaves))
+    ).toEqual([
+      "parent",
+      "parent:subwaves-toggle",
+      "parent:older-child",
+      "parent:newer-child",
+    ]);
+    expect(
+      JSON.parse(
+        globalThis.sessionStorage.getItem("sidebar-wave-tree-expansion-v1") ??
+          "{}"
+      )
+    ).toEqual({
+      expandedParentIds: ["parent"],
+      collapsedParentIds: ["parent"],
+    });
+  });
+
   it("does not reload the same active parent when the expand callback changes", () => {
     const firstOnParentExpand = jest.fn();
     const secondOnParentExpand = jest.fn();
@@ -317,7 +352,7 @@ describe("useSidebarWaveTree", () => {
     ]);
   });
 
-  it("lets manual collapse hide the active subwave parent rows", () => {
+  it("keeps active subwave parent rows visible when collapse is requested", () => {
     const onParentExpand = jest.fn();
     const { result } = renderHook(() =>
       useSidebarWaveTree({
@@ -343,27 +378,30 @@ describe("useSidebarWaveTree", () => {
 
     expect(
       getTreeRowKeys(result.current.getRows(result.current.topLevelWaves))
-    ).toEqual(["parent", "parent:subwaves-toggle"]);
+    ).toEqual([
+      "parent",
+      "parent:subwaves-toggle",
+      "parent:older-child",
+      "parent:newer-child",
+    ]);
     expect(onParentExpand).not.toHaveBeenCalled();
   });
 
-  it("reopens a manually collapsed active subwave parent", () => {
+  it("applies an active-parent collapse after navigation leaves the subwave", () => {
     const onParentExpand = jest.fn();
-    const { result } = renderHook(() =>
-      useSidebarWaveTree({
-        waves,
-        activeWaveId: "older-child",
-        onParentExpand,
-      })
+    const { result, rerender } = renderHook(
+      ({ activeWaveId }: { readonly activeWaveId: string | null }) =>
+        useSidebarWaveTree({
+          waves,
+          activeWaveId,
+          onParentExpand,
+        }),
+      {
+        initialProps: {
+          activeWaveId: "older-child" as string | null,
+        },
+      }
     );
-
-    act(() => {
-      result.current.toggleParent("parent");
-    });
-
-    expect(
-      getTreeRowKeys(result.current.getRows(result.current.topLevelWaves))
-    ).toEqual(["parent", "parent:subwaves-toggle"]);
 
     act(() => {
       result.current.toggleParent("parent");
@@ -377,8 +415,13 @@ describe("useSidebarWaveTree", () => {
       "parent:older-child",
       "parent:newer-child",
     ]);
-    expect(onParentExpand).toHaveBeenCalledTimes(1);
-    expect(onParentExpand).toHaveBeenLastCalledWith("parent");
+
+    rerender({ activeWaveId: null });
+
+    expect(
+      getTreeRowKeys(result.current.getRows(result.current.topLevelWaves))
+    ).toEqual(["parent", "parent:subwaves-toggle"]);
+    expect(onParentExpand).not.toHaveBeenCalled();
   });
 
   it("loads a direct active subwave parent without showing it expanded before rows exist", () => {

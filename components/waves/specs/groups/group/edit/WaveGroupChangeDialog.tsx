@@ -237,6 +237,8 @@ export default function WaveGroupChangeDialog({
         defaultIncludedIdentity={defaultIncludedIdentity}
         membersRoleLabel={groupLabel}
         allowGroupClear={false}
+        showChooseGroup={false}
+        isWaveAccessEditor={true}
         disabled={disabled}
         startMode="criteria"
         beforePanel={shortcut}
