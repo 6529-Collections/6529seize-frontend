@@ -75,6 +75,102 @@ function LeaderboardResultBadge({
   );
 }
 
+function LeaderboardMediaPreview({
+  drop,
+  title,
+  opensWholeCard,
+  hasTouchScreen,
+  isHighlighting,
+  onOpen,
+}: {
+  readonly drop: ExtendedDrop;
+  readonly title: string;
+  readonly opensWholeCard: boolean;
+  readonly hasTouchScreen: boolean;
+  readonly isHighlighting: boolean;
+  readonly onOpen: () => void;
+}) {
+  const locale = useBrowserLocale();
+  const isTabletOrSmaller = useMediaQuery("(max-width: 1023px)");
+  const primaryMedia = drop.parts[0]?.media[0];
+  const mediaImageScale = isTabletOrSmaller
+    ? ImageScale.AUTOx450
+    : ImageScale.AUTOx1080;
+  const previewImageUrl = useMemo(
+    () => getDropPreviewImageUrl(drop.metadata),
+    [drop.metadata]
+  );
+  const hasStaticMediaPreview =
+    primaryMedia?.mime_type.includes("image") === true ||
+    Boolean(previewImageUrl);
+  const highlightAnimation =
+    isHighlighting && !hasTouchScreen ? "tw-animate-gallery-reveal" : "";
+  const imageContainerClass =
+    "tw-aspect-square tw-relative tw-flex-shrink-0 tw-touch-pan-y tw-overflow-hidden tw-bg-iron-900 tw-group/image";
+  const imageScaleClasses =
+    hasTouchScreen || !hasStaticMediaPreview
+      ? ""
+      : `tw-transform tw-duration-700 tw-ease-out group-hover/image:tw-scale-105 ${highlightAnimation}`;
+  const mediaContent = (
+    <div
+      className={`tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center ${imageScaleClasses}`}
+    >
+      <MediaDisplay
+        media_mime_type={primaryMedia?.mime_type ?? "image/jpeg"}
+        media_url={primaryMedia?.url ?? ""}
+        disableMediaInteraction={true}
+        isInertPreview={opensWholeCard}
+        fillVideoContainer={true}
+        imageScale={mediaImageScale}
+        previewImageUrl={previewImageUrl}
+      />
+    </div>
+  );
+
+  if (opensWholeCard) {
+    return (
+      <div
+        inert
+        className={`${imageContainerClass} tw-m-0 tw-w-full tw-rounded-lg`}
+      >
+        {mediaContent}
+      </div>
+    );
+  }
+
+  if (hasStaticMediaPreview) {
+    return (
+      <button
+        type="button"
+        onClick={onOpen}
+        aria-label={t(locale, "waves.leaderboard.grid.openNamed", { title })}
+        className={`${imageContainerClass} tw-m-0 tw-w-full tw-cursor-pointer tw-rounded-lg tw-border-none tw-bg-transparent tw-p-0 tw-text-left`}
+      >
+        {mediaContent}
+      </button>
+    );
+  }
+
+  return (
+    <div className={`${imageContainerClass} tw-m-0 tw-w-full tw-rounded-lg`}>
+      {mediaContent}
+      <button
+        type="button"
+        onClick={onOpen}
+        aria-label={t(locale, "drop.media.openMedia")}
+        title={t(locale, "drop.media.openMedia")}
+        className="tw-absolute tw-right-2 tw-top-2 tw-z-20 tw-flex tw-size-8 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-white/[0.08] tw-bg-black/70 tw-p-0 tw-text-iron-300 tw-shadow-md tw-backdrop-blur-sm tw-transition-colors tw-duration-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-iron-100"
+      >
+        <FontAwesomeIcon
+          icon={faArrowUpRightFromSquare}
+          className="tw-size-3.5"
+          aria-hidden="true"
+        />
+      </button>
+    </div>
+  );
+}
+
 export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
   ({
     drop,
@@ -96,7 +192,6 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
     } = useVotingModalState(isVotingActionLocked);
     const [isHighlighting, setIsHighlighting] = useState(false);
     const isMobileScreen = useIsMobileScreen();
-    const isTabletOrSmaller = useMediaQuery("(max-width: 1023px)");
     const locale = useBrowserLocale();
     const {
       cardRef,
@@ -129,17 +224,6 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
     const { canShowVote } = useDropInteractionRules(drop);
     const canShowVotingAction = canShowVote && !isVotingActionLocked;
     const primaryMedia = drop.parts[0]?.media[0];
-    const mediaImageScale = isTabletOrSmaller
-      ? ImageScale.AUTOx450
-      : ImageScale.AUTOx1080;
-
-    const previewImageUrl = useMemo(
-      () => getDropPreviewImageUrl(drop.metadata),
-      [drop.metadata]
-    );
-    const hasStaticMediaPreview =
-      primaryMedia?.mime_type.includes("image") === true ||
-      Boolean(previewImageUrl);
 
     const isFirstRenderRef = useRef(true);
     const previousSortRef = useRef(activeSort);
@@ -222,78 +306,6 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
       ? drop.title
       : t(locale, "waves.leaderboard.grid.untitled");
 
-    const highlightAnimation =
-      isHighlighting && !hasTouchScreen ? "tw-animate-gallery-reveal" : "";
-
-    const baseImageClasses =
-      "tw-aspect-square tw-relative tw-flex-shrink-0 tw-touch-pan-y tw-overflow-hidden tw-bg-iron-900 tw-group/image";
-
-    const imageScaleClasses =
-      hasTouchScreen || !hasStaticMediaPreview
-        ? ""
-        : `tw-transform tw-duration-700 tw-ease-out group-hover/image:tw-scale-105 ${highlightAnimation}`;
-
-    const imageContainerClass = baseImageClasses;
-    const mediaContent = (
-      <div
-        className={`tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center ${imageScaleClasses}`}
-      >
-        <MediaDisplay
-          media_mime_type={primaryMedia?.mime_type ?? "image/jpeg"}
-          media_url={primaryMedia?.url ?? ""}
-          disableMediaInteraction={true}
-          isInertPreview={opensWholeCard}
-          fillVideoContainer={true}
-          imageScale={mediaImageScale}
-          previewImageUrl={previewImageUrl}
-        />
-      </div>
-    );
-
-    let mediaPreview;
-    if (opensWholeCard) {
-      mediaPreview = (
-        <div
-          inert
-          className={`${imageContainerClass} tw-m-0 tw-w-full tw-rounded-lg`}
-        >
-          {mediaContent}
-        </div>
-      );
-    } else if (hasStaticMediaPreview) {
-      mediaPreview = (
-        <button
-          type="button"
-          onClick={openDrop}
-          aria-label={t(locale, "waves.leaderboard.grid.openNamed", { title })}
-          className={`${imageContainerClass} tw-m-0 tw-w-full tw-cursor-pointer tw-rounded-lg tw-border-none tw-bg-transparent tw-p-0 tw-text-left`}
-        >
-          {mediaContent}
-        </button>
-      );
-    } else {
-      mediaPreview = (
-        <div
-          className={`${imageContainerClass} tw-m-0 tw-w-full tw-rounded-lg`}
-        >
-          {mediaContent}
-          <button
-            type="button"
-            onClick={openDrop}
-            aria-label={t(locale, "drop.media.openMedia")}
-            title={t(locale, "drop.media.openMedia")}
-            className="tw-absolute tw-right-2 tw-top-2 tw-z-20 tw-flex tw-size-8 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-white/[0.08] tw-bg-black/70 tw-p-0 tw-text-iron-300 tw-shadow-md tw-backdrop-blur-sm tw-transition-colors tw-duration-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-iron-100"
-          >
-            <FontAwesomeIcon
-              icon={faArrowUpRightFromSquare}
-              className="tw-size-3.5"
-              aria-hidden="true"
-            />
-          </button>
-        </div>
-      );
-    }
-
     return (
       <div
         ref={cardRef}
@@ -343,7 +355,14 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
         <div
           className={`tw-relative tw-z-10 tw-flex tw-flex-1 tw-flex-col ${opensWholeCard ? "tw-pointer-events-none [&_[data-tooltip-id]]:tw-pointer-events-auto [&_[tabindex]]:tw-pointer-events-auto [&_a]:tw-pointer-events-auto [&_button]:tw-pointer-events-auto" : ""}`}
         >
-          {mediaPreview}
+          <LeaderboardMediaPreview
+            drop={drop}
+            title={title}
+            opensWholeCard={opensWholeCard}
+            hasTouchScreen={hasTouchScreen}
+            isHighlighting={isHighlighting}
+            onOpen={openDrop}
+          />
           <div className="tw-flex tw-flex-1 tw-flex-col tw-rounded-b-lg tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950/50 tw-p-3">
             <div className="tw-mb-3 tw-min-w-0">
               <div className="tw-flex tw-min-w-0 tw-items-start tw-justify-between tw-gap-2">

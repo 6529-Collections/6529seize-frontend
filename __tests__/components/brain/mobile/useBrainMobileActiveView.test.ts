@@ -28,6 +28,30 @@ const createProps = (
 });
 
 describe("useBrainMobileActiveView", () => {
+  it("keeps the selection callback stable until its route context changes", () => {
+    const props = createProps({ isCompleted: false });
+    const { result, rerender } = renderHook(useBrainMobileActiveView, {
+      initialProps: props,
+    });
+    const initialCallback = result.current.onViewChange;
+
+    rerender({ ...props, hasAuthenticatedProfile: true });
+    expect(result.current.onViewChange).toBe(initialCallback);
+    act(() => {
+      result.current.onViewChange(BrainView.ABOUT);
+    });
+    expect(result.current.activeView).toBe(BrainView.ABOUT);
+    expect(result.current.onViewChange).toBe(initialCallback);
+
+    rerender({ ...props, waveId: "wave-2", pathname: "/waves/wave-2" });
+    expect(result.current.onViewChange).not.toBe(initialCallback);
+    expect(result.current.activeView).toBe(BrainView.DEFAULT);
+    act(() => {
+      result.current.onViewChange(BrainView.ABOUT);
+    });
+    expect(result.current.activeView).toBe(BrainView.ABOUT);
+  });
+
   it("restores an available view from the current navigation entry", () => {
     const { result } = renderHook(() =>
       useBrainMobileActiveView(

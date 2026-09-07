@@ -65,6 +65,15 @@ interface MobileAboutTabState {
   readonly activeTab: SidebarTab;
 }
 
+const getRestoredWaveView = (
+  isApp: boolean,
+  waveId: string | null,
+  currentWaveView: ReturnType<
+    typeof useNavigationHistoryContext
+  >["currentWaveView"]
+): BrainView | null =>
+  isApp && currentWaveView?.waveId === waveId ? currentWaveView.view : null;
+
 const BrainMobileContent: React.FC<Props> = ({ children }) => {
   const router = useRouter();
   // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense covered by BrainMobile Suspense wrapper
@@ -162,15 +171,17 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
     searchParams,
     wave,
     waveId,
-    restoredView:
-      isApp && currentWaveView?.waveId === waveId ? currentWaveView.view : null,
+    restoredView: getRestoredWaveView(isApp, waveId, currentWaveView),
   });
-  const onViewChange = (view: BrainView) => {
-    selectView(view);
-    if (isApp && waveId) {
-      rememberWaveView({ waveId, view });
-    }
-  };
+  const onViewChange = useCallback(
+    (view: BrainView) => {
+      selectView(view);
+      if (isApp && waveId) {
+        rememberWaveView({ waveId, view });
+      }
+    },
+    [selectView, isApp, waveId, rememberWaveView]
+  );
   const [aboutTabState, setAboutTabState] = useState<MobileAboutTabState>({
     waveId: null,
     activeTab: SidebarTab.ABOUT,

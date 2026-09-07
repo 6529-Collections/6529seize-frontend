@@ -175,33 +175,40 @@ describe("NavigationHistoryContext", () => {
     expect(routerMock.push).toHaveBeenCalledWith("/network");
   });
 
-  it("restores the wave view on repeated profile Back round trips", () => {
-    mockPathname = "/waves/wave-1";
-    const { result, rerender } = renderHook(
-      () => useNavigationHistoryContext(),
-      { wrapper }
-    );
-    const selection = { waveId: "wave-1", view: BrainView.LEADERBOARD };
-
-    act(() => {
-      result.current.rememberWaveView(selection);
-    });
-
-    for (let visit = 0; visit < 2; visit += 1) {
-      mockPathname = "/Articulate";
-      rerender();
-      expect(result.current.currentWaveView).toBeNull();
+  it.each(["goBack", "goBackTo"] as const)(
+    "restores the wave view on repeated profile round trips using %s",
+    (navigation) => {
+      mockPathname = "/waves/wave-1";
+      const { result, rerender } = renderHook(
+        () => useNavigationHistoryContext(),
+        { wrapper }
+      );
+      const selection = { waveId: "wave-1", view: BrainView.LEADERBOARD };
 
       act(() => {
-        result.current.goBack();
+        result.current.rememberWaveView(selection);
       });
 
-      expect(routerMock.push).toHaveBeenLastCalledWith("/waves/wave-1");
-      mockPathname = "/waves/wave-1";
-      rerender();
-      expect(result.current.currentWaveView).toEqual(selection);
+      for (let visit = 0; visit < 2; visit += 1) {
+        mockPathname = "/Articulate";
+        rerender();
+        expect(result.current.currentWaveView).toBeNull();
+
+        act(() => {
+          if (navigation === "goBackTo") {
+            result.current.goBackTo("/waves/wave-1");
+          } else {
+            result.current.goBack();
+          }
+        });
+
+        expect(routerMock.push).toHaveBeenLastCalledWith("/waves/wave-1");
+        mockPathname = "/waves/wave-1";
+        rerender();
+        expect(result.current.currentWaveView).toEqual(selection);
+      }
     }
-  });
+  );
 
   it("does not restore a previous visit when navigating normally between waves", () => {
     mockPathname = "/waves/wave-1";

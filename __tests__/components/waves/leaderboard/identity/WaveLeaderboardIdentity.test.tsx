@@ -1,6 +1,8 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import { WaveLeaderboardIdentity } from "@/components/waves/leaderboard/identity/WaveLeaderboardIdentity";
+import type { ApiDropResolvedIdentityProfile } from "@/generated/models/ApiDropResolvedIdentityProfile";
+import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
 import { ApiWaveParticipationSubmissionStrategyType } from "@/generated/models/ApiWaveParticipationSubmissionStrategyType";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 
@@ -19,7 +21,7 @@ jest.mock("@/components/waves/drops/DropAuthorBadges", () => ({
 }));
 
 describe("WaveLeaderboardIdentity", () => {
-  const resolvedProfile = {
+  const resolvedProfile: ApiDropResolvedIdentityProfile = {
     id: "p1",
     handle: "alice",
     primary_address: "0xabc",
@@ -33,12 +35,17 @@ describe("WaveLeaderboardIdentity", () => {
     xtdh: 5,
     xtdh_rate: 6,
     level: 7,
+    classification: ApiProfileClassification.Pseudonym,
+    sub_classification: null,
     subscribed_actions: [],
     archived: false,
     active_main_stage_submission_ids: [],
     winner_main_stage_drop_ids: [],
     artist_of_prevote_cards: [],
+    profile_wave_id: null,
     is_wave_creator: false,
+    bio: null,
+    top_rep_categories: [],
   };
 
   it("renders the condensed summary for resolved identities", () => {
@@ -120,7 +127,7 @@ describe("WaveLeaderboardIdentity", () => {
                   pfp: "https://example.com/avatar.png",
                   bio: "Identity bio",
                   top_rep_categories: [{ category: "Art", rep: 12 }],
-                },
+                } satisfies ApiDropResolvedIdentityProfile,
               },
             ],
           } as ExtendedDrop

@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReadonlyURLSearchParams } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { BrainView } from "./brainMobileViews";
 
@@ -284,12 +284,15 @@ export function useBrainMobileActiveView({
   const candidateView =
     selection?.contextToken === currentContextToken ? selection.view : baseView;
 
-  const onViewChange = (view: BrainView) => {
-    setSelection({
-      contextToken: currentContextToken,
-      view,
-    });
-  };
+  const onViewChange = useCallback(
+    (view: BrainView) => {
+      setSelection({
+        contextToken: currentContextToken,
+        view,
+      });
+    },
+    [currentContextToken]
+  );
 
   const activeView = normalizeActiveView({
     activeView: candidateView,
