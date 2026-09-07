@@ -108,7 +108,7 @@ export const CREATE_WAVE_GROUPS: Record<
   ],
 };
 
-export const CREATE_WAVE_STEPS_LABELS: Record<
+const CREATE_WAVE_STEPS_LABELS: Record<
   ApiWaveType,
   Record<CreateWaveStep, string>
 > = {
