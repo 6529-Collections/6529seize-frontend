@@ -82,7 +82,7 @@ jobs:
             ${{ runner.os }}-node22-pnpm-
 
       - name: Use cached pnpm store
-        run: ./bin/6529 exec pnpm config set store-dir ~/.pnpm-store
+        run: echo "npm_config_store_dir=$HOME/.pnpm-store" >> "$GITHUB_ENV"
 
       - name: Install Socket Firewall
         id: socket-firewall

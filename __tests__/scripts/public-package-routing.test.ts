@@ -68,6 +68,7 @@ describe("public Coordinator package policy", () => {
       "--filter-prod=app",
       "--ignore-workspace",
       "--config.dangerously-allow-all-builds=true",
+      "--global-pnpmfile=hook.cjs",
     ]) {
       expect(() => policy.validateArguments(["install", option])).toThrow(
         "pnpm option is not allowed"
@@ -136,6 +137,18 @@ describe("public Coordinator package policy", () => {
     expect(() =>
       policy.validateEnvironment({
         NODE_ENV: "test",
+        npm_config_global_pnpmfile: "/tmp/hook.cjs",
+      })
+    ).toThrow("package environment override is not allowed");
+    expect(() =>
+      policy.validateEnvironment({
+        NODE_ENV: "test",
+        npm_config_store_dir: "relative-store",
+      })
+    ).toThrow("package store directory must be absolute");
+    expect(() =>
+      policy.validateEnvironment({
+        NODE_ENV: "test",
         npm_config_dangerously_allow_all_builds: "true",
       })
     ).toThrow("package environment override is not allowed");
@@ -188,6 +201,12 @@ describe("public Coordinator package policy", () => {
         )
       )
     ).toThrow("must contain only");
+    expect(() =>
+      policy.validateWorkspace(`${workspace}\nregistry: https://example.com\n`)
+    ).toThrow("setting is not allowed: registry");
+    expect(() =>
+      policy.validateWorkspace(`${workspace}\nglobalPnpmfile: ./hook.cjs\n`)
+    ).toThrow("setting is not allowed: globalPnpmfile");
     expect(() =>
       policy.validateWorkspace(
         workspace.replace(
@@ -287,6 +306,7 @@ describe("public Coordinator package policy", () => {
         NODE_AUTH_TOKEN: "old-github-package-token",
         NPM_TOKEN: "unrelated-npm-token",
         xdg_config_home: "/tmp/untrusted-pnpm-config",
+        npm_config_store_dir: path.join(repositoryRoot, ".pnpm-store"),
         SFW_BIN: process.execPath,
       },
       pnpmBinary: process.execPath,
@@ -316,6 +336,9 @@ describe("public Coordinator package policy", () => {
       path.join(repositoryRoot, ".npmrc")
     );
     expect(options.env["XDG_CONFIG_HOME"]).toBe(observedConfigHome);
+    expect(options.env["npm_config_store_dir"]).toBe(
+      path.join(repositoryRoot, ".pnpm-store")
+    );
     expect(options.env).not.toHaveProperty("xdg_config_home");
     expect(observedConfigHome).not.toBe("/tmp/untrusted-pnpm-config");
     expect(fs.existsSync(observedConfigHome as string)).toBe(false);

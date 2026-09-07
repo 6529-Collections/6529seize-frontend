@@ -106,7 +106,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node22-pnpm-
       - name: Use cached pnpm store
-        run: ./bin/6529 exec pnpm config set store-dir ~/.pnpm-store
+        run: echo "npm_config_store_dir=$HOME/.pnpm-store" >> "$GITHUB_ENV"
       - name: Install Socket Firewall
         id: socket_firewall
         uses: SocketDev/action@2d3f25590c6ed6ba11a9a14c064d962a3a04698f # v1.3.1
@@ -203,7 +203,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node22-pnpm-
       - name: Use cached pnpm store
-        run: ./bin/6529 exec pnpm config set store-dir ~/.pnpm-store
+        run: echo "npm_config_store_dir=$HOME/.pnpm-store" >> "$GITHUB_ENV"
       - name: Install Socket Firewall
         id: socket_firewall
         uses: SocketDev/action@2d3f25590c6ed6ba11a9a14c064d962a3a04698f # v1.3.1

@@ -63,12 +63,19 @@ function packageEnvironment(environment, repositoryRoot, pnpmConfigHome) {
   removeEnvironmentVariableCaseInsensitive(childEnvironment, "NODE_AUTH_TOKEN");
   removeEnvironmentVariableCaseInsensitive(childEnvironment, "NPM_TOKEN");
   removeEnvironmentVariableCaseInsensitive(childEnvironment, "XDG_CONFIG_HOME");
+  const configuredStoreDir = Object.entries(childEnvironment).find(
+    ([key]) => key.toLowerCase() === "npm_config_store_dir"
+  )?.[1];
+  removeEnvironmentVariableCaseInsensitive(childEnvironment, "npm_config_store_dir");
 
   const projectNpmrc = path.join(repositoryRoot, ".npmrc");
   childEnvironment.npm_config_registry = "https://registry.npmjs.org/";
   childEnvironment.npm_config_userconfig = projectNpmrc;
   childEnvironment.npm_config_globalconfig = projectNpmrc;
   childEnvironment.XDG_CONFIG_HOME = pnpmConfigHome;
+  if (configuredStoreDir !== undefined) {
+    childEnvironment.npm_config_store_dir = configuredStoreDir;
+  }
 
   return childEnvironment;
 }

@@ -1,5 +1,6 @@
 const fs = require("node:fs");
 const path = require("node:path");
+const YAML = require("yaml");
 
 const NO_FOLLOW = fs.constants.O_NOFOLLOW ?? 0;
 
@@ -42,6 +43,7 @@ const FORBIDDEN_OPTION_NAMES = new Set([
   "g",
   "global",
   "globalconfig",
+  "globalpnpmfile",
   "ignoreworkspace",
   "ignorepnpmfile",
   "ignorescripts",
@@ -165,6 +167,37 @@ function validatePackageJson(text) {
 }
 
 function validateWorkspace(text) {
+  let workspace;
+  try {
+    workspace = YAML.parse(text);
+  } catch {
+    throw policyError("pnpm-workspace.yaml must be valid YAML");
+  }
+  if (workspace === null || typeof workspace !== "object" || Array.isArray(workspace)) {
+    throw policyError("pnpm-workspace.yaml must contain a settings object");
+  }
+  for (const key of Object.keys(workspace)) {
+    const name = key.toLowerCase().replace(/[^a-z0-9]/g, "");
+    const containsCredentialNetworkOrHookOverride =
+      name === "auth" ||
+      name.endsWith("auth") ||
+      name.includes("authtoken") ||
+      name.includes("token") ||
+      name.includes("username") ||
+      name.includes("password") ||
+      name.includes("userconfig") ||
+      name.includes("globalconfig") ||
+      name.includes("registry") ||
+      name.includes("registries") ||
+      name.includes("proxy") ||
+      name.includes("strictssl") ||
+      name.includes("cafile") ||
+      name.includes("pnpmfile") ||
+      name === "hooks";
+    if (containsCredentialNetworkOrHookOverride) {
+      throw policyError(`pnpm-workspace.yaml setting is not allowed: ${key}`);
+    }
+  }
   if (!/^minimumReleaseAge:\s*10080\s*$/m.test(text)) {
     throw policyError("pnpm-workspace.yaml must keep the seven-day package age rule");
   }
@@ -282,6 +315,12 @@ function validateEnvironment(environment) {
       continue;
     }
     const name = normalizedKey.slice("npmconfig".length);
+    if (name === "storedir") {
+      if (typeof environment[key] !== "string" || !path.isAbsolute(environment[key])) {
+        throw policyError(`package store directory must be absolute: ${key}`);
+      }
+      continue;
+    }
     const containsCredentialOrNetworkOverride =
       name === "auth" ||
       name.endsWith("auth") ||
