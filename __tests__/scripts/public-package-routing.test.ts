@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 
 type PublicPolicy = {
@@ -7,7 +8,10 @@ type PublicPolicy = {
   RELEASE_VERSION: string;
   validateArguments: (args: string[]) => void;
   validateEnvironment: (environment: NodeJS.ProcessEnv) => void;
+  validateLockfile: (text: string) => void;
+  validatePackageJson: (text: string) => void;
   validateRepositoryFiles: (repositoryRoot: string) => void;
+  validateWorkspace: (text: string) => void;
 };
 
 type SecurePackageRunner = {
@@ -69,6 +73,12 @@ describe("public Coordinator package policy", () => {
       ])
     ).toThrow("direct dependency source is not allowed");
     expect(() =>
+      policy.validateArguments(["add", "package@workspace:*"])
+    ).toThrow("direct dependency source is not allowed");
+    expect(() =>
+      policy.validateArguments(["add", "package@//packages.example/pkg.tgz"])
+    ).toThrow("direct dependency source is not allowed");
+    expect(() =>
       policy.validateEnvironment({
         NODE_ENV: "test",
         npm_config_registry: "https://example.com",
@@ -88,7 +98,110 @@ describe("public Coordinator package policy", () => {
     ).toThrow("NODE_TLS_REJECT_UNAUTHORIZED cannot disable TLS checks");
   });
 
+  it("rejects an unreviewed package manifest", () => {
+    const manifest = JSON.parse(
+      fs.readFileSync(path.join(repositoryRoot, "package.json"), "utf8")
+    ) as {
+      devDependencies: Record<string, string>;
+      peerDependencies?: Record<string, string>;
+    };
+
+    manifest.devDependencies[policy.RELEASE_PACKAGE] =
+      `^${policy.RELEASE_VERSION}`;
+    expect(() => policy.validatePackageJson(JSON.stringify(manifest))).toThrow(
+      `must be an exact ${policy.RELEASE_VERSION} dev dependency`
+    );
+
+    manifest.devDependencies[policy.RELEASE_PACKAGE] = policy.RELEASE_VERSION;
+    manifest.peerDependencies = { [policy.RELEASE_PACKAGE]: "*" };
+    expect(() => policy.validatePackageJson(JSON.stringify(manifest))).toThrow(
+      "may exist only in devDependencies"
+    );
+  });
+
+  it("rejects changes to the reviewed age exception", () => {
+    const workspace = fs.readFileSync(
+      path.join(repositoryRoot, "pnpm-workspace.yaml"),
+      "utf8"
+    );
+
+    expect(() =>
+      policy.validateWorkspace(
+        workspace.replace(
+          `"${policy.RELEASE_PACKAGE}"`,
+          `"${policy.RELEASE_PACKAGE}@${policy.RELEASE_VERSION}"`
+        )
+      )
+    ).toThrow("must have the reviewed age exception");
+  });
+
+  it("rejects changes to the reviewed lockfile resolution", () => {
+    const lockfile = fs.readFileSync(
+      path.join(repositoryRoot, "pnpm-lock.yaml"),
+      "utf8"
+    );
+
+    expect(() =>
+      policy.validateLockfile(
+        lockfile.replace(policy.RELEASE_INTEGRITY, "sha512-wrong")
+      )
+    ).toThrow("does not pin the reviewed public package");
+    expect(() =>
+      policy.validateLockfile(`${lockfile}\n# npm.pkg.github.com\n`)
+    ).toThrow("cannot resolve packages from GitHub Packages");
+  });
+
+  const itWithSymlinkSupport = process.platform === "win32" ? it.skip : it;
+
+  itWithSymlinkSupport(
+    "rejects repository policy files that are symlinks",
+    () => {
+      const temporaryRoot = fs.mkdtempSync(
+        path.join(os.tmpdir(), "public-package-policy-")
+      );
+      try {
+        for (const relativePath of [
+          "package.json",
+          "pnpm-workspace.yaml",
+          "pnpm-lock.yaml",
+        ]) {
+          fs.copyFileSync(
+            path.join(repositoryRoot, relativePath),
+            path.join(temporaryRoot, relativePath)
+          );
+        }
+        fs.symlinkSync(
+          path.join(repositoryRoot, ".npmrc"),
+          path.join(temporaryRoot, ".npmrc")
+        );
+
+        expect(() => policy.validateRepositoryFiles(temporaryRoot)).toThrow(
+          ".npmrc must be a regular file"
+        );
+      } finally {
+        fs.rmSync(temporaryRoot, { recursive: true, force: true });
+      }
+    }
+  );
+
   it("runs pnpm through Socket Firewall without package tokens", () => {
+    const rejectedSpawn = jest.fn(() => ({ status: 0 }));
+    expect(() =>
+      runner.runSecurePnpm({
+        args: ["install"],
+        environment: {
+          NODE_ENV: "test",
+          npm_config_registry: "https://packages.example",
+          SFW_BIN: process.execPath,
+        },
+        pnpmBinary: process.execPath,
+        repositoryRoot,
+        spawn: rejectedSpawn,
+        platform: process.platform,
+      })
+    ).toThrow("package environment override is not allowed");
+    expect(rejectedSpawn).not.toHaveBeenCalled();
+
     const spawn = jest.fn(() => ({ status: 0 }));
     const result = runner.runSecurePnpm({
       args: ["install", "--frozen-lockfile"],

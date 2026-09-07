@@ -111,7 +111,11 @@ function validatePackageJson(text) {
       `${RELEASE_PACKAGE} must be an exact ${RELEASE_VERSION} dev dependency`
     );
   }
-  for (const section of ["dependencies", "optionalDependencies"]) {
+  for (const section of [
+    "dependencies",
+    "optionalDependencies",
+    "peerDependencies",
+  ]) {
     if (manifest[section]?.[RELEASE_PACKAGE] !== undefined) {
       throw policyError(`${RELEASE_PACKAGE} may exist only in devDependencies`);
     }
@@ -160,7 +164,11 @@ function validateArguments(args) {
     throw policyError(`unsupported pnpm command: ${args[0] ?? "missing"}`);
   }
   for (const argument of args.slice(1)) {
-    if (/(?:^|@)(?:file|git\+|git|http|https|link):/i.test(argument)) {
+    if (
+      /(?:^|@)(?:(?:file|git\+|git|http|https|link|workspace|github|gitlab|bitbucket):|\/\/)/i.test(
+        argument
+      )
+    ) {
       throw policyError(`direct dependency source is not allowed: ${argument}`);
     }
     if (!argument.startsWith("-")) {
