@@ -172,10 +172,17 @@ describe("MemesQuickVoteDialog", () => {
       />
     );
 
+    expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Change vote amount" }));
     fireEvent.change(screen.getByRole("textbox"), {
       target: { value: "-250" },
     });
     expect(screen.getByRole("textbox")).toHaveValue("-250");
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Close change vote amount" })
+    );
+    expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Vote -250" }));
     await act(async () => {
@@ -187,6 +194,47 @@ describe("MemesQuickVoteDialog", () => {
       expect(submitVote).toHaveBeenCalledWith(activeDrop, -250);
     });
   });
+
+  it.each([
+    { draft: "9999", label: "Vote 5,000", amount: 5_000 },
+    { draft: "-9999", label: "Vote -5,000", amount: -5_000 },
+  ])(
+    "displays and submits the existing limit for draft $draft",
+    async ({ draft, label, amount }) => {
+      const activeDrop = createDrop({ minRating: -5_000 });
+      const submitVote = jest.fn().mockResolvedValue(true);
+
+      render(
+        <MemesQuickVoteDialog
+          {...createDialogProps({
+            activeDrop,
+            latestUsedAmount: null,
+            recentAmounts: [],
+            submitVote,
+          })}
+        />
+      );
+
+      fireEvent.click(
+        screen.getByRole("button", { name: "Change vote amount" })
+      );
+      fireEvent.change(screen.getByRole("textbox"), {
+        target: { value: draft },
+      });
+
+      expect(screen.getByRole("textbox")).toHaveValue(draft);
+      const voteButton = screen.getByRole("button", { name: label });
+      expect(voteButton).toHaveTextContent(label);
+      fireEvent.click(voteButton);
+
+      await act(async () => {
+        jest.advanceTimersByTime(650);
+        await Promise.resolve();
+      });
+
+      expect(submitVote).toHaveBeenCalledWith(activeDrop, amount);
+    }
+  );
 
   it("does not render active drop content while closed", () => {
     render(
@@ -216,6 +264,7 @@ describe("MemesQuickVoteDialog", () => {
       />
     );
 
+    fireEvent.click(screen.getByRole("button", { name: "Change vote amount" }));
     fireEvent.change(screen.getByRole("textbox"), {
       target: { value: "-" },
     });
@@ -248,7 +297,7 @@ describe("MemesQuickVoteDialog", () => {
     );
 
     const negativeButton = screen.getByRole("button", { name: "-250" });
-    expect(negativeButton).toHaveClass("tw-text-rose-200");
+    expect(negativeButton).toHaveClass("tw-text-red");
 
     fireEvent.click(negativeButton);
     await act(async () => {
@@ -272,6 +321,7 @@ describe("MemesQuickVoteDialog", () => {
       />
     );
 
+    fireEvent.click(screen.getByRole("button", { name: "Change vote amount" }));
     fireEvent.change(screen.getByRole("textbox"), {
       target: { value: "-250" },
     });

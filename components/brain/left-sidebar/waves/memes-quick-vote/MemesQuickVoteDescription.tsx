@@ -16,9 +16,9 @@ export default function MemesQuickVoteDescription({
   const visibleDescriptionRef = useRef<HTMLParagraphElement | null>(null);
   const clampClass = isExpanded
     ? "tw-line-clamp-none"
-    : "tw-line-clamp-1 md:tw-line-clamp-4";
+    : "tw-line-clamp-2 md:tw-line-clamp-4";
   const descriptionClassName =
-    "tw-mb-0 tw-whitespace-pre-line tw-text-sm tw-font-medium tw-leading-relaxed tw-text-iron-400 md:tw-text-md";
+    "tw-mb-0 tw-whitespace-pre-line tw-text-sm tw-font-normal tw-leading-relaxed tw-text-iron-300 md:tw-text-md";
 
   const measureOverflow = useCallback(() => {
     const visibleDescription = visibleDescriptionRef.current;
@@ -32,7 +32,7 @@ export default function MemesQuickVoteDescription({
     const collapsedLineCount = globalThis.matchMedia("(min-width: 768px)")
       .matches
       ? 4
-      : 1;
+      : 2;
     const collapsedHeight = lineHeight * collapsedLineCount;
 
     if (!Number.isFinite(collapsedHeight) || collapsedHeight <= 0) {
@@ -47,7 +47,7 @@ export default function MemesQuickVoteDescription({
     visibleDescription.style.overflow = "visible";
     visibleDescription.style.webkitLineClamp = "unset";
 
-    const fullHeight = visibleDescription.getBoundingClientRect().height;
+    const fullHeight = visibleDescription.offsetHeight;
 
     visibleDescription.style.display = previousDisplay;
     visibleDescription.style.overflow = previousOverflow;
@@ -106,7 +106,7 @@ export default function MemesQuickVoteDescription({
           onClick={() => {
             setIsExpanded((current) => !current);
           }}
-          className="tw-inline-flex tw-w-fit tw-border-0 tw-bg-transparent tw-px-0 tw-py-1 tw-text-xs tw-font-medium tw-leading-none tw-text-iron-500 tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white/15 desktop-hover:hover:tw-text-iron-300"
+          className="-tw-ml-2 tw-inline-flex tw-min-h-11 tw-w-fit tw-items-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-2 tw-py-2 tw-text-xs tw-font-medium tw-leading-none tw-text-iron-400 tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-iron-200"
         >
           {isExpanded ? "See less" : "See more"}
         </button>

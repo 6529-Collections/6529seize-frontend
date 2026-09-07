@@ -469,6 +469,10 @@ const MEMES_QUICK_VOTE_MESSAGES = objectMessages("memes.quickVote", {
   unrated: "{count} unrated",
   summary: "{leftThisRound}, {unrated}",
   inMemesWave: "{leftThisRound}, {unrated} in the memes wave",
+  remainingPower: "{amount} {unit} remaining",
+  unit: "votes",
+  untitledSubmission: "Untitled submission",
+  swipeHint: "Swipe left to skip · right to vote {amount} {unit}",
 } as const);
 
 const MEMES_SUBMISSION_MESSAGES = objectMessages("memes.submission", {
