@@ -545,6 +545,32 @@ describe("CreateWave", () => {
     expect(editor).toBeVisible();
   });
 
+  it("refreshes the description on every entry to review, including from another step", () => {
+    mockedUseWaveConfig.mockReturnValue({
+      ...mockWaveConfig,
+      step: CreateWaveStep.DESCRIPTION,
+    });
+    const { rerender } = renderCreateWave();
+    fireEvent.click(screen.getByTestId("mock-next"));
+    mockedUseWaveConfig.mockReturnValue({
+      ...mockWaveConfig,
+      step: CreateWaveStep.RULES,
+    });
+    rerender(createWaveElement());
+    mockGetDropSnapshot.mockReturnValue({
+      parts: [{ content: "Current description" }],
+    });
+    fireEvent.click(screen.getByTestId("mock-next"));
+    mockedUseWaveConfig.mockReturnValue({
+      ...mockWaveConfig,
+      step: CreateWaveStep.REVIEW,
+    });
+    rerender(createWaveElement());
+    expect(screen.getByTestId("create-wave-review")).toHaveTextContent(
+      "Current description"
+    );
+  });
+
   it("blocks review while inline image uploads are pending", () => {
     mockedUseWaveConfig.mockReturnValue({
       ...mockWaveConfig,

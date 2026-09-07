@@ -179,13 +179,13 @@ export default function CreateWave({
   ): Promise<void> => {
     if (step === CreateWaveStep.DESCRIPTION) {
       setDescriptionVisited(true);
-      if (direction === "forward") {
-        const snapshot = getDescriptionForReview();
-        if (!snapshot) {
-          return;
-        }
-        setDescriptionSnapshot(snapshot);
+    }
+    if (targetStep === CreateWaveStep.REVIEW) {
+      const snapshot = getDescriptionForReview();
+      if (!snapshot) {
+        return;
       }
+      setDescriptionSnapshot(snapshot);
     }
     if (targetStep !== CreateWaveStep.GROUPS) {
       resetTransientGroupState();
