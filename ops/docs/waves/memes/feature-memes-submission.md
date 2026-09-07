@@ -122,8 +122,9 @@ reached), select the header restriction control to see the reason, then use
 
 ## Failure and Recovery
 
-- Unsupported type or oversized upload shows inline validation errors in
-  `Artwork`.
+- An oversized file, unsupported type, or invalid GLB shows an inline validation
+  error immediately in `Artwork`, without a `Try Again` button. Use `Select Art`
+  or drag and drop another file into the upload area to replace it.
 - If the uploaded file cannot be verified or has not finished processing, the
   submission is rejected; wait for the upload to finish and try again.
 - Selecting `Continue` with missing or invalid values gives every affected

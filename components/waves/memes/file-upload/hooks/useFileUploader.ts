@@ -64,8 +64,7 @@ const testAndStoreVideoCompatibility = async (
         canPlay: false,
         tested: true,
         errorMessage: "Video compatibility check failed",
-        technicalReason:
-          error instanceof Error ? error.message : String(error),
+        technicalReason: error instanceof Error ? error.message : String(error),
       },
     });
   }
@@ -102,7 +101,7 @@ const useFileUploader = ({
 
       if (!result.valid) {
         const errorMessage = result.error ?? "Invalid file";
-        dispatch({ type: "PROCESSING_ERROR", payload: errorMessage });
+        dispatch({ type: "VALIDATION_ERROR", payload: errorMessage });
         showToast?.({ type: "error", message: errorMessage });
         return;
       }
