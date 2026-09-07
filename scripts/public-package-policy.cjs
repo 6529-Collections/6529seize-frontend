@@ -206,6 +206,7 @@ function validateWorkspace(text) {
       name.includes("cafile") ||
       name.includes("pnpmfile") ||
       name === "hooks" ||
+      name === "packages" ||
       name === "configdependencies" ||
       name === "dangerouslyallowallbuilds" ||
       name === "onlybuiltdependencies" ||
@@ -284,6 +285,39 @@ function validateLockfile(text) {
     /(?:^|[^a-z0-9.-])npm\.pkg\.github\.com(?=[:/]|[^a-z0-9.-]|$)/i.test(text)
   ) {
     throw policyError("pnpm-lock.yaml cannot resolve packages from GitHub Packages");
+  }
+  for (const rawLine of text.split(/\r?\n/)) {
+    const line = rawLine.trim();
+    if (!line.startsWith("resolution:")) {
+      continue;
+    }
+    const resolution = line.match(/^resolution:\s*\{([^}]*)\}\s*$/);
+    if (!resolution) {
+      throw policyError("pnpm-lock.yaml has an unsupported package resolution");
+    }
+    const fields = new Map();
+    for (const rawField of resolution[1].split(",")) {
+      const separator = rawField.indexOf(":");
+      if (separator < 1) {
+        throw policyError("pnpm-lock.yaml has an unsupported package resolution");
+      }
+      const key = rawField.slice(0, separator).trim();
+      const value = rawField.slice(separator + 1).trim().replace(/^["']|["']$/g, "");
+      if (fields.has(key) || (key !== "integrity" && key !== "tarball")) {
+        throw policyError("pnpm-lock.yaml has an unsupported package resolution");
+      }
+      fields.set(key, value);
+    }
+    if (!/^sha(?:1|256|384|512)-\S+$/.test(fields.get("integrity") ?? "")) {
+      throw policyError("pnpm-lock.yaml package resolutions require integrity");
+    }
+    const tarball = fields.get("tarball");
+    if (
+      tarball !== undefined &&
+      !tarball.startsWith("https://registry.npmjs.org/")
+    ) {
+      throw policyError("pnpm-lock.yaml cannot resolve a non-public tarball");
+    }
   }
   if (text.includes(`${RELEASE_PACKAGE}@0.0.3`)) {
     throw policyError("pnpm-lock.yaml still references private version 0.0.3");

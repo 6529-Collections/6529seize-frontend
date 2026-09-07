@@ -288,6 +288,7 @@ describe("public Coordinator package policy", () => {
     for (const setting of [
       "configDependencies:\n  hook-package: 1.0.0",
       "dangerouslyAllowAllBuilds: true",
+      "packages:\n  - .deepsec",
       "onlyBuiltDependencies:\n  - unreviewed-package",
       "ignoredBuiltDependencies:\n  - unreviewed-package",
     ]) {
@@ -329,6 +330,16 @@ describe("public Coordinator package policy", () => {
         `${lockfile}\n# npm:${policy.RELEASE_PACKAGE}@0.0.5\n`
       )
     ).toThrow("references an unreviewed package version");
+    expect(() =>
+      policy.validateLockfile(
+        `${lockfile}\n  malicious@1.0.0:\n    resolution: {integrity: sha512-safe, tarball: https://packages.example/malicious.tgz}\n`
+      )
+    ).toThrow("cannot resolve a non-public tarball");
+    expect(() =>
+      policy.validateLockfile(
+        `${lockfile}\n  malicious@1.0.0:\n    resolution: {repo: https://example.com/repository.git, commit: abc123}\n`
+      )
+    ).toThrow("unsupported package resolution");
   });
 
   const itWithSymlinkSupport = process.platform === "win32" ? it.skip : it;
