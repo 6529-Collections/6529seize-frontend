@@ -110,17 +110,6 @@ export default function CreateWaveRules({
               <CreateWaveTermsOfService
                 terms={config.drops.terms}
                 setTerms={setBindingRules}
-                title={t(locale, "waves.create.rules.acceptanceTitle")}
-                toggleLabel={t(locale, "waves.create.rules.acceptanceToggle")}
-                description={t(
-                  locale,
-                  "waves.create.rules.acceptanceDescription"
-                )}
-                placeholder={t(
-                  locale,
-                  "waves.create.rules.acceptancePlaceholder"
-                )}
-                helperText={t(locale, "waves.create.rules.acceptanceHelper")}
               />
             </section>
           )}

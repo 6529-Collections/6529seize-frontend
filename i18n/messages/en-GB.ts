@@ -511,6 +511,14 @@ export const EN_GB_MESSAGES = {
     "Please choose a subwave type to continue.",
   "waves.create.overview.typeRequired":
     "Please choose a wave type to continue.",
+  "waves.create.rules.acceptanceTitle": "Rules that require acceptance",
+  "waves.create.rules.acceptanceDescription":
+    "Participants must accept these rules and sign with their wallet before submitting.",
+  "waves.create.rules.acceptancePlaceholder":
+    "Enter rules participants must accept before submitting...",
+  "waves.create.rules.acceptanceHelper":
+    "Leave empty if no rules require signing.",
+  "waves.create.rules.acceptanceCharacterCount": "Characters: {count}",
   "waves.create.review.title": "Overview",
   "waves.create.review.description":
     "Review your wave before creating it. Use Previous or the completed steps to make changes.",

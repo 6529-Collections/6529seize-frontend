@@ -4,18 +4,6 @@ import { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import type { CreateWaveConfig } from "@/types/waves.types";
 
-jest.mock(
-  "@/components/waves/create-wave/drops/terms/CreateWaveTermsOfService",
-  () => ({
-    __esModule: true,
-    default: ({ setTerms }: { setTerms: (terms: string) => void }) => (
-      <button type="button" onClick={() => setTerms("Binding rule")}>
-        Rules that require acceptance
-      </button>
-    ),
-  })
-);
-
 const getConfig = (
   type: ApiWaveType,
   customRules: string | null = null
@@ -111,7 +99,7 @@ describe("CreateWaveRules", () => {
       screen.queryByRole("button", { name: "Wave guidelines" })
     ).not.toBeInTheDocument();
     expect(
-      screen.queryByRole("button", { name: "Rules that require acceptance" })
+      screen.queryByRole("textbox", { name: "Rules that require acceptance" })
     ).toBeNull();
 
     expect(
@@ -133,27 +121,58 @@ describe("CreateWaveRules", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("includes acceptance rules for Rank waves and preserves their handler", () => {
-    const setDrops = jest.fn();
-    render(
-      <CreateWaveRules
-        config={getConfig(ApiWaveType.Rank)}
-        setDisplay={jest.fn()}
-        setDrops={setDrops}
-      />
-    );
+  it.each([ApiWaveType.Rank, ApiWaveType.Approve])(
+    "requires signing when rules are entered for %s waves",
+    (waveType) => {
+      const setDrops = jest.fn();
+      render(
+        <CreateWaveRules
+          config={getConfig(waveType)}
+          setDisplay={jest.fn()}
+          setDrops={setDrops}
+        />
+      );
 
-    fireEvent.click(
-      screen.getByRole("button", { name: "Rules that require acceptance" })
-    );
+      expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
+      fireEvent.change(
+        screen.getByRole("textbox", { name: "Rules that require acceptance" }),
+        { target: { value: "Binding rule" } }
+      );
 
-    expect(setDrops).toHaveBeenCalledWith(
-      expect.objectContaining({
-        terms: "Binding rule",
-        signatureRequired: true,
-      })
-    );
-  });
+      expect(setDrops).toHaveBeenCalledWith(
+        expect.objectContaining({
+          terms: "Binding rule",
+          signatureRequired: true,
+        })
+      );
+    }
+  );
+
+  it.each(["", "  \n  "])(
+    "disables signing when acceptance rules become blank (%j)",
+    (terms) => {
+      const setDrops = jest.fn();
+      const config = getConfig(ApiWaveType.Rank);
+      config.drops.terms = "Binding rule";
+      config.drops.signatureRequired = true;
+      render(
+        <CreateWaveRules
+          config={config}
+          setDisplay={jest.fn()}
+          setDrops={setDrops}
+        />
+      );
+
+      fireEvent.change(
+        screen.getByRole("textbox", { name: "Rules that require acceptance" }),
+        { target: { value: terms } }
+      );
+
+      expect(setDrops).toHaveBeenCalledWith(
+        expect.objectContaining({ terms, signatureRequired: false })
+      );
+    }
+  );
 
   it("shows restored wave guidelines immediately without a collapse control", () => {
     render(

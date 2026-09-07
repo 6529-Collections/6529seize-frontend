@@ -40,8 +40,9 @@ submission step.
 1. Complete `Groups` for `Chat`, or `Drops` for `Rank` and `Approve`.
 2. Open `Rules`.
 3. Optionally enter wave guidelines in the visible field.
-4. For `Rank` and `Approve`, optionally enable `Require acceptance` and enter
-   rules participants must accept before submitting.
+4. For `Rank` and `Approve`, optionally enter rules participants must accept
+   and sign before submitting. This textbox is always visible. Leave it empty
+   if no rules require signing.
 5. Click `Next` to continue to `Description` for `Chat`, or `Voting` for
    `Rank` and `Approve`.
 
@@ -69,8 +70,8 @@ the existing submit acceptance flow.
   not support acceptance-required rules.
 - Leaving custom-rule fields blank is valid.
 - Wave guidelines are capped at `2,000` characters.
-- For `Rank` and `Approve`, turning off `Require acceptance` clears the
-  acceptance-required rules text.
+- For `Rank` and `Approve`, clearing the acceptance-required rules textbox
+  removes the signature requirement. Whitespace-only text also counts as empty.
 - For `Rank` and `Approve`, acceptance-required rules require a wallet
   signature only when rules text is present.
 

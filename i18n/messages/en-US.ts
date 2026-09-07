@@ -1704,12 +1704,12 @@ const WAVE_CREATE_RULES_MESSAGES = objectMessages("waves.create.rules", {
   guidelinesSaveErrorTitle: "Couldn't save these guidelines.",
   guidelinesSaveErrorDescription: PLEASE_TRY_AGAIN,
   acceptanceTitle: "Rules that require acceptance",
-  acceptanceToggle: "Require acceptance",
   acceptanceDescription:
-    "Use this only for custom creator rules that participants must accept and sign before submitting.",
+    "Participants must accept these rules and sign with their wallet before submitting.",
   acceptancePlaceholder:
     "Enter rules participants must accept before submitting...",
-  acceptanceHelper: "Participants will sign these rules with their wallet",
+  acceptanceHelper: "Leave empty if no rules require signing.",
+  acceptanceCharacterCount: "Characters: {count}",
 } as const);
 
 const WAVE_CREATE_VOTING_MESSAGES = objectMessages("waves.create.voting", {

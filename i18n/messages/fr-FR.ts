@@ -510,6 +510,14 @@ export const FR_FR_MESSAGES = {
     "Veuillez choisir un type de sous-wave pour continuer.",
   "waves.create.overview.typeRequired":
     "Veuillez choisir un type de wave pour continuer.",
+  "waves.create.rules.acceptanceTitle": "Règles à accepter",
+  "waves.create.rules.acceptanceDescription":
+    "Les participants doivent accepter ces règles et les signer avec leur portefeuille avant de soumettre leur contenu.",
+  "waves.create.rules.acceptancePlaceholder":
+    "Saisissez les règles à accepter avant de soumettre du contenu...",
+  "waves.create.rules.acceptanceHelper":
+    "Laissez vide si aucune règle ne nécessite de signature.",
+  "waves.create.rules.acceptanceCharacterCount": "Caractères : {count}",
   "waves.create.review.title": "Vue d’ensemble",
   "waves.create.review.description":
     "Vérifiez votre wave avant de la créer. Utilisez Précédent ou les étapes terminées pour apporter des modifications.",

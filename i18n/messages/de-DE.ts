@@ -505,6 +505,14 @@ export const DE_DE_MESSAGES = {
     "Bitte wähle einen Subwave-Typ aus, um fortzufahren.",
   "waves.create.overview.typeRequired":
     "Bitte wähle einen Wave-Typ aus, um fortzufahren.",
+  "waves.create.rules.acceptanceTitle": "Regeln, denen zugestimmt werden muss",
+  "waves.create.rules.acceptanceDescription":
+    "Teilnehmende müssen diesen Regeln zustimmen und sie vor dem Einreichen mit ihrer Wallet signieren.",
+  "waves.create.rules.acceptancePlaceholder":
+    "Gib die Regeln ein, denen Teilnehmende vor dem Einreichen zustimmen müssen...",
+  "waves.create.rules.acceptanceHelper":
+    "Leer lassen, wenn keine Regeln eine Signatur erfordern.",
+  "waves.create.rules.acceptanceCharacterCount": "Zeichen: {count}",
   "waves.create.review.title": "Übersicht",
   "waves.create.review.description":
     "Prüfe deine Wave vor dem Erstellen. Über Zurück oder die abgeschlossenen Schritte kannst du Änderungen vornehmen.",

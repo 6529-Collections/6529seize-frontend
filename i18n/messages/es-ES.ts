@@ -500,6 +500,14 @@ export const ES_ES_MESSAGES = {
   "waves.create.overview.subwaveTypeRequired":
     "Elige un tipo de subwave para continuar.",
   "waves.create.overview.typeRequired": "Elige un tipo de wave para continuar.",
+  "waves.create.rules.acceptanceTitle": "Reglas que requieren aceptación",
+  "waves.create.rules.acceptanceDescription":
+    "Los participantes deben aceptar estas reglas y firmarlas con su cartera antes de enviar contenido.",
+  "waves.create.rules.acceptancePlaceholder":
+    "Introduce las reglas que los participantes deben aceptar antes de enviar contenido...",
+  "waves.create.rules.acceptanceHelper":
+    "Déjalo vacío si ninguna regla requiere firma.",
+  "waves.create.rules.acceptanceCharacterCount": "Caracteres: {count}",
   "waves.create.review.title": "Resumen",
   "waves.create.review.description":
     "Revisa tu wave antes de crearla. Usa Anterior o los pasos completados para hacer cambios.",
