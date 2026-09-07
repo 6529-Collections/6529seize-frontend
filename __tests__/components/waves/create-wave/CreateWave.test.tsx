@@ -12,10 +12,11 @@ import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import CreateWave from "@/components/waves/create-wave/CreateWave";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { upsertCreateWaveDraft } from "@/helpers/waves/create-wave-draft.helpers";
-import { CreateWaveStep } from "@/types/waves.types";
+import { CreateWaveStep, type CreateWaveConfig } from "@/types/waves.types";
 import { hasSubwaveMembersOutsideParent } from "@/services/api/subwave-access-api";
 
 jest.mock("@/services/api/subwave-access-api", () => ({
@@ -282,7 +283,7 @@ describe("CreateWave", () => {
   const mockWaveConfig = {
     config: {
       overview: {
-        type: "CHAT",
+        type: ApiWaveType.Chat,
         typeSelected: true,
         name: "Test Wave",
         image: null,
@@ -312,7 +313,7 @@ describe("CreateWave", () => {
         adminCanDeleteDrops: false,
       },
       voting: {
-        type: "TDH",
+        type: ApiWaveCreditType.Tdh,
         creditScope: ApiWaveCreditScope.Wave,
         category: null,
         profileId: null,
@@ -343,7 +344,7 @@ describe("CreateWave", () => {
         },
       },
       chat: { enabled: true },
-    },
+    } satisfies CreateWaveConfig,
     step: CreateWaveStep.OVERVIEW,
     selectedOutcomeType: null,
     errors: [],
