@@ -2587,7 +2587,7 @@
       "facts": [
         "Rank waves collect drops and allow participants to vote/rank them according to configured rules.",
         "On the Setup step, rank waves choose between Announce Winners (scheduled winner announcements) and Perpetual Ranking (a continuous leaderboard with no winners and no end date).",
-        "Rank wave setup includes Setup, Access, Schedule, Drops, Guidelines, Voting, Description, and final Overview; Announce Winners waves also configure an Outcomes step, which Perpetual Ranking waves skip.",
+        "Rank wave setup includes Setup, Access, Schedule, Drops, Voting, Guidelines, Description, and final Overview; Announce Winners waves also configure Outcomes before Guidelines, while Perpetual Ranking waves skip Outcomes.",
         "Rank wave rules are visible in the desktop right sidebar and mobile About information path.",
         "Leaderboards, winners, and voting state are part of rank-wave participation; perpetual ranking waves keep a live leaderboard but never announce winners or award outcomes."
       ],
@@ -2616,7 +2616,7 @@
       ],
       "facts": [
         "Approve waves use approval-oriented voting rather than a plain chat flow.",
-        "Approve wave setup includes Setup, Access, Schedule, Drops, Guidelines, Voting, Outcomes, Description, and final Overview.",
+        "Approve wave setup includes Setup, Access, Schedule, Drops, Voting, Outcomes, Guidelines, Description, and final Overview.",
         "Approve wave rules are visible in the desktop right sidebar and mobile About information path.",
         "Use Approve when the wave is intended to accept or reject submissions."
       ],
@@ -2740,7 +2740,7 @@
       ],
       "facts": [
         "Guidelines is for editing optional guidelines and acceptance-required rules. The read-only configuration summary is in the final Overview after Description. Overview shows access, schedules, submissions, voting, approval settings, detailed outcomes, author rules and guidelines, and the description. Confirm and create submits only from this last step. Previous returns to Description without clearing text or attachments.",
-        "All wave creation includes a Guidelines step. Chat enters Guidelines after Access and then goes to Description; Rank and Approve enter Guidelines after Drops and then go to Voting.",
+        "Guidelines is directly before Description for every wave type. Chat enters it after Access, Perpetual Ranking after Voting, and scheduled Rank and Approve after Outcomes.",
         "Generated rules summarize the wave setup. Chat rules focus on wave type, access, and chat settings; Rank and Approve rules also include timing, submissions, voting, approval, and outcome visibility.",
         "Creators use the Wave guidelines section and Add wave guidelines... textbox to add guidelines. The subtitle explains that users see them when sending their first chat message. Guidelines are saved as wave metadata and also shown under Guidelines in the wave rules panel.",
         "When a wave has guidelines, a profile with no prior chat messages or participation drops in that wave reviews them before its first chat message is sent. Agree sends the pending message; Decline keeps the draft and shows the guidelines again on the next attempt.",

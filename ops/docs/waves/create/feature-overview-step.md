@@ -22,10 +22,10 @@ Set the wave name, optional image, and wave type before moving to later steps.
 ## Step Paths
 
 - `Chat`: `Setup` -> `Groups` -> `Guidelines` -> `Description` -> `Overview`
-- `Rank`: `Setup` -> `Groups` -> `Schedule` -> `Drops` -> `Guidelines` ->
-  `Voting` -> `Outcomes` -> `Description` -> `Overview`
-- `Approve`: `Setup` -> `Groups` -> `Schedule` -> `Drops` -> `Guidelines` ->
-  `Voting` -> `Outcomes` -> `Description` -> `Overview`
+- `Rank`: `Setup` -> `Groups` -> `Schedule` -> `Drops` -> `Voting` -> `Outcomes` ->
+  `Guidelines` -> `Description` -> `Overview`
+- `Approve`: `Setup` -> `Groups` -> `Schedule` -> `Drops` -> `Voting` -> `Outcomes` ->
+  `Guidelines` -> `Description` -> `Overview`
 
 ## What You Can Set
 

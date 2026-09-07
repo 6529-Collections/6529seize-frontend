@@ -15,12 +15,12 @@ Write the first wave drop here, then click `Next` to review the full wave.
 ## Step Paths
 
 - `Chat`: `Setup` -> `Groups` -> `Guidelines` -> `Description` -> `Overview`
-- Scheduled `Rank`: `Setup` -> `Groups` -> `Schedule` -> `Drops` -> `Guidelines` ->
-  `Voting` -> `Outcomes` -> `Description` -> `Overview`
-- `Perpetual Ranking`: `Setup` -> `Groups` -> `Schedule` -> `Drops` ->
-  `Guidelines` -> `Voting` -> `Description` -> `Overview`
-- `Approve`: `Setup` -> `Groups` -> `Schedule` -> `Drops` -> `Guidelines` ->
-  `Voting` -> `Outcomes` -> `Description` -> `Overview`
+- Scheduled `Rank`: `Setup` -> `Groups` -> `Schedule` -> `Drops` -> `Voting` -> `Outcomes` ->
+  `Guidelines` -> `Description` -> `Overview`
+- `Perpetual Ranking`: `Setup` -> `Groups` -> `Schedule` -> `Drops` -> `Voting` ->
+  `Guidelines` -> `Description` -> `Overview`
+- `Approve`: `Setup` -> `Groups` -> `Schedule` -> `Drops` -> `Voting` -> `Outcomes` ->
+  `Guidelines` -> `Description` -> `Overview`
 
 ## What You Can Add
 

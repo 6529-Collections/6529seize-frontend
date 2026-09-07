@@ -16,10 +16,10 @@ user-reachable for `Chat`, `Rank`, and `Approve` waves.
 ## Step Paths
 
 - `Chat`: `Setup` -> `Access` -> `Guidelines` -> `Description` -> `Overview`
-- `Rank`: `Setup` -> `Access` -> `Schedule` -> `Drops` -> `Guidelines` ->
-  `Voting` -> `Outcomes` -> `Description` -> `Overview`
-- `Approve`: `Setup` -> `Access` -> `Schedule` -> `Drops` -> `Guidelines` ->
-  `Voting` -> `Outcomes` -> `Description` -> `Overview`
+- `Rank`: `Setup` -> `Access` -> `Schedule` -> `Drops` -> `Voting` -> `Outcomes` ->
+  `Guidelines` -> `Description` -> `Overview`
+- `Approve`: `Setup` -> `Access` -> `Schedule` -> `Drops` -> `Voting` -> `Outcomes` ->
+  `Guidelines` -> `Description` -> `Overview`
 
 ## Entry Points
 

@@ -3,7 +3,7 @@
 ## Overview
 
 Use `Outcomes` to define winner rewards in `Rank` and `Approve` wave creation.
-You must save at least one outcome before `Next` can move to `Description`.
+You must save at least one outcome before `Next` can move to `Guidelines`.
 
 Outcome type, reward configuration, and outcome visibility stay visible.
 The optional Approve winner limit is in the named `Winner limits` expandable.
@@ -17,8 +17,8 @@ The optional Approve winner limit is in the named `Winner limits` expandable.
 
 ## Step Path
 
-- Scheduled `Rank`: `Setup -> Groups -> Schedule -> Drops -> Guidelines -> Voting -> Outcomes -> Description -> Overview`
-- `Approve`: `Setup -> Groups -> Schedule -> Drops -> Guidelines -> Voting -> Outcomes -> Description -> Overview`
+- Scheduled `Rank`: `Setup -> Groups -> Schedule -> Drops -> Voting -> Outcomes -> Guidelines -> Description -> Overview`
+- `Approve`: `Setup -> Groups -> Schedule -> Drops -> Voting -> Outcomes -> Guidelines -> Description -> Overview`
 
 `Perpetual Ranking` skips this step because its live leaderboard is the outcome
 and it never announces winners.
@@ -56,13 +56,13 @@ and it never announces winners.
    still apply when hidden.
 7. For `Approve`, open `Winner limits` and optionally set `Max Winners`; blank
    means unlimited.
-8. Click `Next` to continue to `Description`.
+8. Click `Next` to continue to `Guidelines`, followed by `Description`.
 
 ## Common Scenarios
 
 - Mix outcome types in one wave (for example manual + rep).
 - Add multiple winner rows for `Rep` or `NIC`.
-- Return from `Description` to `Outcomes` and adjust rewards before submit.
+- Return from `Guidelines` to `Outcomes` and adjust rewards before submit.
 - Open-ended approval: when both wave end and max winners are blank, the visible
   warning explains that the wave will run indefinitely.
 

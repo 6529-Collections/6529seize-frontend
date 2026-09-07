@@ -24,13 +24,13 @@ behavior tuning are in an expandable section named for those controls.
 
 ## Step Path
 
-- Scheduled `Rank`: `Setup -> Groups -> Schedule -> Drops -> Guidelines -> Voting -> Outcomes -> Description -> Overview`
-- `Perpetual Ranking`: `Setup -> Groups -> Schedule -> Drops -> Guidelines -> Voting -> Description -> Overview`
-- `Approve`: `Setup -> Groups -> Schedule -> Drops -> Guidelines -> Voting -> Outcomes -> Description -> Overview`
+- Scheduled `Rank`: `Setup -> Groups -> Schedule -> Drops -> Voting -> Outcomes -> Guidelines -> Description -> Overview`
+- `Perpetual Ranking`: `Setup -> Groups -> Schedule -> Drops -> Voting -> Guidelines -> Description -> Overview`
+- `Approve`: `Setup -> Groups -> Schedule -> Drops -> Voting -> Outcomes -> Guidelines -> Description -> Overview`
 
 ## Navigation Behavior
 
-- Enter `Voting` from `Guidelines`.
+- Enter `Voting` from `Drops`.
 - `Back` from `Outcomes` returns to `Voting`.
 - `Next` stays enabled; validation runs when clicked.
 - On large screens, the step rail can reopen completed steps only.
@@ -57,7 +57,7 @@ behavior tuning are in an expandable section named for those controls.
 9. For `Approve` waves, choose `No hold` or `Require hold time`.
 10. If hold time is required, set `Minimum time above threshold` in `Minutes` or
    `Hours`.
-11. Click `Next` to continue to `Outcomes`, or to `Description` for
+11. Click `Next` to continue to `Outcomes`, or to `Guidelines` for
     `Perpetual Ranking`.
 
 ## Validation and State Rules
@@ -95,7 +95,7 @@ behavior tuning are in an expandable section named for those controls.
 - If time-weighted interval validation appears, set a value in range and retry.
 - If hold-time validation appears, set a whole positive minute/hour value,
   choose `No hold`, or extend the approve-wave end date.
-- If submit fails later in `Description`, keep voting settings and retry submit.
+- If submit fails later in the final `Overview`, keep voting settings and retry submit.
 - A validation error inside the collapsed optional section reopens it as
   disclosure as `Needs attention`, focuses the invalid control, and exposes its
   error message.

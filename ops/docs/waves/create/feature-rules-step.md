@@ -21,8 +21,8 @@ in the final [Overview step](feature-final-overview-step.md).
 ## Step Path
 
 - `Chat`: `Setup -> Groups -> Guidelines -> Description -> Overview`
-- `Rank`: `Setup -> Groups -> Schedule -> Drops -> Guidelines -> Voting -> Outcomes -> Description -> Overview`
-- `Approve`: `Setup -> Groups -> Schedule -> Drops -> Guidelines -> Voting -> Outcomes -> Description -> Overview`
+- `Rank`: `Setup -> Groups -> Schedule -> Drops -> Voting -> Outcomes -> Guidelines -> Description -> Overview`
+- `Approve`: `Setup -> Groups -> Schedule -> Drops -> Voting -> Outcomes -> Guidelines -> Description -> Overview`
 
 ## Wave Guidelines
 
@@ -40,14 +40,15 @@ submission step.
 
 ## User Journey
 
-1. Complete `Groups` for `Chat`, or `Drops` for `Rank` and `Approve`.
+1. Complete `Access` for `Chat`, `Voting` for Perpetual Ranking, or
+   `Outcomes` for scheduled `Rank` and `Approve`.
 2. Open `Guidelines`.
 3. Optionally enter wave guidelines in the visible field.
 4. For `Rank` and `Approve`, optionally enter rules participants must accept
    and sign before submitting. This textbox is always visible. Leave it empty
    if no rules require signing.
-5. Click `Next` to continue to `Description` for `Chat`, or `Voting` for
-   `Rank` and `Approve`.
+5. Click `Next` to continue to `Description`. Guidelines is directly before
+   Description for every wave type.
 
 ## Participant Visibility
 

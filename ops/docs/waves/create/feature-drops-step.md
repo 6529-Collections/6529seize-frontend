@@ -27,7 +27,7 @@ simultaneous-submission limits are under `Submission requirements`.
 
 - Follow the `Rank` or `Approve` path:
   `Setup -> Groups -> Schedule -> Drops`.
-- Use `Back` from `Guidelines` to return in one step.
+- Use `Back` from `Voting` to return in one step.
 - On large screens, use the step rail after you move past `Drops`.
 
 ## User Journey
@@ -45,7 +45,7 @@ simultaneous-submission limits are under `Submission requirements`.
 4. Optionally set `Maximum number of simultaneous submissions per participant`.
 5. Collapse `Submission requirements` if desired; the configured values remain in the
    draft and the disclosure shows `Customized`.
-6. Click `Next` to continue to `Guidelines`.
+6. Click `Next` to continue to `Voting`.
 
 ## Common Scenarios
 
@@ -55,7 +55,7 @@ simultaneous-submission limits are under `Submission requirements`.
   added`).
 - Add metadata rules for fields every participant must provide.
 - Leave submission-limit blank for unlimited simultaneous submissions.
-- Add wave guidelines and acceptance requirements in the next `Guidelines` step.
+- Add wave guidelines and acceptance requirements in `Guidelines`, directly before `Description`.
 
 ## Edge Cases
 

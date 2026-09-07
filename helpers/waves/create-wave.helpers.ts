@@ -115,24 +115,18 @@ export const getCreateWaveNextStep = ({
     case CreateWaveStep.DATES:
       return CreateWaveStep.DROPS;
     case CreateWaveStep.DROPS:
-      if (waveType === ApiWaveType.Chat) {
-        return CreateWaveStep.VOTING;
-      }
-      return CreateWaveStep.RULES;
-    case CreateWaveStep.RULES:
-      if (waveType === ApiWaveType.Chat) {
-        return CreateWaveStep.DESCRIPTION;
-      }
       return CreateWaveStep.VOTING;
+    case CreateWaveStep.RULES:
+      return CreateWaveStep.DESCRIPTION;
     case CreateWaveStep.VOTING:
       if (waveType === ApiWaveType.Chat || skipsOutcomes) {
-        return CreateWaveStep.DESCRIPTION;
+        return CreateWaveStep.RULES;
       }
       return CreateWaveStep.OUTCOMES;
     case CreateWaveStep.APPROVAL:
       return CreateWaveStep.OUTCOMES;
     case CreateWaveStep.OUTCOMES:
-      return CreateWaveStep.DESCRIPTION;
+      return CreateWaveStep.RULES;
     case CreateWaveStep.DESCRIPTION:
       return CreateWaveStep.REVIEW;
     case CreateWaveStep.REVIEW:
@@ -169,11 +163,11 @@ export const getCreateWavePreviousStep = ({
       if (waveType === ApiWaveType.Chat) {
         return CreateWaveStep.GROUPS;
       }
-      return CreateWaveStep.DROPS;
-    case CreateWaveStep.VOTING:
-      if (waveType !== ApiWaveType.Chat) {
-        return CreateWaveStep.RULES;
+      if (skipsOutcomes) {
+        return CreateWaveStep.VOTING;
       }
+      return CreateWaveStep.OUTCOMES;
+    case CreateWaveStep.VOTING:
       return CreateWaveStep.DROPS;
     case CreateWaveStep.APPROVAL:
       return CreateWaveStep.VOTING;
@@ -182,13 +176,7 @@ export const getCreateWavePreviousStep = ({
     case CreateWaveStep.REVIEW:
       return CreateWaveStep.DESCRIPTION;
     case CreateWaveStep.DESCRIPTION:
-      if (waveType === ApiWaveType.Chat) {
-        return CreateWaveStep.RULES;
-      }
-      if (skipsOutcomes) {
-        return CreateWaveStep.VOTING;
-      }
-      return CreateWaveStep.OUTCOMES;
+      return CreateWaveStep.RULES;
     default:
       assertUnreachable(step);
       return null;
