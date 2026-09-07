@@ -3,7 +3,8 @@
 ## Overview
 
 Use `Rules` to add optional wave guidelines and, for Rank and Approve waves,
-rules that participants must accept. The read-only configuration summary is
+rules that participants must accept. The fields are always visible, with no
+expand/collapse control. The read-only configuration summary is
 in the final [Overview step](feature-final-overview-step.md).
 
 ## Location in the Site
@@ -38,14 +39,10 @@ submission step.
 
 1. Complete `Groups` for `Chat`, or `Drops` for `Rank` and `Approve`.
 2. Open `Rules`.
-3. Open `Wave guidelines` for Chat, or `Wave guidelines and acceptance` for
-   Rank and Approve, only when wave-specific guidance is needed.
-4. Optionally enter wave guidelines.
-5. For `Rank` and `Approve`, optionally enable `Require acceptance` and enter
+3. Optionally enter wave guidelines in the visible field.
+4. For `Rank` and `Approve`, optionally enable `Require acceptance` and enter
    rules participants must accept before submitting.
-6. Collapse the section if desired; entered rules remain in the draft
-   and the disclosure shows `Customized`.
-7. Click `Next` to continue to `Description` for `Chat`, or `Voting` for
+5. Click `Next` to continue to `Description` for `Chat`, or `Voting` for
    `Rank` and `Approve`.
 
 ## Participant Visibility
@@ -68,7 +65,7 @@ the existing submit acceptance flow.
 ## Edge Cases
 
 - `Chat` wave guidelines do not require acceptance.
-- Chat's optional-section label mentions only wave guidelines because Chat does
+- Chat's section heading mentions only wave guidelines because Chat does
   not support acceptance-required rules.
 - Leaving custom-rule fields blank is valid.
 - Wave guidelines are capped at `2,000` characters.

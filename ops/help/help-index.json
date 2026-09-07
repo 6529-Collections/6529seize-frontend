@@ -2525,7 +2525,7 @@
         "All wave types include Rules; Rank and Approve also include Schedule, Drops, and Voting. Scheduled Rank and Approve include Outcomes, while Perpetual Ranking skips Outcomes.",
         "Schedule keeps Submissions Open, Voting Opens, and applicable first-announcement controls visible under Opening dates. Winner schedule or Wave end reveals secondary controls; Perpetual Ranking has no Schedule optional section.",
         "Drops keeps submission type visible and puts optional controls under Submission requirements.",
-        "Rules keeps generated wave rules visible and puts optional Wave guidelines and applicable acceptance rules in a Wave guidelines section.",
+        "Rules always shows the Wave guidelines field and applicable acceptance-rule controls, with no expand/collapse control. The generated configuration summary appears in the final read-only Overview.",
         "Voting keeps the power model, scope, required Rep or Memes details, and Approve threshold visible; named Vote limits sections contain negative-vote behavior, time weighting, and Approve hold timing.",
         "Outcomes keeps outcome selection, reward configuration, and Show outcomes visible; Approve waves place the optional maximum winner count under Winner limits.",
         "In Description, individual @ mention suggestions follow the draft wave's Visibility group; private drafts suggest only eligible profiles.",

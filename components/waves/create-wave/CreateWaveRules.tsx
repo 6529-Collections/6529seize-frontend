@@ -11,7 +11,6 @@ import { t } from "@/i18n/messages";
 import CreateWaveTermsOfService from "./drops/terms/CreateWaveTermsOfService";
 import CreateWaveStepHeader from "./utils/CreateWaveStepHeader";
 import { CREATE_WAVE_FORM_STYLES } from "./utils/createWaveFormStyles";
-import CreateWaveAdvancedSection from "./utils/CreateWaveAdvancedSection";
 
 interface CreateWaveRulesProps {
   readonly config: CreateWaveConfig;
@@ -29,8 +28,6 @@ export default function CreateWaveRules({
   const customRulesHelpId = "create-wave-custom-rules-help";
   const customRulesCounterId = "create-wave-custom-rules-counter";
   const supportsAcceptanceRules = config.overview.type !== ApiWaveType.Chat;
-  const hasCustomRules = Boolean(normalizeWaveCustomRules(customRules));
-  const hasBindingRules = Boolean(normalizeWaveCustomRules(config.drops.terms));
   const setDisplayRules = (value: string) => {
     setDisplay({
       ...config.display,
@@ -51,18 +48,22 @@ export default function CreateWaveRules({
     <div className="tw-flex tw-flex-col tw-gap-y-6">
       <CreateWaveStepHeader title={t(locale, "waves.create.rules.title")} />
 
-      <CreateWaveAdvancedSection
-        title={t(
-          locale,
-          supportsAcceptanceRules
-            ? "waves.create.rules.advancedSummary"
-            : "waves.create.rules.chatAdvancedSummary"
-        )}
-        isCustomized={hasCustomRules || hasBindingRules}
-        hasError={false}
-        variant="filled"
+      <section
+        aria-labelledby="create-wave-guidelines-title"
+        className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900/60"
       >
-        <div className="tw-space-y-6 tw-p-5">
+        <h3
+          id="create-wave-guidelines-title"
+          className={`${CREATE_WAVE_FORM_STYLES.sectionTitle} tw-px-5 tw-py-4`}
+        >
+          {t(
+            locale,
+            supportsAcceptanceRules
+              ? "waves.create.rules.advancedSummary"
+              : "waves.create.rules.chatAdvancedSummary"
+          )}
+        </h3>
+        <div className="tw-space-y-6 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-p-5">
           <section>
             <div className="tw-space-y-3">
               <div>
@@ -124,7 +125,7 @@ export default function CreateWaveRules({
             </section>
           )}
         </div>
-      </CreateWaveAdvancedSection>
+      </section>
     </div>
   );
 }

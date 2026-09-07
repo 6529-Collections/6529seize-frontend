@@ -104,18 +104,19 @@ describe("CreateWaveRules", () => {
         "Automatic rules are generated from the wave setup. Add creator rules only for wave-specific requirements that are not already covered."
       )
     ).not.toBeInTheDocument();
-    const advancedButton = screen.getByRole("button", {
-      name: "Wave guidelines",
-    });
-    expect(advancedButton).toHaveAttribute("aria-expanded", "false");
-    expect(screen.getByLabelText("Wave guidelines")).not.toBeVisible();
+    expect(
+      screen.getByRole("heading", { level: 3, name: "Wave guidelines" })
+    ).toBeVisible();
+    expect(
+      screen.queryByRole("button", { name: "Wave guidelines" })
+    ).not.toBeInTheDocument();
     expect(
       screen.queryByRole("button", { name: "Rules that require acceptance" })
     ).toBeNull();
 
-    fireEvent.click(advancedButton);
-
-    expect(screen.getByLabelText("Wave guidelines")).toBeVisible();
+    expect(
+      screen.getByRole("textbox", { name: "Wave guidelines" })
+    ).toBeVisible();
     expect(
       screen.getByText("These guidelines are shown in wave rules panel")
     ).toBeVisible();
@@ -143,11 +144,6 @@ describe("CreateWaveRules", () => {
     );
 
     fireEvent.click(
-      screen.getByRole("button", {
-        name: "Wave guidelines and acceptance",
-      })
-    );
-    fireEvent.click(
       screen.getByRole("button", { name: "Rules that require acceptance" })
     );
 
@@ -159,7 +155,7 @@ describe("CreateWaveRules", () => {
     );
   });
 
-  it("marks restored wave guidelines as Customized while collapsed", () => {
+  it("shows restored wave guidelines immediately without a collapse control", () => {
     render(
       <CreateWaveRules
         config={getConfig(ApiWaveType.Rank, "Restored rule")}
@@ -169,10 +165,14 @@ describe("CreateWaveRules", () => {
     );
 
     expect(
-      screen.getByRole("button", {
-        name: /Wave guidelines and acceptance Customized/,
+      screen.getByRole("heading", {
+        level: 3,
+        name: "Wave guidelines and acceptance",
       })
-    ).toHaveAttribute("aria-expanded", "false");
-    expect(screen.getByDisplayValue("Restored rule")).not.toBeVisible();
+    ).toBeVisible();
+    expect(
+      screen.queryByRole("button", { name: /Wave guidelines and acceptance/ })
+    ).not.toBeInTheDocument();
+    expect(screen.getByDisplayValue("Restored rule")).toBeVisible();
   });
 });
