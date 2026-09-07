@@ -205,6 +205,11 @@ describe("public Coordinator package policy", () => {
       policy.validateWorkspace(`${workspace}\nregistry: https://example.com\n`)
     ).toThrow("setting is not allowed: registry");
     expect(() =>
+      policy.validateWorkspace(
+        `${workspace}\n"registries":\n  reviewed: https://example.com\n`
+      )
+    ).toThrow("setting is not allowed: registries");
+    expect(() =>
       policy.validateWorkspace(`${workspace}\nglobalPnpmfile: ./hook.cjs\n`)
     ).toThrow("setting is not allowed: globalPnpmfile");
     expect(() =>

@@ -1,6 +1,5 @@
 const fs = require("node:fs");
 const path = require("node:path");
-const YAML = require("yaml");
 
 const NO_FOLLOW = fs.constants.O_NOFOLLOW ?? 0;
 
@@ -167,16 +166,21 @@ function validatePackageJson(text) {
 }
 
 function validateWorkspace(text) {
-  let workspace;
-  try {
-    workspace = YAML.parse(text);
-  } catch {
-    throw policyError("pnpm-workspace.yaml must be valid YAML");
+  const topLevelKeys = [];
+  for (const rawLine of text.split(/\r?\n/)) {
+    const trimmedLine = rawLine.trim();
+    if (trimmedLine === "" || trimmedLine.startsWith("#") || /^\s/.test(rawLine)) {
+      continue;
+    }
+    const keyMatch = rawLine.match(
+      /^(?:"([^"\r\n]+)"|'([^'\r\n]+)'|([A-Za-z0-9_.@/+\-]+))\s*:/
+    );
+    if (!keyMatch) {
+      throw policyError("pnpm-workspace.yaml has an unsupported top-level line");
+    }
+    topLevelKeys.push(keyMatch[1] ?? keyMatch[2] ?? keyMatch[3]);
   }
-  if (workspace === null || typeof workspace !== "object" || Array.isArray(workspace)) {
-    throw policyError("pnpm-workspace.yaml must contain a settings object");
-  }
-  for (const key of Object.keys(workspace)) {
+  for (const key of topLevelKeys) {
     const name = key.toLowerCase().replace(/[^a-z0-9]/g, "");
     const containsCredentialNetworkOrHookOverride =
       name === "auth" ||
