@@ -60,6 +60,11 @@ describe("public Coordinator package policy", () => {
     expect(() => policy.validateArguments(["install", "--registry=x"])).toThrow(
       "pnpm option is not allowed"
     );
+    for (const option of ["-C", "-g", "-w", "--filter=app"]) {
+      expect(() => policy.validateArguments(["install", option])).toThrow(
+        "pnpm option is not allowed"
+      );
+    }
     expect(() =>
       policy.validateArguments(["install", "--config.userconfig=x"])
     ).toThrow("pnpm option is not allowed");
@@ -84,6 +89,21 @@ describe("public Coordinator package policy", () => {
         `alias@npm:${policy.RELEASE_PACKAGE}@${policy.RELEASE_VERSION}`,
       ])
     ).toThrow("direct dependency source is not allowed");
+    for (const source of [
+      "owner/repository",
+      "./package",
+      "../package.tgz",
+      "package.tgz",
+      "git@github.com:owner/repository.git",
+      "ssh://git@github.com/owner/repository.git",
+    ]) {
+      expect(() => policy.validateArguments(["add", source])).toThrow(
+        "direct dependency source is not allowed"
+      );
+    }
+    expect(() =>
+      policy.validateArguments(["add", "@reviewed-scope/package@1.2.3"])
+    ).not.toThrow();
     for (const args of [
       ["add", policy.RELEASE_PACKAGE],
       ["install", `${policy.RELEASE_PACKAGE}@${policy.RELEASE_VERSION}`],

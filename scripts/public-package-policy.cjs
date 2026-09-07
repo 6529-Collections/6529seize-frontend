@@ -1,6 +1,8 @@
 const fs = require("node:fs");
 const path = require("node:path");
 
+const NO_FOLLOW = fs.constants.O_NOFOLLOW ?? 0;
+
 const RELEASE_PACKAGE = "@6529-collections/release-request";
 const RELEASE_VERSION = "0.0.4";
 const RELEASE_INTEGRITY =
@@ -27,10 +29,13 @@ const FORBIDDEN_OPTION_NAMES = new Set([
   "ca",
   "cafile",
   "cert",
+  "c",
   "config",
   "configdependencies",
   "configdir",
   "dir",
+  "filter",
+  "g",
   "global",
   "globalconfig",
   "ignorepnpmfile",
@@ -53,6 +58,7 @@ const FORBIDDEN_OPTION_NAMES = new Set([
   "userconfig",
   "username",
   "virtualstoredir",
+  "w",
   "workspace",
   "workspacedir",
 ]);
@@ -63,11 +69,34 @@ function policyError(message) {
 
 function readRepositoryFile(repositoryRoot, relativePath) {
   const filePath = path.join(repositoryRoot, relativePath);
-  const stat = fs.lstatSync(filePath);
-  if (!stat.isFile() || stat.isSymbolicLink()) {
+  const pathStat = fs.lstatSync(filePath);
+  if (!pathStat.isFile() || pathStat.isSymbolicLink()) {
     throw policyError(`${relativePath} must be a regular file`);
   }
-  return fs.readFileSync(filePath, "utf8");
+
+  let descriptor;
+  try {
+    descriptor = fs.openSync(filePath, fs.constants.O_RDONLY | NO_FOLLOW);
+  } catch (error) {
+    if (error instanceof Error && "code" in error && error.code === "ELOOP") {
+      throw policyError(`${relativePath} must be a regular file`);
+    }
+    throw error;
+  }
+
+  try {
+    const openedStat = fs.fstatSync(descriptor);
+    if (
+      !openedStat.isFile() ||
+      openedStat.dev !== pathStat.dev ||
+      openedStat.ino !== pathStat.ino
+    ) {
+      throw policyError(`${relativePath} changed while it was checked`);
+    }
+    return fs.readFileSync(descriptor, "utf8");
+  } finally {
+    fs.closeSync(descriptor);
+  }
 }
 
 function parseNpmrc(text) {
@@ -163,7 +192,9 @@ function validateLockfile(text) {
       throw policyError("pnpm-lock.yaml does not pin the reviewed public package");
     }
   }
-  if (text.includes("npm.pkg.github.com")) {
+  if (
+    /(?:^|[^a-z0-9.-])npm\.pkg\.github\.com(?=[:/]|[^a-z0-9.-]|$)/i.test(text)
+  ) {
     throw policyError("pnpm-lock.yaml cannot resolve packages from GitHub Packages");
   }
   if (text.includes(`${RELEASE_PACKAGE}@0.0.3`)) {
@@ -174,6 +205,25 @@ function validateLockfile(text) {
 function normalizedOptionName(argument) {
   const option = argument.replace(/^-+/, "").split("=", 1)[0];
   return option.toLowerCase().replace(/[^a-z0-9]/g, "");
+}
+
+function isDirectDependencySource(argument) {
+  if (/(?:^|@)(?:[a-z][a-z0-9+.-]*:|\/\/)/i.test(argument)) {
+    return true;
+  }
+  if (/^[^@/\\\s]+@[^:/\\\s]+:[^\s]+$/.test(argument)) {
+    return true;
+  }
+  if (/^(?:\.{1,2}[\/\\]|~[\/\\]|[a-z]:[\/\\]|\\\\)/i.test(argument)) {
+    return true;
+  }
+  if (/\.(?:tgz|tar|tar\.gz)$/i.test(argument)) {
+    return true;
+  }
+  if (argument.includes("/") || argument.includes("\\")) {
+    return !/^@[^/@\\\s]+\/[^/@\\\s]+(?:@[^/\\\s]+)?$/.test(argument);
+  }
+  return false;
 }
 
 function validateArguments(args) {
@@ -189,11 +239,7 @@ function validateArguments(args) {
         `${RELEASE_PACKAGE} cannot be changed by a package command`
       );
     }
-    if (
-      /(?:^|@)(?:(?:file|git\+|git|http|https|link|workspace|github|gitlab|bitbucket|npm):|\/\/)/i.test(
-        argument
-      )
-    ) {
+    if (isDirectDependencySource(argument)) {
       throw policyError(`direct dependency source is not allowed: ${argument}`);
     }
     if (!argument.startsWith("-")) {
@@ -279,6 +325,7 @@ module.exports = {
   SECURE_REPOSITORY_ROOT_ARGUMENT,
   validateArguments,
   validateEnvironment,
+  isDirectDependencySource,
   validateLockfile,
   validateNpmrc,
   validatePackageJson,
