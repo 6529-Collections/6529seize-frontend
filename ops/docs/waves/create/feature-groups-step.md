@@ -67,9 +67,10 @@ user-reachable for `Chat`, `Rank`, and `Approve` waves.
 - `Edit` opens the full criteria builder. `Identities`, `Level`, `TDH`, `NIC`,
   `Rep`, `Required NFTs`, `Collection Access`, and `xTDH Grant` remain directly
   available as prominent buttons.
-- A blue dot and stronger button treatment identify each criterion that has a
-  value. Screen readers receive the same state as `Configured` in the button
-  name.
+- The currently open criterion has a solid blue button with an underlined
+  label. A dot identifies each criterion that has a value, whether or not it is
+  open. Screen readers receive the configured state in the button name and the
+  open state as pressed.
 - While editing, `Before editing` shows the currently applied audience,
   including `Everyone`, and `After editing` shows the proposed audience and
   readable criteria summary.

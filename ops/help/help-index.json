@@ -2511,7 +2511,7 @@
         "An empty access, drop, vote, or chat scope is labeled Everyone. During editing, matching Before editing and After editing summaries compare the applied and proposed audiences.",
         "A selected saved access group shows its current eligible identity count; View members opens a paginated, searchable member browser without leaving wave creation.",
         "A valid draft exposes View members from its After editing summary; there is no separate Preview matches, Close, or Discard draft action.",
-        "Criteria buttons are visually prominent and show a dot plus an accessible Configured state when a value is set.",
+        "The currently open criterion has a solid blue button with an underlined label and is announced as pressed. A dot plus an accessible Configured state marks criteria with values independently of which editor is open.",
         "Make wave public changes access to Everyone and also changes chat, submission, or voting only when that row still matched access at click time; independently customized rows and Admins remain unchanged.",
         "A chat, submission, or voting row that differs from access offers Match wave access to copy the current access group and resume default synchronization.",
         "Group membership previews use current profile, reputation, and ownership data, so the matching identities can change over time.",

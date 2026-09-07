@@ -528,7 +528,7 @@ describe("CreateWaveGroupInlinePanel", () => {
       name: "Rep, Configured",
     });
     expect(configuredRep).toHaveAttribute("data-configured", "true");
-    expect(configuredRep).toHaveClass("tw-bg-primary-500/15");
+    expect(configuredRep).toHaveClass("tw-bg-primary-600");
   });
 
   it("shows all criteria buttons without a more-rules step", async () => {
