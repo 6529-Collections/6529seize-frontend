@@ -70,12 +70,30 @@ describe("public Coordinator package policy", () => {
       "-r",
       "--recursive",
       "--config.dangerously-allow-all-builds=true",
+      "--allow-build=unreviewed-package",
       "--global-pnpmfile=hook.cjs",
     ]) {
       expect(() => policy.validateArguments(["install", option])).toThrow(
         "pnpm option is not allowed"
       );
     }
+    for (const option of [
+      "-Dg",
+      "-Dr",
+      "--rec",
+      "--dangerously-allow-all-b=true",
+    ]) {
+      expect(() =>
+        policy.validateArguments(["add", option, "package"])
+      ).toThrow("pnpm option is not allowed");
+    }
+    expect(() =>
+      policy.validateArguments(["add", "-D", "package"])
+    ).not.toThrow();
+    expect(() =>
+      policy.validateArguments(["install", "--frozen-lockfile", "--prod"])
+    ).not.toThrow();
+    expect(() => policy.validateArguments(["audit", "--fix"])).not.toThrow();
     expect(() =>
       policy.validateArguments(["install", "--config.userconfig=x"])
     ).toThrow("pnpm option is not allowed");
@@ -214,6 +232,16 @@ describe("public Coordinator package policy", () => {
     expect(() =>
       policy.validatePackageJson(JSON.stringify(manifestWithAlias))
     ).toThrow("cannot be referenced through another dependency");
+
+    const manifestWithDirectSource = {
+      ...manifest,
+      dependencies: {
+        sharp: "https://example.invalid/sharp.tgz",
+      },
+    };
+    expect(() =>
+      policy.validatePackageJson(JSON.stringify(manifestWithDirectSource))
+    ).toThrow("package.json direct dependency source is not allowed: sharp");
   });
 
   it("rejects changes to the reviewed age exception", () => {
@@ -249,6 +277,14 @@ describe("public Coordinator package policy", () => {
     expect(() =>
       policy.validateWorkspace(`${workspace}\nglobalPnpmfile: ./hook.cjs\n`)
     ).toThrow("setting is not allowed: globalPnpmfile");
+    for (const escapedSetting of [
+      '"reg\\u0069stry": https://example.com',
+      '"dangerouslyAllowAllBu\\u0069lds": true',
+    ]) {
+      expect(() =>
+        policy.validateWorkspace(`${workspace}\n${escapedSetting}\n`)
+      ).toThrow("quoted top-level keys cannot contain escapes");
+    }
     for (const setting of [
       "configDependencies:\n  hook-package: 1.0.0",
       "dangerouslyAllowAllBuilds: true",

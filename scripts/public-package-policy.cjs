@@ -37,56 +37,10 @@ const PACKAGE_MUTATION_COMMANDS = new Set([
   "remove",
   "update",
 ]);
-const FORBIDDEN_UPDATE_OPTION_NAMES = new Set(["l", "latest"]);
-const FORBIDDEN_OPTION_NAMES = new Set([
-  "allowbuilds",
-  "auth",
-  "authtoken",
-  "ca",
-  "cafile",
-  "cert",
-  "c",
-  "config",
-  "configdependencies",
-  "configdir",
-  "dangerouslyallowallbuilds",
-  "dir",
-  "filter",
-  "filterprod",
-  "g",
-  "global",
-  "globalconfig",
-  "globalpnpmfile",
-  "ignoreworkspace",
-  "ignorepnpmfile",
-  "ignorescripts",
-  "ignoredbuiltdependencies",
-  "key",
-  "lockfiledir",
-  "lockfiledirectory",
-  "modulesdir",
-  "neverbuiltdependencies",
-  "npmglobalconfig",
-  "offline",
-  "onlybuiltdependencies",
-  "onlybuiltdependenciesfile",
-  "password",
-  "pnpmfile",
-  "prefix",
-  "proxy",
-  "preferoffline",
-  "r",
-  "recursive",
-  "httpsproxy",
-  "registry",
-  "strictssl",
-  "token",
-  "userconfig",
-  "username",
-  "virtualstoredir",
-  "w",
-  "workspace",
-  "workspacedir",
+const ALLOWED_OPTIONS_BY_COMMAND = new Map([
+  ["add", new Set(["-D", "--save-dev"])],
+  ["audit", new Set(["--fix"])],
+  ["install", new Set(["--frozen-lockfile", "--prod"])],
 ]);
 
 function policyError(message) {
@@ -195,6 +149,14 @@ function validatePackageJson(text) {
           `${RELEASE_PACKAGE} cannot be referenced through another dependency`
         );
       }
+      if (
+        typeof dependencySpec === "string" &&
+        isDirectDependencySource(dependencySpec)
+      ) {
+        throw policyError(
+          `package.json direct dependency source is not allowed: ${dependencyName}`
+        );
+      }
     }
   }
   if (manifest.pnpm !== undefined) {
@@ -217,6 +179,12 @@ function validateWorkspace(text) {
     );
     if (!keyMatch) {
       throw policyError("pnpm-workspace.yaml has an unsupported top-level line");
+    }
+    const quotedKey = keyMatch[1] ?? keyMatch[2];
+    if (quotedKey?.includes("\\")) {
+      throw policyError(
+        "pnpm-workspace.yaml quoted top-level keys cannot contain escapes"
+      );
     }
     topLevelKeys.push(keyMatch[1] ?? keyMatch[2] ?? keyMatch[3]);
   }
@@ -328,11 +296,6 @@ function validateLockfile(text) {
   }
 }
 
-function normalizedOptionName(argument) {
-  const option = argument.replace(/^-+/, "").split("=", 1)[0];
-  return option.toLowerCase().replace(/[^a-z0-9]/g, "");
-}
-
 function isDirectDependencySource(argument) {
   if (/(?:^|@)(?:[a-z][a-z0-9+.-]*:|\/\/)/i.test(argument)) {
     return true;
@@ -356,6 +319,7 @@ function validateArguments(args) {
   if (!ALLOWED_COMMANDS.has(args[0])) {
     throw policyError(`unsupported pnpm command: ${args[0] ?? "missing"}`);
   }
+  const allowedOptions = ALLOWED_OPTIONS_BY_COMMAND.get(args[0]) ?? new Set();
   for (const argument of args.slice(1)) {
     if (
       PACKAGE_MUTATION_COMMANDS.has(args[0]) &&
@@ -365,24 +329,14 @@ function validateArguments(args) {
         `${RELEASE_PACKAGE} cannot be changed by a package command`
       );
     }
-    if (isDirectDependencySource(argument)) {
-      throw policyError(`direct dependency source is not allowed: ${argument}`);
-    }
-    if (!argument.startsWith("-")) {
+    if (argument.startsWith("-")) {
+      if (!allowedOptions.has(argument)) {
+        throw policyError(`pnpm option is not allowed: ${argument}`);
+      }
       continue;
     }
-    const name = normalizedOptionName(argument);
-    const unprefixedName = name.startsWith("config")
-      ? name.slice("config".length)
-      : name;
-    if (
-      (args[0] === "update" &&
-        (FORBIDDEN_UPDATE_OPTION_NAMES.has(name) ||
-          FORBIDDEN_UPDATE_OPTION_NAMES.has(unprefixedName))) ||
-      FORBIDDEN_OPTION_NAMES.has(name) ||
-      FORBIDDEN_OPTION_NAMES.has(unprefixedName)
-    ) {
-      throw policyError(`pnpm option is not allowed: ${argument}`);
+    if (isDirectDependencySource(argument)) {
+      throw policyError(`direct dependency source is not allowed: ${argument}`);
     }
   }
 }
@@ -407,25 +361,7 @@ function validateEnvironment(environment) {
       }
       continue;
     }
-    const containsCredentialOrNetworkOverride =
-      name === "auth" ||
-      name.endsWith("auth") ||
-      name.includes("authtoken") ||
-      name.includes("token") ||
-      name.includes("username") ||
-      name.includes("password") ||
-      name.includes("userconfig") ||
-      name.includes("globalconfig") ||
-      name.includes("registry") ||
-      name.includes("proxy") ||
-      name.includes("strictssl") ||
-      name.includes("cafile");
-    if (
-      FORBIDDEN_OPTION_NAMES.has(name) ||
-      containsCredentialOrNetworkOverride
-    ) {
-      throw policyError(`package environment override is not allowed: ${key}`);
-    }
+    throw policyError(`package environment override is not allowed: ${key}`);
   }
 }
 
