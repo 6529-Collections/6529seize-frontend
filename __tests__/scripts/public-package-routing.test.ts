@@ -204,6 +204,16 @@ describe("public Coordinator package policy", () => {
     expect(() =>
       policy.validatePackageJson(JSON.stringify(manifestWithDependenciesMeta))
     ).toThrow("package.json dependency build settings are not allowed");
+
+    const manifestWithAlias = {
+      ...manifest,
+      dependencies: {
+        "coordinator-next": `npm:${policy.RELEASE_PACKAGE}@0.0.5`,
+      },
+    };
+    expect(() =>
+      policy.validatePackageJson(JSON.stringify(manifestWithAlias))
+    ).toThrow("cannot be referenced through another dependency");
   });
 
   it("rejects changes to the reviewed age exception", () => {
@@ -215,8 +225,16 @@ describe("public Coordinator package policy", () => {
     expect(() =>
       policy.validateWorkspace(
         workspace.replace(
-          `"${policy.RELEASE_PACKAGE}"`,
-          `"${policy.RELEASE_PACKAGE}@${policy.RELEASE_VERSION}"`
+          `"${policy.RELEASE_PACKAGE}@${policy.RELEASE_VERSION}"`,
+          `"${policy.RELEASE_PACKAGE}"`
+        )
+      )
+    ).toThrow("must contain only");
+    expect(() =>
+      policy.validateWorkspace(
+        workspace.replace(
+          `"${policy.RELEASE_PACKAGE}@${policy.RELEASE_VERSION}"`,
+          `"${policy.RELEASE_PACKAGE}@0.0.5"`
         )
       )
     ).toThrow("must contain only");
@@ -249,8 +267,8 @@ describe("public Coordinator package policy", () => {
     expect(() =>
       policy.validateWorkspace(
         workspace.replace(
-          `  - "${policy.RELEASE_PACKAGE}"`,
-          `  - "${policy.RELEASE_PACKAGE}"\n  - "unreviewed-package"`
+          `  - "${policy.RELEASE_PACKAGE}@${policy.RELEASE_VERSION}"`,
+          `  - "${policy.RELEASE_PACKAGE}@${policy.RELEASE_VERSION}"\n  - "unreviewed-package"`
         )
       )
     ).toThrow("must contain only");
@@ -270,6 +288,11 @@ describe("public Coordinator package policy", () => {
     expect(() =>
       policy.validateLockfile(`${lockfile}\n# npm.pkg.github.com\n`)
     ).toThrow("cannot resolve packages from GitHub Packages");
+    expect(() =>
+      policy.validateLockfile(
+        `${lockfile}\n# npm:${policy.RELEASE_PACKAGE}@0.0.5\n`
+      )
+    ).toThrow("references an unreviewed package version");
   });
 
   const itWithSymlinkSupport = process.platform === "win32" ? it.skip : it;

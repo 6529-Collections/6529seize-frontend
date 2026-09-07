@@ -5,6 +5,7 @@ const NO_FOLLOW = fs.constants.O_NOFOLLOW ?? 0;
 
 const RELEASE_PACKAGE = "@6529-collections/release-request";
 const RELEASE_VERSION = "0.0.4";
+const RELEASE_REFERENCE = `${RELEASE_PACKAGE}@${RELEASE_VERSION}`;
 const RELEASE_INTEGRITY =
   "sha512-rbGE0a3zlYUQlkg43/1TWAysNLksw0eaewywxDi6IoiucWgsZyEOrmbctBRWeDxLNAU3VypzrjyIGkjZ8ediiQ==";
 const ALLOWED_BUILD_DEPENDENCIES = new Set([
@@ -171,11 +172,29 @@ function validatePackageJson(text) {
   }
   for (const section of [
     "dependencies",
+    "devDependencies",
     "optionalDependencies",
     "peerDependencies",
   ]) {
-    if (manifest[section]?.[RELEASE_PACKAGE] !== undefined) {
+    const dependencies = manifest[section];
+    if (
+      section !== "devDependencies" &&
+      dependencies?.[RELEASE_PACKAGE] !== undefined
+    ) {
       throw policyError(`${RELEASE_PACKAGE} may exist only in devDependencies`);
+    }
+    for (const [dependencyName, dependencySpec] of Object.entries(
+      dependencies ?? {}
+    )) {
+      if (
+        dependencyName !== RELEASE_PACKAGE &&
+        typeof dependencySpec === "string" &&
+        dependencySpec.includes(RELEASE_PACKAGE)
+      ) {
+        throw policyError(
+          `${RELEASE_PACKAGE} cannot be referenced through another dependency`
+        );
+      }
     }
   }
   if (manifest.pnpm !== undefined) {
@@ -242,11 +261,11 @@ function validateWorkspace(text) {
   if (
     exceptions.length !== 1 ||
     !new RegExp(
-      `^-\\s*["']?${RELEASE_PACKAGE.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}["']?$`
+      `^-\\s*["']?${RELEASE_REFERENCE.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}["']?$`
     ).test(exceptions[0])
   ) {
     throw policyError(
-      `minimumReleaseAgeExclude must contain only ${RELEASE_PACKAGE}`
+      `minimumReleaseAgeExclude must contain only ${RELEASE_REFERENCE}`
     );
   }
 
@@ -300,6 +319,12 @@ function validateLockfile(text) {
   }
   if (text.includes(`${RELEASE_PACKAGE}@0.0.3`)) {
     throw policyError("pnpm-lock.yaml still references private version 0.0.3");
+  }
+  for (const suffix of text.split(`${RELEASE_PACKAGE}@`).slice(1)) {
+    const referencedVersion = suffix.match(/^[0-9A-Za-z.+-]+/)?.[0];
+    if (referencedVersion !== RELEASE_VERSION) {
+      throw policyError("pnpm-lock.yaml references an unreviewed package version");
+    }
   }
 }
 
