@@ -274,7 +274,7 @@ describe("public Coordinator package policy", () => {
         NODE_ENV: "test",
         NODE_AUTH_TOKEN: "old-github-package-token",
         NPM_TOKEN: "unrelated-npm-token",
-        XDG_CONFIG_HOME: "/tmp/untrusted-pnpm-config",
+        xdg_config_home: "/tmp/untrusted-pnpm-config",
         SFW_BIN: process.execPath,
       },
       pnpmBinary: process.execPath,
@@ -304,6 +304,7 @@ describe("public Coordinator package policy", () => {
       path.join(repositoryRoot, ".npmrc")
     );
     expect(options.env["XDG_CONFIG_HOME"]).toBe(observedConfigHome);
+    expect(options.env).not.toHaveProperty("xdg_config_home");
     expect(observedConfigHome).not.toBe("/tmp/untrusted-pnpm-config");
     expect(fs.existsSync(observedConfigHome as string)).toBe(false);
   });

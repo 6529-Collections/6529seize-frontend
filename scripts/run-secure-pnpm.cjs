@@ -62,6 +62,7 @@ function packageEnvironment(environment, repositoryRoot, pnpmConfigHome) {
   // package credentials to pnpm or dependency lifecycle scripts.
   removeEnvironmentVariableCaseInsensitive(childEnvironment, "NODE_AUTH_TOKEN");
   removeEnvironmentVariableCaseInsensitive(childEnvironment, "NPM_TOKEN");
+  removeEnvironmentVariableCaseInsensitive(childEnvironment, "XDG_CONFIG_HOME");
 
   const projectNpmrc = path.join(repositoryRoot, ".npmrc");
   childEnvironment.npm_config_registry = "https://registry.npmjs.org/";
