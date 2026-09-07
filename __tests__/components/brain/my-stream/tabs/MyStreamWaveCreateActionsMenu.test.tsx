@@ -54,18 +54,21 @@ const createWave = ({
   eligible = true,
   parentWave = null,
   adminGroupId = "parent-admin-group",
+  viewGroupId = null,
   includeAdminGroup = true,
   includeWaveConfig = true,
 }: {
   readonly eligible?: boolean;
   readonly parentWave?: object | null;
   readonly adminGroupId?: string | null;
+  readonly viewGroupId?: string | null;
   readonly includeAdminGroup?: boolean;
   readonly includeWaveConfig?: boolean;
 } = {}) =>
   ({
     id: "parent-wave",
     parent_wave: parentWave,
+    visibility: { scope: { group: viewGroupId ? { id: viewGroupId } : null } },
     chat: { scope: { group: { is_direct_message: false } } },
     wave: includeWaveConfig
       ? {
@@ -115,19 +118,41 @@ describe("MyStreamWaveCreateActionsMenu", () => {
       expect.objectContaining({
         parentWaveId: "parent-wave",
         parentAdminGroupId: "parent-admin-group",
+        parentViewGroupId: null,
       })
     );
   });
+
+  it.each(["desktop", "mobile"] as const)(
+    "passes the exact parent view group into %s subwave creation",
+    async (variant) => {
+      render(
+        <MyStreamWaveCreateActionsMenu
+          wave={createWave({ viewGroupId: "parent-view-group" })}
+          onCreated={jest.fn()}
+          variant={variant}
+        />
+      );
+
+      await userEvent.click(
+        screen.getByRole("button", { name: "New subwave" })
+      );
+
+      expect(createWaveModalMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          isOpen: true,
+          parentViewGroupId: "parent-view-group",
+          parentAdminGroupId: "parent-admin-group",
+        })
+      );
+    }
+  );
 
   it.each([
     ["an active proxy", { activeProfileProxy: { id: "proxy" } }, createWave()],
     ["a nested wave", {}, createWave({ parentWave: { id: "root" } })],
     ["no reusable admin group", {}, createWave({ adminGroupId: null })],
-    [
-      "no admin-group payload",
-      {},
-      createWave({ includeAdminGroup: false }),
-    ],
+    ["no admin-group payload", {}, createWave({ includeAdminGroup: false })],
   ])("hides subwave creation for %s", (_label, authOverride, wave) => {
     mockedUseAuth.mockReturnValue({
       connectedProfile: { handle: "alice" },

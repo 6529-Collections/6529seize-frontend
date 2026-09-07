@@ -107,7 +107,12 @@ const getPrivilegeGroupDefaults = ({
   };
 };
 
-export function useWaveConfig() {
+// eslint-disable-next-line max-lines-per-function -- Existing controller; initialize inherited access here so validation and submission share the same state.
+export function useWaveConfig({
+  initialViewGroupId = null,
+}: {
+  readonly initialViewGroupId?: string | null | undefined;
+} = {}) {
   const initialType = ApiWaveType.Chat;
   const initialStep = CreateWaveStep.OVERVIEW;
 
@@ -126,10 +131,10 @@ export function useWaveConfig() {
         image: null,
       },
       groups: {
-        canView: null,
-        canDrop: null,
-        canVote: null,
-        canChat: null,
+        canView: initialViewGroupId,
+        canDrop: type === ApiWaveType.Chat ? null : initialViewGroupId,
+        canVote: type === ApiWaveType.Chat ? null : initialViewGroupId,
+        canChat: initialViewGroupId,
         admin: null,
       },
       chat: {

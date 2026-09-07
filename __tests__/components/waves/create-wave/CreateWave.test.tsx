@@ -387,11 +387,13 @@ describe("CreateWave", () => {
   type RenderCreateWaveOptions = {
     readonly parentWaveId?: string | null | undefined;
     readonly parentAdminGroupId?: string | null | undefined;
+    readonly parentViewGroupId?: string | null | undefined;
   };
 
   const createWaveElement = ({
     parentWaveId,
     parentAdminGroupId,
+    parentViewGroupId,
   }: RenderCreateWaveOptions = {}) => (
     <AuthContext.Provider value={mockAuthContext}>
       <ReactQueryWrapperContext.Provider value={mockQueryContext}>
@@ -400,6 +402,7 @@ describe("CreateWave", () => {
           onBack={onBack}
           parentWaveId={parentWaveId}
           parentAdminGroupId={parentAdminGroupId}
+          parentViewGroupId={parentViewGroupId}
         />
       </ReactQueryWrapperContext.Provider>
     </AuthContext.Provider>
@@ -421,12 +424,15 @@ describe("CreateWave", () => {
     renderCreateWave({
       parentWaveId: "parent-wave",
       parentAdminGroupId: "parent-admin-group",
+      parentViewGroupId: "parent-view-group",
     });
 
     expect(screen.getByTestId("create-wave-flow-title")).toHaveTextContent(
       'Create subwave "Test Wave"'
     );
-    expect(mockedUseWaveConfig).toHaveBeenCalledWith();
+    expect(mockedUseWaveConfig).toHaveBeenCalledWith({
+      initialViewGroupId: "parent-view-group",
+    });
   });
 
   it("calls onBack when back button is clicked", () => {

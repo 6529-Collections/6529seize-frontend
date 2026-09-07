@@ -32,15 +32,18 @@ export default function CreateWave({
   onSuccess,
   parentWaveId,
   parentAdminGroupId,
+  parentViewGroupId,
 }: {
   readonly profile: ApiIdentity;
   readonly onBack: () => void;
   readonly onSuccess?: (() => void) | undefined;
   readonly parentWaveId?: string | null | undefined;
   readonly parentAdminGroupId?: string | null | undefined;
+  readonly parentViewGroupId?: string | null | undefined;
 }) {
   const waveConfig = useSubwaveWaveConfig({
     parentAdminGroupId,
+    parentViewGroupId,
   });
   const {
     config,

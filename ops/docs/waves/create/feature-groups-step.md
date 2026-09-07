@@ -44,8 +44,13 @@ user-reachable for `Chat`, `Rank`, and `Approve` waves.
 - `Enable chat` controls whether `Who can chat` is active on `Rank` and
   `Approve` waves.
 - `Allow admins to delete posts` is enabled by default.
-- Default scopes are `Everyone` for access, drop, vote, and chat, and `Only me`
-  for top-level-wave administration. Subwaves inherit the parent admin group.
+- Top-level waves default to `Everyone` for access, drop, vote, and chat, and
+  `Only me` for administration.
+- A new subwave starts with the parent wave's exact access group and admin
+  group. Chat and, for `Rank` and `Approve`, submission and voting start with
+  that same access group. A public parent's subwaves start with `Everyone`.
+- Changing the wave type resets access and participation to these defaults.
+  A subwave's access group must match its parent's when submitted.
 
 ## Editing Criteria
 

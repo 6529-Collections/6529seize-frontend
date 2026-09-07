@@ -13,6 +13,7 @@ interface CreateWaveModalProps {
   readonly profile: ApiIdentity;
   readonly parentWaveId?: string | null | undefined;
   readonly parentAdminGroupId?: string | null | undefined;
+  readonly parentViewGroupId?: string | null | undefined;
 }
 
 export default function CreateWaveModal({
@@ -21,6 +22,7 @@ export default function CreateWaveModal({
   profile,
   parentWaveId,
   parentAdminGroupId,
+  parentViewGroupId,
 }: CreateWaveModalProps) {
   const locale = useBrowserLocale();
 
@@ -65,6 +67,7 @@ export default function CreateWaveModal({
           onSuccess={onClose}
           parentWaveId={parentWaveId}
           parentAdminGroupId={parentAdminGroupId}
+          parentViewGroupId={parentViewGroupId}
         />
       </div>
     </MobileWrapperDialog>
