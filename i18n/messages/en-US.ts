@@ -1754,6 +1754,26 @@ const WAVE_CREATE_DROPDOWN_MESSAGES = objectMessages("waves.create.dropdown", {
   currentValue: "Current value: {value}",
 } as const);
 
+const WAVE_CREATE_REVIEW_MESSAGES = objectMessages("waves.create.review", {
+  title: "Overview",
+  description:
+    "Review your wave before creating it. Use Previous or the completed steps to make changes.",
+  submit: "Confirm and create",
+  uploadsPending: "Wait for image uploads to finish.",
+  setup: "Setup",
+  name: "Name",
+  parent: "Parent wave",
+  picture: "Wave profile picture",
+  manual: "Manual",
+  outcomeType: "Outcome type",
+  reward: "Reward",
+  category: "Category",
+  total: "Total",
+  winner: "Winner {position}",
+  perApprovedDrop: "Per approved drop",
+  outcome: "Outcome {number}",
+} as const);
+
 const WAVE_CREATE_PROGRESS_MESSAGES = objectMessages("waves.create.progress", {
   step: "Step {current} of {total}",
   label: "Wave setup progress",
@@ -3605,6 +3625,7 @@ export const EN_US_MESSAGES = {
   ...WAVE_CREATE_VOTING_MESSAGES,
   ...WAVE_CREATE_DROPDOWN_MESSAGES,
   ...WAVE_CREATE_PROGRESS_MESSAGES,
+  ...WAVE_CREATE_REVIEW_MESSAGES,
   ...WAVE_CREATE_DESCRIPTION_MESSAGES,
   ...WAVE_LEADERBOARD_PHASE_MESSAGES,
   ...WAVE_RULES_SCHEDULE_MESSAGES,

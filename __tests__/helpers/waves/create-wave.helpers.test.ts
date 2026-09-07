@@ -118,7 +118,7 @@ describe("create-wave.helpers", () => {
           step: CreateWaveStep.DESCRIPTION,
           waveType: ApiWaveType.Rank,
         })
-      ).toBeNull();
+      ).toBe(CreateWaveStep.REVIEW);
     });
 
     it("skips the outcomes step for perpetual rank waves", () => {
@@ -181,6 +181,43 @@ describe("create-wave.helpers", () => {
       ).toContain(CreateWaveStep.OUTCOMES);
     });
   });
+
+  it.each([
+    [ApiWaveType.Chat, false],
+    [ApiWaveType.Rank, false],
+    [ApiWaveType.Rank, true],
+    [ApiWaveType.Approve, false],
+  ] as const)(
+    "ends %s (perpetual=%s) with a reversible final review",
+    (waveType, ongoingRanking) => {
+      const steps = getCreateWaveMainSteps({ waveType, ongoingRanking });
+      expect(steps.slice(-2)).toEqual([
+        CreateWaveStep.DESCRIPTION,
+        CreateWaveStep.REVIEW,
+      ]);
+      expect(
+        getCreateWaveNextStep({
+          step: CreateWaveStep.DESCRIPTION,
+          waveType,
+          ongoingRanking,
+        })
+      ).toBe(CreateWaveStep.REVIEW);
+      expect(
+        getCreateWavePreviousStep({
+          step: CreateWaveStep.REVIEW,
+          waveType,
+          ongoingRanking,
+        })
+      ).toBe(CreateWaveStep.DESCRIPTION);
+      expect(
+        getCreateWaveNextStep({
+          step: CreateWaveStep.REVIEW,
+          waveType,
+          ongoingRanking,
+        })
+      ).toBeNull();
+    }
+  );
 
   describe("getCreateWavePreviousStep", () => {
     it("returns expected previous steps based on wave type", () => {

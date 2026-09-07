@@ -2374,7 +2374,7 @@
         "Compact proposal cards do not generate summaries, categories, or proposal metadata.",
         "Selecting a proposal card opens the complete original proposal, including its full markdown, media, attachments, and multipart navigation.",
         "Memes, Curation, and Quorum Waves keep their specialized proposal presentations.",
-        "Wave creators can choose Full proposal or Summary card under Advanced settings in the Overview step for a Rank or Approve Wave. New Waves default to Summary card; existing Waves and older drafts without this setting keep Full proposal except for the Network Museum compatibility fallback.",
+        "Wave creators can choose Full proposal or Summary card under Advanced settings in the Setup step for a Rank or Approve Wave. New Waves default to Summary card; existing Waves and older drafts without this setting keep Full proposal except for the Network Museum compatibility fallback.",
         "Wave admins can change the same presentation later from the right sidebar under Settings, Display, Proposal cards. This control is available for standard Rank and Approve Waves, not Chat, Memes, Curation, or Quorum presentations.",
         "Summary card lets the admin set a proposal-text limit from 120 to 1000 characters and choose whether the first ready still image appears beside proposal summaries in chat and list views. Invalid limits cannot be saved. Full proposal media is unchanged."
       ],
@@ -2425,7 +2425,7 @@
       "facts": [
         "Eligible admins can open the + menu in a root wave's tab row and select New subwave on web or in the app.",
         "New subwave is hidden in direct messages, inside an existing subwave, while using a profile proxy, when the parent has no reusable admin group, or when the profile cannot administer the parent.",
-        "Subwave creation shows Create subwave of the parent wave name in both the modal header and Overview heading. Its first-step labels are Subwave Name, Subwave Profile Picture, and Subwave Type. Saved Drafts is hidden during subwave creation.",
+        "Subwave creation shows Create subwave of the parent wave name in both the modal header and Setup heading. Its first-step labels are Subwave Name, Subwave Profile Picture, and Subwave Type. Saved Drafts is hidden during subwave creation.",
         "A new subwave starts with the parent wave's exact access group. Chat and, for Rank and Approve waves, submission and voting default to that same group. A public parent's subwaves start public. Changing the wave type restores these defaults, but inherited groups are editable and do not have to match the parent's groups.",
         "When creating a subwave or editing its groups, a group with members outside the parent's audience triggers a warning before saving. Continue anyway saves the chosen group; Go back keeps the form open. Different groups fully covered by the parent's audience need no warning. Members must have access to both the subwave and its parent, even if the subwave itself is public. Parent visibility can change while subwaves exist.",
         "A new subwave starts with the parent wave's admin group, and the creator can choose a different existing admin group in the Groups step before submitting."
@@ -2501,8 +2501,8 @@
         "description"
       ],
       "facts": [
-        "The wave creation flow starts with Overview and then configures access, description, and additional steps depending on wave type.",
-        "The Overview step begins with the Create Wave heading and keeps the wave name, picture, type, and Rank ranking mode visible; Appearance and labels contains display, proposal-card, and applicable tab-label customization.",
+        "The wave creation flow starts with Setup and then configures access, rules, description, and additional steps depending on wave type. A final read-only Overview follows Description, with Confirm and create as the submit action.",
+        "The Setup step begins with the Create Wave heading and keeps the wave name, picture, type, and Rank ranking mode visible; Appearance and labels contains display, proposal-card, and applicable tab-label customization.",
         "Optional sections are named for their contents instead of repeating Advanced settings. They show Customized for non-default values and open automatically when a hidden field needs attention.",
         "The Access step initially shows one Who can access this wave control. By default, that group can also chat and, for Rank and Approve waves, submit and vote; only the creator can administer the wave.",
         "Customize other permissions expands the separate chat, submission, voting, and admin group controls when a wave needs different access rules.",
@@ -2562,7 +2562,7 @@
       ],
       "facts": [
         "Chat waves are conversation-focused waves.",
-        "Chat wave creation uses Overview, Groups, Rules, and Description steps.",
+        "Chat wave creation uses Setup, Access, Rules, Description, and final Overview steps.",
         "Use Chat when the wave does not need ranking or approval mechanics."
       ],
       "canonical_path": "/waves?create=wave",
@@ -2590,8 +2590,8 @@
       ],
       "facts": [
         "Rank waves collect drops and allow participants to vote/rank them according to configured rules.",
-        "On the Overview step, rank waves choose between Announce Winners (scheduled winner announcements) and Perpetual Ranking (a continuous leaderboard with no winners and no end date).",
-        "Rank wave setup includes Overview, Groups, Schedule, Drops, Rules, Voting, and Description; Announce Winners waves also configure an Outcomes step, which Perpetual Ranking waves skip.",
+        "On the Setup step, rank waves choose between Announce Winners (scheduled winner announcements) and Perpetual Ranking (a continuous leaderboard with no winners and no end date).",
+        "Rank wave setup includes Setup, Access, Schedule, Drops, Rules, Voting, Description, and final Overview; Announce Winners waves also configure an Outcomes step, which Perpetual Ranking waves skip.",
         "Rank wave rules are visible in the desktop right sidebar and mobile About information path.",
         "Leaderboards, winners, and voting state are part of rank-wave participation; perpetual ranking waves keep a live leaderboard but never announce winners or award outcomes."
       ],
@@ -2620,7 +2620,7 @@
       ],
       "facts": [
         "Approve waves use approval-oriented voting rather than a plain chat flow.",
-        "Approve wave setup includes Overview, Groups, Schedule, Drops, Rules, Voting, Outcomes, and Description.",
+        "Approve wave setup includes Setup, Access, Schedule, Drops, Rules, Voting, Outcomes, Description, and final Overview.",
         "Approve wave rules are visible in the desktop right sidebar and mobile About information path.",
         "Use Approve when the wave is intended to accept or reject submissions."
       ],
@@ -2743,6 +2743,7 @@
         "mobile"
       ],
       "facts": [
+        "Rules is for editing optional guidelines and acceptance-required rules. The read-only configuration summary is in the final Overview after Description. Overview shows access, schedules, submissions, voting, approval settings, detailed outcomes, author rules and guidelines, and the description. Confirm and create submits only from this last step. Previous returns to Description without clearing text or attachments.",
         "All wave creation includes a Rules step. Chat enters Rules after Groups and then goes to Description; Rank and Approve enter Rules after Drops and then go to Voting.",
         "Generated rules summarize the wave setup. Chat rules focus on wave type, access, and chat settings; Rank and Approve rules also include timing, submissions, voting, approval, and outcome visibility.",
         "Creators can add Wave guidelines that are saved as wave metadata and shown under Guidelines in the wave rules panel.",
@@ -2756,6 +2757,7 @@
       "tags": ["waves", "rules", "chat", "rank", "approve"],
       "source_refs": [
         "ops/docs/waves/create/feature-rules-step.md",
+        "ops/docs/waves/create/feature-final-overview-step.md",
         "ops/docs/waves/composer/feature-first-message-guidelines.md",
         "ops/docs/waves/flow-wave-participation.md",
         "ops/docs/waves/sidebars/feature-right-sidebar-tabs.md"

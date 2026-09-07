@@ -35,7 +35,7 @@ Use this area to create:
 
 - Entry points: [Wave Create Modal Entry Points](feature-modal-entry-points.md)
 - Step pages:
-  1. [Wave Creation Overview Step](feature-overview-step.md)
+  1. [Wave Creation Setup Step](feature-overview-step.md)
   2. [Wave Creation Group Access and Permissions](feature-groups-step.md)
   3. [Wave Creation Schedule](feature-dates-step.md) (`Rank` and
      `Approve`)
@@ -47,11 +47,12 @@ Use this area to create:
   7. [Wave Creation Outcomes Step](feature-outcomes-step.md) (`Rank` and
      `Approve`)
   8. [Wave Creation Description Step](feature-description-step.md)
+  9. [Final Overview](feature-final-overview-step.md)
 - Step path by wave type:
-  - `Chat`: `Overview -> Groups -> Rules -> Description`
-  - Scheduled `Rank`: `Overview -> Groups -> Schedule -> Drops -> Rules -> Voting -> Outcomes -> Description`
-  - `Perpetual Ranking`: `Overview -> Groups -> Schedule -> Drops -> Rules -> Voting -> Description`
-  - `Approve`: `Overview -> Groups -> Schedule -> Drops -> Rules -> Voting -> Outcomes -> Description`
+  - `Chat`: `Setup -> Groups -> Rules -> Description -> Overview`
+  - Scheduled `Rank`: `Setup -> Groups -> Schedule -> Drops -> Rules -> Voting -> Outcomes -> Description -> Overview`
+  - `Perpetual Ranking`: `Setup -> Groups -> Schedule -> Drops -> Rules -> Voting -> Description -> Overview`
+  - `Approve`: `Setup -> Groups -> Schedule -> Drops -> Rules -> Voting -> Outcomes -> Description -> Overview`
 
 The default path keeps the decisions most creators need visible. Less common
 customization is available from expandable sections named for their contents,

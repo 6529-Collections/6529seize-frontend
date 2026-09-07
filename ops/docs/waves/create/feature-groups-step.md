@@ -15,15 +15,15 @@ user-reachable for `Chat`, `Rank`, and `Approve` waves.
 
 ## Step Paths
 
-- `Chat`: `Overview` -> `Access` -> `Rules` -> `Description`
-- `Rank`: `Overview` -> `Access` -> `Schedule` -> `Drops` -> `Rules` ->
-  `Voting` -> `Outcomes` -> `Description`
-- `Approve`: `Overview` -> `Access` -> `Schedule` -> `Drops` -> `Rules` ->
-  `Voting` -> `Outcomes` -> `Description`
+- `Chat`: `Setup` -> `Access` -> `Rules` -> `Description` -> `Overview`
+- `Rank`: `Setup` -> `Access` -> `Schedule` -> `Drops` -> `Rules` ->
+  `Voting` -> `Outcomes` -> `Description` -> `Overview`
+- `Approve`: `Setup` -> `Access` -> `Schedule` -> `Drops` -> `Rules` ->
+  `Voting` -> `Outcomes` -> `Description` -> `Overview`
 
 ## Entry Points
 
-- Continue from `Overview` to `Access`.
+- Continue from `Setup` to `Access`.
 - Use `Back` from later steps to return to `Access`.
 - On large screens, reopen `Access` from the step rail after moving past it.
 
@@ -142,7 +142,7 @@ user-reachable for `Chat`, `Rank`, and `Approve` waves.
 
 - [Wave Creation Index](README.md)
 - [Waves Index](../README.md)
-- [Wave Creation Overview Step](feature-overview-step.md)
+- [Wave Creation Setup Step](feature-overview-step.md)
 - [Wave Creation Schedule](feature-dates-step.md)
 - [Wave Creation Drop Settings](feature-drops-step.md)
 - [Wave Creation Rules Step](feature-rules-step.md)

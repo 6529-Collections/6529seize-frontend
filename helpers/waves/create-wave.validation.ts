@@ -674,8 +674,9 @@ export const getCreateWaveValidationErrors = ({
         })
       );
       break;
+    case CreateWaveStep.REVIEW:
     case CreateWaveStep.DESCRIPTION:
-      // No validation for description step
+      // Description validation is handled by the mounted editor.
       break;
     default:
       assertUnreachable(step);

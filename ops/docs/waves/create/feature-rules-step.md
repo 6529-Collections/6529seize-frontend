@@ -2,16 +2,9 @@
 
 ## Overview
 
-Use `Rules` in wave creation to review generated rules and optionally add wave
-guidelines.
-
-The step separates rules into two layers:
-
-- visible rules generated from the current wave configuration
-- optional wave guidelines in an expandable section
-
-Creators should not retype rules that are already shown in the generated rules
-preview.
+Use `Rules` to add optional wave guidelines and, for Rank and Approve waves,
+rules that participants must accept. The read-only configuration summary is
+in the final [Overview step](feature-final-overview-step.md).
 
 ## Location in the Site
 
@@ -26,37 +19,9 @@ preview.
 
 ## Step Path
 
-- `Chat`: `Overview -> Groups -> Rules -> Description`
-- `Rank`: `Overview -> Groups -> Schedule -> Drops -> Rules -> Voting -> Outcomes -> Description`
-- `Approve`: `Overview -> Groups -> Schedule -> Drops -> Rules -> Voting -> Outcomes -> Description`
-
-## Generated Rules Preview
-
-The generated rules preview summarizes configured wave behavior, including:
-
-- wave type
-- who can view and administer the wave
-- who can drop and vote for `Rank` and `Approve` waves
-- chat access group for `Chat` waves
-- chat status (`Enabled` or `Disabled`) and chat access group for `Rank` and
-  `Approve` waves
-- submission and voting windows for `Rank` and `Approve` waves
-- rank-wave decision timing
-- standard drops or identity nominations
-- required media and required metadata
-- simultaneous-submission limit
-- terms or signature requirements
-- whether admins can delete drops
-- vote credit type, scope, category, profile, and card set
-- whether negative voting is allowed
-- maximum votes per identity per drop
-- time-weighted voting
-- approve-wave threshold, hold time, max approved drops, and approval window
-- outcomes visibility and configured outcome count
-
-Restricted access rows show both the live `1 user` or `X users` count and a
-concise criteria summary. The count links to the searchable member browser at
-`/network?page=1&group={groupId}`, matching the `Groups` step explorer.
+- `Chat`: `Setup -> Groups -> Rules -> Description -> Overview`
+- `Rank`: `Setup -> Groups -> Schedule -> Drops -> Rules -> Voting -> Outcomes -> Description -> Overview`
+- `Approve`: `Setup -> Groups -> Schedule -> Drops -> Rules -> Voting -> Outcomes -> Description -> Overview`
 
 ## Wave Guidelines
 
@@ -73,15 +38,14 @@ submission step.
 
 1. Complete `Groups` for `Chat`, or `Drops` for `Rank` and `Approve`.
 2. Open `Rules`.
-3. Review the generated rules preview.
-4. Open `Wave guidelines` for Chat, or `Wave guidelines and acceptance` for
+3. Open `Wave guidelines` for Chat, or `Wave guidelines and acceptance` for
    Rank and Approve, only when wave-specific guidance is needed.
-5. Optionally enter wave guidelines.
-6. For `Rank` and `Approve`, optionally enable `Require acceptance` and enter
+4. Optionally enter wave guidelines.
+5. For `Rank` and `Approve`, optionally enable `Require acceptance` and enter
    rules participants must accept before submitting.
-7. Collapse the section if desired; entered rules remain in the draft
+6. Collapse the section if desired; entered rules remain in the draft
    and the disclosure shows `Customized`.
-8. Click `Next` to continue to `Description` for `Chat`, or `Voting` for
+7. Click `Next` to continue to `Description` for `Chat`, or `Voting` for
    `Rank` and `Approve`.
 
 ## Participant Visibility
@@ -103,9 +67,6 @@ the existing submit acceptance flow.
 
 ## Edge Cases
 
-- `Chat` generated rules focus on wave type and access. They do not show a
-  chat-status enable/disable row because chat waves require chat to stay
-  enabled.
 - `Chat` wave guidelines do not require acceptance.
 - Chat's optional-section label mentions only wave guidelines because Chat does
   not support acceptance-required rules.

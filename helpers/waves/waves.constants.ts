@@ -1,3 +1,5 @@
+import type { SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
@@ -55,6 +57,7 @@ const CREATE_WAVE_MAIN_STEPS: Record<ApiWaveType, CreateWaveStep[]> = {
     CreateWaveStep.GROUPS,
     CreateWaveStep.RULES,
     CreateWaveStep.DESCRIPTION,
+    CreateWaveStep.REVIEW,
   ],
   [ApiWaveType.Rank]: [
     CreateWaveStep.OVERVIEW,
@@ -65,6 +68,7 @@ const CREATE_WAVE_MAIN_STEPS: Record<ApiWaveType, CreateWaveStep[]> = {
     CreateWaveStep.VOTING,
     CreateWaveStep.OUTCOMES,
     CreateWaveStep.DESCRIPTION,
+    CreateWaveStep.REVIEW,
   ],
   [ApiWaveType.Approve]: [
     CreateWaveStep.OVERVIEW,
@@ -75,6 +79,7 @@ const CREATE_WAVE_MAIN_STEPS: Record<ApiWaveType, CreateWaveStep[]> = {
     CreateWaveStep.VOTING,
     CreateWaveStep.OUTCOMES,
     CreateWaveStep.DESCRIPTION,
+    CreateWaveStep.REVIEW,
   ],
 };
 
@@ -108,7 +113,7 @@ export const CREATE_WAVE_STEPS_LABELS: Record<
   Record<CreateWaveStep, string>
 > = {
   [ApiWaveType.Chat]: {
-    [CreateWaveStep.OVERVIEW]: "Overview",
+    [CreateWaveStep.OVERVIEW]: "Setup",
     [CreateWaveStep.GROUPS]: "Access",
     [CreateWaveStep.DATES]: "Schedule",
     [CreateWaveStep.DROPS]: "Drops",
@@ -117,9 +122,10 @@ export const CREATE_WAVE_STEPS_LABELS: Record<
     [CreateWaveStep.APPROVAL]: "Approval",
     [CreateWaveStep.OUTCOMES]: "Outcomes",
     [CreateWaveStep.DESCRIPTION]: "Description",
+    [CreateWaveStep.REVIEW]: "Overview",
   },
   [ApiWaveType.Rank]: {
-    [CreateWaveStep.OVERVIEW]: "Overview",
+    [CreateWaveStep.OVERVIEW]: "Setup",
     [CreateWaveStep.GROUPS]: "Access",
     [CreateWaveStep.DATES]: "Schedule",
     [CreateWaveStep.DROPS]: "Drops",
@@ -128,9 +134,10 @@ export const CREATE_WAVE_STEPS_LABELS: Record<
     [CreateWaveStep.APPROVAL]: "Approval",
     [CreateWaveStep.OUTCOMES]: "Outcomes",
     [CreateWaveStep.DESCRIPTION]: "Description",
+    [CreateWaveStep.REVIEW]: "Overview",
   },
   [ApiWaveType.Approve]: {
-    [CreateWaveStep.OVERVIEW]: "Overview",
+    [CreateWaveStep.OVERVIEW]: "Setup",
     [CreateWaveStep.GROUPS]: "Access",
     [CreateWaveStep.DATES]: "Schedule",
     [CreateWaveStep.DROPS]: "Drops",
@@ -139,7 +146,26 @@ export const CREATE_WAVE_STEPS_LABELS: Record<
     [CreateWaveStep.APPROVAL]: "Approval",
     [CreateWaveStep.OUTCOMES]: "Outcomes",
     [CreateWaveStep.DESCRIPTION]: "Description",
+    [CreateWaveStep.REVIEW]: "Overview",
   },
+};
+
+export const getCreateWaveStepLabel = ({
+  step,
+  waveType,
+  locale,
+}: {
+  readonly step: CreateWaveStep;
+  readonly waveType: ApiWaveType;
+  readonly locale: SupportedLocale;
+}): string => {
+  if (step === CreateWaveStep.OVERVIEW) {
+    return t(locale, "waves.create.review.setup");
+  }
+  if (step === CreateWaveStep.REVIEW) {
+    return t(locale, "waves.create.review.title");
+  }
+  return CREATE_WAVE_STEPS_LABELS[waveType][step];
 };
 
 export const CREATE_WAVE_SELECT_GROUP_LABELS: Record<

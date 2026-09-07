@@ -134,6 +134,8 @@ export const getCreateWaveNextStep = ({
     case CreateWaveStep.OUTCOMES:
       return CreateWaveStep.DESCRIPTION;
     case CreateWaveStep.DESCRIPTION:
+      return CreateWaveStep.REVIEW;
+    case CreateWaveStep.REVIEW:
       return null;
     default:
       assertUnreachable(step);
@@ -177,6 +179,8 @@ export const getCreateWavePreviousStep = ({
       return CreateWaveStep.VOTING;
     case CreateWaveStep.OUTCOMES:
       return CreateWaveStep.VOTING;
+    case CreateWaveStep.REVIEW:
+      return CreateWaveStep.DESCRIPTION;
     case CreateWaveStep.DESCRIPTION:
       if (waveType === ApiWaveType.Chat) {
         return CreateWaveStep.RULES;

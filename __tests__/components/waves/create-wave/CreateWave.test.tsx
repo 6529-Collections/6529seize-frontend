@@ -121,6 +121,19 @@ jest.mock("@/services/api/wave-group-validation-api", () => ({
   validateWaveGroups: jest.fn(),
 }));
 
+jest.mock("@/components/waves/create-wave/review/CreateWaveReview", () => ({
+  __esModule: true,
+  default: ({
+    description,
+  }: {
+    description: { parts: { content: string }[] } | null;
+  }) => (
+    <section data-testid="create-wave-review">
+      {description?.parts.map((part) => part.content).join(" ")}
+    </section>
+  ),
+}));
+
 // Mock step components
 jest.mock("@/components/waves/create-wave/overview/CreateWaveOverview", () => {
   return function MockCreateWaveOverview() {
@@ -160,13 +173,19 @@ jest.mock("@/components/waves/create-wave/utils/CreateWaveActions", () => {
   return function MockCreateWaveActions({
     onComplete,
     nextDisabled,
+    setStep,
   }: {
     onComplete: () => void;
     nextDisabled: boolean;
+    setStep: (step: CreateWaveStep, direction: "forward" | "backward") => void;
   }) {
     return (
       <div data-testid="create-wave-actions">
-        <button data-testid="mock-next" disabled={nextDisabled}>
+        <button
+          data-testid="mock-next"
+          disabled={nextDisabled}
+          onClick={() => setStep(CreateWaveStep.REVIEW, "forward")}
+        >
           Next
         </button>
         <button onClick={onComplete}>Complete</button>
@@ -487,6 +506,61 @@ describe("CreateWave", () => {
     expect(screen.getByText("Saved Drafts")).toBeInTheDocument();
   });
 
+  it("preserves the description editor while reviewing and returning to edit", async () => {
+    mockedUseWaveConfig.mockReturnValue({
+      ...mockWaveConfig,
+      step: CreateWaveStep.DESCRIPTION,
+    });
+    const { rerender } = renderCreateWave();
+    const editor = screen.getByTestId("create-wave-description");
+    const input = editor.querySelector("input")!;
+    fireEvent.change(input, { target: { value: "Keep this unsaved text" } });
+    fireEvent.click(screen.getByTestId("mock-next"));
+    await waitFor(() =>
+      expect(mockWaveConfig.onStep).toHaveBeenCalledWith({
+        step: CreateWaveStep.REVIEW,
+        direction: "forward",
+      })
+    );
+    expect(mockRequestDrop).not.toHaveBeenCalled();
+    expect(mockAddWaveMutation.mutateAsync).not.toHaveBeenCalled();
+
+    mockedUseWaveConfig.mockReturnValue({
+      ...mockWaveConfig,
+      step: CreateWaveStep.REVIEW,
+    });
+    rerender(createWaveElement());
+    expect(screen.getByTestId("create-wave-review")).toHaveTextContent(
+      "Test content"
+    );
+    expect(editor).not.toBeVisible();
+
+    mockedUseWaveConfig.mockReturnValue({
+      ...mockWaveConfig,
+      step: CreateWaveStep.DESCRIPTION,
+    });
+    rerender(createWaveElement());
+    expect(screen.getByTestId("create-wave-description")).toBe(editor);
+    expect(input).toHaveValue("Keep this unsaved text");
+    expect(editor).toBeVisible();
+  });
+
+  it("blocks review when the description is empty", () => {
+    mockedUseWaveConfig.mockReturnValue({
+      ...mockWaveConfig,
+      step: CreateWaveStep.DESCRIPTION,
+    });
+    mockGetDropSnapshot.mockReturnValue(null);
+    renderCreateWave();
+    fireEvent.click(screen.getByTestId("mock-next"));
+    expect(mockWaveConfig.onStep).not.toHaveBeenCalled();
+    expect(screen.getByTestId("create-wave-description")).toHaveAttribute(
+      "data-show-drop-error",
+      "true"
+    );
+    expect(mockAddWaveMutation.mutateAsync).not.toHaveBeenCalled();
+  });
+
   it("calls onBack when back button is clicked", () => {
     renderCreateWave();
 
@@ -620,14 +694,17 @@ describe("CreateWave", () => {
       });
     });
 
-    it("successfully submits wave when all conditions are met", async () => {
-      const configOnDescriptionStep = {
+    it("submits from final review while the description editor is hidden", async () => {
+      const configOnReviewStep = {
         ...mockWaveConfig,
-        step: CreateWaveStep.DESCRIPTION,
+        step: CreateWaveStep.REVIEW,
       };
-      mockedUseWaveConfig.mockReturnValue(configOnDescriptionStep);
+      mockedUseWaveConfig.mockReturnValue(configOnReviewStep);
 
       renderCreateWave();
+
+      expect(screen.getByTestId("create-wave-review")).toBeVisible();
+      expect(screen.getByTestId("create-wave-description")).not.toBeVisible();
 
       const completeButton = screen.getByRole("button", { name: /complete/i });
       fireEvent.click(completeButton);

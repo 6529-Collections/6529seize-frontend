@@ -11,6 +11,9 @@ import {
 import { usePathname } from "next/navigation";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { getCreateSubwaveTitle } from "@/helpers/waves/create-subwave-title.helpers";
+import type { CreateDropConfig } from "@/entities/IDrop";
+import { useObjectUrl } from "@/hooks/useObjectUrl";
+import CreateWaveDescription from "./description/CreateWaveDescription";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useLayout } from "@/components/brain/my-stream/layout/LayoutContext";
@@ -62,7 +65,13 @@ export default function CreateWave({
     endDateConfig,
     setEndDateConfig,
   } = waveConfig;
-  const waveNameSuffix = config.overview.name ? ` "${config.overview.name}"` : "";
+  const waveNameSuffix = config.overview.name
+    ? ` "${config.overview.name}"`
+    : "";
+  const imageUrl = useObjectUrl(config.overview.image);
+  const [descriptionVisited, setDescriptionVisited] = useState(false);
+  const [descriptionSnapshot, setDescriptionSnapshot] =
+    useState<CreateDropConfig | null>(null);
   const descriptionRef = useRef<CreateWaveDescriptionHandles | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [criteriaReplacementByGroup, setCriteriaReplacementByGroup] = useState<
@@ -135,6 +144,8 @@ export default function CreateWave({
   }, []);
 
   const onLoadDraft = (draft: CreateWaveDraft) => {
+    setDescriptionVisited(false);
+    setDescriptionSnapshot(null);
     resetTransientGroupState();
     replaceConfig(draft.config);
     setEndDateConfig(draft.endDateConfig);
@@ -147,6 +158,7 @@ export default function CreateWave({
     onHaveDropToSubmitChange,
     onInlineGroupCreate,
     onComplete,
+    getDescriptionForReview,
     subwaveAccessConfirmation,
   } = useCreateWaveSubmission({
     config,
@@ -161,10 +173,20 @@ export default function CreateWave({
     parentAdminGroupId,
   });
 
-  const setStep = (
+  const setStep = async (
     targetStep: CreateWaveStep,
     direction: "forward" | "backward"
   ): Promise<void> => {
+    if (step === CreateWaveStep.DESCRIPTION) {
+      setDescriptionVisited(true);
+      if (direction === "forward") {
+        const snapshot = getDescriptionForReview();
+        if (!snapshot) {
+          return;
+        }
+        setDescriptionSnapshot(snapshot);
+      }
+    }
     if (targetStep !== CreateWaveStep.GROUPS) {
       resetTransientGroupState();
     }
@@ -240,10 +262,7 @@ export default function CreateWave({
             controller={waveConfig}
             isSubwave={isSubwave}
             parentWaveName={parentWaveName}
-            profile={profile}
-            descriptionRef={descriptionRef}
-            submitting={submitting}
-            showDropError={showDropError}
+            descriptionSnapshot={descriptionSnapshot}
             overviewLeading={
               !isSubwave && (
                 <CreateWaveDraftsSection
@@ -253,11 +272,27 @@ export default function CreateWave({
                 />
               )
             }
-            onHaveDropToSubmitChange={onHaveDropToSubmitChange}
             onCriteriaReplacementChange={onCriteriaReplacementChange}
             onGroupResolutionChange={onGroupResolutionChange}
             onInlineGroupCreate={onInlineGroupCreate}
           />
+          {/* Keep the composer mounted after its first visit: hiding it preserves
+              Lexical state, unsaved text, uploads, and its snapshot handle. */}
+          {(descriptionVisited ||
+            step === CreateWaveStep.DESCRIPTION ||
+            step === CreateWaveStep.REVIEW) && (
+            <div hidden={step !== CreateWaveStep.DESCRIPTION}>
+              <CreateWaveDescription
+                ref={descriptionRef}
+                profile={profile}
+                submitting={submitting || step !== CreateWaveStep.DESCRIPTION}
+                showDropError={showDropError}
+                visibilityGroupId={config.groups.canView}
+                wave={{ name: config.overview.name, image: imageUrl, id: null }}
+                onHaveDropToSubmitChange={onHaveDropToSubmitChange}
+              />
+            </div>
+          )}
         </CreateWaveLayout>
       </CreateWaveFlow>
       <SubwaveAccessWarningDialog

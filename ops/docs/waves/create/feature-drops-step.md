@@ -26,7 +26,7 @@ simultaneous-submission limits are under `Submission requirements`.
 ## Entry Points
 
 - Follow the `Rank` or `Approve` path:
-  `Overview -> Groups -> Schedule -> Drops`.
+  `Setup -> Groups -> Schedule -> Drops`.
 - Use `Back` from `Rules` to return in one step.
 - On large screens, use the step rail after you move past `Drops`.
 
@@ -88,7 +88,7 @@ simultaneous-submission limits are under `Submission requirements`.
 - [Wave Creation Index](README.md)
 - [Waves Index](../README.md)
 - [Wave Create Modal Entry Points](feature-modal-entry-points.md)
-- [Wave Creation Overview Step](feature-overview-step.md)
+- [Wave Creation Setup Step](feature-overview-step.md)
 - [Wave Creation Group Access and Permissions](feature-groups-step.md)
 - [Wave Creation Schedule](feature-dates-step.md)
 - [Wave Creation Rules Step](feature-rules-step.md)
