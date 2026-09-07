@@ -380,6 +380,11 @@ describe("public Coordinator package policy", () => {
     ).toThrow("escape sequences are not supported");
     expect(() =>
       policy.validateLockfile(
+        `${lockfile}\n  "@6529-collections/release-reque\\u0073t@0.0.5":\n    resolution: {integrity: sha512-unreviewed}\n`
+      )
+    ).toThrow("escape sequences are not supported");
+    expect(() =>
+      policy.validateLockfile(
         `${lockfile}\n  malicious@1.0.0:\n    resolution:\n      integrity: sha512-safe\n`
       )
     ).toThrow("unsupported package resolution");
