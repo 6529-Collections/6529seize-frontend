@@ -98,16 +98,16 @@ function TabButton({
         event.stopPropagation();
         onClick();
       }}
-      className={`tw-relative tw-flex-1 tw-rounded-md tw-border-0 tw-bg-transparent tw-px-3 tw-pb-0 tw-pt-2 tw-text-xs tw-font-medium tw-transition-colors focus:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400/60 ${
+      className={`tw-relative tw-flex tw-flex-1 tw-items-center tw-justify-center tw-rounded-t-md tw-border-0 tw-bg-transparent tw-px-3 tw-py-0 tw-text-sm tw-font-medium tw-transition-colors focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 ${
         active
           ? "tw-text-iron-50"
           : "tw-text-iron-500 desktop-hover:hover:tw-bg-white/[0.025] desktop-hover:hover:tw-text-iron-200"
       }`}
     >
       <span
-        className={`tw-relative tw-inline-flex tw-pb-2 ${
+        className={`tw-relative tw-inline-flex tw-py-3 ${
           active
-            ? "after:tw-absolute after:tw-inset-x-0 after:tw-bottom-0 after:tw-h-px after:tw-bg-primary-400 after:tw-content-['']"
+            ? "after:tw-absolute after:tw-inset-x-0 after:-tw-bottom-px after:tw-h-px after:tw-bg-primary-400 after:tw-content-['']"
             : ""
         }`}
       >
@@ -251,7 +251,7 @@ export function ParticipationDropVoteDetailsContent({
         </div>
       )}
 
-      <div className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.06] tw-px-4 tw-pb-3 tw-pt-2">
+      <div className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.06] tw-px-4 tw-pt-2">
         <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-text-xs tw-font-normal tw-leading-4 tw-text-iron-500">
           <span>
             {formatNumberWithCommas(drop.raters_count)}{" "}
@@ -267,7 +267,7 @@ export function ParticipationDropVoteDetailsContent({
         <div
           role="tablist"
           aria-label="Vote details"
-          className="tw-mt-2 tw-flex tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.06]"
+          className="tw-mt-2 tw-flex"
         >
           <TabButton
             active={activeTab === "voters"}

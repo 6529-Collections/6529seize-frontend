@@ -1,4 +1,5 @@
 import React from "react";
+import DropLargestVote from "@/components/waves/drop/DropLargestVote";
 import ApprovalDropVoteSummary from "@/components/waves/drops/ApprovalDropVoteSummary";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
@@ -55,7 +56,7 @@ export const WaveLeaderboardDropRaters: React.FC<
   const hasUserVoted = userVote !== 0;
 
   return (
-    <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2 sm:tw-justify-end">
+    <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2 sm:tw-justify-end">
       <div className="tw-flex tw-items-center tw-gap-x-2 tw-text-sm tw-leading-5">
         <div className="tw-relative tw-inline-flex tw-items-center tw-gap-x-1.5">
           <span className={`tw-font-medium ${totalVoteClass}`}>
@@ -88,6 +89,7 @@ export const WaveLeaderboardDropRaters: React.FC<
           </span>
         </div>
       )}
+      <DropLargestVote drop={drop} className="tw-w-full" />
     </div>
   );
 };

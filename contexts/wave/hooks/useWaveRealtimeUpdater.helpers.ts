@@ -138,12 +138,16 @@ const updateCachedDrop = ({
   }
 
   const preferExistingPollVote = options.preferExistingPollVote;
+  const clearLargestVote = type === ProcessIncomingDropType.DROP_RATING_UPDATE;
   if (preferExistingPollVote === undefined) {
-    updateDropInCachedDrops(queryClient, drop);
+    updateDropInCachedDrops(queryClient, drop, { clearLargestVote });
     return;
   }
 
-  updateDropInCachedDrops(queryClient, drop, { preferExistingPollVote });
+  updateDropInCachedDrops(queryClient, drop, {
+    preferExistingPollVote,
+    clearLargestVote,
+  });
 };
 
 const normalizeHandle = (handle: string | null | undefined): string =>

@@ -566,7 +566,6 @@
     "__tests__/components/waves/drop/SingleWaveDropVoteSlider.test.tsx": 11,
     "__tests__/components/waves/drop/SingleWaveDropVoteSubmit.test.tsx": 3,
     "__tests__/components/waves/drop/SingleWaveDropWrapper.test.tsx": 1,
-    "__tests__/components/waves/drop/useSingleWaveDropData.test.tsx": 1,
     "__tests__/components/waves/drop/useSingleWaveDropVoteRationale.test.tsx": 2,
     "__tests__/components/waves/drop/WaveDropAdditionalInfo.test.tsx": 1,
     "__tests__/components/waves/drops/ArtistActiveSubmissionContent.test.tsx": 2,

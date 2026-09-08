@@ -69,10 +69,15 @@ describe("SingleWaveDropVoters", () => {
     expect(useVoters).toHaveBeenLastCalledWith(
       expect.objectContaining({ enabled: false })
     );
-    await user.click(screen.getByRole("button", { name: "Top voters" }));
+    await user.click(
+      screen.getByRole("button", { name: "Top voters View voters" })
+    );
     expect(useVoters).toHaveBeenLastCalledWith(
       expect.objectContaining({ enabled: true })
     );
+    expect(
+      screen.getByRole("button", { name: "Top voters Hide voters" })
+    ).toHaveAttribute("aria-expanded", "true");
     expect(screen.getByText("Be the First to Make a Vote")).toBeInTheDocument();
   });
 
@@ -87,7 +92,9 @@ describe("SingleWaveDropVoters", () => {
       isLoading: false,
     });
     render(<SingleWaveDropVoters drop={baseDrop} />);
-    await user.click(screen.getByRole("button", { name: "Top voters" }));
+    await user.click(
+      screen.getByRole("button", { name: "Top voters View voters" })
+    );
     expect(screen.getByTestId("voter")).toHaveTextContent("v1");
     intersectionCb();
     expect(fetchNextPage).toHaveBeenCalled();
@@ -105,7 +112,7 @@ describe("SingleWaveDropVoters", () => {
 
     render(<SingleWaveDropVoters drop={baseDrop} />);
     await user.click(
-      screen.getByRole("button", { name: "Download all top voters as CSV" })
+      screen.getByRole("button", { name: "Download all voters as CSV" })
     );
 
     expect(downloadMock).toHaveBeenCalledWith(
@@ -144,7 +151,7 @@ describe("SingleWaveDropVoters", () => {
       />
     );
     await user.click(
-      screen.getByRole("button", { name: "Download all top voters as CSV" })
+      screen.getByRole("button", { name: "Download all voters as CSV" })
     );
 
     expect(downloadMock).toHaveBeenCalledWith(
@@ -174,7 +181,7 @@ describe("SingleWaveDropVoters", () => {
     render(<SingleWaveDropVoters drop={baseDrop} />);
 
     const downloadButton = screen.getByRole("button", {
-      name: "Download all top voters as CSV",
+      name: "Download all voters as CSV",
     });
     expect(downloadButton).toBeDisabled();
     expect(downloadButton).toHaveTextContent("Downloading");

@@ -41,7 +41,7 @@ export const WaveLeaderboardRightSidebarVoters: React.FC<
   if (!connectedProfileHandle) {
     return (
       <WaveLeaderboardRightSidebarState
-        icon={<UserGroupIcon aria-hidden="true" className="tw-size-5" />}
+        icon={<UserGroupIcon aria-hidden="true" className="tw-size-6" />}
         title={waveRightPanelText(
           "waves.sidebar.rightPanel.voters.connectTitle"
         )}
@@ -71,7 +71,7 @@ export const WaveLeaderboardRightSidebarVoters: React.FC<
   if (voters.length === 0) {
     return (
       <WaveLeaderboardRightSidebarState
-        icon={<UserGroupIcon aria-hidden="true" className="tw-size-5" />}
+        icon={<UserGroupIcon aria-hidden="true" className="tw-size-6" />}
         title={waveRightPanelText("waves.sidebar.rightPanel.voters.emptyTitle")}
         description={waveRightPanelText(
           "waves.sidebar.rightPanel.voters.emptyDescription"
