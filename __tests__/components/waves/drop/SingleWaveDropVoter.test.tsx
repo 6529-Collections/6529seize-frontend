@@ -1,19 +1,22 @@
-import React from 'react';
-import { render, screen } from '@testing-library/react';
-import { SingleWaveDropVoter } from '@/components/waves/drop/SingleWaveDropVoter';
-import { ApiWaveCreditType } from '@/generated/models/ApiWaveCreditType';
+import React from "react";
+import { render, screen } from "@testing-library/react";
+import { SingleWaveDropVoter } from "@/components/waves/drop/SingleWaveDropVoter";
+import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 
-jest.mock('next/link', () => ({ __esModule: true, default: ({ href, children }: any) => <a href={href}>{children}</a> }));
+jest.mock("next/link", () => ({
+  __esModule: true,
+  default: ({ href, children }: any) => <a href={href}>{children}</a>,
+}));
 
-describe('SingleWaveDropVoter', () => {
+describe("SingleWaveDropVoter", () => {
   const baseVoter = {
-    voter: { handle: '0x1111111111111111111111111111111111111111', pfp: null },
+    voter: { handle: "0x1111111111111111111111111111111111111111", pfp: null },
     positive_votes_summed: 2,
     negative_votes_summed: 1,
     absolute_votes_summed: 3,
   } as any;
 
-  it('renders voter information and totals', () => {
+  it("renders voter information and totals", () => {
     render(
       <SingleWaveDropVoter
         voter={baseVoter}
@@ -21,13 +24,26 @@ describe('SingleWaveDropVoter', () => {
         creditType={ApiWaveCreditType.Rep}
       />
     );
-    expect(screen.getByText('1')).toBeInTheDocument();
+    expect(screen.getByText("1")).toBeInTheDocument();
     expect(screen.getByText(baseVoter.voter.handle)).toBeInTheDocument();
-    expect(screen.getAllByText((_content, element) =>
-      element?.textContent === '3 Rep Total'
-    ).length).toBeGreaterThan(0);
-    const handleSpan = screen.getByText(baseVoter.voter.handle).parentElement as HTMLElement;
-    expect(handleSpan.className).toContain('tw-inline-block');
-    expect(handleSpan.className).toContain('tw-truncate');
+    expect(
+      screen.getByRole("img", {
+        name: `${baseVoter.voter.handle}: +2 Rep`,
+      })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("img", {
+        name: `${baseVoter.voter.handle}: -1 Rep`,
+      })
+    ).toBeInTheDocument();
+    expect(
+      screen.getAllByText(
+        (_content, element) => element?.textContent === "3 Rep Total"
+      ).length
+    ).toBeGreaterThan(0);
+    const handleSpan = screen.getByText(baseVoter.voter.handle)
+      .parentElement as HTMLElement;
+    expect(handleSpan.className).toContain("tw-inline-block");
+    expect(handleSpan.className).toContain("tw-truncate");
   });
 });
