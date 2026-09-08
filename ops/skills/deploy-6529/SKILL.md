@@ -15,8 +15,9 @@ description: Execute authorized 6529 frontend, backend, or coupled staging and p
    backend `src/config/deploy-services.json`, including real dependency order
    and allowed environments. Deploy only required units. Follow each repo's
    `6529` wrapper rules for package commands.
-3. Establish the exact release inputs for that scope, including the requester,
-   target, database-change status, PR branches, and full PR head SHAs. Follow
+3. For a new staging or direct production release intent that includes frontend,
+   establish the exact release inputs: requester, target, database-change status,
+   PR branches, and full PR head SHAs. Follow
    [Coordinator release recording](#coordinator-release-recording) before any
    merge or deployment mutation.
 4. Fetch the destination branch and merge without discarding other developers'
@@ -87,6 +88,7 @@ separately through direct `gh` commands.
 
 Version `0.0.4` runs synchronously in the foreground and waits for the central
 GitHub workflow. Queueing and execution can add waiting time before deployment.
+Re-verify these semantics against the installed CLI when changing its version.
 Do not retry, background, detach, or wrap it in an invented shell timeout. If the
 wait does not return, report the available evidence and escalate to the
 Coordinator owner; do not interrupt it merely to continue deployment.
@@ -99,7 +101,9 @@ Handle the outcome before returning to Prepare:
 - Ordinary returned failure (exit `1` through `127`): report one short warning
   with the reason or first error and any available request ID, Issue/workflow
   links, and local record paths. Keep the local records and continue the same
-  authorized deployment path without requiring a recording fix.
+  authorized deployment path without requiring a recording fix. This includes
+  returned setup, input-validation, and dispatch errors: successful submission
+  is not a deployment gate. Report missing evidence honestly.
 - Signal-style interruption (exit `128` or higher): report the status and
   available evidence, stop release work, and escalate to the Coordinator owner.
   Do not silently treat an interrupted or unfinished wait as an ordinary failure.
