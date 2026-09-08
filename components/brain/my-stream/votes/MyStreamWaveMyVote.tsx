@@ -219,7 +219,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
       className={`tw-group/my-vote tw-cursor-pointer tw-px-2 tw-py-5 tw-transition-colors tw-duration-200 tw-@container/my-vote motion-reduce:tw-transition-none sm:tw-px-4 sm:tw-py-6 ${
         isSelected
           ? "tw-bg-primary-500/10"
-          : "tw-bg-transparent desktop-hover:hover:tw-bg-iron-950"
+          : "tw-bg-iron-950 desktop-hover:hover:tw-bg-iron-900"
       }`}
     >
       <div
