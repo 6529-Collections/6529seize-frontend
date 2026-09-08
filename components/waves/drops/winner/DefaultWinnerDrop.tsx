@@ -138,7 +138,7 @@ const DefaultWinnerDropInner = ({
     metadata: drop.metadata,
   });
   const getBackgroundColorClass = (_loc: DropLocation): string =>
-    "tw-bg-iron-950";
+    "tw-bg-[var(--drop-card-background,theme(colors.iron.950))]";
 
   let bgColorClass = getBackgroundColorClass(location);
   if (contentPresentation === "proposalCard") {

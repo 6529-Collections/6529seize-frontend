@@ -163,7 +163,7 @@ function EndedParticipationDropInner({
   }, [mobileMenu]);
 
   const getDropLocationBackground = () => {
-    return "tw-bg-iron-950 tw-ring-1 tw-ring-inset tw-ring-iron-800";
+    return "tw-bg-[var(--drop-card-background,theme(colors.iron.950))] tw-ring-1 tw-ring-inset tw-ring-iron-800";
   };
 
   let dropBackgroundClass = getDropLocationBackground();

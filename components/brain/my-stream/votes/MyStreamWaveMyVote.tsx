@@ -216,10 +216,10 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
     <article // NOSONAR -- S1082/S6847: native artwork/title buttons provide keyboard activation.
       aria-labelledby={titleId}
       onClick={handleRowClick}
-      className={`tw-cursor-pointer tw-px-2 tw-py-5 tw-transition-colors tw-duration-200 tw-@container/my-vote motion-reduce:tw-transition-none sm:tw-px-4 sm:tw-py-6 ${
+      className={`tw-group/my-vote tw-cursor-pointer tw-px-2 tw-py-5 tw-transition-colors tw-duration-200 tw-@container/my-vote motion-reduce:tw-transition-none sm:tw-px-4 sm:tw-py-6 ${
         isSelected
           ? "tw-bg-primary-500/10"
-          : "tw-bg-transparent"
+          : "tw-bg-iron-950 desktop-hover:hover:tw-bg-iron-900"
       }`}
     >
       <div
@@ -319,7 +319,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
               <button
                 type="button"
                 onClick={handleOpenDrop}
-                className="tw-max-w-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-50 tw-transition-colors tw-duration-200 [overflow-wrap:anywhere] focus-visible:tw-rounded-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-primary-300 motion-reduce:tw-transition-none"
+                className="tw-max-w-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-50 tw-transition-colors tw-duration-200 [overflow-wrap:anywhere] focus-visible:tw-rounded-sm focus-visible:tw-text-primary-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:group-hover/my-vote:tw-text-primary-400 motion-reduce:tw-transition-none"
               >
                 {dropTitle}
               </button>

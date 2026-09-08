@@ -6,7 +6,10 @@ import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimation
 import CommonDropdownItemsDefaultWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsDefaultWrapper";
 import { useAuth } from "@/components/auth/Auth";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { useCanShowDropCurationsAction } from "@/hooks/drops/useCanShowDropCurationsAction";
+import {
+  type QuickCurationAction,
+  useCanShowDropCurationsAction,
+} from "@/hooks/drops/useCanShowDropCurationsAction";
 import { useDropCurationMembershipMutation } from "@/hooks/drops/useDropCurationMembershipMutation";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import { getProfileWaveIdentity } from "@/hooks/useProfileWave";
@@ -35,12 +38,17 @@ interface WaveDropActionsMoreProps {
   readonly drop: ExtendedDrop;
   readonly onOpenChange?: (isOpen: boolean) => void;
   readonly showOnlyQuickRemove?: boolean | undefined;
+  readonly standaloneQuickRemoveCuration?:
+    | QuickCurationAction
+    | null
+    | undefined;
 }
 
 export default function WaveDropActionsMore({
   drop,
   onOpenChange,
   showOnlyQuickRemove = false,
+  standaloneQuickRemoveCuration = null,
 }: WaveDropActionsMoreProps) {
   const { connectedProfile } = useAuth();
   const locale = useBrowserLocale();
@@ -50,16 +58,24 @@ export default function WaveDropActionsMore({
   const [isReportOpen, setIsReportOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const { canDelete, canSetPinnedDrop } = useDropInteractionRules(drop);
-  const { showManageCurations, quickAddCuration, quickRemoveCuration } =
-    useCanShowDropCurationsAction({
-      dropId: drop.id,
-      waveId: drop.wave.id,
-      profileIdentity: getProfileWaveIdentity(connectedProfile),
-      isTemporaryDrop: drop.id.startsWith("temp-"),
-      isWaveAdmin: drop.wave.authenticated_user_admin === true,
-      enabled:
-        (isOpen || isCurationsDialogOpen) && Boolean(connectedProfile?.handle),
-    });
+  const {
+    showManageCurations,
+    quickAddCuration,
+    quickRemoveCuration: availableQuickRemoveCuration,
+  } = useCanShowDropCurationsAction({
+    dropId: drop.id,
+    waveId: drop.wave.id,
+    profileIdentity: getProfileWaveIdentity(connectedProfile),
+    isTemporaryDrop: drop.id.startsWith("temp-"),
+    isWaveAdmin: drop.wave.authenticated_user_admin === true,
+    enabled:
+      !showOnlyQuickRemove &&
+      (isOpen || isCurationsDialogOpen) &&
+      Boolean(connectedProfile?.handle),
+  });
+  const quickRemoveCuration = showOnlyQuickRemove
+    ? standaloneQuickRemoveCuration
+    : availableQuickRemoveCuration;
   const { updateMembershipAsync } = useDropCurationMembershipMutation({
     dropId: drop.id,
     waveId: drop.wave.id,
@@ -110,6 +126,13 @@ export default function WaveDropActionsMore({
       // The mutation owns the user-facing error toast.
     }
   };
+
+  if (
+    showOnlyQuickRemove &&
+    (!quickRemoveCuration || drop.id.startsWith("temp-"))
+  ) {
+    return null;
+  }
 
   return (
     <>

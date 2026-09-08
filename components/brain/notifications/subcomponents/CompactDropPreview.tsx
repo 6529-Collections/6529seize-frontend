@@ -2,6 +2,9 @@
 
 import type { ReactElement } from "react";
 import { useLayoutEffect, useRef, useState } from "react";
+import Button from "@/components/utils/button/Button";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
 const COMPACT_PX = 256;
 const COMPACT_THRESHOLD_PX = COMPACT_PX * 1.5;
@@ -13,6 +16,7 @@ interface CompactDropPreviewProps {
 export default function CompactDropPreview({
   children,
 }: CompactDropPreviewProps) {
+  const locale = useBrowserLocale();
   const [isExpanded, setIsExpanded] = useState(false);
   const [measuredHeight, setMeasuredHeight] = useState<number | null>(null);
   const measureRef = useRef<HTMLDivElement | null>(null);
@@ -56,14 +60,15 @@ export default function CompactDropPreview({
             className="tw-pointer-events-none tw-absolute tw-inset-x-0 tw-bottom-0 tw-h-14 tw-bg-gradient-to-b tw-from-transparent tw-to-iron-950"
             aria-hidden="true"
           />
-          <button
-            type="button"
-            className="tw-absolute tw-bottom-2 tw-right-2 tw-z-10 tw-inline-flex tw-items-center tw-gap-1 tw-rounded-full tw-border tw-border-iron-600/40 tw-bg-black/40 tw-px-2 tw-py-1 tw-text-xs tw-font-semibold tw-text-iron-200 tw-backdrop-blur tw-transition-colors hover:tw-border-iron-500/60 hover:tw-bg-black/60"
+          <Button
+            variant="tertiary"
+            size="xs"
+            className="tw-absolute tw-bottom-2 tw-right-2 tw-z-10"
             aria-expanded={isExpanded}
             onClick={() => setIsExpanded(true)}
           >
-            Show full drop
-          </button>
+            {t(locale, "notifications.preview.expand")}
+          </Button>
         </>
       ) : null}
     </div>
