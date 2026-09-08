@@ -1,4 +1,5 @@
 import DropVoteProgressing from "@/components/drops/view/utils/DropVoteProgressing";
+import DropLargestVote from "@/components/waves/drop/DropLargestVote";
 import ParticipationDropVoteDetailsTrigger from "@/components/waves/drops/participation/ratings/ParticipationDropVoteDetailsTrigger";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
@@ -27,7 +28,7 @@ const MemesLeaderboardDropVoteSummary: React.FC<
   const isUserVoteNegative = userVote < 0;
 
   return (
-    <div className="tw-flex @[700px]:tw-flex-1 tw-items-center tw-gap-4 @[700px]:tw-justify-between">
+    <div className="tw-flex tw-min-w-0 tw-flex-wrap @[700px]:tw-flex-1 tw-items-center tw-gap-x-4 tw-gap-y-1 @[700px]:tw-justify-between">
       {/* Left side: Vote counts + User vote (on large) */}
       <div className="tw-flex tw-items-baseline tw-gap-2 tw-text-sm">
         <span
@@ -109,6 +110,7 @@ const MemesLeaderboardDropVoteSummary: React.FC<
           visualVariant="memes"
         />
       </div>
+      <DropLargestVote drop={drop} className="tw-w-full" />
     </div>
   );
 };

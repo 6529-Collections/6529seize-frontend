@@ -81,7 +81,7 @@ export const WaveLeaderboardRightSidebarActivityLogs: React.FC<
   if (logs.length === 0) {
     return (
       <WaveLeaderboardRightSidebarState
-        icon={<ClockIcon aria-hidden="true" className="tw-size-5" />}
+        icon={<ClockIcon aria-hidden="true" className="tw-size-6" />}
         title={waveRightPanelText(
           "waves.sidebar.rightPanel.activity.emptyTitle"
         )}

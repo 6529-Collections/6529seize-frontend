@@ -53,6 +53,15 @@ export function applyWaveDropVoteUpdate(
   // partial runtime response cannot erase richer cached card fields.
   updateDropInCachedDrops(queryClient, updatedDrop, {
     mergeWithExisting: true,
+    clearLargestVote: true,
+  });
+
+  void queryClient.invalidateQueries({
+    queryKey: [
+      QueryKey.DROP,
+      { drop_id: updatedDrop.id, view: "vote-summary" },
+    ],
+    exact: true,
   });
 
   if (options.invalidateWaveSummary !== false) {

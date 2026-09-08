@@ -62,33 +62,35 @@ export default function WaveLeaderboardGalleryItemVotes({
   };
 
   return (
-    <div
-      role="group"
-      aria-label={t(locale, "waves.leaderboard.grid.voteSummary.standard", {
-        current: formatInteger(locale, current),
-        projected: formatInteger(locale, projected),
-        unit: votingLabel,
-      })}
-      className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-2"
-    >
+    <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-1">
       <div
-        aria-hidden="true"
+        role="group"
+        aria-label={t(locale, "waves.leaderboard.grid.voteSummary.standard", {
+          current: formatInteger(locale, current),
+          projected: formatInteger(locale, projected),
+          unit: votingLabel,
+        })}
         className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-2"
       >
-        <span
-          className={`tw-text-xs tw-font-semibold tw-tabular-nums sm:tw-text-sm ${getColorClass()}`}
+        <div
+          aria-hidden="true"
+          className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-2"
         >
-          {formatInteger(locale, current)}
-        </span>
-        <DropVoteProgressing
-          current={current}
-          projected={projected}
-          projectedLabel={formatInteger(locale, projected)}
-          subtle={variant === "subtle"}
-          numberFont="sans"
-          numberSize="mobile-xs"
-          numberWeight="semibold"
-        />
+          <span
+            className={`tw-text-xs tw-font-semibold tw-tabular-nums sm:tw-text-sm ${getColorClass()}`}
+          >
+            {formatInteger(locale, current)}
+          </span>
+          <DropVoteProgressing
+            current={current}
+            projected={projected}
+            projectedLabel={formatInteger(locale, projected)}
+            subtle={variant === "subtle"}
+            numberFont="sans"
+            numberSize="mobile-xs"
+            numberWeight="semibold"
+          />
+        </div>
       </div>
     </div>
   );

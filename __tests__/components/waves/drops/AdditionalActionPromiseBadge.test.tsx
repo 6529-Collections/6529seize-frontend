@@ -1,31 +1,34 @@
-import type { ReactElement, ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
 import { AdditionalActionPromiseBadge } from "@/components/waves/drops/AdditionalActionPromiseBadge";
+import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 
 const BADGE_LABEL = t(DEFAULT_LOCALE, "drops.additionalActionBadge.label");
 const TOOLTIP_COPY = t(DEFAULT_LOCALE, "drops.additionalActionBadge.tooltip");
 
-jest.mock("@/components/utils/tooltip/CustomTooltip", () => ({
-  __esModule: true,
-  default: ({
+jest.mock("react-tooltip", () => ({
+  Tooltip: ({
     children,
-    content,
+    id,
     delayShow,
-    placement,
+    place,
+    style,
   }: {
-    readonly children: ReactElement;
-    readonly content: ReactNode;
+    readonly children: ReactNode;
+    readonly id: string;
     readonly delayShow?: number;
-    readonly placement?: string;
+    readonly place?: string;
+    readonly style?: CSSProperties;
   }) => (
     <span
-      data-testid="custom-tooltip"
-      data-content={typeof content === "string" ? content : undefined}
+      id={id}
+      data-testid="shared-tooltip"
       data-delay-show={delayShow}
-      data-placement={placement}
+      data-placement={place}
+      data-shared-styles={style === TOOLTIP_STYLES}
     >
       {children}
     </span>
@@ -36,11 +39,15 @@ describe("AdditionalActionPromiseBadge", () => {
   it("shows the badge with explanatory tooltip copy", () => {
     const markup = renderToStaticMarkup(<AdditionalActionPromiseBadge />);
     const descriptionId = markup.match(/aria-describedby="([^"]+)"/)?.[1];
+    const tooltipId = markup.match(/data-tooltip-id="([^"]+)"/)?.[1];
 
-    expect(markup).toContain('data-testid="custom-tooltip"');
-    expect(markup).toContain(`data-content="${TOOLTIP_COPY}"`);
+    expect(tooltipId).toBeTruthy();
+    expect(markup).toContain(`id="${tooltipId}" data-testid="shared-tooltip"`);
     expect(markup).toContain('data-placement="top"');
     expect(markup).toContain('data-delay-show="200"');
+    expect(markup).toContain(
+      `data-shared-styles="true">${TOOLTIP_COPY}</span>`
+    );
     expect(markup).toContain("<button");
     expect(markup).toContain('type="button"');
     expect(markup).toContain("tw-cursor-help");
