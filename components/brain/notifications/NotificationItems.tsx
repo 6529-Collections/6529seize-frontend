@@ -1,4 +1,5 @@
 import type { DropInteractionParams } from "@/components/waves/drops/Drop";
+import { useEmoji } from "@/contexts/EmojiContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
@@ -39,34 +40,6 @@ const getItemDrops = (item: NotificationDisplayItem): readonly ApiDrop[] => {
   return "related_drops" in item ? item.related_drops : [];
 };
 
-const hasNotificationContent = (item: NotificationDisplayItem): boolean => {
-  if (isGroupedReactionsItem(item)) {
-    return true;
-  }
-
-  // Match the drop-dependent renderers before adding a row label or divider.
-  switch (item.cause) {
-    case ApiNotificationCause.DropReplied:
-      return Array.isArray(item.related_drops) && !!item.related_drops[1];
-    case ApiNotificationCause.DropQuoted:
-    case ApiNotificationCause.IdentityMentioned:
-    case ApiNotificationCause.DropVoted:
-    case DROP_POLL_VOTED_NOTIFICATION_CAUSE:
-    case ApiNotificationCause.DropReacted:
-    case ApiNotificationCause.DropBoosted:
-    case ApiNotificationCause.AllDrops:
-      return Array.isArray(item.related_drops) && !!item.related_drops[0];
-    case ApiNotificationCause.IdentitySubscribed:
-    case ApiNotificationCause.IdentityRep:
-    case ApiNotificationCause.IdentityNic:
-    case ApiNotificationCause.WaveCreated:
-    case ApiNotificationCause.PriorityAlert:
-    case ApiNotificationCause.SubscriptionCoverage:
-    default:
-      return true;
-  }
-};
-
 const getActiveDropForItem = (
   item: NotificationDisplayItem,
   activeDrop: ActiveDropState | null
@@ -100,6 +73,7 @@ function NotificationItemsComponent({
 }: NotificationItemsProps) {
   const locale = useBrowserLocale();
   const { isApp } = useDeviceInfo();
+  const { findCustomEmoji, findNativeEmoji } = useEmoji();
   const keyedItems = useMemo(
     () =>
       items.map((item, index) => {
@@ -114,6 +88,40 @@ function NotificationItemsComponent({
       }),
     [items]
   );
+
+  const hasNotificationContent = (item: NotificationDisplayItem): boolean => {
+    if (isGroupedReactionsItem(item)) {
+      return true;
+    }
+
+    // Match the child renderers before adding a row label or divider.
+    switch (item.cause) {
+      case ApiNotificationCause.DropReacted: {
+        if (!Array.isArray(item.related_drops) || !item.related_drops[0]) {
+          return false;
+        }
+        const rawId = item.additional_context.reaction.replaceAll(":", "");
+        return !!findCustomEmoji(rawId) || !!findNativeEmoji(rawId);
+      }
+      case ApiNotificationCause.DropReplied:
+        return Array.isArray(item.related_drops) && !!item.related_drops[1];
+      case ApiNotificationCause.DropQuoted:
+      case ApiNotificationCause.IdentityMentioned:
+      case ApiNotificationCause.DropVoted:
+      case DROP_POLL_VOTED_NOTIFICATION_CAUSE:
+      case ApiNotificationCause.DropBoosted:
+      case ApiNotificationCause.AllDrops:
+        return Array.isArray(item.related_drops) && !!item.related_drops[0];
+      case ApiNotificationCause.IdentitySubscribed:
+      case ApiNotificationCause.IdentityRep:
+      case ApiNotificationCause.IdentityNic:
+      case ApiNotificationCause.WaveCreated:
+      case ApiNotificationCause.PriorityAlert:
+      case ApiNotificationCause.SubscriptionCoverage:
+      default:
+        return true;
+    }
+  };
 
   return (
     <div className="tw-flex tw-flex-col tw-pb-3">

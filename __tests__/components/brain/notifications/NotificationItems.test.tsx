@@ -1,3 +1,4 @@
+import type { Emoji, NativeEmoji } from "@/contexts/EmojiContext";
 import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import type {
@@ -8,6 +9,8 @@ import { render, screen } from "@testing-library/react";
 const NotificationItem = jest.fn((_props: unknown) => (
   <div data-testid="item" />
 ));
+const findCustomEmoji = jest.fn<Emoji | null, [string]>();
+const findNativeEmoji = jest.fn<NativeEmoji | null, [string]>();
 
 jest.mock("@/components/brain/notifications/NotificationItem", () => ({
   __esModule: true,
@@ -31,12 +34,22 @@ jest.mock("@/hooks/useDeviceInfo", () => ({
   default: () => ({ isApp: false }),
 }));
 
+jest.mock("@/contexts/EmojiContext", () => ({
+  useEmoji: () => ({ findCustomEmoji, findNativeEmoji }),
+}));
+
 import NotificationItems from "@/components/brain/notifications/NotificationItems";
 import React from "react";
 
 describe("NotificationItems", () => {
   beforeEach(() => {
     NotificationItem.mockClear();
+    findCustomEmoji.mockReset().mockReturnValue(null);
+    findNativeEmoji.mockReset().mockImplementation((id) =>
+      id === "heart"
+        ? { id, name: "Heart", keywords: "heart", skins: [{ native: "❤️" }] }
+        : null
+    );
   });
 
   it("passes activeDrop only to the related notification row", () => {
@@ -130,6 +143,7 @@ describe("NotificationItems", () => {
   });
 
   it("updates grouped unread status when every notification is read", () => {
+    findNativeEmoji.mockReturnValue(null);
     const group: GroupedReactionsItem = {
       type: "grouped_reactions",
       id: 5,
@@ -166,6 +180,42 @@ describe("NotificationItems", () => {
 
     expect(screen.getByTestId("group")).toBeInTheDocument();
     expect(screen.queryByText("Unread")).not.toBeInTheDocument();
+  });
+
+  it("omits unsupported reaction rows until their emoji becomes available", () => {
+    const notification: INotificationDropReacted = {
+      ...unreadNotification,
+      additional_context: { reaction: ":custom-reaction:" },
+    };
+    const onReply = jest.fn();
+    const { container, rerender } = render(
+      <NotificationItems
+        items={[notification]}
+        activeDrop={null}
+        onReply={onReply}
+      />
+    );
+
+    expect(container.querySelector("#feed-item-4")).not.toBeInTheDocument();
+    expect(screen.queryByText("Unread")).not.toBeInTheDocument();
+    expect(NotificationItem).not.toHaveBeenCalled();
+
+    findCustomEmoji.mockReturnValue({
+      id: "custom-reaction",
+      name: "Custom reaction",
+      keywords: "reaction",
+      skins: [{ src: "/custom-reaction.png" }],
+    });
+    rerender(
+      <NotificationItems
+        items={[notification]}
+        activeDrop={null}
+        onReply={onReply}
+      />
+    );
+
+    expect(screen.getByTestId("item")).toBeInTheDocument();
+    expect(screen.getByText("Unread")).toBeVisible();
   });
 
   it("omits rows with missing drop content but retains header-only alerts", () => {
