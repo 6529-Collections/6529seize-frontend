@@ -1,6 +1,7 @@
 "use client";
 
-import { formatNumberWithCommas } from "@/helpers/Helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { formatInteger } from "@/i18n/format";
 import { CheckIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 
@@ -25,6 +26,7 @@ export default function MemesQuickVoteAmountButton({
   isVoteFeedbackActive,
   onVoteAmount,
 }: MemesQuickVoteAmountButtonProps) {
+  const locale = useBrowserLocale();
   const isNegativeAmount = amount < 0;
   const isQuickVoteFeedbackTarget =
     isVoteFeedbackActive &&
@@ -59,8 +61,8 @@ export default function MemesQuickVoteAmountButton({
     >
       {isQuickVoteFeedbackTarget ? (
         <span className="tw-inline-flex tw-items-center tw-gap-1.5 tw-font-bold tw-leading-none">
-          <CheckIcon className="tw-size-4 tw-shrink-0" />
-          <span>{formatNumberWithCommas(amount)}</span>
+          <CheckIcon aria-hidden="true" className="tw-size-4 tw-shrink-0" />
+          <span>{formatInteger(locale, amount)}</span>
         </span>
       ) : (
         <span
@@ -70,7 +72,7 @@ export default function MemesQuickVoteAmountButton({
               (isNegativeAmount ? "tw-text-red" : "tw-text-primary-300")
           )}
         >
-          {formatNumberWithCommas(amount)}
+          {formatInteger(locale, amount)}
         </span>
       )}
     </button>

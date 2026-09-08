@@ -4,7 +4,6 @@ import DropListItemContentMedia from "@/components/drops/view/item/content/media
 import type { MediaLoadStrategy } from "@/components/drops/view/item/content/media/mediaLoadStrategy";
 import WaveDropAuthorPfp from "@/components/waves/drops/WaveDropAuthorPfp";
 import WaveDropTime from "@/components/waves/drops/time/WaveDropTime";
-import { formatNumberWithCommas } from "@/helpers/Helpers";
 import {
   getDropPreviewImageUrl,
   type ExtendedDrop,
@@ -15,7 +14,7 @@ import {
   formatMemesQuickVoteLeftThisRoundText,
   formatMemesQuickVoteUnratedText,
 } from "@/hooks/memesQuickVote.helpers";
-import { formatNumber } from "@/i18n/format";
+import { formatInteger, formatNumber } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
@@ -170,10 +169,12 @@ function MemesQuickVoteMediaStage({
   readonly swipeOffset: number;
   readonly touchSurfaceProps: MemesQuickVoteTouchSurfaceProps;
 }) {
+  const locale = useBrowserLocale();
+
   if (mediaContent === null) {
     return (
       <div className="tw-flex tw-h-[45vh] tw-w-full tw-shrink-0 tw-items-center tw-justify-center tw-border-b tw-border-solid tw-border-white/5 tw-bg-black/30 tw-text-sm tw-text-iron-500 md:tw-h-full md:tw-border-0">
-        Preview unavailable
+        {t(locale, "memes.quickVote.previewUnavailable")}
       </div>
     );
   }
@@ -262,7 +263,7 @@ function MemesQuickVotePreviewContent({
     renderMode === "preloaded" ? "eager" : "in-view";
   const title =
     drop.metadata.find((entry) => entry.data_key === "title")?.data_value ??
-    "Untitled submission";
+    t(locale, "memes.quickVote.untitledSubmission");
   const description =
     drop.metadata.find((entry) => entry.data_key === "description")
       ?.data_value ?? "";
@@ -393,16 +394,22 @@ function MemesQuickVotePreviewContent({
           )}
         {isInteractive && typeof uncastPower === "number" && (
           <span className="tw-sr-only tw-text-primary-300">
-            {formatNumberWithCommas(uncastPower)} {votingLabel ?? "votes"} left
+            {t(locale, "memes.quickVote.powerLeft", {
+              amount: formatInteger(locale, uncastPower),
+              unit: votingLabel ?? t(locale, "memes.quickVote.unit"),
+            })}
           </span>
         )}
         {isInteractive && (
           <>
             <span className="tw-sr-only">
-              {formatMemesQuickVoteLeftThisRoundText(leftThisRoundCount)}
+              {formatMemesQuickVoteLeftThisRoundText(
+                leftThisRoundCount,
+                locale
+              )}
             </span>
             <span className="tw-sr-only">
-              {formatMemesQuickVoteUnratedText(unratedCount)}
+              {formatMemesQuickVoteUnratedText(unratedCount, locale)}
             </span>
           </>
         )}

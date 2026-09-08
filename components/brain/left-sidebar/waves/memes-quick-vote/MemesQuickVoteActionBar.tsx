@@ -1,7 +1,6 @@
 "use client";
 
 import MemesWaveZapIcon from "@/components/brain/left-sidebar/waves/MemesWaveZapIcon";
-import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import { formatInteger } from "@/i18n/format";
@@ -60,20 +59,22 @@ export default function MemesQuickVoteActionBar({
   const isTouchDevice = useIsTouchDevice();
   const hasQuickAmounts = quickAmounts.length > 0;
   const isCustomRowVisible = isCustomOpen;
-  const usesCustomAmount = !hasQuickAmounts || isCustomOpen;
+  const usesCustomAmount = latestUsedAmount === null || isCustomOpen;
   const customInputRef = useRef<HTMLInputElement | null>(null);
   const previousCustomRowVisibleRef = useRef(isCustomRowVisible);
   const customAmountLabel =
-    customVoteAmount === null ? null : formatNumberWithCommas(customVoteAmount);
-  const recentVoteAmount = latestUsedAmount ?? quickAmounts[0];
+    customVoteAmount === null ? null : formatInteger(locale, customVoteAmount);
+  const recentVoteAmount = latestUsedAmount;
   const recentAmountLabel =
     typeof recentVoteAmount === "number"
-      ? formatNumberWithCommas(recentVoteAmount)
+      ? formatInteger(locale, recentVoteAmount)
       : null;
   const voteAmountLabel = usesCustomAmount
     ? customAmountLabel
     : recentAmountLabel;
-  const voteLabel = voteAmountLabel ? `Vote ${voteAmountLabel}` : "Vote";
+  const voteLabel = voteAmountLabel
+    ? t(locale, "memes.quickVote.voteAmount", { amount: voteAmountLabel })
+    : t(locale, "memes.quickVote.vote");
   const showVoteFeedback =
     isVoteFeedbackActive &&
     (usesCustomAmount
@@ -171,7 +172,9 @@ export default function MemesQuickVoteActionBar({
           <button
             type="button"
             aria-label={
-              isCustomOpen ? "Close change vote amount" : "Change vote amount"
+              isCustomOpen
+                ? t(locale, "memes.quickVote.closeChangeAmount")
+                : t(locale, "memes.quickVote.changeAmount")
             }
             aria-expanded={isCustomOpen}
             onClick={handleToggleCustom}
@@ -190,7 +193,6 @@ export default function MemesQuickVoteActionBar({
           </button>
           <button
             type="button"
-            aria-label={voteLabel}
             onClick={handleVote}
             disabled={isSubmitting}
             className={clsx(
@@ -209,7 +211,9 @@ export default function MemesQuickVoteActionBar({
               />
             )}
             <span className="tw-truncate tw-tabular-nums">
-              {showVoteFeedback ? "Voted" : voteLabel}
+              {showVoteFeedback
+                ? t(locale, "memes.quickVote.voted")
+                : voteLabel}
             </span>
           </button>
           <button
@@ -218,7 +222,7 @@ export default function MemesQuickVoteActionBar({
             disabled={isSubmitting}
             className="tw-inline-flex tw-min-h-14 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-px-3 tw-text-sm tw-font-semibold tw-text-iron-400 tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-40 desktop-hover:hover:tw-bg-white/[0.05] desktop-hover:hover:tw-text-white md:tw-min-h-11"
           >
-            Skip
+            {t(locale, "memes.quickVote.skip")}
           </button>
         </div>
       </div>

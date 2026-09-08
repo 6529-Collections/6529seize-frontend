@@ -236,6 +236,90 @@ describe("MemesQuickVoteDialog", () => {
     }
   );
 
+  it("returns to the latest used amount after closing an edited draft", async () => {
+    const activeDrop = createDrop();
+    const submitVote = jest.fn().mockResolvedValue(true);
+
+    render(
+      <MemesQuickVoteDialog
+        {...createDialogProps({
+          activeDrop,
+          latestUsedAmount: 500,
+          recentAmounts: [250, 500],
+          submitVote,
+        })}
+      />
+    );
+
+    expect(screen.getByRole("button", { name: "Vote 500" })).toBeEnabled();
+    fireEvent.click(screen.getByRole("button", { name: "Change vote amount" }));
+    fireEvent.change(screen.getByRole("textbox"), {
+      target: { value: "100" },
+    });
+    expect(screen.getByRole("button", { name: "Vote 100" })).toBeEnabled();
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Close change vote amount" })
+    );
+    expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Vote 500" })).toBeEnabled();
+
+    fireEvent.click(screen.getByRole("button", { name: "Change vote amount" }));
+    expect(screen.getByRole("textbox")).toHaveValue("100");
+    fireEvent.click(
+      screen.getByRole("button", { name: "Close change vote amount" })
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Vote 500" }));
+
+    expect(screen.getByRole("button", { name: "Voted" })).toBeDisabled();
+    expect(submitVote).not.toHaveBeenCalled();
+
+    await act(async () => {
+      jest.advanceTimersByTime(650);
+      await Promise.resolve();
+    });
+
+    expect(submitVote).toHaveBeenCalledWith(activeDrop, 500);
+  });
+
+  it("uses the closed custom draft when the latest amount is unavailable for a negative-only range", async () => {
+    const activeDrop = createDrop({ minRating: -5_000, maxRating: 0 });
+    const submitVote = jest.fn().mockResolvedValue(true);
+
+    render(
+      <MemesQuickVoteDialog
+        {...createDialogProps({
+          activeDrop,
+          latestUsedAmount: 250,
+          recentAmounts: [-400, 250],
+          submitVote,
+        })}
+      />
+    );
+
+    expect(screen.getByRole("button", { name: "-400" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Vote" })).toBeEnabled();
+    fireEvent.click(screen.getByRole("button", { name: "Change vote amount" }));
+    fireEvent.change(screen.getByRole("textbox"), {
+      target: { value: "-100" },
+    });
+    fireEvent.click(
+      screen.getByRole("button", { name: "Close change vote amount" })
+    );
+
+    expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "-400" })).toBeEnabled();
+    fireEvent.click(screen.getByRole("button", { name: "Vote -100" }));
+    expect(screen.getByRole("button", { name: "Voted" })).toBeDisabled();
+
+    await act(async () => {
+      jest.advanceTimersByTime(650);
+      await Promise.resolve();
+    });
+
+    expect(submitVote).toHaveBeenCalledWith(activeDrop, -100);
+  });
+
   it("does not render active drop content while closed", () => {
     render(
       <MemesQuickVoteDialog

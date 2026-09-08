@@ -1,5 +1,7 @@
 "use client";
 
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 interface MemesQuickVoteDescriptionProps {
@@ -11,6 +13,7 @@ export default function MemesQuickVoteDescription({
   allowToggle = true,
   description,
 }: MemesQuickVoteDescriptionProps) {
+  const locale = useBrowserLocale();
   const [isExpanded, setIsExpanded] = useState(false);
   const [isOverflowing, setIsOverflowing] = useState(false);
   const visibleDescriptionRef = useRef<HTMLParagraphElement | null>(null);
@@ -108,7 +111,9 @@ export default function MemesQuickVoteDescription({
           }}
           className="-tw-ml-2 tw-inline-flex tw-min-h-11 tw-w-fit tw-items-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-2 tw-py-2 tw-text-xs tw-font-medium tw-leading-none tw-text-iron-400 tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-iron-200"
         >
-          {isExpanded ? "See less" : "See more"}
+          {isExpanded
+            ? t(locale, "memes.quickVote.collapseDescription")
+            : t(locale, "memes.quickVote.expandDescription")}
         </button>
       )}
     </div>
