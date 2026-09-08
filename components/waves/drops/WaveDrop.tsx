@@ -80,6 +80,7 @@ const WaveDropInner = ({
   timestampLayout = "inline",
   showInteractions = true,
   showStandaloneActionsButton = false,
+  standaloneQuickRemoveCuration = null,
   inlineAuthorOnDesktop = false,
   mediaImageScale,
   fullWidthMedia = false,
@@ -189,6 +190,7 @@ const WaveDropInner = ({
   } = getWaveDropActionPresentation({
     drop,
     showStandaloneActionsButton,
+    standaloneQuickRemoveCuration,
     showInteractions: effectiveShowInteractions,
     showReplyAndQuote,
     isMobileLayoutViewport,
@@ -645,6 +647,7 @@ const WaveDropInner = ({
     onEdit: handleOnEdit,
     onBoostAnimation: handleMobileBoostAnimation,
     showOnlyQuickRemove: showStandaloneActionsButton,
+    standaloneQuickRemoveCuration,
   });
 
   const dropClasses = getDropClasses(

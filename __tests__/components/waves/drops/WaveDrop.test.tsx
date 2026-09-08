@@ -228,6 +228,45 @@ describe("WaveDrop", () => {
     jest.useRealTimers();
   });
 
+  it.each([
+    { isMobile: false, canRemove: false },
+    { isMobile: false, canRemove: true },
+    { isMobile: true, canRemove: false },
+    { isMobile: true, canRemove: true },
+  ])(
+    "gates curation menu entry with permission on mobile=$isMobile, canRemove=$canRemove",
+    ({ isMobile, canRemove }) => {
+      isMobileMock.mockReturnValue(isMobile);
+      setViewportWidth(isMobile ? 390 : 1440);
+      setHoverSupport(!isMobile);
+
+      renderWithEditingDropProvider(
+        <WaveDrop
+          drop={drop}
+          previousDrop={null}
+          nextDrop={null}
+          showWaveInfo={false}
+          activeDrop={null}
+          showReplyAndQuote={false}
+          location={DropLocation.WAVE}
+          dropViewDropId={null}
+          onReply={jest.fn()}
+          onReplyClick={jest.fn()}
+          onQuoteClick={jest.fn()}
+          showStandaloneActionsButton
+          standaloneQuickRemoveCuration={
+            canRemove ? { id: "curation-1", name: "Marketplace" } : null
+          }
+        />
+      );
+
+      const headerProps = getLastMockProps(mockWaveDropHeader);
+      expect(headerProps.showActionsButton).toBe(isMobile && canRemove);
+      expect(Boolean(headerProps.desktopActions)).toBe(!isMobile && canRemove);
+      expect(screen.queryByTestId("actions")).not.toBeInTheDocument();
+    }
+  );
+
   it("shows actions on desktop", () => {
     setHoverSupport(true);
 

@@ -8,6 +8,8 @@ import CommonIntersectionElement from "@/components/utils/CommonIntersectionElem
 import Drop, { DropLocation } from "@/components/waves/drops/Drop";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useWaveCurationDrops } from "@/hooks/useWaveCurationDrops";
+import { useCurationManagementPermission } from "@/hooks/useCurationManagementPermission";
+import type { QuickCurationAction } from "@/hooks/drops/useCanShowDropCurationsAction";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { useApprovalWaveStatus } from "@/hooks/waves/useApprovalWaveStatus";
 import { useCallback, useMemo, type ReactNode } from "react";
@@ -30,6 +32,7 @@ function MyStreamWaveCurationDropItem({
   winningThresholdMinDurationMs,
   isVotingClosed,
   isVotingControlsLocked,
+  standaloneQuickRemoveCuration,
 }: {
   readonly drop: ExtendedDrop;
   readonly previousDrop: ExtendedDrop | null;
@@ -39,6 +42,7 @@ function MyStreamWaveCurationDropItem({
   readonly winningThresholdMinDurationMs?: number | null | undefined;
   readonly isVotingClosed?: boolean | undefined;
   readonly isVotingControlsLocked?: boolean | undefined;
+  readonly standaloneQuickRemoveCuration: QuickCurationAction | null;
 }) {
   return (
     <Drop
@@ -56,6 +60,7 @@ function MyStreamWaveCurationDropItem({
       onQuoteClick={() => {}}
       onDropContentClick={onDropClick}
       showStandaloneActionsButton
+      standaloneQuickRemoveCuration={standaloneQuickRemoveCuration}
       winningThreshold={winningThreshold}
       winningThresholdMinDurationMs={winningThresholdMinDurationMs}
       isVotingClosed={isVotingClosed}
@@ -72,13 +77,23 @@ export default function MyStreamWaveCurationContent({
   constrainToViewport = true,
 }: MyStreamWaveCurationContentProps) {
   const { leaderboardViewStyle } = useLayout();
-  const { drops, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage } =
-    useWaveCurationDrops({
-      wave,
-      curationId,
-    });
+  const {
+    drops,
+    fetchNextPage,
+    hasNextPage,
+    isFetching,
+    isFetchingNextPage,
+    isPlaceholderData,
+  } = useWaveCurationDrops({
+    wave,
+    curationId,
+  });
 
   const isInitialLoading = isFetching && drops.length === 0;
+  const canManageActiveCuration = useCurationManagementPermission({
+    curationId,
+    probeDropId: isPlaceholderData ? "" : (drops[0]?.id ?? ""),
+  });
   const {
     winningThreshold,
     winningThresholdMinDurationMs,
@@ -98,6 +113,13 @@ export default function MyStreamWaveCurationContent({
   );
 
   const curationTitle = curationName?.trim() ?? "Curation";
+  const standaloneQuickRemoveCuration = useMemo<QuickCurationAction | null>(
+    () =>
+      canManageActiveCuration && !isPlaceholderData
+        ? { id: curationId, name: curationTitle }
+        : null,
+    [canManageActiveCuration, curationId, curationTitle, isPlaceholderData]
+  );
 
   const renderedDrops = useMemo(
     () =>
@@ -112,6 +134,7 @@ export default function MyStreamWaveCurationContent({
           winningThresholdMinDurationMs={winningThresholdMinDurationMs}
           isVotingClosed={isVotingClosed}
           isVotingControlsLocked={isVotingControlsLocked}
+          standaloneQuickRemoveCuration={standaloneQuickRemoveCuration}
         />
       )),
     [
@@ -119,6 +142,7 @@ export default function MyStreamWaveCurationContent({
       isVotingClosed,
       isVotingControlsLocked,
       onDropClick,
+      standaloneQuickRemoveCuration,
       winningThreshold,
       winningThresholdMinDurationMs,
     ]

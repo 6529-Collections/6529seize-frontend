@@ -133,6 +133,9 @@ const WaveDropMobileMenuProviderRoot: React.FC<{
           showCopyOption={activeMenu.showCopyOption}
           showVoting={activeMenu.showVoting}
           showOnlyQuickRemove={activeMenu.showOnlyQuickRemove}
+          standaloneQuickRemoveCuration={
+            activeMenu.standaloneQuickRemoveCuration
+          }
         />
       )}
     </WaveDropMobileMenuContext.Provider>

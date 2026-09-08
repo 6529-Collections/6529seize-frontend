@@ -127,6 +127,7 @@ describe("WaveDropActionsMore", () => {
     await userEvent.click(screen.getByRole("button", { name: "More actions" }));
 
     expect(screen.queryByTestId("set-pinned-drop")).toBeNull();
+    expect(screen.getByTestId("copy-link")).toBeInTheDocument();
   });
 
   it("does not bubble the menu trigger click to a parent card", async () => {
@@ -263,13 +264,16 @@ describe("WaveDropActionsMore", () => {
   });
 
   it("shows only Remove for a post inside the active curation", async () => {
-    mockedUseCanShowDropCurationsAction.mockReturnValue({
-      showManageCurations: true,
-      quickAddCuration: null,
-      quickRemoveCuration: { id: "curation-1", name: "Marketplace" },
-    });
-
-    render(<WaveDropActionsMore drop={drop} showOnlyQuickRemove />);
+    render(
+      <WaveDropActionsMore
+        drop={drop}
+        showOnlyQuickRemove
+        standaloneQuickRemoveCuration={{
+          id: "curation-1",
+          name: "Marketplace",
+        }}
+      />
+    );
 
     await userEvent.click(screen.getByRole("button", { name: "More actions" }));
 
@@ -277,5 +281,43 @@ describe("WaveDropActionsMore", () => {
     expect(screen.queryByTestId("copy-link")).toBeNull();
     expect(screen.queryByText("Manage Curations")).toBeNull();
     expect(screen.queryByRole("button", { name: "Flag Content" })).toBeNull();
+    expect(mockedUseCanShowDropCurationsAction).toHaveBeenLastCalledWith(
+      expect.objectContaining({ enabled: false })
+    );
+
+    await userEvent.click(screen.getByRole("button", { name: "Remove" }));
+
+    expect(updateMembershipAsync).toHaveBeenCalledWith(
+      "curation-1",
+      "remove",
+      expect.objectContaining({ successMessage: "Removed from Marketplace." })
+    );
+    expect(screen.queryByTestId("dropdown")).not.toBeInTheDocument();
+  });
+
+  it("hides the curation-only menu when no removal action is available", () => {
+    render(<WaveDropActionsMore drop={drop} showOnlyQuickRemove />);
+
+    expect(screen.queryByRole("button", { name: "More actions" })).toBeNull();
+    expect(screen.queryByTestId("dropdown")).toBeNull();
+  });
+
+  it("removes an open curation-only menu when permission is lost", async () => {
+    const { rerender } = render(
+      <WaveDropActionsMore
+        drop={drop}
+        showOnlyQuickRemove
+        standaloneQuickRemoveCuration={{
+          id: "curation-1",
+          name: "Marketplace",
+        }}
+      />
+    );
+    await userEvent.click(screen.getByRole("button", { name: "More actions" }));
+
+    rerender(<WaveDropActionsMore drop={drop} showOnlyQuickRemove />);
+
+    expect(screen.queryByRole("button", { name: "More actions" })).toBeNull();
+    expect(screen.queryByTestId("dropdown")).toBeNull();
   });
 });
