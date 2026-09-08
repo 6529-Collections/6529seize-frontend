@@ -36,7 +36,13 @@ export default function NotificationWaveCreated({
   let waveAction: ReactNode = null;
   if (isDirectMessage && waveHref) {
     waveAction = (
-      <ButtonLink href={waveHref} prefetch={false} variant="action" size="xs">
+      <ButtonLink
+        href={waveHref}
+        prefetch={false}
+        variant="primary"
+        size="xs"
+        className="focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950"
+      >
         {t(DEFAULT_LOCALE, "notifications.waveCreated.openDm")}
       </ButtonLink>
     );
@@ -83,7 +89,7 @@ export default function NotificationWaveCreated({
           <Link
             href={waveHref}
             prefetch={false}
-            className="tw-text-sm tw-font-medium tw-text-primary-400 tw-no-underline hover:tw-text-primary-300"
+            className="tw-max-w-full tw-rounded-sm tw-text-sm tw-font-medium tw-text-primary-400 tw-no-underline tw-underline-offset-4 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 desktop-hover:hover:tw-text-primary-300 desktop-hover:hover:tw-underline"
           >
             {waveName}
           </Link>

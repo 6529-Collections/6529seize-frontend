@@ -65,7 +65,7 @@ function NotificationRatingInlinePart({
   }
 
   return (
-    <span className="tw-inline-flex tw-items-center tw-gap-x-1 tw-whitespace-nowrap">
+    <span className="tw-inline-flex tw-min-w-0 tw-max-w-full tw-flex-wrap tw-items-baseline tw-gap-x-1">
       <span
         className={
           separator === "arrow"
@@ -135,7 +135,7 @@ export default function NotificationIdentityRating({
             <Link
               href={profileHref}
               prefetch={false}
-              className="tw-text-base tw-no-underline hover:tw-underline"
+              className="tw-rounded-sm tw-text-base tw-no-underline tw-underline-offset-4 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 desktop-hover:hover:tw-underline"
             >
               {ratingPhrase}
             </Link>
