@@ -28,6 +28,89 @@ const createProps = (
 });
 
 describe("useBrainMobileActiveView", () => {
+  it("keeps the selection callback stable until its route context changes", () => {
+    const props = createProps({ isCompleted: false });
+    const { result, rerender } = renderHook(useBrainMobileActiveView, {
+      initialProps: props,
+    });
+    const initialCallback = result.current.onViewChange;
+
+    rerender({ ...props, hasAuthenticatedProfile: true });
+    expect(result.current.onViewChange).toBe(initialCallback);
+    act(() => {
+      result.current.onViewChange(BrainView.ABOUT);
+    });
+    expect(result.current.activeView).toBe(BrainView.ABOUT);
+    expect(result.current.onViewChange).toBe(initialCallback);
+
+    rerender({ ...props, waveId: "wave-2", pathname: "/waves/wave-2" });
+    expect(result.current.onViewChange).not.toBe(initialCallback);
+    expect(result.current.activeView).toBe(BrainView.DEFAULT);
+    act(() => {
+      result.current.onViewChange(BrainView.ABOUT);
+    });
+    expect(result.current.activeView).toBe(BrainView.ABOUT);
+  });
+
+  it("restores an available view from the current navigation entry", () => {
+    const { result } = renderHook(() =>
+      useBrainMobileActiveView(
+        createProps({
+          isCompleted: false,
+          restoredView: BrainView.LEADERBOARD,
+          wave: { id: "wave-1" } as UseBrainMobileActiveViewProps["wave"],
+        })
+      )
+    );
+
+    expect(result.current.activeView).toBe(BrainView.LEADERBOARD);
+    act(() => {
+      result.current.onViewChange(BrainView.DEFAULT);
+    });
+    expect(result.current.activeView).toBe(BrainView.DEFAULT);
+  });
+
+  it("normalizes a restored view that is no longer available", () => {
+    const { result } = renderHook(() =>
+      useBrainMobileActiveView(
+        createProps({
+          restoredView: BrainView.MY_VOTES,
+          wave: { id: "wave-1" } as UseBrainMobileActiveViewProps["wave"],
+        })
+      )
+    );
+
+    expect(result.current.activeView).toBe(BrainView.SUBMISSIONS);
+  });
+
+  it.each(["42", ""])(
+    "opens explicit Chat target '%s' ahead of restored or locally selected views",
+    (serialNo) => {
+      const props = createProps({
+        isCompleted: false,
+        restoredView: BrainView.LEADERBOARD,
+        wave: { id: "wave-1" } as UseBrainMobileActiveViewProps["wave"],
+      });
+      const { result, rerender } = renderHook(useBrainMobileActiveView, {
+        initialProps: props,
+      });
+      act(() => {
+        result.current.onViewChange(BrainView.ABOUT);
+      });
+
+      rerender({
+        ...props,
+        searchParams: createSearchParams(`serialNo=${serialNo}`),
+      });
+
+      expect(result.current.activeView).toBe(BrainView.DEFAULT);
+      act(() => {
+        result.current.onViewChange(BrainView.LEADERBOARD);
+      });
+      expect(result.current.activeView).toBe(BrainView.LEADERBOARD);
+    }
+  );
+
   it("does not default to submissions while the wave is loading", () => {
     const { result } = renderHook(() =>
       useBrainMobileActiveView(createProps({ wave: undefined }))

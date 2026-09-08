@@ -17,8 +17,9 @@ Use the touch drop menu to run drop actions without leaving the thread.
   mobile/tablet layout on a touch surface.
 - Press and hold an eligible drop, or use `Open drop actions` when that button
   is the touch entry surface.
-- On leaderboard list cards, press and hold the card to open the compact
-  slide-up sheet.
+- In the native mobile app on a touchscreen, tap a Memes leaderboard List or
+  artwork Grid card to open the drop, or press and hold to open the compact
+  slide-up sheet. Tapping the List username opens the author's profile instead.
 
 ## Menu Entry Rules
 
@@ -77,11 +78,14 @@ actions` in the drop header.
 ## User Journey
 
 1. Open a touch-supported drop surface.
-2. Enter the menu from long-press or the touch action button, depending on the
-   current layout.
-3. Review the actions available for that drop and your current session state.
-4. Select an action.
-5. The menu closes or hands off to the selected action flow in the current
+2. In the touchscreen native app, tap a Memes leaderboard List or artwork Grid
+   card when you only need to open the drop, or press and hold when you need the
+   complete action sheet. The List username opens the author's profile instead.
+3. On other drop surfaces, enter the menu from long-press or the touch action
+   button, depending on the current layout.
+4. Review the actions available for that drop and your current session state.
+5. Select an action.
+6. The menu closes or hands off to the selected action flow in the current
    thread.
 
 ## Common Scenarios
@@ -94,6 +98,19 @@ actions` in the drop header.
   layouts, including when the embedded browser reports hover support.
 - Winner and participation drops support touch long-press in compact
   mobile/tablet layouts and on touch-only desktop-width surfaces without hover.
+- On touchscreen native-app Memes leaderboard List and artwork Grid cards,
+  tapping the title, media, description, or free card space opens the
+  submission. Explicit vote, rating, and other action buttons stay independent.
+- In native-app List view, tapping the username opens the author's profile;
+  tapping the avatar or author badges opens the submission. In Grid view,
+  tapping the username still opens the submission.
+- On these native-app cards, releasing a long press does not also open the drop.
+  Dismissing the sheet lets the next normal tap open it.
+- Swiping to scroll, cancelling a touch, or touching a native-app card to stop
+  ongoing scrolling does not open it. Once scrolling settles, a normal tap opens
+  it.
+- Browser views, including mobile browsers, keep their author profile links and
+  media behavior; they do not use the native-app whole-card touch rule.
 - Leaderboard list cards keep vertical scrolling responsive until the hold
   completes, then show the compact action sheet.
 - Wave admins can use the same touch sheet to change the wave's pinned
