@@ -40,7 +40,7 @@ export default function NotificationHeader({
         )}
       </div>
       <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-2">
-        <div className="tw-flex tw-min-w-[min(100%,16rem)] tw-flex-1 tw-flex-wrap tw-items-center tw-gap-x-1 tw-gap-y-1 tw-leading-6 [overflow-wrap:anywhere]">
+        <div className="tw-flex tw-min-w-[min(100%,16rem)] tw-flex-1 tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1 tw-leading-6 [overflow-wrap:anywhere]">
           <UserProfileTooltipWrapper user={author.handle ?? ""}>
             <Link
               href={`/${author.handle}`}

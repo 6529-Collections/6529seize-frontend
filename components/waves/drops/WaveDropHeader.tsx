@@ -125,7 +125,7 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
           )}
         </div>
       </div>
-      <div>
+      <div className={showWaveInfo ? "tw-mt-1" : undefined}>
         {showWaveInfo &&
           (() => {
             const waveMeta = (
@@ -153,7 +153,7 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
               <Link
                 onClick={(e) => handleNavigation(e, waveHref)}
                 href={waveHref}
-                className="tw-leading-0 -tw-mt-1 tw-mb-0 tw-text-[11px] tw-text-iron-500 tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-300"
+                className="tw-block tw-rounded-sm tw-text-xs tw-leading-4 tw-text-iron-400 tw-no-underline tw-transition tw-duration-300 tw-ease-out [overflow-wrap:anywhere] hover:tw-text-iron-300 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950"
               >
                 {drop.wave.name}
               </Link>

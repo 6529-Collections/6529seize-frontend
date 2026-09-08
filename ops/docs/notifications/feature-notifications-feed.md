@@ -87,6 +87,8 @@ with a multi-select cause filter, grouped reactions, and inline drop previews.
   within the row. Keyboard focus visibly identifies profile and wave links and
   the `Show full drop` action.
 - Drop-linked rows show inline drop context with reply/quote actions.
+- In the app, drop previews use a slightly lighter charcoal surface to separate
+  posts from the black feed background. Wave names have space below the author.
 - Long drop previews can collapse and show `Show full drop`.
 - Repeated `DROP_REACTED` notifications on one drop are grouped into one
   `New reactions` row with grouped avatars and reaction badges.
