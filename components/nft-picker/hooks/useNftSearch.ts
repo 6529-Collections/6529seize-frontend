@@ -1,7 +1,6 @@
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import { isValidEthAddress } from "@/helpers/Helpers";
 import {
-  useCollectionSearch,
   useContractOverviewQuery,
   primeContractCache,
 } from "@/hooks/useAlchemyNftQueries";
@@ -11,38 +10,20 @@ import type { Suggestion, SupportedChain } from "../types";
 type UseNftSearchProps = {
   chain: SupportedChain;
   debounceMs: number;
-  hideSpamProp: boolean;
 };
 
-export function useNftSearch({ chain, debounceMs, hideSpamProp }: UseNftSearchProps) {
-  const [query, setQuery] = useState<string>("");
+export function useNftSearch({ chain, debounceMs }: UseNftSearchProps) {
+  const [query, setQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
-  const [hideSpam, setHideSpam] = useState(hideSpamProp);
-
-  useEffect(() => {
-    setHideSpam(hideSpamProp);
-  }, [hideSpamProp]);
-
-  const isAddressQuery = useMemo(() => isValidEthAddress(query.trim()), [query]);
-  const contractQueryAddress = useMemo(() => {
-    if (!isAddressQuery) {
-      return undefined;
-    }
-    return query.trim() as `0x${string}`;
-  }, [isAddressQuery, query]);
-
-  const {
-    data: searchResult,
-    isFetching: isSearchFetching,
-  } = useCollectionSearch({
-    query,
-    chain,
-    hideSpam,
-    debounceMs,
-    enabled: !isAddressQuery && query.length > 1,
-  });
-
+  const trimmedQuery = query.trim();
+  const isAddressQuery = isValidEthAddress(trimmedQuery);
+  const debouncedQuery = useDebouncedValue(trimmedQuery, debounceMs);
+  // Disable stale lookups as soon as the input changes.
+  const contractQueryAddress =
+    isAddressQuery && trimmedQuery === debouncedQuery
+      ? (trimmedQuery.toLowerCase() as `0x${string}`)
+      : undefined;
   const addressOverviewQuery = useContractOverviewQuery({
     address: contractQueryAddress,
     chain,
@@ -53,32 +34,24 @@ export function useNftSearch({ chain, debounceMs, hideSpamProp }: UseNftSearchPr
     if (contractQueryAddress && addressOverviewQuery.data) {
       return [addressOverviewQuery.data];
     }
-    return searchResult?.items ?? [];
-  }, [contractQueryAddress, addressOverviewQuery.data, searchResult?.items]);
+    return [];
+  }, [contractQueryAddress, addressOverviewQuery.data]);
 
-  const hiddenCount = useMemo(() => {
-    if (contractQueryAddress) {
-      return 0;
-    }
-    return searchResult?.hiddenCount ?? 0;
-  }, [contractQueryAddress, searchResult?.hiddenCount]);
-
-  const handleToggleSpam = () => {
-    setHideSpam((prev) => !prev);
-  };
+  const isLoading =
+    isAddressQuery &&
+    (trimmedQuery !== debouncedQuery || addressOverviewQuery.isFetching);
+  const isError = Boolean(contractQueryAddress) && addressOverviewQuery.isError;
+  const isNotFound =
+    Boolean(contractQueryAddress) &&
+    !isLoading &&
+    addressOverviewQuery.isSuccess &&
+    !addressOverviewQuery.data;
 
   const resetSearch = () => {
     setIsOpen(false);
     setQuery("");
     setActiveIndex(0);
   };
-
-  const debouncedQuery = useDebouncedValue(query, debounceMs);
-  const isDebouncing = query !== debouncedQuery;
-
-  const isLoading =
-    (isAddressQuery && addressOverviewQuery.isFetching) ||
-    (!isAddressQuery && query.length > 1 && (isSearchFetching || isDebouncing));
 
   return {
     query,
@@ -87,12 +60,13 @@ export function useNftSearch({ chain, debounceMs, hideSpamProp }: UseNftSearchPr
     setIsOpen,
     activeIndex,
     setActiveIndex,
-    hideSpam,
     suggestionList,
-    hiddenCount,
-    handleToggleSpam,
     resetSearch,
     primeContractCache,
     isLoading,
+    isError,
+    isNotFound,
+    isInvalidAddress: trimmedQuery.length > 0 && !isAddressQuery,
+    retry: addressOverviewQuery.refetch,
   };
 }

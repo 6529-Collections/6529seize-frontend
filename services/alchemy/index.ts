@@ -6,7 +6,7 @@ if (typeof window !== "undefined") {
 }
 
 export type * from "./types";
-export { searchNftCollections, getContractOverview } from "./collections";
+export { getContractOverview } from "./collections";
 export { getTokensMetadata } from "./tokens";
 /** @api */
 export { getNftsForContractAndOwner } from "./owner-nfts";

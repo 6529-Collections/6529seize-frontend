@@ -1,6 +1,6 @@
 # Alchemy NFT API deprecation TODO
 
-Status: Open
+Status: Address-only implementation complete; deployment and manual acceptance pending
 
 Deadline: September 30, 2026
 
@@ -20,7 +20,7 @@ Sources:
 - [V3 `getNFTsForOwner`](https://www.alchemy.com/docs/reference/nft-api-endpoints/nft-api-endpoints/nft-ownership-endpoints/get-nf-ts-for-owner-v-3)
 - [Current NFT API endpoint inventory](https://www.alchemy.com/docs/reference/nft-api-endpoints)
 
-## Audit result
+## Original audit result (before implementation)
 
 | Deprecated endpoint family | Repository status | Assessment |
 | --- | --- | --- |
@@ -49,82 +49,27 @@ The affected call path is:
    picker, so the migration affects product behavior rather than only an
    unused helper.
 
-## Required TODOs
+## Implementation checklist
 
-### 1. Decide the replacement behavior
+- [x] Select address-only behavior; reuse the existing contract metadata route and BE fallback.
+- [x] Remove keyword lookup, its query cache, search response normalization/types, and server helper.
+- [x] Return HTTP 410 from the old local search route without contacting Alchemy.
+- [x] Add debounced address validation, loading/not-found/error states, retry, and stale-result protection.
+- [x] Remove the keyword spam-filter toggle; document that pasted-address lookup remains unfiltered.
+- [x] Enforce the existing ERC-721 restriction for keyboard and mouse selection.
+- [x] Update focused tests, product guidance, and the help corpus.
+- [x] Add [Actual changes](ACTUAL_CHANGES.md) and [What to test](WHAT_TO_TEST.md).
+- [ ] Complete manual acceptance on the deployed environment.
+- [ ] Coordinate FE/BE rollout and the explicit loss of old-client keyword fallback.
+- [ ] Sync and release Core through its separate PR/workflow before September 30.
+- [ ] Obtain the external allowlist-service owner's audit and migrate its
+  Distribution Plan search if it calls a retired endpoint.
 
-- [ ] Choose between the following intentionally different product contracts:
-  - **Recommended minimal migration:** make collection lookup address-only and
-    reuse `useContractOverviewQuery`, `/api/alchemy/contract`, and backend
-    `/alchemy-proxy/contract`, all of which already use V3
-    `getContractMetadata`.
-  - **Preserve free-text discovery:** select and document a different search
-    provider or a 6529-owned indexed catalogue. `getContractMetadata` alone
-    cannot implement keyword search.
-- [ ] Confirm whether the picker should show an explicit "enter a contract
-  address" state or retain search suggestions from a new source.
-- [ ] Define spam filtering for the chosen path. V3 `getContractMetadata`
-  returns one contract but does not include Alchemy's documented `isSpam` or
-  `spamClassifications` fields. If address-only lookup must preserve spam
-  rejection, call V3 `isSpamContract` separately; otherwise document the
-  intentional filtering change. Neither option reproduces a filtered result
-  list.
+The initial audit's Meme Card Set impact was overstated: its collection is fixed
+and its separate 6529 card-name search remains supported. The shared picker
+is still included in regression coverage. See ACTUAL_CHANGES.md for details.
 
-### 2. Remove the deprecated frontend call path
-
-- [ ] Remove or replace `app/api/alchemy/collections/route.ts`.
-- [ ] Remove or replace `searchNftCollections` in
-  `services/alchemy/collections.ts` and its server-only export.
-- [ ] Refactor `useCollectionSearch` and its suggestion cache in
-  `hooks/useAlchemyNftQueries.ts` according to the chosen behavior.
-- [ ] Retire obsolete `AlchemySearchResponse`, search params/results, response
-  normalization, and `NFT_COLLECTION_SEARCH` cache-key code if free-text
-  discovery is removed.
-- [ ] Update `NftPicker` loading, empty, invalid-address, keyboard, and helper
-  text states so the UI accurately describes the new contract.
-- [ ] Exercise both consumers: xTDH grant selection and Meme Card Set voting
-  configuration.
-
-### 3. Coordinate the backend fallback contract
-
-- [ ] Land the backend removal or replacement of
-  `/alchemy-proxy/collections` in coordination with this change. Do not leave a
-  fallback that still calls the deprecated endpoint.
-- [ ] Fix or eliminate the existing response-shape mismatch: the backend
-  wrapper returns an array after unwrapping Alchemy's `{ contracts: [...] }`
-  envelope, while frontend `processSearchResponse` expects the envelope. The
-  current backend fallback can therefore normalize a successful response to an
-  empty suggestion list.
-- [ ] If a public 6529 API contract replaces the runtime-only proxy route,
-  define it in the backend OpenAPI source and regenerate/synchronize the
-  frontend client through the repositories' documented workflow.
-
-### 4. Audit the separate allowlist service
-
-- [ ] Ask the owner of `ALLOWLIST_API_ENDPOINT` to inspect
-  `POST /other/search-contract-metadata` and
-  `GET /other/contract-metadata/{contract}`. Their implementation is not in
-  FE, BE, or Core, so this three-repository audit cannot prove whether that
-  service calls either deprecated Alchemy endpoint.
-- [ ] If the allowlist search uses `searchContractMetadata`, coordinate its
-  migration with the Distribution Plan "Search NFT collection" UI. This is a
-  second free-text discovery flow and has the same non-equivalent replacement
-  problem.
-
-### 5. Validate and roll out before September 30
-
-- [ ] Add focused tests for the selected address-only or replacement-search
-  contract, including primary-route failure and backend fallback behavior.
-- [ ] Update tests that currently fixture the `contracts` search envelope and
-  NftPicker keyword suggestions.
-- [ ] Run the frontend changed-file checks and focused Alchemy/NftPicker tests.
-- [ ] Re-scan production source for all endpoint names in Alchemy's notice.
-- [ ] Deploy any required backend API change before or atomically with the
-  frontend behavior that depends on it.
-- [ ] Sync the merged frontend change into Core through Core's `pull-web`
-  workflow; do not patch Core's imported renderer independently.
-
-## Exactness and logic assessment
+## Original exactness and logic assessment
 
 - Existing `getContractMetadata` calls match the recommended V3 endpoint and
   pass `contractAddress`. The normalization layer already tolerates the

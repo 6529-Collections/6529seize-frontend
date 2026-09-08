@@ -7,17 +7,13 @@ import type {
   ContractOverview,
   NftPickerProps,
 } from "@/components/nft-picker/types";
-import {
-  useCollectionSearch,
-  useContractOverviewQuery,
-} from "@/hooks/useAlchemyNftQueries";
+import { useContractOverviewQuery } from "@/hooks/useAlchemyNftQueries";
 
 type VirtualizedTokenListMockProps = {
   readonly footerContent?: ReactNode | undefined;
 };
 
 jest.mock("@/hooks/useAlchemyNftQueries", () => ({
-  useCollectionSearch: jest.fn(),
   useContractOverviewQuery: jest.fn(),
   primeContractCache: jest.fn(),
 }));
@@ -43,7 +39,6 @@ jest.mock("@/components/token-list/VirtualizedTokenList", () => ({
   ),
 }));
 
-const mockedUseCollectionSearch = useCollectionSearch as jest.Mock;
 const mockedUseContractOverviewQuery = useContractOverviewQuery as jest.Mock;
 
 const fixedContract: ContractOverview = {
@@ -102,10 +97,6 @@ function renderFixedPicker({
 
 beforeEach(() => {
   jest.clearAllMocks();
-  mockedUseCollectionSearch.mockReturnValue({
-    data: { items: [], hiddenCount: 0 },
-    isFetching: false,
-  });
   mockedUseContractOverviewQuery.mockReturnValue({
     data: null,
     isFetching: false,
@@ -276,18 +267,81 @@ describe("NftPicker fixedContract", () => {
 });
 
 describe("NftPicker contract search", () => {
+  it("explains address-only input and never offers results for a collection name", async () => {
+    const user = userEvent.setup();
+    render(<NftPicker onChange={jest.fn()} debounceMs={0} />);
+    const input = screen.getByLabelText("Select collection");
+    expect(input).toHaveAttribute(
+      "placeholder",
+      "Paste an Ethereum contract address…"
+    );
+    await user.type(input, "memes");
+    expect(input).toHaveAttribute("aria-invalid", "true");
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "40 hexadecimal characters"
+    );
+    expect(mockedUseContractOverviewQuery).toHaveBeenLastCalledWith({
+      address: undefined,
+      chain: "ethereum",
+      enabled: false,
+    });
+  });
+
+  it("prevents keyboard selection of unsupported token types", async () => {
+    const user = userEvent.setup();
+    const onContractChange = jest.fn();
+    mockedUseContractOverviewQuery.mockImplementation(
+      ({ address }: { address?: string }) => ({
+        data: address ? { ...searchContract, tokenType: "ERC1155" } : null,
+        isFetching: false,
+      })
+    );
+    render(
+      <NftPicker
+        onChange={jest.fn()}
+        onContractChange={onContractChange}
+        debounceMs={0}
+      />
+    );
+    const input = screen.getByLabelText("Select collection");
+    await user.type(input, searchContract.address);
+    expect(
+      await screen.findByText("Only ERC-721 collections can be selected here.")
+    ).toBeInTheDocument();
+    await user.keyboard("{ArrowDown}{Enter}");
+    expect(onContractChange).not.toHaveBeenCalled();
+  });
+
+  it("announces errors and lets the user retry lookup", async () => {
+    const user = userEvent.setup();
+    const retry = jest.fn();
+    mockedUseContractOverviewQuery.mockImplementation(
+      ({ address }: { address?: string }) => ({
+        data: null,
+        isFetching: false,
+        isError: Boolean(address),
+        refetch: retry,
+      })
+    );
+    render(<NftPicker onChange={jest.fn()} debounceMs={0} />);
+    await user.type(
+      screen.getByLabelText("Select collection"),
+      searchContract.address
+    );
+    await user.click(await screen.findByRole("button", { name: "Try again" }));
+    expect(retry).toHaveBeenCalledTimes(1);
+  });
+
   it("emits onContractChange only after a user selects a searched contract", async () => {
     const user = userEvent.setup();
     const onChange = jest.fn();
     const onContractChange = jest.fn();
 
-    mockedUseCollectionSearch.mockImplementation(
-      ({ query }: { query: string }) => ({
-        data:
-          query.length > 1
-            ? { items: [searchContract], hiddenCount: 0 }
-            : { items: [], hiddenCount: 0 },
+    mockedUseContractOverviewQuery.mockImplementation(
+      ({ address }: { address?: string }) => ({
+        data: address === searchContract.address ? searchContract : null,
         isFetching: false,
+        isSuccess: Boolean(address),
       })
     );
 
@@ -300,7 +354,10 @@ describe("NftPicker contract search", () => {
       />
     );
 
-    await user.type(screen.getByLabelText("Select collection"), "memes");
+    await user.type(
+      screen.getByLabelText("Select collection"),
+      searchContract.address
+    );
     const suggestionName = await screen.findByText("Search Memes");
     const suggestionButton = suggestionName.closest("button");
     expect(suggestionButton).not.toBeNull();
