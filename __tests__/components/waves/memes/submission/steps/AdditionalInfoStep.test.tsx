@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import AdditionalInfoStep from "@/components/waves/memes/submission/steps/AdditionalInfoStep";
 import type { TraitsData } from "@/components/waves/memes/submission/types/TraitsData";
 
@@ -52,7 +53,20 @@ describe("AdditionalInfoStep", () => {
     onBack: jest.fn(),
     onPreview: jest.fn(),
     onSubmit: jest.fn(),
+    identity: {
+      status: "eligible",
+      profileStatus: "eligible",
+      profile: { id: "profile-a", handle: "alice", display: "Alice" },
+      address: "0x1234567890123456789012345678901234567890",
+      walletName: "MetaMask",
+      canSubmit: true,
+      connectWallet: jest.fn(),
+      verifyProfile: jest.fn(),
+      retryEligibility: jest.fn(),
+    } as any,
     isSubmitting: false,
+    submissionPhase: "idle" as const,
+    uploadProgress: 0,
   };
 
   it("disables preview and submit when metadata exceeds 5000 chars", () => {
@@ -68,7 +82,8 @@ describe("AdditionalInfoStep", () => {
     expect(screen.getByRole("button", { name: "Back" })).toHaveClass(
       "tw-h-10",
       "tw-text-sm",
-      "tw-bg-white/[0.07]"
+      "!tw-bg-transparent",
+      "!tw-border-transparent"
     );
     expect(screen.getByRole("button", { name: "Preview" })).toHaveClass(
       "tw-h-10",
@@ -80,5 +95,22 @@ describe("AdditionalInfoStep", () => {
       "tw-text-sm",
       "tw-bg-iron-200"
     );
+  });
+
+  it("keeps the text Back action operable and disabled during submission", async () => {
+    const user = userEvent.setup();
+    const onBack = jest.fn();
+    const { rerender } = render(
+      <AdditionalInfoStep {...baseProps} onBack={onBack} />
+    );
+    await user.click(screen.getByRole("button", { name: "Back" }));
+    expect(onBack).toHaveBeenCalledTimes(1);
+
+    rerender(
+      <AdditionalInfoStep {...baseProps} onBack={onBack} isSubmitting />
+    );
+    expect(screen.getByRole("button", { name: "Back" })).toBeDisabled();
+    await user.click(screen.getByRole("button", { name: "Back" }));
+    expect(onBack).toHaveBeenCalledTimes(1);
   });
 });

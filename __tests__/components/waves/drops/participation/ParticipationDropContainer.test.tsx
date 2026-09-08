@@ -78,7 +78,9 @@ test("keeps inactive rank and background styles on the clipped card", () => {
 
   const clippedCard = getClippedCard(getShell(container));
 
-  expect(clippedCard.className).toContain("tw-bg-iron-950");
+  expect(clippedCard.className).toContain(
+    "tw-bg-[var(--drop-card-background,theme(colors.iron.950))]"
+  );
   expect(clippedCard.className).toContain("tw-border-iron-800");
   expect(clippedCard.className).toContain(
     "desktop-hover:hover:tw-border-amber-500/20"

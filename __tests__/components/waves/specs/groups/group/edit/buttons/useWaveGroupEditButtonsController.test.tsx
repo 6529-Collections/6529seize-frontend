@@ -1,7 +1,13 @@
-import { act, renderHook } from "@testing-library/react";
+import { act, renderHook, waitFor } from "@testing-library/react";
 import { useMutation } from "@tanstack/react-query";
 import { WaveGroupType } from "@/components/waves/specs/groups/group/WaveGroup.types";
 import { useWaveGroupEditButtonsController } from "@/components/waves/specs/groups/group/edit/buttons/hooks/useWaveGroupEditButtonsController";
+import { hasSubwaveMembersOutsideParent } from "@/services/api/subwave-access-api";
+import type { ApiWave } from "@/generated/models/ApiWave";
+
+jest.mock("@/services/api/subwave-access-api", () => ({
+  hasSubwaveMembersOutsideParent: jest.fn(),
+}));
 
 jest.mock("@tanstack/react-query", () => ({
   ...jest.requireActual("@tanstack/react-query"),
@@ -40,6 +46,7 @@ const onWaveCreated = jest.fn();
 
 beforeEach(() => {
   jest.clearAllMocks();
+  jest.mocked(hasSubwaveMembersOutsideParent).mockResolvedValue(false);
   requestAuth.mockResolvedValue({ success: true });
   mockCommonApiPost.mockResolvedValue({});
   mockValidateWaveGroups.mockResolvedValue({ valid: true, invalid_roles: [] });
@@ -60,6 +67,46 @@ beforeEach(() => {
 });
 
 describe("useWaveGroupEditButtonsController", () => {
+  it.each([true, false])(
+    "respects the parent audience warning before saving: %s",
+    async (confirmed) => {
+      jest.mocked(hasSubwaveMembersOutsideParent).mockResolvedValue(true);
+      const wave = {
+        ...(buildWave() as ApiWave),
+        parent_wave: { id: "parent" },
+      } as ApiWave;
+      const { result } = renderHook(() =>
+        useWaveGroupEditButtonsController({
+          wave,
+          type: WaveGroupType.VIEW,
+          requestAuth,
+          setToast,
+          onWaveCreated,
+        })
+      );
+      let pending: Promise<boolean>;
+      act(() => {
+        pending = result.current.updateWave({
+          visibility: { scope: { group_id: null } },
+          participation: { scope: { group_id: null } },
+          voting: { scope: { group_id: null } },
+          chat: { enabled: true, scope: { group_id: null } },
+          wave: { type: "CHAT", admin_group: null },
+        } as never);
+      });
+      await waitFor(() =>
+        expect(result.current.subwaveAccessConfirmation.isOpen).toBe(true)
+      );
+      expect(mockCommonApiPost).not.toHaveBeenCalled();
+      await act(async () => {
+        result.current.subwaveAccessConfirmation.onDecision(confirmed);
+        await expect(pending!).resolves.toBe(confirmed);
+      });
+      expect(mockCommonApiPost).toHaveBeenCalledTimes(confirmed ? 1 : 0);
+      expect(result.current.mutating).toBe(false);
+    }
+  );
+
   it("blocks a wave update when a privilege group is outside visibility", async () => {
     mockValidateWaveGroups.mockResolvedValue({
       valid: false,
@@ -148,6 +195,10 @@ describe("useWaveGroupEditButtonsController", () => {
       chat_group_id: "chat-group",
     });
     expect(onWaveCreated).toHaveBeenCalledTimes(1);
+    expect(hasSubwaveMembersOutsideParent).toHaveBeenCalledWith(
+      { parentWaveId: undefined, viewGroupId: null },
+      expect.any(AbortSignal)
+    );
   });
 
   it("keeps the editor flow open when authentication fails", async () => {

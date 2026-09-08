@@ -119,16 +119,23 @@ export default function CreateWaveGroup({
     queryKey: [QueryKey.GROUPS, "create-wave-selected-group", savedGroupId],
     queryFn: async ({ signal }) => {
       await Promise.resolve();
-      onGroupResolutionChange(true);
+      const reportResolution = (active: boolean) => {
+        // Saving can cancel the inherited group's refresh. That old request
+        // must not change whether the wizard can continue with the new group.
+        if (!signal.aborted) {
+          onGroupResolutionChange(active);
+        }
+      };
+      reportResolution(true);
       try {
         const restoredGroup = await commonApiFetch<ApiGroupFull>({
           endpoint: `groups/${encodeURIComponent(savedGroupId)}`,
           signal,
         });
-        onGroupResolutionChange(false);
+        reportResolution(false);
         return restoredGroup;
       } catch (error) {
-        onGroupResolutionChange(true);
+        reportResolution(true);
         throw error;
       }
     },

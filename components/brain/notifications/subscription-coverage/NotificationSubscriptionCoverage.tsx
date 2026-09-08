@@ -10,7 +10,7 @@ import { formatInteger } from "@/i18n/format";
 import { t, type MessageKey } from "@/i18n/messages";
 import type { INotificationSubscriptionCoverage } from "@/types/feed.types";
 import { ArrowRightIcon, BellAlertIcon } from "@heroicons/react/24/outline";
-import Link from "next/link";
+import ButtonLink from "@/components/utils/button/ButtonLink";
 import NotificationTimestamp from "../subcomponents/NotificationTimestamp";
 
 function getMessageKey(status: ApiSubscriptionCoverageStatus): MessageKey {
@@ -70,7 +70,7 @@ export default function NotificationSubscriptionCoverage({
           <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-leading-5 tw-text-iron-300">
             {t(locale, getMessageKey(context.status))}
           </p>
-          <p className="tw-mb-0 tw-mt-2 tw-text-xs tw-leading-5 tw-text-iron-500">
+          <p className="tw-mb-0 tw-mt-2 tw-text-xs tw-leading-5 tw-text-iron-400">
             {runwayText}
           </p>
           {context.next_unfunded ? (
@@ -99,10 +99,12 @@ export default function NotificationSubscriptionCoverage({
             </p>
           ) : null}
           <div className="tw-mt-3">
-            <Link
+            <ButtonLink
               href={profileHref}
               prefetch={false}
-              className="tw-inline-flex tw-min-h-9 tw-items-center tw-gap-1.5 tw-rounded-lg tw-bg-primary-500 tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-white tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 desktop-hover:hover:tw-bg-primary-400"
+              variant="primary"
+              size="sm"
+              className="focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950"
             >
               {context.minimum_top_up_eth
                 ? t(locale, "subscriptions.topUp.submit", {
@@ -113,7 +115,7 @@ export default function NotificationSubscriptionCoverage({
                   })
                 : t(locale, "subscriptions.coverage.action.topUp")}
               <ArrowRightIcon className="tw-size-3.5" aria-hidden="true" />
-            </Link>
+            </ButtonLink>
           </div>
         </div>
       </div>

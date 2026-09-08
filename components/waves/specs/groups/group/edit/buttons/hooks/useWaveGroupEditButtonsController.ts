@@ -14,6 +14,7 @@ import { toErrorMessage } from "@/services/groups/groupMutations";
 import type { WaveGroupType } from "../../../WaveGroup.types";
 import { getGroupIdFromUpdateBody } from "../utils/waveGroupEdit";
 import { getValidationRoles } from "../utils/waveGroupValidation";
+import { useSubwaveAccessConfirmation } from "@/components/waves/hooks/useSubwaveAccessConfirmation";
 
 type RequestAuth = () => Promise<{ success: boolean }>;
 
@@ -32,6 +33,9 @@ interface UseWaveGroupEditButtonsControllerProps {
 
 interface WaveGroupEditButtonsController {
   readonly mutating: boolean;
+  readonly subwaveAccessConfirmation: ReturnType<
+    typeof useSubwaveAccessConfirmation
+  >;
   readonly updateWave: (
     body: ApiUpdateWaveRequest,
     opts?: { readonly skipAuth?: boolean | undefined }
@@ -46,6 +50,8 @@ export const useWaveGroupEditButtonsController = ({
   onWaveCreated,
 }: UseWaveGroupEditButtonsControllerProps): WaveGroupEditButtonsController => {
   const locale = useBrowserLocale();
+  const subwaveAccessConfirmation = useSubwaveAccessConfirmation();
+  const { confirmSubwaveAccess } = subwaveAccessConfirmation;
   const [mutating, setMutating] = useState(false);
   const editWaveMutation = useMutation({
     mutationFn: async (body: ApiUpdateWaveRequest) =>
@@ -120,11 +126,37 @@ export const useWaveGroupEditButtonsController = ({
         }
       }
 
+      try {
+        const parentAccessConfirmed = await confirmSubwaveAccess({
+          parentWaveId: wave.parent_wave?.id,
+          viewGroupId: body.visibility.scope.group_id,
+        });
+        if (!parentAccessConfirmed) {
+          setMutating(false);
+          return false;
+        }
+      } catch {
+        setToast({
+          type: "error",
+          message: t(locale, "waves.subwaves.accessWarning.checkFailed"),
+        });
+        setMutating(false);
+        return false;
+      }
+
       await editWaveMutation.mutateAsync(body);
       return true;
     },
-    [editWaveMutation, locale, requestAuth, setToast, type]
+    [
+      confirmSubwaveAccess,
+      editWaveMutation,
+      locale,
+      requestAuth,
+      setToast,
+      type,
+      wave.parent_wave?.id,
+    ]
   );
 
-  return { mutating, updateWave };
+  return { mutating, updateWave, subwaveAccessConfirmation };
 };

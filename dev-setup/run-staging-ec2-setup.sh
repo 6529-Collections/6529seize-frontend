@@ -39,14 +39,6 @@ color() {
   return 0
 }
 
-require_private_package_auth() {
-  if [[ -z "${NODE_AUTH_TOKEN:-}" ]]; then
-    color red "NODE_AUTH_TOKEN with read-only GitHub Packages access is required before staging setup."
-    exit 1
-  fi
-  return 0
-}
-
 # Resolve a real binary by stripping the repo's bin/ shim directory from PATH,
 # so calls like `npm -v` and `npm install --global` never hit the repo shims.
 # Usage: resolve_real_binary npm REAL_NPM
@@ -352,13 +344,12 @@ obtain_cert_and_enable_https() {
 # ---------- Build & Run ----------
 
 install_dependencies() {
-  local package_auth_token="$1"
   color yellow "Installing project dependencies through Socket Firewall + pnpm…"
   if [[ -d "$REPO_ROOT/node_modules" ]]; then
     color yellow "Removing existing node_modules for a clean install…"
     rm -rf "$REPO_ROOT/node_modules"
   fi
-  ( cd "$REPO_ROOT" && NODE_AUTH_TOKEN="$package_auth_token" ./bin/6529 ci )
+  ( cd "$REPO_ROOT" && ./bin/6529 ci )
   color green "Dependencies installed."
   return 0
 }
@@ -526,10 +517,8 @@ EOF
 # ---------- Main ----------
 
 main() {
-  # Package authentication must be present before prompts or filesystem changes.
-  require_private_package_auth
-  local package_auth_token="$NODE_AUTH_TOKEN"
-  unset NODE_AUTH_TOKEN
+  # Private-package tokens are no longer needed and must not reach builds or PM2.
+  unset NODE_AUTH_TOKEN NPM_TOKEN
 
   # 0) Gather ALL user input up front (single interaction)
   collect_all_inputs
@@ -544,8 +533,7 @@ main() {
   ensure_java_for_openapi
 
   # 2) Build & run app
-  install_dependencies "$package_auth_token"
-  unset package_auth_token
+  install_dependencies
   build_project
   start_pm2
 

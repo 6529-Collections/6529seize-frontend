@@ -1,8 +1,9 @@
 "use client";
 
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { formatInteger } from "@/i18n/format";
+import { t } from "@/i18n/messages";
 import {
-  formatMemesQuickVoteLeftThisRoundText,
-  formatMemesQuickVoteUnratedText,
   getDefaultQuickVoteAmount,
   getQuickVoteRatingRange,
   normalizeQuickVoteAmount,
@@ -71,6 +72,7 @@ interface MemesQuickVotePreviewPaneProps {
 interface MemesQuickVoteControlsPaneProps {
   readonly className: string;
   readonly customValue: string;
+  readonly customVoteAmount: number | null;
   readonly drop: NonNullable<MemesQuickVoteDialogProps["activeDrop"]>;
   readonly feedbackAmount: number | null;
   readonly feedbackSource: VoteFeedbackSource | null;
@@ -244,6 +246,7 @@ function MemesQuickVotePreviewPane({
 function MemesQuickVoteControlsPane({
   className,
   customValue,
+  customVoteAmount,
   drop,
   feedbackAmount,
   feedbackSource,
@@ -267,6 +270,7 @@ function MemesQuickVoteControlsPane({
     <div className={className}>
       <MemesQuickVoteControls
         customValue={customValue}
+        customVoteAmount={customVoteAmount}
         drop={drop}
         isCustomOpen={isCustomOpen}
         isSubmitting={isSubmitting}
@@ -305,6 +309,7 @@ function MemesQuickVoteDialogContent({
   unratedCount,
   votingLabel,
 }: MemesQuickVoteDialogContentProps) {
+  const locale = useBrowserLocale();
   const ratingRange = useMemo(
     () => getQuickVoteRatingRange(activeDrop),
     [activeDrop]
@@ -318,9 +323,7 @@ function MemesQuickVoteDialogContent({
     [ratingRange.maxRating]
   );
   const [customValue, setCustomValue] = useState(() => `${defaultAmount}`);
-  const [isCustomOpen, setIsCustomOpen] = useState(
-    () => recentAmounts.length === 0
-  );
+  const [isCustomOpen, setIsCustomOpen] = useState(false);
   const [isAdvancing, setIsAdvancing] = useState(false);
   const [voteFeedback, setVoteFeedback] = useState<{
     readonly amount: number;
@@ -512,6 +515,7 @@ function MemesQuickVoteDialogContent({
   } satisfies Omit<MemesQuickVotePreviewPaneProps, "className">;
   const controlsPaneProps = {
     customValue,
+    customVoteAmount: normalizedCustomAmount,
     drop: activeDrop,
     feedbackAmount: voteFeedback?.amount ?? null,
     feedbackSource: voteFeedback?.source ?? null,
@@ -535,27 +539,30 @@ function MemesQuickVoteDialogContent({
   return (
     <div className="tw-flex tw-h-full tw-flex-col md:tw-grid md:tw-min-h-0 md:tw-grid-cols-[minmax(0,1.22fr)_minmax(25rem,1fr)] md:tw-items-stretch">
       {isMobile && (
-        <div className="tw-flex tw-items-center tw-justify-between tw-border-b tw-border-solid tw-border-white/5 tw-bg-black/40 tw-px-4 tw-pb-3 tw-pt-[calc(env(safe-area-inset-top,0px)+0.75rem)] tw-backdrop-blur-xl md:tw-hidden">
+        <div className="tw-flex tw-shrink-0 tw-items-center tw-justify-between tw-px-5 tw-pb-5 tw-pt-[calc(env(safe-area-inset-top,0px)+1rem)] md:tw-hidden">
           <button
             type="button"
             onClick={onClose}
             data-autofocus="true"
-            className="tw-inline-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.05] tw-text-iron-400 tw-shadow-inner tw-transition-colors active:tw-bg-white/10"
-            aria-label="Close quick vote"
+            className="tw-inline-flex tw-size-11 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.04] tw-text-iron-300 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 active:tw-bg-white/10"
+            aria-label={t(locale, "memes.quickVote.closeDialog")}
           >
             <XMarkIcon className="tw-size-5 tw-shrink-0" />
           </button>
 
-          <div className="tw-flex tw-min-w-0 tw-flex-col tw-items-center tw-justify-center tw-px-3">
-            <span className="tw-truncate tw-text-[13px] tw-font-bold tw-leading-tight tw-text-iron-300">
-              {formatMemesQuickVoteLeftThisRoundText(leftThisRoundCount)}
+          <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-items-center tw-gap-1 tw-px-2 tw-text-center tw-text-xs tw-tabular-nums tw-leading-4">
+            <span className="tw-font-semibold tw-text-iron-300">
+              {t(locale, "memes.quickVote.leftThisRound", {
+                count: formatInteger(locale, leftThisRoundCount),
+              })}
             </span>
-            <span className="tw-truncate tw-text-[12px] tw-font-medium tw-leading-tight tw-text-iron-500">
-              {formatMemesQuickVoteUnratedText(unratedCount)}
+            <span className="tw-text-iron-400">
+              {t(locale, "memes.quickVote.unrated", {
+                count: formatInteger(locale, unratedCount),
+              })}
             </span>
           </div>
-
-          <div className="tw-size-10 tw-shrink-0" aria-hidden="true" />
+          <div className="tw-size-11 tw-shrink-0" aria-hidden="true" />
         </div>
       )}
 
@@ -567,7 +574,7 @@ function MemesQuickVoteDialogContent({
           />
 
           <MemesQuickVoteControlsPane
-            className="tw-shrink-0 tw-border-t tw-border-solid tw-border-white/5 tw-bg-[#0a0a0a] md:tw-hidden"
+            className="tw-shrink-0 md:tw-hidden"
             {...controlsPaneProps}
           />
         </div>
@@ -607,6 +614,7 @@ export default function MemesQuickVoteDialog({
   unratedCount,
   votingLabel,
 }: MemesQuickVoteDialogProps) {
+  const locale = useBrowserLocale();
   const dialogRef = useRef<HTMLDialogElement | null>(null);
   const previouslyFocusedElementRef = useRef<HTMLElement | null>(null);
   const previousBodyOverflowRef = useRef("");
@@ -676,9 +684,9 @@ export default function MemesQuickVoteDialog({
     } else if (isExhausted) {
       dialogBody = (
         <MemesQuickVoteDialogDoneState
-          description="No unrated memes are left in quick vote right now."
+          description={t(locale, "memes.quickVote.doneDescription")}
           onClose={onClose}
-          title="You're all caught up"
+          title={t(locale, "memes.quickVote.doneTitle")}
         />
       );
     } else if (!activeDrop && hasDiscoveryError) {
@@ -715,7 +723,7 @@ export default function MemesQuickVoteDialog({
       ref={dialogRef}
       data-session-id={sessionId}
       className="tailwind-scope tw-fixed tw-inset-0 tw-m-0 tw-h-[100dvh] tw-max-h-[100dvh] tw-w-screen tw-max-w-none tw-overflow-hidden tw-border-none tw-bg-transparent tw-p-0"
-      aria-label="Memes quick vote"
+      aria-label={t(locale, "memes.quickVote.dialogLabel")}
     >
       {isOpen && (
         <div
@@ -728,19 +736,19 @@ export default function MemesQuickVoteDialog({
             onClose();
           }}
         >
-          <div className="tw-relative tw-flex tw-h-full tw-max-h-full tw-w-full tw-flex-col tw-overflow-hidden tw-bg-[#0a0a0a] tw-shadow-[0_0_80px_rgba(0,0,0,0.8)] md:tw-h-[38rem] md:tw-max-h-[min(calc(100vh-3rem),38rem)] md:tw-max-w-[68rem] md:tw-rounded-2xl md:tw-border md:tw-border-solid md:tw-border-white/10">
+          <div className="tw-relative tw-flex tw-h-[calc(100%_-_var(--native-keyboard-inset-bottom,0px))] tw-max-h-full tw-w-full tw-flex-col tw-overflow-hidden tw-bg-[#0a0a0a] tw-shadow-[0_0_80px_rgba(0,0,0,0.8)] tw-transition-[height] tw-duration-[var(--native-keyboard-layout-transition-duration,0ms)] tw-ease-out motion-reduce:tw-transition-none md:tw-h-[38rem] md:tw-max-h-[min(calc(100vh-3rem),38rem)] md:tw-max-w-[68rem] md:tw-rounded-2xl md:tw-border md:tw-border-solid md:tw-border-white/10">
             <button
               type="button"
               data-autofocus={
                 !isMobile || showStandaloneStateShellClose ? "true" : undefined
               }
               onClick={onClose}
-              className={`tw-absolute tw-right-4 tw-top-[calc(env(safe-area-inset-top,0px)+0.75rem)] tw-z-20 tw-size-10 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.05] tw-text-iron-400 tw-shadow-inner tw-backdrop-blur-md tw-transition-colors active:tw-bg-white/10 disabled:tw-cursor-not-allowed disabled:tw-opacity-60 desktop-hover:hover:tw-text-white md:tw-right-6 md:tw-top-6 ${
+              className={`tw-absolute tw-right-4 tw-top-[calc(env(safe-area-inset-top,0px)+0.75rem)] tw-z-20 tw-size-11 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.05] tw-text-iron-400 tw-shadow-inner tw-backdrop-blur-md tw-transition-colors active:tw-bg-white/10 disabled:tw-cursor-not-allowed disabled:tw-opacity-60 desktop-hover:hover:tw-text-white md:tw-right-6 md:tw-top-6 ${
                 showStandaloneStateShellClose
                   ? "tw-inline-flex md:tw-inline-flex"
                   : "tw-hidden md:tw-inline-flex"
               }`}
-              aria-label="Close quick vote"
+              aria-label={t(locale, "memes.quickVote.closeDialog")}
             >
               <XMarkIcon className="tw-size-5 tw-shrink-0" />
             </button>

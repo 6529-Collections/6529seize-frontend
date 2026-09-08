@@ -8,12 +8,7 @@ import React, {
   useState,
   useSyncExternalStore,
 } from "react";
-import {
-  LazyMotion,
-  domAnimation,
-  m,
-  useReducedMotion,
-} from "framer-motion";
+import { LazyMotion, domAnimation, m, useReducedMotion } from "framer-motion";
 import BrainMobileTabs from "./mobile/BrainMobileTabs";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
@@ -59,6 +54,7 @@ import { SidebarTab } from "./right-sidebar/BrainRightSidebarTypes";
 import { WaveContentTabs } from "./right-sidebar/WaveContent";
 import { waveRightPanelText } from "@/helpers/waves/wave-right-panel.helpers";
 import { useLayout } from "./my-stream/layout/LayoutContext";
+import { useNavigationHistoryContext } from "@/contexts/NavigationHistoryContext";
 
 interface Props {
   readonly children: ReactNode;
@@ -69,12 +65,22 @@ interface MobileAboutTabState {
   readonly activeTab: SidebarTab;
 }
 
+const getRestoredWaveView = (
+  isApp: boolean,
+  waveId: string | null,
+  currentWaveView: ReturnType<
+    typeof useNavigationHistoryContext
+  >["currentWaveView"]
+): BrainView | null =>
+  isApp && currentWaveView?.waveId === waveId ? currentWaveView.view : null;
+
 const BrainMobileContent: React.FC<Props> = ({ children }) => {
   const router = useRouter();
   // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense covered by BrainMobile Suspense wrapper
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const { isApp } = useDeviceInfo();
+  const { currentWaveView, rememberWaveView } = useNavigationHistoryContext();
   const shouldReduceMotion = useReducedMotion() ?? false;
   const { registerRef } = useLayout();
   const { connectedProfile, fetchingProfile } = useAuth();
@@ -150,7 +156,7 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
       !(isCompetitionWave && isWaveMetadataPending) &&
       !isWavePollsPending
     );
-  const { activeView, onViewChange } = useBrainMobileActiveView({
+  const { activeView, onViewChange: selectView } = useBrainMobileActiveView({
     firstDecisionDone,
     isApp,
     isCompleted,
@@ -165,7 +171,17 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
     searchParams,
     wave,
     waveId,
+    restoredView: getRestoredWaveView(isApp, waveId, currentWaveView),
   });
+  const onViewChange = useCallback(
+    (view: BrainView) => {
+      selectView(view);
+      if (isApp && waveId) {
+        rememberWaveView({ waveId, view });
+      }
+    },
+    [selectView, isApp, waveId, rememberWaveView]
+  );
   const [aboutTabState, setAboutTabState] = useState<MobileAboutTabState>({
     waveId: null,
     activeTab: SidebarTab.ABOUT,

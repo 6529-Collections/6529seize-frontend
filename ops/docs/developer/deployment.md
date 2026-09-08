@@ -4,6 +4,12 @@ Agents and developers deploy with ordinary merges and the repository's GitHub
 Actions workflows. Use the phase authorized by the user; a staging request does
 not authorize production.
 
+For a new staging or direct production release intent that includes frontend,
+follow [Coordinator release recording](../../skills/deploy-6529/SKILL.md#coordinator-release-recording)
+after authorization, scope, and exact release inputs are established, before any
+merge or deployment. Use the same recording outcome for retries, resumes, and
+promotion; the skill defines submission and failure handling.
+
 | Target     | Frontend                                                                       | Backend                                                                                                         |
 | ---------- | ------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------- |
 | Staging    | Merge into `1a-staging` and push; `Web Deploy - STAGING` starts automatically. | Merge into `1a-staging`, then dispatch `Deploy a service` for each required service with `environment=staging`. |

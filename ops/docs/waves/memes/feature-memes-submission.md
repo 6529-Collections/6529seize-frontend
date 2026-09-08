@@ -77,7 +77,11 @@ reached), select the header restriction control to see the reason, then use
   the modal after the software keyboard opens. In the native app, the modal
   also reduces its height so the keyboard does not cover the action bar.
 - The upload drop zone shows grouped format badges for image, video, and
-  interactive model uploads before a file is selected.
+  interactive model uploads and `Max 250 MB` on the same row before a file is
+  selected. The row wraps on smaller screens.
+  File sizes use decimal MB in the artwork preview and submission progress.
+  While a selected file is processing, the message notes that large files may
+  take longer.
 - After a file is selected, the preview surface keeps a `Change` control for
   clearing the current upload and picking another file.
 - The interactive artwork panel always shows `Media Type` as `Interactive HTML
@@ -90,8 +94,11 @@ reached), select the header restriction control to see the reason, then use
 - Numeric trait fields reject `0`.
 - Upload checks:
   - accepted formats include `PNG`, `JPG/JPEG`, `GIF`, `MP4/MOV`, and
-    `GLB/GLTF`
-  - files above `200MB` are rejected
+    binary `GLB` models; JSON `.gltf` files are not accepted, and `.glb`
+    uploads must contain a valid GLB v2 binary header
+  - files above `250 MB` (`250,000,000 bytes`) are rejected
+  - the service verifies the completed stored file size again when the Main
+    Stage submission is created, so API submissions follow the same limit
 - Switching between `Upload File` and `Interactive HTML` keeps each source
   draft for the current modal session.
 
@@ -115,8 +122,11 @@ reached), select the header restriction control to see the reason, then use
 
 ## Failure and Recovery
 
-- Unsupported type or oversized upload shows inline validation errors in
-  `Artwork`.
+- An oversized file, unsupported type, or invalid GLB shows an inline validation
+  error immediately in `Artwork`, without a `Try Again` button. Use `Select Art`
+  or drag and drop another file into the upload area to replace it.
+- If the uploaded file cannot be verified or has not finished processing, the
+  submission is rejected; wait for the upload to finish and try again.
 - Selecting `Continue` with missing or invalid values gives every affected
   field red error styling and an inline recovery message.
 - If artwork is missing, the upload area or interactive hash input turns red.

@@ -327,7 +327,7 @@ export default function ParticipationDropVoteDetailsTrigger({
             fixedHeight
             tall
             showScrollbar
-            headerClassName="tw-pb-0 tw-pt-2"
+            headerClassName="tw-pb-0 tw-pt-5"
             titleClassName="tw-m-0"
           >
             <div className="tw-flex tw-min-h-0 tw-flex-1 tw-flex-col">

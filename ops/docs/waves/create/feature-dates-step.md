@@ -20,8 +20,8 @@ in expandable sections named for those controls.
 ## Entry Points
 
 - Start a `Rank` or `Approve` create flow and continue
-  `Overview -> Groups -> Schedule`.
-- Use `Back` from `Drops`, `Rules`, `Voting`, `Outcomes`, or `Description`.
+  `Setup -> Access -> Schedule`.
+- Use `Back` from `Drops`, `Guidelines`, `Voting`, `Outcomes`, or `Description`.
 - On large screens, use the step rail to return to `Schedule` after you have
   moved past it.
 
@@ -112,9 +112,9 @@ For `Approve` waves:
 - [Wave Creation Index](README.md)
 - [Waves Index](../README.md)
 - [Wave Create Modal Entry Points](feature-modal-entry-points.md)
-- [Wave Creation Overview Step](feature-overview-step.md)
+- [Wave Creation Setup Step](feature-overview-step.md)
 - [Wave Creation Group Access and Permissions](feature-groups-step.md)
 - [Wave Creation Drop Settings](feature-drops-step.md)
-- [Wave Creation Rules Step](feature-rules-step.md)
+- [Wave Creation Guidelines Step](feature-rules-step.md)
 - [Wave Leaderboard Decision Timeline](../leaderboard/feature-decision-timeline.md)
 - [Docs Home](../../README.md)

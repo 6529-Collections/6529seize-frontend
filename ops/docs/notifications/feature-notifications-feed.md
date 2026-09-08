@@ -47,6 +47,9 @@ with a multi-select cause filter, grouped reactions, and inline drop previews.
 
 ## Feed Filters
 
+- The app header supplies the visible `Notifications` title. Desktop and mobile
+  web show the title beside the filter; the app keeps that page heading
+  available to screen readers without repeating it visually.
 - The filter presentation follows the app layout boundary:
   - mobile-layout viewports open `Filter notifications` in a bottom sheet;
   - wider viewports keep the compact anchored dropdown.
@@ -57,6 +60,8 @@ with a multi-select cause filter, grouped reactions, and inline drop previews.
   multiple selected categories show the selected count. Closing and reopening
   the filter preserves the current selection. `All` clears category filters
   and returns to the complete feed.
+- Escape from a desktop filter option closes the menu and returns keyboard
+  focus to the trigger.
 - The mobile sheet traps focus, blocks background feed interaction and
   scrolling, supports Escape/backdrop/close-button dismissal, restores focus
   to the trigger, scrolls internally on short viewports, and includes bottom
@@ -76,7 +81,14 @@ with a multi-select cause filter, grouped reactions, and inline drop previews.
 
 ## Row and Action Behavior
 
+- Dividers separate notifications, with stronger definition in the app, and
+  timestamps use secondary emphasis.
+- Long profile names, wave names, rating categories, and fallback details wrap
+  within the row. Keyboard focus visibly identifies profile and wave links and
+  the `Show full drop` action.
 - Drop-linked rows show inline drop context with reply/quote actions.
+- In the app, drop previews use a slightly lighter charcoal surface to separate
+  posts from the black feed background. Wave names have space below the author.
 - Long drop previews can collapse and show `Show full drop`.
 - Repeated `DROP_REACTED` notifications on one drop are grouped into one
   `New reactions` row with grouped avatars and reaction badges.
@@ -105,6 +117,9 @@ with a multi-select cause filter, grouped reactions, and inline drop previews.
 
 - Opening `/notifications` marks notifications read for the active authenticated
   profile.
+- Rows still reported as unread show an `Unread` label and dot. A grouped
+  reaction row is unread while any of its notifications is unread. The label
+  disappears when refreshed notification data confirms they are read.
 - When the active identity changes (for example after account/profile switch),
   the feed query does not reuse previous-profile rows as placeholder data.
 - During switch-account handoff between already known connected accounts,

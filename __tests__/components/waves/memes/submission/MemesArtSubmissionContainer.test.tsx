@@ -5,6 +5,7 @@ import MemesArtSubmissionContainer from "@/components/waves/memes/submission/Mem
 import { SubmissionStep } from "@/components/waves/memes/submission/types/Steps";
 import { useArtworkSubmissionForm } from "@/components/waves/memes/submission/hooks/useArtworkSubmissionForm";
 import { useArtworkSubmissionMutation } from "@/components/waves/memes/submission/hooks/useArtworkSubmissionMutation";
+import { useMemesSubmissionIdentity } from "@/components/waves/memes/submission/hooks/useMemesSubmissionIdentity";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useAuth } from "@/components/auth/Auth";
 import { commonApiDelete } from "@/services/api/common-api";
@@ -15,9 +16,16 @@ jest.mock("@/components/waves/memes/submission/hooks/useArtworkSubmissionForm");
 jest.mock(
   "@/components/waves/memes/submission/hooks/useArtworkSubmissionMutation"
 );
+jest.mock(
+  "@/components/waves/memes/submission/hooks/useMemesSubmissionIdentity"
+);
 jest.mock("@/components/auth/SeizeConnectContext");
 jest.mock("@/services/api/common-api", () => ({
   commonApiDelete: jest.fn(),
+}));
+jest.mock("@/services/auth/auth.utils", () => ({
+  getAuthJwt: jest.fn(() => "jwt"),
+  getWalletAddress: jest.fn(() => "0x123"),
 }));
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
   useMyStreamOptional: () => ({ processDropRemoved: jest.fn() }),
@@ -71,6 +79,9 @@ const mockForm = useArtworkSubmissionForm as jest.MockedFunction<
 >;
 const mockMutation = useArtworkSubmissionMutation as jest.MockedFunction<
   typeof useArtworkSubmissionMutation
+>;
+const mockIdentity = useMemesSubmissionIdentity as jest.MockedFunction<
+  typeof useMemesSubmissionIdentity
 >;
 const mockSeizeConnect = useSeizeConnectContext as jest.MockedFunction<
   typeof useSeizeConnectContext
@@ -233,6 +244,16 @@ describe("MemesArtSubmissionContainer", () => {
       submissionError: undefined,
       isSubmitting: false,
     } as any);
+    mockIdentity.mockReturnValue({
+      status: "eligible",
+      profile: { id: "profile-a", handle: "alice" },
+      address: "0x123",
+      walletName: "MetaMask",
+      canSubmit: true,
+      connectWallet: jest.fn(),
+      verifyProfile: jest.fn(),
+      retryEligibility: jest.fn(),
+    } as any);
     mockSeizeConnect.mockReturnValue({
       address: "0x123",
       isSafeWallet: false,
@@ -315,6 +336,38 @@ describe("MemesArtSubmissionContainer", () => {
       false,
       expect.any(Object)
     );
+  });
+
+  it("does not start submission when the connected profile is not eligible", async () => {
+    const user = userEvent.setup();
+    const submitArtwork = jest.fn(async () => "result");
+    formState.currentStep = SubmissionStep.ADDITIONAL_INFO;
+    formState.existingMedia = {
+      url: "https://example.com/art.png",
+      mimeType: "image/png",
+    };
+    mockMutation.mockReturnValue({
+      submitArtwork,
+      uploadProgress: 0,
+      submissionPhase: "idle",
+      submissionError: undefined,
+      isSubmitting: false,
+    } as any);
+    mockIdentity.mockReturnValue({
+      status: "ineligible",
+      profile: { id: "profile-b", handle: "bob" },
+      address: "0x456",
+      walletName: "MetaMask",
+      canSubmit: false,
+      connectWallet: jest.fn(),
+      verifyProfile: jest.fn(),
+      retryEligibility: jest.fn(),
+    } as any);
+
+    render(<MemesArtSubmissionContainer onClose={onClose} wave={wave} />);
+    await user.click(screen.getByTestId("additional-submit"));
+
+    expect(submitArtwork).not.toHaveBeenCalled();
   });
 
   it("shows resubmission acknowledgement before the prefilled form", () => {

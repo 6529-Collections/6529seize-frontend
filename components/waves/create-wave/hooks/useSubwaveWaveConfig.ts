@@ -8,10 +8,12 @@ import { useWaveConfig } from "./useWaveConfig";
 
 export function useSubwaveWaveConfig({
   parentAdminGroupId,
+  parentViewGroupId,
 }: {
   readonly parentAdminGroupId?: string | null | undefined;
+  readonly parentViewGroupId?: string | null | undefined;
 }) {
-  const waveConfig = useWaveConfig();
+  const waveConfig = useWaveConfig({ initialViewGroupId: parentViewGroupId });
   const [parentAdminGroup, setParentAdminGroup] = useState<ApiGroupFull | null>(
     null
   );

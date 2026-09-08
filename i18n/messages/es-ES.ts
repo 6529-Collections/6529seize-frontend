@@ -9,6 +9,14 @@ import stormComposerEsMessages from "@/i18n/messages/stormComposer.es-ES.json";
 import type { MessageKey } from "@/i18n/messages/en-US";
 
 export const ES_ES_MESSAGES = {
+  "waves.subwaves.accessWarning.title":
+    "Se aplican las restricciones de la wave principal",
+  "waves.subwaves.accessWarning.message":
+    "Algunos miembros de este grupo no tienen acceso a la wave principal, por lo que no podrán abrir esta subwave. Puedes usar este grupo de todos modos.",
+  "waves.subwaves.accessWarning.continue": "Continuar de todos modos",
+  "waves.subwaves.accessWarning.back": "Volver",
+  "waves.subwaves.accessWarning.checkFailed":
+    "No se pudo comprobar el acceso a la wave principal. Inténtalo de nuevo.",
   "network.groupInspection.bulkRep":
     "Dar REP a todos los perfiles que cumplen los criterios",
   "network.groupInspection.bulkNic":
@@ -484,6 +492,50 @@ export const ES_ES_MESSAGES = {
   "waves.gifPicker.unavailable.hint":
     "Puedes subir un archivo GIF en su lugar.",
   "common.close": "Cerrar",
+  "waves.create.dialog.subwaveOfTitle": "Crear subwave de «{parentWaveName}»",
+  "waves.create.overview.subwaveName": "Nombre de la subwave",
+  "waves.create.overview.subwavePicture": "Imagen de perfil de la subwave",
+  "waves.create.overview.subwaveType": "Tipo de subwave",
+  "waves.create.overview.type": "Tipo de wave",
+  "waves.create.overview.subwaveTypeRequired":
+    "Elige un tipo de subwave para continuar.",
+  "waves.create.overview.typeRequired": "Elige un tipo de wave para continuar.",
+  "waves.create.outcomes.showOutcomes":
+    "Mostrar la sección Resultados del menú",
+  "waves.create.outcomes.showOutcomesDescription":
+    "Muestra la pestaña Resultados y los detalles de las recompensas en las tarjetas de la clasificación y de los ganadores. Las recompensas se siguen aplicando aunque estén ocultas.",
+  "waves.create.rules.title": "Directrices",
+  "waves.create.rules.guidelinesFieldLabel": "Directrices del chat",
+  "waves.create.rules.guidelinesDescription":
+    "Estas directrices se mostrarán a los usuarios cuando envíen su primer mensaje de chat.",
+  "waves.create.rules.guidelinesPlaceholder":
+    "Añade directrices para el chat...",
+  "waves.create.rules.acceptanceTitle": "Reglas que requieren aceptación",
+  "waves.create.rules.acceptanceDescription":
+    "Los participantes deben aceptar estas reglas y firmarlas con su cartera antes de enviar contenido.",
+  "waves.create.rules.acceptancePlaceholder":
+    "Introduce las reglas que los participantes deben aceptar antes de enviar contenido...",
+  "waves.create.rules.acceptanceHelper":
+    "Déjalo vacío si ninguna regla requiere firma.",
+  "waves.create.rules.acceptanceCharacterCount": "Caracteres: {count}",
+  "waves.create.review.title": "Resumen",
+  "waves.create.review.description":
+    "Revisa tu wave antes de crearla. Usa Anterior o los pasos completados para hacer cambios.",
+  "waves.create.review.submit": "Confirmar y crear",
+  "waves.create.review.uploadsPending":
+    "Espera a que terminen de subirse las imágenes.",
+  "waves.create.review.setup": "Configuración",
+  "waves.create.review.name": "Nombre",
+  "waves.create.review.parent": "Wave principal",
+  "waves.create.review.picture": "Imagen de perfil de la wave",
+  "waves.create.review.manual": "Manual",
+  "waves.create.review.outcomeType": "Tipo de resultado",
+  "waves.create.review.reward": "Recompensa",
+  "waves.create.review.category": "Categoría",
+  "waves.create.review.total": "Total",
+  "waves.create.review.winner": "Ganador {position}",
+  "waves.create.review.perApprovedDrop": "Por drop aprobado",
+  "waves.create.review.outcome": "Resultado {number}",
   "waves.create.dialog.subwaveTitle": "Crear subwave",
   "waves.create.dialog.waveTitle": "Crear wave",
   "waves.create.actions.cancel": "Cancelar",
@@ -1009,6 +1061,8 @@ export const ES_ES_MESSAGES = {
   "notifications.filter.ariaLabel": "Filtrar notificaciones: {selection}",
   "notifications.filter.selected": "{count} seleccionadas",
   "notifications.filter.sheetTitle": "Filtrar notificaciones",
+  "notifications.status.unread": "Sin leer",
+  "notifications.preview.expand": "Mostrar el drop completo",
   "notifications.filter.option.mentions": "Menciones",
   "notifications.filter.option.replies": "Respuestas",
   "notifications.filter.option.identity": "Identidad",

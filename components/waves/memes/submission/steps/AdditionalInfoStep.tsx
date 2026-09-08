@@ -1,7 +1,9 @@
 "use client";
 
-import PrimaryButton from "@/components/utils/button/PrimaryButton";
+import Button from "@/components/utils/button/Button";
 import SecondaryButton from "@/components/utils/button/SecondaryButton";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { motion } from "framer-motion";
 import { useMemo, type FC } from "react";
 import AdditionalMediaUpload from "../components/AdditionalMediaUpload";
@@ -22,6 +24,10 @@ import {
   type MetadataValueLengthStatus,
 } from "../utils/submissionMetadata";
 import { validateTokenIdFormat } from "../utils/tokenParsing";
+import type { MemesSubmissionIdentity } from "../hooks/useMemesSubmissionIdentity";
+import { SubmissionActionButton } from "../ui/SubmissionActionButton";
+import { SubmissionIdentityPanel } from "../ui/SubmissionIdentityPanel";
+import type { SubmissionPhase } from "../ui/SubmissionProgress";
 
 interface AdditionalInfoStepProps {
   readonly traits: TraitsData;
@@ -47,7 +53,10 @@ interface AdditionalInfoStepProps {
   readonly onBack: () => void;
   readonly onPreview: () => void;
   readonly onSubmit: () => void;
+  readonly identity: MemesSubmissionIdentity;
   readonly isSubmitting: boolean;
+  readonly submissionPhase: SubmissionPhase;
+  readonly uploadProgress: number;
   readonly submitLabel?: string | undefined;
 }
 
@@ -75,9 +84,15 @@ const AdditionalInfoStep: FC<AdditionalInfoStepProps> = ({
   onBack,
   onPreview,
   onSubmit,
+  identity,
   isSubmitting,
-  submitLabel = "Submit Artwork",
+  submissionPhase,
+  uploadProgress,
+  submitLabel,
 }) => {
+  const locale = useBrowserLocale();
+  const resolvedSubmitLabel =
+    submitLabel ?? t(locale, "memes.submission.action.submitArtwork");
   const metadataLengthValidation = useMemo(
     () =>
       getSubmissionMetadataLengthValidation({
@@ -213,8 +228,7 @@ const AdditionalInfoStep: FC<AdditionalInfoStepProps> = ({
     >
       <div className="tw-mx-auto tw-w-full tw-max-w-4xl tw-flex-1 tw-overflow-y-auto tw-px-4 tw-pb-8 tw-pt-8 tw-scrollbar-thin tw-scrollbar-track-iron-900 tw-scrollbar-thumb-iron-700 md:tw-px-8">
         <p className="tw-mb-8 tw-text-sm tw-text-iron-400">
-          Complete the following details for distribution and storytelling
-          purposes.
+          {t(locale, "memes.submission.additionalInfo.description")}
         </p>
 
         <div className="tw-flex tw-flex-col tw-gap-y-10">
@@ -280,30 +294,34 @@ const AdditionalInfoStep: FC<AdditionalInfoStepProps> = ({
       </div>
 
       <div className="tw-mt-auto tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-py-3">
-        <div className="tw-mx-auto tw-grid tw-w-full tw-max-w-4xl tw-grid-cols-2 tw-gap-2 tw-px-4 sm:tw-flex sm:tw-items-center sm:tw-justify-between md:tw-px-8">
-          <SecondaryButton
-            onClicked={onBack}
-            disabled={isSubmitting}
-            className="tw-w-full sm:tw-w-auto"
-          >
-            Back
-          </SecondaryButton>
-          <div className="tw-contents sm:tw-flex sm:tw-items-center sm:tw-gap-2">
+        <div className="tw-mx-auto tw-flex tw-w-full tw-max-w-4xl tw-flex-col tw-gap-2 tw-px-4 md:tw-flex-row md:tw-items-center md:tw-justify-between md:tw-gap-3 md:tw-px-8">
+          <SubmissionIdentityPanel identity={identity} />
+          <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2 md:tw-shrink-0">
+            <Button
+              variant="secondary"
+              onClick={onBack}
+              disabled={isSubmitting}
+              className="tw-flex-1 !tw-border-transparent !tw-bg-transparent !tw-shadow-none md:tw-flex-none"
+            >
+              {t(locale, "memes.submission.action.back")}
+            </Button>
             <SecondaryButton
               onClicked={onPreview}
               disabled={!formValid || isSubmitting}
-              className="tw-w-full sm:tw-w-auto"
+              className="tw-flex-1 md:tw-flex-none"
             >
-              Preview
+              {t(locale, "memes.submission.action.preview")}
             </SecondaryButton>
-            <PrimaryButton
-              onClicked={onSubmit}
-              disabled={!formValid}
-              loading={isSubmitting}
-              className="tw-col-span-2 tw-w-full sm:tw-w-auto"
-            >
-              {submitLabel}
-            </PrimaryButton>
+            <SubmissionActionButton
+              identity={identity}
+              isFormValid={formValid}
+              isSubmitting={isSubmitting}
+              submissionPhase={submissionPhase}
+              uploadProgress={uploadProgress}
+              submitLabel={resolvedSubmitLabel}
+              onSubmit={onSubmit}
+              className="tw-flex-1 md:tw-flex-none"
+            />
           </div>
         </div>
       </div>

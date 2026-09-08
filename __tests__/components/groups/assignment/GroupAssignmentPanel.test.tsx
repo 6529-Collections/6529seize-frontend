@@ -441,7 +441,6 @@ describe("GroupAssignmentPanel shared layout", () => {
     renderDialogPanel();
 
     await user.click(screen.getByRole("button", { name: "Edit criteria" }));
-    await user.click(screen.getByRole("button", { name: "Identities" }));
 
     expect(screen.getByTestId("identity-builder")).not.toHaveAttribute(
       "data-results-layout"
@@ -458,7 +457,6 @@ describe("GroupAssignmentPanel shared layout", () => {
     renderDialogPanel();
 
     await user.click(screen.getByRole("button", { name: "Edit criteria" }));
-    await user.click(screen.getByRole("button", { name: "Identities" }));
     await user.click(screen.getByRole("button", { name: "add identity" }));
 
     expect(

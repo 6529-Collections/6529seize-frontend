@@ -3,10 +3,13 @@ import React from "react";
 import { MyStreamWaveTab } from "@/types/waves.types";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { Time } from "@/helpers/time";
+import type { ApiWaveCuration } from "@/generated/models/ApiWaveCuration";
 
 const setActiveTab = jest.fn();
 const updateAvailableTabs = jest.fn();
 const searchParamsGet = jest.fn();
+const onSelectCuration = jest.fn();
+let mockCurations: ApiWaveCuration[] = [];
 let mockWavePollSummary = { hasPolls: false, unansweredPolls: 0 };
 
 jest.mock("next/navigation", () => ({
@@ -59,8 +62,8 @@ jest.mock("@/hooks/waves/useDecisionPoints", () => ({
   }),
 }));
 
-jest.mock("@/hooks/waves/useWaveCurations", () => ({
-  useWaveCurations: () => ({ data: [] }),
+jest.mock("@/hooks/waves/useWaveCurationTabs", () => ({
+  useWaveCurationTabs: () => ({ data: mockCurations }),
 }));
 
 jest.mock("@/hooks/waves/useWaveCurationReorderMutation", () => ({
@@ -138,13 +141,14 @@ function renderComponent(activeTab: MyStreamWaveTab = MyStreamWaveTab.CHAT) {
       }
       setActiveTab={setActiveTab}
       activeCurationId={null}
-      onSelectCuration={jest.fn()}
+      onSelectCuration={onSelectCuration}
     />
   );
 }
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockCurations = [];
   mockApproveLabels.approvals = "Proposals";
   mockApproveLabels.approved = "Approved";
   searchParamsGet.mockReturnValue(null);
@@ -189,6 +193,29 @@ const setMobileScrollMetrics = (
 };
 
 describe("MyStreamWaveDesktopTabs", () => {
+  it("keeps curations selectable in both desktop and mobile web tab strips", () => {
+    mockCurations = [
+      {
+        id: "curation-1",
+        name: "Curators' choice",
+        wave_id: "wave-1",
+        group_id: "group-1",
+        priority_order: 1,
+        created_at: 1,
+        updated_at: 1,
+      },
+    ];
+
+    renderComponent();
+
+    const tabs = screen.getAllByRole("tab", { name: "Curators' choice" });
+    expect(tabs).toHaveLength(2);
+    tabs.forEach((tab) => {
+      fireEvent.click(tab);
+      expect(onSelectCuration).toHaveBeenLastCalledWith("curation-1");
+    });
+  });
+
   it("renders Polls for chat waves when available", () => {
     mockWaveInfo = {
       isChatWave: true,

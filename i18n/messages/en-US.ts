@@ -465,15 +465,87 @@ const WAVE_SCORE_NAVIGATION_MESSAGES = objectMessages("waveScore.navigation", {
 } as const);
 
 const MEMES_QUICK_VOTE_MESSAGES = objectMessages("memes.quickVote", {
+  dialogLabel: "Memes quick vote",
+  closeDialog: "Close quick vote",
+  doneTitle: "You're all caught up",
+  doneDescription: "No unrated memes are left in quick vote right now.",
   leftThisRound: "{count} left this round",
   unrated: "{count} unrated",
   summary: "{leftThisRound}, {unrated}",
   inMemesWave: "{leftThisRound}, {unrated} in the memes wave",
+  remainingPower: "{amount} {unit} remaining",
+  powerLeft: "{amount} {unit} left",
+  unit: "votes",
+  untitledSubmission: "Untitled submission",
+  previewUnavailable: "Preview unavailable",
+  vote: "Vote",
+  voteAmount: "Vote {amount}",
+  voted: "Voted",
+  skip: "Skip",
+  changeAmount: "Change vote amount",
+  closeChangeAmount: "Close change vote amount",
+  expandDescription: "See more",
+  collapseDescription: "See less",
+  swipeHint: "Swipe left to skip · right to vote {amount} {unit}",
 } as const);
 
 const MEMES_SUBMISSION_MESSAGES = objectMessages("memes.submission", {
   "media.missingUpload": "Select artwork or choose Interactive HTML.",
   "media.missingInteractive": "Enter a valid hash or choose Upload File.",
+  "identity.connectPrompt":
+    "Connect a wallet to confirm the profile submitting this artwork.",
+  "identity.unknownProfile": "Unknown profile",
+  "identity.submittingAs": "Submitting as",
+  "identity.wallet": "Wallet",
+  "identity.walletConnected": "Wallet connected",
+  "identity.walletNotConnected": "Connect a wallet to submit",
+  "identity.eligible": "Eligible to submit",
+  "identity.loadingProfile": "Loading the connected profile…",
+  "identity.needsProfile":
+    "This wallet does not have a profile that can submit artwork.",
+  "identity.needsAuth": "Verify this profile before checking eligibility.",
+  "identity.verifyingProfile": "Verifying the connected profile…",
+  "identity.checking": "Checking this profile's eligibility…",
+  "identity.checkError":
+    "We couldn't verify this profile's eligibility. Try again before submitting.",
+  "identity.ineligible":
+    "This profile is not eligible to submit to this collection.",
+  "identity.limitReached":
+    "This profile has reached its submission limit for this collection.",
+  "identity.notStarted": "Submissions are not open yet.",
+  "identity.ended": "Submissions are closed.",
+  "identity.changedBeforeSubmit":
+    "The active wallet changed. Confirm the submitting profile and try again.",
+  "identity.connectErrorTitle": "Couldn't open wallet connection.",
+  "identity.connectErrorDescription": "Please try again.",
+  "action.connectWallet": "Connect Wallet",
+  "action.submitArtwork": "Submit Artwork",
+  "action.submitNewVersion": "Submit New Version",
+  "action.back": "Back",
+  "action.backToEdit": "Back to Edit",
+  "action.preview": "Preview",
+  "action.connecting": "Connecting…",
+  "action.loadingProfile": "Loading Profile…",
+  "action.verifyProfile": "Verify Profile",
+  "action.verifyingProfile": "Verifying Profile…",
+  "action.checkingEligibility": "Checking Eligibility…",
+  "action.retryEligibility": "Retry Eligibility Check",
+  "action.switchWallet": "Switch Wallet",
+  "action.submissionsNotOpen": "Submissions Not Open",
+  "action.submissionsClosed": "Submissions Closed",
+  "action.uploading": "Uploading {progress}%",
+  "action.signing": "Check Wallet to Sign…",
+  "action.submitting": "Submitting…",
+  "action.submitted": "Submitted",
+  "shell.submitTitle": "Submit Work to The Memes",
+  "shell.resubmitTitle": "Resubmit Work to The Memes",
+  "shell.resubmissionDescription":
+    "Resubmitting creates a new submission with this data, then asks you to confirm deleting the original.",
+  "preview.title": "Submission Preview",
+  "preview.description":
+    "Read-only preview of how your submission may appear in different views.",
+  "additionalInfo.description":
+    "Complete the following details for distribution and storytelling purposes.",
 } as const);
 
 const MEMES_WAVE_FOOTER_MESSAGES = objectMessages("memes.waveFooter", {
@@ -681,6 +753,77 @@ const WAVE_VOTE_MESSAGES = objectMessages("waves.vote", {
   modalTitle: "Vote for this artwork",
   decreaseLabel: "Decrease vote",
   increaseLabel: "Increase vote",
+} as const);
+
+const WAVE_VOTE_INSIGHTS_MESSAGES = objectMessages("waves.voteInsights", {
+  topVoters: "Top voters",
+  viewVoters: "View voters",
+  hideVoters: "Hide voters",
+  emptyVotersTitle: "Be the First to Make a Vote",
+  emptyVotersDescription:
+    "Vote on this drop to see voter rankings appear here.",
+  emptyActivityTitle: "Be the First to Make a Vote",
+  emptyActivityDescription:
+    "Vote on this drop to see activity updates appear here in real-time.",
+  downloadAll: "Download All",
+  downloading: "Downloading",
+  downloadAllVoters: "Download all voters as CSV",
+  largestVote: "Largest vote",
+  largestVotes: "Largest votes",
+  currentVotes: "Current votes",
+  viewBreakdown: "View vote breakdown",
+  largestPositive: "Largest supporting vote",
+  largestNegative: "Largest opposing vote",
+  others: "Others",
+  otherPositiveVotes: "Other positive voters combined: {vote} {unit}",
+  otherNegativeVotes: "Other negative voters combined: {vote} {unit}",
+  positiveTotal: "Positive total",
+  negativeTotal: "Negative total",
+  allocationExplanation:
+    "Current individual vote allocations, not vote changes or the time-weighted score.",
+  voteByName: "{name}: {vote} {unit}",
+  largestVoteByName: "Largest vote by {name}: {vote} {unit}",
+} as const);
+
+const WAVE_MY_VOTES_MESSAGES = objectMessages("waves.myVotes", {
+  total: "Total",
+  votesGivenNow: "Votes given now",
+  projectedAtDecision: "Projected vote count at decision time",
+  yourVotes: "Your votes",
+  inCredit: "in {credit}",
+  vote: "Vote",
+  submitVote: "Submit vote",
+  voteUpdated: "Vote updated.",
+  voteUpdateError: "Couldn't update your vote.",
+  authError: "Couldn't authenticate. Reconnect your wallet and try again.",
+  tryAgain: "Please try again.",
+  "limit.maximum": "{label} is {value} {credit}.",
+  "limit.minimum": "Minimum is {value} {credit}.",
+  selectAll: "Select all",
+  deselectAll: "Deselect all",
+  resetVotes: "Reset votes",
+  resetting: "Resetting…",
+  resetError: "Couldn't reset this vote.",
+  availableInWave: "Available in wave",
+  "selected.one": "{count} selected",
+  "selected.other": "{count} selected",
+  "resetSelected.one": "Reset {count} vote",
+  "resetSelected.other": "Reset {count} votes",
+  "resetTitle.one": "Reset {count} vote?",
+  "resetTitle.other": "Reset {count} votes?",
+  "resetMessage.one":
+    "This will set your vote to 0 on the selected submission.",
+  "resetMessage.other":
+    "This will set your votes to 0 on the {count} selected submissions.",
+  "confirmReset.one": "Reset vote",
+  "confirmReset.other": "Reset {count} votes",
+  cancelReset: "Cancel",
+  selectForReset: "Select {title} for vote reset",
+  deselectForReset: "Deselect {title} from vote reset",
+  voterAvatar: "Voter {profile}",
+  "voter.one": "voter",
+  "voter.other": "voters",
+  empty: "You haven't voted on any submissions in this wave yet.",
 } as const);
 
 const WAVE_POLL_MESSAGES = objectMessages("waves.poll", {
@@ -1605,6 +1748,7 @@ const WAVE_CREATE_ACTIONS_MESSAGES = objectMessages("waves.create.actions", {
 } as const);
 
 const WAVE_CREATE_DIALOG_MESSAGES = objectMessages("waves.create.dialog", {
+  subwaveOfTitle: 'Create subwave of "{parentWaveName}"',
   profileRequiredConfirm: "Go to Identity",
   profileRequiredDescription: "Set up your profile before creating a Wave.",
   profileRequiredTitle: "Create your profile first",
@@ -1620,6 +1764,12 @@ const WAVE_CREATE_ADVANCED_MESSAGES = objectMessages("waves.create.advanced", {
 } as const);
 
 const WAVE_CREATE_OVERVIEW_MESSAGES = objectMessages("waves.create.overview", {
+  typeRequired: "Please choose a wave type to continue.",
+  subwaveTypeRequired: "Please choose a subwave type to continue.",
+  type: "Wave Type",
+  subwaveType: "Subwave Type",
+  subwavePicture: "Subwave Profile Picture",
+  subwaveName: "Subwave Name",
   title: "Create Wave",
   name: "Wave Name",
   picture: "Wave Profile Picture",
@@ -1663,7 +1813,9 @@ const WAVE_CREATE_OUTCOMES_MESSAGES = objectMessages("waves.create.outcomes", {
   rankAdvancedSummary: "Outcome visibility",
   approveAdvancedSummary: "Winner limits",
   chooseType: "Choose outcome type",
-  showOutcomes: "Show outcomes",
+  showOutcomes: "Show outcomes menu section",
+  showOutcomesDescription:
+    "Shows the Outcomes tab and reward details on leaderboard and winner cards. Rewards still apply when hidden.",
   nicPositiveError: "NIC must be a positive number",
   repPositiveError: "Rep must be a positive number",
   "perpetual.title": "Outcome is leaderboard position",
@@ -1681,12 +1833,13 @@ const WAVE_CREATE_OUTCOMES_MESSAGES = objectMessages("waves.create.outcomes", {
 } as const);
 
 const WAVE_CREATE_RULES_MESSAGES = objectMessages("waves.create.rules", {
-  title: "Rules",
+  title: "Guidelines",
   advancedSummary: "Wave guidelines and acceptance",
   chatAdvancedSummary: "Wave guidelines",
-  guidelinesFieldLabel: "Wave guidelines",
-  guidelinesDescription: "These guidelines are shown in wave rules panel",
-  guidelinesPlaceholder: "Add optional wave guidelines...",
+  guidelinesFieldLabel: "Chat guidelines",
+  guidelinesDescription:
+    "These guidelines will be shown to user when they send their first chat message",
+  guidelinesPlaceholder: "Add chat guidelines...",
   guidelinesSettingsLabel: "Guidelines",
   guidelinesSettingsEditLabel: "Edit guidelines",
   guidelinesSettingsAdded: "Added",
@@ -1697,12 +1850,12 @@ const WAVE_CREATE_RULES_MESSAGES = objectMessages("waves.create.rules", {
   guidelinesSaveErrorTitle: "Couldn't save these guidelines.",
   guidelinesSaveErrorDescription: PLEASE_TRY_AGAIN,
   acceptanceTitle: "Rules that require acceptance",
-  acceptanceToggle: "Require acceptance",
   acceptanceDescription:
-    "Use this only for custom creator rules that participants must accept and sign before submitting.",
+    "Participants must accept these rules and sign with their wallet before submitting.",
   acceptancePlaceholder:
     "Enter rules participants must accept before submitting...",
-  acceptanceHelper: "Participants will sign these rules with their wallet",
+  acceptanceHelper: "Leave empty if no rules require signing.",
+  acceptanceCharacterCount: "Characters: {count}",
 } as const);
 
 const WAVE_CREATE_VOTING_MESSAGES = objectMessages("waves.create.voting", {
@@ -1745,6 +1898,26 @@ const WAVE_CREATE_VOTING_MESSAGES = objectMessages("waves.create.voting", {
 
 const WAVE_CREATE_DROPDOWN_MESSAGES = objectMessages("waves.create.dropdown", {
   currentValue: "Current value: {value}",
+} as const);
+
+const WAVE_CREATE_REVIEW_MESSAGES = objectMessages("waves.create.review", {
+  title: "Overview",
+  description:
+    "Review your wave before creating it. Use Previous or the completed steps to make changes.",
+  submit: "Confirm and create",
+  uploadsPending: "Wait for image uploads to finish.",
+  setup: "Setup",
+  name: "Name",
+  parent: "Parent wave",
+  picture: "Wave profile picture",
+  manual: "Manual",
+  outcomeType: "Outcome type",
+  reward: "Reward",
+  category: "Category",
+  total: "Total",
+  winner: "Winner {position}",
+  perApprovedDrop: "Per approved drop",
+  outcome: "Outcome {number}",
 } as const);
 
 const WAVE_CREATE_PROGRESS_MESSAGES = objectMessages("waves.create.progress", {
@@ -2594,6 +2767,8 @@ export const EN_US_MESSAGES = {
   "notifications.filter.ariaLabel": "Filter notifications: {selection}",
   "notifications.filter.selected": "{count} selected",
   "notifications.filter.sheetTitle": "Filter notifications",
+  "notifications.status.unread": "Unread",
+  "notifications.preview.expand": "Show full drop",
   "notifications.filter.option.mentions": "Mentions",
   "notifications.filter.option.replies": "Replies",
   "notifications.filter.option.identity": "Identity",
@@ -3583,6 +3758,13 @@ export const EN_US_MESSAGES = {
   ...WAVE_CREATE_ADVANCED_MESSAGES,
   ...WAVE_CREATE_OVERVIEW_MESSAGES,
   ...WAVE_CREATE_GROUPS_MESSAGES,
+  "waves.subwaves.accessWarning.title": "Parent wave restrictions apply",
+  "waves.subwaves.accessWarning.message":
+    "Some members of this group cannot access the parent wave, so they will not be able to open this subwave. You can still use this group.",
+  "waves.subwaves.accessWarning.continue": "Continue anyway",
+  "waves.subwaves.accessWarning.back": "Go back",
+  "waves.subwaves.accessWarning.checkFailed":
+    "Couldn't check parent wave access. Please try again.",
   ...WAVE_CREATE_DATES_MESSAGES,
   ...WAVE_CREATE_RANK_MODE_MESSAGES,
   ...WAVE_CREATE_DROPS_MESSAGES,
@@ -3591,6 +3773,7 @@ export const EN_US_MESSAGES = {
   ...WAVE_CREATE_VOTING_MESSAGES,
   ...WAVE_CREATE_DROPDOWN_MESSAGES,
   ...WAVE_CREATE_PROGRESS_MESSAGES,
+  ...WAVE_CREATE_REVIEW_MESSAGES,
   ...WAVE_CREATE_DESCRIPTION_MESSAGES,
   ...WAVE_LEADERBOARD_PHASE_MESSAGES,
   ...WAVE_RULES_SCHEDULE_MESSAGES,
@@ -3645,6 +3828,8 @@ export const EN_US_MESSAGES = {
   ...WAVE_VOTE_RATIONALE_MESSAGES,
   ...WAVE_VOTE_MODE_MESSAGES,
   ...WAVE_VOTE_MESSAGES,
+  ...WAVE_VOTE_INSIGHTS_MESSAGES,
+  ...WAVE_MY_VOTES_MESSAGES,
   ...WAVE_POLL_MESSAGES,
   ...WAVE_SUBMISSION_BUTTON_LABEL_MESSAGES,
   ...TRANSFER_MESSAGES,

@@ -3,7 +3,7 @@
   "config": "tsconfig.jest.json",
   "toolchain": {
     "typescript_version": "5.9.3",
-    "pnpm_lock_sha256": "0fb070f1df410851c3dc29bbdd4adc10d0cb8a2478c4163dc863ce2041f100a3",
+    "pnpm_lock_sha256": "a80737e105a9c739bdbcb2de0b99b7f42085beb6808e8fc821429c056a31958b",
     "jest_tsconfig_sha256": "feda509a89cdd90cbcd9da6eecae28759c34c7aaae3725593ec2b1c022017062",
     "base_tsconfig_sha256": "fdbd8e548aed634324fd228e74d541ea702c1311597aa938741651e50de59c5f"
   },
@@ -84,7 +84,7 @@
     "__tests__/components/brain/my-stream/tabs/MyStreamWaveTabsMemeSubmit.test.tsx": 1,
     "__tests__/components/brain/my-stream/votes/MyStreamWaveMyVoteInput.test.tsx": 2,
     "__tests__/components/brain/my-stream/votes/MyStreamWaveMyVotes.test.tsx": 3,
-    "__tests__/components/brain/my-stream/votes/MyStreamWaveMyVotesReset.test.tsx": 3,
+    "__tests__/components/brain/my-stream/votes/MyStreamWaveMyVotesReset.test.tsx": 2,
     "__tests__/components/brain/my-stream/votes/MyStreamWaveMyVotesResetProgress.test.tsx": 1,
     "__tests__/components/brain/my-stream/votes/MyStreamWaveMyVoteVotes.test.tsx": 1,
     "__tests__/components/brain/notifications/all-drops/NotificationAllDrops.test.tsx": 3,
@@ -566,7 +566,6 @@
     "__tests__/components/waves/drop/SingleWaveDropVoteSlider.test.tsx": 11,
     "__tests__/components/waves/drop/SingleWaveDropVoteSubmit.test.tsx": 3,
     "__tests__/components/waves/drop/SingleWaveDropWrapper.test.tsx": 1,
-    "__tests__/components/waves/drop/useSingleWaveDropData.test.tsx": 1,
     "__tests__/components/waves/drop/useSingleWaveDropVoteRationale.test.tsx": 2,
     "__tests__/components/waves/drop/WaveDropAdditionalInfo.test.tsx": 1,
     "__tests__/components/waves/drops/ArtistActiveSubmissionContent.test.tsx": 2,
@@ -658,7 +657,6 @@
     "__tests__/components/waves/leaderboard/drops/QuorumWaveLeaderboardDrop.test.tsx": 2,
     "__tests__/components/waves/leaderboard/drops/WaveLeaderboardDrop.test.tsx": 1,
     "__tests__/components/waves/leaderboard/drops/WaveLeaderboardLoading.test.tsx": 1,
-    "__tests__/components/waves/leaderboard/gallery/WaveLeaderboardGalleryItem.test.tsx": 1,
     "__tests__/components/waves/leaderboard/gallery/WaveLeaderboardGalleryItemVotes.test.tsx": 1,
     "__tests__/components/waves/leaderboard/grid/WaveLeaderboardGrid.test.tsx": 2,
     "__tests__/components/waves/leaderboard/grid/WaveLeaderboardGridItem.test.tsx": 1,
