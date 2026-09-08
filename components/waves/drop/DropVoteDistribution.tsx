@@ -160,9 +160,11 @@ function formatOtherVotes(
 function VoteRibbonSide({
   side,
   locale,
+  tooltipId,
 }: {
   readonly side: VoteSide;
   readonly locale: SupportedLocale;
+  readonly tooltipId: string;
 }) {
   if (side.total === 0) {
     return null;
@@ -176,6 +178,7 @@ function VoteRibbonSide({
       {side.voters.map((entry, index) => (
         <VoteRibbonPiece
           key={entry.voter.id}
+          tooltipId={tooltipId}
           voteId={entry.voter.id}
           width={Math.abs(entry.vote / side.total) * 100}
           color={colors[index] ?? colors[0]}
@@ -183,6 +186,7 @@ function VoteRibbonSide({
       ))}
       {side.remainder !== 0 && (
         <VoteRibbonPiece
+          tooltipId={tooltipId}
           voteId={`others-${side.positive}`}
           width={Math.abs(side.remainder / side.total) * 100}
           color={`${STRIPED_PIECE} ${side.positive ? "tw-bg-green/90" : "tw-bg-red/90"}`}
@@ -194,11 +198,13 @@ function VoteRibbonSide({
 }
 
 function VoteRibbonPiece({
+  tooltipId,
   voteId,
   width,
   color,
   text,
 }: {
+  readonly tooltipId: string;
   readonly voteId: string;
   readonly width: number;
   readonly color: string;
@@ -206,6 +212,7 @@ function VoteRibbonPiece({
 }) {
   return (
     <span
+      data-tooltip-id={tooltipId}
       data-vote-id={voteId}
       className="tw-group tw-block tw-h-4 tw-min-w-0 tw-shrink-0 tw-pr-0.5 last:tw-pr-0"
       style={{ width: `${width}%` }}
@@ -268,9 +275,13 @@ function LargestSideVote({
 function VoteRibbonTooltip({
   id,
   content,
+  hover = false,
+  onOpenChange,
 }: {
   readonly id: string;
-  readonly content: string;
+  readonly content: string | ((anchor: HTMLElement | null) => string);
+  readonly hover?: boolean;
+  readonly onOpenChange?: (isOpen: boolean) => void;
 }) {
   const tooltipRef = useRef<TooltipRefProps>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -299,20 +310,22 @@ function VoteRibbonTooltip({
     <Tooltip
       ref={tooltipRef}
       id={id}
-      content={content}
-      render={({ content: tooltipContent }) => (
-        <span className="tw-block tw-max-h-[calc(100dvh-4rem)] tw-overflow-y-auto tw-overscroll-contain">
-          {tooltipContent}
+      render={({ activeAnchor }) => (
+        <span className="tw-block tw-max-h-[calc(50dvh-4rem)] tw-overflow-y-auto tw-overscroll-contain">
+          {typeof content === "string" ? content : content(activeAnchor)}
         </span>
       )}
-      setIsOpen={setIsOpen}
+      setIsOpen={(open) => {
+        setIsOpen(open);
+        onOpenChange?.(open);
+      }}
       place="top"
       positionStrategy="fixed"
       offset={8}
       opacity={1}
       clickable
-      openEvents={{ mouseenter: true, focus: true, click: true }}
-      closeEvents={{ mouseleave: true, blur: true }}
+      openEvents={hover ? { mouseenter: true } : { focus: true, click: true }}
+      closeEvents={hover ? { mouseleave: true, click: true } : { blur: true }}
       globalCloseEvents={{ clickOutsideAnchor: true }}
       style={{ ...TOOLTIP_STYLES, pointerEvents: "auto" }}
       className="tailwind-scope tw-max-w-[calc(100vw-2rem)] tw-whitespace-pre-line tw-break-words tw-text-left motion-reduce:tw-transition-none"
@@ -331,7 +344,8 @@ function VoteRibbon({
   readonly unit: string;
 }) {
   const tooltipId = buildTooltipId("vote-ribbon", useId());
-  const [hoveredVoteId, setHoveredVoteId] = useState<string | null>(null);
+  const hoverTooltipId = buildTooltipId("vote-ribbon-segment", useId());
+  const [isBreakdownOpen, setIsBreakdownOpen] = useState(false);
   const breakdown = sides
     .filter((side) => side.total !== 0)
     .flatMap((side) => [
@@ -346,23 +360,23 @@ function VoteRibbon({
       ...(side.remainder === 0 ? [] : [formatOtherVotes(side, locale, unit)]),
     ])
     .join("\n");
-  const hoveredVoter = sides
-    .flatMap((side) => side.voters)
-    .find((entry) => entry.voter.id === hoveredVoteId);
-  const hoveredRemainder = sides.find(
-    (side) =>
-      `others-${side.positive}` === hoveredVoteId && side.remainder !== 0
-  );
-  let content = breakdown;
-  if (hoveredVoter) {
-    content = t(locale, "waves.voteInsights.voteByName", {
-      name: getVoterName(hoveredVoter),
-      vote: formatVote(locale, hoveredVoter.vote),
-      unit,
-    });
-  } else if (hoveredRemainder) {
-    content = formatOtherVotes(hoveredRemainder, locale, unit);
-  }
+  const getHoveredContent = (anchor: HTMLElement | null) => {
+    const voteId = anchor?.dataset["voteId"];
+    const voter = sides
+      .flatMap((side) => side.voters)
+      .find((entry) => entry.voter.id === voteId);
+    if (voter) {
+      return t(locale, "waves.voteInsights.voteByName", {
+        name: getVoterName(voter),
+        vote: formatVote(locale, voter.vote),
+        unit,
+      });
+    }
+    const remainder = sides.find(
+      (side) => `others-${side.positive}` === voteId && side.remainder !== 0
+    );
+    return remainder ? formatOtherVotes(remainder, locale, unit) : "";
+  };
 
   return (
     <>
@@ -371,19 +385,6 @@ function VoteRibbon({
         dir="ltr"
         aria-label={t(locale, "waves.voteInsights.viewBreakdown")}
         data-tooltip-id={tooltipId}
-        onPointerOver={(event) => {
-          const piece =
-            event.target instanceof Element
-              ? event.target.closest<HTMLElement>("[data-vote-id]")
-              : null;
-          setHoveredVoteId(
-            event.pointerType === "mouse"
-              ? (piece?.dataset["voteId"] ?? null)
-              : null
-          );
-        }}
-        onFocus={() => setHoveredVoteId(null)}
-        onClick={() => setHoveredVoteId(null)}
         className="-tw-my-2 tw-flex tw-min-h-8 tw-w-full tw-cursor-pointer tw-items-center tw-gap-2 tw-rounded-md tw-border-0 tw-bg-transparent tw-px-0 tw-py-2 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
       >
         {sides.some((side) => side.total < 0) && (
@@ -403,6 +404,7 @@ function VoteRibbon({
               key={String(side.positive)}
               side={side}
               locale={locale}
+              tooltipId={hoverTooltipId}
             />
           ))}
         </span>
@@ -415,7 +417,18 @@ function VoteRibbon({
           </span>
         )}
       </button>
-      <VoteRibbonTooltip id={tooltipId} content={content} />
+      {!isBreakdownOpen && (
+        <VoteRibbonTooltip
+          id={hoverTooltipId}
+          content={getHoveredContent}
+          hover
+        />
+      )}
+      <VoteRibbonTooltip
+        id={tooltipId}
+        content={breakdown}
+        onOpenChange={setIsBreakdownOpen}
+      />
     </>
   );
 }

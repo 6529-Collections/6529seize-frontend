@@ -77,7 +77,7 @@ async function fetchPreviewPage(
     !Number.isSafeInteger(result.count) ||
     result.count < 0 ||
     result.page !== page ||
-    result.next !== (result.count > page * pageSize) ||
+    result.next !== result.count > page * pageSize ||
     !Array.isArray(result.data) ||
     result.data.length !== expectedLength ||
     result.data.some((entry) => !isValidPreviewVoter(entry))
@@ -109,7 +109,12 @@ export async function fetchDropVoteSummaryPreview(
   const voters = [...first.data];
   const pages = Math.ceil(first.count / PREVIEW_PAGE_SIZE);
   for (let page = 2; page <= pages; page += 1) {
-    const result = await fetchPreviewPage(dropId, page, PREVIEW_PAGE_SIZE, signal);
+    const result = await fetchPreviewPage(
+      dropId,
+      page,
+      PREVIEW_PAGE_SIZE,
+      signal
+    );
     if (result.count !== first.count) {
       throw new Error("Votes changed while loading the local design preview.");
     }
@@ -136,7 +141,7 @@ export async function fetchDropVoteSummaryPreview(
     !Number.isSafeInteger(negativeTotal) ||
     !Number.isSafeInteger(positiveTotal - negativeTotal)
   ) {
-    throw new Error("Vote amounts exceed the local preview's safe range.");
+    throw new RangeError("Vote amounts exceed the local preview's safe range.");
   }
   if (positiveTotal === 0 && negativeTotal === 0) {
     return {};
