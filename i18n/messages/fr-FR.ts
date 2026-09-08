@@ -9,6 +9,14 @@ import stormComposerFrMessages from "@/i18n/messages/stormComposer.fr-FR.json";
 import type { MessageKey } from "@/i18n/messages/en-US";
 
 export const FR_FR_MESSAGES = {
+  "waves.subwaves.accessWarning.title":
+    "Les restrictions de la wave parente s’appliquent",
+  "waves.subwaves.accessWarning.message":
+    "Certains membres de ce groupe n’ont pas accès à la wave parente et ne pourront donc pas ouvrir cette sous-wave. Vous pouvez quand même utiliser ce groupe.",
+  "waves.subwaves.accessWarning.continue": "Continuer quand même",
+  "waves.subwaves.accessWarning.back": "Retour",
+  "waves.subwaves.accessWarning.checkFailed":
+    "Impossible de vérifier l’accès à la wave parente. Veuillez réessayer.",
   "network.groupInspection.bulkRep":
     "Donner du REP à tous les profils correspondant aux critères",
   "network.groupInspection.bulkNic":
@@ -492,6 +500,51 @@ export const FR_FR_MESSAGES = {
   "waves.gifPicker.unavailable.hint":
     "Vous pouvez televerser un fichier GIF a la place.",
   "common.close": "Fermer",
+  "waves.create.dialog.subwaveOfTitle":
+    "Créer une sous-wave de « {parentWaveName} »",
+  "waves.create.overview.subwaveName": "Nom de la sous-wave",
+  "waves.create.overview.subwavePicture": "Photo de profil de la sous-wave",
+  "waves.create.overview.subwaveType": "Type de sous-wave",
+  "waves.create.overview.type": "Type de wave",
+  "waves.create.overview.subwaveTypeRequired":
+    "Veuillez choisir un type de sous-wave pour continuer.",
+  "waves.create.overview.typeRequired":
+    "Veuillez choisir un type de wave pour continuer.",
+  "waves.create.outcomes.showOutcomes": "Afficher la section Résultats du menu",
+  "waves.create.outcomes.showOutcomesDescription":
+    "Affiche l’onglet Résultats et les détails des récompenses sur les cartes du classement et des gagnants. Les récompenses restent applicables lorsqu’elles sont masquées.",
+  "waves.create.rules.title": "Directives",
+  "waves.create.rules.guidelinesFieldLabel": "Directives du chat",
+  "waves.create.rules.guidelinesDescription":
+    "Ces directives seront affichées aux utilisateurs lorsqu’ils enverront leur premier message dans le chat.",
+  "waves.create.rules.guidelinesPlaceholder":
+    "Ajoutez des directives pour le chat...",
+  "waves.create.rules.acceptanceTitle": "Règles à accepter",
+  "waves.create.rules.acceptanceDescription":
+    "Les participants doivent accepter ces règles et les signer avec leur portefeuille avant de soumettre leur contenu.",
+  "waves.create.rules.acceptancePlaceholder":
+    "Saisissez les règles à accepter avant de soumettre du contenu...",
+  "waves.create.rules.acceptanceHelper":
+    "Laissez vide si aucune règle ne nécessite de signature.",
+  "waves.create.rules.acceptanceCharacterCount": "Caractères : {count}",
+  "waves.create.review.title": "Vue d’ensemble",
+  "waves.create.review.description":
+    "Vérifiez votre wave avant de la créer. Utilisez Précédent ou les étapes terminées pour apporter des modifications.",
+  "waves.create.review.submit": "Confirmer et créer",
+  "waves.create.review.uploadsPending":
+    "Attendez la fin du téléversement des images.",
+  "waves.create.review.setup": "Configuration",
+  "waves.create.review.name": "Nom",
+  "waves.create.review.parent": "Wave parente",
+  "waves.create.review.picture": "Photo de profil de la wave",
+  "waves.create.review.manual": "Manuel",
+  "waves.create.review.outcomeType": "Type de résultat",
+  "waves.create.review.reward": "Récompense",
+  "waves.create.review.category": "Catégorie",
+  "waves.create.review.total": "Total",
+  "waves.create.review.winner": "Gagnant {position}",
+  "waves.create.review.perApprovedDrop": "Par drop approuvé",
+  "waves.create.review.outcome": "Résultat {number}",
   "waves.create.dialog.subwaveTitle": "Créer une sous-wave",
   "waves.create.dialog.waveTitle": "Créer une wave",
   "waves.create.actions.cancel": "Annuler",
@@ -512,8 +565,13 @@ export const FR_FR_MESSAGES = {
   "waves.create.groups.title": "Accès",
   "waves.create.groups.description":
     "Choisissez qui peut accéder à cette Wave, y participer et la gérer.",
-  "waves.create.groups.viewGroupName": "Visibilité",
+  "waves.create.groups.viewGroupName": "Qui peut accéder à cette Wave",
+  "waves.create.groups.accessHelper":
+    "Par défaut, toutes les personnes ayant accès peuvent participer. Vous seul pouvez administrer la Wave.",
+  "waves.create.groups.customizePermissions":
+    "Personnaliser les autres autorisations",
   "waves.create.groups.adminGroupName": "Administrateurs",
+  "waves.create.groups.currentGroup": "Avant modification",
   "waves.create.groups.currentGroupWithName": "Groupe actuel : {name}",
   "waves.create.groups.dialog.addTitle": "Ajouter un groupe",
   "waves.create.groups.dialog.changeTitle": "Changer de groupe",
@@ -563,6 +621,12 @@ export const FR_FR_MESSAGES = {
   "waves.create.groups.editAccess.confirmUseVisibility":
     "Utiliser les critères de visibilité",
   "waves.create.groups.actions.editCriteria": "Modifier les critères",
+  "waves.create.groups.actions.edit": "Modifier",
+  "waves.create.groups.actions.matchWaveAccess":
+    "Aligner sur l’accès à la wave",
+  "waves.create.groups.draft.saveChanges": "Enregistrer les modifications",
+  "waves.create.groups.draft.afterEditing": "Après modification",
+  "waves.create.groups.rules.configured": "Configuré",
   "waves.create.groups.inlineIdentities.modeLabel": "Traitement des identités",
   "waves.create.groups.inlineIdentities.included.label": "Incluses",
   "waves.create.groups.inlineIdentities.included.searchLabel":
@@ -838,10 +902,8 @@ export const FR_FR_MESSAGES = {
     "Découvrez ce que la communauté partage dans les Profile Waves.",
   "waves.profileFeed.errorTitle":
     "Impossible de charger les publications de profil",
-  "waves.profileFeed.errorDescription":
-    "Actualisez cette vue pour réessayer.",
-  "waves.profileFeed.emptyTitle":
-    "Aucune publication de profil pour le moment",
+  "waves.profileFeed.errorDescription": "Actualisez cette vue pour réessayer.",
+  "waves.profileFeed.emptyTitle": "Aucune publication de profil pour le moment",
   "waves.profileFeed.emptyDescription":
     "Les nouvelles publications des Profile Waves des membres apparaîtront ici.",
   "waves.leaderboard.listLabel": "Drops du classement",

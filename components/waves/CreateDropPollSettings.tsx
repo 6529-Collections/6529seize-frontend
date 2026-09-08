@@ -49,7 +49,7 @@ function PollCheckbox({
         />
         <span
           aria-hidden="true"
-          className={`tw-flex tw-size-4 tw-items-center tw-justify-center tw-rounded tw-border tw-border-solid tw-transition-colors peer-focus-visible:tw-ring-2 peer-focus-visible:tw-ring-primary-400 peer-focus-visible:tw-ring-offset-2 peer-focus-visible:tw-ring-offset-iron-800 ${
+          className={`tw-pointer-events-none tw-flex tw-size-4 tw-items-center tw-justify-center tw-rounded tw-border tw-border-solid tw-transition-colors peer-focus-visible:tw-ring-2 peer-focus-visible:tw-ring-primary-400 peer-focus-visible:tw-ring-offset-2 peer-focus-visible:tw-ring-offset-iron-800 ${
             checked
               ? "tw-border-primary-400 tw-bg-primary-500"
               : "tw-border-iron-600 tw-bg-iron-950"

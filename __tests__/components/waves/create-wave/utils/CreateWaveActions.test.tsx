@@ -68,7 +68,7 @@ describe("CreateWaveActions", () => {
     render(
       <CreateWaveActions
         config={config}
-        step={CreateWaveStep.DESCRIPTION}
+        step={CreateWaveStep.REVIEW}
         submitting={false}
         setStep={jest.fn()}
         onComplete={onComplete}

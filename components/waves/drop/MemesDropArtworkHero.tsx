@@ -9,6 +9,9 @@ interface MemesDropArtworkHeroProps {
 export function MemesDropArtworkHero({
   artworkMedia,
 }: MemesDropArtworkHeroProps) {
+  const loadStrategy =
+    artworkMedia?.mime_type === "text/html" ? "in-view" : "eager";
+
   return (
     <div className="tw-flex tw-w-full tw-flex-col lg:tw-min-h-screen">
       <div className="tw-flex tw-items-center tw-justify-center tw-px-4 tw-py-4 sm:tw-px-6 lg:tw-flex-1 lg:tw-py-8 xl:tw-px-20">
@@ -20,7 +23,7 @@ export function MemesDropArtworkHero({
                 media_url={artworkMedia.url}
                 isCompetitionDrop={true}
                 imageScale={ImageScale.AUTOx1080}
-                loadStrategy="eager"
+                loadStrategy={loadStrategy}
                 fillVideoContainer={true}
               />
             </div>

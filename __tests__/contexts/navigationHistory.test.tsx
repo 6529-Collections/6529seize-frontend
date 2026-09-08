@@ -6,6 +6,7 @@ import {
 } from "@/contexts/NavigationHistoryContext";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useViewContext } from "@/components/navigation/ViewContext";
+import { BrainView } from "@/components/brain/mobile/brainMobileViews";
 
 jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
@@ -33,7 +34,9 @@ let mockSearchParams = new URLSearchParams();
 const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <NavigationHistoryProvider>{children}</NavigationHistoryProvider>
 );
-const strictWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+const strictWrapper: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => (
   <React.StrictMode>
     <NavigationHistoryProvider>{children}</NavigationHistoryProvider>
   </React.StrictMode>
@@ -170,5 +173,83 @@ describe("NavigationHistoryContext", () => {
       result.current.goBack();
     });
     expect(routerMock.push).toHaveBeenCalledWith("/network");
+  });
+
+  it.each(["goBack", "goBackTo"] as const)(
+    "restores the wave view on repeated profile round trips using %s",
+    (navigation) => {
+      mockPathname = "/waves/wave-1";
+      const { result, rerender } = renderHook(
+        () => useNavigationHistoryContext(),
+        { wrapper }
+      );
+      const selection = { waveId: "wave-1", view: BrainView.LEADERBOARD };
+
+      act(() => {
+        result.current.rememberWaveView(selection);
+      });
+
+      for (let visit = 0; visit < 2; visit += 1) {
+        mockPathname = "/Articulate";
+        rerender();
+        expect(result.current.currentWaveView).toBeNull();
+
+        act(() => {
+          if (navigation === "goBackTo") {
+            result.current.goBackTo("/waves/wave-1");
+          } else {
+            result.current.goBack();
+          }
+        });
+
+        expect(routerMock.push).toHaveBeenLastCalledWith("/waves/wave-1");
+        mockPathname = "/waves/wave-1";
+        rerender();
+        expect(result.current.currentWaveView).toEqual(selection);
+      }
+    }
+  );
+
+  it("does not restore a previous visit when navigating normally between waves", () => {
+    mockPathname = "/waves/wave-1";
+    const { result, rerender } = renderHook(
+      () => useNavigationHistoryContext(),
+      { wrapper }
+    );
+
+    act(() => {
+      result.current.rememberWaveView({
+        waveId: "wave-1",
+        view: BrainView.ABOUT,
+      });
+    });
+    mockPathname = "/waves/wave-2";
+    rerender();
+    mockPathname = "/waves/wave-1";
+    rerender();
+
+    expect(result.current.currentWaveView).toBeNull();
+  });
+
+  it("does not record a wave selection against another route", () => {
+    mockPathname = "/Articulate";
+    const { result, rerender } = renderHook(
+      () => useNavigationHistoryContext(),
+      { wrapper }
+    );
+
+    act(() => {
+      result.current.rememberWaveView({
+        waveId: "wave-1",
+        view: BrainView.LEADERBOARD,
+      });
+    });
+    mockPathname = "/waves/wave-1";
+    rerender();
+    act(() => {
+      result.current.goBack();
+    });
+
+    expect(result.current.currentWaveView).toBeNull();
   });
 });

@@ -93,6 +93,7 @@ export enum CreateWaveStep {
   APPROVAL = "APPROVAL",
   OUTCOMES = "OUTCOMES",
   DESCRIPTION = "DESCRIPTION",
+  REVIEW = "REVIEW",
 }
 
 export interface CreateWaveDatesConfig {

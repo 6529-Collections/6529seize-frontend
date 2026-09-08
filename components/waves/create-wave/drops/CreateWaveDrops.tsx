@@ -2,7 +2,8 @@
 
 import type { ApiWaveParticipationRequirement } from "@/generated/models/ApiWaveParticipationRequirement";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
-import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
+import type { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
+import { normalizeWaveCustomRules } from "@/helpers/waves/wave-metadata.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import type {
@@ -12,18 +13,9 @@ import type {
 import CreateWaveDropsMetadata from "./metadata/CreateWaveDropsMetadata";
 import CreateWaveDropsSubmissionMode from "./submission-mode/CreateWaveDropsSubmissionMode";
 import CreateWaveDropsTypes from "./types/CreateWaveDropsTypes";
-import CreateWaveAdvancedSection from "../utils/CreateWaveAdvancedSection";
+import CreateWaveTermsOfService from "./terms/CreateWaveTermsOfService";
 import CreateWaveStepHeader from "../utils/CreateWaveStepHeader";
 import { CREATE_WAVE_FORM_STYLES } from "../utils/createWaveFormStyles";
-
-const ADVANCED_DROPS_ERRORS = new Set<CREATE_WAVE_VALIDATION_ERROR>([
-  CREATE_WAVE_VALIDATION_ERROR.APPLICATIONS_PER_PARTICIPANT_MUST_BE_POSITIVE,
-  CREATE_WAVE_VALIDATION_ERROR.DROPS_REQUIRED_METADATA_NON_UNIQUE,
-  CREATE_WAVE_VALIDATION_ERROR.DROPS_REQUIRED_METADATA_RESERVED_IDENTITY_KEY,
-  CREATE_WAVE_VALIDATION_ERROR.CHAT_WAVE_CANNOT_HAVE_APPLICATIONS_PER_PARTICIPANT,
-  CREATE_WAVE_VALIDATION_ERROR.CHAT_WAVE_CANNOT_HAVE_REQUIRED_TYPES,
-  CREATE_WAVE_VALIDATION_ERROR.CHAT_WAVE_CANNOT_HAVE_REQUIRED_METADATA,
-]);
 
 export default function CreateWaveDrops({
   waveType,
@@ -79,14 +71,15 @@ export default function CreateWaveDrops({
     });
   };
 
+  const setBindingRules = (terms: string | null) => {
+    setDrops({
+      ...drops,
+      terms,
+      signatureRequired: Boolean(normalizeWaveCustomRules(terms)),
+    });
+  };
+
   const isNotChatType = waveType !== ApiWaveType.Chat;
-  const isCustomized =
-    drops.requiredTypes.length > 0 ||
-    drops.requiredMetadata.length > 0 ||
-    drops.noOfApplicationsAllowedPerParticipant !== null;
-  const hasAdvancedError = errors.some((error) =>
-    ADVANCED_DROPS_ERRORS.has(error)
-  );
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-y-6">
@@ -102,13 +95,17 @@ export default function CreateWaveDrops({
           onChange={onSubmissionStrategyChange}
         />
       )}
-      <CreateWaveAdvancedSection
-        title={t(locale, "waves.create.drops.requirementsTitle")}
-        isCustomized={isCustomized}
-        hasError={hasAdvancedError}
-        variant="filled"
+      <section
+        aria-labelledby="create-wave-submission-requirements-title"
+        className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900/60"
       >
-        <div className="tw-flex tw-flex-col tw-gap-y-6 tw-p-5">
+        <h3
+          id="create-wave-submission-requirements-title"
+          className={`${CREATE_WAVE_FORM_STYLES.sectionTitle} tw-px-5 tw-py-4`}
+        >
+          {t(locale, "waves.create.drops.requirementsTitle")}
+        </h3>
+        <div className="tw-flex tw-flex-col tw-gap-y-6 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-p-5">
           <CreateWaveDropsTypes
             requiredTypes={drops.requiredTypes}
             onRequiredTypeChange={onRequiredTypeChange}
@@ -161,8 +158,16 @@ export default function CreateWaveDrops({
               </p>
             </div>
           )}
+          {isNotChatType && (
+            <div className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-pt-6">
+              <CreateWaveTermsOfService
+                terms={drops.terms}
+                setTerms={setBindingRules}
+              />
+            </div>
+          )}
         </div>
-      </CreateWaveAdvancedSection>
+      </section>
     </div>
   );
 }

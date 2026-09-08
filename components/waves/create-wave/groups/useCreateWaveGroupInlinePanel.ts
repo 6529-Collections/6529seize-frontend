@@ -429,7 +429,7 @@ function useCreateWaveGroupInlinePanelController({
     if (builder.criteriaReplacementActive) {
       if (builder.panel === PANEL_ACTIONS || builder.panel === PANEL_SEARCH) {
         setBuilder((current) =>
-          openInlineGroupPanel({ current, panel: PANEL_RULE_LIST })
+          openInlineGroupPanel({ current, panel: PANEL_IDENTITY })
         );
       }
       return;
@@ -598,7 +598,7 @@ export function useCreateWaveGroupInlinePanel({
       if (startMode === "criteria") {
         return {
           ...initial,
-          panel: PANEL_RULE_LIST,
+          panel: PANEL_IDENTITY,
           criteriaReplacementActive: true,
         };
       }

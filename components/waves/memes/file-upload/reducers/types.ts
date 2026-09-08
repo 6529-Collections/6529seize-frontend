@@ -59,6 +59,7 @@ export type FileUploaderAction =
   | { type: "RESET_STATE" }
   | { type: "START_PROCESSING"; payload: File }
   | { type: "PROCESSING_SUCCESS"; payload: { objectUrl: string; file: File } }
+  | { type: "VALIDATION_ERROR"; payload: string }
   | { type: "PROCESSING_ERROR"; payload: string }
   | { type: "PROCESSING_RETRY" }
   | { type: "PROCESSING_TIMEOUT" }

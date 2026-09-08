@@ -4,6 +4,7 @@ import type { UploadAreaProps } from '../reducers/types';
 import ErrorMessage from './ErrorMessage';
 import FileTypeIndicator from './FileTypeIndicator';
 import { SUBMISSION_UI_FORMAT_GROUPS } from '@/constants/submission-media.constants';
+import { FILE_SIZE_LIMIT_LABEL } from '../utils/constants';
 
 /**
  * Upload Area Component
@@ -20,7 +21,7 @@ const UploadArea: React.FC<UploadAreaProps> = ({
   hasRecoveryOption,
   onRetry
 }) => (
-  <div className="tw-absolute tw-inset-0 tw-flex tw-flex-col tw-items-center tw-justify-center tw-p-6">
+  <div className="tw-absolute tw-inset-0 tw-flex tw-flex-col tw-items-center tw-justify-center tw-p-6 tw-pb-24 sm:tw-pb-6">
     {/* Subtle animated dashed border around entire area */}
     <div className="tw-absolute tw-inset-[10px] tw-border-2 tw-border-dashed tw-border-iron-700 group-hover:tw-border-primary-500/30 tw-rounded-lg tw-transition-all tw-duration-300" />
     <div className="tw-absolute tw-inset-[10px] tw-border tw-border-dashed tw-border-iron-600/20 group-hover:tw-border-iron-500/30 tw-rounded-lg tw-animate-pulse tw-transition-all tw-duration-300" />
@@ -87,7 +88,7 @@ const UploadArea: React.FC<UploadAreaProps> = ({
           onRetry={onRetry}
         />
       )}
-      <div className="tw-flex tw-flex-wrap tw-justify-center tw-gap-3 sm:tw-gap-4">
+      <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-center tw-gap-3 sm:tw-gap-4">
         {SUBMISSION_UI_FORMAT_GROUPS.map((formatGroup) => (
           <FileTypeIndicator
             key={formatGroup.kind}
@@ -95,6 +96,9 @@ const UploadArea: React.FC<UploadAreaProps> = ({
             label={formatGroup.label}
           />
         ))}
+        <span className="tw-whitespace-nowrap tw-text-xs tw-font-medium tw-text-iron-400">
+          Max {FILE_SIZE_LIMIT_LABEL}
+        </span>
       </div>
     </div>
     
@@ -109,7 +113,7 @@ const UploadArea: React.FC<UploadAreaProps> = ({
         <div className="tw-flex tw-flex-col tw-items-center tw-gap-3">
           <div className="tw-h-12 tw-w-12 tw-border-t-2 tw-border-b-2 tw-border-primary-500 tw-rounded-full tw-animate-spin" />
           <span className="tw-text-iron-300 tw-font-medium">Processing file...</span>
-          <span className="tw-text-iron-400 tw-text-xs">This may take longer for large files (up to 100MB)</span>
+          <span className="tw-text-iron-400 tw-text-xs">Large files may take longer.</span>
         </div>
       </motion.div>
     )}

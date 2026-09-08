@@ -6,6 +6,13 @@ import { TRANSFER_MESSAGES } from "@/i18n/messages/transfer";
 import type { MessageKey } from "@/i18n/messages/en-US";
 
 export const EN_GB_MESSAGES = {
+  "waves.subwaves.accessWarning.title": "Parent wave restrictions apply",
+  "waves.subwaves.accessWarning.message":
+    "Some members of this group cannot access the parent wave, so they will not be able to open this subwave. You can still use this group.",
+  "waves.subwaves.accessWarning.continue": "Continue anyway",
+  "waves.subwaves.accessWarning.back": "Go back",
+  "waves.subwaves.accessWarning.checkFailed":
+    "Couldn't check parent wave access. Please try again.",
   "network.groupInspection.bulkRep": "REP everyone matching criteria",
   "network.groupInspection.bulkNic": "NIC everyone matching criteria",
   "network.groupInspection.bulkActionsLabel": "Bulk rating actions",
@@ -495,6 +502,48 @@ export const EN_GB_MESSAGES = {
   "waves.poll.composer.validation.futureClosingTime":
     "Choose a future closing time.",
   "common.close": "Close",
+  "waves.create.dialog.subwaveOfTitle": 'Create subwave of "{parentWaveName}"',
+  "waves.create.overview.subwaveName": "Subwave Name",
+  "waves.create.overview.subwavePicture": "Subwave Profile Picture",
+  "waves.create.overview.subwaveType": "Subwave Type",
+  "waves.create.overview.type": "Wave Type",
+  "waves.create.overview.subwaveTypeRequired":
+    "Please choose a subwave type to continue.",
+  "waves.create.overview.typeRequired":
+    "Please choose a wave type to continue.",
+  "waves.create.outcomes.showOutcomes": "Show outcomes menu section",
+  "waves.create.outcomes.showOutcomesDescription":
+    "Shows the Outcomes tab and reward details on leaderboard and winner cards. Rewards still apply when hidden.",
+  "waves.create.rules.title": "Guidelines",
+  "waves.create.rules.guidelinesFieldLabel": "Chat guidelines",
+  "waves.create.rules.guidelinesDescription":
+    "These guidelines will be shown to user when they send their first chat message",
+  "waves.create.rules.guidelinesPlaceholder": "Add chat guidelines...",
+  "waves.create.rules.acceptanceTitle": "Rules that require acceptance",
+  "waves.create.rules.acceptanceDescription":
+    "Participants must accept these rules and sign with their wallet before submitting.",
+  "waves.create.rules.acceptancePlaceholder":
+    "Enter rules participants must accept before submitting...",
+  "waves.create.rules.acceptanceHelper":
+    "Leave empty if no rules require signing.",
+  "waves.create.rules.acceptanceCharacterCount": "Characters: {count}",
+  "waves.create.review.title": "Overview",
+  "waves.create.review.description":
+    "Review your wave before creating it. Use Previous or the completed steps to make changes.",
+  "waves.create.review.submit": "Confirm and create",
+  "waves.create.review.uploadsPending": "Wait for image uploads to finish.",
+  "waves.create.review.setup": "Setup",
+  "waves.create.review.name": "Name",
+  "waves.create.review.parent": "Parent wave",
+  "waves.create.review.picture": "Wave profile picture",
+  "waves.create.review.manual": "Manual",
+  "waves.create.review.outcomeType": "Outcome type",
+  "waves.create.review.reward": "Reward",
+  "waves.create.review.category": "Category",
+  "waves.create.review.total": "Total",
+  "waves.create.review.winner": "Winner {position}",
+  "waves.create.review.perApprovedDrop": "Per approved drop",
+  "waves.create.review.outcome": "Outcome {number}",
   "waves.create.dialog.subwaveTitle": "Create subwave",
   "waves.create.dialog.waveTitle": "Create Wave",
   "waves.create.actions.cancel": "Cancel",
@@ -515,8 +564,12 @@ export const EN_GB_MESSAGES = {
   "waves.create.groups.title": "Access",
   "waves.create.groups.description":
     "Choose who can access, participate in, and manage this wave.",
-  "waves.create.groups.viewGroupName": "Visibility",
+  "waves.create.groups.viewGroupName": "Who can access this wave",
+  "waves.create.groups.accessHelper":
+    "By default, everyone with access can participate. Only you can administer the wave.",
+  "waves.create.groups.customizePermissions": "Customise other permissions",
   "waves.create.groups.adminGroupName": "Admins",
+  "waves.create.groups.currentGroup": "Before editing",
   "waves.create.groups.currentGroupWithName": "Current group: {name}",
   "waves.create.groups.dialog.addTitle": "Add group",
   "waves.create.groups.dialog.changeTitle": "Change group",
@@ -562,6 +615,11 @@ export const EN_GB_MESSAGES = {
   "waves.create.groups.editAccess.confirmUseVisibility":
     "Use visibility criteria",
   "waves.create.groups.actions.editCriteria": "Edit criteria",
+  "waves.create.groups.actions.edit": "Edit",
+  "waves.create.groups.actions.matchWaveAccess": "Match wave access",
+  "waves.create.groups.draft.saveChanges": "Save changes",
+  "waves.create.groups.draft.afterEditing": "After editing",
+  "waves.create.groups.rules.configured": "Configured",
   "waves.create.groups.inlineIdentities.modeLabel": "Identity treatment",
   "waves.create.groups.inlineIdentities.included.label": "Included",
   "waves.create.groups.inlineIdentities.included.searchLabel":

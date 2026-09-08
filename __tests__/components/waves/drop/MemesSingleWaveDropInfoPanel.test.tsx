@@ -244,6 +244,20 @@ describe("MemesSingleWaveDropInfoPanel", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("keeps interactive HTML hero media on the viewport-aware renderer", () => {
+    render(
+      <MemesSingleWaveDropInfoPanel
+        drop={dropWithMedia("text/html", "interactive.html")}
+        wave={null}
+      />
+    );
+
+    expect(screen.getByTestId("media")).toHaveAttribute(
+      "data-load-strategy",
+      "in-view"
+    );
+  });
+
   it("passes single-drop close callback to resubmit source deletion", async () => {
     const onClose = jest.fn();
 

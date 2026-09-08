@@ -14,7 +14,7 @@ jest.mock("@/components/utils/button/PrimaryButton", () => {
 });
 
 describe("CreateWaveNextStep", () => {
-  it("renders Next when step not description", async () => {
+  it("renders Next before the final review", async () => {
     const user = userEvent.setup();
     const onClick = jest.fn();
     render(
@@ -29,17 +29,17 @@ describe("CreateWaveNextStep", () => {
     expect(onClick).toHaveBeenCalled();
   });
 
-  it("renders Complete when step is description", () => {
+  it("renders confirmation only on final review", () => {
     render(
       <CreateWaveNextStep
         disabled={false}
         submitting={true}
-        step={CreateWaveStep.DESCRIPTION}
+        step={CreateWaveStep.REVIEW}
         onClick={jest.fn()}
       />
     );
-    expect(screen.getByText("Complete")).toBeInTheDocument();
-    expect(screen.getByText("Complete")).toBeDisabled();
+    expect(screen.getByText("Confirm and create")).toBeInTheDocument();
+    expect(screen.getByText("Confirm and create")).toBeDisabled();
   });
 
   it("disables Next while its step is submitting", () => {

@@ -14,7 +14,6 @@ run-name: Production deploy ${{ github.sha }}
 permissions:
   actions: read
   contents: read
-  packages: read
 
 concurrency:
   group: web-deploy-prod

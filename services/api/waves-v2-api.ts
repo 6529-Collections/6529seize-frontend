@@ -155,7 +155,7 @@ export function getWavesV2OverviewQueryKeyParams({
 const getWaveOverviewContext = (wave: ApiWaveOverview) =>
   wave.context_profile_context;
 
-const mapApiWaveOverviewToSidebarWave = (
+export const mapApiWaveOverviewToSidebarWave = (
   wave: ApiWaveOverview
 ): SidebarWave => {
   const context = getWaveOverviewContext(wave);

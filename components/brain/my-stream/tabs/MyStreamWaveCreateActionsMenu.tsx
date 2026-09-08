@@ -77,7 +77,7 @@ export default function MyStreamWaveCreateActionsMenu({
     ? "tw-group tw-flex tw-size-11 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-300 focus-visible:tw-outline-none"
     : "tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-text-iron-200 tw-transition tw-duration-150 hover:tw-border-iron-500 hover:tw-bg-iron-800 hover:tw-text-white";
   const trigger = isMobile ? (
-    <span className="tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-md tw-bg-iron-900/80 tw-ring-1 tw-ring-inset tw-ring-white/10 tw-transition-colors tw-duration-150 group-active:tw-bg-iron-800 group-active:tw-text-white group-focus-visible:tw-ring-2 group-focus-visible:tw-ring-primary-300 group-focus-visible:tw-ring-offset-2 group-focus-visible:tw-ring-offset-black desktop-hover:group-hover:tw-bg-iron-800 desktop-hover:group-hover:tw-text-white motion-reduce:tw-transition-none">
+    <span className="tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-md tw-bg-iron-900/80 tw-ring-1 tw-ring-inset tw-ring-white/10 tw-transition-colors tw-duration-150 group-focus-visible:tw-ring-2 group-focus-visible:tw-ring-primary-300 group-focus-visible:tw-ring-offset-2 group-focus-visible:tw-ring-offset-black group-active:tw-bg-iron-800 group-active:tw-text-white desktop-hover:group-hover:tw-bg-iron-800 desktop-hover:group-hover:tw-text-white motion-reduce:tw-transition-none">
       <PlusIcon className="tw-size-4" aria-hidden="true" />
     </span>
   ) : (
@@ -129,7 +129,9 @@ export default function MyStreamWaveCreateActionsMenu({
           onClose={() => setIsCreateSubwaveOpen(false)}
           profile={connectedProfile}
           parentWaveId={wave.id}
+          parentWaveName={wave.name}
           parentAdminGroupId={parentAdminGroupId}
+          parentViewGroupId={wave.visibility.scope.group?.id ?? null}
         />
       )}
     </>
