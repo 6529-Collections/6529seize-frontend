@@ -36,7 +36,7 @@ export default function MemesQuickVoteControls({
       className="tw-relative tw-flex tw-shrink-0 tw-flex-col tw-pb-[max(env(safe-area-inset-bottom,0px),1rem)] md:tw-h-full md:tw-min-h-0 md:tw-pb-5"
     >
       <div className="tw-hidden tw-shrink-0 tw-pb-5 tw-pl-6 tw-pr-20 tw-pt-6 md:tw-block">
-        <div className="tw-flex tw-min-h-11 tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1 tw-text-xs tw-leading-4 tw-tabular-nums">
+        <div className="tw-flex tw-min-h-11 tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1 tw-text-xs tw-tabular-nums tw-leading-4">
           <span className="tw-font-semibold tw-text-iron-300">
             {t(locale, "memes.quickVote.leftThisRound", {
               count: formatInteger(locale, leftThisRoundCount),
