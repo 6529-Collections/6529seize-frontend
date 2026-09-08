@@ -21,12 +21,6 @@ jest.mock(
   })
 );
 
-jest.mock("@/components/utils/button/SecondaryButton", () => (props: any) => (
-  <button onClick={props.onClicked} disabled={props.disabled}>
-    {props.children}
-  </button>
-));
-
 jest.mock("@/components/utils/button/PrimaryButton", () => (props: any) => (
   <button
     onClick={props.onClicked}

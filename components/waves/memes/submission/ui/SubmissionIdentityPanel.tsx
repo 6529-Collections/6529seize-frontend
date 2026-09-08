@@ -104,7 +104,7 @@ export function SubmissionIdentityPanel({
             className={`tw-absolute -tw-bottom-0.5 -tw-right-0.5 tw-size-2.5 tw-rounded-full tw-ring-2 tw-ring-iron-950 ${address ? "tw-bg-emerald-400" : "tw-bg-amber-400"}`}
           />
         </button>
-        <p className="tw-mb-0 tw-min-w-0 tw-break-words tw-text-iron-400">
+        <p className="tw-m-0 tw-min-w-0 tw-break-words tw-leading-5 tw-text-iron-400">
           <span className="tw-sr-only">
             {t(locale, "memes.submission.identity.submittingAs")}{" "}
           </span>
@@ -115,7 +115,7 @@ export function SubmissionIdentityPanel({
       </div>
       {statusMessageKey && (
         <p
-          className={`tw-mb-0 tw-flex tw-min-w-0 tw-items-center tw-gap-1 ${statusColor}`}
+          className={`tw-m-0 tw-flex tw-min-w-0 tw-items-center tw-gap-1 ${statusColor}`}
           role={isWarning ? "alert" : "status"}
         >
           {t(locale, statusMessageKey)}

@@ -1,6 +1,6 @@
 "use client";
 
-import SecondaryButton from "@/components/utils/button/SecondaryButton";
+import Button from "@/components/utils/button/Button";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -66,16 +66,17 @@ export function MemesSubmissionPreviewScreen({
         />
       </div>
 
-      <div className="tw-mt-auto tw-flex tw-flex-col tw-gap-3 tw-border-t tw-border-iron-800 tw-px-4 tw-pt-3 md:tw-flex-row md:tw-items-center md:tw-justify-between">
+      <div className="tw-mt-auto tw-flex tw-flex-col tw-gap-2 tw-border-t tw-border-iron-800 tw-px-4 tw-pt-3 md:tw-flex-row md:tw-items-center md:tw-justify-between md:tw-gap-3">
         <SubmissionIdentityPanel identity={identity} />
         <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2 md:tw-shrink-0">
-          <SecondaryButton
-            onClicked={onBackToEdit}
+          <Button
+            variant="secondary"
+            onClick={onBackToEdit}
             disabled={isSubmitting}
-            className="tw-flex-1 md:tw-flex-none"
+            className="tw-flex-1 !tw-border-transparent !tw-bg-transparent !tw-shadow-none md:tw-flex-none"
           >
             {t(locale, "memes.submission.action.backToEdit")}
-          </SecondaryButton>
+          </Button>
           <SubmissionActionButton
             identity={identity}
             isFormValid={true}
