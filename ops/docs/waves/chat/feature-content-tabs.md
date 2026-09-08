@@ -7,8 +7,10 @@ wave sections such as `Chat`, `Leaderboard`, `Sales`, `Winners`, and other
 wave-dependent views.
 
 In the `My Votes` tab, non-image drops use a preview image from drop metadata when available, so rows render quickly and stay stable in list form.
-The app stores the last selected tab for each wave on the current device, then
-restores it whenever that wave is opened again and the tab is still available.
+The web layout stores the last selected tab for each wave on the current device,
+then restores it when that wave is opened again and the tab is still available.
+In the native app, Back restores the wave section from that navigation-history
+entry. Opening another wave normally still uses its default section.
 
 ## Location in the Site
 
@@ -33,9 +35,10 @@ restores it whenever that wave is opened again and the tab is still available.
 3. If multiple sections are available, the tab strip appears and selects the
    active tab:
    - Most waves default to `Chat`.
-   - Memes waves default to `Leaderboard` when that tab is available.
-   - Returning to a previously viewed wave restores the last saved valid tab when
-     it is still available.
+   - On web, Memes waves default to `Leaderboard` when that tab is available;
+     a fresh native-app visit defaults to `Chat` while voting is open.
+   - Web restores a previously saved valid tab. Native app Back restores the
+     section from that visit when it is still available.
 4. Select a tab to switch sections.
 5. The main content panel updates in place while staying on the same route.
 6. When open polls still need the signed-in user's answer and the user can
@@ -62,8 +65,10 @@ restores it whenever that wave is opened again and the tab is still available.
   video, or interactive media is indicated with a small badge at the title row.
 - In `My Votes`, non-image drops show a static preview thumbnail in the row when
   `preview_image` metadata is valid.
-- Move between waves and return later; the previously selected tab is restored for the
-  wave if it remains available.
+- On web, move between waves and return later to restore the saved valid tab.
+- In the native app, open an author profile from Leaderboard and use Back to
+  return to Leaderboard. Repeated profile visits preserve the same behavior.
+- A link targeting a specific chat message still opens Chat.
 - Polls can allow every reader to respond or limit responses to people who can
   chat. Readers who cannot respond still see poll results, but vote controls are
   hidden.
