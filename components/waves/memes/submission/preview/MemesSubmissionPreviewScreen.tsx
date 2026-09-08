@@ -66,13 +66,13 @@ export function MemesSubmissionPreviewScreen({
         />
       </div>
 
-      <div className="tw-mt-auto tw-space-y-3 tw-border-t tw-border-iron-800 tw-px-4 tw-pt-3">
+      <div className="tw-mt-auto tw-flex tw-flex-col tw-gap-3 tw-border-t tw-border-iron-800 tw-px-4 tw-pt-3 md:tw-flex-row md:tw-items-center md:tw-justify-between">
         <SubmissionIdentityPanel identity={identity} />
-        <div className="tw-grid tw-gap-2 sm:tw-flex sm:tw-items-center sm:tw-justify-between">
+        <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2 md:tw-shrink-0">
           <SecondaryButton
             onClicked={onBackToEdit}
             disabled={isSubmitting}
-            className="tw-w-full sm:tw-w-auto"
+            className="tw-flex-1 md:tw-flex-none"
           >
             {t(locale, "memes.submission.action.backToEdit")}
           </SecondaryButton>
@@ -84,7 +84,7 @@ export function MemesSubmissionPreviewScreen({
             uploadProgress={uploadProgress}
             submitLabel={resolvedSubmitLabel}
             onSubmit={onSubmit}
-            className="tw-w-full sm:tw-w-auto"
+            className="tw-flex-1 md:tw-flex-none"
           />
         </div>
       </div>

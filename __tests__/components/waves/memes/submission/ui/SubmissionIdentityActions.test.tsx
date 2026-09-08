@@ -92,7 +92,7 @@ describe("Memes submission identity actions", () => {
     expect(
       screen.getByRole("button", { name: "Wallet connected" })
     ).toBeInTheDocument();
-    expect(screen.getByText("Eligible to submit")).toBeInTheDocument();
+    expect(screen.queryByText("Eligible to submit")).not.toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Submit Artwork" }));
     expect(onSubmit).toHaveBeenCalledTimes(1);
   });
@@ -131,7 +131,7 @@ describe("Memes submission identity actions", () => {
     const { onSubmit } = renderAction({ identity });
 
     expect(screen.getByText("@alice")).toBeInTheDocument();
-    expect(screen.getByText("Eligible to submit")).toBeInTheDocument();
+    expect(screen.queryByText("Eligible to submit")).not.toBeInTheDocument();
     expect(
       screen.queryByText(/connect a wallet to confirm/i)
     ).not.toBeInTheDocument();

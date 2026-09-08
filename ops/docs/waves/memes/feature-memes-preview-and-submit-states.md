@@ -38,9 +38,8 @@ On `success`, the modal auto-closes after a short delay.
    - click `Submit Artwork` directly
 3. If you open preview, review both card layouts and use `Back to Edit` if
    needed.
-4. Confirm the avatar, `Submitting as` profile, and eligibility in the compact
-   strip above the action buttons. The authenticated profile stays visible even
-   when its wallet is disconnected.
+4. Confirm the submitting profile's avatar and handle in the compact footer.
+   The authenticated profile stays visible even when its wallet is disconnected.
 5. If the wallet is disconnected, click `Connect Wallet`. Connecting never
    starts submission automatically.
 6. After the connected profile is shown and confirmed as eligible, click
@@ -53,14 +52,16 @@ On `success`, the modal auto-closes after a short delay.
 
 - `Preview` is optional; direct submit from `Additional Information` is
   supported.
-- Both finish paths show the authenticated submitting profile in a compact strip
-  above the existing action buttons, without a wallet address or wallet-provider
-  name.
-- The strip's amber dot means that profile's wallet is not connected; green means
-  it is connected. Hover, focus, or tap the dot for `Wallet not connected` or
+- Both finish paths show the authenticated submitting profile on the left and
+  grouped action buttons on the right in one desktop footer row. On smaller
+  screens, the buttons sit below the identity and can wrap when needed. There is
+  no visible `Submitting as` label, wallet address, or wallet-provider name.
+- The avatar's amber dot means that profile's wallet is not connected; green means
+  it is connected. Hover, focus, or tap the avatar for `Wallet not connected` or
   `Wallet connected`; press `Escape` or move focus away to dismiss the tooltip.
-- Eligibility is shown separately from wallet connection. An eligible profile
-  still needs its wallet connected before submitting.
+- Normal eligibility is not labeled. Eligibility checks, errors, and blocking
+  explanations remain visible. An eligible profile still needs its wallet
+  connected before submitting.
 - Connecting a different wallet does not by itself change the active submitting
   profile. If A remains active while B's wallet is connected, the strip still
   shows A with an amber dot. Explicitly switching profiles updates the strip and
