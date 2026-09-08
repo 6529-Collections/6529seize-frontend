@@ -6085,6 +6085,8 @@
         "The My Votes tab is documented under wave leaderboard features.",
         "It helps a user inspect their own voting activity where the wave supports it.",
         "Availability depends on wave type, eligibility, and voting state.",
+        "Click a row outside its controls or use its artwork or title buttons to open the drop. The artwork and title buttons support Enter and Space. Checkboxes, vote controls, and profile links keep their own actions. Selecting text does not open the drop. Use the checkbox beside the artwork or Select all to select loaded rows for reset.",
+        "Reset votes opens a confirmation showing the selected count. Confirming sets those votes to zero; cancelling leaves votes unchanged.",
         "Rows can include an Explain action that opens a normal drop reply prefilled with a vote rationale prefix without submitting or changing the vote."
       ],
       "canonical_path": "/waves",
