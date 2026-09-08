@@ -126,6 +126,7 @@ export default function MemesQuickVoteActionBar({
             {hasQuickAmounts && (
               <div
                 aria-hidden={isCustomOpen}
+                inert={isCustomOpen}
                 className={clsx(
                   "tw-absolute tw-inset-0 tw-h-full tw-w-full tw-transform-gpu tw-transition-all tw-duration-300 tw-ease-out motion-reduce:tw-transform-none motion-reduce:tw-transition-none",
                   isCustomOpen
