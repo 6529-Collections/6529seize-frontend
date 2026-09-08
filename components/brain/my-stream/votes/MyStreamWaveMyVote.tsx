@@ -213,7 +213,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
   };
 
   return (
-    <article
+    <article // NOSONAR -- S1082/S6847: native artwork/title buttons provide keyboard activation.
       aria-labelledby={titleId}
       onClick={handleRowClick}
       className={`tw-cursor-pointer tw-px-2 tw-py-5 tw-transition-colors tw-duration-200 tw-@container/my-vote motion-reduce:tw-transition-none sm:tw-px-4 sm:tw-py-6 ${
