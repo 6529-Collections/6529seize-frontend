@@ -66,7 +66,7 @@ export function MemesSubmissionPreviewScreen({
         />
       </div>
 
-      <div className="tw-mt-auto tw-space-y-3 tw-border-t tw-border-iron-800 tw-px-4 tw-pt-6">
+      <div className="tw-mt-auto tw-space-y-3 tw-border-t tw-border-iron-800 tw-px-4 tw-pt-3">
         <SubmissionIdentityPanel identity={identity} />
         <div className="tw-grid tw-gap-2 sm:tw-flex sm:tw-items-center sm:tw-justify-between">
           <SecondaryButton

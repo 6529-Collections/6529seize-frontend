@@ -118,7 +118,8 @@ describe("useMemesSubmissionIdentity", () => {
     );
 
     expect(result.current.status).toBe("disconnected");
-    expect(result.current.profile).toBeNull();
+    expect(result.current.profile).toBe(alice);
+    expect(result.current.profileStatus).toBe("eligible");
     expect(result.current.canSubmit).toBe(false);
 
     await act(async () => {
@@ -138,6 +139,21 @@ describe("useMemesSubmissionIdentity", () => {
     expect(result.current.profile?.handle).toBe("alice");
     expect(result.current.address).toBe("0xaaa");
     expect(result.current.canSubmit).toBe(true);
+    expect(mockCommonApiFetch).not.toHaveBeenCalled();
+  });
+
+  it("keeps the active authenticated profile when another wallet cannot sign for it", () => {
+    connectState = { ...connectState, canSignActiveWallet: false };
+    const { result } = renderHook(
+      () => useMemesSubmissionIdentity(eligibleWave),
+      { wrapper: createWrapper() }
+    );
+
+    expect(result.current.profile).toBe(alice);
+    expect(result.current.profileStatus).toBe("eligible");
+    expect(result.current.address).toBeNull();
+    expect(result.current.status).toBe("disconnected");
+    expect(result.current.canSubmit).toBe(false);
     expect(mockCommonApiFetch).not.toHaveBeenCalled();
   });
 
@@ -163,6 +179,7 @@ describe("useMemesSubmissionIdentity", () => {
       expect(result.current.status).toBe("checking-eligibility");
     });
     expect(result.current.profile?.handle).toBe("bob");
+    expect(result.current.profileStatus).toBe("checking-eligibility");
     expect(result.current.canSubmit).toBe(false);
     expect(mockUseWave).not.toHaveBeenCalledWith(undefined);
 
