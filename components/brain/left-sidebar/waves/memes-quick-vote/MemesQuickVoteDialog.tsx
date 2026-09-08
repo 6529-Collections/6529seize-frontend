@@ -545,7 +545,7 @@ function MemesQuickVoteDialogContent({
             onClick={onClose}
             data-autofocus="true"
             className="tw-inline-flex tw-size-11 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.04] tw-text-iron-300 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 active:tw-bg-white/10"
-            aria-label="Close quick vote"
+            aria-label={t(locale, "memes.quickVote.closeDialog")}
           >
             <XMarkIcon className="tw-size-5 tw-shrink-0" />
           </button>
@@ -614,6 +614,7 @@ export default function MemesQuickVoteDialog({
   unratedCount,
   votingLabel,
 }: MemesQuickVoteDialogProps) {
+  const locale = useBrowserLocale();
   const dialogRef = useRef<HTMLDialogElement | null>(null);
   const previouslyFocusedElementRef = useRef<HTMLElement | null>(null);
   const previousBodyOverflowRef = useRef("");
@@ -683,9 +684,9 @@ export default function MemesQuickVoteDialog({
     } else if (isExhausted) {
       dialogBody = (
         <MemesQuickVoteDialogDoneState
-          description="No unrated memes are left in quick vote right now."
+          description={t(locale, "memes.quickVote.doneDescription")}
           onClose={onClose}
-          title="You're all caught up"
+          title={t(locale, "memes.quickVote.doneTitle")}
         />
       );
     } else if (!activeDrop && hasDiscoveryError) {
@@ -722,7 +723,7 @@ export default function MemesQuickVoteDialog({
       ref={dialogRef}
       data-session-id={sessionId}
       className="tailwind-scope tw-fixed tw-inset-0 tw-m-0 tw-h-[100dvh] tw-max-h-[100dvh] tw-w-screen tw-max-w-none tw-overflow-hidden tw-border-none tw-bg-transparent tw-p-0"
-      aria-label="Memes quick vote"
+      aria-label={t(locale, "memes.quickVote.dialogLabel")}
     >
       {isOpen && (
         <div
@@ -747,7 +748,7 @@ export default function MemesQuickVoteDialog({
                   ? "tw-inline-flex md:tw-inline-flex"
                   : "tw-hidden md:tw-inline-flex"
               }`}
-              aria-label="Close quick vote"
+              aria-label={t(locale, "memes.quickVote.closeDialog")}
             >
               <XMarkIcon className="tw-size-5 tw-shrink-0" />
             </button>
