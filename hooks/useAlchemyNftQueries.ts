@@ -1,11 +1,7 @@
 "use client";
 
-import {
-  keepPreviousData,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
-import { useEffect, useMemo } from "react";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
 
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { publicEnv } from "@/config/env";
