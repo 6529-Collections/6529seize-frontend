@@ -115,7 +115,7 @@ function NotificationItemComponent({
       <div className="tw-relative lg:tw-hidden">
         <div className="tw-h-full tw-w-[1px] -tw-translate-x-8 tw-bg-iron-800"></div>
       </div>
-      <div className="tw-w-full">{getComponent()}</div>
+      <div className="tw-w-full tw-min-w-0">{getComponent()}</div>
     </div>
   );
 }

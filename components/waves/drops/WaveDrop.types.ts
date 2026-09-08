@@ -1,6 +1,7 @@
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ImageScale } from "@/helpers/image.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import type { QuickCurationAction } from "@/hooks/drops/useCanShowDropCurationsAction";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import type { ReactNode } from "react";
 import type {
@@ -29,6 +30,10 @@ export interface WaveDropProps {
   readonly timestampLayout?: DropTimestampLayout | undefined;
   readonly showInteractions?: boolean | undefined;
   readonly showStandaloneActionsButton?: boolean | undefined;
+  readonly standaloneQuickRemoveCuration?:
+    | QuickCurationAction
+    | null
+    | undefined;
   readonly inlineAuthorOnDesktop?: boolean | undefined;
   readonly mediaImageScale?: ImageScale | undefined;
   readonly fullWidthMedia?: boolean | undefined;

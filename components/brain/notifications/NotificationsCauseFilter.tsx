@@ -5,6 +5,7 @@ import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrappe
 import CommonDropdownItemsDefaultWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsDefaultWrapper";
 import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 import { usePrefetchNotifications } from "@/hooks/useNotificationsQuery";
 import type { SupportedLocale } from "@/i18n/locales";
@@ -100,11 +101,13 @@ function FilterMenuItem({
   title,
   selected,
   onSelect,
+  onDismiss,
   onMouseEnter,
 }: {
   readonly title: string;
   readonly selected: boolean;
   readonly onSelect: () => void;
+  readonly onDismiss: () => void;
   readonly onMouseEnter?: (() => void) | undefined;
 }) {
   return (
@@ -118,6 +121,12 @@ function FilterMenuItem({
           onSelect();
         }}
         onMouseEnter={onMouseEnter}
+        onKeyDown={(event) => {
+          if (event.key === "Escape") {
+            event.stopPropagation();
+            onDismiss();
+          }
+        }}
         className={`tw-flex tw-w-full tw-items-center tw-gap-3 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-3 tw-py-2.5 tw-text-left tw-text-sm tw-font-medium tw-transition-colors tw-duration-200 focus-visible:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-primary-400 ${
           selected
             ? "tw-text-primary-400 desktop-hover:hover:tw-bg-primary-400/10"
@@ -186,6 +195,7 @@ export default function NotificationsCauseFilter({
   const [openPresentation, setOpenPresentation] =
     useState<FilterPresentation | null>(null);
   const locale = useBrowserLocale();
+  const { isApp } = useDeviceInfo();
   const isMobileLayoutViewport = useIsMobileLayoutViewport();
   const buttonRef = useRef<HTMLButtonElement>(null);
   const menuBaseId = useId();
@@ -250,13 +260,24 @@ export default function NotificationsCauseFilter({
     });
   };
 
+  const dismissDesktopMenu = () => {
+    setOpenPresentation(null);
+    buttonRef.current?.focus({ preventScroll: true });
+  };
+
   return (
     <div className="tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-3 tw-pb-2 tw-pt-2 lg:tw-pt-4">
-      <h1 className="tw-m-0 tw-min-w-0 tw-truncate tw-text-xl tw-font-semibold tw-text-iron-100">
+      <h1
+        className={
+          isApp
+            ? "tw-sr-only"
+            : "tw-m-0 tw-min-w-0 tw-truncate tw-text-xl tw-font-semibold tw-text-iron-100"
+        }
+      >
         {t(locale, "profilePreferences.notifications.heading")}
       </h1>
 
-      <div className="tw-relative tw-w-36 tw-flex-shrink-0 sm:tw-w-56">
+      <div className="tw-relative tw-ml-auto tw-w-36 tw-flex-shrink-0 sm:tw-w-56">
         <button
           id={triggerId}
           ref={buttonRef}
@@ -295,6 +316,7 @@ export default function NotificationsCauseFilter({
             title={t(locale, "profilePreferences.notifications.ALL.label")}
             selected={selectedFilters.length === 0}
             onSelect={() => updateSelectedFilters([])}
+            onDismiss={dismissDesktopMenu}
           />
           {NOTIFICATION_FILTERS.map((filter) => (
             <FilterMenuItem
@@ -302,6 +324,7 @@ export default function NotificationsCauseFilter({
               title={t(locale, filter.labelKey)}
               selected={isFilterSelected(filter, activeCauses)}
               onSelect={() => toggleFilter(filter)}
+              onDismiss={dismissDesktopMenu}
               onMouseEnter={() => prefetchFilter(filter)}
             />
           ))}

@@ -75,6 +75,8 @@ Not shown on:
 
 - Named Curation rows are shown only when
   `authenticated_user_can_curate` is true for the current account.
+- In Curation tabs, a post's standalone `More` menu offers `Remove` only when
+  permission to manage that Curation is confirmed; otherwise the menu is hidden.
 - If Curations exist but none are manageable, the dialog explains that state
   and offers creation when allowed.
 - If a drop is not curatable for your account, specialized leaderboard

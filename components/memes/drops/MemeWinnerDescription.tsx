@@ -6,10 +6,8 @@ export default function MemeWinnerDescription({
   description,
 }: MemeWinnerDescriptionProps) {
   return (
-    <div>
-      <p className="tw-mb-0 tw-whitespace-pre-line tw-text-md tw-text-iron-400">
-        {description}
-      </p>
-    </div>
+    <p className="tw-m-0 tw-whitespace-pre-line tw-text-md tw-leading-6 tw-text-iron-400 [overflow-wrap:anywhere]">
+      {description}
+    </p>
   );
 }
