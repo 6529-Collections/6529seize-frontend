@@ -22,6 +22,6 @@ done
 
 bash ./scripts/setup-codex-worktree.sh
 
-# Codex captures the successful setup environment. Remove an inherited runtime
-# credential so it is never persisted in that capture.
-unset NODE_AUTH_TOKEN'''
+# Codex captures the successful setup environment. Public package installation
+# needs no token, so do not persist inherited package credentials.
+unset NODE_AUTH_TOKEN NPM_TOKEN'''

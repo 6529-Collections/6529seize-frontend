@@ -22,7 +22,6 @@ The supported entrypoint is the repo-local `6529` command:
 6529 audit:fix
 6529 run dev
 6529 run build
-6529 approve-builds
 6529 staging
 6529 run test
 6529 run lint
@@ -54,129 +53,32 @@ shell after running it, or activate it immediately in the current shell:
 source <(./bin/6529 bootstrap --print-export)
 ```
 
-Then supply the private-package authentication described below before
-installing dependencies.
+### Public release-request package
 
-### Private GitHub Packages authentication
+`@6529-collections/release-request` is installed from public npm at the exact
+version in `package.json` and `pnpm-lock.yaml`. Developers and CI do not need a
+package token, a private registry, or operating-system credential setup.
 
-The repository has one narrow private-package exception for
-`@6529-collections/release-request@0.0.3`. Each developer should create a
-GitHub PAT classic with `read:packages` only and authorize organization SSO when
-required. The repository can validate where the token is used, but it cannot
-inspect the token's GitHub permissions.
-
-Do not save the token in the repository, pnpm configuration, `.env` files,
-shell profiles, shell history, or command arguments.
-
-For a normal interactive package command, just use the existing wrapper:
-
-```bash
-6529 ci
-```
-
-If `NODE_AUTH_TOKEN` is not already set, `6529` first checks the macOS Keychain
-or Windows Credential Manager. When no stored credential is available, it asks
-for the token with hidden input and keeps it in memory only for that command.
-Empty input is rejected. CI and other non-interactive shells never read a
-developer credential, prompt, or wait; they must receive `NODE_AUTH_TOKEN` at
-runtime and fail closed when it is missing.
-
-The prompt applies only to package commands that can resolve, install, or audit
-dependencies: `ci`, `install:prod`, `add`, `remove`, `update`, `audit`, and
-`audit:fix`. It does not run for ordinary development, test, build, or
-application commands.
+The package is allowed to bypass the normal seven-day dependency-age delay
+because it comes from the trusted 6529 Coordinator repository and npm records
+its GitHub provenance. Every version still needs a reviewed frontend pull
+request, an exact version pin, and the expected lockfile integrity before it is
+used here.
 
 `6529 ci` is the normal deterministic installation path. It runs the secure
 pnpm install with `--frozen-lockfile`, so routine setup cannot change
 `pnpm-lock.yaml`. Bare `6529 install` and `6529 i` are rejected because they
 are ambiguous between frozen setup and dependency mutation. The redundant
 `6529 install:frozen` alias is also rejected so `6529 ci` remains the single
-frozen-install vocabulary. Use `6529 add`, `6529 remove`, or `6529 update`
-when intentionally changing dependencies.
+frozen-install vocabulary.
 
-### One-time credential-store setup
+The public-package policy checks the committed `.npmrc`, the exact Coordinator
+package version and integrity, the age exception, package command arguments,
+and package-manager environment overrides before pnpm starts. It rejects
+registry, credential, proxy, TLS, hook, and project-root overrides. Package
+traffic stays behind Socket Firewall; no registry bypass is needed.
 
-On macOS, save the read-only token once in your private login Keychain with this
-command:
-
-```bash
-security add-generic-password \
-  -U \
-  -a "$(id -un)" \
-  -s "6529seize-frontend-github-packages" \
-  -w
-```
-
-Keep `-w` last and do not put the token after it. The `security` command asks
-for the token separately with hidden input, so the token is not placed in the
-command or shell history. Run the same command again to replace an expired
-token.
-
-On Windows, open PowerShell in the repository and run:
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass `
-  -File .\scripts\private-github-packages-credential.ps1 store
-```
-
-The helper asks for the token with hidden input and stores it as the generic
-credential `6529seize-frontend-github-packages` in Windows Credential Manager.
-Run the same command again to replace an expired token.
-
-Normal interactive package commands read the matching operating-system
-credential automatically and fall back to the hidden terminal prompt when it
-is missing. The checked-in Codex environment setup uses the same credential for
-its non-interactive `./bin/6529 ci`, then removes `NODE_AUTH_TOKEN` before
-Codex captures the successful setup environment. It also copies existing
-`.env.development` and `.env.production` files from the primary worktree for
-local development and restricts the copies to the current user. It does not
-write the package token into those files or a shell profile. If the credential
-is missing, Codex setup fails immediately with a clear message.
-
-On other Codex hosts, supply `NODE_AUTH_TOKEN` to the setup process at runtime.
-The setup removes it before Codex captures the resulting environment.
-
-Commands that may change dependency resolution first update the manifest and
-lockfile without package credentials. The helper validates the resulting
-policy before it runs a fixed authenticated `install --frozen-lockfile`, so
-new public package metadata cannot use the private token to resolve another
-GitHub Package.
-
-The authenticated fetch phase disables lifecycle scripts and pnpm hook files.
-Repository-local pnpm hooks and pnpm config dependencies are rejected before
-the command starts. User and global npm config layers are pinned to the same
-validated repository `.npmrc` so they cannot add another registry, credential,
-proxy, CA, or TLS override. After that phase succeeds and the package policy is
-checked again, the helper rebuilds the repository's explicitly approved
-dependencies without passing any case variant of `NODE_AUTH_TOKEN` to pnpm or
-its lifecycle scripts. It uses one pending rebuild so each approved dependency
-and the root lifecycle run at most once. Pnpm hooks remain disabled during the
-token-free rebuild.
-
-The existing `6529` commands remain the only supported entrypoint. The secure
-pnpm helper checks the committed `.npmrc`, package manifest, lockfile integrity,
-exact release-age exception, command arguments, and token presence before it
-starts pnpm. It fails closed if the private host, scope, package, version,
-tarball, integrity, or network routing is extended or changed. Project-level
-registry, credential, proxy, TLS, CA, and pnpm project/workspace relocation
-overrides are rejected rather than forwarded to an authenticated command.
-Dependency aliases, overrides, resolutions, and catalogs also cannot point an
-otherwise innocent package name at the private scope. Workspace policy checks
-decode quoted YAML escapes and reject private-host resolver URLs before pnpm
-starts.
-
-The worktree and staging setup helpers keep the token out of bootstrap, build,
-and long-running application processes. They attach it only to the secure
-install command and remove it again before continuing.
-
-Socket Firewall Free cannot proxy this private registry correctly. For this one
-case, pnpm connects directly to `npm.pkg.github.com` with normal TLS certificate
-verification. The helper keeps Socket's loopback proxy for every other host,
-including `registry.npmjs.org`, and keeps Socket's CA as an additional trusted
-root for those proxied requests. There is no general skip-Socket option.
-
-To report or apply audit fixes, use the same secure wrapper path. It prompts
-silently when the token is not already present:
+To report or apply audit fixes, use the same secure wrapper path:
 
 ```bash
 6529 audit
@@ -189,12 +91,9 @@ For an intentional dependency update, use:
 6529 update [package]
 ```
 
-Dependabot intentionally ignores the exact private package because its npm
-update job has no package credential. `6529 update` cannot change this
-package: the bypass remains pinned to `0.0.3` before pnpm starts. A future
-upgrade requires a separate reviewed change that updates the policy constants,
-manifest, release-age exception, and lockfile tarball integrity together. Do
-not add a Dependabot secret or a generic authenticated update mode.
+Coordinator package upgrades remain deliberate. The exact package version,
+policy constants, and lockfile integrity must change together in a reviewed
+pull request.
 
 After bootstrap, prefer the bare `6529` command for day-to-day work while you
 are inside this repository. Outside the repo, `6529` should remain unavailable.
@@ -223,11 +122,10 @@ wrapper as JavaScript:
 pm2 start bash --name=6529seize -- -lc 'cd /path/to/repo && ./bin/6529 run start:standalone'
 ```
 
-If pnpm reports ignored install/build scripts, use:
-
-```bash
-6529 approve-builds
-```
+If a new dependency needs an install/build script, add it to `allowBuilds` in
+`pnpm-workspace.yaml` and `ALLOWED_BUILD_DEPENDENCIES` in
+`scripts/public-package-policy.cjs` in the same reviewed pull request. Then run
+`6529 ci`. Build approvals are never accepted automatically.
 
 ## GitHub workflow helpers
 
@@ -337,9 +235,8 @@ Socket Firewall Free is still wrapper mode. That means:
 - It only protects commands that are actually prefixed with `sfw`.
 - It blocks confirmed malware, but AI-flagged packages may only warn.
 - It does not provide true centralized enforcement by itself.
-- It does not inspect private/custom registries in Free mode. This repository's
-  only exception is the fail-closed, direct-TLS rule for the exact
-  `@6529-collections/release-request@0.0.3` GitHub Package described above.
+- It does not inspect private/custom registries in Free mode. This repository
+  now uses the public npm registry only.
 - It cannot block already-cached artifacts when no network request is made.
 
 Because of those limits, the strongest enforcement in this repo comes from:

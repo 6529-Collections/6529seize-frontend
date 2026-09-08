@@ -1,20 +1,18 @@
 #!/usr/bin/env node
 
 const fs = require("node:fs");
+const os = require("node:os");
 const path = require("node:path");
 const { spawnSync } = require("node:child_process");
 
 const {
   SECURE_PNPM_BINARY_ARGUMENT,
   SECURE_REPOSITORY_ROOT_ARGUMENT,
+  validateRepositoryFiles,
   validateRepositoryPolicy,
-} = require("./private-github-packages-policy.cjs");
+} = require("./public-package-policy.cjs");
 
 const REPOSITORY_ROOT = path.resolve(__dirname, "..");
-const ROUTING_HELPER_PATH = path.join(
-  __dirname,
-  "run-pnpm-with-private-github-bypass.cjs"
-);
 
 function resolveSfwCommand(environment = process.env) {
   const configuredBinary = environment["SFW_BIN"];
@@ -47,6 +45,42 @@ function quoteWindowsShellArgument(value) {
   return `"${escapedTrailingBackslashes}"`;
 }
 
+function removeEnvironmentVariableCaseInsensitive(environment, variableName) {
+  for (const key of Object.keys(environment)) {
+    if (key.toLowerCase() === variableName.toLowerCase()) {
+      delete environment[key];
+    }
+  }
+}
+
+function packageEnvironment(environment, repositoryRoot, pnpmConfigHome) {
+  const childEnvironment = {
+    ...environment,
+    SEIZE_SECURE_INSTALL: "1",
+  };
+
+  // This repository resolves public packages only. Do not pass unrelated
+  // package credentials to pnpm or dependency lifecycle scripts.
+  removeEnvironmentVariableCaseInsensitive(childEnvironment, "NODE_AUTH_TOKEN");
+  removeEnvironmentVariableCaseInsensitive(childEnvironment, "NPM_TOKEN");
+  removeEnvironmentVariableCaseInsensitive(childEnvironment, "XDG_CONFIG_HOME");
+  const configuredStoreDir = Object.entries(childEnvironment).find(
+    ([key]) => key.toLowerCase() === "npm_config_store_dir"
+  )?.[1];
+  removeEnvironmentVariableCaseInsensitive(childEnvironment, "npm_config_store_dir");
+
+  const projectNpmrc = path.join(repositoryRoot, ".npmrc");
+  childEnvironment.npm_config_registry = "https://registry.npmjs.org/";
+  childEnvironment.npm_config_userconfig = projectNpmrc;
+  childEnvironment.npm_config_globalconfig = projectNpmrc;
+  childEnvironment.XDG_CONFIG_HOME = pnpmConfigHome;
+  if (configuredStoreDir !== undefined) {
+    childEnvironment.npm_config_store_dir = configuredStoreDir;
+  }
+
+  return childEnvironment;
+}
+
 function runSecurePnpm({
   args = process.argv.slice(2),
   environment = process.env,
@@ -65,7 +99,6 @@ function runSecurePnpm({
     environment,
     validateEnvironmentOverrides: true,
   });
-
   if (typeof pnpmBinary !== "string" || !path.isAbsolute(pnpmBinary)) {
     throw new Error(
       `${SECURE_PNPM_BINARY_ARGUMENT} requires an absolute pnpm path`
@@ -79,31 +112,32 @@ function runSecurePnpm({
   const command = useWindowsShell
     ? quoteWindowsShellArgument(sfwCommand)
     : sfwCommand;
-  const commandArguments = [
-    process.execPath,
-    ROUTING_HELPER_PATH,
-    SECURE_REPOSITORY_ROOT_ARGUMENT,
-    repositoryRoot,
-    SECURE_PNPM_BINARY_ARGUMENT,
-    trustedPnpmBinary,
-    "--",
-    ...args,
-  ];
-  const result = spawn(
-    command,
-    useWindowsShell
-      ? commandArguments.map(quoteWindowsShellArgument)
-      : commandArguments,
-    {
-      cwd: repositoryRoot,
-      stdio: "inherit",
-      shell: useWindowsShell,
-      env: {
-        ...environment,
-        SEIZE_SECURE_INSTALL: "1",
-      },
-    }
+  const commandArguments = [trustedPnpmBinary, ...args];
+  const pnpmConfigHome = fs.mkdtempSync(
+    path.join(os.tmpdir(), "6529-pnpm-config-")
   );
+  let result;
+  try {
+    const childEnvironment = packageEnvironment(
+      environment,
+      repositoryRoot,
+      pnpmConfigHome
+    );
+    result = spawn(
+      command,
+      useWindowsShell
+        ? commandArguments.map(quoteWindowsShellArgument)
+        : commandArguments,
+      {
+        cwd: repositoryRoot,
+        stdio: "inherit",
+        shell: useWindowsShell,
+        env: childEnvironment,
+      }
+    );
+  } finally {
+    fs.rmSync(pnpmConfigHome, { recursive: true, force: true });
+  }
 
   if (result.error) {
     if (result.error.code === "ENOENT") {
@@ -114,7 +148,13 @@ function runSecurePnpm({
     throw result.error;
   }
 
-  return result.status ?? 1;
+  const status = result.status ?? 1;
+  if (status === 0) {
+    // Package commands can change package.json, the workspace file, or the
+    // lockfile. Confirm the resulting repository still obeys the same policy.
+    validateRepositoryFiles(repositoryRoot);
+  }
+  return status;
 }
 
 function parseSecureInvocationArguments(args) {
@@ -166,9 +206,10 @@ module.exports = {
   REPOSITORY_ROOT,
   SECURE_PNPM_BINARY_ARGUMENT,
   SECURE_REPOSITORY_ROOT_ARGUMENT,
-  ROUTING_HELPER_PATH,
+  packageEnvironment,
   parseSecureInvocationArguments,
   quoteWindowsShellArgument,
+  removeEnvironmentVariableCaseInsensitive,
   resolveSfwCommand,
   runSecurePnpm,
 };
