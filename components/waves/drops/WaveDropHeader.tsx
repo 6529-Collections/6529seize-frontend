@@ -47,6 +47,7 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
 }) => {
   const router = useRouter();
   const compact = useCompactMode();
+  const identityRowHeightClass = compact ? "tw-min-h-8" : "tw-min-h-10";
   const authorIdentity = drop.author.handle ?? drop.author.primary_address;
   const isStackedTimestamp = timestampLayout === "stacked";
 
@@ -62,8 +63,10 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
 
   return (
     <>
-      <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-2">
-        <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1">
+      <div
+        className={`tw-flex tw-items-center tw-justify-between tw-gap-x-2 ${identityRowHeightClass}`}
+      >
+        <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1">
           <div
             className={
               isStackedTimestamp
@@ -71,15 +74,17 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
                 : "tw-flex tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1"
             }
           >
-            <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1">
+            <div
+              className={`tw-flex tw-min-w-0 tw-max-w-full tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1 ${isStackedTimestamp ? identityRowHeightClass : ""}`}
+            >
               <p
-                className={`tw-m-0 tw-font-semibold tw-leading-none ${compact ? "tw-text-sm" : "tw-text-md"}`}
+                className={`tw-m-0 tw-min-w-0 tw-max-w-full tw-font-semibold tw-leading-5 [overflow-wrap:anywhere] ${compact ? "tw-text-sm" : "tw-text-md"}`}
               >
                 <UserProfileTooltipWrapper user={authorIdentity}>
                   <Link
                     onClick={(e) => handleNavigation(e, `/${authorIdentity}`)}
                     href={`/${authorIdentity}`}
-                    className="tw-text-iron-200 tw-no-underline tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-text-opacity-80 desktop-hover:hover:tw-underline"
+                    className="tw-rounded-sm tw-text-iron-200 tw-no-underline tw-transition tw-duration-300 tw-ease-out focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-text-opacity-80 desktop-hover:hover:tw-underline"
                   >
                     <ProfileNameWithAiMarker
                       classification={drop.author.classification}
