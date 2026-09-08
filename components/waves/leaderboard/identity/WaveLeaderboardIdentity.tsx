@@ -17,16 +17,22 @@ import { shortenAddress } from "@/helpers/address.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import Link from "next/link";
 
-type WaveLeaderboardIdentityVariant = "responsive" | "condensed";
-
-interface WaveLeaderboardIdentityProps {
+type WaveLeaderboardIdentityProps = {
   readonly drop: ExtendedDrop;
-  readonly variant: WaveLeaderboardIdentityVariant;
   readonly cardVariant?: ParticipationIdentityProfileCardVariant | undefined;
   readonly className?: string | undefined;
   readonly showIdentityHeader?: boolean | undefined;
   readonly supplementFullWidth?: boolean | undefined;
-}
+} & (
+  | {
+      readonly variant: "responsive";
+      readonly disableNavigation?: false | undefined;
+    }
+  | {
+      readonly variant: "condensed";
+      readonly disableNavigation?: boolean | undefined;
+    }
+);
 
 interface WaveLeaderboardIdentitySummaryProps {
   readonly profile: ApiDropResolvedIdentityProfile | null;
@@ -34,6 +40,7 @@ interface WaveLeaderboardIdentitySummaryProps {
   readonly contextId?: string | number | undefined;
   readonly showIdentityHeader?: boolean | undefined;
   readonly supplementFullWidth?: boolean | undefined;
+  readonly disableNavigation?: boolean | undefined;
 }
 
 function WaveLeaderboardIdentitySummary({
@@ -42,6 +49,7 @@ function WaveLeaderboardIdentitySummary({
   contextId,
   showIdentityHeader = true,
   supplementFullWidth: _supplementFullWidth = false,
+  disableNavigation = false,
 }: WaveLeaderboardIdentitySummaryProps) {
   const displayLabel =
     profile?.handle ?? profile?.primary_address ?? fallbackValue;
@@ -53,6 +61,15 @@ function WaveLeaderboardIdentitySummary({
   const rootHref = profile
     ? `/${encodeURIComponent(displayLabel.toLowerCase())}`
     : null;
+  const profileLinkEnabled = rootHref !== null && !disableNavigation;
+  const labelClassName = rootHref
+    ? "tw-max-w-full tw-text-sm tw-font-semibold tw-leading-none tw-text-iron-50 tw-no-underline"
+    : "tw-break-all tw-text-sm tw-font-semibold tw-leading-none tw-text-iron-50";
+  const labelContent = (
+    <span className={rootHref ? "tw-block tw-truncate" : undefined}>
+      {displayLabel}
+    </span>
+  );
   const primaryAddress = profile?.primary_address;
   const shouldShowAddress =
     !!profile?.handle &&
@@ -84,7 +101,7 @@ function WaveLeaderboardIdentitySummary({
     >
       {showIdentityHeader && (
         <div className="tw-flex tw-items-start tw-gap-3">
-          {rootHref ? (
+          {profileLinkEnabled ? (
             <Link
               href={rootHref}
               prefetch={false}
@@ -101,7 +118,7 @@ function WaveLeaderboardIdentitySummary({
             </Link>
           ) : (
             <ProfileAvatar
-              pfpUrl={null}
+              pfpUrl={profile?.pfp ?? null}
               size={ProfileBadgeSize.SMALL}
               alt={`${displayLabel} avatar`}
               fallbackContent={avatarFallback}
@@ -110,19 +127,17 @@ function WaveLeaderboardIdentitySummary({
 
           <div className="tw-min-w-0 tw-flex-1">
             <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
-              {rootHref ? (
+              {profileLinkEnabled ? (
                 <Link
                   href={rootHref}
                   prefetch={false}
                   onClick={(event) => event.stopPropagation()}
-                  className="tw-max-w-full tw-text-sm tw-font-semibold tw-leading-none tw-text-iron-50 tw-no-underline desktop-hover:hover:tw-text-iron-300"
+                  className={`${labelClassName} desktop-hover:hover:tw-text-iron-300`}
                 >
-                  <span className="tw-block tw-truncate">{displayLabel}</span>
+                  {labelContent}
                 </Link>
               ) : (
-                <span className="tw-break-all tw-text-sm tw-font-semibold tw-leading-none tw-text-iron-50">
-                  {displayLabel}
-                </span>
+                <span className={labelClassName}>{labelContent}</span>
               )}
 
               {profile && (
@@ -131,10 +146,12 @@ function WaveLeaderboardIdentitySummary({
                     level={profile.level}
                     size={UserCICAndLevelSize.SMALL}
                   />
-                  <DropAuthorBadges
-                    profile={profile}
-                    tooltipIdPrefix={`leaderboard-identity-${contextId ?? profile.id}`}
-                  />
+                  <div inert={disableNavigation} className="tw-contents">
+                    <DropAuthorBadges
+                      profile={profile}
+                      tooltipIdPrefix={`leaderboard-identity-${contextId ?? profile.id}`}
+                    />
+                  </div>
                 </>
               )}
             </div>
@@ -171,6 +188,7 @@ export function WaveLeaderboardIdentity({
   className,
   showIdentityHeader = true,
   supplementFullWidth = false,
+  disableNavigation = false,
 }: WaveLeaderboardIdentityProps) {
   const identityProfile = getDropIdentityProfile({
     wave: drop.wave,
@@ -223,6 +241,7 @@ export function WaveLeaderboardIdentity({
         contextId={drop.id}
         showIdentityHeader={showIdentityHeader}
         supplementFullWidth={supplementFullWidth}
+        disableNavigation={disableNavigation}
       />
     </div>
   );

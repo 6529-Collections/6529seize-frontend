@@ -1,7 +1,10 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import { WaveLeaderboardIdentity } from "@/components/waves/leaderboard/identity/WaveLeaderboardIdentity";
+import type { ApiDropResolvedIdentityProfile } from "@/generated/models/ApiDropResolvedIdentityProfile";
+import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
 import { ApiWaveParticipationSubmissionStrategyType } from "@/generated/models/ApiWaveParticipationSubmissionStrategyType";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 
 jest.mock(
   "@/components/waves/drops/participation/ParticipationIdentityProfileCard",
@@ -18,7 +21,7 @@ jest.mock("@/components/waves/drops/DropAuthorBadges", () => ({
 }));
 
 describe("WaveLeaderboardIdentity", () => {
-  const resolvedProfile = {
+  const resolvedProfile: ApiDropResolvedIdentityProfile = {
     id: "p1",
     handle: "alice",
     primary_address: "0xabc",
@@ -32,12 +35,17 @@ describe("WaveLeaderboardIdentity", () => {
     xtdh: 5,
     xtdh_rate: 6,
     level: 7,
+    classification: ApiProfileClassification.Pseudonym,
+    sub_classification: null,
     subscribed_actions: [],
     archived: false,
     active_main_stage_submission_ids: [],
     winner_main_stage_drop_ids: [],
     artist_of_prevote_cards: [],
+    profile_wave_id: null,
     is_wave_creator: false,
+    bio: null,
+    top_rep_categories: [],
   };
 
   it("renders the condensed summary for resolved identities", () => {
@@ -98,6 +106,48 @@ describe("WaveLeaderboardIdentity", () => {
     expect(
       screen.getByTestId("wave-leaderboard-identity-summary")
     ).toBeInTheDocument();
+  });
+
+  it("keeps condensed identity content readable without profile navigation", () => {
+    render(
+      <WaveLeaderboardIdentity
+        drop={
+          {
+            id: "d1",
+            wave: {
+              submission_type:
+                ApiWaveParticipationSubmissionStrategyType.Identity,
+            },
+            metadata: [
+              {
+                data_key: "identity",
+                data_value: "0xabc",
+                resolved_profile: {
+                  ...resolvedProfile,
+                  pfp: "https://example.com/avatar.png",
+                  bio: "Identity bio",
+                  top_rep_categories: [{ category: "Art", rep: 12 }],
+                } satisfies ApiDropResolvedIdentityProfile,
+              },
+            ],
+          } as ExtendedDrop
+        }
+        variant="condensed"
+        disableNavigation
+      />
+    );
+
+    expect(screen.queryByRole("link")).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("img", { name: "alice avatar" })
+    ).toBeInTheDocument();
+    for (const text of ["alice", "0xabc", "7", "Identity bio", "Art"]) {
+      expect(screen.getByText(text)).toBeInTheDocument();
+      expect(screen.getByText(text).closest("[inert]")).toBeNull();
+    }
+    expect(screen.getByTestId("identity-badges").parentElement).toHaveAttribute(
+      "inert"
+    );
   });
 
   it("renders a plain fallback when the identity is unresolved", () => {

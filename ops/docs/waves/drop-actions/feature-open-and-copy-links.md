@@ -23,6 +23,9 @@ Drop-level `Open` / `Open drop` actions and link-card `Open link` /
 - Link preview and quote cards in thread markdown: `Link actions` ->
   `Copy link`, `Open link`
 - Leaderboard and winners cards can also show `Open` (same `drop` behavior).
+- In the native mobile app on a touchscreen, Memes leaderboard List and artwork
+  Grid cards also open from their title, media, or free card space. A List
+  username opens the author's profile; a Grid username opens the submission.
 
 ## Entry Points
 
@@ -36,8 +39,8 @@ Drop-level `Open` / `Open drop` actions and link-card `Open link` /
 ## User Journey
 
 1. Open a thread and find either a posted drop or a rendered link/quote card.
-2. Choose `Open` / `Open drop` from drop actions when you want focused
-   single-drop view.
+2. Choose `Open` / `Open drop` from drop actions, or tap a leaderboard card in
+   the touchscreen native app, when you want focused single-drop view.
 3. The app sets `drop={dropId}` in the current URL and opens single-drop view.
 4. For preview or quote cards, open `Link actions`.
 5. The card menu shows `Copy link` and `Open link`.
@@ -62,6 +65,21 @@ Drop-level `Open` / `Open drop` actions and link-card `Open link` /
 - Mobile copy uses Clipboard API when available and falls back to textarea copy.
 - Memes submission drop copy links use canonical wave drop URLs and open the
   single-drop overlay when opened.
+- In the native mobile app on a touchscreen, a short tap on a Memes leaderboard
+  List or artwork Grid card opens the submission. The title, media,
+  description, and free card space are part of that opening target.
+- In native-app List view, the username opens the author's profile, while the
+  avatar and author badges remain part of the submission-opening target. In Grid
+  view, the username remains part of the submission-opening target.
+- Explicit vote, rating, and other action buttons keep their own actions and do
+  not also open the submission.
+- Native-app touchscreen cards show non-interactive media previews, using a
+  provided poster image when available. Open the submission to use media
+  controls instead of playing media directly in the card.
+- Browser views, including mobile browsers, keep their author profile links and
+  media interactions. The native-app whole-card touch rule does not apply there.
+- In the native app, scroll gestures do not open the card. Press and hold opens
+  the action sheet instead; see [Wave Drop Touch Menu](feature-touch-drop-menu.md).
 
 ## Edge Cases
 
