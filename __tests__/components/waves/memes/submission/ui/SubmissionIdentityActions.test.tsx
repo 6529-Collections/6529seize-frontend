@@ -155,13 +155,13 @@ describe("Memes submission identity actions", () => {
         }),
       });
       const indicator = screen.getByRole("button", {
-        name: "Wallet not connected",
+        name: "Connect a wallet to submit",
       });
       if (interaction === "hover") await user.hover(indicator);
       if (interaction === "focus") await user.tab();
       if (interaction === "click") await user.click(indicator);
       expect(await screen.findByRole("tooltip")).toHaveTextContent(
-        "Wallet not connected"
+        "Connect a wallet to submit"
       );
       await user.keyboard("{Escape}");
       await waitFor(() =>
