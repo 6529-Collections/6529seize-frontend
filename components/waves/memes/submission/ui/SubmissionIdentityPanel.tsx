@@ -3,9 +3,12 @@
 import ProfileAvatar, {
   ProfileBadgeSize,
 } from "@/components/common/profile/ProfileAvatar";
-import { shortenAddress } from "@/helpers/address.helpers";
+import { buildTooltipId, TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t, type MessageKey } from "@/i18n/messages";
+import { CheckIcon } from "@heroicons/react/24/outline";
+import { useId } from "react";
+import { Tooltip } from "react-tooltip";
 import type { MemesSubmissionIdentity } from "../hooks/useMemesSubmissionIdentity";
 
 interface SubmissionIdentityPanelProps {
@@ -32,7 +35,14 @@ export function SubmissionIdentityPanel({
   identity,
 }: SubmissionIdentityPanelProps) {
   const locale = useBrowserLocale();
-  const { profile, address, walletName, status } = identity;
+  const tooltipId = buildTooltipId("submission-connection", useId());
+  const { profile, address, profileStatus: status } = identity;
+  const connectionLabel = t(
+    locale,
+    address
+      ? "memes.submission.identity.walletConnected"
+      : "memes.submission.identity.walletNotConnected"
+  );
   const statusMessageKey = STATUS_MESSAGE_KEYS[status];
   const isWarning = [
     "needs-profile",
@@ -49,13 +59,14 @@ export function SubmissionIdentityPanel({
     return "tw-text-iron-300";
   })();
 
-  if (!profile || !address) {
+  if (!profile) {
     return (
-      <div className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/60 tw-p-4">
-        <output className="tw-mb-0 tw-block tw-text-sm tw-text-iron-300">
-          {t(locale, "memes.submission.identity.connectPrompt")}
-        </output>
-      </div>
+      <output className="tw-mb-0 tw-block tw-py-1 tw-text-sm tw-text-iron-300">
+        {t(
+          locale,
+          statusMessageKey ?? "memes.submission.identity.connectPrompt"
+        )}
+      </output>
     );
   }
 
@@ -72,14 +83,23 @@ export function SubmissionIdentityPanel({
   const fallback = identityName.charAt(0).toUpperCase();
 
   return (
-    <div className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/60 tw-p-4">
-      <p className="tw-mb-3 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-400">
-        {t(locale, "memes.submission.identity.submittingAs")}
-      </p>
-      <div className="tw-flex tw-items-center tw-gap-3">
+    <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1 tw-py-1 tw-text-sm">
+      <div className="tw-flex tw-min-w-0 tw-max-w-full tw-items-center tw-gap-2">
+        <button
+          type="button"
+          aria-label={connectionLabel}
+          data-tooltip-id={tooltipId}
+          data-tooltip-content={connectionLabel}
+          className="tw-flex tw-size-6 tw-shrink-0 tw-cursor-help tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-p-0 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+        >
+          <span
+            aria-hidden="true"
+            className={`tw-size-2 tw-rounded-full ${address ? "tw-bg-emerald-400" : "tw-bg-amber-400"}`}
+          />
+        </button>
         <ProfileAvatar
           pfpUrl={profile.pfp}
-          size={ProfileBadgeSize.MEDIUM}
+          size={ProfileBadgeSize.SMALL}
           alt=""
           fallbackContent={
             <span
@@ -90,25 +110,37 @@ export function SubmissionIdentityPanel({
             </span>
           }
         />
-        <div className="tw-min-w-0 tw-flex-1">
-          <p className="tw-mb-0 tw-truncate tw-text-sm tw-font-semibold tw-text-iron-100">
+        <p className="tw-mb-0 tw-min-w-0 tw-break-words tw-text-iron-400">
+          {t(locale, "memes.submission.identity.submittingAs")}{" "}
+          <span className="tw-font-semibold tw-text-iron-100">
             {profileLabel}
-          </p>
-          <p className="tw-mb-0 tw-text-xs tw-text-iron-400">
-            {t(locale, "memes.submission.identity.wallet")}:{" "}
-            <span className="tw-font-mono">{shortenAddress(address)}</span>
-            {walletName ? ` · ${walletName}` : ""}
-          </p>
-        </div>
+          </span>
+        </p>
       </div>
       {statusMessageKey && (
         <p
-          className={`tw-mb-0 tw-mt-3 tw-text-sm ${statusColor}`}
+          className={`tw-mb-0 tw-flex tw-min-w-0 tw-items-center tw-gap-1 ${statusColor}`}
           role={isWarning ? "alert" : "status"}
         >
+          {status === "eligible" && (
+            <CheckIcon className="tw-size-4 tw-shrink-0" aria-hidden="true" />
+          )}
           {t(locale, statusMessageKey)}
         </p>
       )}
+      <Tooltip
+        id={tooltipId}
+        place="top"
+        positionStrategy="fixed"
+        style={TOOLTIP_STYLES}
+        openEvents={{ mouseenter: true, focus: true, click: true }}
+        closeEvents={{ mouseleave: true, blur: true }}
+        globalCloseEvents={{
+          escape: true,
+          scroll: true,
+          clickOutsideAnchor: true,
+        }}
+      />
     </div>
   );
 }

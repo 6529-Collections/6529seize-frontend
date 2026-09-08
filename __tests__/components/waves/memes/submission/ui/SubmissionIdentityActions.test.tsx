@@ -1,13 +1,14 @@
 import { SubmissionActionButton } from "@/components/waves/memes/submission/ui/SubmissionActionButton";
 import { SubmissionIdentityPanel } from "@/components/waves/memes/submission/ui/SubmissionIdentityPanel";
 import type { MemesSubmissionIdentity } from "@/components/waves/memes/submission/hooks/useMemesSubmissionIdentity";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 const createIdentity = (
   overrides: Partial<MemesSubmissionIdentity> = {}
 ): MemesSubmissionIdentity => ({
   status: "eligible",
+  profileStatus: "eligible",
   profile: {
     id: "profile-a",
     handle: "alice",
@@ -64,6 +65,7 @@ describe("Memes submission identity actions", () => {
     const user = userEvent.setup();
     const identity = createIdentity({
       status: "disconnected",
+      profileStatus: "disconnected",
       profile: null,
       address: null,
       walletName: null,
@@ -86,7 +88,10 @@ describe("Memes submission identity actions", () => {
     const { onSubmit } = renderAction({ identity });
 
     expect(screen.getByText("@alice")).toBeInTheDocument();
-    expect(screen.getByText(/0x1234…7890/)).toBeInTheDocument();
+    expect(screen.queryByText(/0x1234|MetaMask/)).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Wallet connected" })
+    ).toBeInTheDocument();
     expect(screen.getByText("Eligible to submit")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Submit Artwork" }));
     expect(onSubmit).toHaveBeenCalledTimes(1);
@@ -96,6 +101,7 @@ describe("Memes submission identity actions", () => {
     const user = userEvent.setup();
     const identity = createIdentity({
       status: "ineligible",
+      profileStatus: "ineligible",
       profile: {
         id: "profile-b",
         handle: "bob",
@@ -113,6 +119,56 @@ describe("Memes submission identity actions", () => {
     expect(identity.connectWallet).toHaveBeenCalledTimes(1);
     expect(onSubmit).not.toHaveBeenCalled();
   });
+
+  it("keeps the authenticated profile and eligibility visible before connecting", async () => {
+    const user = userEvent.setup();
+    const identity = createIdentity({
+      status: "disconnected",
+      address: null,
+      walletName: null,
+      canSubmit: false,
+    });
+    const { onSubmit } = renderAction({ identity });
+
+    expect(screen.getByText("@alice")).toBeInTheDocument();
+    expect(screen.getByText("Eligible to submit")).toBeInTheDocument();
+    expect(
+      screen.queryByText(/connect a wallet to confirm/i)
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Submit Artwork" })
+    ).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Connect Wallet" }));
+    expect(identity.connectWallet).toHaveBeenCalledTimes(1);
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+
+  it.each(["hover", "focus", "click"] as const)(
+    "explains the connection indicator on %s and dismisses with Escape",
+    async (interaction) => {
+      const user = userEvent.setup();
+      renderAction({
+        identity: createIdentity({
+          status: "disconnected",
+          address: null,
+          canSubmit: false,
+        }),
+      });
+      const indicator = screen.getByRole("button", {
+        name: "Wallet not connected",
+      });
+      if (interaction === "hover") await user.hover(indicator);
+      if (interaction === "focus") await user.tab();
+      if (interaction === "click") await user.click(indicator);
+      expect(await screen.findByRole("tooltip")).toHaveTextContent(
+        "Wallet not connected"
+      );
+      await user.keyboard("{Escape}");
+      await waitFor(() =>
+        expect(screen.queryByRole("tooltip")).not.toBeInTheDocument()
+      );
+    }
+  );
 
   it("keeps the action disabled with a clear signing label", () => {
     const identity = createIdentity();

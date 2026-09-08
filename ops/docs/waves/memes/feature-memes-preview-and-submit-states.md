@@ -38,7 +38,9 @@ On `success`, the modal auto-closes after a short delay.
    - click `Submit Artwork` directly
 3. If you open preview, review both card layouts and use `Back to Edit` if
    needed.
-4. Confirm the `Submitting as` profile, signer wallet address, and wallet name.
+4. Confirm the avatar, `Submitting as` profile, and eligibility in the compact
+   strip above the action buttons. The authenticated profile stays visible even
+   when its wallet is disconnected.
 5. If the wallet is disconnected, click `Connect Wallet`. Connecting never
    starts submission automatically.
 6. After the connected profile is shown and confirmed as eligible, click
@@ -51,8 +53,18 @@ On `success`, the modal auto-closes after a short delay.
 
 - `Preview` is optional; direct submit from `Additional Information` is
   supported.
-- Both finish paths show the profile and exact wallet that will sign the
-  submission.
+- Both finish paths show the authenticated submitting profile in a compact strip
+  above the existing action buttons, without a wallet address or wallet-provider
+  name.
+- The strip's amber dot means that profile's wallet is not connected; green means
+  it is connected. Hover, focus, or tap the dot for `Wallet not connected` or
+  `Wallet connected`; press `Escape` or move focus away to dismiss the tooltip.
+- Eligibility is shown separately from wallet connection. An eligible profile
+  still needs its wallet connected before submitting.
+- Connecting a different wallet does not by itself change the active submitting
+  profile. If A remains active while B's wallet is connected, the strip still
+  shows A with an amber dot. Explicitly switching profiles updates the strip and
+  uses that profile's eligibility result.
 - A disconnected wallet shows `Connect Wallet` instead of `Submit Artwork`.
 - If a different profile is connected while the modal is open, the current
   draft remains in place while eligibility is checked again for that profile.

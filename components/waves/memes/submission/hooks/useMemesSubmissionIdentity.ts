@@ -30,6 +30,7 @@ export type MemesSubmissionIdentityStatus =
 
 export interface MemesSubmissionIdentity {
   readonly status: MemesSubmissionIdentityStatus;
+  readonly profileStatus: MemesSubmissionIdentityStatus;
   readonly profile: ApiIdentity | null;
   readonly address: string | null;
   readonly walletName: string | null;
@@ -69,10 +70,7 @@ const getEligibilityRequestStatus = ({
   return null;
 };
 
-const getIdentityStatus = ({
-  isConnecting,
-  canSignActiveWallet,
-  address,
+const getProfileStatus = ({
   fetchingProfile,
   hasProfile,
   isAuthenticated,
@@ -86,9 +84,6 @@ const getIdentityStatus = ({
   submissionStatus,
   canSubmitNow,
 }: {
-  readonly isConnecting: boolean;
-  readonly canSignActiveWallet: boolean;
-  readonly address: string | undefined;
   readonly fetchingProfile: boolean;
   readonly hasProfile: boolean;
   readonly isAuthenticated: boolean | undefined;
@@ -102,8 +97,6 @@ const getIdentityStatus = ({
   readonly submissionStatus: SubmissionStatus;
   readonly canSubmitNow: boolean;
 }): MemesSubmissionIdentityStatus => {
-  if (isConnecting) return "connecting";
-  if (!canSignActiveWallet || !address) return "disconnected";
   if (fetchingProfile) return "loading-profile";
   if (!hasProfile) return "needs-profile";
   if (isVerifyingProfile) return "verifying-profile";
@@ -234,13 +227,7 @@ export function useMemesSubmissionIdentity(
     await refetchEligibility();
   }, [refetchEligibility]);
 
-  const status = getIdentityStatus({
-    isConnecting:
-      isStartingConnection ||
-      seizeConnectOpen ||
-      connectionState === "connecting",
-    address,
-    canSignActiveWallet,
+  const profileStatus = getProfileStatus({
     fetchingProfile,
     hasProfile: Boolean(connectedProfile?.handle),
     isAuthenticated,
@@ -254,10 +241,21 @@ export function useMemesSubmissionIdentity(
     submissionStatus: participation.status,
     canSubmitNow: participation.canSubmitNow,
   });
+  const status = (() => {
+    if (
+      isStartingConnection ||
+      seizeConnectOpen ||
+      connectionState === "connecting"
+    )
+      return "connecting";
+    if (!canSignActiveWallet || !address) return "disconnected";
+    return profileStatus;
+  })();
 
   return {
     status,
-    profile: canSignActiveWallet && address ? (connectedProfile ?? null) : null,
+    profileStatus,
+    profile: connectedProfile ?? null,
     address: canSignActiveWallet ? (address ?? null) : null,
     walletName: canSignActiveWallet ? (walletName ?? null) : null,
     canSubmit: status === "eligible",

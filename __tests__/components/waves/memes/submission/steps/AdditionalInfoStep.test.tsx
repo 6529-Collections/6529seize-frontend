@@ -54,6 +54,7 @@ describe("AdditionalInfoStep", () => {
     onSubmit: jest.fn(),
     identity: {
       status: "eligible",
+      profileStatus: "eligible",
       profile: { id: "profile-a", handle: "alice", display: "Alice" },
       address: "0x1234567890123456789012345678901234567890",
       walletName: "MetaMask",
