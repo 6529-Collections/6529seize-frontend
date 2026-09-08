@@ -150,7 +150,7 @@ describe("useArtworkSubmissionForm", () => {
     expect(result.current.isAdditionalActionPromised).toBe(true);
   });
 
-  it("initializes from a draft without profile defaults or bio fetch", () => {
+  it("preserves draft fields while syncing the read-only submitting profile", () => {
     const operationalData = {
       airdrop_config: [{ id: "draft-airdrop", address: "0xdraft", count: 20 }],
       payment_info: {
@@ -189,10 +189,28 @@ describe("useArtworkSubmissionForm", () => {
     expect(result.current.artworkUrl).toBe("https://example.com/art.png");
     expect(result.current.existingMedia).toEqual(initialDraft.existingMedia);
     expect(result.current.traits.artist).toBe("draft-artist");
-    expect(result.current.traits.seizeArtistProfile).toBe("draft-profile");
+    expect(result.current.traits.seizeArtistProfile).toBe("alice");
     expect(result.current.operationalData).toBe(operationalData);
     expect(result.current.isAdditionalActionPromised).toBe(true);
     expect(commonApiFetch).not.toHaveBeenCalled();
+  });
+
+  it("updates only the read-only submitting profile when identity changes", () => {
+    const { result, rerender } = renderArtworkSubmissionForm();
+
+    act(() => {
+      result.current.updateTraitField("artist", "Custom artist credit");
+    });
+    (useAuth as jest.Mock).mockReturnValue({
+      connectedProfile: { handle: "bob", primary_wallet: "0xbob" },
+    });
+    rerender();
+
+    expect(result.current.traits.seizeArtistProfile).toBe("bob");
+    expect(result.current.traits.artist).toBe("Custom artist credit");
+    expect(result.current.operationalData.payment_info.payment_address).toBe(
+      "0xalice"
+    );
   });
 
   it("clears existing resubmission media to allow first replacement selection", () => {

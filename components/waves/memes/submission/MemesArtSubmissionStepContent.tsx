@@ -10,6 +10,7 @@ import { SubmissionStep } from "./types/Steps";
 import type { SubmissionPhase } from "./ui/SubmissionProgress";
 import { getResubmissionMediaTypeInfo } from "./utils/resubmissionMediaType";
 import type { ArtworkSubmissionForm } from "./hooks/useArtworkSubmissionForm";
+import type { MemesSubmissionIdentity } from "./hooks/useMemesSubmissionIdentity";
 
 interface MemesArtSubmissionStepContentProps {
   readonly form: ArtworkSubmissionForm;
@@ -21,6 +22,7 @@ interface MemesArtSubmissionStepContentProps {
   readonly uploadProgress: number;
   readonly submissionError?: string | undefined;
   readonly submitLabel: string;
+  readonly identity: MemesSubmissionIdentity;
   readonly onClose: () => void;
   readonly onBackToEdit: () => void;
   readonly onBackFromAdditionalInfo: () => void;
@@ -41,6 +43,7 @@ export function MemesArtSubmissionStepContent({
   uploadProgress,
   submissionError,
   submitLabel,
+  identity,
   onClose,
   onBackToEdit,
   onBackFromAdditionalInfo,
@@ -123,9 +126,7 @@ export function MemesArtSubmissionStepContent({
           updateTraitField={form.updateTraitField}
           setTraits={form.setTraits}
           isAdditionalActionPromised={form.isAdditionalActionPromised}
-          onAdditionalActionPromisedChange={
-            form.setAdditionalActionPromised
-          }
+          onAdditionalActionPromisedChange={form.setAdditionalActionPromised}
           isSubmitting={isSubmitting}
           submissionPhase={submissionPhase}
           uploadProgress={uploadProgress}
@@ -141,7 +142,10 @@ export function MemesArtSubmissionStepContent({
             previewDrop={previewDrop}
             onBackToEdit={onBackToEdit}
             onSubmit={onSubmitClick}
+            identity={identity}
             isSubmitting={isSubmitting}
+            submissionPhase={submissionPhase}
+            uploadProgress={uploadProgress}
             submitLabel={submitLabel}
           />
         );
@@ -174,7 +178,10 @@ export function MemesArtSubmissionStepContent({
           onBack={onBackFromAdditionalInfo}
           onPreview={onOpenPreview}
           onSubmit={onSubmitClick}
+          identity={identity}
           isSubmitting={isSubmitting}
+          submissionPhase={submissionPhase}
+          uploadProgress={uploadProgress}
           submitLabel={submitLabel}
         />
       );
