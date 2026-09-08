@@ -12,7 +12,7 @@ import { useUnreadIndicator } from "@/hooks/useUnreadIndicator";
 import { useUnreadNotifications } from "@/hooks/useUnreadNotifications";
 import { useAuth } from "@/components/auth/Auth";
 import { getWaveHomeRoute } from "../../../helpers/navigation.helpers";
-import { useWaveCurations } from "@/hooks/waves/useWaveCurations";
+import { useWaveCurationTabs } from "@/hooks/waves/useWaveCurationTabs";
 import MyStreamWaveCreateActionsMenu from "../my-stream/tabs/MyStreamWaveCreateActionsMenu";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -115,7 +115,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
     ? searchParams.get("curation")
     : null;
   const { data: curations = [], isPending: isCurationsPending } =
-    useWaveCurations({
+    useWaveCurationTabs({
       waveId: wave?.id ?? "",
       enabled: shouldShowCurationTabs,
     });
