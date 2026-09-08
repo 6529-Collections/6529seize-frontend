@@ -40,11 +40,8 @@ describe("production exact-artifact deployment contract", () => {
     );
     const serialized = JSON.stringify(job);
 
-    expect(job.permissions).toEqual({
-      contents: "read",
-      packages: "read",
-    });
-    expect(installStep.env.NODE_AUTH_TOKEN).toBe("${{ github.token }}");
+    expect(job.permissions).toEqual({ contents: "read" });
+    expect(installStep.env).not.toHaveProperty("NODE_AUTH_TOKEN");
     expect(serialized).not.toContain("AWS_ACCESS_KEY_ID");
     expect(serialized).not.toContain("configure-aws-credentials");
     expect(buildSource).toContain(
