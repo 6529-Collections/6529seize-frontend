@@ -465,15 +465,87 @@ const WAVE_SCORE_NAVIGATION_MESSAGES = objectMessages("waveScore.navigation", {
 } as const);
 
 const MEMES_QUICK_VOTE_MESSAGES = objectMessages("memes.quickVote", {
+  dialogLabel: "Memes quick vote",
+  closeDialog: "Close quick vote",
+  doneTitle: "You're all caught up",
+  doneDescription: "No unrated memes are left in quick vote right now.",
   leftThisRound: "{count} left this round",
   unrated: "{count} unrated",
   summary: "{leftThisRound}, {unrated}",
   inMemesWave: "{leftThisRound}, {unrated} in the memes wave",
+  remainingPower: "{amount} {unit} remaining",
+  powerLeft: "{amount} {unit} left",
+  unit: "votes",
+  untitledSubmission: "Untitled submission",
+  previewUnavailable: "Preview unavailable",
+  vote: "Vote",
+  voteAmount: "Vote {amount}",
+  voted: "Voted",
+  skip: "Skip",
+  changeAmount: "Change vote amount",
+  closeChangeAmount: "Close change vote amount",
+  expandDescription: "See more",
+  collapseDescription: "See less",
+  swipeHint: "Swipe left to skip · right to vote {amount} {unit}",
 } as const);
 
 const MEMES_SUBMISSION_MESSAGES = objectMessages("memes.submission", {
   "media.missingUpload": "Select artwork or choose Interactive HTML.",
   "media.missingInteractive": "Enter a valid hash or choose Upload File.",
+  "identity.connectPrompt":
+    "Connect a wallet to confirm the profile submitting this artwork.",
+  "identity.unknownProfile": "Unknown profile",
+  "identity.submittingAs": "Submitting as",
+  "identity.wallet": "Wallet",
+  "identity.walletConnected": "Wallet connected",
+  "identity.walletNotConnected": "Connect a wallet to submit",
+  "identity.eligible": "Eligible to submit",
+  "identity.loadingProfile": "Loading the connected profile…",
+  "identity.needsProfile":
+    "This wallet does not have a profile that can submit artwork.",
+  "identity.needsAuth": "Verify this profile before checking eligibility.",
+  "identity.verifyingProfile": "Verifying the connected profile…",
+  "identity.checking": "Checking this profile's eligibility…",
+  "identity.checkError":
+    "We couldn't verify this profile's eligibility. Try again before submitting.",
+  "identity.ineligible":
+    "This profile is not eligible to submit to this collection.",
+  "identity.limitReached":
+    "This profile has reached its submission limit for this collection.",
+  "identity.notStarted": "Submissions are not open yet.",
+  "identity.ended": "Submissions are closed.",
+  "identity.changedBeforeSubmit":
+    "The active wallet changed. Confirm the submitting profile and try again.",
+  "identity.connectErrorTitle": "Couldn't open wallet connection.",
+  "identity.connectErrorDescription": "Please try again.",
+  "action.connectWallet": "Connect Wallet",
+  "action.submitArtwork": "Submit Artwork",
+  "action.submitNewVersion": "Submit New Version",
+  "action.back": "Back",
+  "action.backToEdit": "Back to Edit",
+  "action.preview": "Preview",
+  "action.connecting": "Connecting…",
+  "action.loadingProfile": "Loading Profile…",
+  "action.verifyProfile": "Verify Profile",
+  "action.verifyingProfile": "Verifying Profile…",
+  "action.checkingEligibility": "Checking Eligibility…",
+  "action.retryEligibility": "Retry Eligibility Check",
+  "action.switchWallet": "Switch Wallet",
+  "action.submissionsNotOpen": "Submissions Not Open",
+  "action.submissionsClosed": "Submissions Closed",
+  "action.uploading": "Uploading {progress}%",
+  "action.signing": "Check Wallet to Sign…",
+  "action.submitting": "Submitting…",
+  "action.submitted": "Submitted",
+  "shell.submitTitle": "Submit Work to The Memes",
+  "shell.resubmitTitle": "Resubmit Work to The Memes",
+  "shell.resubmissionDescription":
+    "Resubmitting creates a new submission with this data, then asks you to confirm deleting the original.",
+  "preview.title": "Submission Preview",
+  "preview.description":
+    "Read-only preview of how your submission may appear in different views.",
+  "additionalInfo.description":
+    "Complete the following details for distribution and storytelling purposes.",
 } as const);
 
 const MEMES_WAVE_FOOTER_MESSAGES = objectMessages("memes.waveFooter", {

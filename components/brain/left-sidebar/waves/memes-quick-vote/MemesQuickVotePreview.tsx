@@ -2,23 +2,25 @@
 
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
 import type { MediaLoadStrategy } from "@/components/drops/view/item/content/media/mediaLoadStrategy";
-import { formatNumberWithCommas } from "@/helpers/Helpers";
+import WaveDropAuthorPfp from "@/components/waves/drops/WaveDropAuthorPfp";
+import WaveDropTime from "@/components/waves/drops/time/WaveDropTime";
 import {
   getDropPreviewImageUrl,
   type ExtendedDrop,
 } from "@/helpers/waves/drop.helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import {
   formatMemesQuickVoteLeftThisRoundText,
   formatMemesQuickVoteUnratedText,
 } from "@/hooks/memesQuickVote.helpers";
+import { formatInteger, formatNumber } from "@/i18n/format";
+import { t } from "@/i18n/messages";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import type { ReactNode, TouchEventHandler } from "react";
-import { useMemo } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import MemesQuickVoteDescription from "./MemesQuickVoteDescription";
-import MemesQuickVoteDropHeader from "./MemesQuickVoteDropHeader";
 import useMemesQuickVotePreviewSwipe from "./useMemesQuickVotePreviewSwipe";
 import ContentModerationDropGate from "@/components/content-moderation/ContentModerationDropGate";
 
@@ -112,19 +114,29 @@ function MemesQuickVoteMobileDetails({
 }) {
   return (
     <div
-      className="tw-relative tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-bg-[#0d0d0e] md:tw-hidden"
+      className="tw-relative tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-overflow-hidden md:tw-hidden"
       style={{ touchAction: "pan-y" }}
       onTouchStart={touchSurfaceProps.onTouchStart}
       onTouchMove={touchSurfaceProps.onTouchMove}
       onTouchEnd={touchSurfaceProps.onTouchEnd}
       onTouchCancel={touchSurfaceProps.onTouchCancel}
     >
-      <div className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-overscroll-contain tw-px-6 tw-pb-5 tw-pt-4 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:tw-hidden">
-        <div className="tw-flex tw-flex-col tw-gap-4">
-          <MemesQuickVoteDropHeader drop={drop} />
+      <div className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-overscroll-contain tw-px-6 tw-pb-3 tw-pt-2">
+        <div className="tw-flex tw-flex-col tw-gap-3">
+          <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-2.5">
+            <WaveDropAuthorPfp drop={drop} />
+            <span className="tw-min-w-0 tw-truncate tw-text-xs tw-font-semibold tw-text-iron-200">
+              {drop.author.handle ?? drop.author.primary_address}
+            </span>
+            <span aria-hidden="true" className="tw-text-iron-500">
+              ·
+            </span>
+            <WaveDropTime timestamp={drop.created_at} color="iron-400" />
+            <span className="tw-sr-only">{drop.wave.name}</span>
+          </div>
 
-          <div className="tw-space-y-3">
-            <h2 className="tw-mb-0 tw-text-[1.15rem] tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-white">
+          <div className="tw-space-y-2.5">
+            <h2 className="tw-m-0 tw-break-words tw-text-[1.25rem] tw-font-bold tw-leading-[1.1] tw-tracking-tight tw-text-white">
               {title}
             </h2>
 
@@ -143,22 +155,26 @@ function MemesQuickVoteMobileDetails({
 }
 
 function MemesQuickVoteMediaStage({
+  hasTouchScreen,
   isInteractive,
   isMobile,
   mediaContent,
   swipeOffset,
   touchSurfaceProps,
 }: {
+  readonly hasTouchScreen: boolean;
   readonly isInteractive: boolean;
   readonly isMobile: boolean;
   readonly mediaContent: ReactNode;
   readonly swipeOffset: number;
   readonly touchSurfaceProps: MemesQuickVoteTouchSurfaceProps;
 }) {
+  const locale = useBrowserLocale();
+
   if (mediaContent === null) {
     return (
       <div className="tw-flex tw-h-[45vh] tw-w-full tw-shrink-0 tw-items-center tw-justify-center tw-border-b tw-border-solid tw-border-white/5 tw-bg-black/30 tw-text-sm tw-text-iron-500 md:tw-h-full md:tw-border-0">
-        Preview unavailable
+        {t(locale, "memes.quickVote.previewUnavailable")}
       </div>
     );
   }
@@ -178,6 +194,7 @@ function MemesQuickVoteMediaStage({
 
       {isInteractive &&
         isMobile &&
+        hasTouchScreen &&
         (["left", "right"] as const).map((side) => (
           <MemesQuickVoteMobileSwipeSurface
             key={side}
@@ -189,7 +206,7 @@ function MemesQuickVoteMediaStage({
           />
         ))}
 
-      {isInteractive && isMobile && (
+      {isInteractive && isMobile && hasTouchScreen && (
         <div
           aria-hidden="true"
           className="tw-pointer-events-none tw-absolute tw-inset-x-0 tw-inset-y-0 tw-z-10 tw-flex tw-items-center tw-justify-between md:tw-hidden"
@@ -240,12 +257,13 @@ function MemesQuickVotePreviewContent({
   onSkip,
   onVoteWithSwipe,
 }: MemesQuickVotePreviewProps) {
+  const locale = useBrowserLocale();
   const isInteractive = renderMode === "active";
   const loadStrategy: MediaLoadStrategy =
     renderMode === "preloaded" ? "eager" : "in-view";
   const title =
     drop.metadata.find((entry) => entry.data_key === "title")?.data_value ??
-    "Untitled submission";
+    t(locale, "memes.quickVote.untitledSubmission");
   const description =
     drop.metadata.find((entry) => entry.data_key === "description")
       ?.data_value ?? "";
@@ -257,18 +275,16 @@ function MemesQuickVotePreviewContent({
     isInteractiveHtmlMedia && (hasTouchScreen || renderMode === "preloaded")
       ? previewImageUrl
       : undefined;
-  const swipeHint = useMemo(() => {
-    if (swipeVoteAmount === null) {
-      return null;
-    }
-
-    return `${formatNumberWithCommas(swipeVoteAmount)} ${
-      votingLabel ?? "votes"
-    }`;
-  }, [swipeVoteAmount, votingLabel]);
-  const swipeInstructionText = swipeHint
-    ? `Swipe left to skip, right to vote ${swipeHint}`
-    : null;
+  const swipeInstructionText =
+    swipeVoteAmount === null
+      ? null
+      : t(locale, "memes.quickVote.swipeHint", {
+          amount: formatNumber(locale, swipeVoteAmount, {
+            maximumFractionDigits: 0,
+            signDisplay: "exceptZero",
+          }),
+          unit: votingLabel ?? t(locale, "memes.quickVote.unit"),
+        });
   const {
     previewCardRef,
     canUseSwiperTouchSurface,
@@ -341,6 +357,7 @@ function MemesQuickVotePreviewContent({
         className="tw-flex tw-h-full tw-flex-col md:tw-flex md:tw-min-h-0 md:tw-flex-1 md:tw-p-0"
       >
         <MemesQuickVoteMediaStage
+          hasTouchScreen={hasTouchScreen}
           isInteractive={isInteractive}
           isMobile={isMobile}
           mediaContent={mediaContent}
@@ -369,21 +386,30 @@ function MemesQuickVotePreviewContent({
         }
         className="tw-sr-only"
       >
-        {isInteractive && swipeInstructionText && (
-          <span className="tw-sr-only">{swipeInstructionText}</span>
-        )}
+        {isInteractive &&
+          isMobile &&
+          hasTouchScreen &&
+          swipeInstructionText && (
+            <span className="tw-sr-only">{swipeInstructionText}</span>
+          )}
         {isInteractive && typeof uncastPower === "number" && (
           <span className="tw-sr-only tw-text-primary-300">
-            {formatNumberWithCommas(uncastPower)} {votingLabel ?? "votes"} left
+            {t(locale, "memes.quickVote.powerLeft", {
+              amount: formatInteger(locale, uncastPower),
+              unit: votingLabel ?? t(locale, "memes.quickVote.unit"),
+            })}
           </span>
         )}
         {isInteractive && (
           <>
             <span className="tw-sr-only">
-              {formatMemesQuickVoteLeftThisRoundText(leftThisRoundCount)}
+              {formatMemesQuickVoteLeftThisRoundText(
+                leftThisRoundCount,
+                locale
+              )}
             </span>
             <span className="tw-sr-only">
-              {formatMemesQuickVoteUnratedText(unratedCount)}
+              {formatMemesQuickVoteUnratedText(unratedCount, locale)}
             </span>
           </>
         )}
@@ -402,7 +428,7 @@ function MemesQuickVotePreviewContent({
             allowTouchMove={!isBusy}
             resistanceRatio={0}
             touchStartPreventDefault={false}
-            className="tw-h-full tw-overflow-visible"
+            className="tw-h-full tw-overflow-visible [&>.swiper-wrapper>.swiper-slide]:[scale:1]"
             onTouchMove={handleSwiperMove}
             onTouchEnd={handleSwiperTouchEnd}
           >
