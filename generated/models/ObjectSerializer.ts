@@ -226,7 +226,9 @@ export * from '../models/ApiDropV2Page';
 export * from '../models/ApiDropV2PageWithoutCount';
 export * from '../models/ApiDropViewerModerationContext';
 export * from '../models/ApiDropVote';
+export * from '../models/ApiDropVoteDistribution';
 export * from '../models/ApiDropVoteEditLog';
+export * from '../models/ApiDropVoteSummary';
 export * from '../models/ApiDropVoter';
 export * from '../models/ApiDropVotersPage';
 export * from '../models/ApiDropWinningContext';
@@ -852,7 +854,9 @@ import { ApiDropV2Page } from '../models/ApiDropV2Page';
 import { ApiDropV2PageWithoutCount } from '../models/ApiDropV2PageWithoutCount';
 import { ApiDropViewerModerationContext } from '../models/ApiDropViewerModerationContext';
 import { ApiDropVote } from '../models/ApiDropVote';
+import { ApiDropVoteDistribution } from '../models/ApiDropVoteDistribution';
 import { ApiDropVoteEditLog } from '../models/ApiDropVoteEditLog';
+import { ApiDropVoteSummary } from '../models/ApiDropVoteSummary';
 import { ApiDropVoter } from '../models/ApiDropVoter';
 import { ApiDropVotersPage } from '../models/ApiDropVotersPage';
 import { ApiDropWinningContext } from '../models/ApiDropWinningContext';
@@ -1601,7 +1605,9 @@ let typeMap: {[index: string]: any} = {
     "ApiDropV2PageWithoutCount": ApiDropV2PageWithoutCount,
     "ApiDropViewerModerationContext": ApiDropViewerModerationContext,
     "ApiDropVote": ApiDropVote,
+    "ApiDropVoteDistribution": ApiDropVoteDistribution,
     "ApiDropVoteEditLog": ApiDropVoteEditLog,
+    "ApiDropVoteSummary": ApiDropVoteSummary,
     "ApiDropVoter": ApiDropVoter,
     "ApiDropVotersPage": ApiDropVotersPage,
     "ApiDropWinningContext": ApiDropWinningContext,

@@ -1,9 +1,10 @@
 "use client";
 
-import CustomTooltip from "@/components/utils/tooltip/CustomTooltip";
+import { buildTooltipId, TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { useId, type MouseEvent } from "react";
+import { Tooltip } from "react-tooltip";
 
 const ADDITIONAL_ACTION_PROMISE_LABEL = t(
   DEFAULT_LOCALE,
@@ -33,29 +34,42 @@ export function AdditionalActionPromiseBadge({
 }: AdditionalActionPromiseBadgeProps) {
   const badgeClassName = `${BADGE_CLASSES} ${className}`;
   const descriptionId = useId();
+  const tooltipId = buildTooltipId("additional-action", descriptionId);
 
   return (
     <>
-      <CustomTooltip
-        content={ADDITIONAL_ACTION_PROMISE_TOOLTIP}
-        placement="top"
+      {focusable ? (
+        <button
+          type="button"
+          aria-describedby={descriptionId}
+          data-tooltip-id={tooltipId}
+          onClick={stopBadgeClickPropagation}
+          className={`${badgeClassName} tw-border-0`}
+        >
+          {ADDITIONAL_ACTION_PROMISE_LABEL}
+        </button>
+      ) : (
+        <span
+          aria-describedby={descriptionId}
+          data-tooltip-id={tooltipId}
+          className={badgeClassName}
+        >
+          {ADDITIONAL_ACTION_PROMISE_LABEL}
+        </span>
+      )}
+      <Tooltip
+        id={tooltipId}
+        place="top"
+        offset={8}
+        opacity={1}
         delayShow={200}
+        positionStrategy="fixed"
+        globalCloseEvents={{ escape: true, scroll: true }}
+        style={TOOLTIP_STYLES}
+        className="tw-max-w-[min(20rem,calc(100vw-2rem))] tw-whitespace-normal tw-text-left tw-leading-5"
       >
-        {focusable ? (
-          <button
-            type="button"
-            aria-describedby={descriptionId}
-            onClick={stopBadgeClickPropagation}
-            className={`${badgeClassName} tw-border-0`}
-          >
-            {ADDITIONAL_ACTION_PROMISE_LABEL}
-          </button>
-        ) : (
-          <span aria-describedby={descriptionId} className={badgeClassName}>
-            {ADDITIONAL_ACTION_PROMISE_LABEL}
-          </span>
-        )}
-      </CustomTooltip>
+        {ADDITIONAL_ACTION_PROMISE_TOOLTIP}
+      </Tooltip>
       <span id={descriptionId} className="tw-sr-only">
         {ADDITIONAL_ACTION_PROMISE_TOOLTIP}
       </span>

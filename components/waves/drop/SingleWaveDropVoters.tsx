@@ -1,14 +1,12 @@
 "use client";
 
 import { useAuth } from "@/components/auth/Auth";
-import Button from "@/components/utils/button/Button";
-import { publicEnv } from "@/config/env";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 import { useWaveTopVoters } from "@/hooks/useWaveTopVoters";
-import { getAuthJwt, getStagingAuth } from "@/services/auth/auth.utils";
-import { sanitizeErrorForUser } from "@/utils/error-sanitizer";
-import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
+import { t } from "@/i18n/messages";
+import { UserGroupIcon } from "@heroicons/react/24/outline";
 import { ChevronDownIcon } from "@heroicons/react/24/solid";
 import {
   AnimatePresence,
@@ -17,32 +15,27 @@ import {
   m,
   useReducedMotion,
 } from "framer-motion";
-import React, { useCallback, useEffect, useId, useState } from "react";
-import useDownloader from "@/hooks/useDownloader";
+import React, { useId, useState } from "react";
+import { SingleWaveDropEmptyState } from "./SingleWaveDropEmptyState";
 import { SingleWaveDropVoter } from "./SingleWaveDropVoter";
+import { SingleWaveDropVotersDownload } from "./SingleWaveDropVotersDownload";
 
 interface SingleWaveDropVotersProps {
   readonly drop: ApiDrop;
+  readonly summary?: React.ReactNode;
 }
-
-const getSafeCsvFilenameId = (dropId: string): string => {
-  const safeId = dropId
-    .replaceAll(/[/\\:*?"<>|]/g, "_")
-    .replaceAll(/\s+/g, "_")
-    .slice(0, 180);
-
-  return safeId || "drop";
-};
 
 export const SingleWaveDropVoters: React.FC<SingleWaveDropVotersProps> = ({
   drop,
+  summary,
 }) => {
-  const { connectedProfile, setToast } = useAuth();
+  const locale = useBrowserLocale();
+  const { connectedProfile } = useAuth();
   const [isVotersOpen, setIsVotersOpen] = useState(false);
   const shouldReduceMotion = useReducedMotion() ?? false;
   const panelId = useId();
-  const buttonId = `${panelId}-toggle`;
-  const { download, error: downloadError, isInProgress } = useDownloader();
+  const headingId = `${panelId}-heading`;
+  const indicatorId = `${panelId}-indicator`;
   const { voters, isFetchingNextPage, fetchNextPage, hasNextPage, isLoading } =
     useWaveTopVoters({
       waveId: drop.wave.id,
@@ -53,52 +46,6 @@ export const SingleWaveDropVoters: React.FC<SingleWaveDropVotersProps> = ({
       sort: "ABSOLUTE",
       enabled: isVotersOpen,
     });
-
-  const downloadUrl = `${publicEnv.API_ENDPOINT}/api/v2/drops/${encodeURIComponent(
-    drop.id
-  )}/votes/download`;
-
-  const buildDownloadHeaders = useCallback((): Record<string, string> => {
-    const headers: Record<string, string> = {
-      Accept: "text/csv",
-    };
-    const apiAuth = getStagingAuth();
-    const walletAuth = getAuthJwt();
-
-    if (apiAuth) {
-      headers["x-6529-auth"] = apiAuth;
-    }
-
-    if (walletAuth) {
-      headers["Authorization"] = `Bearer ${walletAuth}`;
-    }
-
-    return headers;
-  }, []);
-
-  useEffect(() => {
-    if (!downloadError?.errorMessage) {
-      return;
-    }
-
-    setToast({
-      type: "error",
-      title: "Couldn't download voters.",
-      description: "Please try again.",
-      details: sanitizeErrorForUser(downloadError.errorMessage),
-    });
-  }, [downloadError, setToast]);
-
-  const onDownloadAllVotes = useCallback(async () => {
-    if (isInProgress) {
-      return;
-    }
-
-    const safeId = getSafeCsvFilenameId(drop.id);
-    await download(downloadUrl, `drop-votes-${safeId}.csv`, undefined, {
-      headers: buildDownloadHeaders(),
-    });
-  }, [buildDownloadHeaders, download, downloadUrl, drop.id, isInProgress]);
 
   const toggleVoters = () => setIsVotersOpen((current) => !current);
 
@@ -111,68 +58,58 @@ export const SingleWaveDropVoters: React.FC<SingleWaveDropVotersProps> = ({
   return (
     <LazyMotion features={domAnimation}>
       <div>
-        <div
-          className={`tw-flex tw-w-full tw-items-center tw-justify-between tw-border-0 tw-px-4 tw-py-2.5 tw-text-left tw-transition-colors tw-duration-300 tw-ease-out desktop-hover:hover:tw-bg-iron-900 ${
-            isVotersOpen ? "tw-bg-iron-800" : "tw-bg-iron-950"
-          }`}
-        >
+        {/* Only a rendered vote ribbon uses the compact header spacing. */}
+        <div className="tw-group tw-relative tw-isolate tw-flex tw-min-h-[3.25rem] tw-items-center tw-gap-3 tw-bg-iron-950 tw-px-4 tw-py-2.5 tw-transition-colors tw-duration-300 tw-ease-out desktop-hover:hover:tw-bg-iron-900 motion-reduce:tw-transition-none [&:has(+figure)]:tw-min-h-11 [&:has(+figure)]:tw-pb-1">
+          {/* The full-row toggle and download remain separate native buttons. */}
           <button
             type="button"
-            id={buttonId}
             aria-expanded={isVotersOpen}
             aria-controls={panelId}
+            aria-labelledby={`${headingId} ${indicatorId}`}
             onClick={toggleVoters}
-            className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-border-0 tw-bg-transparent tw-p-0 tw-text-left"
+            className="tw-absolute tw-inset-0 tw-w-full tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-2px] focus-visible:tw-outline-primary-400"
+          />
+          <span
+            id={headingId}
+            className="tw-pointer-events-none tw-relative tw-min-w-12 tw-flex-1 tw-text-sm tw-font-medium tw-text-iron-400"
           >
-            <span
-              className={`tw-text-sm tw-font-medium ${isVotersOpen ? "tw-text-iron-300" : "tw-text-iron-400"}`}
+            {t(locale, "waves.voteInsights.topVoters")}
+          </span>
+          <SingleWaveDropVotersDownload dropId={drop.id} />
+          <span
+            id={indicatorId}
+            className="tw-pointer-events-none tw-relative tw-ml-1 tw-inline-flex tw-min-w-0 tw-items-center tw-gap-1.5 tw-text-xs tw-font-medium tw-text-iron-400 tw-transition-colors desktop-hover:group-hover:tw-text-iron-200 motion-reduce:tw-transition-none"
+          >
+            {t(
+              locale,
+              isVotersOpen
+                ? "waves.voteInsights.hideVoters"
+                : "waves.voteInsights.viewVoters"
+            )}
+            <m.span
+              aria-hidden="true"
+              className="tw-flex"
+              animate={{ rotate: isVotersOpen ? 180 : 0 }}
+              transition={{ duration: shouldReduceMotion ? 0 : 0.3 }}
             >
-              Top voters
-            </span>
-          </button>
-          <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-x-3">
-            <Button
-              type="button"
-              onClick={onDownloadAllVotes}
-              loading={isInProgress}
-              variant="tertiary"
-              size="xs"
-              aria-label="Download all top voters as CSV"
-            >
-              <span>{isInProgress ? "Downloading" : "Download All"}</span>
-              {!isInProgress && <ArrowDownTrayIcon className="tw-size-4" />}
-            </Button>
-            <button
-              type="button"
-              onClick={toggleVoters}
-              aria-expanded={isVotersOpen}
-              aria-controls={panelId}
-              className="tw-flex tw-size-6 tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-p-0"
-              aria-label={`${isVotersOpen ? "Collapse" : "Expand"} top voters`}
-            >
-              <m.div
-                animate={{ rotate: isVotersOpen ? 180 : 0 }}
-                transition={{ duration: shouldReduceMotion ? 0 : 0.3 }}
-              >
-                <ChevronDownIcon
-                  className={`tw-h-4 tw-w-4 tw-flex-shrink-0 ${isVotersOpen ? "tw-text-iron-400" : "tw-text-iron-600"}`}
-                />
-              </m.div>
-            </button>
-          </div>
+              <ChevronDownIcon className="tw-size-4 tw-flex-shrink-0 tw-text-iron-400" />
+            </m.span>
+          </span>
         </div>
+
+        {summary}
 
         <AnimatePresence>
           {isVotersOpen && (
             <m.div
               id={panelId}
               role="region"
-              aria-labelledby={buttonId}
+              aria-labelledby={headingId}
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
               transition={{ duration: shouldReduceMotion ? 0 : 0.3 }}
-              className="tw-overflow-hidden"
+              className="tw-overflow-hidden tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10"
             >
               <div className="tw-max-h-[19.75rem] tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300">
                 {voters.length > 0 || isLoading ? (
@@ -195,36 +132,14 @@ export const SingleWaveDropVoters: React.FC<SingleWaveDropVotersProps> = ({
                     <div ref={intersectionElementRef}></div>
                   </>
                 ) : (
-                  <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-space-y-4 tw-py-6 tw-text-iron-400">
-                    <div className="tw-group tw-relative">
-                      <div className="tw-absolute tw-inset-0 tw-animate-[spin_4s_linear_infinite] tw-rounded-full tw-bg-gradient-to-br tw-from-primary-400/20 tw-via-indigo-500/10 tw-to-iron-800/10 desktop-hover:group-hover:tw-from-primary-400/30 motion-reduce:tw-animate-none"></div>
-                      <div className="tw-absolute tw-inset-0 tw-animate-[spin_5s_linear_infinite] tw-rounded-full tw-bg-gradient-to-tr tw-from-iron-800/10 tw-via-indigo-500/10 tw-to-primary-400/20 desktop-hover:group-hover:tw-to-primary-400/30 motion-reduce:tw-animate-none"></div>
-                      <div className="tw-bg-gradient-radial tw-absolute tw-inset-0 tw-animate-pulse tw-from-primary-300/5 tw-to-transparent motion-reduce:tw-animate-none"></div>
-                      <svg
-                        className="tw-relative tw-size-8 tw-flex-shrink-0 tw-text-white/60"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth="1"
-                        stroke="currentColor"
-                        aria-hidden="true"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M22.7 13.5L20.7005 11.5L18.7 13.5M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C15.3019 3 18.1885 4.77814 19.7545 7.42909M12 7V12L15 14"
-                        />
-                      </svg>
-                    </div>
-                    <div className="tw-flex tw-flex-col tw-items-center tw-gap-y-2">
-                      <span className="tw-bg-gradient-to-br tw-from-iron-200 tw-via-iron-300 tw-to-iron-400 tw-bg-clip-text tw-text-base tw-font-semibold tw-tracking-tight tw-text-transparent">
-                        Be the First to Make a Vote
-                      </span>
-                      <p className="tw-mb-0 tw-max-w-64 tw-text-center tw-text-sm tw-text-iron-500">
-                        Vote on this drop to see voter rankings appear here.
-                      </p>
-                    </div>
-                  </div>
+                  <SingleWaveDropEmptyState
+                    icon={<UserGroupIcon className="tw-size-6" />}
+                    title={t(locale, "waves.voteInsights.emptyVotersTitle")}
+                    description={t(
+                      locale,
+                      "waves.voteInsights.emptyVotersDescription"
+                    )}
+                  />
                 )}
               </div>
             </m.div>
