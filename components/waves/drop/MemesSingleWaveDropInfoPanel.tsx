@@ -124,7 +124,6 @@ export const MemesSingleWaveDropInfoPanel = ({
         <MemesDropArtworkHero artworkMedia={artworkMedia} />
         <MemesDropSummarySection
           drop={drop}
-          voteDistribution={voteDistribution}
           title={title}
           description={description}
           artworkMimeType={artworkMedia?.mime_type}
@@ -141,6 +140,7 @@ export const MemesSingleWaveDropInfoPanel = ({
 
         <MemesDropDetailsSection
           drop={drop}
+          voteDistribution={voteDistribution}
           wave={wave}
           artworkMedia={artworkMedia}
           fileInfo={fileInfo}

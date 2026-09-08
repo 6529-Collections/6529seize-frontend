@@ -12,7 +12,6 @@ import { SingleWaveDropInfoContainer } from "./SingleWaveDropInfoContainer";
 import { SingleWaveDropInfoDetails } from "./SingleWaveDropInfoDetails";
 import { WaveDropMetaRow } from "./WaveDropMetaRow";
 import { WaveDropVoteSummary } from "./WaveDropVoteSummary";
-import DropVoteDistribution from "./DropVoteDistribution";
 
 interface SingleWaveDropInfoPanelProps {
   readonly drop: ExtendedDrop;
@@ -63,16 +62,14 @@ export const SingleWaveDropInfoPanel = ({
               </div>
             )}
 
-            <DropVoteDistribution
-              drop={drop}
-              voteDistribution={voteDistribution}
-            />
-
             <WaveDropMetaRow drop={drop} isWinner={isWinner} />
 
             {!isChatWave && (
               <div className="tw-mt-6">
-                <SingleWaveDropInfoDetails drop={drop} />
+                <SingleWaveDropInfoDetails
+                  drop={drop}
+                  voteDistribution={voteDistribution}
+                />
               </div>
             )}
             {canDelete && drop.drop_type !== ApiDropType.Winner && (

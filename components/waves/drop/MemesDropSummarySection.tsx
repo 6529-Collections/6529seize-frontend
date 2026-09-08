@@ -1,18 +1,15 @@
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import type { ApiDropVoteDistribution } from "@/generated/models/ApiDropVoteDistribution";
 import { AdditionalActionPromiseBadge } from "@/components/waves/drops/AdditionalActionPromiseBadge";
 import { faAddressCard, faStar } from "@fortawesome/free-regular-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { WaveDropMetaRow } from "./WaveDropMetaRow";
 import { WaveDropVoteSummary } from "./WaveDropVoteSummary";
-import DropVoteDistribution from "./DropVoteDistribution";
 import MainStageMemeCardLink, {
   isValidMemeCardId,
 } from "@/components/memes/drops/MainStageMemeCardLink";
 
 interface MemesDropSummarySectionProps {
   readonly drop: ExtendedDrop;
-  readonly voteDistribution?: ApiDropVoteDistribution | undefined;
   readonly title: string;
   readonly description: string;
   readonly artworkMimeType?: string | undefined;
@@ -27,7 +24,6 @@ interface MemesDropSummarySectionProps {
 
 export function MemesDropSummarySection({
   drop,
-  voteDistribution,
   title,
   description,
   artworkMimeType,
@@ -54,11 +50,6 @@ export function MemesDropSummarySection({
             onVoteClick={onVoteClick}
           />
         </div>
-
-        <DropVoteDistribution
-          drop={drop}
-          voteDistribution={voteDistribution}
-        />
 
         <div className="tw-mb-6">
           <h1 className="tw-mb-4 tw-text-lg tw-font-bold tw-tracking-tight tw-text-white sm:tw-text-2xl">

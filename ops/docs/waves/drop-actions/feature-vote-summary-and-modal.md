@@ -42,21 +42,34 @@ distribution with signed positive and negative highlights.
 
 ### Read the Current Vote Distribution
 
-1. Review the ribbon beside `−` and `+` and the `Largest negative vote` and
-   `Largest positive vote` labels below it. Each available label identifies
-   one voter and their signed current allocation on this drop.
-2. Select the ribbon or highlights to expand the breakdown. Keyboard users can
-   focus this control and use `Enter` or `Space`.
-3. Read `Negative total` and `Positive total` as the complete signed totals of
-   current allocations in each direction. For example, `−11M` and `+27M` give
-   a raw net allocation of `+16M`.
-4. Each direction lists up to its three largest individual allocations with
-   exact amounts and profile links. `Others` combines the remaining
-   allocations on that side; it is an amount, not a voter count.
+1. Find the ribbon inside `Top voters`, beneath its header and `View voters`
+   control. The ribbon stays visible whether the voter list is open or closed;
+   it does not expand or toggle the list.
+2. Review the ribbon beside `−` and `+` and the `Largest opposing vote` and
+   `Largest supporting vote` labels below it. Opposing means negative and
+   supporting means positive. Each available label identifies one voter and
+   their signed current allocation on this drop. These labels are static
+   summaries, not buttons or tooltip triggers. On narrow screens, one
+   `Largest votes` label sits above a single row of signed highlights. Names
+   shorten when space is limited; the amounts remain visible.
+3. Hover a segment for its voter and exact signed amount. A striped segment
+   shows the other voters' combined amount on that side. Tap or click anywhere
+   on the ribbon, or keyboard-focus it, to see the complete breakdown, including
+   very small segments. Press `Escape` or tap outside to dismiss the tooltip.
+4. Select the `Top voters` header row, apart from its separate download control,
+   to reveal the voter rows below the ribbon. Its `View voters` indicator changes
+   to `Hide voters` while open.
+   The graph and largest-vote summaries stay visible when the list is collapsed.
+   Row ordering, absolute totals, and pagination are unchanged.
+5. Use `Download All` in the header to download all voters as CSV.
+   It stays visible when collapsed and uses an icon-only button on narrow
+   screens. Downloading does not toggle the list.
 
 The ribbon's negative and positive widths reflect the amounts on each side,
 before they offset each other. Individual segments show the highlighted
-voters, with a striped `Others` segment when there is a remainder.
+voters (up to three per direction), with a striped `Others` segment when there
+is a remainder. `Others` represents the remaining allocation amount on that
+side, not a voter count.
 
 These figures describe current allocations, not vote-edit history. In a wave
 with time weighting, their raw net can differ from the calculated score and
@@ -73,9 +86,9 @@ ranking, and voting rules retain their usual meaning.
 - Default single-drop panels use centered modal overlay on all screen sizes.
 - Memes single-drop panels use bottom sheet on small screens and centered modal
   on larger screens.
-- The distribution's largest positive and negative votes remain visible while
-  its detailed breakdown is collapsed. The separate `Top voters` section can
-  remain closed.
+- The ribbon and its largest positive and negative votes remain visible
+  inside the `Top voters` section. Only the voter list beneath them expands;
+  there is no second expandable breakdown.
 - After you change or reset a vote, an open drop's distribution refreshes.
 - While the drop is open, relevant real-time drop and vote updates also request
   a fresh distribution. Closely spaced updates are grouped, so the summary may
@@ -99,7 +112,8 @@ ranking, and voting rules retain their usual meaning.
   omitted for winners and for chat or approve waves, even where those views
   have other voting information.
 - If only one direction has votes, only that direction has a largest-voter
-  highlight and breakdown. No opposing voter is invented for an empty side.
+  highlight and a sign beside the ribbon. No opposing voter or sign is shown
+  for an empty side.
 - Missing or unavailable distribution data hides this optional section. Its
   absence does not mean all votes are zero or that no negative votes exist.
 

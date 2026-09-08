@@ -1,5 +1,4 @@
 import DropVoteProgressing from "@/components/drops/view/utils/DropVoteProgressing";
-import DropLargestVote from "@/components/waves/drop/DropLargestVote";
 import ApprovalDropVoteSummary from "@/components/waves/drops/ApprovalDropVoteSummary";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
@@ -93,7 +92,6 @@ export default function WaveLeaderboardGalleryItemVotes({
           />
         </div>
       </div>
-      <DropLargestVote drop={drop} />
     </div>
   );
 }

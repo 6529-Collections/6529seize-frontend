@@ -12,15 +12,10 @@ import type { ApiDropV2 } from "@/generated/models/ApiDropV2";
 import type { ApiDropV2Page } from "@/generated/models/ApiDropV2Page";
 import type { ApiDropV2PageWithoutCount } from "@/generated/models/ApiDropV2PageWithoutCount";
 import type { ApiDropVotersPage } from "@/generated/models/ApiDropVotersPage";
-import type { ApiDropVoteSummary } from "@/generated/models/ApiDropVoteSummary";
 import type { ApiDropWithoutWavesPageWithoutCount } from "@/generated/models/ApiDropWithoutWavesPageWithoutCount";
 import type { ApiWaveDropsFeed } from "@/generated/models/ApiWaveDropsFeed";
 import type { ApiWaveMin } from "@/generated/models/ApiWaveMin";
 import type { ApiWaveDropsFeedV2 } from "@/generated/models/ApiWaveDropsFeedV2";
-import {
-  fetchDropVoteSummaryPreview,
-  isLocalVotePreviewEnabled,
-} from "@/services/api/drop-vote-preview-api";
 import {
   commonApiFetch,
   commonApiFetchWithRetry,
@@ -424,19 +419,6 @@ const fetchDropAndWaveV2 = async (
     endpoint: `v2/drops/${getDropEndpointId(getNormalizedDropId(dropId))}`,
     signal,
   });
-
-export async function fetchDropVoteSummaryByIdV2(
-  dropId: string,
-  signal?: AbortSignal
-): Promise<ApiDropVoteSummary> {
-  if (isLocalVotePreviewEnabled()) {
-    return fetchDropVoteSummaryPreview(dropId, signal);
-  }
-  return commonApiFetch<ApiDropVoteSummary>({
-    endpoint: `v2/drops/${getDropEndpointId(getNormalizedDropId(dropId))}/vote-summary`,
-    signal,
-  });
-}
 
 export async function fetchWaveDropsFeedV2({
   waveId,

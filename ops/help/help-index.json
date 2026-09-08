@@ -6081,6 +6081,8 @@
         "largest vote",
         "largest positive vote",
         "largest negative vote",
+        "largest supporting vote",
+        "largest opposing vote",
         "vote distribution"
       ],
       "keywords": [
@@ -6096,15 +6098,17 @@
         "others"
       ],
       "facts": [
-        "The right-sidebar Voters tab ranks voters across a rank wave; a single drop's collapsible Top voters section ranks voters for that drop. Both keep descending absolute totals, colored direction markers, and pagination.",
-        "Leaderboard cards for participatory rank-wave drops can show Largest vote with a profile link and signed amount without opening Top voters. It is the largest current individual allocation by absolute size, so a negative vote can be selected.",
+        "The right-sidebar Voters tab ranks voters across a rank wave; a single drop's collapsible Top voters section ranks voters for that drop. Both keep descending absolute totals and pagination. Single-drop rows show an explicit green plus for positive votes and coral minus for negative votes, both when both directions have amounts, and neither for zero-only rows. The adjacent number remains an absolute total, not a vote change. Wave-sidebar rows retain their colored markers.",
+        "Leaderboard List view items for participatory rank-wave drops can show Largest vote with a profile link and signed amount without opening Top voters. Grid cards do not show this highlight and keep their existing voter-count and voting controls. It is the largest current individual allocation by absolute size, so a negative vote can be selected.",
         "A signed allocation belongs to one voter on this drop: plus is positive and minus is negative. It is not the voter's latest adjustment or their total across the wave.",
-        "In single-drop detail, an optional current-vote ribbon shows the largest positive and negative votes. Expanding it reveals complete signed totals, up to the three largest individual allocations in each direction, and Others for the remaining amount on that side.",
-        "Ribbon widths represent positive and negative allocation amounts before they offset each other. Others is an allocation total, not a voter count.",
+        "In single-drop detail, an optional current-vote ribbon with Largest supporting vote (positive) and Largest opposing vote (negative) stays visible inside Top voters, beneath its header. Select the Top voters header row, apart from its separate download control, to toggle the voter rows below the summary; its indicator reads View voters when closed and Hide voters when open. Row ordering, absolute totals, and pagination are unchanged. Download All stays visible in the header, including when collapsed, and uses an icon-only button on narrow screens. It downloads all voters as CSV without toggling the list. The graph does not toggle the list, and collapsing the rows does not hide the summary.",
+        "Ribbon widths represent complete positive and negative allocation amounts before they offset each other. Each side highlights up to three individual allocations; the striped Others segment combines the remaining amount on that side, not a voter count.",
+        "Hover a ribbon segment to see its voter and exact signed amount; Others shows a combined amount. Tap or click anywhere on the ribbon, or keyboard-focus it, to see the complete breakdown, including very small segments. Largest supporting vote and Largest opposing vote are static summaries and do not open tooltips. Narrow screens show one Largest votes label above a single row of signed highlights; names shorten as needed while amounts remain visible. Escape or tapping outside dismisses the tooltip.",
+        "When one direction has no allocations, its sign and largest-voter highlight are hidden. A positive-only ribbon shows no minus sign, and a negative-only ribbon shows no plus sign.",
         "Current allocation totals are separate from the calculated and projected score in the existing TDH Total strip. Time weighting can make those scores differ from the raw positive-plus-negative net; voting rules and leaderboard ranking are unchanged.",
         "Largest-vote and distribution summaries are optional and limited to participatory RANK drops. They are omitted for winners, CHAT and APPROVE waves, or unavailable data. Missing summaries do not prove there are no votes or no negative votes.",
         "An open drop's distribution refreshes after the user edits or resets a vote and when relevant real-time drop or vote updates arrive; closely spaced updates are grouped. Reopening detail can reuse a result for up to 60 seconds unless a vote update requests fresh data. There is no periodic polling, and the summary is not a live activity log.",
-        "After the user edits or resets a vote, that drop's card highlight is cleared until the leaderboard's next normal refresh. Voting does not force the leaderboard to reload or reorder.",
+        "Reactions and content updates preserve the latest available card highlight. The user's own or incoming real-time vote changes clear it until the leaderboard's next normal refresh. Voting does not force the leaderboard to reload or reorder.",
         "Top voters are distinct from winners, which are about submitted drops or outcomes."
       ],
       "canonical_path": "/waves",

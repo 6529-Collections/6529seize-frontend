@@ -16,6 +16,8 @@ import {
 } from "@/helpers/AllowlistToolHelpers";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
 interface SingleWaveDropVoterProps {
   readonly voter: ApiWaveVoter;
@@ -28,12 +30,13 @@ export const SingleWaveDropVoter: React.FC<SingleWaveDropVoterProps> = ({
   position,
   creditType,
 }) => {
+  const locale = useBrowserLocale();
   const hasPositiveVotes = !!voter.positive_votes_summed;
   const hasNegativeVotes = !!voter.negative_votes_summed;
 
   const pfpClasses =
     "tw-size-7 tw-rounded-md tw-ring-1 tw-ring-white/10 tw-bg-iron-800 tw-flex-shrink-0 tw-object-contain";
-  const dotClasses = "tw-w-1.5 tw-h-1.5 tw-rounded-sm";
+  const directionClasses = "tw-text-sm tw-font-medium tw-leading-none";
 
   const voterIdentity = voter.voter.handle ?? voter.voter.id;
   const shouldLimit =
@@ -80,9 +83,23 @@ export const SingleWaveDropVoter: React.FC<SingleWaveDropVoterProps> = ({
             data-tooltip-id={`single-voter-${voterIdentity}-${position}`}
           >
             {hasPositiveVotes && (
-              <div className={`${dotClasses} tw-bg-green`} />
+              <span
+                role="img"
+                aria-label={t(locale, "waves.voteInsights.positiveTotal")}
+                className={`${directionClasses} tw-text-green`}
+              >
+                +
+              </span>
             )}
-            {hasNegativeVotes && <div className={`${dotClasses} tw-bg-red`} />}
+            {hasNegativeVotes && (
+              <span
+                role="img"
+                aria-label={t(locale, "waves.voteInsights.negativeTotal")}
+                className={`${directionClasses} tw-text-red`}
+              >
+                −
+              </span>
+            )}
           </div>
           <Tooltip
             id={`single-voter-${voterIdentity}-${position}`}

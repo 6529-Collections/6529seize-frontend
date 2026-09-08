@@ -1,4 +1,4 @@
-import { publicEnv } from "@/config/env";
+import { getNodeEnv, publicEnv } from "@/config/env";
 import type { ApiDropVoter } from "@/generated/models/ApiDropVoter";
 import type { ApiDropVotersPage } from "@/generated/models/ApiDropVotersPage";
 import type { ApiDropVoteSummary } from "@/generated/models/ApiDropVoteSummary";
@@ -17,7 +17,7 @@ const isLoopback = (hostname: string): boolean =>
 // Temporary design preview using real, existing API reads. Production uses
 // backend summaries; this path does not validate their SQL or performance.
 export function isLocalVotePreviewEnabled(): boolean {
-  if (process.env.NODE_ENV !== "development") {
+  if (getNodeEnv() !== "development") {
     return false;
   }
   try {
@@ -25,6 +25,26 @@ export function isLocalVotePreviewEnabled(): boolean {
   } catch {
     return false;
   }
+}
+
+function isValidPreviewVoter(entry: unknown): boolean {
+  if (
+    typeof entry !== "object" ||
+    entry === null ||
+    !("vote" in entry) ||
+    !("voter" in entry)
+  ) {
+    return false;
+  }
+  const voter = entry.voter;
+  return (
+    Number.isSafeInteger(entry.vote) &&
+    typeof voter === "object" &&
+    voter !== null &&
+    "id" in voter &&
+    typeof voter.id === "string" &&
+    voter.id.trim().length > 0
+  );
 }
 
 async function fetchPreviewPage(
@@ -60,12 +80,7 @@ async function fetchPreviewPage(
     result.next !== (result.count > page * pageSize) ||
     !Array.isArray(result.data) ||
     result.data.length !== expectedLength ||
-    result.data.some(
-      (entry) =>
-        !Number.isSafeInteger(entry?.vote) ||
-        typeof entry.voter?.id !== "string" ||
-        entry.voter.id.trim().length === 0
-    )
+    result.data.some((entry) => !isValidPreviewVoter(entry))
   ) {
     throw new Error("Incomplete vote data for the local design preview.");
   }

@@ -6,7 +6,7 @@ import type { ApiDropVoteDistribution } from "@/generated/models/ApiDropVoteDist
 import { isWsDropUpdateRefData, WsMessageType } from "@/helpers/Types";
 import { useDebouncedQueryRefetch } from "@/hooks/useDebouncedQueryRefetch";
 import { DROP_DETAIL_STALE_TIME_MS } from "@/services/api/drop-api";
-import { fetchDropVoteSummaryByIdV2 } from "@/services/api/wave-drops-v2-api";
+import { fetchDropVoteSummaryByIdV2 } from "@/services/api/drop-vote-summary-api";
 import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
 import { useQuery } from "@tanstack/react-query";
 import { useCallback } from "react";
@@ -38,7 +38,7 @@ export function useDropVoteSummary({
   });
   const onDropUpdate = useCallback(
     (message: ApiDrop) => {
-      if (enabled && message?.id === dropId && message.wave?.id === waveId) {
+      if (enabled && message.id === dropId && message.wave.id === waveId) {
         requestRefetch();
       }
     },

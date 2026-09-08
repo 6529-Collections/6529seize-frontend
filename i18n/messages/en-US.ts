@@ -515,8 +515,7 @@ const PROFILE_WAVE_FEED_MESSAGES = objectMessages("waves.profileFeed", {
   errorTitle: "Couldn’t load profile posts",
   errorDescription: "Refresh this view to try again.",
   emptyTitle: "No profile posts yet",
-  emptyDescription:
-    "New posts from members’ Profile Waves will appear here.",
+  emptyDescription: "New posts from members’ Profile Waves will appear here.",
 } as const);
 
 const WAVE_LEADERBOARD_MESSAGES = objectMessages("waves.leaderboard", {
@@ -685,12 +684,27 @@ const WAVE_VOTE_MESSAGES = objectMessages("waves.vote", {
 } as const);
 
 const WAVE_VOTE_INSIGHTS_MESSAGES = objectMessages("waves.voteInsights", {
-  localPreview: "Local preview · real votes",
+  topVoters: "Top voters",
+  viewVoters: "View voters",
+  hideVoters: "Hide voters",
+  emptyVotersTitle: "Be the First to Make a Vote",
+  emptyVotersDescription:
+    "Vote on this drop to see voter rankings appear here.",
+  emptyActivityTitle: "Be the First to Make a Vote",
+  emptyActivityDescription:
+    "Vote on this drop to see activity updates appear here in real-time.",
+  downloadAll: "Download All",
+  downloading: "Downloading",
+  downloadAllVoters: "Download all voters as CSV",
   largestVote: "Largest vote",
+  largestVotes: "Largest votes",
   currentVotes: "Current votes",
-  largestPositive: "Largest positive vote",
-  largestNegative: "Largest negative vote",
+  viewBreakdown: "View vote breakdown",
+  largestPositive: "Largest supporting vote",
+  largestNegative: "Largest opposing vote",
   others: "Others",
+  otherPositiveVotes: "Other positive voters combined: {vote} {unit}",
+  otherNegativeVotes: "Other negative voters combined: {vote} {unit}",
   positiveTotal: "Positive total",
   negativeTotal: "Negative total",
   allocationExplanation:

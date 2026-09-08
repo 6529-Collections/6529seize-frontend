@@ -41,7 +41,6 @@ works from the card.
    - projected vote total only when current and projected values are both numeric and different
    - rater count
    - optional `Your votes` with wave credit label when viewer rating context exists
-   - optional `Largest vote` with voter profile link and a compact signed amount
 4. Select card media to open drop detail, or select `Vote` when the action is available.
 5. Select `Load more drops` to fetch the next page.
 
@@ -58,10 +57,9 @@ works from the card.
 - On touch devices, dragging vertically on card media continues page scrolling;
   a tap still opens the drop detail.
 - On non-touch devices, sort changes briefly highlight card media to signal reordering.
-- `Largest vote` identifies the largest current individual allocation in
-  either direction. Its sign distinguishes a positive vote from a negative
-  vote; see [Wave Top Voters Lists](feature-top-voters-lists.md) for its meaning
-  and refresh behavior.
+- Grid cards do not show the `Largest vote` highlight. Use `List view` or open
+  the drop detail for individual-vote highlights; the grid keeps its existing
+  voter-count dropdown and voting controls.
 
 ## Edge Cases
 
@@ -71,8 +69,6 @@ works from the card.
 - Gallery can show `No drops to show` even when list view has entries, if none of
   the current results include media.
 - `Vote` is hidden when voting UI is not available for the current viewer/drop state.
-- Missing `Largest vote` data hides only that highlight. The existing score,
-  projection, and voting controls retain their usual behavior.
 
 ## Failure and Recovery
 

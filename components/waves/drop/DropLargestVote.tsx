@@ -60,9 +60,12 @@ function LargestVoteContent({
   }
 
   const { voter, vote } = largestVote;
-  const address = voter.primary_address?.trim();
-  const fallbackIdentity = address && address !== "UNKNOWN" ? address : voter.id;
-  const name = voter.handle?.trim() || fallbackIdentity;
+  const address = voter.primary_address.trim();
+  const fallbackIdentity =
+    address && address !== "UNKNOWN" ? address : voter.id;
+  const handle = voter.handle?.trim();
+  const name =
+    handle === undefined || handle.length === 0 ? fallbackIdentity : handle;
   const unit = WAVE_VOTING_LABELS[drop.wave.voting_credit_type];
   const compactVote = formatNumber(locale, vote, {
     notation: "compact",
@@ -86,9 +89,6 @@ function LargestVoteContent({
     >
       <span aria-hidden="true" className="tw-shrink-0 tw-text-iron-400">
         {t(locale, "waves.voteInsights.largestVote")}
-      </span>
-      <span aria-hidden="true" className="tw-shrink-0 tw-text-iron-500">
-        ·
       </span>
       <Link
         href={`/${encodeURIComponent(name)}`}
