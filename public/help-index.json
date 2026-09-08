@@ -5404,6 +5404,7 @@
         "Wave content tabs organize the visible wave content area.",
         "Some waves can switch between chat and gallery-style views.",
         "Available tabs depend on wave type, state, and content.",
+        "Native app Back restores the wave section from that visit, such as returning from an author profile to Leaderboard; normally opening another wave still uses its default section.",
         "Open unanswered polls can show a View results control so eligible readers can inspect counts and percentages before voting, then return to Vote while the poll is open."
       ],
       "canonical_path": "/waves",
@@ -5899,6 +5900,9 @@
       "facts": [
         "Wave drop open and copy link actions are documented under drop actions.",
         "Use this when users ask how to copy or open a specific drop.",
+        "In the native mobile app on a touchscreen, tapping the title, media, description, or free space of a Memes leaderboard List or artwork Grid card opens the submission. In List view, the username opens the author's profile, while the avatar and author badges open the submission. In Grid view, the username opens the submission. Explicit vote, rating, and other action buttons keep their own actions.",
+        "Native-app touchscreen leaderboard cards show non-interactive media previews, using a provided poster image when available; open the submission for media controls. Media-format and additional-action-promise badges are informational, not separate tap or keyboard-focus actions.",
+        "Browser views, including mobile browsers, retain their author profile links and media interactions; the native-app whole-card touch rule does not apply there.",
         "Wave-level sharing is handled in the wave header."
       ],
       "canonical_path": "/waves",
@@ -5961,6 +5965,8 @@
       "keywords": ["waves", "drop", "touch", "long", "press", "menu", "mobile"],
       "facts": [
         "Wave drop touch menu behavior covers long-press and touch action button entry points.",
+        "In the native mobile app on a touchscreen, a short tap on a Memes leaderboard List or artwork Grid card opens the drop, including taps on its media. The List username opens the author's profile, while the List avatar and author badges open the submission; the Grid username opens the submission. A long press still opens the action sheet without also opening the drop on release. Explicit vote, rating, and other action buttons stay independent.",
+        "Scrolling gestures, cancelled touches, and touches that stop ongoing scrolling do not open native-app leaderboard cards; tap normally once scrolling settles. Browser views, including mobile browsers, retain their own profile-link and media behavior.",
         "Menu entries depend on device, drop state, and available actions.",
         "Use this when mobile users ask where drop actions went."
       ],
