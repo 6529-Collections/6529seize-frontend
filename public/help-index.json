@@ -5,6 +5,35 @@
   "base_url": "https://6529.io",
   "records": [
     {
+      "id": "waves.memes.submission-identity",
+      "kind": "workflow",
+      "title": "Memes submission profile and wallet confirmation",
+      "aliases": ["submitting as", "submit artwork", "Memes submission wallet"],
+      "keywords": [
+        "memes",
+        "submission",
+        "profile",
+        "wallet",
+        "eligible",
+        "amber",
+        "green"
+      ],
+      "facts": [
+        "Additional Information and Submission Preview show the authenticated submitting profile's avatar and handle beside grouped action buttons on desktop, even when its wallet is disconnected. On smaller screens, the buttons sit below the identity and can wrap. Normal eligibility is not labeled; eligibility checks, errors, and blocking explanations remain visible.",
+        "The connection dot on the avatar is amber when the active profile's wallet is not connected and green when it is connected. Hover, keyboard focus, or tap the avatar reveals Connect a wallet to submit or Wallet connected. The footer does not show a Submitting as label, wallet address, or wallet-provider name. Back actions use a quiet text style while Preview stays outlined and the primary action stays filled.",
+        "Connect Wallet replaces Submit Artwork when the active profile has no signing connection. Connecting never starts artwork submission automatically; review the profile and click Submit Artwork separately.",
+        "Connecting B's wallet while A remains the active authenticated profile leaves A in the strip with an amber dot. Explicitly switching the active profile updates the strip and checks that profile's eligibility before allowing submission.",
+        "The primary action stays disabled during upload, signing, and processing, with phase-specific progress text."
+      ],
+      "canonical_path": "/waves",
+      "related_paths": ["/waves"],
+      "tags": ["waves", "memes", "submission"],
+      "source_refs": [
+        "ops/docs/waves/memes/feature-memes-preview-and-submit-states.md",
+        "components/waves/memes/submission/ui/SubmissionIdentityPanel.tsx"
+      ]
+    },
+    {
       "id": "content-moderation.controls",
       "kind": "workflow",
       "title": "Content moderation and personal visibility controls",
