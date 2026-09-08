@@ -5,13 +5,11 @@ import WaveChatStatus from "@/components/waves/specs/WaveChatStatus";
 import WaveDisableLinks from "@/components/waves/specs/WaveDisableLinks";
 import WaveSlowMode from "@/components/waves/specs/WaveSlowMode";
 import { waveRightPanelText } from "@/helpers/waves/wave-right-panel.helpers";
-import { Suspense } from "react";
 import WaveAccessGroups from "./WaveAccessGroups";
 import WaveConfigurationAdminSettings from "./WaveConfigurationAdminSettings";
 import WaveConfigurationDeleteChatHistory from "./WaveConfigurationDeleteChatHistory";
 import WaveConfigurationDisplay from "./WaveConfigurationDisplay";
 import WaveConfigurationPersonalDisplay from "./WaveConfigurationPersonalDisplay";
-import WaveConfigurationPersonalCuration from "./WaveConfigurationPersonalCuration";
 import WaveConfigurationReadOnlySections from "./WaveConfigurationReadOnlySections";
 import WaveConfigurationRules from "./WaveConfigurationRules";
 import WavePanelSection from "./WavePanelSection";
@@ -85,9 +83,6 @@ export default function WaveConfigurationSections({
       <WaveConfigurationAdminSettings wave={wave} />
       <WaveConfigurationDeleteChatHistory wave={wave} />
       {showChatSettings && <WaveConfigurationPersonalDisplay />}
-      <Suspense fallback={null}>
-        <WaveConfigurationPersonalCuration wave={wave} />
-      </Suspense>
     </div>
   );
 }
