@@ -146,11 +146,61 @@ describe("MyStreamWaveMyVoteInput", () => {
 
     expect(input.value).toBe("-5");
     expect(submitButton).toBeDisabled();
+    expect(input).toHaveAttribute("aria-invalid", "true");
+    expect(screen.getByRole("status")).toHaveTextContent("Minimum is 0 TDH.");
+    expect(input).toHaveAccessibleDescription(
+      "Max for wave 10 Minimum is 0 TDH."
+    );
 
     fireEvent.blur(input);
     fireEvent.keyDown(input, { key: "Enter" });
 
     expect(input.value).toBe("-5");
+    expect(input).toHaveAccessibleDescription(
+      "Max for wave 10 Minimum is 0 TDH."
+    );
+    expect(auth.requestAuth).not.toHaveBeenCalled();
+    expect(mutateAsync).not.toHaveBeenCalled();
+  });
+
+  it("explains a refreshed maximum without changing the stored vote", () => {
+    const dropWithRating = {
+      ...drop,
+      context_profile_context: { rating: 8, min_rating: 0, max_rating: 10 },
+    };
+    const { rerender } = render(
+      <MyStreamWaveMyVoteInput drop={dropWithRating} />,
+      { wrapper }
+    );
+    const input = screen.getByRole("textbox");
+    expect(input).not.toHaveAttribute("aria-invalid");
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+
+    rerender(
+      <MyStreamWaveMyVoteInput
+        drop={{
+          ...dropWithRating,
+          context_profile_context: { rating: 8, min_rating: 0, max_rating: 5 },
+        }}
+      />
+    );
+
+    expect(input).toHaveValue("8");
+    expect(input).toHaveAttribute("aria-invalid", "true");
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Max for wave is 5 TDH."
+    );
+    expect(input).toHaveAccessibleDescription(
+      "Max for wave 5 Max for wave is 5 TDH."
+    );
+    expect(screen.getByRole("button", { name: "Submit vote" })).toBeDisabled();
+
+    rerender(<MyStreamWaveMyVoteInput drop={dropWithRating} />);
+
+    expect(input).toHaveValue("8");
+    expect(input).not.toHaveAttribute("aria-invalid");
+    expect(input).toHaveAccessibleDescription("Max for wave 10");
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
     expect(auth.requestAuth).not.toHaveBeenCalled();
     expect(mutateAsync).not.toHaveBeenCalled();
   });
@@ -254,15 +304,107 @@ describe("MyStreamWaveMyVoteInput", () => {
     expect(mutateAsync).toHaveBeenCalledWith({ rate: 10, previousRate: 20 });
   });
 
-  it("clamps vote value within limits and submits on click", async () => {
+  it("preserves clamped vote feedback through blur until explicit submission", async () => {
     render(<MyStreamWaveMyVoteInput drop={drop} />, { wrapper });
     const input = screen.getByRole("textbox");
+    fireEvent.focus(input);
     fireEvent.change(input, { target: { value: "15" } });
-    expect((input as HTMLInputElement).value).toBe("10");
+    fireEvent.blur(input);
+
+    expect(input).toHaveValue("10");
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Max for wave is 10 TDH."
+    );
+    expect(input).toHaveAccessibleDescription(
+      "Max for wave 10 Max for wave is 10 TDH."
+    );
+    expect(auth.requestAuth).not.toHaveBeenCalled();
+    expect(mutateAsync).not.toHaveBeenCalled();
 
     fireEvent.click(screen.getByRole("button", { name: "Submit vote" }));
     await waitFor(() => expect(auth.requestAuth).toHaveBeenCalled());
     expect(mutateAsync).toHaveBeenCalledWith({ rate: 10, previousRate: 0 });
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+  });
+
+  it("clears retained limit feedback after a valid edit", () => {
+    render(<MyStreamWaveMyVoteInput drop={drop} />, { wrapper });
+    const input = screen.getByRole("textbox");
+
+    fireEvent.change(input, { target: { value: "15" } });
+    fireEvent.blur(input);
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Max for wave is 10 TDH."
+    );
+
+    fireEvent.change(input, { target: { value: "5" } });
+
+    expect(input).toHaveValue("5");
+    expect(input).toHaveAccessibleDescription("Max for wave 10");
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    expect(auth.requestAuth).not.toHaveBeenCalled();
+    expect(mutateAsync).not.toHaveBeenCalled();
+  });
+
+  it("requires explicit submission of the displayed limit after an oversized paste", async () => {
+    render(<MyStreamWaveMyVoteInput drop={drop} />, { wrapper });
+    const input = screen.getByRole("textbox");
+
+    fireEvent.change(input, {
+      target: { value: "1000000000000000000000" },
+    });
+
+    expect(input).toHaveValue("10");
+    expect(input).not.toHaveAttribute("aria-invalid");
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Max for wave is 10 TDH."
+    );
+
+    expect(auth.requestAuth).not.toHaveBeenCalled();
+    expect(mutateAsync).not.toHaveBeenCalled();
+
+    fireEvent.keyDown(input, { key: "Enter" });
+
+    await waitFor(() =>
+      expect(mutateAsync).toHaveBeenCalledWith({ rate: 10, previousRate: 0 })
+    );
+    expect(auth.requestAuth).toHaveBeenCalledTimes(1);
+  });
+
+  it("clears stale limit feedback when live vote context changes", async () => {
+    const { rerender } = render(<MyStreamWaveMyVoteInput drop={drop} />, {
+      wrapper,
+    });
+    const input = screen.getByRole("textbox");
+
+    fireEvent.change(input, { target: { value: "15" } });
+
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Max for wave is 10 TDH."
+    );
+
+    rerender(
+      <MyStreamWaveMyVoteInput
+        drop={{
+          ...drop,
+          context_profile_context: { rating: 4, min_rating: 0, max_rating: 9 },
+        }}
+      />
+    );
+
+    expect(input).toHaveValue("4");
+    expect(input).toHaveAccessibleDescription("Max for wave 9");
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    expect(auth.requestAuth).not.toHaveBeenCalled();
+    expect(mutateAsync).not.toHaveBeenCalled();
+
+    fireEvent.change(input, { target: { value: "5" } });
+    fireEvent.keyDown(input, { key: "Enter" });
+
+    await waitFor(() =>
+      expect(mutateAsync).toHaveBeenCalledWith({ rate: 5, previousRate: 4 })
+    );
+    expect(auth.requestAuth).toHaveBeenCalledTimes(1);
   });
 
   it("does not submit when voting is closed", () => {
