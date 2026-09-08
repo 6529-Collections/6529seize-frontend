@@ -2370,7 +2370,7 @@
         "Compact proposal cards do not generate summaries, categories, or proposal metadata.",
         "Selecting a proposal card opens the complete original proposal, including its full markdown, media, attachments, and multipart navigation.",
         "Memes, Curation, and Quorum Waves keep their specialized proposal presentations.",
-        "Wave creators can choose Full proposal or Summary card under Advanced settings in the Overview step for a Rank or Approve Wave. New Waves default to Summary card; existing Waves and older drafts without this setting keep Full proposal except for the Network Museum compatibility fallback.",
+        "Wave creators can choose Full proposal or Summary card under Advanced settings in the Setup step for a Rank or Approve Wave. New Waves default to Summary card; existing Waves and older drafts without this setting keep Full proposal except for the Network Museum compatibility fallback.",
         "Wave admins can change the same presentation later from the right sidebar under Settings, Display, Proposal cards. This control is available for standard Rank and Approve Waves, not Chat, Memes, Curation, or Quorum presentations.",
         "Summary card lets the admin set a proposal-text limit from 120 to 1000 characters and choose whether the first ready still image appears beside proposal summaries in chat and list views. Invalid limits cannot be saved. Full proposal media is unchanged."
       ],
@@ -2421,14 +2421,18 @@
       "facts": [
         "Eligible admins can open the + menu in a root wave's tab row and select New subwave on web or in the app.",
         "New subwave is hidden in direct messages, inside an existing subwave, while using a profile proxy, when the parent has no reusable admin group, or when the profile cannot administer the parent.",
-        "A new subwave starts with the parent wave's admin group, and the creator can choose a different existing admin group in the Groups step before submitting."
+        "Subwave creation shows Create subwave of the parent wave name in both the modal header and Setup heading. Its first-step labels are Subwave Name, Subwave Profile Picture, and Subwave Type. Saved Drafts is hidden during subwave creation.",
+        "A new subwave starts with the parent wave's exact access group. Chat and, for Rank and Approve waves, submission and voting default to that same group. A public parent's subwaves start public. Changing the wave type restores these defaults, but inherited groups are editable and do not have to match the parent's groups.",
+        "When creating a subwave or editing its groups, a group with members outside the parent's audience triggers a warning before saving. Continue anyway saves the chosen group; Go back keeps the form open. Different groups fully covered by the parent's audience need no warning. Members must have access to both the subwave and its parent, even if the subwave itself is public. Parent visibility can change while subwaves exist.",
+        "A new subwave starts with the parent wave's admin group, and the creator can choose a different existing admin group in the Access step before submitting."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves"],
       "tags": ["waves", "subwaves", "create", "admin", "mobile"],
       "source_refs": [
         "ops/docs/waves/chat/feature-content-tabs.md",
-        "ops/docs/waves/create/feature-groups-step.md"
+        "ops/docs/waves/create/feature-groups-step.md",
+        "ops/docs/waves/create/feature-overview-step.md"
       ]
     },
     {
@@ -2493,19 +2497,19 @@
         "description"
       ],
       "facts": [
-        "The wave creation flow starts with Overview and then configures access, description, and additional steps depending on wave type.",
-        "The Overview step begins with the Create Wave heading and keeps the wave name, picture, type, and Rank ranking mode visible; Appearance and labels contains display, proposal-card, and applicable tab-label customization.",
+        "The wave creation flow starts with Setup and then configures access, rules, description, and additional steps depending on wave type. A final read-only Overview follows Description, with Confirm and create as the submit action.",
+        "The Setup step begins with the Create Wave heading and keeps the wave name, picture, type, and Rank ranking mode visible; Appearance and labels contains display, proposal-card, and applicable tab-label customization.",
         "Optional sections are named for their contents instead of repeating Advanced settings. They show Customized for non-default values and open automatically when a hidden field needs attention.",
         "The Access step initially shows one Who can access this wave control. By default, that group can also chat and, for Rank and Approve waves, submit and vote; only the creator can administer the wave.",
         "Customize other permissions expands the separate chat, submission, voting, and admin group controls when a wave needs different access rules.",
-        "Each Access row offers one Edit action with a pencil icon and no Choose group action. Edit keeps Identities alongside the rule choices, supports explicitly included and excluded identities, and Next stays disabled until the pending replacement is saved or cancelled.",
+        "Each Access row offers one Edit action with a pencil icon and no Choose group action. Edit opens Identities immediately alongside the rule choices, supports explicitly included and excluded identities, and Next stays disabled until the pending replacement is saved or cancelled.",
         "The inline criteria editor includes a Hide criteria and members switch. Its tooltip explains that the criteria and member list remain visible to group members but are hidden from everyone else. The switch starts off for a new inline group, preserves the setting copied from the current assignment, and applies the current setting when Save changes is selected.",
         "The inline Identities editor can add either included or excluded identities through profile search, an authenticated EMMA allowlist, or a dragged or selected CSV file. Source wallets are normalized and deduplicated, source choices persist while the group remains an unsaved draft, and the latest include or exclude action wins when the same wallet appears on both sides.",
         "Inline group identity search ranks exact, prefix, and substring profile-handle matches before ENS-only matches, then orders each match group by profile level, highest first.",
         "An empty access, drop, vote, or chat scope is labeled Everyone. During editing, matching Before editing and After editing summaries compare the applied and proposed audiences.",
         "A selected saved access group shows its current eligible identity count; View members opens a paginated, searchable member browser without leaving wave creation.",
         "A valid draft exposes View members from its After editing summary; there is no separate Preview matches, Close, or Discard draft action.",
-        "Criteria buttons are visually prominent and show a dot plus an accessible Configured state when a value is set.",
+        "The currently open criterion has a solid blue button with an underlined label and is announced as pressed. A dot plus an accessible Configured state marks criteria with values independently of which editor is open.",
         "Make wave public changes access to Everyone and also changes chat, submission, or voting only when that row still matched access at click time; independently customized rows and Admins remain unchanged.",
         "A chat, submission, or voting row that differs from access offers Match wave access to copy the current access group and resume default synchronization.",
         "Group membership previews use current profile, reputation, and ownership data, so the matching identities can change over time.",
@@ -2514,12 +2518,12 @@
         "Wave creation verifies the final access groups again after authentication and before creating a personal group for the Admins scope or the Wave.",
         "New inline groups include the connected creator by default, even when the group otherwise contains only rules; choosing a saved group preserves the saved group's membership instead.",
         "Inline identity groups warn when the connected creator is excluded, because excluding yourself from a view group can prevent you from opening the created wave.",
-        "All wave types include Rules; Rank and Approve also include Schedule, Drops, and Voting. Scheduled Rank and Approve include Outcomes, while Perpetual Ranking skips Outcomes.",
+        "All wave types include Guidelines; Rank and Approve also include Schedule, Drops, and Voting. Scheduled Rank and Approve include Outcomes, while Perpetual Ranking skips Outcomes.",
         "Schedule keeps Submissions Open, Voting Opens, and applicable first-announcement controls visible under Opening dates. Winner schedule or Wave end reveals secondary controls; Perpetual Ranking has no Schedule optional section.",
-        "Drops keeps submission type visible and puts optional controls under Submission requirements.",
-        "Rules keeps generated wave rules visible and puts optional Wave guidelines and applicable acceptance rules in a Wave guidelines section.",
+        "Drops shows submission type and Submission requirements as always-visible sections. Submission requirements contains required media types, metadata, the simultaneous-submission limit, and signing rules, with no expand/collapse control.",
+        "Guidelines always shows the Chat guidelines textbox. For Rank and Approve, Rules that require acceptance is in Drops under Submission requirements, below the simultaneous-submission limit. The section is always visible. Entering signing rules requires a wallet signature before submitting; leaving the textbox empty or clearing it removes that requirement. There is no acceptance toggle. The generated configuration summary appears in the final read-only Overview.",
         "Voting keeps the power model, scope, required Rep or Memes details, and Approve threshold visible; named Vote limits sections contain negative-vote behavior, time weighting, and Approve hold timing.",
-        "Outcomes keeps outcome selection, reward configuration, and Show outcomes visible; Approve waves place the optional maximum winner count under Winner limits.",
+        "Outcomes keeps outcome selection, reward configuration, and Show outcomes menu section visible. Show outcomes menu section controls the Outcomes tab and reward details on leaderboard and winner cards; rewards still apply when hidden. Approve waves place the optional maximum winner count under Winner limits.",
         "In Description, individual @ mention suggestions follow the draft wave's Visibility group; private drafts suggest only eligible profiles.",
         "The docs for wave creation live under ops/docs/waves/create; on web, use /waves?create=wave to open create-wave mode."
       ],
@@ -2554,7 +2558,7 @@
       ],
       "facts": [
         "Chat waves are conversation-focused waves.",
-        "Chat wave creation uses Overview, Groups, Rules, and Description steps.",
+        "Chat wave creation uses Setup, Access, Guidelines, Description, and final Overview steps.",
         "Use Chat when the wave does not need ranking or approval mechanics."
       ],
       "canonical_path": "/waves?create=wave",
@@ -2582,8 +2586,8 @@
       ],
       "facts": [
         "Rank waves collect drops and allow participants to vote/rank them according to configured rules.",
-        "On the Overview step, rank waves choose between Announce Winners (scheduled winner announcements) and Perpetual Ranking (a continuous leaderboard with no winners and no end date).",
-        "Rank wave setup includes Overview, Groups, Schedule, Drops, Rules, Voting, and Description; Announce Winners waves also configure an Outcomes step, which Perpetual Ranking waves skip.",
+        "On the Setup step, rank waves choose between Announce Winners (scheduled winner announcements) and Perpetual Ranking (a continuous leaderboard with no winners and no end date).",
+        "Rank wave setup includes Setup, Access, Schedule, Drops, Voting, Guidelines, Description, and final Overview; Announce Winners waves also configure Outcomes before Guidelines, while Perpetual Ranking waves skip Outcomes.",
         "Rank wave rules are visible in the desktop right sidebar and mobile About information path.",
         "Leaderboards, winners, and voting state are part of rank-wave participation; perpetual ranking waves keep a live leaderboard but never announce winners or award outcomes."
       ],
@@ -2612,7 +2616,7 @@
       ],
       "facts": [
         "Approve waves use approval-oriented voting rather than a plain chat flow.",
-        "Approve wave setup includes Overview, Groups, Schedule, Drops, Rules, Voting, Outcomes, and Description.",
+        "Approve wave setup includes Setup, Access, Schedule, Drops, Voting, Outcomes, Guidelines, Description, and final Overview.",
         "Approve wave rules are visible in the desktop right sidebar and mobile About information path.",
         "Use Approve when the wave is intended to accept or reject submissions."
       ],
@@ -2716,6 +2720,7 @@
         "configuration rules",
         "rules step",
         "wave guidelines",
+        "chat guidelines",
         "guidelines",
         "creator rules",
         "custom rules",
@@ -2735,12 +2740,13 @@
         "mobile"
       ],
       "facts": [
-        "All wave creation includes a Rules step. Chat enters Rules after Groups and then goes to Description; Rank and Approve enter Rules after Drops and then go to Voting.",
+        "Guidelines is for editing optional chat guidelines. Acceptance-required rules are configured in Drops under Submission requirements. The read-only configuration summary is in the final Overview after Description. Overview shows access, schedules, submissions, voting, approval settings, detailed outcomes, acceptance-required rules and guidelines, and the description. Confirm and create submits only from this last step. Previous returns to Description without clearing text or attachments.",
+        "Guidelines is directly before Description for every wave type. Chat enters it after Access, Perpetual Ranking after Voting, and scheduled Rank and Approve after Outcomes.",
         "Generated rules summarize the wave setup. Chat rules focus on wave type, access, and chat settings; Rank and Approve rules also include timing, submissions, voting, approval, and outcome visibility.",
-        "Creators can add Wave guidelines that are saved as wave metadata and shown under Guidelines in the wave rules panel.",
+        "Creators use the Chat guidelines section and Add chat guidelines... textbox to add guidelines. The subtitle explains that users see them when sending their first chat message. Guidelines are saved as wave metadata and also shown under Guidelines in the wave rules panel.",
         "When a wave has guidelines, a profile with no prior chat messages or participation drops in that wave reviews them before its first chat message is sent. Agree sends the pending message; Decline keeps the draft and shows the guidelines again on the next attempt.",
-        "For Rank and Approve waves, creators can add rules that require acceptance; those use the existing participation terms and wallet-signature submit flow.",
-        "Wave admins can edit Wave guidelines later from Configuration. For Rank and Approve waves, admins can also edit acceptance-required rules there.",
+        "For Rank and Approve waves, creators add Rules that require acceptance in Drops under Submission requirements. The textbox sits below the simultaneous-submission limit. Entering rules requires signing; empty or whitespace-only text does not. The section stays open, and navigating between steps preserves the text. These rules use the existing participation terms and wallet-signature submit flow.",
+        "Wave admins can edit Chat guidelines later from Configuration. For Rank and Approve waves, admins can also edit acceptance-required rules there.",
         "Participants can review rules in Configuration in the desktop wave right sidebar or from the mobile About information path."
       ],
       "canonical_path": "/waves/create",
@@ -2748,6 +2754,8 @@
       "tags": ["waves", "rules", "chat", "rank", "approve"],
       "source_refs": [
         "ops/docs/waves/create/feature-rules-step.md",
+        "ops/docs/waves/create/feature-drops-step.md",
+        "ops/docs/waves/create/feature-final-overview-step.md",
         "ops/docs/waves/composer/feature-first-message-guidelines.md",
         "ops/docs/waves/flow-wave-participation.md",
         "ops/docs/waves/sidebars/feature-right-sidebar-tabs.md"
@@ -3022,7 +3030,7 @@
       ],
       "facts": [
         "Selecting an access-row gear in Wave Configuration opens the group editor directly without an intermediate context menu.",
-        "The Configuration modal renders the same criteria editor as wave creation, including the privacy row, configured criteria chips, Before editing and After editing summaries, Cancel, and Save changes. Wave access editors do not offer Choose group. It preloads the row's rules, included and excluded identities, NFT and grant requirements, and criteria/member privacy setting.",
+        "The Configuration modal opens on Identities in the same criteria editor as wave creation, including the privacy row, configured criteria chips, Before editing and After editing summaries, Cancel, and Save changes. Wave access editors do not offer Choose group. It preloads the row's rules, included and excluded identities, NFT and grant requirements, and criteria/member privacy setting.",
         "A public access row starts a new criteria draft with the editor's primary wallet explicitly included by default; Include me can be turned off from Identities.",
         "An already restricted row keeps its saved included and excluded identities and does not add the editor automatically.",
         "Saving edited criteria creates a separate group and normally updates only the selected access row; it does not mutate the original group or other access rows that use it.",
@@ -3195,6 +3203,9 @@
         "started",
         "proxy",
         "preview",
+        "250 mb",
+        "glb",
+        "gltf",
         "quick",
         "vote",
         "additional",
@@ -3213,6 +3224,8 @@
         "In the Artwork step, Continue remains available before required fields are complete, except while an interactive artwork hash is being verified; selecting Continue turns every missing or invalid field and the missing media control red, shows inline recovery messages, and focuses the first missing item in form order.",
         "On larger viewports the artwork remains visible while the metadata form scrolls independently. On smaller viewports the complete form scrolls as one page, focused text fields move into view when the software keyboard opens, and the native modal shrinks to keep its action bar above the keyboard.",
         "On The Memes Main Stage, the desktop How to Submit control and native app lock both open Unlock submissions with the current 50,000 MemesNominee REP requirement, live progress, and a Get nominated action.",
+        "Main Stage file uploads accept PNG, JPG/JPEG, GIF, MP4/MOV, and binary GLB models up to 250 MB (250,000,000 bytes); the upload area shows Max 250 MB beside the format badges; JSON .gltf files are not accepted, and the service verifies the stored file size when the submission is created.",
+        "An oversized file, unsupported format, or invalid GLB shows an inline error immediately without Try Again. Use Select Art or drag and drop another file into the upload area to replace the rejected file.",
         "Use the wave composer and Memes-specific submission surfaces when participating in Memes waves."
       ],
       "canonical_path": "/waves",
@@ -7166,7 +7179,9 @@
       "facts": [
         "Drop Forge craft claims live under /drop-forge/craft.",
         "Craft claim detail pages use /drop-forge/craft/{id}.",
-        "Craft claims are distinct from launch claims."
+        "Craft claims are distinct from launch claims.",
+        "A winning submission only creates a craft claim after successful media inspection and validation of the computed details. Zero-byte files, empty SHA-256 digests, non-positive image/video dimensions, or video without positive duration and codecs cannot become valid computed media details. The binary media limit is 250 MB (250,000,000 bytes). Editable draft fields may still be incomplete; HTML details are format-only, and GLB does not require video-only details.",
+        "GLB binary contents are checked server-side during inspection and before animation publication; renaming another file to .glb does not make it valid. This does not guarantee scene rendering or availability of external resources. Correct invalid or oversized media before retrying publication."
       ],
       "canonical_path": "/drop-forge/craft",
       "related_paths": ["/drop-forge", "/drop-forge/launch"],

@@ -498,14 +498,17 @@ describe("CreateWaveGroupInlinePanel", () => {
     });
   });
 
-  it("opens editors without a separate close button", async () => {
+  it("opens Identities immediately on Edit without a separate close button", async () => {
     const user = userEvent.setup();
     renderInlinePanel();
 
     await user.click(screen.getByRole("button", { name: "Edit" }));
-    await user.click(screen.getByRole("button", { name: "Identities" }));
 
     expect(screen.getByTestId("identities-panel")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Identities" })).toHaveAttribute(
+      "aria-pressed",
+      "true"
+    );
     expect(screen.getByRole("button", { name: "Cancel" })).toBeInTheDocument();
     expect(
       screen.queryByRole("button", { name: "Close" })
@@ -528,7 +531,7 @@ describe("CreateWaveGroupInlinePanel", () => {
       name: "Rep, Configured",
     });
     expect(configuredRep).toHaveAttribute("data-configured", "true");
-    expect(configuredRep).toHaveClass("tw-bg-primary-500/15");
+    expect(configuredRep).toHaveClass("tw-bg-primary-600");
   });
 
   it("shows all criteria buttons without a more-rules step", async () => {
@@ -643,9 +646,9 @@ describe("CreateWaveGroupInlinePanel", () => {
       screen.getAllByText(/xTDH grant for NextGen 6529/).length
     ).toBeGreaterThan(0);
 
-    await user.click(
+    expect(
       screen.getByRole("button", { name: "Identities, Configured" })
-    );
+    ).toHaveAttribute("aria-pressed", "true");
 
     expect(
       screen.getByTestId("restored-included-identities")
@@ -746,7 +749,6 @@ describe("CreateWaveGroupInlinePanel", () => {
     renderInlinePanel();
 
     await user.click(screen.getByRole("button", { name: "Edit" }));
-    await user.click(screen.getByRole("button", { name: "Identities" }));
     await user.click(screen.getByRole("button", { name: "include identity" }));
 
     await user.click(screen.getByRole("button", { name: "Rep" }));
@@ -834,7 +836,6 @@ describe("CreateWaveGroupInlinePanel", () => {
     renderInlinePanel();
 
     await user.click(screen.getByRole("button", { name: "Edit" }));
-    await user.click(screen.getByRole("button", { name: "Identities" }));
     await user.click(screen.getByRole("button", { name: "include identity" }));
 
     expect(
@@ -868,7 +869,6 @@ describe("CreateWaveGroupInlinePanel", () => {
     renderInlinePanel({ onCreateGroup });
 
     await user.click(screen.getByRole("button", { name: "Edit" }));
-    await user.click(screen.getByRole("button", { name: "Identities" }));
     await user.click(screen.getByRole("button", { name: "include identity" }));
     await user.click(screen.getByRole("button", { name: "exclude identity" }));
     await user.click(screen.getByRole("button", { name: "Save changes" }));
@@ -891,7 +891,6 @@ describe("CreateWaveGroupInlinePanel", () => {
     renderInlinePanel({ onCreateGroup });
 
     await user.click(screen.getByRole("button", { name: "Edit" }));
-    await user.click(screen.getByRole("button", { name: "Identities" }));
     await user.click(
       screen.getByRole("button", { name: "include EMMA wallets" })
     );

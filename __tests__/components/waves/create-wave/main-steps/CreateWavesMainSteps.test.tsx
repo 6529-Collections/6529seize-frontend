@@ -48,7 +48,7 @@ describe("CreateWavesMainSteps", () => {
     expect(screen.queryByText("Approval")).not.toBeInTheDocument();
   });
 
-  it("renders rules in the chat wave step list", () => {
+  it("renders guidelines in the chat wave step list", () => {
     render(
       <CreateWavesMainSteps
         waveType={ApiWaveType.Chat}
@@ -57,6 +57,6 @@ describe("CreateWavesMainSteps", () => {
       />
     );
 
-    expect(screen.getByText("Rules")).toBeInTheDocument();
+    expect(screen.getByText("Guidelines")).toBeInTheDocument();
   });
 });
