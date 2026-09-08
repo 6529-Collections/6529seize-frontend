@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor, within } from "@testing-library/react";
 import React from "react";
 import MyStreamWaveMyVotesReset from "@/components/brain/my-stream/votes/MyStreamWaveMyVotesReset";
 import { AuthContext } from "@/components/auth/Auth";
@@ -156,7 +156,13 @@ test("resets votes for selected drops", async () => {
       </ReactQueryWrapperContext.Provider>
     </AuthContext.Provider>
   );
-  fireEvent.click(screen.getAllByRole("button")[1]);
+  fireEvent.click(screen.getByRole("button", { name: "Reset 2 votes" }));
+  const dialog = await screen.findByRole("dialog", { name: "Reset 2 votes?" });
+
+  expect(onResettingChange).not.toHaveBeenCalled();
+  expect(removeSelected).not.toHaveBeenCalled();
+  expect(invalidateQueries).not.toHaveBeenCalled();
+  fireEvent.click(within(dialog).getByRole("button", { name: "Reset 2 votes" }));
 
   await waitFor(() =>
     expect(onResettingChange).toHaveBeenNthCalledWith(2, false)
@@ -185,6 +191,53 @@ test("resets votes for selected drops", async () => {
     queryKey: [QueryKey.DROP_VOTE_LOGS, { dropId: "b" }],
   });
   // onDropRateChange is handled by React Query elsewhere, not directly by this component
+});
+
+test("Cancel and Escape dismiss confirmation and restore focus without resetting votes", async () => {
+  const removeSelected = jest.fn();
+  const onResettingChange = jest.fn();
+  render(
+    <AuthContext.Provider value={auth}>
+      <ReactQueryWrapperContext.Provider value={rqContext}>
+        <MyStreamWaveMyVotesReset
+          waveId="wave-1"
+          haveDrops
+          selected={new Set(["a"])}
+          allItemsSelected={false}
+          onToggleSelectAll={jest.fn()}
+          removeSelected={removeSelected}
+          onResettingChange={onResettingChange}
+        />
+      </ReactQueryWrapperContext.Provider>
+    </AuthContext.Provider>
+  );
+
+  const resetButton = screen.getByRole("button", { name: "Reset 1 vote" });
+  resetButton.focus();
+  fireEvent.click(resetButton);
+  const dialog = await screen.findByRole("dialog", { name: "Reset 1 vote?" });
+  expect(dialog).toHaveAttribute("aria-modal", "true");
+  await waitFor(() => expect(dialog).toContainElement(document.activeElement));
+
+  fireEvent.click(within(dialog).getByRole("button", { name: "Cancel" }));
+  await waitFor(() => {
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(resetButton).toHaveFocus();
+  });
+
+  fireEvent.click(resetButton);
+  const reopenedDialog = await screen.findByRole("dialog", {
+    name: "Reset 1 vote?",
+  });
+  fireEvent.keyDown(reopenedDialog, { key: "Escape", code: "Escape" });
+  await waitFor(() => {
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(resetButton).toHaveFocus();
+  });
+
+  expect(onResettingChange).not.toHaveBeenCalled();
+  expect(removeSelected).not.toHaveBeenCalled();
+  expect(invalidateQueries).not.toHaveBeenCalled();
 });
 
 test("cleans up and invalidates once when a later reset fails", async () => {
@@ -229,7 +282,13 @@ test("cleans up and invalidates once when a later reset fails", async () => {
     </AuthContext.Provider>
   );
 
-  fireEvent.click(screen.getAllByRole("button")[1]);
+  fireEvent.click(screen.getByRole("button", { name: "Reset 2 votes" }));
+  const dialog = await screen.findByRole("dialog", { name: "Reset 2 votes?" });
+
+  expect(onResettingChange).not.toHaveBeenCalled();
+  expect(removeSelected).not.toHaveBeenCalled();
+  expect(invalidateQueries).not.toHaveBeenCalled();
+  fireEvent.click(within(dialog).getByRole("button", { name: "Reset 2 votes" }));
 
   await waitFor(() =>
     expect(onResettingChange).toHaveBeenNthCalledWith(2, false)

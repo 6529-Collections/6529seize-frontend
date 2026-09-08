@@ -84,7 +84,7 @@
     "__tests__/components/brain/my-stream/tabs/MyStreamWaveTabsMemeSubmit.test.tsx": 1,
     "__tests__/components/brain/my-stream/votes/MyStreamWaveMyVoteInput.test.tsx": 2,
     "__tests__/components/brain/my-stream/votes/MyStreamWaveMyVotes.test.tsx": 3,
-    "__tests__/components/brain/my-stream/votes/MyStreamWaveMyVotesReset.test.tsx": 3,
+    "__tests__/components/brain/my-stream/votes/MyStreamWaveMyVotesReset.test.tsx": 2,
     "__tests__/components/brain/my-stream/votes/MyStreamWaveMyVotesResetProgress.test.tsx": 1,
     "__tests__/components/brain/my-stream/votes/MyStreamWaveMyVoteVotes.test.tsx": 1,
     "__tests__/components/brain/notifications/all-drops/NotificationAllDrops.test.tsx": 3,
