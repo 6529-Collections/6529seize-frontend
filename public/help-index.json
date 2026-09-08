@@ -5419,7 +5419,10 @@
         "chat tabs",
         "gallery tab",
         "polls tab",
-        "poll results"
+        "poll results",
+        "switch curation",
+        "curation tabs",
+        "your curation view"
       ],
       "keywords": [
         "waves",
@@ -5428,12 +5431,17 @@
         "chat",
         "gallery",
         "polls",
-        "results"
+        "results",
+        "curation"
       ],
       "facts": [
         "Wave content tabs organize the visible wave content area.",
         "Some waves can switch between chat and gallery-style views.",
         "Available tabs depend on wave type, state, and content.",
+        "Named curations are collections of posts from a wave. Switch between them using their tabs below the wave header on desktop and mobile web, or alongside the main wave navigation tabs in the native app. Select a regular tab such as Chat to leave the curation view.",
+        "Curation navigation is available to viewers and admins through the tabs. Configuration contains admin-only curation management, with no separate curation view picker.",
+        "A single curation has its own named tab. When many tabs overflow the row, scroll horizontally or swipe on touch layouts; the active tab scrolls into view.",
+        "A valid ?curation={curationId} wave link opens that curation. If the curation was deleted or does not belong to this wave, the wave returns to its regular view after available curations load successfully. Loading or a failed request does not discard the linked curation.",
         "Native app Back restores the wave section from that visit, such as returning from an author profile to Leaderboard; normally opening another wave still uses its default section.",
         "Open unanswered polls can show a View results control so eligible readers can inspect counts and percentages before voting, then return to Vote while the poll is open."
       ],
@@ -5442,7 +5450,9 @@
       "tags": ["waves", "tabs"],
       "source_refs": [
         "ops/docs/waves/chat/feature-content-tabs.md",
-        "ops/docs/waves/header/feature-chat-gallery-toggle.md"
+        "ops/docs/waves/header/feature-chat-gallery-toggle.md",
+        "components/brain/my-stream/MyStreamWaveDesktopTabs.tsx",
+        "components/brain/mobile/BrainMobileTabs.tsx"
       ]
     },
     {
