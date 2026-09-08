@@ -469,6 +469,20 @@ const MEMES_QUICK_VOTE_MESSAGES = objectMessages("memes.quickVote", {
   unrated: "{count} unrated",
   summary: "{leftThisRound}, {unrated}",
   inMemesWave: "{leftThisRound}, {unrated} in the memes wave",
+  remainingPower: "{amount} {unit} remaining",
+  powerLeft: "{amount} {unit} left",
+  unit: "votes",
+  untitledSubmission: "Untitled submission",
+  previewUnavailable: "Preview unavailable",
+  vote: "Vote",
+  voteAmount: "Vote {amount}",
+  voted: "Voted",
+  skip: "Skip",
+  changeAmount: "Change vote amount",
+  closeChangeAmount: "Close change vote amount",
+  expandDescription: "See more",
+  collapseDescription: "See less",
+  swipeHint: "Swipe left to skip · right to vote {amount} {unit}",
 } as const);
 
 const MEMES_SUBMISSION_MESSAGES = objectMessages("memes.submission", {

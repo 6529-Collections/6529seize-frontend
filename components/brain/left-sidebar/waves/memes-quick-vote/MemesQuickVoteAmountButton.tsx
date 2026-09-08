@@ -1,6 +1,7 @@
 "use client";
 
-import { formatNumberWithCommas } from "@/helpers/Helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { formatInteger } from "@/i18n/format";
 import { CheckIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 
@@ -25,23 +26,24 @@ export default function MemesQuickVoteAmountButton({
   isVoteFeedbackActive,
   onVoteAmount,
 }: MemesQuickVoteAmountButtonProps) {
+  const locale = useBrowserLocale();
   const isNegativeAmount = amount < 0;
   const isQuickVoteFeedbackTarget =
     isVoteFeedbackActive &&
     feedbackSource === "quick-amount" &&
     feedbackAmount === amount;
   let buttonToneClassName = isNegativeAmount
-    ? "tw-border-rose-500/25 tw-bg-rose-500/10 tw-text-[14px] tw-font-bold tw-text-rose-200 tw-shadow-sm tw-transition-colors desktop-hover:hover:tw-bg-rose-500/15 desktop-hover:hover:tw-text-rose-100"
-    : "tw-border-white/5 tw-bg-white/[0.03] tw-text-[14px] tw-font-bold tw-text-zinc-300 tw-shadow-sm tw-transition-colors desktop-hover:hover:tw-bg-white/[0.06] desktop-hover:hover:tw-text-white";
+    ? "tw-border-red/25 tw-bg-red/10 tw-text-[14px] tw-font-bold tw-text-red tw-shadow-sm tw-transition-colors desktop-hover:hover:tw-bg-red/15 desktop-hover:hover:tw-text-white"
+    : "tw-border-white/5 tw-bg-white/[0.03] tw-text-[14px] tw-font-bold tw-text-iron-300 tw-shadow-sm tw-transition-colors desktop-hover:hover:tw-bg-white/[0.06] desktop-hover:hover:tw-text-white";
 
   if (isQuickVoteFeedbackTarget) {
     buttonToneClassName = isNegativeAmount
-      ? "tw-border-rose-500/40 tw-bg-rose-500/20 tw-text-rose-100 tw-shadow-[0_0_20px_rgba(244,63,94,0.14)]"
-      : "tw-border-emerald-500/35 tw-bg-emerald-500/15 tw-text-emerald-100 tw-shadow-[0_0_20px_rgba(16,185,129,0.15)]";
+      ? "tw-border-red/40 tw-bg-red/20 tw-text-red tw-shadow-[0_0_20px] tw-shadow-red/[0.14]"
+      : "tw-border-success/35 tw-bg-success/15 tw-text-success tw-shadow-[0_0_20px] tw-shadow-success/15";
   } else if (isLatestUsed) {
     buttonToneClassName = isNegativeAmount
-      ? "tw-border-rose-500/35 tw-bg-rose-500/15 tw-text-rose-200 tw-shadow-sm tw-transition-all desktop-hover:hover:tw-bg-rose-500/25 desktop-hover:hover:tw-text-rose-100"
-      : "tw-border-blue-500/30 tw-bg-blue-500/15 tw-text-primary-300 tw-shadow-sm tw-transition-all desktop-hover:hover:tw-bg-blue-500/25 desktop-hover:hover:tw-text-primary-200";
+      ? "tw-border-red/35 tw-bg-red/15 tw-text-red tw-shadow-sm tw-transition-all desktop-hover:hover:tw-bg-red/25 desktop-hover:hover:tw-text-white"
+      : "tw-border-primary-500/30 tw-bg-primary-500/15 tw-text-primary-300 tw-shadow-sm tw-transition-all desktop-hover:hover:tw-bg-primary-500/25 desktop-hover:hover:tw-text-white";
   }
 
   return (
@@ -59,18 +61,18 @@ export default function MemesQuickVoteAmountButton({
     >
       {isQuickVoteFeedbackTarget ? (
         <span className="tw-inline-flex tw-items-center tw-gap-1.5 tw-font-bold tw-leading-none">
-          <CheckIcon className="tw-size-4 tw-shrink-0" />
-          <span>{formatNumberWithCommas(amount)}</span>
+          <CheckIcon aria-hidden="true" className="tw-size-4 tw-shrink-0" />
+          <span>{formatInteger(locale, amount)}</span>
         </span>
       ) : (
         <span
           className={clsx(
             "tw-font-bold tw-leading-none",
             isLatestUsed &&
-              (isNegativeAmount ? "tw-text-rose-200" : "tw-text-primary-300")
+              (isNegativeAmount ? "tw-text-red" : "tw-text-primary-300")
           )}
         >
-          {formatNumberWithCommas(amount)}
+          {formatInteger(locale, amount)}
         </span>
       )}
     </button>
