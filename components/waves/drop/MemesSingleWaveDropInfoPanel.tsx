@@ -2,6 +2,7 @@
 
 import { MobileVotingModal, VotingModal } from "@/components/voting";
 import { useVotingModalState } from "@/components/voting/useVotingModalState";
+import type { ApiDropVoteDistribution } from "@/generated/models/ApiDropVoteDistribution";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { getFileInfoFromUrl } from "@/helpers/file.helpers";
 import {
@@ -19,6 +20,7 @@ import { MemesDropSummarySection } from "./MemesDropSummarySection";
 
 interface MemesSingleWaveDropInfoPanelProps {
   readonly drop: ExtendedDrop;
+  readonly voteDistribution?: ApiDropVoteDistribution | undefined;
   readonly wave: ApiWave | null;
   readonly onClose?: (() => void) | undefined;
   readonly isVotingClosed?: boolean | undefined;
@@ -28,6 +30,7 @@ interface MemesSingleWaveDropInfoPanelProps {
 
 export const MemesSingleWaveDropInfoPanel = ({
   drop,
+  voteDistribution,
   wave,
   onClose,
   isVotingClosed = false,
@@ -137,6 +140,7 @@ export const MemesSingleWaveDropInfoPanel = ({
 
         <MemesDropDetailsSection
           drop={drop}
+          voteDistribution={voteDistribution}
           wave={wave}
           artworkMedia={artworkMedia}
           fileInfo={fileInfo}

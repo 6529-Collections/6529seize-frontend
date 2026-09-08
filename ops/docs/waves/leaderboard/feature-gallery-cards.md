@@ -67,6 +67,9 @@ works from the card.
 - In the touchscreen native app, dragging vertically scrolls without opening
   the card. Press and hold opens the [touch action sheet](../drop-actions/feature-touch-drop-menu.md).
 - On non-touch devices, sort changes briefly highlight card media to signal reordering.
+- Grid cards do not show the `Largest vote` highlight. Use `List view` or open
+  the drop detail for individual-vote highlights; the grid keeps its existing
+  voter-count dropdown and voting controls.
 
 ## Edge Cases
 
@@ -98,6 +101,7 @@ works from the card.
 - [Wave Leaderboards Index](README.md)
 - [Wave Leaderboard Drop States](feature-drop-states.md)
 - [Wave Leaderboard Sort and Price Filters](feature-sort-and-group-filters.md)
+- [Wave Top Voters Lists](feature-top-voters-lists.md)
 - [Wave Leaderboard Decision Timeline](feature-decision-timeline.md)
 - [Drop Actions: Vote Summary and Modal](../drop-actions/feature-vote-summary-and-modal.md)
 - [Vote Slider](../drop-actions/feature-vote-slider.md)
