@@ -28,6 +28,9 @@ Users can:
 - Select `Configuration` to inspect or manage access.
 - In `Access`, select the gear on a row to open its group editor.
 - In `Curations`, use the section gear or a curation row gear.
+- To view a curation, select its name in the
+  [wave content tabs](../chat/feature-content-tabs.md) on desktop, mobile web,
+  or the native app.
 
 ## User Journey
 
@@ -126,7 +129,7 @@ Users can:
 - Curation management is entirely hidden from viewers who cannot edit the wave.
 - Curation rows show an unavailable-group label when full group data is missing.
 - If no curations exist, administrators see the empty state and the create gear;
-  other viewers see no curation selector.
+  other viewers see no `Curations` management section.
 - Identity suggestions start after at least 3 typed characters.
 - Identity selection supports `ArrowUp`, `ArrowDown`, and `Enter`.
 
