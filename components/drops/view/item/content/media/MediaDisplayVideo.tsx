@@ -13,6 +13,7 @@ interface Props {
   readonly src: string;
   readonly mimeType?: string | undefined;
   readonly showControls?: boolean | undefined;
+  readonly isInertPreview?: boolean | undefined;
   readonly fillContainer?: boolean | undefined;
 }
 
@@ -20,6 +21,7 @@ const MediaDisplayVideo: React.FC<Props> = ({
   src,
   mimeType,
   showControls = false,
+  isInertPreview = false,
   fillContainer = false,
 }) => {
   // Intersection observer for scroll-based triggers
@@ -125,7 +127,7 @@ const MediaDisplayVideo: React.FC<Props> = ({
     >
       <SeizeVideoPlayer
         videoRef={videoRef}
-        template="ambient-media"
+        template={isInertPreview ? "card-preview" : "ambient-media"}
         layout={fillContainer ? "fill" : "natural"}
         align={fillContainer ? "center" : "left"}
         showActions={showControls}

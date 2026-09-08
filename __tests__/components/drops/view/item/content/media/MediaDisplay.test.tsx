@@ -17,6 +17,7 @@ jest.mock(
       data-src={props.src}
       data-controls={String(props.showControls)}
       data-fill-container={String(props.fillContainer)}
+      data-inert-preview={String(props.isInertPreview)}
     />
   )
 );
@@ -114,6 +115,27 @@ describe("MediaDisplay", () => {
     expect(node).toHaveAttribute("data-src", "vid.mp4");
     expect(node).toHaveAttribute("data-controls", "true");
     expect(node).toHaveAttribute("data-fill-container", "false");
+    expect(node).toHaveAttribute("data-inert-preview", "false");
+  });
+
+  it("passes inert preview mode to native card video previews", () => {
+    render(
+      <MediaDisplay
+        media_mime_type="video/mp4"
+        media_url="vid.mp4"
+        disableMediaInteraction
+        isInertPreview
+      />
+    );
+
+    expect(screen.getByTestId("video")).toHaveAttribute(
+      "data-inert-preview",
+      "true"
+    );
+    expect(screen.getByTestId("video")).toHaveAttribute(
+      "data-controls",
+      "false"
+    );
   });
 
   it("forwards fill container sizing to video media", () => {
