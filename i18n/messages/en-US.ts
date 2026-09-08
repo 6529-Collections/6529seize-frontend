@@ -498,7 +498,7 @@ const MEMES_SUBMISSION_MESSAGES = objectMessages("memes.submission", {
   "identity.submittingAs": "Submitting as",
   "identity.wallet": "Wallet",
   "identity.walletConnected": "Wallet connected",
-  "identity.walletNotConnected": "Wallet not connected",
+  "identity.walletNotConnected": "Connect a wallet to submit",
   "identity.eligible": "Eligible to submit",
   "identity.loadingProfile": "Loading the connected profile…",
   "identity.needsProfile":

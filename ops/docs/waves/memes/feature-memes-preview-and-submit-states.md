@@ -56,8 +56,11 @@ On `success`, the modal auto-closes after a short delay.
   grouped action buttons on the right in one desktop footer row. On smaller
   screens, the buttons sit below the identity and can wrap when needed. There is
   no visible `Submitting as` label, wallet address, or wallet-provider name.
+  The avatar and handle are vertically centered. Back actions use a quiet text
+  style while retaining their full button tap area; `Preview` remains outlined
+  and the primary action remains filled.
 - The avatar's amber dot means that profile's wallet is not connected; green means
-  it is connected. Hover, focus, or tap the avatar for `Wallet not connected` or
+  it is connected. Hover, focus, or tap the avatar for `Connect a wallet to submit` or
   `Wallet connected`; press `Escape` or move focus away to dismiss the tooltip.
 - Normal eligibility is not labeled. Eligibility checks, errors, and blocking
   explanations remain visible. An eligible profile still needs its wallet

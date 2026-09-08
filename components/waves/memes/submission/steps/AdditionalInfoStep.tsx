@@ -1,5 +1,6 @@
 "use client";
 
+import Button from "@/components/utils/button/Button";
 import SecondaryButton from "@/components/utils/button/SecondaryButton";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -293,16 +294,17 @@ const AdditionalInfoStep: FC<AdditionalInfoStepProps> = ({
       </div>
 
       <div className="tw-mt-auto tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-py-3">
-        <div className="tw-mx-auto tw-flex tw-w-full tw-max-w-4xl tw-flex-col tw-gap-3 tw-px-4 md:tw-flex-row md:tw-items-center md:tw-justify-between md:tw-px-8">
+        <div className="tw-mx-auto tw-flex tw-w-full tw-max-w-4xl tw-flex-col tw-gap-2 tw-px-4 md:tw-flex-row md:tw-items-center md:tw-justify-between md:tw-gap-3 md:tw-px-8">
           <SubmissionIdentityPanel identity={identity} />
           <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2 md:tw-shrink-0">
-            <SecondaryButton
-              onClicked={onBack}
+            <Button
+              variant="secondary"
+              onClick={onBack}
               disabled={isSubmitting}
-              className="tw-flex-1 md:tw-flex-none"
+              className="tw-flex-1 !tw-border-transparent !tw-bg-transparent !tw-shadow-none md:tw-flex-none"
             >
               {t(locale, "memes.submission.action.back")}
-            </SecondaryButton>
+            </Button>
             <SecondaryButton
               onClicked={onPreview}
               disabled={!formValid || isSubmitting}
