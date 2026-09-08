@@ -304,15 +304,46 @@ describe("MyStreamWaveMyVoteInput", () => {
     expect(mutateAsync).toHaveBeenCalledWith({ rate: 10, previousRate: 20 });
   });
 
-  it("clamps vote value within limits and submits on click", async () => {
+  it("preserves clamped vote feedback through blur until explicit submission", async () => {
     render(<MyStreamWaveMyVoteInput drop={drop} />, { wrapper });
     const input = screen.getByRole("textbox");
+    fireEvent.focus(input);
     fireEvent.change(input, { target: { value: "15" } });
-    expect((input as HTMLInputElement).value).toBe("10");
+    fireEvent.blur(input);
+
+    expect(input).toHaveValue("10");
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Max for wave is 10 TDH."
+    );
+    expect(input).toHaveAccessibleDescription(
+      "Max for wave 10 Max for wave is 10 TDH."
+    );
+    expect(auth.requestAuth).not.toHaveBeenCalled();
+    expect(mutateAsync).not.toHaveBeenCalled();
 
     fireEvent.click(screen.getByRole("button", { name: "Submit vote" }));
     await waitFor(() => expect(auth.requestAuth).toHaveBeenCalled());
     expect(mutateAsync).toHaveBeenCalledWith({ rate: 10, previousRate: 0 });
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+  });
+
+  it("clears retained limit feedback after a valid edit", () => {
+    render(<MyStreamWaveMyVoteInput drop={drop} />, { wrapper });
+    const input = screen.getByRole("textbox");
+
+    fireEvent.change(input, { target: { value: "15" } });
+    fireEvent.blur(input);
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Max for wave is 10 TDH."
+    );
+
+    fireEvent.change(input, { target: { value: "5" } });
+
+    expect(input).toHaveValue("5");
+    expect(input).toHaveAccessibleDescription("Max for wave 10");
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    expect(auth.requestAuth).not.toHaveBeenCalled();
+    expect(mutateAsync).not.toHaveBeenCalled();
   });
 
   it("requires explicit submission of the displayed limit after an oversized paste", async () => {

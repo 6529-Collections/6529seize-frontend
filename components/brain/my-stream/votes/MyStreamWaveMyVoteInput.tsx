@@ -198,7 +198,7 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
     }
 
     const clampedValue = clampVoteValue(parsedVoteValue);
-    setVoteLimitMessage(getVoteLimitMessage(parsedVoteValue));
+    setVoteLimitMessage(displayedVoteLimitMessage);
     setVoteDraftValue(String(clampedValue));
   };
 
