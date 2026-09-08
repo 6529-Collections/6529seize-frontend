@@ -14,6 +14,7 @@ interface DropVoteProgressingProps {
   readonly numberFont?: "mono" | "sans" | undefined;
   readonly numberSize?: "mobile-xs" | "sm" | "body" | undefined;
   readonly numberWeight?: "bold" | "semibold" | undefined;
+  readonly numberTracking?: "normal" | undefined;
   readonly visualVariant?: "default" | "memes" | undefined;
 }
 
@@ -95,6 +96,7 @@ export default function DropVoteProgressing({
   numberFont = "mono",
   numberSize = "sm",
   numberWeight = "bold",
+  numberTracking,
   visualVariant = "default",
 }: DropVoteProgressingProps): ReactElement | null {
   if (typeof current !== "number" || typeof projected !== "number") {
@@ -125,6 +127,8 @@ export default function DropVoteProgressing({
     compact || numberFont === "sans" ? "tw-tabular-nums" : "tw-font-mono";
   const numberWeightClass =
     numberWeight === "semibold" ? "tw-font-semibold" : "tw-font-bold";
+  const numberTrackingClass =
+    numberTracking === "normal" ? "!tw-tracking-normal" : "";
 
   return (
     <>
@@ -140,7 +144,7 @@ export default function DropVoteProgressing({
           className={`tw-flex-shrink-0 ${compact ? "tw-size-2" : "tw-size-2.5"} ${arrowColor}`}
         />
         <span
-          className={`${valueClasses} ${color} ${numberSizeClass} ${numberTypographyClass} ${numberWeightClass}`}
+          className={`${valueClasses} ${color} ${numberSizeClass} ${numberTypographyClass} ${numberWeightClass} ${numberTrackingClass}`}
         >
           {projectedLabel ?? formatNumberWithCommas(projected)}
         </span>
