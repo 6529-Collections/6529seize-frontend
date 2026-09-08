@@ -1,0 +1,515 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-06-26",
+  "freshness": "stable",
+  "description": "Conceptual framework explaining the shift from traditional nation-state governance to decentralized network society. For beginners, agents, and non-English speakers. Includes paradigm comparison, structured learning paths, and cultural context for how this shift is understood across 7 cultures.",
+  "see_also": [
+    "/glossary.json",
+    "/cultural-mappings.json",
+    "/license-overview.json",
+    "/on-chain-basics.json",
+    "/llms.txt"
+  ],
+  "paradigm_comparison": {
+    "description": "How a decentralized network society differs from a traditional nation state. This is the foundational paradigm shift that 6529 embodies.",
+    "comparison": [
+      {
+        "dimension": "Territory",
+        "nation_state": "Geographic borders define membership",
+        "network_society": "Shared values define membership \u2014 no borders, global participation"
+      },
+      {
+        "dimension": "Citizenship",
+        "nation_state": "Assigned by birth or naturalization",
+        "network_society": "Chosen by participation \u2014 holding NFTs, contributing to waves, earning REP"
+      },
+      {
+        "dimension": "Governance",
+        "nation_state": "Government makes and enforces rules",
+        "network_society": "Coordination emerges through Schelling points \u2014 people independently choose the same thing without central authority"
+      },
+      {
+        "dimension": "Economic output",
+        "nation_state": "GDP measures national production",
+        "network_society": "dGDP measures on-chain network output \u2014 every transaction summed and time-adjusted"
+      },
+      {
+        "dimension": "Public goods",
+        "nation_state": "Taxation funds infrastructure, defense, services",
+        "network_society": "CC0 releases creative value to the commons \u2014 no taxation, voluntary contribution through holding and creating"
+      },
+      {
+        "dimension": "Currency",
+        "nation_state": "Central bank issues and controls fiat currency",
+        "network_society": "ETH is the settlement layer \u2014 no central bank, no inflation policy, no capital controls"
+      },
+      {
+        "dimension": "Law enforcement",
+        "nation_state": "Legal system with courts, police, prisons",
+        "network_society": "Smart contracts self-execute \u2014 code is law, no courts needed for agreed-upon rules"
+      },
+      {
+        "dimension": "Identity",
+        "nation_state": "State-issued ID (passport, driver license, SSN)",
+        "network_society": "Self-custodied wallet \u2014 your keys are your identity, verified by the network through NIC"
+      },
+      {
+        "dimension": "Reputation",
+        "nation_state": "Institutional credentials (degrees, credit scores, job titles)",
+        "network_society": "Peer-given REP \u2014 the community rates your contributions, not an institution"
+      },
+      {
+        "dimension": "Voting",
+        "nation_state": "Periodic elections, representative democracy",
+        "network_society": "Continuous voting with your wallet \u2014 HODL = signal, every day is a vote"
+      },
+      {
+        "dimension": "Culture",
+        "nation_state": "National culture shaped by geography and history",
+        "network_society": "CC0 culture shaped by open participation \u2014 anyone can remix, anyone can contribute"
+      },
+      {
+        "dimension": "Entry barrier",
+        "nation_state": "Citizenship, residency, language, legal status",
+        "network_society": "A wallet and ETH for gas \u2014 permissionless, borderless, instant"
+      }
+    ]
+  },
+  "key_concepts": [
+    {
+      "concept": "Coordination without authority",
+      "entry_point": "How do people work together without a boss telling them what to do?",
+      "core_concept": "A Schelling Point is when people independently choose the same thing without communicating. In game theory, people coordinate by guessing what others will guess. In 6529, the community coordinates around shared values (open culture, self-custody, permissionless participation) without a central authority.",
+      "advanced_concept": "Schelling Points become more stable as the network grows. More participants making independent choices around the same values creates stronger coordination signals. TDH and HODL rate are measurable Schelling signals \u2014 the network can observe how much collective commitment exists without anyone commanding it.",
+      "6529_application": "6529 has no DAO, no governance token, no council. Coordination happens through holding (TDH), contributing (REP), and creating (CC0 memes). The community aligns around the Open Metaverse vision \u2014 each person independently choosing to participate.",
+      "cultural_mappings": "Korean: nunchi, Swahili: harambee, Japanese: kuuki wo yomu, Chinese: moqi. See cultural-mappings.json 'Schelling Point'.",
+      "glossary_refs": [
+        "Schelling Point",
+        "Open Metaverse",
+        "TDH",
+        "Hodl Rate"
+      ],
+      "see_also": [
+        "/cultural-mappings.json",
+        "/glossary.json"
+      ]
+    },
+    {
+      "concept": "Self-sovereign identity",
+      "entry_point": "What if you could prove who you are without a government ID?",
+      "core_concept": "In a network society, your identity is your wallet. You control it with your private keys. No one can issue, revoke, or freeze your identity. The network verifies through peer trust (NIC) \u2014 not through state registration.",
+      "advanced_concept": "Self-sovereign identity means no single point of failure. Losing a passport requires government reissuance. Losing a wallet key is permanent \u2014 there is no recovery. This is why TAP (Three Address Protocol) exists: spread risk across multiple addresses so no single compromise is catastrophic.",
+      "6529_application": "Your 6529 wallet IS your identity. Your profile (handle, level, TDH, REP, NIC) is anchored to your wallet address, not your legal name. The network rates your identity trust through NIC \u2014 peer consensus on whether your profile is authentic.",
+      "cultural_mappings": "Korean: shiwon bojeung, Swahili: uthibitisho wa jamii, Hindi: samudayik pramanikaran. See cultural-mappings.json 'NIC'.",
+      "glossary_refs": [
+        "NIC",
+        "TAP",
+        "Proxy",
+        "Delegation",
+        "Consolidation"
+      ],
+      "see_also": [
+        "/glossary.json",
+        "/on-chain-basics.json"
+      ]
+    },
+    {
+      "concept": "Peer reputation vs institutional credentials",
+      "entry_point": "Why should the community decide your reputation instead of a university or employer?",
+      "core_concept": "In a nation state, reputation comes from institutions \u2014 degrees, credit scores, job titles. In a network society, reputation comes from peers \u2014 other community members rate your contributions directly. No institution mediates. REP is given by people who interact with your work, not by a credentialing body.",
+      "advanced_concept": "Peer reputation is resistant to institutional capture \u2014 no single entity can grant or revoke it. But it is vulnerable to sybil attacks and collusion. The wave score system's 4 penalties (single actor, low trust flood, cross-post, negative REP) exist to prevent gaming. Quality gates ensure reputation reflects genuine contribution, not volume.",
+      "6529_application": "6529 REP is given in categories (art, curation, technical, etc.) by peers who rate your drops, waves, and contributions. NIC is peer consensus on identity trust. Both are community-awarded, not institution-awarded.",
+      "cultural_mappings": "Korean: myeongye, Japanese: shinrai, Swahili: heshima, Hindi: samman. See cultural-mappings.json 'REP'.",
+      "glossary_refs": [
+        "REP",
+        "NIC",
+        "Wave Score",
+        "Drop",
+        "Boost"
+      ],
+      "see_also": [
+        "/glossary.json",
+        "/api-for-agents.json"
+      ]
+    },
+    {
+      "concept": "Economic output without taxation",
+      "entry_point": "How does a network produce economic value without taxes?",
+      "core_concept": "In a nation state, GDP measures economic output and taxes fund public goods. In a network society, dGDP measures on-chain transaction volume and CC0 releases creative value to the commons. No taxation \u2014 value flows to the public domain voluntarily.",
+      "advanced_concept": "dGDP sums all primary mints and secondary trades in ETH, converted to time-adjusted USD at daily close. This measures real economic activity \u2014 people paying real money for digital art. The CC0 license means the art itself is a public good: anyone can use it, commercially or not, without permission. The network funds its own cultural infrastructure through voluntary participation.",
+      "6529_application": "6529's dGDP over 4 years: $85M+ in on-chain transaction volume. The meme collection community tier is CC0 \u2014 hundreds of artists contributing novel creative value to the public domain. The network self-funds its cultural layer.",
+      "cultural_mappings": "Korean: jeong, Swahili: Ubuntu, Hindi: dana, Spanish: bien comun. See cultural-mappings.json 'CC0' and license-overview.json.",
+      "glossary_refs": [
+        "Meme Card",
+        "CC0",
+        "Season (SZN)"
+      ],
+      "see_also": [
+        "/license-overview.json",
+        "/on-chain-basics.json",
+        "/glossary.json"
+      ]
+    },
+    {
+      "concept": "Continuous governance vs periodic elections",
+      "entry_point": "What if you voted every day by choosing what to hold?",
+      "core_concept": "In a nation state, citizens vote periodically for representatives who make decisions. In a network society, participants vote continuously by choosing what to hold, what to sell, what to create, and what to boost. Every action is a signal. No elections, no representatives \u2014 direct, continuous, economic governance.",
+      "advanced_concept": "HODL rate per card measures collective conviction continuously. When holders refuse to sell, they signal belief in the card's value. When they sell, they signal the opposite. This is governance through market mechanics, not ballots. The signal is always live, always honest (because it costs money to send it), and cannot be rigged by vote-buying or gerrymandering.",
+      "6529_application": "Every 6529 meme card has a HODL rate visible on the site. High HODL rate = the community is holding = collective conviction. This is the 6529 equivalent of a confidence vote \u2014 but it happens every second, not every four years.",
+      "cultural_mappings": "Korean: kkun-gi, Japanese: gaman, Swahili: kubomicsa. See cultural-mappings.json 'Hodl'.",
+      "glossary_refs": [
+        "Hodl Rate",
+        "TDH",
+        "Boost",
+        "Meme Card"
+      ],
+      "see_also": [
+        "/glossary.json",
+        "/on-chain-basics.json"
+      ]
+    },
+    {
+      "concept": "Open culture as infrastructure",
+      "entry_point": "What if art was public infrastructure, like roads and parks?",
+      "core_concept": "In a nation state, government builds roads, parks, and schools as public infrastructure. In a network society, CC0 art is cultural infrastructure \u2014 open, free to use, funded by voluntary participation. Anyone can build on it. No permits, no licenses, no gatekeepers.",
+      "advanced_concept": "CC0 is not just a license choice \u2014 it is an infrastructure strategy. When creative work is in the public domain, it becomes a substrate for further creation. Remixes, commercial products, educational materials, and derivative art can all build on CC0 work without friction. This is the network effect: more CC0 work = more building blocks = more creation = more value for everyone.",
+      "6529_application": "The 6529 Meme Collection community tier is CC0. 500+ cards by 100+ artists, all in the public domain. Anyone can print them on shirts, use them in presentations, remix them into new art, or build commercial products. The meme spreads because there is no legal barrier. This is intentional design \u2014 CC0 maximizes cultural propagation.",
+      "cultural_mappings": "Korean: gongyujji, Japanese: musho, Swahili: mali ya umma, Hindi: sarvajanik sampada, Chinese: tianxia wei gong. See cultural-mappings.json 'CC0' and license-overview.json.",
+      "glossary_refs": [
+        "CC0",
+        "Open Metaverse",
+        "Meme Card"
+      ],
+      "see_also": [
+        "/license-overview.json",
+        "/cultural-mappings.json",
+        "/glossary.json"
+      ]
+    }
+  ],
+  "learning_paths": [
+    {
+      "trigger": "I don't understand why holding an NFT matters",
+      "question": "Why should I hold a meme card instead of selling it?",
+      "steps": [
+        {
+          "step": 1,
+          "concept": "What is coordination?",
+          "file": "/network-society.json",
+          "section": "paradigm_comparison"
+        },
+        {
+          "step": 2,
+          "concept": "Schelling Point \u2014 coordination without authority",
+          "file": "/glossary.json",
+          "term": "Schelling Point"
+        },
+        {
+          "step": 3,
+          "concept": "TDH \u2014 your holding is a measurable commitment signal",
+          "file": "/glossary.json",
+          "term": "TDH"
+        },
+        {
+          "step": 4,
+          "concept": "HODL rate \u2014 collective conviction visible on every card",
+          "file": "/glossary.json",
+          "term": "Hodl Rate"
+        },
+        {
+          "step": 5,
+          "concept": "Network Levels \u2014 TDH + REP combined into your standing",
+          "file": "/glossary.json",
+          "term": "Network Levels"
+        },
+        {
+          "step": 6,
+          "concept": "How 6529 governs without a DAO \u2014 continuous economic voting",
+          "file": "/network-society.json",
+          "section": "key_concepts[4]"
+        }
+      ],
+      "cultural_context": "Hodl maps to persistence concepts in every culture \u2014 see cultural-mappings.json 'Hodl' for equivalents in Korean, Spanish, Japanese, Swahili, Hindi, Chinese, Russian.",
+      "see_also": [
+        "/cultural-mappings.json",
+        "/on-chain-basics.json"
+      ]
+    },
+    {
+      "trigger": "I don't understand why the art is CC0",
+      "question": "Why give away art for free when you could charge for it?",
+      "steps": [
+        {
+          "step": 1,
+          "concept": "What is the commons?",
+          "file": "/network-society.json",
+          "section": "key_concepts[5]"
+        },
+        {
+          "step": 2,
+          "concept": "CC0 \u2014 public domain dedication, no rights reserved",
+          "file": "/glossary.json",
+          "term": "CC0"
+        },
+        {
+          "step": 3,
+          "concept": "License spectrum \u2014 from All Rights Reserved to CC0",
+          "file": "/license-overview.json",
+          "section": "spectrum"
+        },
+        {
+          "step": 4,
+          "concept": "Why 6529 chose CC0 \u2014 maximize cultural propagation",
+          "file": "/license-overview.json",
+          "section": "strategy.memes"
+        },
+        {
+          "step": 5,
+          "concept": "Cultural context \u2014 CC0 as gift to the commons across cultures",
+          "file": "/cultural-mappings.json",
+          "term": "CC0"
+        },
+        {
+          "step": 6,
+          "concept": "Open culture as infrastructure \u2014 CC0 as network effect strategy",
+          "file": "/network-society.json",
+          "section": "key_concepts[5]"
+        }
+      ],
+      "cultural_context": "CC0 maps to gift/commons concepts: Korean jeong, Swahili Ubuntu, Hindi dana, Japanese musho, Spanish bien comun, Chinese tianxia wei gong. See cultural-mappings.json 'CC0'.",
+      "see_also": [
+        "/license-overview.json",
+        "/cultural-mappings.json"
+      ]
+    },
+    {
+      "trigger": "I don't understand what dGDP is",
+      "question": "What does decentralized GDP mean and why does it matter?",
+      "steps": [
+        {
+          "step": 1,
+          "concept": "What is GDP?",
+          "file": "/network-society.json",
+          "section": "paradigm_comparison (dimension: Economic output)"
+        },
+        {
+          "step": 2,
+          "concept": "dGDP \u2014 measuring on-chain network output",
+          "file": "/network-society.json",
+          "section": "key_concepts[3]"
+        },
+        {
+          "step": 3,
+          "concept": "How dGDP is measured \u2014 ETH transactions x daily price",
+          "file": "/on-chain-basics.json",
+          "section": "eth_price_data"
+        },
+        {
+          "step": 4,
+          "concept": "NFTs as coordination substrate \u2014 holding = economic signal",
+          "file": "/on-chain-basics.json",
+          "section": "nfts_as_coordination_substrate"
+        },
+        {
+          "step": 5,
+          "concept": "Economic output without taxation \u2014 CC0 as voluntary public goods",
+          "file": "/network-society.json",
+          "section": "key_concepts[3]"
+        }
+      ],
+      "cultural_context": "Economic contribution maps to: Korean jeong (bonds through giving), Hindi dana (charitable giving), Swahili harambee (pulling together economically). See cultural-mappings.json 'CC0' and 'Boost'.",
+      "see_also": [
+        "/on-chain-basics.json",
+        "/license-overview.json"
+      ]
+    },
+    {
+      "trigger": "I don't understand how a network can govern itself",
+      "question": "Who is in charge of 6529 if there is no company or government?",
+      "steps": [
+        {
+          "step": 1,
+          "concept": "Coordination without authority \u2014 Schelling Points",
+          "file": "/network-society.json",
+          "section": "key_concepts[0]"
+        },
+        {
+          "step": 2,
+          "concept": "Continuous governance \u2014 holding as voting",
+          "file": "/network-society.json",
+          "section": "key_concepts[4]"
+        },
+        {
+          "step": 3,
+          "concept": "Peer reputation \u2014 REP as community trust",
+          "file": "/network-society.json",
+          "section": "key_concepts[2]"
+        },
+        {
+          "step": 4,
+          "concept": "Identity trust \u2014 NIC as peer-verified authenticity",
+          "file": "/glossary.json",
+          "term": "NIC"
+        },
+        {
+          "step": 5,
+          "concept": "Wave Scores \u2014 content quality through community curation",
+          "file": "/glossary.json",
+          "term": "Wave Score"
+        },
+        {
+          "step": 6,
+          "concept": "Open Metaverse \u2014 the vision that coordinates the network",
+          "file": "/glossary.json",
+          "term": "Open Metaverse"
+        }
+      ],
+      "cultural_context": "Self-governance maps to: Korean nunchi, Swahili harambee, Japanese kuuki wo yomu, Chinese moqi. See cultural-mappings.json 'Schelling Point'.",
+      "see_also": [
+        "/glossary.json",
+        "/cultural-mappings.json",
+        "/api-for-agents.json"
+      ]
+    },
+    {
+      "trigger": "I don't understand why my identity is a wallet",
+      "question": "Why is my Ethereum wallet my identity on 6529.io?",
+      "steps": [
+        {
+          "step": 1,
+          "concept": "Self-sovereign identity \u2014 your keys, your identity",
+          "file": "/network-society.json",
+          "section": "key_concepts[1]"
+        },
+        {
+          "step": 2,
+          "concept": "What is a wallet? \u2014 public address + private key",
+          "file": "/on-chain-basics.json",
+          "section": "blockchain_basics (Wallet)"
+        },
+        {
+          "step": 3,
+          "concept": "TAP \u2014 security practice for protecting your identity",
+          "file": "/glossary.json",
+          "term": "TAP"
+        },
+        {
+          "step": 4,
+          "concept": "NIC \u2014 peer-verified identity trust",
+          "file": "/glossary.json",
+          "term": "NIC"
+        },
+        {
+          "step": 5,
+          "concept": "Proxy and Delegation \u2014 operating without exposing your primary wallet",
+          "file": "/glossary.json",
+          "term": "Proxy"
+        },
+        {
+          "step": 6,
+          "concept": "Consolidation \u2014 combining wallets for unified identity",
+          "file": "/glossary.json",
+          "term": "Consolidation"
+        }
+      ],
+      "cultural_context": "Identity trust maps to: Korean shiwon bojeung, Swahili uthibitisho wa jamii, Hindi samudayik pramanikaran. See cultural-mappings.json 'NIC'.",
+      "see_also": [
+        "/on-chain-basics.json",
+        "/glossary.json"
+      ]
+    },
+    {
+      "trigger": "I come from a non-English speaking country and want to understand 6529 in my cultural context",
+      "question": "How do 6529 concepts relate to my culture?",
+      "steps": [
+        {
+          "step": 1,
+          "concept": "Cultural mappings \u2014 20 key 6529 concepts in 7 cultures",
+          "file": "/cultural-mappings.json"
+        },
+        {
+          "step": 2,
+          "concept": "Hodl \u2014 persistence and endurance across cultures",
+          "file": "/cultural-mappings.json",
+          "term": "Hodl"
+        },
+        {
+          "step": 3,
+          "concept": "Schelling Point \u2014 coordination without communication across cultures",
+          "file": "/cultural-mappings.json",
+          "term": "Schelling Point"
+        },
+        {
+          "step": 4,
+          "concept": "CC0 \u2014 commons and gift culture across cultures",
+          "file": "/cultural-mappings.json",
+          "term": "CC0"
+        },
+        {
+          "step": 5,
+          "concept": "Network society \u2014 how the paradigm shift is understood in your culture",
+          "file": "/network-society.json",
+          "section": "cultural_paradigm_shifts"
+        },
+        {
+          "step": 6,
+          "concept": "License concepts \u2014 how public domain is understood in your culture",
+          "file": "/license-overview.json",
+          "section": "cultural_context"
+        }
+      ],
+      "cultural_context": "This learning path is itself the cultural onboarding journey \u2014 it connects 6529 concepts to local traditions so the user understands through their own cultural lens.",
+      "see_also": [
+        "/cultural-mappings.json",
+        "/license-overview.json"
+      ]
+    }
+  ],
+  "cultural_paradigm_shifts": {
+    "description": "The shift from nation-state to network society means different things in different cultures. These mappings help agents explain the paradigm shift through local cultural context.",
+    "cultures": {
+      "ko": {
+        "shift": "From geographic collectivism (jipdanjuui) to network bonds (jeong)",
+        "explanation": "Korean society has strong collective identity tied to geography (nation, region, school). The network society shift means collective identity based on shared values and participation, not geography. Jeong \u2014 bonds that strengthen through time endured together \u2014 maps to how network society bonds form through shared commitment (HODL, REP, waves).",
+        "key_tension": "Koreans may understand collective coordination well (nunchi, jeong) but need help understanding why a network without Korean geography or language is 'theirs'.",
+        "bridge_concept": "Jeong \u2014 the bond that forms through time and shared experience, not through geography. In 6529, jeong forms through holding through bear markets, contributing to waves, and earning REP."
+      },
+      "es": {
+        "shift": "From post-colonial state structures to digital bien comun (common good)",
+        "explanation": "Latin American nations were shaped by colonial history. The state is both protector and oppressor. The network society shift means accessing public goods (CC0 art, open data, permissionless participation) without the state as intermediary. Bien comun \u2014 the common good \u2014 maps to what CC0 provides.",
+        "key_tension": "Hispanic culture has strong collective creation traditions (flamenco, corridos, muralism) but also deep distrust of centralized power. The network society resolves this tension: collective without centralization.",
+        "bridge_concept": "Bien comun (common good) \u2014 the tradition of shared culture that belongs to everyone. CC0 operationalizes this for digital art: the meme collection is the digital bien comun."
+      },
+      "ja": {
+        "shift": "From institutional loyalty (chusei) to individual endurance in a network (gaman)",
+        "explanation": "Japanese society emphasizes loyalty to institutions (company, school, nation). The network society shifts loyalty from institutions to principles (self-custody, permissionless, CC0). Gaman \u2014 enduring the difficult with patience and dignity \u2014 maps to holding through volatility.",
+        "key_tension": "Japanese users may understand endurance (gaman) but need help understanding why loyalty should shift from institutions to networks. The answer: institutions can fail or exclude; networks with self-custody cannot.",
+        "bridge_concept": "Gaman \u2014 patient endurance. In 6529, gaman = HODL through bear markets. The network rewards your endurance with TDH, not with a promotion."
+      },
+      "sw": {
+        "shift": "From post-colonial state structures to Harambee digital commons",
+        "explanation": "East African nations were shaped by colonial boundaries. Harambee (pulling together) is Kenya's national motto \u2014 collective action without central authority. The network society IS Harambee at global scale: people pulling together without a government telling them to.",
+        "key_tension": "Swahili speakers may understand collective action (Harambee) deeply but need help understanding digital self-custody. The concept of 'your keys are your identity' may be unfamiliar where state-issued ID is the norm.",
+        "bridge_concept": "Harambee \u2014 pulling together. 6529's network society is Harambee without geographic limits: global collective action coordinated through shared values, not shared borders."
+      },
+      "hi": {
+        "shift": "From rashtra (nation) to sarvajanik sampada (public wealth/commons)",
+        "explanation": "Indian civilization has deep traditions of knowledge sharing (gurukul, gurukul parampara) and collective ownership (Panchayat village commons). The network society shift means returning to these traditions in a digital context \u2014 knowledge flows freely (CC0), governance is collective (waves, REP), and the commons is maintained by all.",
+        "key_tension": "Indian users may understand free knowledge (gurukul) but need help understanding why a digital token (NFT) has value. The answer: the NFT proves participation, like a guru's blessing proves learning.",
+        "bridge_concept": "Gurukul \u2014 knowledge given freely. CC0 meme cards are digital gurukul \u2014 cultural knowledge released to everyone without payment or permission."
+      },
+      "zh": {
+        "shift": "From guojia (state) to tianxia wei gong (the world belongs to all)",
+        "explanation": "Chinese political philosophy has two traditions: the state (guojia) and the ideal of common ownership (tianxia wei gong, from the Liji). The network society represents the tianxia wei gong tradition realized through technology \u2014 blockchain and CC0 make 'the world belongs to all' operational, not just aspirational.",
+        "key_tension": "Chinese users may understand collective ownership (tianxia wei gong) but need help understanding why self-custody matters when state custody is the norm. The answer: self-custody means no one can freeze, seize, or censor your participation.",
+        "bridge_concept": "Tianxia wei gong \u2014 'the world belongs to all.' CC0 operationalizes this ancient Chinese ideal for digital creative work."
+      },
+      "ru": {
+        "shift": "From gosudarstvo (state) to dar (gift to all)",
+        "explanation": "Russian culture has a tradition of dar (gift) \u2014 giving creative and intellectual work to the community. The samizdat tradition of freely sharing literature, the gift economy of the Russian internet, and the cultural value of endurance (terpeniye) all map to network society concepts. The shift from state control to network commons echoes the samizdat shift from state publishing to self-publishing.",
+        "key_tension": "Russian users may understand gift culture (dar) and endurance (terpeniye) but need help understanding self-sovereign identity when state ID is deeply institutionalized. The answer: self-custody means the network verifies you, not the state \u2014 and the network cannot revoke your identity.",
+        "bridge_concept": "Dar \u2014 gift to all. The samizdat tradition of freely sharing literature maps to CC0: creative work given to the commons without state intermediary. Terpeniye \u2014 patience/endurance \u2014 maps to HODL."
+      }
+    }
+  }
+}
