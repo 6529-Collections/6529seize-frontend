@@ -735,7 +735,7 @@ export default function MemesQuickVoteDialog({
             onClose();
           }}
         >
-          <div className="tw-relative tw-flex tw-h-full tw-max-h-full tw-w-full tw-flex-col tw-overflow-hidden tw-bg-[#0a0a0a] tw-shadow-[0_0_80px_rgba(0,0,0,0.8)] md:tw-h-[38rem] md:tw-max-h-[min(calc(100vh-3rem),38rem)] md:tw-max-w-[68rem] md:tw-rounded-2xl md:tw-border md:tw-border-solid md:tw-border-white/10">
+          <div className="tw-relative tw-flex tw-h-[calc(100%_-_var(--native-keyboard-inset-bottom,0px))] tw-max-h-full tw-w-full tw-flex-col tw-overflow-hidden tw-bg-[#0a0a0a] tw-shadow-[0_0_80px_rgba(0,0,0,0.8)] tw-transition-[height] tw-duration-[var(--native-keyboard-layout-transition-duration,0ms)] tw-ease-out motion-reduce:tw-transition-none md:tw-h-[38rem] md:tw-max-h-[min(calc(100vh-3rem),38rem)] md:tw-max-w-[68rem] md:tw-rounded-2xl md:tw-border md:tw-border-solid md:tw-border-white/10">
             <button
               type="button"
               data-autofocus={

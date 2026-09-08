@@ -56,6 +56,8 @@ participatory submissions in the configured memes wave.
   Select `Change vote amount` to open it. Closing the editor keeps the typed
   draft for reopening on the same submission; typing alone does not save a
   remembered amount for later submissions.
+- In the native app's mobile layout, the dialog shrinks when the keyboard opens
+  to keep the amount input and voting controls above it.
 - Remembered amounts appear above the control bar while custom entry is closed.
   Selecting one submits that amount.
 - Descriptions start collapsed to two lines in the mobile layout and four on

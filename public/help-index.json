@@ -3205,6 +3205,7 @@
         "Memes Quick Vote opens from the Uncast Power card or compact bolt-count trigger in supported Waves footers when an authenticated non-proxy profile has remaining voting power and unrated submissions.",
         "The Quick Vote dialog shows submission counts at the top and remaining voting power above the bottom controls: Change vote amount on the left, Vote in the center, and Skip on the right.",
         "Quick Vote custom entry starts closed. Open Change vote amount to type an amount, then select Vote or press Enter. Closing the editor retains the draft for reopening on the same submission; typing alone does not save it as a remembered amount. Selecting a remembered amount submits that vote.",
+        "In the native app's mobile layout, the Quick Vote dialog shrinks when the keyboard opens to keep the amount input and voting controls above it.",
         "Quick Vote descriptions collapse to two lines in the mobile layout and four on desktop; See more appears only when text is hidden. Swipe chevrons appear only on touch screens in the mobile layout, where swiping right votes and swiping left skips. Use Vote and Skip in a narrow browser without touch input.",
         "The Memes - Main Stage is a Memes wave context, not the /the-memes collection browse or mint route.",
         "Submission availability depends on login, proxy mode, participation eligibility, the submission window, and per-user submission limits.",
