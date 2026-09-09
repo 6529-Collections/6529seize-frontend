@@ -452,7 +452,10 @@ async function searchLegacyWavesByName({
     headers,
   });
 
-  return waves.map(mapApiWaveToSidebarWave);
+  return waves.map((wave) => ({
+    ...mapApiWaveToSidebarWave(wave),
+    creator: wave.author,
+  }));
 }
 
 const WAVE_SEARCH_UNAVAILABLE_MESSAGE =
