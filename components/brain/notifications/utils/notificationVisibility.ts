@@ -9,7 +9,7 @@ export function getVisibleNotificationCauses(
   causes: NotificationCause[] | undefined,
   hideNftPurchasing: boolean
 ): NotificationCause[] | null {
-  if (!hideNftPurchasing) return causes?.length ? causes : null;
+  if (!hideNftPurchasing) return causes && causes.length > 0 ? causes : null;
   const allowed = (causes ?? []).filter(
     (cause) => cause !== ApiNotificationCause.SubscriptionCoverage
   );

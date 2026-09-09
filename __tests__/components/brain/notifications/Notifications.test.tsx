@@ -84,8 +84,10 @@ jest.mock("@/components/brain/my-stream/layout/MyStreamNoItems", () => ({
 
 const useNotificationsQueryMock = jest.fn();
 jest.mock("@/hooks/useNotificationsQuery", () => ({
-  useNotificationsQuery: (options: unknown) =>
-    useNotificationsQueryMock(options),
+  useNotificationsQuery: (options: unknown) => {
+    const result = useNotificationsQueryMock(options);
+    return { ...result, rawItems: result.rawItems ?? result.items };
+  },
 }));
 
 jest.mock("@/components/notifications/NotificationsContext", () => ({

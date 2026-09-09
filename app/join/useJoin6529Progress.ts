@@ -15,6 +15,6 @@ export function useJoin6529Progress({
 }): TimelineProgress {
   return useMemo(
     () => buildJoinJourneyProgress(pageState, facts, hideNftPurchasing),
-    [facts.hasCollected, facts.hasParticipated, pageState, hideNftPurchasing]
+    [facts, pageState, hideNftPurchasing]
   );
 }

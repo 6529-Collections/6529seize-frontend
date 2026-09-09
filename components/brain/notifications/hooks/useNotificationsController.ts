@@ -181,7 +181,7 @@ export const useNotificationsController =
         ),
       [queryItems, hideNftPurchasing]
     );
-    const rawItems = (rawItemsFromQuery ?? queryItems).filter((item) =>
+    const rawItems = rawItemsFromQuery.filter((item) =>
       isNotificationVisible(item, hideNftPurchasing)
     );
 
