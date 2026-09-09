@@ -4,7 +4,8 @@
 
 `/discover` renders a dedicated grid of active-wave cards.
 
-- It uses the same card component as home `Most active waves`.
+- Cards use the same wave information as home `Most active waves`, with artwork
+  that fills rounded cards and fades into a dark background behind the text.
 - The dedicated route expands the list to 20 cards.
 - The route requests discovery data with `exclude_followed=true`.
 - There is no `View all` footer because `/discover` is already the expanded
@@ -40,6 +41,15 @@ from home discovery.
 - Open a DM-targeting card to jump into `/messages/{waveId}`.
 - Review the compact preview row when a wave description drop has usable text
   or media content.
+- Read the available metrics in labelled chips: `Score` is the visibility
+  score, `Hot` is the hotness score, and `REP` is Wave REP. Visibility and hotness
+  are scores out of 100. REP shows a signed, compact raw total when available;
+  otherwise it shows the Wave REP score out of 100. Screen-reader labels
+  distinguish the raw total from the score.
+- Description text is limited to two lines. Cards keep space for the preview
+  when it is absent, with drop count and relative activity time aligned below.
+- Artwork is subtly desaturated at rest and returns to full color on hover or
+  keyboard focus. Touch cards retain full color.
 - Use `/discover` as the larger browse surface when home six-card discovery is
   not enough.
 
@@ -49,6 +59,8 @@ from home discovery.
   `Most active waves` cards.
 - Preview content comes from the wave description drop rather than the latest
   chat message.
+- Description previews retain their existing text and media handling; markdown
+  markers can remain visible, and preview links are not separately clickable.
 - If a wave description drop is empty, whitespace-only, or media-free, the card
   still opens the target wave route without rendering the compact preview row.
 - Auth/profile requirements still apply after entering `/waves` or `/messages`

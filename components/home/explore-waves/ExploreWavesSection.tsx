@@ -14,12 +14,16 @@ import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { ExploreWaveCard } from "./ExploreWaveCard";
+import {
+  ExploreWaveCard,
+  type ExploreWaveCardVariant,
+} from "./ExploreWaveCard";
 import { ExploreWaveCardSkeleton } from "./ExploreWaveCardSkeleton";
 
 const DEFAULT_WAVES_LIMIT = 6;
 
 interface ExploreWavesSectionProps {
+  readonly cardVariant?: ExploreWaveCardVariant | undefined;
   readonly title?: string | undefined;
   readonly subtitle?: string | null | undefined;
   readonly limit?: number | undefined;
@@ -41,6 +45,7 @@ interface ExploreWavesSectionProps {
 }
 
 export function ExploreWavesSection({
+  cardVariant = "default",
   title = "Tired of bot replies? Join the most interesting chats in crypto",
   subtitle = "Most active waves",
   limit = DEFAULT_WAVES_LIMIT,
@@ -172,13 +177,16 @@ export function ExploreWavesSection({
           <div className="tw-grid tw-grid-cols-1 tw-gap-x-3 tw-gap-y-4 sm:tw-grid-cols-2 sm:tw-gap-6 lg:tw-grid-cols-3">
             {isLoading
               ? Array.from({ length: limit }).map((_, index) => (
-                  <div key={`skeleton-${index}`} className="tw-h-full tw-w-full">
-                    <ExploreWaveCardSkeleton />
+                  <div
+                    key={`skeleton-${index}`}
+                    className="tw-h-full tw-w-full"
+                  >
+                    <ExploreWaveCardSkeleton variant={cardVariant} />
                   </div>
                 ))
               : waves?.map((wave) => (
                   <div key={wave.id} className="tw-h-full tw-w-full">
-                    <ExploreWaveCard wave={wave} />
+                    <ExploreWaveCard wave={wave} variant={cardVariant} />
                   </div>
                 ))}
           </div>

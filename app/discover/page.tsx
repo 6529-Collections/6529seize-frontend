@@ -15,7 +15,7 @@ function DiscoverFallback() {
         {Array.from({ length: 6 }).map((_, index) => (
           <div
             key={index}
-            className="tw-h-64 tw-rounded-xl tw-bg-iron-950 tw-ring-1 tw-ring-inset tw-ring-white/10"
+            className="tw-h-[22rem] tw-rounded-xl tw-bg-iron-950 tw-ring-1 tw-ring-inset tw-ring-white/10"
           />
         ))}
       </div>
