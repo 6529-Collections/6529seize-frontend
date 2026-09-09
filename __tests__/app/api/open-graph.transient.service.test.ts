@@ -44,7 +44,7 @@ describe("createTransientPlan", () => {
       new URL(
         "https://www.transient.xyz/nfts/ethereum/0xda48f4db41415fc2873efb487eec1068626fad60/7"
       ),
-      { fetchHtml, assertPublicUrl }
+      { fetchHtml, assertPublicUrl, fetchTokenMetadata }
     );
 
     expect(plan).not.toBeNull();

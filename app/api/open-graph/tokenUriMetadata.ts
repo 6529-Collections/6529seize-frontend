@@ -6,23 +6,32 @@ import { fetchPublicUrl, type UrlGuardOptions } from "@/lib/security/urlGuard";
 // the compressed Content-Length, and keep the existing permissive MIME handling.
 export const TOKEN_URI_MAX_BYTES = 64 * 1024 * 1024;
 const TOKEN_URI_TIMEOUT_MS = 4000;
+// Metadata can contain substantial embedded art. Keep the generous byte limit
+// without allowing a batch to buffer and parse several such documents at once.
+let tokenMetadataActive = false;
 
 export async function fetchTokenUriJson(
   url: URL,
   options: UrlGuardOptions
 ): Promise<unknown> {
-  const response = await fetchPublicUrl(
-    url,
-    { headers: { Accept: "application/json" } },
-    {
-      ...options,
-      timeoutMs: TOKEN_URI_TIMEOUT_MS,
-      maxRedirects: 5,
+  if (tokenMetadataActive) throw new Error("NFT metadata processing is busy.");
+  tokenMetadataActive = true;
+  try {
+    const response = await fetchPublicUrl(
+      url,
+      { headers: { Accept: "application/json" } },
+      {
+        ...options,
+        timeoutMs: TOKEN_URI_TIMEOUT_MS,
+        maxRedirects: 5,
+      }
+    );
+    if (!response.ok) {
+      discardResponse(response);
+      throw new Error("NFT metadata request failed.");
     }
-  );
-  if (!response.ok) {
-    discardResponse(response);
-    throw new Error("NFT metadata request failed.");
+    return await readLimitedJson<unknown>(response, TOKEN_URI_MAX_BYTES);
+  } finally {
+    tokenMetadataActive = false;
   }
-  return readLimitedJson<unknown>(response, TOKEN_URI_MAX_BYTES);
 }

@@ -8,13 +8,18 @@ jest.mock("undici", () => ({
 }));
 
 import { lookup } from "node:dns/promises";
+import type { LookupAddress, LookupAllOptions } from "node:dns";
 import {
   fetchTokenUriJson,
   TOKEN_URI_MAX_BYTES,
 } from "@/app/api/open-graph/tokenUriMetadata";
 import { BodyTooLargeError } from "@/lib/fetch/limitedBody";
 
-const mockLookup = jest.mocked(lookup);
+const lookupAll: (
+  hostname: string,
+  options: LookupAllOptions
+) => Promise<LookupAddress[]> = lookup;
+const mockLookup = jest.mocked(lookupAll);
 const url = new URL("https://metadata.example/nft/1");
 
 describe("NFT metadata transport", () => {
@@ -103,7 +108,37 @@ describe("NFT metadata transport", () => {
     await expect(fetchTokenUriJson(url, {})).rejects.toBeInstanceOf(
       BodyTooLargeError
     );
-    expect(reads).toBe(65);
+    expect(reads).toBe(Math.floor(TOKEN_URI_MAX_BYTES / chunk.byteLength) + 1);
     expect(cancel).toHaveBeenCalledTimes(1);
+  });
+
+  it("bounds simultaneous reads and recovers when the admitted body completes", async () => {
+    const stream = new TransformStream<Uint8Array, Uint8Array>();
+    const writer = stream.writable.getWriter();
+    mockFetch.mockResolvedValueOnce(new Response(stream.readable));
+    const admitted = fetchTokenUriJson(url, {});
+    await expect(fetchTokenUriJson(url, {})).rejects.toThrow(
+      "processing is busy"
+    );
+    await expect(fetchTokenUriJson(url, {})).rejects.toThrow(
+      "processing is busy"
+    );
+    await writer.write(new TextEncoder().encode('{"name":"Artwork"}'));
+    await writer.close();
+    await expect(admitted).resolves.toEqual({ name: "Artwork" });
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+    mockFetch.mockResolvedValueOnce(new Response('{"name":"Next artwork"}'));
+    await expect(fetchTokenUriJson(url, {})).resolves.toEqual({
+      name: "Next artwork",
+    });
+  });
+
+  it("releases metadata admission after a failed fetch", async () => {
+    mockFetch.mockRejectedValueOnce(new Error("upstream unavailable"));
+    await expect(fetchTokenUriJson(url, {})).rejects.toThrow();
+    mockFetch.mockResolvedValueOnce(new Response('{"name":"Artwork"}'));
+    await expect(fetchTokenUriJson(url, {})).resolves.toEqual({
+      name: "Artwork",
+    });
   });
 });

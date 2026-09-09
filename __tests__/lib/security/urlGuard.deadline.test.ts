@@ -8,9 +8,14 @@ jest.mock("undici", () => ({
 }));
 
 import { lookup } from "node:dns/promises";
+import type { LookupAddress, LookupAllOptions } from "node:dns";
 import { fetchPublicUrl } from "@/lib/security/urlGuard";
 
-const mockLookup = jest.mocked(lookup);
+const lookupAll: (
+  hostname: string,
+  options: LookupAllOptions
+) => Promise<LookupAddress[]> = lookup;
+const mockLookup = jest.mocked(lookupAll);
 const options = { timeoutMs: 100, revalidateFinalUrl: false };
 
 describe("public fetch deadline", () => {
@@ -22,6 +27,34 @@ describe("public fetch deadline", () => {
   });
 
   afterEach(() => jest.useRealTimers());
+
+  it("does not start DNS or fetch for an already cancelled caller", async () => {
+    const caller = new AbortController();
+    const reason = new Error("caller disconnected");
+    caller.abort(reason);
+    await expect(
+      fetchPublicUrl("https://example.com", { signal: caller.signal }, options)
+    ).rejects.toBe(reason);
+    expect(mockLookup).not.toHaveBeenCalled();
+    expect(mockFetch).not.toHaveBeenCalled();
+    expect(jest.getTimerCount()).toBe(0);
+  });
+
+  it("cleans up when the upstream body fails", async () => {
+    const reason = new Error("upstream disconnected");
+    mockFetch.mockResolvedValue(
+      new Response(
+        new ReadableStream({
+          pull(controller) {
+            controller.error(reason);
+          },
+        })
+      )
+    );
+    const response = await fetchPublicUrl("https://example.com", {}, options);
+    await expect(response.text()).rejects.toBe(reason);
+    expect(jest.getTimerCount()).toBe(0);
+  });
 
   it("ends a body that stalls after headers and cancels the upstream reader", async () => {
     const cancel = jest.fn();
