@@ -196,6 +196,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
       return;
     }
 
+    // Input/label clicks already select through onChange; do not toggle twice.
     const control = target.closest(
       "a, button, input, select, textarea, label, [role='button'], [role='link'], [role='checkbox'], [role='dialog'], [tabindex], [contenteditable='true'], [data-vote-controls]"
     );

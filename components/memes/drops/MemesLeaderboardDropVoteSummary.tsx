@@ -1,11 +1,11 @@
 import DropVoteProgressing from "@/components/drops/view/utils/DropVoteProgressing";
 import DropLargestVote from "@/components/waves/drop/DropLargestVote";
 import ParticipationDropVoteDetailsTrigger from "@/components/waves/drops/participation/ratings/ParticipationDropVoteDetailsTrigger";
-import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { t } from "@/i18n/messages";
+import { formatInteger } from "@/i18n/format";
+import { t, tRich } from "@/i18n/messages";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
@@ -31,7 +31,6 @@ const MemesLeaderboardDropVoteSummary: React.FC<
   const hasUserVoted =
     userContext?.rating !== undefined && userContext?.rating !== 0;
   const userVote = userContext?.rating ?? 0;
-  const isUserVoteNegative = userVote < 0;
 
   return (
     <div className="tw-grid tw-min-w-0 tw-grid-cols-1 tw-items-center tw-gap-x-4 tw-gap-y-1 @[700px]:tw-grid-cols-[minmax(0,1fr)_auto]">
@@ -42,50 +41,53 @@ const MemesLeaderboardDropVoteSummary: React.FC<
             isPositive ? "tw-text-iron-100" : "tw-text-rose-400"
           }`}
         >
-          {formatNumberWithCommas(current)}
+          {formatInteger(locale, current)}
         </span>
         <div className="tw-flex tw-items-baseline tw-gap-1">
           <DropVoteProgressing
             current={current}
             projected={projected}
+            projectedLabel={formatInteger(locale, projected)}
+            tooltipLabel={t(locale, "waves.myVotes.projectedAtDecision")}
             numberFont="sans"
             numberSize="body"
             numberWeight="semibold"
             visualVariant="memes"
           />
           <span className="tw-whitespace-nowrap tw-text-label tw-font-semibold tw-uppercase tw-leading-5 tw-tracking-ordinal tw-text-iron-600">
-            {creditType} total
+            {t(locale, "waves.leaderboard.voteSummary.total", { creditType })}
           </span>
         </div>
         {/* User vote badge - hidden on small containers */}
         {hasUserVoted && (
           <span className="tw-ml-3 tw-hidden tw-border-b-0 tw-border-l tw-border-r-0 tw-border-t-0 tw-border-solid tw-border-white/10 tw-pl-3 tw-font-mono tw-text-xs tw-text-iron-500 @[500px]:tw-inline">
-            Your vote:{" "}
-            <span className="tw-font-bold tw-text-white">
-              {isUserVoteNegative && "-"}
-              {formatNumberWithCommas(Math.abs(userVote))}
-            </span>
+            {tRich(locale, "waves.leaderboard.voteSummary.yourVote", {
+              vote: (
+                <span key="user-vote" className="tw-font-bold tw-text-white">
+                  {formatInteger(locale, userVote)}
+                </span>
+              ),
+            })}
           </span>
         )}
       </div>
 
       {/* Keep voters and voting centered together, above the secondary summary. */}
-      <div
-        className="tw-flex tw-items-center tw-justify-between tw-gap-4 @[700px]:tw-justify-end"
-        onClick={(event) => event.stopPropagation()}
-      >
+      <div className="tw-flex tw-items-center tw-justify-between tw-gap-4 @[700px]:tw-justify-end">
         <div className="tw-flex tw-items-center tw-gap-2">
           {topVoters.length > 0 && (
             <div className="tw-flex tw-items-center -tw-space-x-2">
               {topVoters.map((voter) => {
+                const address = voter.profile.primary_address?.trim();
                 const identity =
-                  voter.profile.handle ?? voter.profile.primary_address;
-                const tooltipId = `voter-${drop.id}-${identity}`;
+                  voter.profile.handle?.trim() ||
+                  (address && address !== "UNKNOWN" ? address : voter.profile.id);
+                const tooltipId = `voter-${drop.id}-${voter.profile.id}`;
 
                 return (
-                  <React.Fragment key={identity}>
+                  <React.Fragment key={voter.profile.id}>
                     <Link
-                      href={`/${identity}`}
+                      href={`/${encodeURIComponent(identity)}`}
                       onClick={(e) => e.stopPropagation()}
                       data-tooltip-id={tooltipId}
                       aria-label={t(locale, "waves.myVotes.voterAvatar", {
@@ -125,7 +127,7 @@ const MemesLeaderboardDropVoteSummary: React.FC<
                         pointerEvents: "none",
                       }}
                     >
-                      {identity} - {formatNumberWithCommas(voter.rating)}
+                      {identity} - {formatInteger(locale, voter.rating)}
                     </Tooltip>
                   </React.Fragment>
                 );

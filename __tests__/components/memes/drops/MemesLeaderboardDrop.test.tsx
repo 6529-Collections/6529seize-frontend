@@ -150,7 +150,13 @@ jest.mock("@/components/voting", () => ({
   ),
 }));
 jest.mock("@/components/voting/VotingModalButton", () => (p: any) => (
-  <button data-testid="vote-btn" onClick={p.onClick}>
+  <button
+    data-testid="vote-btn"
+    onClick={(event) => {
+      event.stopPropagation();
+      p.onClick();
+    }}
+  >
     vote
   </button>
 ));
