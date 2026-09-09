@@ -27,6 +27,11 @@ import {
   LOAD_TIMEOUT_MS,
 } from "../utils/constants";
 import { getNotificationErrorDetails } from "../utils/getNotificationErrorDetails";
+import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
+import {
+  getVisibleNotificationCauses,
+  isNotificationVisible,
+} from "../utils/notificationVisibility";
 
 interface NotificationsContentState {
   readonly isLoadingProfile: boolean;
@@ -62,6 +67,7 @@ interface UseNotificationsControllerResult {
 
 export const useNotificationsController =
   (): UseNotificationsControllerResult => {
+    const { hideNftPurchasing } = useNftPurchasingVisibility();
     const {
       connectedProfile,
       isAuthenticated: isAuthContextAuthenticated,
@@ -144,8 +150,14 @@ export const useNotificationsController =
       }
     }, [isAuthenticated]);
 
+    const visibleCauses = useMemo(
+      () =>
+        getVisibleNotificationCauses(activeFilter?.cause, hideNftPurchasing),
+      [activeFilter?.cause, hideNftPurchasing]
+    );
+
     const {
-      items,
+      items: queryItems,
       rawItems: rawItemsFromQuery,
       isFetching,
       isFetchingNextPage,
@@ -160,9 +172,18 @@ export const useNotificationsController =
       activeProfileProxy: !!activeProfileProxy,
       limit: "30",
       reverse: true,
-      cause: activeFilter?.cause?.length ? activeFilter.cause : null,
+      cause: visibleCauses,
     });
-    const rawItems = rawItemsFromQuery ?? items;
+    const items = useMemo(
+      () =>
+        queryItems.filter((item) =>
+          isNotificationVisible(item, hideNftPurchasing)
+        ),
+      [queryItems, hideNftPurchasing]
+    );
+    const rawItems = (rawItemsFromQuery ?? queryItems).filter((item) =>
+      isNotificationVisible(item, hideNftPurchasing)
+    );
 
     const { mutateAsync: markNotificationIdsAsRead } = useMutation({
       mutationFn: async (ids: number[]) => {

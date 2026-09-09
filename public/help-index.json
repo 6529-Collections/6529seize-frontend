@@ -644,6 +644,7 @@
       ],
       "facts": [
         "The Join 6529 page lives at /join-6529.",
+        "On native iOS when the detected country is not US or is unknown, the Collect step, subscription promotions/actions, and purchasing FAQs are absent; progress counts four visible steps and there is no unavailable banner.",
         "/join redirects to /join-6529 for compatibility.",
         "It is a state-aware onboarding hub that adapts to wallet connection, wallet auth, and profile setup.",
         "The journey covers connecting a wallet, setting up a profile, joining a Wave, participating, and collecting.",
@@ -1019,6 +1020,7 @@
       ],
       "facts": [
         "The Minting The Memes guide lives at /about/minting.",
+        "On native iOS when the detected country is not US or is unknown, About Minting and Subscriptions links are hidden and direct visits return to /about without rendering the guides.",
         "The guide links to the current in-app mint at /the-memes/mint and the official standalone mint page at https://thememes.6529.io/.",
         "Users can choose regular minting or subscription minting; a subscription does not create eligibility and can mint only in a phase the destination wallet already qualifies for.",
         "The current mint flow can move through Phase 0, Phase 1, Phase 2, and a public phase for a card.",
@@ -1495,6 +1497,7 @@
       ],
       "facts": [
         "A user's Meme Card subscription controls and history live under /{user}/subscriptions.",
+        "On native iOS when the detected country is not US or is unknown, subscription controls stay hidden and direct or deep-linked visits return to the profile Identity tab without showing subscription content.",
         "The tab leads with subscription coverage: status, consecutive intended drops funded, funded-through and next-unfunded Meme context, and an authoritative top-up deadline only when one is available.",
         "The tab also shows exact ETH balance, raw mint capacity, airdrop address, manual or automatic mode, edition preference, upcoming drops, and history when subscriptions are available.",
         "Owners can update settings, including airdrop address and mode, and top up; read-only viewers can inspect visible subscription information.",
@@ -4777,6 +4780,7 @@
         "Standard wave-created rows can offer Join wave and Follow creator controls; direct-message wave-created rows offer Open DM instead of joining the wave.",
         "The Reactions filter includes voted, reacted, and boosted drop notifications; the Identity filter includes new follows and REP/NIC updates.",
         "The Subscriptions filter includes transition-based coverage alerts with runway, Meme context, authoritative deadline when available, and exact minimum top-up action.",
+        "On native iOS when the detected country is not US or is unknown, subscription coverage feed items, their filter and the device settings entry are hidden; social follow notifications remain available.",
         "Notification rows may be missing or stale if loading, permissions, or realtime connectivity are disrupted."
       ],
       "canonical_path": "/notifications",
@@ -6810,6 +6814,7 @@
       "keywords": ["nextgen", "mint", "distribution", "plan", "collection"],
       "facts": [
         "NextGen mint and distribution-plan behavior is documented under NextGen docs.",
+        "On native iOS when the detected country is not US or is unknown, mint and burn-to-mint buttons are absent and direct mint routes return to the collection without displaying mint controls; countdown information and distribution data remain available.",
         "Mint routes live under /nextgen/collection/{collection}/mint.",
         "Distribution plan routes live under /nextgen/collection/{collection}/distribution-plan.",
         "The distribution-plan allowlist shows a loading state while entries are fetched and a no-match state when active filters return no entries."

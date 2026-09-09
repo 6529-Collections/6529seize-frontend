@@ -59,9 +59,10 @@ works`, `Eligibility`, or `Help and history`.
 - The subscription profile action changes with authentication state. It asks a
   signed-out user to connect and sends a signed-in profile to its subscription
   settings.
-- On iOS outside the United States, the existing product visibility rule can
-  hide the interactive subscription profile action. The explanatory guide and
-  subscription reference link remain available.
+- On native iOS when the detected country is not `US` or is unknown, Minting
+  and Subscriptions entries and promotional links are hidden. Direct visits to
+  `/about/minting` and `/about/subscriptions` return to `/about` without showing
+  the guide or an unavailable message. US iOS, web, and Android keep the guides.
 - A card may not yet have published claim or Distribution Plan data. The live
   mint flow owns the associated loading, unavailable, and recovery states.
 - A phase can end before a later phase begins. The live mint flow, not the

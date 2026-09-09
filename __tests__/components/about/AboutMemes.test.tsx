@@ -1,5 +1,12 @@
 import { render, screen } from "@testing-library/react";
 import AboutMemes from "@/components/about/AboutMemes";
+import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
+jest.mock("@/hooks/useNftPurchasingVisibility", () => ({
+  useNftPurchasingVisibility: jest.fn(() => ({
+    hideNftPurchasing: false,
+    shouldRedirect: false,
+  })),
+}));
 
 jest.mock("next/image", () => {
   const React = jest.requireActual<typeof import("react")>("react");
@@ -21,6 +28,19 @@ jest.mock("next/link", () => ({
 }));
 
 describe("AboutMemes", () => {
+  afterEach(() =>
+    jest
+      .mocked(useNftPurchasingVisibility)
+      .mockReturnValue({ hideNftPurchasing: false, shouldRedirect: false })
+  );
+  it("omits the minting resource while retaining collection browsing", () => {
+    jest
+      .mocked(useNftPurchasingVisibility)
+      .mockReturnValue({ hideNftPurchasing: true, shouldRedirect: true });
+    const { container } = render(<AboutMemes />);
+    expect(container.querySelector('a[href="/about/minting"]')).toBeNull();
+    expect(container.querySelector('a[href="/the-memes"]')).toBeInTheDocument();
+  });
   it("renders the heading and production preview artwork", () => {
     render(<AboutMemes />);
     expect(

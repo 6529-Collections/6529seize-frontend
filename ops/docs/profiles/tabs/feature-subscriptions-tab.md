@@ -18,6 +18,11 @@ are documented in
 
 ## Entry Points
 
+On native iOS when the detected country is not `US` or is unknown, the tab and
+subscription actions are hidden. Direct links (including native deep links)
+return to the profile's Identity tab without displaying subscription content
+or an unavailable page. US iOS, web, and Android retain their existing behavior.
+
 - Open `/{user}/subscriptions` directly.
 - Open a profile and choose the `Subscriptions` tab.
 - On your own profile, use the profile-header subscription control. It appears

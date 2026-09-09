@@ -45,6 +45,12 @@ Use these collection routes to mint and review distribution data:
 
 ## Route Behavior
 
+- On native iOS when the detected country is not `US` or is unknown, `MINT`
+  and `BURN TO MINT` actions are hidden. Direct mint links return to the
+  collection page without showing mint controls. Countdown information and
+  distribution data remain available. US iOS, web, and Android keep their
+  existing mint behavior.
+
 - Public phase `LIVE` always uses the standard mint widget.
 - Outside public phase `LIVE`, mint widget type comes from merkle config.
 - Missing merkle data on mint route shows `Allowlist Not Found`.

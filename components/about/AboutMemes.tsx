@@ -7,6 +7,7 @@ import Link from "next/link";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import { AboutSection } from "@/types/enums";
+import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 
 import {
   ABOUT_PAGE_TITLE_CLASS_NAME,
@@ -91,6 +92,11 @@ function ResourceCard({ resource }: { readonly resource: Resource }) {
 }
 
 export default function AboutMemes() {
+  const { hideNftPurchasing } = useNftPurchasingVisibility();
+  const resources = RESOURCES.filter(
+    (resource) =>
+      !hideNftPurchasing || resource.href !== `/about/${AboutSection.MINTING}`
+  );
   return (
     <article className="tw-overflow-hidden tw-bg-[#0D0D0F] tw-text-iron-100">
       <header
@@ -100,10 +106,7 @@ export default function AboutMemes() {
           <p className="tw-m-0 tw-mb-5 tw-text-xs tw-font-semibold tw-uppercase tw-leading-5 tw-tracking-[0.16em] tw-text-primary-300">
             {t(DEFAULT_LOCALE, "about.memes.eyebrow")}
           </p>
-          <h1
-            className={ABOUT_PAGE_TITLE_CLASS_NAME}
-            id="about-memes-title"
-          >
+          <h1 className={ABOUT_PAGE_TITLE_CLASS_NAME} id="about-memes-title">
             {t(DEFAULT_LOCALE, "about.memes.title")}
           </h1>
           <div className="tw-mt-10 sm:tw-mt-14 lg:tw-mt-16">
@@ -191,7 +194,7 @@ export default function AboutMemes() {
             </h2>
           </header>
           <ul className="tw-m-0 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-p-0">
-            {RESOURCES.map((resource) => (
+            {resources.map((resource) => (
               <ResourceCard key={resource.href} resource={resource} />
             ))}
           </ul>

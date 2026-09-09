@@ -7,6 +7,13 @@ const setActiveProfileProxyMock = jest.fn().mockResolvedValue(undefined);
 const setToastMock = jest.fn();
 const mockMarkMobileLaunchStep = jest.fn();
 const mockScheduleMobileLaunchFlush = jest.fn();
+let mockHideNftPurchasing = false;
+
+jest.mock("@/hooks/useNftPurchasingVisibility", () => ({
+  useNftPurchasingVisibility: () => ({
+    hideNftPurchasing: mockHideNftPurchasing,
+  }),
+}));
 
 jest.mock("@/utils/monitoring/mobileLaunchTiming", () => ({
   markMobileLaunchStep: (...args: unknown[]) =>
@@ -77,7 +84,8 @@ jest.mock("@/components/brain/my-stream/layout/MyStreamNoItems", () => ({
 
 const useNotificationsQueryMock = jest.fn();
 jest.mock("@/hooks/useNotificationsQuery", () => ({
-  useNotificationsQuery: () => useNotificationsQueryMock(),
+  useNotificationsQuery: (options: unknown) =>
+    useNotificationsQueryMock(options),
 }));
 
 jest.mock("@/components/notifications/NotificationsContext", () => ({
@@ -118,6 +126,7 @@ jest.mock("@/contexts/TitleContext", () => ({
 import Notifications from "@/components/brain/notifications";
 import { floatingDockClearanceClassName } from "@/components/brain/notifications/notifications.constants";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
 
 const useDeviceInfoMock = useDeviceInfo as jest.MockedFunction<
   typeof useDeviceInfo
@@ -146,6 +155,7 @@ const mockSuccessfulNotificationsQuery = () => {
 
 describe("Notifications component", () => {
   beforeEach(() => {
+    mockHideNftPurchasing = false;
     mutateAsyncMock.mockClear();
     mutateAsyncMock.mockResolvedValue(undefined);
     useNotificationsQueryMock.mockReset();
@@ -158,6 +168,27 @@ describe("Notifications component", () => {
     mockMarkMobileLaunchStep.mockClear();
     mockScheduleMobileLaunchFlush.mockClear();
     useDeviceInfoMock.mockReturnValue(getDefaultDeviceInfo());
+  });
+
+  it("excludes coverage from queries and cached results when purchasing is restricted", () => {
+    mockHideNftPurchasing = true;
+    mockSuccessfulNotificationsQuery();
+    useNotificationsQueryMock.mockReturnValue({
+      ...useNotificationsQueryMock(),
+      items: [{ cause: ApiNotificationCause.SubscriptionCoverage }],
+      rawItems: [{ cause: ApiNotificationCause.SubscriptionCoverage }],
+    });
+    useNotificationsQueryMock.mockClear();
+    const { rerender } = render(
+      <Notifications activeDrop={null} setActiveDrop={jest.fn()} />
+    );
+    expect(screen.getByTestId("no-items")).toBeInTheDocument();
+    expect(screen.queryByTestId("wrapper")).not.toBeInTheDocument();
+    const causes = useNotificationsQueryMock.mock.calls[0][0].cause;
+    expect(causes).not.toContain(ApiNotificationCause.SubscriptionCoverage);
+    expect(causes).toContain(ApiNotificationCause.IdentitySubscribed);
+    rerender(<Notifications activeDrop={null} setActiveDrop={jest.fn()} />);
+    expect(useNotificationsQueryMock.mock.lastCall[0].cause).toBe(causes);
   });
 
   it("shows loader when fetching and no items", async () => {

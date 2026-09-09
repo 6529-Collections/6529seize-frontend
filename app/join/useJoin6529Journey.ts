@@ -11,7 +11,10 @@ import { m } from "./page.utils";
 import { useJoin6529Facts } from "./useJoin6529Facts";
 import { useJoin6529Progress } from "./useJoin6529Progress";
 
-export function useJoin6529Journey(locale: SupportedLocale) {
+export function useJoin6529Journey(
+  locale: SupportedLocale,
+  hideNftPurchasing = false
+) {
   const { connectedProfile, fetchingProfile, requestAuth } = useAuth();
   const {
     address,
@@ -28,10 +31,9 @@ export function useJoin6529Journey(locale: SupportedLocale) {
     connectedProfile,
     undefined
   );
-  const subscriptionsHref =
-    !subscriptionProfileIdentity
-      ? SUBSCRIPTIONS_INFO_HREF
-      : `/${subscriptionProfileIdentity}/subscriptions`;
+  const subscriptionsHref = !subscriptionProfileIdentity
+    ? SUBSCRIPTIONS_INFO_HREF
+    : `/${subscriptionProfileIdentity}/subscriptions`;
   const pageState = getJoinPageState({
     hasActiveWalletAddress,
     hasProfile: Boolean(connectedProfile),
@@ -40,7 +42,11 @@ export function useJoin6529Journey(locale: SupportedLocale) {
     enabled: pageState === "loggedIn",
     identity: profileIdentity,
   });
-  const timelineProgress = useJoin6529Progress({ facts, pageState });
+  const timelineProgress = useJoin6529Progress({
+    facts,
+    pageState,
+    hideNftPurchasing,
+  });
 
   const handleConnectWallet = useCallback(() => {
     setWalletActionPending(true);
@@ -89,7 +95,8 @@ export function useJoin6529Journey(locale: SupportedLocale) {
     pageState,
     primaryAction,
     profileHref,
-    secondaryAction,
+    secondaryAction:
+      hideNftPurchasing && pageState === "loggedIn" ? null : secondaryAction,
     subscriptionsHref,
     timelineProgress,
   };

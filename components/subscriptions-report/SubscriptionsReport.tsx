@@ -14,6 +14,7 @@ import {
   normalizeMemeTokenId,
 } from "./SubscriptionsReport.utils";
 import AboutSubscriptionsProfileButton from "@/components/about/AboutSubscriptionsProfileButton";
+import NftPurchasingGate from "@/components/common/NftPurchasingGate";
 import { useAuth } from "@/components/auth/Auth";
 import CircleLoader, {
   CircleLoaderSize,
@@ -54,8 +55,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 const PAGE_SIZE = 10;
 const UPCOMING_PAGE_SIZE = 5;
-const REPORT_SECTION_HEADING_CLASS_NAME =
-  SUBSCRIPTIONS_SECTION_HEADING_CLASS;
+const REPORT_SECTION_HEADING_CLASS_NAME = SUBSCRIPTIONS_SECTION_HEADING_CLASS;
 const REPORT_MAJOR_SECTION_GAP_CLASS_NAME = "tw-pt-[34px]";
 const REPORT_SECTION_CONTENT_GAP_CLASS_NAME = "tw-pt-[13px]";
 const REPORT_TABLE_HEADER_CLASS_NAME = `tw-hidden tw-gap-4 tw-border-b tw-border-x-0 tw-border-t-0 tw-border-solid tw-border-iron-800 tw-px-4 tw-py-2 tw-text-left tw-font-semibold tw-text-iron-400 sm:tw-grid sm:tw-px-6 sm:tw-py-3 ${DATA_TABLE_HEADER_TEXT_CLASS_NAME}`;
@@ -367,9 +367,7 @@ export default function SubscriptionsReportComponent() {
   function renderEmptyState(loading: boolean, type: string) {
     if (loading) {
       return (
-        <output
-          className="tw-animate-pulse tw-text-sm tw-text-iron-400 motion-reduce:tw-animate-none"
-        >
+        <output className="tw-animate-pulse tw-text-sm tw-text-iron-400 motion-reduce:tw-animate-none">
           Loading {type} drops...
         </output>
       );
@@ -452,14 +450,16 @@ export default function SubscriptionsReportComponent() {
             Subscriptions Report
           </h1>
           <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-justify-center tw-gap-x-4 tw-gap-y-3 sm:tw-w-auto sm:tw-justify-end">
-            <AboutSubscriptionsProfileButton />
-            <Link
-              href="/about/subscriptions"
-              className="hover:tw-text-primary-200 tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-leading-5 tw-text-primary-300 tw-no-underline hover:tw-underline"
-              aria-label="Learn more about The Memes subscriptions"
-            >
-              Learn More
-            </Link>
+            <NftPurchasingGate>
+              <AboutSubscriptionsProfileButton />
+              <Link
+                href="/about/subscriptions"
+                className="hover:tw-text-primary-200 tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-leading-5 tw-text-primary-300 tw-no-underline hover:tw-underline"
+                aria-label="Learn more about The Memes subscriptions"
+              >
+                Learn More
+              </Link>
+            </NftPurchasingGate>
           </div>
         </div>
       </div>

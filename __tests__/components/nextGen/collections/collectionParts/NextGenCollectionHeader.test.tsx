@@ -4,6 +4,13 @@ import NextGenCollectionHeader, {
   NextGenBackToCollectionPageLink,
 } from "@/components/nextGen/collections/collectionParts/NextGenCollectionHeader";
 import { fetchUrl } from "@/services/6529api";
+import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
+jest.mock("@/hooks/useNftPurchasingVisibility", () => ({
+  useNftPurchasingVisibility: jest.fn(() => ({
+    hideNftPurchasing: false,
+    shouldRedirect: false,
+  })),
+}));
 
 jest.mock("@/services/6529api", () => ({
   fetchUrl: jest.fn(() => Promise.resolve({})),
@@ -62,6 +69,21 @@ const collection: any = {
 };
 
 describe("NextGenCollectionHeader", () => {
+  afterEach(() =>
+    jest
+      .mocked(useNftPurchasingVisibility)
+      .mockReturnValue({ hideNftPurchasing: false, shouldRedirect: false })
+  );
+  it("retains countdown information without a mint CTA on restricted iOS", () => {
+    jest
+      .mocked(useNftPurchasingVisibility)
+      .mockReturnValue({ hideNftPurchasing: true, shouldRedirect: true });
+    const { container } = render(
+      <NextGenCollectionHeader collection={collection} show_links={false} />
+    );
+    expect(screen.getByText(/Allowlist Starting/)).toBeInTheDocument();
+    expect(container.querySelector('a[href$="/mint"]')).toBeNull();
+  });
   it("renders back link text depending on path", () => {
     window.history.pushState({}, "", "/x/art");
     render(<NextGenBackToCollectionPageLink collection={collection} />);
