@@ -1670,10 +1670,11 @@
         "Profile lookup accepts a public handle or wallet-like identity without requiring wallet authentication, and shows loading, empty, not-found, retryable error, snapshot, holdings, boost breakdown, and paginated collection states.",
         "The daily snapshot uses the Ethereum block at or immediately before 00:00 UTC; holding age uses that block timestamp, while a displayed API date can reflect later processing time.",
         "The current boost is deterministic for a particular snapshot once eligible cards, ownership history, rates, and season configuration are known; future inputs can still change the result.",
-        "Seasons 1 through 20 are configured for a +0.05 bonus when boostable, while the current highest eligible season is excluded and later seasons do not inherit an automatic +0.05 bonus.",
-        "A full eligible Meme collection uses the configured season sum plus diminishing additional-set bonuses of 0.05 multiplied by 0.6529^(n-1); the series has no hard set-count cap and approaches 0.144051 before final rounding.",
-        "Five distinct Gradients add up to a maximum 0.10 bonus. If seasons 1 through 20 are all boostable, a full collection and the limiting additional-set bonus can reach a conditional final multiplier of 2.24 after adding five Gradients and rounding.",
-        "The 2.24 value is a conditional ceiling, not a promise for current holders: future cards must become eligible and can make a previously complete collection incomplete.",
+        "The Current boosts section at /network/tdh#tdh-1-4 loads configured bonus amounts, boosted-season limits, additional-set decay and Gradient limits from GET /tdh/rules. Consult that section for current values and the future schedule.",
+        "The highest eligible season is excluded from season boosts; later seasons do not automatically extend the configured boosted-season limit.",
+        "A full eligible Meme collection uses the configured season sum plus geometrically diminishing bonuses for additional full sets, with no hard set-count cap.",
+        "Distinct Gradients add the configured per-token bonus up to the configured count limit. The page derives the eventual rounded multiplier ceiling from the full season schedule, additional-set series and Gradient limit.",
+        "The displayed future ceiling is conditional: future cards must become eligible and can make a previously complete collection incomplete.",
         "Rates are rounded before wallet and token-level TDH rounding; consolidated wallets preserve qualifying internal-transfer ages, recompute the boost, and sum per-token rounded final contributions.",
         "TDH is used throughout the network, including profiles, leaderboards, Levels, groups, Network views, Waves voting and eligibility, and public data."
       ],
@@ -2005,7 +2006,7 @@
       "facts": [
         "Nakamoto Set is a SZN1 Category B TDH boost term.",
         "Under current TDH 1.4 rules, SZN1 can use a complete set boost or the Genesis Set and Nakamoto Set boosts.",
-        "The current Nakamoto Set boost shown on the TDH page is 1.01x."
+        "Holding Nakamoto (Meme #4) adds the configured Nakamoto partial-set bonus when SZN1 is boostable and incomplete. The complete SZN1 boost replaces its partial-set bonuses. See Current boosts at /network/tdh#tdh-1-4 for the current API-derived amount."
       ],
       "canonical_path": "/network/tdh",
       "related_paths": [
