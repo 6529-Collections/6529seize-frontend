@@ -77,6 +77,13 @@ exception: subtract 2,588 from its 6,529 minted copies, giving 3,941. The effect
 edition is the greater of the resulting count and the stored edition-size floor.
 This adjustment does not apply to other burns.
 
+An edition-size floor is a minimum count used for TDH. If only 200 copies were
+minted and the floor is 310, TDH treats the edition as 310 copies. For new Memes,
+the floor is the mint limit or 310, whichever is lower. If that limit is
+unavailable, the existing floor or supply is used. Older Memes can have different
+floors. Gradients and NextGen use their recorded HODL rates. Every card's rate is
+rounded to two decimal places before calculating TDH.
+
 ## Current Boost Model
 
 The boost is deterministic for a particular snapshot once the eligible cards,

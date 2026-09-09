@@ -49,6 +49,21 @@ export default function TDHCalculationDetails({
               {key === "weights" && (
                 <>
                   <p className={TDH_TEXT}>
+                    {t(locale, "network.tdh.explainer.exact.weights.floor", {
+                      minted: formatInteger(locale, 200),
+                      floor: formatInteger(locale, 310),
+                    })}
+                  </p>
+                  <p className={TDH_TEXT}>
+                    {t(
+                      locale,
+                      "network.tdh.explainer.exact.weights.floorPolicy",
+                      {
+                        floor: formatInteger(locale, 310),
+                      }
+                    )}
+                  </p>
+                  <p className={TDH_TEXT}>
                     {t(locale, "network.tdh.explainer.exact.weights.burns", {
                       adjustment: formatInteger(locale, 2_588),
                       minted: formatInteger(locale, 6_529),
@@ -56,7 +71,7 @@ export default function TDHCalculationDetails({
                     })}
                   </p>
                   <p className={TDH_TEXT}>
-                    {t(locale, "network.tdh.explainer.exact.weights.floor")}
+                    {t(locale, "network.tdh.explainer.exact.weights.rates")}
                   </p>
                 </>
               )}

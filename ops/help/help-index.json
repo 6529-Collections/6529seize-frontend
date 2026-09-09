@@ -1668,6 +1668,7 @@
         "The calculation has three layers: unweighted days, edition weighting, and boosts.",
         "Unweighted days means each NFT contributes 1 unit per day it is held.",
         "Edition weighting means days held are multiplied by a HODL or edition-size rate. The calculator derives rates from the largest eligible effective Meme edition.",
+        "An edition-size floor is a minimum count used for TDH: when fewer copies were minted, the calculation uses the floor instead. The exact calculation section explains how floors are set and gives a worked example.",
         "Boosts multiply weighted TDH by active boosters based on what the holder owns.",
         "The TDH page has anchors for FirstGM's reference role, a fixed worked example, profile lookup, current boosts, and exact calculation details.",
         "The worked example compares Today and +30 days and can remove Nakamoto #4 before the snapshot; it demonstrates that a sale removes both the card contribution and any boost component it supplied.",
