@@ -1,6 +1,10 @@
 # Alchemy NFT API deprecation TODO
 
-Status: Address-only implementation complete; deployment and manual acceptance pending
+Status: Address-only implementation complete; rollout and manual acceptance tracked below
+
+For the point-by-point baseline comparison, see
+[what to test: main versus revised](ACTUAL_CHANGES.md#what-to-test-main-versus-revised)
+and [features removed](ACTUAL_CHANGES.md#features-removed-main-versus-revised).
 
 Deadline: September 30, 2026
 
@@ -55,9 +59,10 @@ The affected call path is:
 - [x] Remove keyword lookup, its query cache, search response normalization/types, and server helper.
 - [x] Return HTTP 410 from the old local search route without contacting Alchemy.
 - [x] Add debounced address validation, loading/not-found/error states, retry, and stale-result protection.
-- [x] Remove the keyword spam-filter toggle; document that pasted-address lookup remains unfiltered.
+- [x] Remove the keyword spam filter and Show anyway control; document that pasted-address lookup remains unfiltered.
 - [x] Enforce the existing ERC-721 restriction for keyboard and mouse selection.
 - [x] Update focused tests, product guidance, and the help corpus.
+- [x] Update the network/open-data E2E pack for the retired search route's 410/message/no-store contract, preserving other routes' 400 validation checks.
 - [x] Add [Actual changes](ACTUAL_CHANGES.md) and [What to test](WHAT_TO_TEST.md).
 - [ ] Complete manual acceptance on the deployed environment.
 - [ ] Coordinate FE/BE rollout and the explicit loss of old-client keyword fallback.

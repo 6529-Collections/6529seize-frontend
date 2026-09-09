@@ -198,22 +198,6 @@ test.describe("Network, Open Data, and public API read-only coverage @surface @m
       400,
       "address is required"
     );
-    const collections = await request.get("/api/alchemy/collections?query=");
-    expect(collections.headers()["cache-control"] ?? "").toContain("no-store");
-    // Both the active and retired endpoint reject this request without caching.
-    expect([
-      { status: 400, body: { error: "query is required" } },
-      {
-        status: 410,
-        body: {
-          error:
-            "Collection name search is no longer available. Use a contract address.",
-        },
-      },
-    ]).toContainEqual({
-      status: collections.status(),
-      body: await collections.json(),
-    });
     await expectNoStoreJsonError(
       request,
       "/api/alchemy/owner-nfts?chainId=not-a-number",
@@ -232,5 +216,21 @@ test.describe("Network, Open Data, and public API read-only coverage @surface @m
     expect((await tiktok.json()) as { error?: string }).toEqual({
       error: "A url query parameter is required.",
     });
+  });
+
+  test("retired Alchemy collection search returns a no-store 410", async ({
+    request,
+  }) => {
+    for (const path of [
+      "/api/alchemy/collections?query=",
+      "/api/alchemy/collections?query=memes",
+    ]) {
+      await expectNoStoreJsonError(
+        request,
+        path,
+        410,
+        "Collection name search is no longer available. Use a contract address."
+      );
+    }
   });
 });
