@@ -79,6 +79,19 @@ from home discovery.
 - `/discover` intentionally omits the home subtitle and footer link.
 - Home still caps its `Most active waves` section to six cards.
 
+### Localization follow-up
+
+- Affected surface: `DiscoverWaveExplorer` headings, sort/filter labels, empty
+  state, and the `ExploreWavesSection` loading/result announcements on `/discover`.
+- Current fallback: this existing copy remains English (`en-US`); card metric
+  labels and number formatting use the existing default-locale helpers.
+- User impact: visitors using other languages continue to receive English
+  controls and status announcements. Wave-authored titles and descriptions stay
+  in their original language.
+- Follow-up owner: frontend wave-discovery maintainers. Move the remaining copy
+  to message keys with complete count-aware status messages, then verify locale
+  fallback and longer translated labels across supported locales.
+
 ## Related Pages
 
 - [Wave Discovery Index](README.md)
