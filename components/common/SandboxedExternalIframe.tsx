@@ -54,9 +54,13 @@ const SandboxedExternalIframe: React.FC<SandboxedExternalIframeProps> = ({
   );
 
   const frameClassName = useMemo(() => {
-    const classes = ["tw-h-full", "tw-w-full", className].filter(
-      (value): value is string => Boolean(value)
-    );
+    const classes = [
+      "tw-block",
+      "tw-h-full",
+      "tw-w-full",
+      "tw-border-0",
+      className,
+    ].filter((value): value is string => Boolean(value));
     return classes.join(" ");
   }, [className]);
 
@@ -157,7 +161,7 @@ const SandboxedExternalIframe: React.FC<SandboxedExternalIframeProps> = ({
       className="tw-flex tw-items-center tw-justify-between tw-gap-2 tw-rounded-t-md tw-border tw-border-iron-800 tw-bg-iron-950 tw-px-3 tw-py-2"
       aria-live="polite"
     >
-      <span className="tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-300">
+      <span className="tw-text-[11px] tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-300">
         Untrusted interactive content
       </span>
       {parsedCanonicalUrl ? (

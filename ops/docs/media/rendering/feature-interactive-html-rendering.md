@@ -61,7 +61,8 @@
 ## Common Scenarios
 
 - Shared wave/drop cards without a preview-image override render the host
-  banner plus sandboxed iframe.
+  banner plus a borderless sandboxed iframe. The banner keeps its uppercase
+  untrusted-content label at 11px and a separate source link.
 - Gallery, leaderboard, and other card surfaces that already have preview
   artwork can show a static preview image for HTML media instead of a live
   iframe.
