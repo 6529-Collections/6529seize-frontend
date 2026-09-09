@@ -27,11 +27,11 @@ export default function WaveHeaderRestrictionButton({
     <HoverCard
       ariaLabel={label}
       content={
-        <div className="tw-w-[min(82vw,18rem)] tw-p-1">
-          <p className="tw-mb-0 tw-text-xs tw-font-semibold tw-text-iron-100">
+        <div className="tw-w-[min(82vw,18rem)] tw-whitespace-normal tw-break-words tw-p-1">
+          <p className="tw-m-0 tw-text-xs tw-font-medium tw-text-iron-400">
             {label}
           </p>
-          <p className="tw-mb-0 tw-mt-1.5 tw-text-xs tw-leading-5 tw-text-iron-400">
+          <p className="tw-mb-0 tw-mt-1.5 tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-100">
             {reason}
           </p>
         </div>

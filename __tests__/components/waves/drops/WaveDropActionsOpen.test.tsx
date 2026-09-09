@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import type { CSSProperties, ReactNode } from "react";
 import WaveDropActionsOpen from "@/components/waves/drops/WaveDropActionsOpen";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
@@ -18,8 +19,14 @@ jest.mock("next/navigation", () => ({
   useSearchParams: jest.fn(),
 }));
 jest.mock("react-tooltip", () => ({
-  Tooltip: ({ id, style, children }: any) => (
-    <div data-testid={`tooltip-${id}`} data-z-index={String(style?.zIndex)}>
+  Tooltip: ({
+    style,
+    children,
+  }: {
+    readonly style?: CSSProperties;
+    readonly children?: ReactNode;
+  }) => (
+    <div role="tooltip" data-z-index={String(style?.zIndex)}>
       {children}
     </div>
   ),
@@ -50,11 +57,16 @@ test("pushes route on click", async () => {
     get: jest.fn(),
   });
   render(<WaveDropActionsOpen drop={drop} />);
-  expect(screen.getByTestId("tooltip-open-2")).toHaveAttribute(
+  const button = screen.getByRole("button", { name: "Open drop" });
+  expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
+  await user.hover(button);
+  const tooltip = await screen.findByRole("tooltip");
+  expect(tooltip).toHaveAttribute(
     "data-z-index",
     String(TOOLTIP_STYLES.zIndex)
   );
-  await user.click(screen.getByRole("button"));
+  expect(tooltip.parentElement).toBe(document.body);
+  await user.click(button);
   expect(push).toHaveBeenCalled();
 });
 
