@@ -17,7 +17,7 @@ export default function AboutTermsOfService() {
       </Row>
       <Row>
         <Col className="tw-pb-3 tw-pt-2 tw-text-left tw-text-sm tw-leading-6 tw-text-iron-500">
-          Last Updated: February 23, 2023
+          Last Updated: September 9, 2026
         </Col>
       </Row>
       <Row className="tw-pb-3 tw-pt-3">
@@ -623,6 +623,13 @@ export default function AboutTermsOfService() {
               g. Your Violation of Laws/Regulations
               <br />
               h. Your Feedback And Ideas
+              <br />
+              <br />
+              For clarity, this indemnity applies to third-party claims against
+              the 6529 Parties arising out of or relating to your own acts or
+              omissions. It does not make you responsible for another person’s
+              acts or omissions merely because you use Our Platform, participate
+              in a Wave or community, or own 6529 NFTs.
               <br />
               <br />
               You will cooperate with the 6529 Parties in defending any such
