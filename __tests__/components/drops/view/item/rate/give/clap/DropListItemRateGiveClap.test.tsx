@@ -9,12 +9,10 @@ jest.mock("@mojs/core", () => ({
   __esModule: true,
   default: {
     Burst: jest.fn().mockImplementation(() => ({ tune: jest.fn() })),
-    Html: jest
-      .fn()
-      .mockImplementation(() => ({
-        then: jest.fn().mockReturnThis(),
-        tune: jest.fn(),
-      })),
+    Html: jest.fn().mockImplementation(() => ({
+      then: jest.fn().mockReturnThis(),
+      tune: jest.fn(),
+    })),
     Timeline: jest
       .fn()
       .mockImplementation(() => ({ add: mockAdd, replay: mockReplay })),
@@ -139,8 +137,13 @@ describe("DropListItemRateGiveClap", () => {
       </>
     );
 
-    const [positive, negative] = screen.getAllByRole("button", {
+    const positive = screen.getByRole("button", {
       name: /clap for drop/i,
+      description: "+1,250,000",
+    });
+    const negative = screen.getByRole("button", {
+      name: /clap for drop/i,
+      description: "-2,500,000",
     });
     expect(positive).toHaveAccessibleDescription("+1,250,000");
     expect(negative).toHaveAccessibleDescription("-2,500,000");
