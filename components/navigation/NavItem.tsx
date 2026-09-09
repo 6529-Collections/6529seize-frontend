@@ -3,8 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import type { MouseEvent } from "react";
-import { useEffect } from "react";
+import type { MouseEvent, PointerEvent } from "react";
+import { useEffect, useState } from "react";
 import { useTitle } from "@/contexts/TitleContext";
 import { useUnreadIndicator } from "@/hooks/useUnreadIndicator";
 import { useUnreadNotifications } from "@/hooks/useUnreadNotifications";
@@ -39,7 +39,7 @@ const getIconSlotClass = ({
     ? "tw-h-8 tw-scale-[0.82] sm:tw-h-9 sm:tw-scale-[0.88]"
     : "tw-h-8 tw-scale-[0.9]";
 
-  return `tw-relative tw-z-10 tw-flex tw-items-center tw-justify-center tw-transition-transform tw-duration-300 tw-ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:tw-transition-none ${compactClassName}`;
+  return `tw-relative tw-z-10 tw-flex tw-translate-y-[var(--mobile-nav-icon-offset,0px)] tw-items-center tw-justify-center tw-transition-transform tw-duration-300 tw-ease-[cubic-bezier(0.22,1,0.36,1)] group-active:tw-opacity-50 group-data-[pressed=true]:tw-opacity-50 motion-reduce:tw-transition-none ${compactClassName}`;
 };
 
 const FixedActiveNavIndicator = () => (
@@ -172,6 +172,7 @@ const NavItemContent = ({
   isCurrentWaveDm = false,
   fullPrefetch = false,
 }: Props) => {
+  const [pressed, setPressed] = useState(false);
   const pathname = usePathname();
   // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense
   const searchParams = useSearchParams();
@@ -302,29 +303,29 @@ const NavItemContent = ({
   const linkClassName =
     variant === "fixed"
       ? "tw-relative tw-flex tw-h-full tw-w-full tw-min-w-0 tw-flex-col tw-items-center tw-justify-start tw-border-0 tw-bg-transparent tw-transition-colors focus:tw-outline-none focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-3px] focus-visible:tw-outline-primary-400"
-      : "tw-relative tw-flex tw-h-full tw-w-full tw-min-w-0 tw-flex-col tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-transition-colors focus:tw-outline-none focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-3px] focus-visible:tw-outline-primary-400";
+      : "tw-group tw-relative tw-flex tw-h-full tw-w-full tw-min-w-0 tw-touch-manipulation tw-flex-col tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-transition-colors focus:tw-outline-none focus-visible:!tw-outline focus-visible:!tw-outline-2 focus-visible:tw-outline-offset-[-3px] focus-visible:!tw-outline-primary-400";
 
-  if (fullPrefetch) {
-    return (
-      <Link
-        href={href}
-        aria-label={name}
-        aria-current={isActive ? "page" : undefined}
-        onClick={handleClick}
-        prefetch={true}
-        className={linkClassName}
-      >
-        {linkContent}
-      </Link>
-    );
-  }
+  const handlePointerDown = (event: PointerEvent<HTMLAnchorElement>) => {
+    if (variant === "floating" && event.isPrimary && event.button === 0) {
+      setPressed(true);
+    }
+  };
+  const clearPressed = () => setPressed(false);
 
   return (
     <Link
       href={href}
       aria-label={name}
       aria-current={isActive ? "page" : undefined}
+      data-pressed={pressed ? "true" : undefined}
       onClick={handleClick}
+      onPointerDown={handlePointerDown}
+      onPointerUp={clearPressed}
+      onPointerCancel={clearPressed}
+      onPointerLeave={clearPressed}
+      onLostPointerCapture={clearPressed}
+      onBlur={clearPressed}
+      prefetch={fullPrefetch ? true : undefined}
       className={linkClassName}
     >
       {linkContent}

@@ -1,4 +1,4 @@
-import type { Page } from "@playwright/test";
+import type { Locator, Page } from "@playwright/test";
 
 import { expect, test } from "../testHelpers";
 import { gotoReady } from "../support/routeReadiness";
@@ -103,6 +103,92 @@ function expectedCapacitorPlatform(projectName: string) {
     return "android";
   }
   throw new Error(`Unexpected Capacitor simulation project: ${projectName}`);
+}
+
+async function expectUsableNotificationTarget(dock: Locator) {
+  const bell = dock.getByRole("link", { name: "Notifications", exact: true });
+  await expect(bell).toBeVisible();
+  await expect(dock.getByRole("link")).toHaveCount(7);
+
+  const target = await bell.evaluate((link) => {
+    const box = link.getBoundingClientRect();
+    const icon = link.querySelector("svg");
+    if (!icon) {
+      throw new Error("Expected a visible notification bell icon.");
+    }
+    const iconBox = icon.getBoundingClientRect();
+    const center = {
+      x: iconBox.x + iconBox.width / 2,
+      y: iconBox.y + iconBox.height / 2,
+    };
+    // Sample the visible icon's center, edges, and corners one pixel inside
+    // its 48px target. Bounding boxes alone miss rounded clipping and overlays.
+    const hits = [-23, 0, 23].flatMap((offsetX) =>
+      [-23, 0, 23].map((offsetY) => ({
+        offsetX,
+        offsetY,
+        hitsBell:
+          document
+            .elementFromPoint(center.x + offsetX, center.y + offsetY)
+            ?.closest("a") === link,
+      }))
+    );
+
+    return {
+      center,
+      width: box.width,
+      height: box.height,
+      horizontalOffset: Math.abs(center.x - (box.x + box.width / 2)),
+      topClearance: center.y - box.top,
+      bottomClearance: box.bottom - center.y,
+      missedPoints: hits.filter((hit) => !hit.hitsBell),
+    };
+  });
+  expect(target.width).toBeGreaterThanOrEqual(48);
+  expect(target.height).toBeGreaterThanOrEqual(48);
+  expect(target.horizontalOffset).toBeLessThanOrEqual(0.5);
+  expect(target.topClearance).toBeGreaterThanOrEqual(24 - 0.01);
+  expect(target.bottomClearance).toBeGreaterThanOrEqual(24 - 0.01);
+  expect(target.missedPoints).toEqual([]);
+
+  const overlappingLinks = await dock.getByRole("link").evaluateAll((links) => {
+    const boxes = links.map((link) => ({
+      name: link.getAttribute("aria-label"),
+      left: link.getBoundingClientRect().left,
+      right: link.getBoundingClientRect().right,
+    }));
+    return boxes.filter((box, index) => {
+      const previous = boxes[index - 1];
+      return previous !== undefined && box.left < previous.right - 0.01;
+    });
+  });
+  expect(overlappingLinks).toEqual([]);
+
+  return target.center;
+}
+
+async function scrollAboutToCompact(page: Page) {
+  const position = await page.evaluate(async () => {
+    const element =
+      Array.from(
+        document.querySelectorAll(
+          '[data-mobile-bottom-nav-scroll-target="true"]'
+        )
+      ).find((candidate) => candidate.scrollHeight > candidate.clientHeight) ??
+      document.scrollingElement;
+    if (!element) {
+      throw new Error("Expected a scrollable About page.");
+    }
+    // Give the dock's scroll tracker a real initial position before crossing
+    // its threshold; /about supplies the content, without injected spacers.
+    element.scrollTo({ top: 1, behavior: "instant" });
+    await new Promise<void>((resolve) =>
+      requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+    );
+    element.scrollTo({ top: 240, behavior: "instant" });
+    return element.scrollTop;
+  });
+  expect(position).toBeGreaterThan(100);
 }
 
 test.describe("Native and Electron simulated shell read-only coverage @surface @medium @readonly", () => {
@@ -213,6 +299,109 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
       "href",
       "/open-data/meme-subscriptions"
     );
+  });
+
+  test("Android notification bell accepts first taps across phone dock sizes", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      testInfo.project.name !== "capacitor-android-sim",
+      "Notification touch targets are covered on the Android Capacitor simulation"
+    );
+
+    await mockCountryCheck(page, "FR");
+
+    for (const width of [320, 360, 412]) {
+      await page.setViewportSize({ width, height: 780 });
+      await gotoReady(page, "/about");
+      await expect(page.locator("body")).toHaveClass(/capacitor-native/);
+      const heading = page.getByRole("heading", {
+        level: 1,
+        name: "About 6529",
+      });
+      await expect(heading).toBeVisible();
+      const dock = page.locator('[data-mobile-bottom-nav-dock="true"]');
+      const bell = dock.getByRole("link", {
+        name: "Notifications",
+        exact: true,
+      });
+      await expect(bell).toBeVisible();
+      const expandedBounds = await bell.boundingBox();
+      expect(expandedBounds).not.toBeNull();
+
+      for (const compact of [false, true]) {
+        await test.step(`${width}px ${compact ? "compact" : "expanded"}`, async () => {
+          if (compact) {
+            await scrollAboutToCompact(page);
+          }
+          await expect
+            .poll(() =>
+              dock.evaluate((element) => element.getBoundingClientRect().height)
+            )
+            .toBe(compact ? 54 : 64);
+
+          const center = await expectUsableNotificationTarget(dock);
+          if (compact) {
+            expect(await bell.boundingBox()).toEqual(expandedBounds);
+          }
+          // Use trusted touchscreen input at the outer corner, where the
+          // original capsule-shaped link silently dropped the first tap.
+          const point = { x: center.x + 23, y: center.y + 23 };
+          if (width === 360 && !compact) {
+            const touch = await page.context().newCDPSession(page);
+            try {
+              await touch.send("Input.dispatchTouchEvent", {
+                type: "touchStart",
+                touchPoints: [point],
+              });
+              await expect(bell).toHaveAttribute("data-pressed", "true");
+              await expect(bell.locator(":scope > div")).toHaveCSS(
+                "opacity",
+                "0.5"
+              );
+              await scrollAboutToCompact(page);
+              // Release at the original position during the 300ms animation,
+              // without Playwright relocating the input to the moving link.
+              await page.waitForTimeout(200);
+              expect(
+                await dock.evaluate(
+                  (element) => element.getBoundingClientRect().height
+                )
+              ).toBeLessThan(64);
+              await touch.send("Input.dispatchTouchEvent", {
+                type: "touchEnd",
+                touchPoints: [],
+              });
+            } finally {
+              await touch
+                .send("Input.dispatchTouchEvent", {
+                  type: "touchCancel",
+                  touchPoints: [],
+                })
+                .catch(() => undefined);
+              await touch.detach();
+            }
+          } else {
+            await page.touchscreen.tap(point.x, point.y);
+          }
+          await expect(page).toHaveURL(/\/notifications$/);
+          await expect(
+            dock.getByRole("link", { name: "Notifications", exact: true })
+          ).toHaveAttribute("aria-current", "page");
+          if (width === 360 && !compact) {
+            await expect(bell).not.toHaveAttribute("data-pressed");
+            await page.keyboard.press("Tab");
+            await bell.focus();
+            await expect(bell).toBeFocused();
+            await expect(bell).toHaveCSS("outline-style", "solid");
+            await expect(bell).toHaveCSS("outline-width", "2px");
+          }
+          await page.goBack();
+          await expect(page).toHaveURL(/\/about$/);
+          await expect(heading).toBeVisible();
+        });
+      }
+    }
   });
 
   test("Capacitor app-wallet shell renders the simulated empty wallet state", async ({
@@ -356,7 +545,8 @@ test.describe("Native iPad drop actions @surface @medium @readonly", () => {
     const runsOnIosCapacitor =
       isCapacitorSimulationProject(testInfo.project.name) &&
       expectedCapacitorPlatform(testInfo.project.name) === "ios";
-    test.skip( // NOSONAR -- This shared cross-project spec runs the iPad regression only in its iOS simulation.
+    test.skip(
+      // NOSONAR -- This shared cross-project spec runs the iPad regression only in its iOS simulation.
       !runsOnIosCapacitor,
       "Native iPad drop actions are covered on the iOS Capacitor simulation"
     );

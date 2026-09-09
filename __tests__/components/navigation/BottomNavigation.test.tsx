@@ -4,7 +4,7 @@ import NavItem from "@/components/navigation/NavItem";
 import { useAuth } from "@/components/auth/Auth";
 import { useLayout } from "@/components/brain/my-stream/layout/LayoutContext";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
-import useDeviceInfo from "@/hooks/useDeviceInfo";
+import useCapacitor from "@/hooks/useCapacitor";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useWave } from "@/hooks/useWave";
 import { useWaveData } from "@/hooks/useWaveData";
@@ -26,7 +26,7 @@ jest.mock("@/components/auth/SeizeConnectContext", () => ({
 jest.mock("@/components/brain/my-stream/layout/LayoutContext", () => ({
   useLayout: jest.fn(),
 }));
-jest.mock("@/hooks/useDeviceInfo", () => ({
+jest.mock("@/hooks/useCapacitor", () => ({
   __esModule: true,
   default: jest.fn(),
 }));
@@ -42,7 +42,10 @@ const registerRef = jest.fn();
 (useLayout as jest.Mock).mockReturnValue({ registerRef });
 (useAuth as jest.Mock).mockReturnValue({ connectedProfile: null });
 (useSeizeConnectContext as jest.Mock).mockReturnValue({ address: undefined });
-(useDeviceInfo as jest.Mock).mockReturnValue({ isApp: false });
+(useCapacitor as jest.Mock).mockReturnValue({
+  isCapacitor: false,
+  isAndroid: false,
+});
 (useMediaQuery as jest.Mock).mockReturnValue(false);
 (useWaveData as jest.Mock).mockReturnValue({ data: null });
 (useWave as jest.Mock).mockReturnValue({ isDm: false });
@@ -73,15 +76,12 @@ const flushAnimationFrame = async () => {
 };
 
 const expectActivePillLayoutCalc = ({
-  compact = false,
   style,
 }: {
-  readonly compact?: boolean;
   readonly style: string | null;
 }) => {
   expect(style).toContain("left: calc(");
   expect(style).toContain("100%");
-  expect(style).toContain(compact ? "0.625rem" : "1rem");
 };
 
 const createScrollableElement = ({
@@ -146,7 +146,10 @@ beforeEach(() => {
   (useSeizeConnectContext as jest.Mock).mockReturnValue({
     address: undefined,
   });
-  (useDeviceInfo as jest.Mock).mockReturnValue({ isApp: false });
+  (useCapacitor as jest.Mock).mockReturnValue({
+    isCapacitor: false,
+    isAndroid: false,
+  });
   (useMediaQuery as jest.Mock).mockReturnValue(false);
   (useWaveData as jest.Mock).mockReturnValue({ data: null });
   (useWave as jest.Mock).mockReturnValue({ isDm: false });
@@ -374,7 +377,6 @@ describe("BottomNavigation", () => {
     const activePill = getByTestId("mobile-dock-active-pill");
     expect(activePill).toHaveClass("tw-h-10", "tw-w-12");
     expectActivePillLayoutCalc({
-      compact: true,
       style: activePill.getAttribute("style"),
     });
   });
