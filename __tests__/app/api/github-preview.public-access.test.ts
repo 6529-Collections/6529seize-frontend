@@ -54,7 +54,7 @@ const discussion = {
 
 describe("GitHub preview public access boundary", () => {
   const originalFetch = globalThis.fetch;
-  const fetchMock = jest.fn<Promise<Response>, [string, RequestInit?]>();
+  const fetchMock = jest.fn<Promise<Response>, Parameters<typeof fetch>>();
   let route: GithubRoute;
 
   beforeEach(async () => {
@@ -133,7 +133,7 @@ describe("GitHub preview public access boundary", () => {
   it("retains authenticated rate headroom for a verified no-scope classic token", async () => {
     mockGithubToken = CLASSIC_TOKEN;
     fetchMock.mockImplementation(async (url) =>
-      jsonResponse(url.endsWith("/rate_limit") ? {} : publicIssue, "")
+      jsonResponse(String(url).endsWith("/rate_limit") ? {} : publicIssue, "")
     );
 
     const responses = await Promise.all([
@@ -148,7 +148,7 @@ describe("GitHub preview public access boundary", () => {
     }
     expect(fetchMock).toHaveBeenCalledTimes(3);
     expect(
-      fetchMock.mock.calls.filter(([url]) => url.endsWith("/rate_limit"))
+      fetchMock.mock.calls.filter(([url]) => String(url).endsWith("/rate_limit"))
     ).toHaveLength(1);
     for (const [, init] of fetchMock.mock.calls) {
       expect(authorization(init)).toBe(`Bearer ${CLASSIC_TOKEN}`);
