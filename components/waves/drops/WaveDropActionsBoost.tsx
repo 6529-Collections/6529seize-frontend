@@ -7,7 +7,7 @@ import { canShowDropBoostAction } from "@/helpers/waves/drop-boost.helpers";
 import { useDropBoostMutation } from "@/hooks/drops/useDropBoostMutation";
 import { AnimatePresence, motion } from "framer-motion";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Tooltip } from "react-tooltip";
+import DropActionTooltip from "./DropActionTooltip";
 
 interface WaveDropActionsBoostProps {
   readonly drop: ExtendedDrop;
@@ -52,14 +52,19 @@ const WaveDropActionsBoost: React.FC<WaveDropActionsBoostProps> = ({
     animationTimeoutRef.current = setTimeout(() => setIsAnimating(false), 300);
   }, [canBoost, isPending, toggleBoost, drop]);
 
-  const tooltipId = `boost-drop-${drop.id}`;
-
   if (!canShowBoost) {
     return null;
   }
 
   return (
-    <>
+    <DropActionTooltip
+      content={
+        <span className="tw-text-xs">
+          {isBoosted ? "Remove Boost" : "Boost"}
+        </span>
+      }
+      disabled={!canBoost || isPending}
+    >
       <button
         className={`tw-group/boost tw-flex tw-h-7 tw-min-w-7 tw-items-center tw-justify-center tw-gap-x-1 tw-rounded-full tw-border-0 tw-bg-transparent tw-px-1.5 tw-text-xs tw-font-medium tw-leading-5 tw-transition-colors tw-duration-200 tw-ease-out desktop-hover:hover:tw-bg-iron-800 ${
           canBoost ? "tw-cursor-pointer" : "tw-cursor-default tw-opacity-50"
@@ -71,7 +76,6 @@ const WaveDropActionsBoost: React.FC<WaveDropActionsBoostProps> = ({
         onClick={handleClick}
         disabled={!canBoost || isPending}
         aria-label={isBoosted ? "Remove boost from drop" : "Boost drop"}
-        {...(canBoost ? { "data-tooltip-id": tooltipId } : {})}
       >
         <AnimatePresence mode="wait">
           <motion.div
@@ -101,31 +105,7 @@ const WaveDropActionsBoost: React.FC<WaveDropActionsBoostProps> = ({
           </motion.span>
         )}
       </button>
-      {canBoost && (
-        <Tooltip
-          id={tooltipId}
-          place="top"
-          positionStrategy="fixed"
-          offset={8}
-          opacity={1}
-          style={{
-            padding: "4px 8px",
-            background: "#37373E",
-            color: "white",
-            fontSize: "13px",
-            fontWeight: 500,
-            borderRadius: "6px",
-            boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
-            zIndex: 99999,
-            pointerEvents: "none",
-          }}
-        >
-          <span className="tw-text-xs">
-            {isBoosted ? "Remove Boost" : "Boost"}
-          </span>
-        </Tooltip>
-      )}
-    </>
+    </DropActionTooltip>
   );
 };
 
