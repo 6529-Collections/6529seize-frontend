@@ -1,7 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import type { ApiArtworkDocumentationContext } from "@/generated/models/ApiArtworkDocumentationContext";
+import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  ApiArtworkDocumentationContextLifecycleEnum,
+  type ApiArtworkDocumentationContext,
+} from "@/generated/models/ApiArtworkDocumentationContext";
+import { ApiArtworkDocumentationCapabilitiesEditModulesEnum } from "@/generated/models/ApiArtworkDocumentationCapabilities";
 import type { ApiArtworkDocumentationUploadSession } from "@/generated/models/ApiArtworkDocumentationUploadSession";
 import type { ApiArtworkDocumentationAssetLinkRequest } from "@/generated/models/ApiArtworkDocumentationAssetLinkRequest";
 import type { DocumentationDraftController } from "@/lib/artwork-documentation/draft-controller";
@@ -41,6 +45,14 @@ interface Props {
   readonly controller: DocumentationDraftController;
 }
 
+function canContinueUpload(
+  signal: AbortSignal,
+  mounted: { readonly current: boolean }
+): boolean {
+  // Both values can change while awaiting a transfer or attachment.
+  return mounted.current && !signal.aborted;
+}
+
 export default function DocumentationUpload({ context, controller }: Props) {
   const { msg, locale } = useDocumentationMessages();
   const [file, setFile] = useState<File | null>(null);
@@ -67,33 +79,38 @@ export default function DocumentationUpload({ context, controller }: Props) {
     `${formatNumber(locale, size / (1024 * 1024), { maximumFractionDigits: 1 })} MiB`;
   const busy = status === "uploading" || status === "processing";
   const canUpload =
-    context.capabilities.edit_modules.some((module) => module === "files") &&
-    context.lifecycle === "active";
+    context.capabilities.edit_modules.includes(
+      ApiArtworkDocumentationCapabilitiesEditModulesEnum.Files
+    ) &&
+    context.lifecycle === ApiArtworkDocumentationContextLifecycleEnum.Active;
 
-  const attach = async (
-    assetId: string,
-    assetRole: string,
-    assetVisibility: string,
-    filename: string
-  ) =>
-    controller.mutate((current, signal) =>
-      linkDocumentationAsset(
-        current,
-        {
-          asset_id: assetId,
-          role: assetRole,
-          label: filename,
-          description: "",
-          intended_visibility: assetVisibility,
-          source_of_asset: "self",
-          source_credit: "",
-          derived_from_asset_ids: [],
-          deposit_note: "",
-          intended_terms: { kind: "private_deposit" },
-        } as ApiArtworkDocumentationAssetLinkRequest,
-        signal
-      )
-    );
+  const attach = useCallback(
+    async (
+      assetId: string,
+      assetRole: string,
+      assetVisibility: string,
+      filename: string
+    ) =>
+      controller.mutate((current, signal) =>
+        linkDocumentationAsset(
+          current,
+          {
+            asset_id: assetId,
+            role: assetRole,
+            label: filename,
+            description: "",
+            intended_visibility: assetVisibility,
+            source_of_asset: "self",
+            source_credit: "",
+            derived_from_asset_ids: [],
+            deposit_note: "",
+            intended_terms: { kind: "private_deposit" },
+          } as ApiArtworkDocumentationAssetLinkRequest,
+          signal
+        )
+      ),
+    [controller]
+  );
   const run = async (resumeId?: string) => {
     if (!file) return;
     const controllerAbort = new AbortController();
@@ -121,7 +138,7 @@ export default function DocumentationUpload({ context, controller }: Props) {
             startKey.current,
             controllerAbort.signal
           );
-      if (!mounted.current || controllerAbort.signal.aborted) return;
+      if (!canContinueUpload(controllerAbort.signal, mounted)) return;
       setSession(upload);
       await transferDocumentationFile({
         contextId: context.id,
@@ -130,10 +147,10 @@ export default function DocumentationUpload({ context, controller }: Props) {
         signal: controllerAbort.signal,
         onProgress: setSent,
       });
-      if (!mounted.current || controllerAbort.signal.aborted) return;
+      if (!canContinueUpload(controllerAbort.signal, mounted)) return;
       setStatus("processing");
     } catch (error) {
-      if (mounted.current && !controllerAbort.signal.aborted)
+      if (canContinueUpload(controllerAbort.signal, mounted))
         setStatus(
           error instanceof DocumentationFileChangedError ? "changed" : "failed"
         );
@@ -158,7 +175,7 @@ export default function DocumentationUpload({ context, controller }: Props) {
             result.asset.intended_visibility,
             result.asset.filename
           );
-          if (mounted.current && !signal.aborted) {
+          if (canContinueUpload(signal, mounted)) {
             setStatus(attached ? "idle" : "failed");
             setFile(null);
             setSession(null);
@@ -177,7 +194,7 @@ export default function DocumentationUpload({ context, controller }: Props) {
         return true;
       },
     });
-  }, [status, session, context.id, controller]);
+  }, [status, session, context.id, attach]);
   useEffect(() => {
     if (status === "processing") return;
     const restored = context.assets.find(
@@ -288,7 +305,7 @@ export default function DocumentationUpload({ context, controller }: Props) {
                     "context_stored_and_reserved_bytes"
                   ] ?? 21474836480) -
                     context.assets.reduce(
-                      (total, asset) => total + (asset.size_bytes ?? 0),
+                      (total, asset) => total + asset.size_bytes,
                       0
                     )
                 )
@@ -334,7 +351,7 @@ export default function DocumentationUpload({ context, controller }: Props) {
         <div role="status">
           <progress
             className="tw-w-full"
-            max={file?.size || 1}
+            max={Math.max(1, file?.size ?? 0)}
             value={sent}
             aria-label={msg("uploadProgress", {
               sent: sizeLabel(sent),

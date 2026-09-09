@@ -17,31 +17,35 @@ export default function DocumentationArtworkPreview({
   const { msg } = useDocumentationMessages();
   const assetId = answerValue(context, "artwork", "canonical_asset_id");
   const asset = context.assets.find((item) => item.id === assetId);
+  const previewAssetId = asset?.id;
+  const previewAssetState = asset?.state;
   const [preview, setPreview] = useState<{ id: string; url: string } | null>(
     null
   );
   useEffect(() => {
-    if (!asset || asset.state !== "ready") return;
+    if (previewAssetId === undefined || previewAssetState !== "ready") return;
     const abort = new AbortController();
     void downloadDocumentationAsset(
       context.id,
-      asset.id,
+      previewAssetId,
       "preview",
       abort.signal
     )
       .then((result) => {
         if (!abort.signal.aborted)
-          setPreview({ id: asset.id, url: result.url });
+          setPreview({ id: previewAssetId, url: result.url });
       })
       .catch(() => {
         if (!abort.signal.aborted) setPreview(null);
       });
     return () => abort.abort();
-  }, [context.id, asset?.id, asset?.state]);
+  }, [context.id, previewAssetId, previewAssetState]);
   if (!asset) return null;
   return (
     <figure className="tw-m-0 tw-flex tw-min-h-32 tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-black tw-p-4">
       {preview?.id === asset.id ? (
+        // Signed private previews must load directly, outside the Next optimizer and shared cache.
+        // eslint-disable-next-line @next/next/no-img-element
         <img
           src={preview.url}
           alt={documentationTitle(context) ?? msg("untitled")}

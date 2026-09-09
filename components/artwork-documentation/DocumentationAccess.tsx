@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import Image from "next/image";
 import IdentitySearch from "@/components/utils/input/identity/IdentitySearch";
 import type { SelectableIdentityOption } from "@/components/utils/input/profile-search/getSelectableIdentity";
 import { getIdentityQueryOptions } from "@/services/api/identity-query";
@@ -66,7 +67,7 @@ export default function DocumentationAccess({
       setBusy(false);
     }
   };
-  const grant = () =>
+  const grantParticipant = () =>
     grantDocumentationAccess(context.id, {
       subject_profile_id: selection?.profileId,
       capabilities: {
@@ -91,7 +92,7 @@ export default function DocumentationAccess({
       <h3 className="tw-text-lg tw-font-semibold">{msg("assign")}</h3>
       {error && <DocumentationNotice error>{msg("error")}</DocumentationNotice>}
       {query.data?.data
-        .filter((grant) => !grant.revoked_at)
+        .filter((grant) => grant.revoked_at === null)
         .map((grant) => (
           <div
             key={grant.id}
@@ -191,7 +192,7 @@ export default function DocumentationAccess({
           busy || !selection?.profileId || (artist && modules.length === 0)
         }
         onClick={() => {
-          void run(grant);
+          void run(grantParticipant);
         }}
       >
         {msg("assign")}
@@ -210,9 +211,12 @@ function GrantedParticipant({ profileId }: { readonly profileId: string }) {
   return (
     <span className="tw-flex tw-items-center tw-gap-2 tw-text-sm tw-text-iron-300">
       {profile.data?.pfp && (
-        <img
+        <Image
           src={profile.data.pfp}
           alt=""
+          width={28}
+          height={28}
+          unoptimized
           className="tw-h-7 tw-w-7 tw-rounded-full tw-object-cover"
         />
       )}
