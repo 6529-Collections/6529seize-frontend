@@ -4,6 +4,7 @@ export function logOnceConfig(label: string, message: string) {
   if (!process.env[`__LOG_${label}_ONCE__`]) {
     process.env[`__LOG_${label}_ONCE__`] = "1";
     process.env["__LOG_ENV_ONCE__"] = "1";
+    // eslint-disable-next-line no-console -- deliberate build-time version banner, emitted once
     console.log(`${label}: ${message}`);
   }
 }
