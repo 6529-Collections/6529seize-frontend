@@ -6,11 +6,7 @@ jest.mock("@/config/alchemyEnv", () => ({
   getAlchemyApiKey: () => "test",
 }));
 
-import {
-  getContractOverview,
-  getTokensMetadata,
-  searchNftCollections,
-} from "@/services/alchemy-api";
+import { getContractOverview, getTokensMetadata } from "@/services/alchemy-api";
 const originalFetch = global.fetch;
 const mockFetch = jest.fn() as jest.MockedFunction<typeof fetch>;
 
@@ -31,39 +27,6 @@ describe("services/alchemy-api", () => {
       json: async () => body,
     } as Response;
   }
-
-  describe("searchNftCollections", () => {
-    it("returns suggestions and filters spam", async () => {
-      mockFetch.mockResolvedValue(
-        jsonResponse({
-          contracts: [
-            {
-              address: "0x1234567890abcdef1234567890abcdef12345678",
-              name: "Example",
-              tokenType: "ERC721",
-              totalSupply: "1000",
-              openSeaMetadata: {
-                floorPrice: 1.2,
-                safelistRequestStatus: "verified",
-              },
-              isSpam: false,
-            },
-            {
-              address: "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
-              name: "Spam",
-              isSpam: true,
-            },
-          ],
-        })
-      );
-
-      const result = await searchNftCollections({ query: "exa" });
-
-      expect(mockFetch).toHaveBeenCalledTimes(1);
-      expect(result.items).toHaveLength(1);
-      expect(result.hiddenCount).toBe(1);
-    });
-  });
 
   describe("getContractOverview", () => {
     it("throws on invalid address", async () => {

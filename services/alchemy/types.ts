@@ -1,18 +1,4 @@
-import type { Suggestion, SupportedChain } from "@/types/nft";
-
-export type SearchContractsParams = {
-  query: string;
-  chain?: SupportedChain | undefined;
-  pageKey?: string | undefined;
-  hideSpam?: boolean | undefined;
-  signal?: AbortSignal | undefined;
-};
-
-export type SearchContractsResult = {
-  items: Suggestion[];
-  hiddenCount: number;
-  nextPageKey?: string | undefined;
-};
+import type { SupportedChain } from "@/types/nft";
 
 export type ContractOverviewParams = {
   address: `0x${string}`;
@@ -77,11 +63,6 @@ export type AlchemyContractResult = {
   openSeaMetadata?: AlchemyOpenSeaMetadata | undefined;
   openseaMetadata?: AlchemyOpenSeaMetadata | undefined;
 } & AlchemyContractMetadata;
-
-export type AlchemySearchResponse = {
-  contracts?: AlchemyContractResult[] | undefined;
-  pageKey?: string | undefined;
-};
 
 export type AlchemyContractMetadataResponse = AlchemyContractMetadata & {
   contractMetadata?: AlchemyContractMetadata | null | undefined;
