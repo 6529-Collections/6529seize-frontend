@@ -18,7 +18,19 @@ jest.mock("@/components/public-review/PublicReviewFeedbackComposer", () => ({
 }));
 
 jest.mock("@/components/public-review/PublicReviewPageComments", () => ({
-  PublicReviewPageComments: () => <div data-testid="comments" />,
+  PublicReviewPageComments: ({
+    sections,
+  }: {
+    sections: readonly { title: string; href?: string }[];
+  }) => (
+    <div data-testid="comments">
+      {sections.map((section) => (
+        <a key={section.title} href={section.href}>
+          {section.title}
+        </a>
+      ))}
+    </div>
+  ),
 }));
 
 const destination: PublicReviewDiscussionDestination = {
@@ -48,6 +60,36 @@ const page: PublicReviewPageContext = {
 describe("PublicReviewEditorialFeedback", () => {
   afterEach(() => {
     window.history.replaceState({}, "", window.location.pathname);
+  });
+
+  it("keeps retained comment targets separate from the composer section choices", () => {
+    render(
+      <PublicReviewEditorialFeedback
+        config={config}
+        destination={destination}
+        page={page}
+        sections={[{ id: "short-guide", title: "Short guide" }]}
+        commentSections={[
+          { id: "short-guide", title: "Short guide" },
+          {
+            id: "saved-details",
+            title: "Saved details",
+            href: `${page.canonicalPath}#saved-details`,
+          },
+        ]}
+      />
+    );
+    expect(screen.getByRole("link", { name: "Saved details" })).toHaveAttribute(
+      "href",
+      `${page.canonicalPath}#saved-details`
+    );
+    fireEvent.click(screen.getByText("Send feedback", { exact: true }));
+    expect(
+      screen.getByRole("option", { name: "Short guide" })
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("option", { name: "Saved details" })
+    ).not.toBeInTheDocument();
   });
 
   it("fills the feedback rail and registers its bottom action for overlay clearance", async () => {

@@ -207,7 +207,7 @@ export function PublicReviewShell({
                 key="review-reading-content"
                 className="tw-mx-auto tw-w-full tw-max-w-[68rem] tw-px-4 tw-pb-20 sm:tw-px-7 lg:tw-px-10 [&_details_[id]]:tw-scroll-mt-24"
               >
-                {primaryPageIds ? <PublicReviewHashScrollRestorer /> : null}
+                <PublicReviewHashScrollRestorer />
                 <div className="tw-pt-6 sm:tw-pt-8">
                   <PublicReviewStatusBanner
                     review={review}

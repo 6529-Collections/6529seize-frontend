@@ -48,10 +48,12 @@ jest.mock("@/components/public-review/PublicReviewEditorialFeedback", () => ({
     config,
     page,
     sections,
+    commentSections,
   }: {
     config: { pages: { value: string; sectionValues?: string[] }[] };
     page: { pageId: string };
     sections: readonly { id: string; title: string }[];
+    commentSections?: readonly { id: string; title: string; href?: string }[];
   }) => (
     <>
       <div data-testid="feedback-sections">
@@ -63,6 +65,13 @@ jest.mock("@/components/public-review/PublicReviewEditorialFeedback", () => ({
         {sections
           .map((section) => `${section.id}: ${section.title}`)
           .join("\n")}
+      </div>
+      <div data-testid="comment-sections">
+        {commentSections?.map((section) => (
+          <a key={section.id} href={section.href}>
+            {section.title}
+          </a>
+        ))}
       </div>
     </>
   ),
@@ -231,6 +240,27 @@ describe("Stream versioned page rendering", () => {
       screen.getByText("Explore an example artwork").closest("details")
     ).not.toHaveAttribute("open");
     expect(screen.getByText("Artwork concept preview")).toBeInTheDocument();
+  });
+
+  it("links retained overview comments to the saved headings without adding composer choices", async () => {
+    await show("overview");
+    for (const section of extractPublicReviewSections(
+      readEditorial(STREAM_REVIEW_VERSION, "overview")
+    )) {
+      if (section.id === "choose-your-path") {
+        expect(screen.getByTestId("feedback-panel-sections")).toHaveTextContent(
+          `${section.id}: ${section.title}`
+        );
+        continue;
+      }
+      expect(screen.getByRole("link", { name: section.title })).toHaveAttribute(
+        "href",
+        `/reviews/6529-stream/versions/${STREAM_REVIEW_VERSION}#${section.id}`
+      );
+      expect(
+        screen.getByTestId("feedback-panel-sections")
+      ).not.toHaveTextContent(`${section.id}: ${section.title}`);
+    }
   });
 
   it("keeps launch evidence on the development page", async () => {

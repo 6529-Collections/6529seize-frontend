@@ -52,6 +52,7 @@ import {
   type StreamReviewRouteParams,
 } from "@/lib/public-review/streamReviewRoutes";
 import {
+  getStreamReviewPageHref,
   getStreamReviewVersion,
   STREAM_REVIEW_DEFINITION,
 } from "@/lib/public-review/streamReviewDefinition";
@@ -108,6 +109,7 @@ async function loadAvailableStreamEditorialContent({
   if (
     route.version === undefined &&
     route.page.id !== "for-artists" &&
+    route.page.id !== "overview" &&
     STREAM_REVIEW_ENTRY_PAGES.some((page) => page.id === route.page.id)
   ) {
     // These current-only guides have no corresponding immutable editorial file.
@@ -460,6 +462,20 @@ async function renderStreamReviewRoute(route: StreamReviewRouteModel) {
   const feedbackSections = currentPages.forArtists
     ? [...displayedSections, ...extractPublicReviewSections(editorialMarkdown)]
     : displayedSections;
+  const commentSections = currentPages.overview
+    ? [
+        ...feedbackSections,
+        ...extractPublicReviewSections(editorialMarkdown)
+          .filter(
+            (section) =>
+              !feedbackSections.some((visible) => visible.id === section.id)
+          )
+          .map((section) => ({
+            ...section,
+            href: `${getStreamReviewPageHref({ page: route.page, version: contentVersion })}#${section.id}`,
+          })),
+      ]
+    : feedbackSections;
   const displayedFeedbackConfig = getDisplayedFeedbackConfig({
     retainSections: entryMarkdown !== undefined,
     feedbackConfig,
@@ -540,6 +556,7 @@ async function renderStreamReviewRoute(route: StreamReviewRouteModel) {
             currentRoute: route.version === undefined,
           })}
           sections={feedbackSections}
+          commentSections={commentSections}
         />
       }
     />
