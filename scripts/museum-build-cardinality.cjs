@@ -9,12 +9,18 @@ const PUBLIC_REVIEW_ID = "6529-stream";
 const PUBLIC_REVIEW_ROOT = path.join("public", "review-data", PUBLIC_REVIEW_ID);
 const BASELINE_BUILD_ROUTES = 31_716;
 const BASELINE_GENERATED_PARAMS = 31_437;
-const REVIEWED_REDUCTION = 28_060;
+// The September snapshot adds 7,063 versioned params and 776 active params
+// relative to the recorded August baseline. These are source estimates;
+// the emitted-build budget below remains independent of snapshot growth.
+const SNAPSHOT_GENERATED_PARAMS_ADDED = 7_839;
+const REVIEWED_REDUCTION = 35_054;
 const STATIC_ROUTE_OVERHEAD = BASELINE_BUILD_ROUTES - BASELINE_GENERATED_PARAMS;
 const EXPECTED_REMAINING_GENERATED_PARAMS =
-  BASELINE_GENERATED_PARAMS - REVIEWED_REDUCTION;
+  BASELINE_GENERATED_PARAMS +
+  SNAPSHOT_GENERATED_PARAMS_ADDED -
+  REVIEWED_REDUCTION;
 const EXPECTED_BUILD_ROUTES_AFTER_REVIEWED_REDUCTION =
-  BASELINE_BUILD_ROUTES - REVIEWED_REDUCTION;
+  BASELINE_BUILD_ROUTES + SNAPSHOT_GENERATED_PARAMS_ADDED - REVIEWED_REDUCTION;
 const MAX_PRERENDERED_ROUTES = 500;
 const EXPECTED_DYNAMIC_DECLARATION_ROUTES = Object.freeze([
   "/reviews/[review]/reference/definitions/[definitionKey]/functions/[declarationKey]",
@@ -743,6 +749,7 @@ function analyze({ root = process.cwd(), includeBuildEvidence = true } = {}) {
     cardinality: {
       baselineBuildRoutes: BASELINE_BUILD_ROUTES,
       baselineGenerateStaticParams: BASELINE_GENERATED_PARAMS,
+      snapshotGenerateStaticParamsAdded: SNAPSHOT_GENERATED_PARAMS_ADDED,
       staticRouteOverhead: STATIC_ROUTE_OVERHEAD,
       reviewedReduction: REVIEWED_REDUCTION,
       observedReviewedReduction,
