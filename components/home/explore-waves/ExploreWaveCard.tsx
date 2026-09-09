@@ -39,7 +39,7 @@ interface ExploreWaveMetric {
 
 const EXPLORE_WAVE_CARD_LOCALE = DEFAULT_LOCALE;
 const METRIC_CHIP_CLASSES =
-  "tw-inline-flex tw-cursor-help tw-items-center tw-gap-1 tw-whitespace-nowrap tw-text-[11px] tw-font-medium tw-leading-none";
+  "tw-inline-flex tw-cursor-help tw-items-center tw-whitespace-nowrap tw-font-medium tw-leading-none";
 const METRIC_ICON_CLASSES = "tw-size-3 tw-flex-shrink-0";
 const METRIC_VALUE_CLASSES = "tw-text-[11px] tw-font-medium tw-text-iron-500";
 const METRIC_SEPARATOR_CLASSES =
@@ -368,7 +368,12 @@ export function ExploreWaveCard({
                 : "tw-text-[11px] tw-text-iron-600"
             )}
           >
-            <span className="tw-size-1.5 tw-flex-shrink-0 tw-rounded-full tw-bg-success/80" />
+            <span
+              className={clsx(
+                "tw-size-1.5 tw-flex-shrink-0 tw-rounded-full",
+                isDiscover ? "tw-bg-emerald-400" : "tw-bg-success/80"
+              )}
+            />
             <span>{dropsCountLabel}</span>
           </div>
         )}
@@ -405,10 +410,10 @@ function ExploreWaveCompactMetrics({
   return (
     <span
       className={clsx(
-        "explore-wave-card-metrics tw-flex tw-items-center tw-gap-2",
+        "explore-wave-card-metrics tw-flex tw-items-center",
         isDiscover
-          ? "tw-mt-3 tw-min-h-7 tw-flex-wrap"
-          : "tw-mt-2.5 tw-flex-nowrap tw-overflow-hidden"
+          ? "tw-mt-3 tw-min-h-6 tw-flex-wrap tw-gap-1"
+          : "tw-mt-2.5 tw-flex-nowrap tw-gap-2 tw-overflow-hidden"
       )}
     >
       {metrics.map((metric, index) => (
@@ -424,8 +429,9 @@ function ExploreWaveCompactMetrics({
           <span
             className={clsx(
               METRIC_CHIP_CLASSES,
-              isDiscover &&
-                "tw-rounded-full tw-bg-black/35 tw-px-2.5 tw-py-2 tw-ring-1 tw-ring-inset tw-ring-white/10"
+              isDiscover
+                ? "tw-gap-0.5 tw-rounded-full tw-bg-black/35 tw-px-1.5 tw-py-1.5 tw-text-[10px] tw-ring-1 tw-ring-inset tw-ring-white/10"
+                : "tw-gap-1 tw-text-[11px]"
             )}
             aria-label={metric.ariaLabel}
           >

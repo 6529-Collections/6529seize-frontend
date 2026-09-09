@@ -17,11 +17,11 @@ export function ExploreWaveCardSkeleton({
             <div className="tw-h-3 tw-w-full tw-animate-pulse tw-rounded-md tw-bg-iron-800/60 motion-reduce:tw-animate-none" />
             <div className="tw-h-3 tw-w-4/5 tw-animate-pulse tw-rounded-md tw-bg-iron-800/60 motion-reduce:tw-animate-none" />
           </div>
-          <div className="tw-mt-3 tw-flex tw-gap-2">
+          <div className="tw-mt-3 tw-flex tw-gap-1">
             {Array.from({ length: 3 }).map((_, index) => (
               <div
                 key={index}
-                className="tw-h-7 tw-w-20 tw-animate-pulse tw-rounded-full tw-bg-iron-800/60 motion-reduce:tw-animate-none"
+                className="tw-h-6 tw-w-16 tw-animate-pulse tw-rounded-full tw-bg-iron-800/60 motion-reduce:tw-animate-none"
               />
             ))}
           </div>
