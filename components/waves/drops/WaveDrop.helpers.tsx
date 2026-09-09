@@ -148,9 +148,7 @@ const getColorClasses = ({
     const ringClasses = isWaveView
       ? ""
       : "tw-ring-1 tw-ring-inset tw-ring-iron-800";
-    const bgClass = isWaveView
-      ? ""
-      : "tw-bg-[var(--drop-card-background,theme(colors.iron.950/80%))]";
+    const bgClass = isWaveView ? "" : "tw-bg-iron-950";
 
     return `${bgClass} ${ringClasses} ${hoverClass}`.trim();
   }

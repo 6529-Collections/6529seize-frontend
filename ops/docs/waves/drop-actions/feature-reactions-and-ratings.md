@@ -21,6 +21,10 @@ rolls back if the request fails.
 ## Entry Points
 
 - Use quick-react buttons in the action bar/menu.
+- On desktop, hover an action or reach it with keyboard focus to read its label
+  beside the control. Labels stay within the viewport in notifications, My
+  Stream, profiles, and wave threads. Moving away, scrolling, resizing, pressing
+  Escape, or clicking dismisses them. Touch uses the drop action menu.
 - Use `Add Reaction` / `Update Reaction` to open the emoji picker.
 - Click or tap a reaction chip to toggle that same reaction.
 - Open reaction details from:
@@ -93,6 +97,12 @@ rolls back if the request fails.
   to vote).
 - If rating is visible but the viewer has no available credit, clap stays visible
   in a disabled state with a tooltip.
+
+### Localization fallback debt
+
+- Drop action labels use the existing English copy across supported locales.
+  The frontend i18n backlog owns moving these labels and their accessible names
+  into a shared message family; tooltip placement does not add new copy.
 
 ## Related Pages
 
