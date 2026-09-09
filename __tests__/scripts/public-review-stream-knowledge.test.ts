@@ -177,6 +177,21 @@ describe("Stream knowledge pack", () => {
         "/reviews/6529-stream/security-testing-and-known-limitations#stream-launch-readiness",
     });
     expect(current.manifest.counts.byKind["readiness_requirement"]).toBe(20);
+    const editorialPaths = new Set(
+      current.records
+        .filter((record) => record.category === "editorial")
+        .map((record) => record.canonicalPath)
+    );
+    const statusRecords = current.records.filter(
+      (record) =>
+        record.category === "status" && record.kind !== "development_status"
+    );
+    expect(statusRecords).toHaveLength(37);
+    expect(
+      statusRecords
+        .filter((record) => !editorialPaths.has(record.canonicalPath))
+        .map((record) => ({ id: record.id, canonicalPath: record.canonicalPath }))
+    ).toEqual([]);
   });
 
   it("carries versioned identity, integrity, counts, and deterministic paths", () => {

@@ -4,7 +4,10 @@ import path from "node:path";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { extractPublicReviewEvidenceStates } from "@/lib/public-review/editorialSections";
-import { PUBLIC_REVIEW_EVIDENCE_STATES } from "@/lib/public-review/publicReviewTypes";
+import {
+  PUBLIC_REVIEW_EVIDENCE_STATES,
+  type PublicReviewEvidenceState,
+} from "@/lib/public-review/publicReviewTypes";
 import {
   getStreamReviewFeedbackHref,
   STREAM_REVIEW_DEFINITION,
@@ -122,7 +125,7 @@ describe("6529 Stream public review definition", () => {
     ).toBe(14);
 
     for (const page of STREAM_REVIEW_PAGES) {
-      const pageStates = new Set(page.evidenceStates);
+      const pageStates = new Set<PublicReviewEvidenceState>(page.evidenceStates);
       expect(page.evidenceStates).toEqual(
         PUBLIC_REVIEW_EVIDENCE_STATES.filter((state) => pageStates.has(state))
       );
@@ -159,8 +162,9 @@ describe("6529 Stream public review definition", () => {
         path.join(editorialRoot, page.editorialFile),
         "utf8"
       );
+      const pageStates = new Set<PublicReviewEvidenceState>(page.evidenceStates);
       const omittedStates = extractPublicReviewEvidenceStates(markdown).filter(
-        (state) => !page.evidenceStates.includes(state)
+        (state) => !pageStates.has(state)
       );
 
       return omittedStates.length === 0

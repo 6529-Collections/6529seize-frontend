@@ -81,7 +81,7 @@ export function getStreamReviewDiagramPresentation({
   const headingOffset = markdown.indexOf(heading);
   if (
     headingOffset < 0 ||
-    markdown.indexOf(heading, headingOffset + heading.length) >= 0
+    markdown.includes(heading, headingOffset + heading.length)
   ) {
     throw new Error(
       `Stream diagram section is missing or ambiguous: ${pageId}`
