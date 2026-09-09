@@ -18,19 +18,22 @@ const CURRENT_STEP: Readonly<Record<JoinPageState, TimelineStepId | null>> = {
 
 export const buildJoinJourneyProgress = (
   pageState: JoinPageState,
-  facts: Join6529Facts
+  facts: Join6529Facts,
+  hideNftPurchasing = false
 ): TimelineProgress => {
   const completedSteps = new Set(BASE_COMPLETED_STEPS[pageState]);
   if (pageState === "loggedIn") {
     if (facts.hasParticipated) {
       completedSteps.add("message");
     }
-    if (facts.hasCollected) {
+    if (facts.hasCollected && !hideNftPurchasing) {
       completedSteps.add("collect");
     }
   }
   const currentStepId = CURRENT_STEP[pageState];
-  const total = TIMELINE_ORDER.length;
+  const total = TIMELINE_ORDER.filter(
+    (id) => !hideNftPurchasing || id !== "collect"
+  ).length;
   const completed = completedSteps.size;
 
   return {

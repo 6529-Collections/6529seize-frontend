@@ -3,6 +3,13 @@ import React from "react";
 import { MyStreamWaveTab } from "@/types/waves.types";
 
 const setActiveContentTab = jest.fn();
+import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
+jest.mock("@/hooks/useNftPurchasingVisibility", () => ({
+  useNftPurchasingVisibility: jest.fn(() => ({
+    hideNftPurchasing: false,
+    shouldRedirect: false,
+  })),
+}));
 
 jest.mock("@/components/brain/ContentTabContext", () => ({
   useContentTab: () => ({ setActiveContentTab }),
@@ -17,8 +24,22 @@ import MyStreamWaveFAQ from "@/components/brain/my-stream/MyStreamWaveFAQ";
 
 describe("MyStreamWaveFAQ", () => {
   beforeEach(() => {
+    jest
+      .mocked(useNftPurchasingVisibility)
+      .mockReturnValue({ hideNftPurchasing: false, shouldRedirect: false });
     setActiveContentTab.mockClear();
     useLayoutMock.mockReturnValue({ faqViewStyle: { height: "21px" } });
+  });
+
+  it("hides the first-party minting section on restricted iOS", () => {
+    jest
+      .mocked(useNftPurchasingVisibility)
+      .mockReturnValue({ hideNftPurchasing: true, shouldRedirect: true });
+    render(<MyStreamWaveFAQ wave={{} as any} />);
+    expect(
+      screen.queryByRole("button", { name: "Minting a Meme Card" })
+    ).toBeNull();
+    expect(screen.getByRole("button", { name: "Intro" })).toBeInTheDocument();
   });
 
   it("sets active tab to FAQ, applies style, and opens intro by default", () => {
