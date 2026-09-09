@@ -50,8 +50,6 @@ import { formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { commonApiFetch } from "@/services/api/common-api";
-import { searchWavesByName } from "@/services/api/waves-v2-api";
-import type { SidebarWave } from "@/types/waves.types";
 
 import type {
   HeaderSearchModalItemType,
@@ -74,6 +72,7 @@ import {
   type FilterableCategory,
 } from "./constants";
 import { HeaderSearchSiteResults } from "./HeaderSearchSiteResults";
+import { useHeaderSearchWaves } from "./useHeaderSearchWaves";
 import {
   getCompositePageSearchValues,
   getPageMatchPriority,
@@ -88,7 +87,6 @@ const HEADER_SEARCH_INPUT_DESCRIPTION_ID = "header-search-input-description";
 const HEADER_SEARCH_SESSION_QUERY_KEY = "headerSearchLastQuery";
 const HEADER_SEARCH_RECENT_QUERIES_KEY = "headerSearchRecentQueries";
 const MAX_RECENT_SEARCHES = 5;
-const EMPTY_WAVE_RESULTS: SidebarWave[] = [];
 
 const getScopedStorageKey = (key: string, scope: string): string =>
   `${key}:${scope}`;
@@ -433,20 +431,11 @@ function ScopedHeaderSearchModal({
   });
 
   const {
-    data: waves = EMPTY_WAVE_RESULTS,
+    waves,
     isFetching: isFetchingWaves,
     error: wavesError,
     refetch: refetchWaves,
-  } = useQuery<SidebarWave[], Error>({
-    queryKey: [QueryKey.WAVES_SEARCH, trimmedDebouncedValue],
-    queryFn: async () =>
-      await searchWavesByName({
-        name: trimmedDebouncedValue,
-        pageSize: 20,
-      }),
-    enabled: shouldSearchDefault,
-    directMessage: false,
-  });
+  } = useHeaderSearchWaves(trimmedDebouncedValue, shouldSearchDefault);
 
   const pageResults = useMemo(
     () =>

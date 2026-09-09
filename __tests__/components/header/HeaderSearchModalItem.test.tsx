@@ -10,6 +10,10 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen } from "@testing-library/react";
 
 const useHoverDirty = jest.fn();
+const mockLocale = jest.fn(() => "en-US");
+jest.mock("@/hooks/useBrowserLocale", () => ({
+  useBrowserLocale: () => mockLocale(),
+}));
 
 jest.mock("react-use", () => ({
   useHoverDirty: (...args: any[]) => useHoverDirty(...args),
@@ -67,6 +71,7 @@ beforeEach(() => {
     removeListener: jest.fn(),
   });
   jest.clearAllMocks();
+  mockLocale.mockReturnValue("en-US");
 });
 
 const publicWaveScope = { group: null };
@@ -200,6 +205,22 @@ describe("HeaderSearchModalItem", () => {
     expect(link.textContent).toContain("Network Museum SAFE Signers");
     expect(link.textContent).toContain("by museum");
     expect(isHeaderSearchWaveDirectMessage(wave)).toBe(false);
+  });
+
+  it.each([
+    ["en-US", "by museum"],
+    ["en-GB", "by museum"],
+    ["fr-FR", "par museum"],
+    ["es-ES", "por museum"],
+    ["de-DE", "von museum"],
+  ])("localizes wave attribution in %s", (locale, attribution) => {
+    mockLocale.mockReturnValue(locale);
+    renderComponent(
+      createWaveResult({ author: { handle: "museum" } }),
+      "wave",
+      false
+    );
+    expect(screen.getByTestId("link")).toHaveTextContent(attribution);
   });
 
   it("selects wave results through the active wave handler", () => {

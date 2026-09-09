@@ -25,6 +25,9 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import { formatStatFloor, getProfileTargetRoute } from "@/helpers/Helpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { formatInteger } from "@/i18n/format";
+import { t } from "@/i18n/messages";
 import type { SidebarWave } from "@/types/waves.types";
 
 import HeaderSearchModalItemMedia from "./HeaderSearchModalItemMedia";
@@ -172,6 +175,7 @@ export default function HeaderSearchModalItem({
   readonly onClose: () => void;
   readonly onWaveSelect?: (wave: HeaderSearchWave) => void;
 }) {
+  const locale = useBrowserLocale();
   const pathname = usePathname();
   const { isApp } = useDeviceInfo();
 
@@ -267,8 +271,12 @@ export default function HeaderSearchModalItem({
       "creator" in content ? content.creator : content.author;
     const author =
       authorCandidate?.handle ?? authorCandidate?.primary_address ?? null;
-    if (author) return `by ${author}`;
-    return "serial_no" in content ? `Wave #${content.serial_no}` : "Wave";
+    if (author) return t(locale, "headerSearch.wave.byAuthor", { author });
+    return "serial_no" in content
+      ? t(locale, "headerSearch.wave.serial", {
+          serial: formatInteger(locale, content.serial_no),
+        })
+      : t(locale, "headerSearch.wave.label");
   };
 
   const primaryText = getPrimaryText();
