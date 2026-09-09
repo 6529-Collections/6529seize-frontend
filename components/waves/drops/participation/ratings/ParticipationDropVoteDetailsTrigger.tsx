@@ -9,6 +9,7 @@ import useIsMobileScreen from "@/hooks/isMobileScreen";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import {
   type MouseEvent as ReactMouseEvent,
+  Fragment,
   useCallback,
   useEffect,
   useLayoutEffect,
@@ -19,7 +20,12 @@ import { createPortal } from "react-dom";
 import { ParticipationDropVoteDetailsContent } from "./ParticipationDropVoteDetailsContent";
 
 type VoteDetailsTab = "voters" | "logs";
-type VoteDetailsTriggerDensity = "default" | "compact" | "gallery" | "tight";
+type VoteDetailsTriggerDensity =
+  | "default"
+  | "compact"
+  | "gallery"
+  | "tight"
+  | "podium";
 
 interface ParticipationDropVoteDetailsTriggerProps {
   readonly drop: ApiDrop;
@@ -36,10 +42,12 @@ const DENSITY_CLASS_NAMES: Record<VoteDetailsTriggerDensity, string> = {
   compact: "tw-gap-1 tw-px-1.5 tw-py-0.5 tw-leading-4",
   gallery: "tw-box-border tw-h-8 tw-gap-1 tw-px-2.5 tw-py-0 tw-leading-4",
   tight: "tw-gap-1 tw-px-2 tw-py-1 tw-leading-5",
+  podium:
+    "tw-min-h-11 tw-min-w-0 tw-max-w-full tw-flex-wrap tw-justify-center tw-gap-1 tw-px-1.5 tw-py-1.5 tw-leading-4",
 };
 
 const isSmallDensity = (density: VoteDetailsTriggerDensity): boolean =>
-  density === "compact" || density === "gallery";
+  density === "compact" || density === "gallery" || density === "podium";
 
 const getTriggerTextSizeClassName = (
   density: VoteDetailsTriggerDensity,
@@ -372,6 +380,7 @@ export default function ParticipationDropVoteDetailsTrigger({
     chevronClassName,
   } = getTriggerClassNames(density, visualVariant, isOpen);
   const voterLabel = getVoterLabel(drop.raters_count);
+  const formattedVoterCount = formatNumberWithCommas(drop.raters_count);
 
   return (
     <>
@@ -386,8 +395,21 @@ export default function ParticipationDropVoteDetailsTrigger({
         onClick={toggleDetails}
         className={triggerClassName}
       >
-        <span className={`${triggerTextClassName} ${countTextColorClassName}`}>
-          {formatNumberWithCommas(drop.raters_count)}
+        <span
+          className={`${triggerTextClassName} ${countTextColorClassName} ${
+            density === "podium"
+              ? "tw-min-w-0 tw-max-w-full [overflow-wrap:anywhere]"
+              : ""
+          }`}
+        >
+          {density === "podium"
+            ? Array.from(formattedVoterCount.matchAll(/[^,]+,?/g), (group) => (
+                <Fragment key={group.index}>
+                  {group[0]}
+                  <wbr />
+                </Fragment>
+              ))
+            : formattedVoterCount}
         </span>
         <span className={`${triggerTextClassName} ${labelTextColorClassName}`}>
           {voterLabel}

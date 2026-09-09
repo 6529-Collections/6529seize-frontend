@@ -11,7 +11,10 @@ import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { ImageScale, getScaledImageUri } from "@/helpers/image.helpers";
 import { WavePodiumItemContentOutcomes } from "./WavePodiumItemContentOutcomes";
 import type { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
+import { podiumPositionStyles, podiumSurfaceClassName } from "./podiumStyles";
 import { WaveWinnersPodiumPlaceholder } from "./WaveWinnersPodiumPlaceholder";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
@@ -35,79 +38,8 @@ interface PodiumAvatarProps {
   readonly className: string;
   readonly ringClass: string;
   readonly ringWidthClass?: string | undefined;
-  readonly shadowClass?: string | undefined;
   readonly fallbackTextClass?: string | undefined;
 }
-
-// Configuration for position-specific styling with CSS ready classes for Tailwind
-const positionStyles = {
-  first: {
-    color: "#fbbf24", // amber-400 - Gold from WinnerDropBadge
-    height: "tw-h-[220px]",
-    pfpSize: "tw-size-12 md:tw-size-14",
-    marginBottom: "-tw-mb-6",
-    textColor: "tw-text-[#fbbf24]",
-    ring: "tw-ring-[#fbbf24]",
-    shadow: "tw-shadow-[0_0_20px_rgba(251,191,36,0.3)]",
-    autorFontSize: "tw-text-sm sm:tw-text-base md:tw-text-xl",
-    positionText: "1st",
-    bgGradient:
-      "tw-bg-gradient-to-b tw-from-[#fbbf24]/20 tw-to-transparent tw-blur-2xl tw-scale-150",
-    gradient: {
-      from: "tw-from-[#fbbf24]/5",
-      via: "tw-via-[#fbbf24]/3",
-      hover: "group-hover:desktop-hover:tw-from-[#fbbf24]/[0.07]",
-      top: "tw-via-[#fbbf24]/10",
-      hover25: "group-hover:desktop-hover:tw-via-[#fbbf24]/25",
-      sides: "tw-from-[#fbbf24]/10 tw-via-[#fbbf24]/5",
-      sidesHover: "group-hover:desktop-hover:tw-via-[#fbbf24]/25",
-    },
-  },
-  second: {
-    color: "#94a3b8", // slate-400 - Silver from WinnerDropBadge
-    height: "tw-h-[190px]",
-    pfpSize: "tw-size-9 md:tw-size-11",
-    marginBottom: "-tw-mb-2",
-    textColor: "tw-text-[#94a3b8]",
-    ring: "tw-ring-[#94a3b8]",
-    shadow: "tw-shadow-[0_0_20px_rgba(148,163,184,0.3)]",
-    autorFontSize: "tw-text-sm sm:tw-text-base",
-    positionText: "2nd",
-    bgGradient:
-      "tw-bg-gradient-to-b tw-from-[#94a3b8]/20 tw-to-transparent tw-blur-2xl tw-scale-150",
-    gradient: {
-      from: "tw-from-[#94a3b8]/5",
-      via: "tw-via-[#94a3b8]/3",
-      hover: "group-hover:desktop-hover:tw-from-[#94a3b8]/[0.07]",
-      top: "tw-via-[#94a3b8]/10",
-      hover25: "group-hover:desktop-hover:tw-via-[#94a3b8]/25",
-      sides: "tw-from-[#94a3b8]/10 tw-via-[#94a3b8]/5",
-      sidesHover: "group-hover:desktop-hover:tw-via-[#94a3b8]/25",
-    },
-  },
-  third: {
-    color: "#CD7F32", // Bronze (same in both components)
-    height: "tw-h-[170px]",
-    pfpSize: "tw-size-9 md:tw-size-11",
-    marginBottom: "-tw-mb-2",
-    textColor: "tw-text-[#CD7F32]",
-    ring: "tw-ring-[#CD7F32]",
-    shadow: "tw-shadow-[0_0_20px_rgba(205,127,50,0.3)]",
-    autorFontSize: "tw-text-sm sm:tw-text-base",
-    positionText: "3rd",
-    bgGradient:
-      "tw-bg-gradient-to-b tw-from-[#CD7F32]/20 tw-to-transparent tw-blur-2xl tw-scale-150",
-    gradient: {
-      from: "tw-from-[#CD7F32]/5",
-      via: "tw-via-[#CD7F32]/3",
-      hover: "group-hover:desktop-hover:tw-from-[#CD7F32]/[0.07]",
-      top: "tw-via-[#CD7F32]/10",
-      hover25: "group-hover:desktop-hover:tw-via-[#CD7F32]/25",
-      sides: "tw-from-[#CD7F32]/10 tw-via-[#CD7F32]/5",
-      sidesHover: "group-hover:desktop-hover:tw-via-[#CD7F32]/25",
-    },
-  },
-};
 
 // Animation variants for the podium items
 const podiumVariants = {
@@ -129,27 +61,10 @@ const podiumVariants = {
   }),
 };
 
-// Height mapping for different positions
-const heightMap = {
-  first: "tw-h-[220px]",
-  second: "tw-h-[190px]",
-  third: "tw-h-[170px]",
-};
-
 const animationIndexMap: Record<WavePodiumItemProps["position"], number> = {
   first: 0,
   second: 1,
   third: 2,
-};
-
-const getHoverTextColorClass = (position: WavePodiumItemProps["position"]) => {
-  const colorMap = {
-    first: "desktop-hover:hover:tw-text-[#fbbf24]",
-    second: "desktop-hover:hover:tw-text-[#94a3b8]",
-    third: "desktop-hover:hover:tw-text-[#CD7F32]",
-  } as const;
-
-  return colorMap[position];
 };
 
 const getAuthorProfileLabel = (drop: ExtendedDrop): string =>
@@ -202,7 +117,6 @@ const PodiumAvatar: React.FC<PodiumAvatarProps> = ({
   className,
   ringClass,
   ringWidthClass = "tw-ring-2",
-  shadowClass,
   fallbackTextClass = "tw-text-xs tw-font-semibold tw-text-iron-100",
 }) => {
   const initial = label.trim().charAt(0).toUpperCase() || "?";
@@ -214,7 +128,7 @@ const PodiumAvatar: React.FC<PodiumAvatarProps> = ({
         alt={alt}
         width={width}
         height={height}
-        className={`${className} ${ringWidthClass} ${ringClass} tw-object-cover ${shadowClass ?? ""}`}
+        className={`${className} ${ringWidthClass} ${ringClass} tw-object-cover`}
       />
     );
   }
@@ -222,7 +136,7 @@ const PodiumAvatar: React.FC<PodiumAvatarProps> = ({
   return (
     <div
       aria-hidden="true"
-      className={`${className} ${ringWidthClass} ${ringClass} ${shadowClass ?? ""} tw-flex tw-items-center tw-justify-center tw-bg-iron-900`}
+      className={`${className} ${ringWidthClass} ${ringClass} tw-flex tw-items-center tw-justify-center tw-bg-iron-900`}
     >
       <span className={fallbackTextClass}>{initial}</span>
     </div>
@@ -237,17 +151,14 @@ export const WavePodiumItem: React.FC<WavePodiumItemProps> = ({
   showVoteDetails = true,
   outcomesVisible = true,
 }) => {
-  const styles = positionStyles[position];
-  const hoverTextColorClass = getHoverTextColorClass(position);
+  const styles = podiumPositionStyles[position];
+  const hoverTextColorClass = styles.hoverTextColor;
+  const reduceMotion = useReducedMotion();
+  const locale = useBrowserLocale();
 
   // If no winner provided, render placeholder
   if (!winner) {
-    return (
-      <WaveWinnersPodiumPlaceholder
-        height={heightMap[position]}
-        position={position}
-      />
-    );
+    return <WaveWinnersPodiumPlaceholder position={position} />;
   }
 
   const drop = winner.drop as ExtendedDrop;
@@ -267,22 +178,25 @@ export const WavePodiumItem: React.FC<WavePodiumItemProps> = ({
 
   return (
     <motion.div
+      className="tw-h-full tw-min-w-0"
       variants={podiumVariants}
-      initial="hidden"
+      initial={reduceMotion ? false : "hidden"}
       animate="visible"
       custom={animationIndex}
     >
-      <div
-        onClick={() => onDropClick(drop)}
-        className="tw-group tw-cursor-pointer"
-      >
-        <div className="tw-flex tw-flex-col tw-items-center">
-          <div
-            className={`tw-flex tw-flex-col tw-items-center ${styles.marginBottom} tw-relative tw-z-10`}
-          >
-            <div className={`tw-absolute tw-inset-0 ${styles.bgGradient}`} />
+      <div className="tw-group tw-relative tw-isolate tw-h-full tw-min-w-0">
+        <button
+          type="button"
+          onClick={() => onDropClick(drop)}
+          aria-label={t(locale, "waves.leaderboard.grid.openNamed", {
+            title: `${styles.positionText} ${primaryLabel}`,
+          })}
+          className="tw-absolute tw-inset-0 tw-z-0 tw-cursor-pointer tw-rounded-xl tw-border-0 tw-bg-transparent tw-p-0 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+        />
+        <div className="tw-pointer-events-none tw-relative tw-z-10 tw-flex tw-h-full tw-min-w-0 tw-flex-col tw-items-center [&_a]:tw-pointer-events-auto [&_button]:tw-pointer-events-auto">
+          <div className="tw-relative tw-z-10 -tw-mb-4 tw-flex tw-flex-shrink-0 tw-flex-col tw-items-center">
             {identityDisplay ? (
-              <div className="tw-transform tw-transition-transform tw-duration-300 group-hover:desktop-hover:tw-scale-[1.02]">
+              <div className="motion-safe:tw-transition-transform motion-safe:tw-duration-200 motion-safe:group-hover:desktop-hover:tw-scale-[1.02]">
                 <PodiumAvatar
                   label={primaryLabel}
                   pfp={primaryPfp}
@@ -291,14 +205,14 @@ export const WavePodiumItem: React.FC<WavePodiumItemProps> = ({
                   height={56}
                   className={`${styles.pfpSize} tw-rounded-xl`}
                   ringClass={styles.ring}
-                  shadowClass={styles.shadow}
                 />
               </div>
             ) : (
               <Link
                 href={authorProfileHref}
+                aria-label={authorProfileLabel}
                 onClick={(e) => e.stopPropagation()}
-                className="tw-transform tw-transition-all tw-duration-300 hover:tw-scale-105"
+                className="tw-rounded-xl focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-4 focus-visible:tw-outline-primary-400 motion-safe:tw-transition-transform motion-safe:desktop-hover:hover:tw-scale-105"
               >
                 <PodiumAvatar
                   label={authorProfileLabel}
@@ -308,13 +222,12 @@ export const WavePodiumItem: React.FC<WavePodiumItemProps> = ({
                   height={56}
                   className={`${styles.pfpSize} tw-rounded-xl`}
                   ringClass={styles.ring}
-                  shadowClass={styles.shadow}
                 />
               </Link>
             )}
 
             <div className="tw-absolute tw-inset-x-0 -tw-bottom-3 tw-flex tw-justify-center">
-              <div className="tw-flex tw-items-center tw-gap-1.5 tw-rounded-full tw-border tw-border-iron-700 tw-bg-iron-900/80 tw-px-3 tw-py-1 tw-shadow-lg tw-backdrop-blur-sm">
+              <div className="tw-flex tw-items-center tw-gap-1.5 tw-rounded-full tw-border tw-border-iron-700 tw-bg-iron-900 tw-px-2 tw-py-1 tw-shadow-sm">
                 <svg
                   className={`tw-w-3 md:tw-size-4 ${styles.textColor}`}
                   aria-hidden="true"
@@ -335,28 +248,17 @@ export const WavePodiumItem: React.FC<WavePodiumItemProps> = ({
             </div>
           </div>
 
-          <div className="tw-relative tw-w-full">
+          <div className="tw-flex tw-w-full tw-min-w-0 tw-flex-1">
             <div
-              className={`${styles.height} tw-relative tw-flex tw-flex-col tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-xl tw-border tw-border-iron-800/60 tw-bg-gradient-to-b tw-from-iron-900/70 tw-via-iron-900/50 tw-to-transparent tw-shadow-[0_4px_24px_rgba(0,0,0,0.2)] tw-backdrop-blur-xl tw-transition-all tw-duration-300 tw-ease-out group-hover:desktop-hover:tw-border-iron-700/70 group-hover:desktop-hover:tw-from-iron-900/75 group-hover:desktop-hover:tw-via-iron-900/55 group-hover:desktop-hover:tw-to-transparent group-hover:desktop-hover:tw-shadow-[0_0_48px_rgba(0,0,0,0.35)]`}
+              className={`${styles.height} ${podiumSurfaceClassName} tw-gap-y-3 tw-transition-colors desktop-hover:group-hover:tw-border-iron-600`}
             >
-              <div className="tw-absolute tw-inset-0">
-                <div
-                  className={`tw-absolute tw-inset-0 tw-bg-gradient-to-b ${styles.gradient.from} ${styles.gradient.via} tw-to-transparent ${styles.gradient.hover}`}
-                />
-                <div
-                  className={`tw-absolute tw-inset-x-0 tw-top-0 tw-h-px tw-bg-gradient-to-r tw-from-transparent ${styles.gradient.top} tw-to-transparent ${styles.gradient.hover25}`}
-                />
-                <div
-                  className={`tw-absolute tw-inset-y-0 tw-right-0 tw-w-px tw-bg-gradient-to-b ${styles.gradient.sides} tw-to-transparent ${styles.gradient.sidesHover}`}
-                />
-                <div
-                  className={`tw-absolute tw-inset-y-0 tw-left-0 tw-w-px tw-bg-gradient-to-b ${styles.gradient.sides} tw-to-transparent ${styles.gradient.sidesHover}`}
-                />
-                <div className="tw-absolute tw-inset-x-0 tw-bottom-0 tw-h-3/4 tw-bg-gradient-to-t tw-from-black/20 tw-via-black/10 tw-to-transparent" />
-              </div>
+              <div
+                aria-hidden="true"
+                className={`tw-pointer-events-none tw-absolute tw-inset-0 tw-rounded-xl tw-bg-gradient-to-b ${styles.surface} tw-to-transparent`}
+              />
 
               {identityDisplay ? (
-                <div className="tw-mb-2 tw-mt-2 tw-flex tw-max-w-full tw-flex-col tw-items-center tw-gap-y-1 tw-px-3 sm:tw-mt-3">
+                <div className="tw-relative tw-flex tw-w-full tw-min-w-0 tw-flex-col tw-items-center tw-gap-y-1">
                   {identityDisplay.profileUser ? (
                     <UserProfileTooltipWrapper
                       user={identityDisplay.profileUser}
@@ -364,11 +266,11 @@ export const WavePodiumItem: React.FC<WavePodiumItemProps> = ({
                       <Link
                         href={getIdentityHref(identityDisplay.profileUser)}
                         onClick={(e) => e.stopPropagation()}
-                        className={`tw-relative tw-block tw-min-w-0 tw-max-w-full tw-text-center tw-no-underline tw-transition-all ${hoverTextColorClass} tw-group/link`}
+                        className={`tw-relative tw-flex tw-min-h-8 tw-min-w-0 tw-max-w-full tw-items-center tw-justify-center tw-gap-1 tw-rounded-md tw-text-center tw-no-underline tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 ${hoverTextColorClass} tw-group/link`}
                       >
                         <span
                           title={primaryLabel}
-                          className={`${styles.autorFontSize} tw-line-clamp-2 tw-block tw-max-w-full tw-whitespace-normal tw-break-words tw-font-semibold tw-leading-tight tw-text-iron-100 ${hoverTextColorClass} tw-transition-colors`}
+                          className={`${styles.authorFontSize} tw-block tw-max-w-full tw-whitespace-normal tw-break-words tw-font-semibold tw-leading-tight tw-text-iron-100 [overflow-wrap:anywhere] ${hoverTextColorClass} tw-transition-colors`}
                         >
                           {primaryLabel}
                         </span>
@@ -379,7 +281,7 @@ export const WavePodiumItem: React.FC<WavePodiumItemProps> = ({
                           viewBox="0 0 24 24"
                           strokeWidth="1.5"
                           stroke="currentColor"
-                          className={`tw-size-3 tw-opacity-0 tw-transition-opacity ${styles.textColor} tw-absolute tw-left-[100%] tw-top-1/2 tw-ml-2 -tw-translate-y-1/2 group-focus-visible/link:tw-opacity-100 desktop-hover:group-hover/link:tw-opacity-100 touch-only:tw-opacity-100`}
+                          className={`tw-size-3 tw-opacity-0 tw-transition-opacity ${styles.textColor} tw-flex-shrink-0 group-focus-visible/link:tw-opacity-100 desktop-hover:group-hover/link:tw-opacity-100 touch-only:tw-opacity-100`}
                         >
                           <path
                             strokeLinecap="round"
@@ -392,20 +294,20 @@ export const WavePodiumItem: React.FC<WavePodiumItemProps> = ({
                   ) : (
                     <span
                       title={primaryLabel}
-                      className={`${styles.autorFontSize} tw-line-clamp-2 tw-block tw-max-w-full tw-whitespace-normal tw-break-words tw-text-center tw-font-semibold tw-leading-tight tw-text-iron-100`}
+                      className={`${styles.authorFontSize} tw-block tw-max-w-full tw-whitespace-normal tw-break-words tw-text-center tw-font-semibold tw-leading-tight tw-text-iron-100 [overflow-wrap:anywhere]`}
                     >
                       {primaryLabel}
                     </span>
                   )}
 
-                  <div className="tw-flex tw-max-w-full tw-flex-wrap tw-items-center tw-justify-center tw-gap-x-1 tw-gap-y-1 tw-text-[11px] tw-text-iron-500">
+                  <div className="tw-flex tw-max-w-full tw-flex-wrap tw-items-center tw-justify-center tw-gap-x-1 tw-gap-y-1 tw-text-xs tw-text-iron-500">
                     {isSelfNominated ? (
-                      <span className="tw-font-normal tw-text-iron-500">
+                      <span className="tw-font-normal tw-text-iron-400 [overflow-wrap:anywhere]">
                         self-nominated
                       </span>
                     ) : (
                       <>
-                        <span className="tw-font-normal tw-text-iron-500">
+                        <span className="tw-font-normal tw-text-iron-400 [overflow-wrap:anywhere]">
                           nominated by
                         </span>
 
@@ -413,11 +315,11 @@ export const WavePodiumItem: React.FC<WavePodiumItemProps> = ({
                           <Link
                             href={authorProfileHref}
                             onClick={(e) => e.stopPropagation()}
-                            className="tw-inline-flex tw-max-w-full tw-items-center tw-text-iron-400 tw-no-underline tw-transition-colors desktop-hover:hover:tw-text-iron-200"
+                            className="tw-inline-flex tw-min-h-8 tw-min-w-0 tw-max-w-full tw-items-center tw-rounded-md tw-text-center tw-text-iron-300 tw-no-underline tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-iron-200"
                           >
                             <span
                               title={authorProfileLabel}
-                              className="tw-block tw-max-w-[7rem] tw-truncate tw-text-[11px] tw-font-medium tw-text-iron-400 tw-transition-colors desktop-hover:hover:tw-text-iron-200"
+                              className="tw-block tw-max-w-full tw-whitespace-normal tw-text-xs tw-font-medium tw-text-iron-400 tw-transition-colors [overflow-wrap:anywhere] desktop-hover:hover:tw-text-iron-200"
                             >
                               {authorProfileLabel}
                             </span>
@@ -432,10 +334,10 @@ export const WavePodiumItem: React.FC<WavePodiumItemProps> = ({
                   <Link
                     href={authorProfileHref}
                     onClick={(e) => e.stopPropagation()}
-                    className={`tw-relative tw-mb-2 tw-mt-2 tw-block tw-min-w-0 tw-max-w-full tw-text-center tw-no-underline tw-transition-all sm:tw-mt-4 ${hoverTextColorClass} tw-group/link`}
+                    className={`tw-relative tw-flex tw-min-h-8 tw-min-w-0 tw-max-w-full tw-items-center tw-justify-center tw-gap-1 tw-rounded-md tw-text-center tw-no-underline tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 ${hoverTextColorClass} tw-group/link`}
                   >
                     <span
-                      className={`${styles.autorFontSize} tw-line-clamp-2 tw-block tw-max-w-full tw-whitespace-normal tw-break-words tw-text-center tw-font-semibold tw-leading-tight tw-text-iron-200 ${hoverTextColorClass} tw-transition-colors`}
+                      className={`${styles.authorFontSize} tw-block tw-max-w-full tw-whitespace-normal tw-break-words tw-text-center tw-font-semibold tw-leading-tight tw-text-iron-200 [overflow-wrap:anywhere] ${hoverTextColorClass} tw-transition-colors`}
                     >
                       {authorProfileLabel}
                     </span>
@@ -446,7 +348,7 @@ export const WavePodiumItem: React.FC<WavePodiumItemProps> = ({
                       viewBox="0 0 24 24"
                       strokeWidth="1.5"
                       stroke="currentColor"
-                      className={`tw-size-3 tw-opacity-0 tw-transition-opacity ${styles.textColor} tw-absolute tw-left-[100%] tw-top-1/2 tw-ml-2 -tw-translate-y-1/2 group-focus-visible/link:tw-opacity-100 desktop-hover:group-hover/link:tw-opacity-100 touch-only:tw-opacity-100`}
+                      className={`tw-size-3 tw-opacity-0 tw-transition-opacity ${styles.textColor} tw-flex-shrink-0 group-focus-visible/link:tw-opacity-100 desktop-hover:group-hover/link:tw-opacity-100 touch-only:tw-opacity-100`}
                     >
                       <path
                         strokeLinecap="round"
@@ -458,12 +360,12 @@ export const WavePodiumItem: React.FC<WavePodiumItemProps> = ({
                 </UserProfileTooltipWrapper>
               )}
 
-              <div className="tw-relative tw-flex tw-flex-col tw-items-center tw-gap-y-2">
-                <div className="tw-flex tw-items-baseline tw-gap-x-1">
+              <div className="tw-relative tw-mt-auto tw-flex tw-w-full tw-min-w-0 tw-flex-col tw-items-center tw-gap-y-2">
+                <div className="tw-flex tw-w-full tw-min-w-0 tw-flex-wrap tw-items-baseline tw-justify-center tw-gap-x-1 tw-text-center">
                   <span
                     className={`${
-                      drop.rating >= 0 ? styles.textColor : "tw-text-[#ff4466]"
-                    } tw-text-sm tw-font-semibold sm:tw-text-base`}
+                      drop.rating >= 0 ? styles.textColor : "tw-text-error"
+                    } tw-min-w-0 tw-max-w-full tw-text-sm tw-font-semibold tw-tabular-nums [overflow-wrap:anywhere] sm:tw-text-base`}
                   >
                     {formatNumberWithCommas(drop.rating)}
                   </span>
@@ -472,14 +374,14 @@ export const WavePodiumItem: React.FC<WavePodiumItemProps> = ({
                   </span>
                 </div>
 
-                <div className="tw-flex tw-flex-col tw-items-center tw-gap-y-2">
+                <div className="tw-flex tw-w-full tw-min-w-0 tw-flex-col tw-items-center tw-gap-y-2">
                   {showVoteDetails ? (
                     <ParticipationDropVoteDetailsTrigger
                       drop={drop}
-                      density="compact"
+                      density="podium"
                     />
                   ) : (
-                    <div className="tw-flex tw-items-center tw-gap-x-1">
+                    <div className="tw-flex tw-max-w-full tw-flex-wrap tw-items-center tw-justify-center tw-gap-x-1 tw-text-center [overflow-wrap:anywhere]">
                       <span className="tw-text-xs tw-text-iron-200 sm:tw-text-sm">
                         {formatNumberWithCommas(drop.raters_count)}
                       </span>
@@ -489,7 +391,7 @@ export const WavePodiumItem: React.FC<WavePodiumItemProps> = ({
                     </div>
                   )}
 
-                  <div onClick={(e) => e.stopPropagation()}>
+                  <div className="tw-max-w-full">
                     <WavePodiumItemContentOutcomes
                       winner={winner}
                       outcomesVisible={outcomesVisible}

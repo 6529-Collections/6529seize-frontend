@@ -6111,6 +6111,8 @@
         "Wave Winners tab behavior is documented under leaderboard features.",
         "Availability depends on wave decision state and whether the wave has winner outcomes.",
         "Single-decision and multi-decision waves have different winner display behavior.",
+        "The single-decision podium shows first place raised in the center, second place on the left, and third place on the right. Card content wraps and grows to fit names, nomination details, vote totals, credit labels, voter counts, and outcomes. Missing places and loading use matching podium placeholders.",
+        "Select a podium card outside its controls, or focus its winner button and press Enter or Space, to open the winning drop. Keyboard focus is visible. Profile links, voter details, and Outcome keep their own actions without opening the drop. Hover, keyboard-focus, or tap Outcome to read the awards; Escape or tapping outside closes the tooltip.",
         "Mapped winners in The Memes Main Stage show a The Memes #N link and a viewer-local scheduled Mint date in the Winners tab; the decision date above the winner group is separate. The same Meme link appears beside the Minted on The Memes outcome on the dedicated drop view. The frontend never guesses a Meme ID or mint date when the backend mapping is absent.",
         "Mapped Meme card pages show a Main Stage Submission action beside Distribution Plan in the market overview panel to the right of the artwork; older unmapped cards omit the action."
       ],

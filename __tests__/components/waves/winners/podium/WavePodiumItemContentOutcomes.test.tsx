@@ -3,11 +3,28 @@ import { WavePodiumItemContentOutcomes } from "@/components/waves/winners/podium
 import { ApiWaveOutcomeCredit } from "@/generated/models/ApiWaveOutcomeCredit";
 import { ApiWaveOutcomeType } from "@/generated/models/ApiWaveOutcomeType";
 
+let mockIsTouchDevice = false;
+
+jest.mock("@/hooks/useIsTouchDevice", () => ({
+  __esModule: true,
+  default: () => mockIsTouchDevice,
+}));
+
 jest.mock("react-tooltip", () => ({
-  Tooltip: ({ children, id }: any) => (
-    <div data-testid={`tooltip-${id}`}>{children}</div>
+  Tooltip: ({ children, closeEvents, id, openEvents }: any) => (
+    <div
+      data-testid={`tooltip-${id}`}
+      data-open-events={JSON.stringify(openEvents)}
+      data-close-events={JSON.stringify(closeEvents)}
+    >
+      {children}
+    </div>
   ),
 }));
+
+beforeEach(() => {
+  mockIsTouchDevice = false;
+});
 
 test("renders icons for all outcome types", () => {
   const winner = {
@@ -26,6 +43,21 @@ test("renders icons for all outcome types", () => {
   expect(screen.getByTestId("tooltip-outcome-1-test-drop-id")).toHaveTextContent(
     "NIC10Rep5Amanual"
   );
+});
+
+test("uses tap-only events on touch-first devices", () => {
+  mockIsTouchDevice = true;
+  const winner = {
+    place: 1,
+    drop: { id: "test-drop-id" },
+    awards: [{ credit: ApiWaveOutcomeCredit.Cic, amount: 10 }],
+  } as any;
+
+  render(<WavePodiumItemContentOutcomes winner={winner} />);
+
+  const tooltip = screen.getByTestId("tooltip-outcome-1-test-drop-id");
+  expect(tooltip).toHaveAttribute("data-open-events", '{"click":true}');
+  expect(tooltip).toHaveAttribute("data-close-events", '{"click":true}');
 });
 
 test("returns null when no outcomes", () => {

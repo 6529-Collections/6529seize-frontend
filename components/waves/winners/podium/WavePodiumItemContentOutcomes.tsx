@@ -8,6 +8,7 @@ import { ApiWaveOutcomeCredit } from "@/generated/models/ApiWaveOutcomeCredit";
 import { ApiWaveOutcomeType } from "@/generated/models/ApiWaveOutcomeType";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
+import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 
 interface WavePodiumItemContentOutcomesProps {
   readonly winner: ApiWaveDecisionWinner;
@@ -21,6 +22,7 @@ const getServerRenderSnapshot = () => false;
 export const WavePodiumItemContentOutcomes: React.FC<
   WavePodiumItemContentOutcomesProps
 > = ({ winner, outcomesVisible = true }) => {
+  const isTouchDevice = useIsTouchDevice();
   const canRenderTooltip = useSyncExternalStore(
     subscribeToClientRender,
     getClientRenderSnapshot,
@@ -98,11 +100,11 @@ export const WavePodiumItemContentOutcomes: React.FC<
   const tooltipId = `outcome-${winner.place}-${winner.drop.id}`;
 
   const tooltipContent = (
-    <div className="tw-flex tw-min-w-[180px] tw-flex-col tw-gap-y-1.5 tw-py-0.5">
+    <div className="tw-flex tw-min-w-0 tw-max-w-full tw-flex-col tw-gap-y-1.5 tw-py-0.5 [overflow-wrap:anywhere]">
       {nicOutcomes.map((nicOutcome) => (
         <div
           key={`NIC-${nicOutcome.value}`}
-          className="tw-flex tw-items-center tw-gap-x-1.5"
+          className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-1.5"
         >
           <span className="tw-font-medium tw-text-iron-50">NIC</span>
           <span className="tw-text-blue-200/90">
@@ -132,7 +134,7 @@ export const WavePodiumItemContentOutcomes: React.FC<
       {manualOutcomes.map((outcome) => (
         <div
           key={`MANUAL-${outcome.description}`}
-          className="tw-flex tw-items-center tw-gap-x-1.5"
+          className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-1.5"
         >
           <span className="tw-text-amber-100/90">{outcome.description}</span>
         </div>
@@ -144,10 +146,10 @@ export const WavePodiumItemContentOutcomes: React.FC<
     <>
       <button
         type="button"
-        className="tw-flex tw-items-center tw-gap-2 tw-rounded-xl tw-border tw-border-solid tw-border-iron-700/20 tw-bg-iron-800/40 tw-px-3 tw-py-1.5 tw-backdrop-blur-sm tw-transition-all tw-duration-200 hover:tw-border-iron-700/40 hover:tw-bg-iron-800/60 hover:tw-shadow-lg"
+        className="tw-flex tw-min-h-11 tw-max-w-full tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700/50 tw-bg-iron-800/40 tw-px-2 tw-py-1.5 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-border-iron-600 desktop-hover:hover:tw-bg-iron-800/60"
         data-tooltip-id={tooltipId}
       >
-        <span className="tw-text-sm tw-font-medium tw-text-iron-300">
+        <span className="tw-text-xs tw-font-medium tw-text-iron-300 sm:tw-text-sm">
           Outcome
         </span>
       </button>
@@ -158,9 +160,24 @@ export const WavePodiumItemContentOutcomes: React.FC<
             place="top"
             offset={8}
             opacity={1}
+            clickable
+            openEvents={
+              isTouchDevice
+                ? { click: true }
+                : { mouseenter: true, focus: true }
+            }
+            closeEvents={
+              isTouchDevice ? { click: true } : { mouseleave: true, blur: true }
+            }
+            globalCloseEvents={{
+              escape: true,
+              scroll: true,
+              clickOutsideAnchor: true,
+            }}
             positionStrategy="fixed"
             style={{
               ...TOOLTIP_STYLES,
+              pointerEvents: "auto",
               maxWidth: "min(360px, calc(100vw - 32px))",
               whiteSpace: "normal",
             }}
