@@ -19,7 +19,7 @@ import {
   commonApiPut,
 } from "./common-api";
 
-export const documentationEndpoint = "artwork-documentation";
+const documentationEndpoint = "artwork-documentation";
 export const documentationHeaders = (
   version?: number,
   key = crypto.randomUUID()
@@ -76,16 +76,34 @@ export const getDocumentationContext = (id: string, signal?: AbortSignal) =>
     errorMode: "structured",
     cache: "no-store",
   });
+export type DocumentationQueueFilters = Partial<
+  Record<
+    | "confirmation_status"
+    | "review_lane"
+    | "outstanding_action"
+    | "profile_id"
+    | "profile_version",
+    string
+  >
+>;
 export const getDocumentationWorks = (
   cursor?: string,
   programId?: string,
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  filters: DocumentationQueueFilters = {}
 ) =>
   commonApiFetch<ApiArtworkDocumentationContextListResponse>({
     endpoint: programId
       ? `${documentationEndpoint}/programs/${encodeURIComponent(programId)}/contexts`
       : `${documentationEndpoint}/works`,
-    params: { scope: "mine", ...(cursor ? { cursor } : {}) },
+    params: {
+      ...(programId
+        ? Object.fromEntries(
+            Object.entries(filters).filter(([, value]) => value)
+          )
+        : { scope: "mine" }),
+      ...(cursor ? { cursor } : {}),
+    },
     signal,
     errorMode: "structured",
     cache: "no-store",
@@ -322,16 +340,6 @@ export const pinDocumentationArtistRecord = (
     signal,
     errorMode: "structured",
   });
-export function availableDocumentationProfile(
-  profiles: ApiArtworkDocumentationProfile[],
-  waveId?: string
-): ApiArtworkDocumentationProfile | undefined {
-  return (
-    profiles.find((profile) => profile.wave_id === waveId) ??
-    profiles.find((profile) => profile.profile_id === "stream_artwork_basic_v1")
-  );
-}
-
 export function documentationErrorStatus(error: unknown): number | undefined {
   return error &&
     typeof error === "object" &&

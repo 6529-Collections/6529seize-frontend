@@ -3,7 +3,7 @@ import type { ApiArtworkDocumentationContext } from "@/generated/models/ApiArtwo
 import type { ApiArtworkDocumentationOperation } from "@/generated/models/ApiArtworkDocumentationOperation";
 
 /** Client guidance uses the server's registered schema; server validation remains authoritative. */
-export function matchesDocumentationSchema(
+function matchesDocumentationSchema(
   value: unknown,
   schema: ApiArtworkDocumentationValueSchema
 ): boolean {
@@ -89,11 +89,11 @@ export function validDocumentationOperation(
 ): boolean {
   if (operation.op === "unset") return true;
   if (
-    moduleId === "files" &&
+    moduleId === "artwork" &&
     operation.field === "canonical_asset_id" &&
     context.latest_revision_id &&
     operation.answer?.value !==
-      context.modules["files"]?.answers["canonical_asset_id"]?.value
+      context.modules["artwork"]?.answers["canonical_asset_id"]?.value
   ) {
     const reason: unknown = Reflect.get(operation, "replacementReason");
     if (

@@ -1,7 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import DocumentationModules from "@/components/artwork-documentation/DocumentationModules";
 import { documentationFixture } from "@/__tests__/fixtures/artwork-documentation";
-import { publicPreviewAnswers } from "@/lib/artwork-documentation/answers";
 
 jest.mock("@/hooks/useBrowserLocale", () => ({
   useBrowserLocale: () => "en-US",
@@ -65,18 +64,43 @@ describe("artwork documentation modules", () => {
       screen.queryByRole("textbox", { name: "Location" })
     ).not.toBeInTheDocument();
   });
-  it("omits restricted fields from the preview data before rendering", () => {
+  it("uses the interview question pinned to this context profile", () => {
     const context = documentationFixture();
-    context.modules["artwork"]!.answers["location"] = {
+    context.profile.interview_instrument = {
+      id: "pinned-interview",
+      version: 1,
+      language: "en",
+      prompts: [
+        { id: "q1", text: "What does this particular threshold mean to you?" },
+      ],
+    };
+    const interview = context.profile.modules.find(
+      (module) => module.id === "interview"
+    )!;
+    interview.fields = [
+      {
+        ...context.profile.modules.find((module) => module.id === "artwork")!
+          .fields[0]!,
+        id: "q1",
+      },
+    ];
+    context.modules["interview"]!.answers["mode"] = {
       status: "provided",
-      value: "Sensitive place",
-      intended_visibility: "restricted",
-    } as (typeof context.modules)[string]["answers"][string];
-    expect(
-      publicPreviewAnswers(context)["artwork"]?.["location"]
-    ).toBeUndefined();
-    expect(JSON.stringify(publicPreviewAnswers(context))).not.toContain(
-      "Sensitive place"
+      intended_visibility: "public_record",
+      value: "written",
+    } as never;
+    render(
+      <DocumentationModules
+        context={context}
+        edits={[]}
+        section="preservation"
+        onChange={jest.fn()}
+      />
     );
+    expect(
+      screen.getByRole("heading", {
+        name: "What does this particular threshold mean to you?",
+      })
+    ).toBeInTheDocument();
   });
 });

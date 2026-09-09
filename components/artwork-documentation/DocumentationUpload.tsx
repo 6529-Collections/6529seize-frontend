@@ -119,7 +119,7 @@ export default function DocumentationUpload({ context, controller }: Props) {
             startKey.current,
             controllerAbort.signal
           );
-      if (!mounted.current) return;
+      if (!mounted.current || controllerAbort.signal.aborted) return;
       setSession(upload);
       await transferDocumentationFile({
         contextId: context.id,
@@ -128,7 +128,7 @@ export default function DocumentationUpload({ context, controller }: Props) {
         signal: controllerAbort.signal,
         onProgress: setSent,
       });
-      if (!mounted.current) return;
+      if (!mounted.current || controllerAbort.signal.aborted) return;
       setStatus("processing");
     } catch (error) {
       if (mounted.current && !controllerAbort.signal.aborted)
@@ -152,7 +152,7 @@ export default function DocumentationUpload({ context, controller }: Props) {
               result.asset.intended_visibility,
               result.asset.filename
             );
-            if (mounted.current) {
+            if (mounted.current && !polling.signal.aborted) {
               setStatus(attached ? "idle" : "failed");
               setFile(null);
               setSession(null);

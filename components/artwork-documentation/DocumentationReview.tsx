@@ -111,7 +111,10 @@ export default function DocumentationReview({
       {preview ? (
         <>
           {previewQuery.data ? (
-            <DocumentationSummary context={previewQuery.data} />
+            <DocumentationSummary
+              context={previewQuery.data}
+              profile={context.profile}
+            />
           ) : (
             <DocumentationNotice error={previewQuery.isError}>
               {msg(previewQuery.isError ? "error" : "loading")}

@@ -13,6 +13,7 @@ import {
   createDocumentationWork,
   documentationWorkspacePath,
   getDocumentationWorks,
+  type DocumentationQueueFilters,
 } from "@/services/api/artwork-documentation-api";
 import { documentationOptionLabel } from "@/i18n/messages/artwork-documentation-fields";
 import { formatDate } from "@/i18n/format";
@@ -57,6 +58,9 @@ function DocumentationListContent({
   const router = useRouter();
   const [profileId, setProfileId] = useState("");
   const [filter, setFilter] = useState("");
+  const [queueFilters, setQueueFilters] = useState<DocumentationQueueFilters>(
+    {}
+  );
   const [starting, setStarting] = useState(false);
   const [error, setError] = useState(false);
   const createKey = useRef(crypto.randomUUID());
@@ -65,10 +69,11 @@ function DocumentationListContent({
       connectedProfile?.id,
       "works",
       programId ?? "mine",
-      actorKey
+      actorKey,
+      JSON.stringify(queueFilters)
     ),
     queryFn: ({ pageParam, signal }) =>
-      getDocumentationWorks(pageParam, programId, signal),
+      getDocumentationWorks(pageParam, programId, signal, queueFilters),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (page) => page.next_cursor ?? undefined,
     enabled: access.enabled,
@@ -182,6 +187,84 @@ function DocumentationListContent({
               </DocumentationButton>
             </div>
           )}
+          {programId && (
+            <div className="tw-grid tw-gap-4 sm:tw-grid-cols-2 lg:tw-grid-cols-3">
+              {(
+                [
+                  [
+                    "confirmation_status",
+                    ["unconfirmed", "current", "newer_draft"],
+                  ],
+                  ["review_lane", ["curatorial", "technical", "rights"]],
+                  [
+                    "outstanding_action",
+                    ["artist_confirmation", "review", "changes_requested"],
+                  ],
+                ] as const
+              ).map(([key, options]) => (
+                <label key={key} className="tw-text-sm tw-text-iron-300">
+                  {msg(`filter.${key}`)}
+                  <select
+                    className={`${inputClass} tw-mt-2`}
+                    value={queueFilters[key] ?? ""}
+                    onChange={(event) =>
+                      setQueueFilters({
+                        ...queueFilters,
+                        [key]: event.target.value,
+                      })
+                    }
+                  >
+                    <option value="">{msg("all")}</option>
+                    {options.map((option) => (
+                      <option key={option} value={option}>
+                        {key === "review_lane"
+                          ? msg(`lane.${option}`)
+                          : key === "outstanding_action"
+                            ? msg(`action.${option}`)
+                            : documentationOptionLabel(option)}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              ))}
+              <label className="tw-text-sm tw-text-iron-300">
+                {msg("profile")}
+                <select
+                  className={`${inputClass} tw-mt-2`}
+                  value={queueFilters.profile_id ?? ""}
+                  onChange={(event) =>
+                    setQueueFilters({
+                      ...queueFilters,
+                      profile_id: event.target.value,
+                    })
+                  }
+                >
+                  <option value="">{msg("all")}</option>
+                  {access.profiles.map((profile) => (
+                    <option key={profile.profile_id} value={profile.profile_id}>
+                      {documentationOptionLabel(profile.profile_id)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="tw-text-sm tw-text-iron-300">
+                {msg("profileVersion")}
+                <input
+                  className={`${inputClass} tw-mt-2`}
+                  type="number"
+                  min={1}
+                  step={1}
+                  value={queueFilters.profile_version ?? ""}
+                  onChange={(event) =>
+                    setQueueFilters({
+                      ...queueFilters,
+                      profile_version: event.target.value,
+                    })
+                  }
+                />
+              </label>
+            </div>
+          )}
           {programIds.length > 1 && (
             <label className="tw-block tw-text-sm tw-text-iron-300">
               {msg("program")}
@@ -236,6 +319,16 @@ function DocumentationListContent({
                       })}
                     </span>
                   </div>
+                  {programId && (
+                    <ul className="tw-m-0 tw-list-none tw-space-y-1 tw-p-0 tw-text-xs tw-text-iron-300">
+                      {record.reviews?.map((review) => (
+                        <li key={review.lane}>
+                          {msg(`lane.${review.lane}`)}:{" "}
+                          {msg(`review.${review.status}`)}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                   <Link
                     href={documentationWorkspacePath(record.work_id, record.id)}
                     className="hover:tw-text-primary-200 tw-mt-2 tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm tw-font-semibold tw-text-primary-300 focus-visible:tw-outline focus-visible:tw-outline-2"

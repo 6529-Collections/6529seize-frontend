@@ -1,5 +1,5 @@
 /** English source labels. Other supported locales currently use this documented fallback. */
-export const DOCUMENTATION_FIELD_LABELS: Readonly<Record<string, string>> = {
+const DOCUMENTATION_FIELD_LABELS: Readonly<Record<string, string>> = {
   display_name: "Artist name",
   preferred_credit: "Preferred credit",
   record_language: "Record language",
@@ -140,7 +140,7 @@ export const DOCUMENTATION_FIELD_LABELS: Readonly<Record<string, string>> = {
   audience: "Audience",
 };
 
-export const DOCUMENTATION_OPTION_LABELS: Readonly<Record<string, string>> = {
+const DOCUMENTATION_OPTION_LABELS: Readonly<Record<string, string>> = {
   provided: "Provided",
   unknown: "Unknown",
   withheld: "Withheld",

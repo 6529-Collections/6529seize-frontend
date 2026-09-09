@@ -1,5 +1,6 @@
 "use client";
 
+import type { ApiArtworkDocumentationProfile } from "@/generated/models/ApiArtworkDocumentationProfile";
 import type { ApiArtworkDocumentationAnswer } from "@/generated/models/ApiArtworkDocumentationAnswer";
 import {
   documentationFieldLabel,
@@ -72,8 +73,11 @@ export function DocumentationValueSummary({
 
 export default function DocumentationSummary({
   context,
+  profile,
 }: {
+  readonly profile?: ApiArtworkDocumentationProfile | undefined;
   readonly context: {
+    readonly profile?: ApiArtworkDocumentationProfile | undefined;
     readonly modules: Record<
       string,
       { readonly answers: Record<string, ApiArtworkDocumentationAnswer> }
@@ -97,7 +101,13 @@ export default function DocumentationSummary({
               return (
                 <div key={field}>
                   <dt className="tw-mb-2 tw-text-sm tw-font-medium tw-text-iron-100">
-                    {documentationFieldLabel(field)}
+                    {(id === "interview"
+                      ? (
+                          profile ?? context.profile
+                        )?.interview_instrument?.prompts.find(
+                          (prompt) => prompt.id === field
+                        )?.text
+                      : undefined) ?? documentationFieldLabel(field)}
                   </dt>
                   <dd className="tw-m-0 tw-text-sm tw-text-iron-300">
                     {isRedacted(answer) ? (

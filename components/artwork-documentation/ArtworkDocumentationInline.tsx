@@ -37,7 +37,7 @@ export interface ArtworkDocumentationInlineHandle {
   ): Promise<{ linked: boolean; contextId: string; workId: string }>;
   flush(): Promise<boolean>;
 }
-export interface ArtworkDocumentationInlineProps {
+interface ArtworkDocumentationInlineProps {
   readonly profileId: string;
   readonly profileVersion: number;
   readonly programId?: string | undefined;
@@ -64,7 +64,6 @@ export const ArtworkDocumentationInline = forwardRef<
     </DocumentationAuthGate>
   );
 });
-export default ArtworkDocumentationInline;
 
 const InlineStart = forwardRef<
   ArtworkDocumentationInlineHandle,

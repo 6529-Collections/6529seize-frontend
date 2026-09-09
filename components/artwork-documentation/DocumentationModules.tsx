@@ -105,7 +105,12 @@ function DocumentationAnswerField(
     !context.capabilities.edit_modules.some((module) => module === moduleId) ||
     redacted;
   const id = `documentation-${moduleId}-${field.id}`;
-  const label = documentationFieldLabel(field.id);
+  const label =
+    (moduleId === "interview"
+      ? context.profile.interview_instrument?.prompts.find(
+          (prompt) => prompt.id === field.id
+        )?.text
+      : undefined) ?? documentationFieldLabel(field.id);
   const [replacementReason, setReplacementReason] = useState("");
   const pending = edits.find(
     (edit) => edit.moduleId === moduleId && edit.operation.field === field.id

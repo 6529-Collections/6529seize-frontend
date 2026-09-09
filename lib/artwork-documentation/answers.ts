@@ -92,22 +92,3 @@ export function visibleField(
     return answerValue(context, moduleId, "mode", edits) === "written";
   return true;
 }
-
-/** Removes confidential values before building a preview tree, rather than CSS-hiding them. */
-export function publicPreviewAnswers(
-  context: ApiArtworkDocumentationContext
-): Record<string, Record<string, ApiArtworkDocumentationAnswer>> {
-  return Object.fromEntries(
-    Object.entries(context.modules).map(([moduleId, module]) => [
-      moduleId,
-      Object.fromEntries(
-        Object.entries(module.answers).filter(
-          ([, answer]) =>
-            !isRedacted(answer) &&
-            (answer as ApiArtworkDocumentationAnswer).intended_visibility ===
-              "public_record"
-        )
-      ),
-    ])
-  ) as Record<string, Record<string, ApiArtworkDocumentationAnswer>>;
-}

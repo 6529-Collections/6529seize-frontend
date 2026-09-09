@@ -45,7 +45,8 @@ export interface DocumentationField {
     | "locationHelp"
     | "changesHelp"
     | "masterHelp"
-    | "sourceFilesHelp";
+    | "sourceFilesHelp"
+    | "interviewEvidenceHelp";
 }
 const text = (max = 1000, multiline = false): ValueEditor => ({
   kind: "text",
@@ -342,8 +343,16 @@ export const MODULE_FIELDS: Readonly<
     field("q6", localized(8000)),
     field("q7", localized(8000)),
     field("q8", localized(8000)),
-    field("recording_asset_id", { kind: "asset" }),
-    field("transcript_asset_id", { kind: "asset" }),
+    field(
+      "recording_asset_id",
+      { kind: "asset" },
+      { help: "interviewEvidenceHelp" }
+    ),
+    field(
+      "transcript_asset_id",
+      { kind: "asset" },
+      { help: "interviewEvidenceHelp" }
+    ),
     field(
       "recording_permission",
       choice("not_requested", "private_review", "intended_public_record")
@@ -356,17 +365,16 @@ export const MODULE_FIELDS: Readonly<
   ],
 };
 
-export const MODULE_SECTIONS: Readonly<Record<ModuleId, DocumentationSection>> =
-  {
-    identity: "artist",
-    artwork: "artwork",
-    files: "artwork",
-    context: "story",
-    process: "story",
-    rights: "rights",
-    preservation: "preservation",
-    interview: "preservation",
-  };
+const MODULE_SECTIONS: Readonly<Record<ModuleId, DocumentationSection>> = {
+  identity: "artist",
+  artwork: "artwork",
+  files: "artwork",
+  context: "story",
+  process: "story",
+  rights: "rights",
+  preservation: "preservation",
+  interview: "preservation",
+};
 
 export function parseSection(
   section: string | undefined

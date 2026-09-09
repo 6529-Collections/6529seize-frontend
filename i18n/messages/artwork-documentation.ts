@@ -1,4 +1,15 @@
 export const ARTWORK_DOCUMENTATION_MESSAGES = {
+  "artworkDocumentation.interviewEvidenceHelp":
+    "Before selecting a recording or transcript, add the interview date, at least one participant and permission for that material. Choose permission for a future public record only when the participants have agreed to that use; otherwise keep the material restricted for private review.",
+  "artworkDocumentation.all": "All",
+  "artworkDocumentation.filter.confirmation_status": "Artist confirmation",
+  "artworkDocumentation.filter.review_lane": "Review lane",
+  "artworkDocumentation.filter.outstanding_action": "Outstanding action",
+  "artworkDocumentation.profileVersion": "Documentation profile version",
+  "artworkDocumentation.action.artist_confirmation":
+    "Needs artist confirmation",
+  "artworkDocumentation.action.review": "Needs review",
+  "artworkDocumentation.action.changes_requested": "Changes requested",
   "artworkDocumentation.yes": "Yes",
   "artworkDocumentation.no": "No",
   "artworkDocumentation.newContext": "Document this work for another context",
