@@ -5,6 +5,49 @@
   "base_url": "https://6529.io",
   "records": [
     {
+      "id": "artwork-documentation.overview",
+      "kind": "workflow",
+      "title": "Private artwork documentation",
+      "aliases": [
+        "my artwork documentation",
+        "artist dossier",
+        "Keys and Gates documentation",
+        "artwork provenance"
+      ],
+      "keywords": [
+        "artwork",
+        "documentation",
+        "artist",
+        "provenance",
+        "original files",
+        "rights",
+        "consent",
+        "preservation",
+        "Keys and Gates"
+      ],
+      "facts": [
+        "When the server enables artwork documentation for a profile, My artwork documentation appears in the account menu and opens /artwork-documentation. Eligible owned artwork menus also offer Artwork documentation on desktop and mobile.",
+        "The private workspace collects artwork identity, story and process, artist credits and contributors, files, rights and people, preservation and display guidance, and an optional artist interview. Each section explains why the information matters.",
+        "Documentation can begin independently or in a supported submission form and can continue afterward. It is optional during submission. A successful artwork post is not retried when its documentation source link needs recovery.",
+        "Drafts save to the database. Unsaved text is not persisted in browser local storage. Keep the window open when saving fails or authentication expires, and resolve a version conflict before continuing.",
+        "All documentation remains private in this phase. Intended for a future public record means future publication intent, not current publication. Private contacts and sensitive rights evidence remain restricted, and original archival files require explicit access.",
+        "File transfer, checksum verification, inspection and malware screening have separate statuses. Upload limits are 4 GiB per file, 20 GiB of stored and reserved files per context, 100 files and five simultaneous upload sessions per context.",
+        "Only the artist can confirm a documentation revision through a direct authenticated session. Confirmation preserves a dated immutable version in the database; it is not a wallet signature, mint instruction, or automatic effect of a proposed license. Curatorial, technical and rights reviews are separate.",
+        "New edits preserve earlier confirmed versions. Shared artist information is versioned and pinned per work. Keys and Gates uses a photography documentation profile; selection does not establish minting, purchase or Museum accession.",
+        "Mint preparation and on-chain, IPFS or Arweave publication are deferred. The documentation form does not perform them."
+      ],
+      "canonical_path": "/artwork-documentation",
+      "link_label": "My artwork documentation",
+      "related_paths": ["/waves"],
+      "tags": ["artwork", "artists", "documentation", "privacy", "museum"],
+      "source_refs": [
+        "ops/docs/artwork-documentation.md",
+        "app/artwork-documentation/page.tsx",
+        "components/header/user/HeaderArtworkDocumentationLink.tsx",
+        "components/waves/drops/WaveDropDocumentationAction.tsx"
+      ]
+    },
+    {
       "id": "waves.memes.submission-identity",
       "kind": "workflow",
       "title": "Memes submission profile and wallet confirmation",
