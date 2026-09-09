@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import styles from "./Clap.module.css";
 import mojs from "@mojs/core";
-import { formatLargeNumber } from "@/helpers/Helpers";
+import { formatLargeNumber, formatNumberWithCommas } from "@/helpers/Helpers";
 import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import DropActionTooltip from "@/components/waves/drops/DropActionTooltip";
 import type { DropVoteState } from "@/hooks/drops/types";
@@ -28,6 +28,7 @@ export default function DropListItemRateGiveClap({
   readonly onSubmit: () => void;
   readonly isMobile?: boolean | undefined;
 }) {
+  const descriptionId = useId();
   const positiveRgba = "rgba(39, 174, 96, 1)";
   const negativeRgba = "rgba(192, 57, 43, 1)";
 
@@ -223,6 +224,8 @@ export default function DropListItemRateGiveClap({
 
   const svgSize = isMobile ? "tw-size-7" : "tw-h-[18px] tw-w-[18px]";
   const voteError = VOTE_STATE_ERRORS[voteState];
+  const signedRate = `${rate > 0 ? "+" : ""}${formatNumberWithCommas(rate)}`;
+  const description = canVote ? signedRate : voteError;
 
   return (
     <DropActionTooltip
@@ -241,6 +244,7 @@ export default function DropListItemRateGiveClap({
           disabled={!rate || !canVote}
           id={`clap-${randomID}`}
           aria-label="Clap for drop"
+          aria-describedby={description ? descriptionId : undefined}
           className={`${clapClasses} tw-relative tw-z-10 tw-flex tw-flex-shrink-0 tw-items-center tw-justify-center tw-border-none tw-bg-current tw-outline-1 tw-outline-transparent tw-transition tw-duration-300 tw-ease-out ${styles["clap"]}`}
           onClick={(e) => {
             e.stopPropagation();
@@ -269,6 +273,11 @@ export default function DropListItemRateGiveClap({
             {countShort}
           </span>
         </button>
+        {description && (
+          <span id={descriptionId} className="tw-sr-only">
+            {description}
+          </span>
+        )}
       </div>
     </DropActionTooltip>
   );
