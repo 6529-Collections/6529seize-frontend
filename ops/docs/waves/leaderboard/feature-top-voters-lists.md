@@ -46,6 +46,8 @@ either list. Grid cards omit that highlight.
   link, and a compact signed amount on standard leaderboard and memes list
   items. Grid cards omit this highlight to keep the artwork and voting controls
   primary.
+- On Memes list cards, the voters control and available `Vote` button stay
+  together on one row. `Largest vote` appears on a separate line below them.
 - The amount is that voter's current allocation on this drop. `+` means a
   positive vote and `−` means a negative vote. It is not their latest vote
   change or their vote total across the wave.

@@ -63,9 +63,7 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
 
   return (
     <>
-      <div
-        className={`tw-flex tw-items-center tw-justify-between tw-gap-x-2 ${identityRowHeightClass}`}
-      >
+      <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-2">
         <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1">
           <div
             className={

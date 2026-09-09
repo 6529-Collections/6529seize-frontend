@@ -2,6 +2,7 @@ import React from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemesLeaderboardDrop } from "@/components/memes/drops/MemesLeaderboardDrop";
+import type MemesLeaderboardDropVoteSummary from "@/components/memes/drops/MemesLeaderboardDropVoteSummary";
 
 const useIsMobileScreen = jest.fn();
 jest.mock("@/hooks/isMobileScreen", () => ({
@@ -29,7 +30,14 @@ jest.mock("@/utils/monitoring/dropOpenTiming", () => ({
   startDropOpen: jest.fn(),
 }));
 
-const mockVoteSummary = jest.fn(() => <div data-testid="summary" />);
+const mockVoteSummary = jest.fn(
+  (props: React.ComponentProps<typeof MemesLeaderboardDropVoteSummary>) => {
+    const Summary = jest.requireActual<
+      typeof import("@/components/memes/drops/MemesLeaderboardDropVoteSummary")
+    >("@/components/memes/drops/MemesLeaderboardDropVoteSummary").default;
+    return <Summary {...props} />;
+  }
+);
 const mockVoteDetailsTrigger = jest.fn((props: any) => (
   <button
     type="button"
@@ -142,7 +150,13 @@ jest.mock("@/components/voting", () => ({
   ),
 }));
 jest.mock("@/components/voting/VotingModalButton", () => (p: any) => (
-  <button data-testid="vote-btn" onClick={p.onClick}>
+  <button
+    data-testid="vote-btn"
+    onClick={(event) => {
+      event.stopPropagation();
+      p.onClick();
+    }}
+  >
     vote
   </button>
 ));

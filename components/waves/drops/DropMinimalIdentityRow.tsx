@@ -22,6 +22,7 @@ export default function DropMinimalIdentityRow({
 }: DropMinimalIdentityRowProps) {
   const router = useRouter();
   const compact = useCompactMode();
+  const identityRowHeightClass = compact ? "tw-min-h-8" : "tw-min-h-10";
   const authorIdentity = drop.author.handle ?? drop.author.primary_address;
   const isStackedTimestamp = timestampLayout === "stacked";
 
@@ -43,7 +44,7 @@ export default function DropMinimalIdentityRow({
       }
     >
       <div
-        className={`tw-flex tw-min-w-0 tw-max-w-full tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1 ${compact ? "tw-min-h-8" : "tw-min-h-10"}`}
+        className={`tw-flex tw-min-w-0 tw-max-w-full tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1 ${isStackedTimestamp ? identityRowHeightClass : ""}`}
       >
         <p className="tw-m-0 tw-min-w-0 tw-max-w-full tw-text-sm tw-font-semibold tw-leading-5 [overflow-wrap:anywhere]">
           <UserProfileTooltipWrapper user={authorIdentity}>
