@@ -58,7 +58,7 @@ export default function WaveDropActions({
       drop.drop_type === ApiDropType.Participatory && isMemesWave(drop.wave.id)
     );
   let visibilityClasses =
-    "tw-pointer-events-none tw-opacity-0 desktop-hover:group-hover:tw-pointer-events-auto desktop-hover:group-hover:tw-opacity-100 desktop-hover:hover:tw-pointer-events-auto desktop-hover:hover:tw-opacity-100";
+    "tw-pointer-events-none tw-opacity-0 focus-within:tw-pointer-events-auto focus-within:tw-opacity-100 desktop-hover:group-hover:tw-pointer-events-auto desktop-hover:group-hover:tw-opacity-100 desktop-hover:hover:tw-pointer-events-auto desktop-hover:hover:tw-opacity-100";
 
   if (isMoreDropdownOpen) {
     visibilityClasses = "tw-pointer-events-auto tw-opacity-100";
