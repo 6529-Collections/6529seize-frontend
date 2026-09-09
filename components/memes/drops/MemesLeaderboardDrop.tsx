@@ -17,9 +17,8 @@ import WaveDropMobileMenuCopyLink from "@/components/waves/drops/WaveDropMobileM
 import WaveDropMobileMenuOpen from "@/components/waves/drops/WaveDropMobileMenuOpen";
 import MemesArtSubmissionModal from "@/components/waves/memes/MemesArtSubmissionModal";
 import { MemesArtResubmitAction } from "@/components/waves/memes/submission/MemesArtResubmitAction";
-import ParticipationDropVoteDetailsTrigger from "@/components/waves/drops/participation/ratings/ParticipationDropVoteDetailsTrigger";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
+import { ImageScale } from "@/helpers/image.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { getDropPreviewImageUrl } from "@/helpers/waves/drop.helpers";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
@@ -32,8 +31,6 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { startDropOpen } from "@/utils/monitoring/dropOpenTiming";
-import Image from "next/image";
-import Link from "next/link";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import MemeDropTraits from "./MemeDropTraits";
@@ -170,9 +167,6 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
   // Get artwork media URL if available
   const artworkMedia = firstPart?.media.at(0);
 
-  // Get top voters for votes display
-  const firstThreeVoters = drop.top_raters.slice(0, 3);
-
   const openDrop = useCallback(() => {
     startDropOpen({
       dropId: drop.id,
@@ -259,19 +253,23 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
                 {/* Title and Description */}
                 <div className="tw-px-4 tw-pb-4 tw-pt-4">
                   <div className="tw-max-w-screen-sm tw-space-y-1">
-                    <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
+                    <div className="tw-flex tw-items-start tw-gap-2">
                       <MediaTypeBadge
                         mimeType={artworkMedia?.mime_type}
                         dropId={drop.id}
                         size="xs"
+                        className="tw-mt-0.5"
                         showTooltip={!opensWholeCard}
                       />
-                      <MemesLeaderboardDropHeader title={title} />
-                      {drop.is_additional_action_promised === true && (
-                        <AdditionalActionPromiseBadge
-                          focusable={!opensWholeCard}
-                        />
-                      )}
+                      <div className="tw-min-w-0 tw-flex-1">
+                        <MemesLeaderboardDropHeader title={title} />
+                        {drop.is_additional_action_promised === true && (
+                          <AdditionalActionPromiseBadge
+                            className="tw-mt-2"
+                            focusable={!opensWholeCard}
+                          />
+                        )}
+                      </div>
                     </div>
                     <MemesLeaderboardDropDescription
                       description={description}
@@ -314,49 +312,9 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
                 <div className="tw-mt-4 tw-flex tw-flex-col tw-gap-y-4 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-bg-iron-900/30 tw-p-4">
                   <MemeDropTraits drop={drop} />
 
-                  <div className="tw-flex tw-flex-col tw-justify-between tw-gap-4 @[700px]:tw-flex-row @[700px]:tw-items-center">
-                    <MemesLeaderboardDropVoteSummary drop={drop} />
-
-                    <div
-                      className="tw-flex tw-w-full tw-flex-shrink-0 tw-items-center tw-justify-between tw-gap-4 @[700px]:tw-w-auto @[700px]:tw-justify-end"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      {/* Voters - only on small containers */}
-                      <div className="tw-flex tw-items-center tw-gap-2 @[700px]:tw-hidden">
-                        {firstThreeVoters.length > 0 && (
-                          <div className="tw-flex tw-items-center -tw-space-x-2">
-                            {firstThreeVoters.map((voter) => (
-                              <Link
-                                key={
-                                  voter.profile.handle ??
-                                  voter.profile.primary_address
-                                }
-                                href={`/${voter.profile.handle ?? voter.profile.primary_address}`}
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                {voter.profile.pfp ? (
-                                  <Image
-                                    className="tw-h-6 tw-w-6 tw-rounded-md tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800 tw-object-contain"
-                                    src={getScaledImageUri(
-                                      voter.profile.pfp,
-                                      ImageScale.W_AUTO_H_50
-                                    )}
-                                    alt="Recent voter"
-                                    width={24}
-                                    height={24}
-                                  />
-                                ) : (
-                                  <div className="tw-h-6 tw-w-6 tw-rounded-lg tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800" />
-                                )}
-                              </Link>
-                            ))}
-                          </div>
-                        )}
-                        <ParticipationDropVoteDetailsTrigger
-                          drop={drop}
-                          visualVariant="memes"
-                        />
-                      </div>
+                  <MemesLeaderboardDropVoteSummary
+                    drop={drop}
+                    voteButton={
                       <VotingModalButton
                         drop={drop}
                         className="!tw-text-meta"
@@ -368,8 +326,8 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
                           setIsVotingModalOpen(true);
                         }}
                       />
-                    </div>
-                  </div>
+                    }
+                  />
                 </div>
               </div>
             </div>

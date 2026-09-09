@@ -2,18 +2,24 @@ import DropVoteProgressing from "@/components/drops/view/utils/DropVoteProgressi
 import DropLargestVote from "@/components/waves/drop/DropLargestVote";
 import ParticipationDropVoteDetailsTrigger from "@/components/waves/drops/participation/ratings/ParticipationDropVoteDetailsTrigger";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
+import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 import { Tooltip } from "react-tooltip";
 
 interface MemesLeaderboardDropVoteSummaryProps {
   readonly drop: ExtendedDrop;
+  readonly voteButton?: React.ReactNode;
 }
 
 const MemesLeaderboardDropVoteSummary: React.FC<
   MemesLeaderboardDropVoteSummaryProps
-> = ({ drop }) => {
+> = ({ drop, voteButton }) => {
+  const locale = useBrowserLocale();
   const current = drop.rating;
   const projected = drop.rating_prediction;
   const creditType = drop.wave.voting_credit_type;
@@ -28,11 +34,11 @@ const MemesLeaderboardDropVoteSummary: React.FC<
   const isUserVoteNegative = userVote < 0;
 
   return (
-    <div className="tw-flex tw-min-w-0 tw-flex-wrap @[700px]:tw-flex-1 tw-items-center tw-gap-x-4 tw-gap-y-1 @[700px]:tw-justify-between">
+    <div className="tw-grid tw-min-w-0 tw-grid-cols-1 tw-items-center tw-gap-x-4 tw-gap-y-1 @[700px]:tw-grid-cols-[minmax(0,1fr)_auto]">
       {/* Left side: Vote counts + User vote (on large) */}
-      <div className="tw-flex tw-items-baseline tw-gap-2 tw-text-sm">
+      <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-baseline tw-gap-2 tw-text-sm">
         <span
-          className={`tw-text-body tw-font-semibold tw-leading-5 tw-tracking-identity tw-tabular-nums ${
+          className={`tw-text-body tw-font-semibold tw-tabular-nums tw-leading-5 tw-tracking-identity ${
             isPositive ? "tw-text-iron-100" : "tw-text-rose-400"
           }`}
         >
@@ -53,9 +59,9 @@ const MemesLeaderboardDropVoteSummary: React.FC<
         </div>
         {/* User vote badge - hidden on small containers */}
         {hasUserVoted && (
-          <span className="tw-hidden @[500px]:tw-inline tw-text-xs tw-text-iron-500 tw-font-mono tw-ml-3 tw-border-l tw-border-solid tw-border-white/10 tw-pl-3 tw-border-t-0 tw-border-r-0 tw-border-b-0">
+          <span className="tw-ml-3 tw-hidden tw-border-b-0 tw-border-l tw-border-r-0 tw-border-t-0 tw-border-solid tw-border-white/10 tw-pl-3 tw-font-mono tw-text-xs tw-text-iron-500 @[500px]:tw-inline">
             Your vote:{" "}
-            <span className="tw-text-white tw-font-bold">
+            <span className="tw-font-bold tw-text-white">
               {isUserVoteNegative && "-"}
               {formatNumberWithCommas(Math.abs(userVote))}
             </span>
@@ -63,54 +69,77 @@ const MemesLeaderboardDropVoteSummary: React.FC<
         )}
       </div>
 
-      {/* Right side: Voters - hidden on small containers (shown next to button) */}
-      <div className="tw-hidden @[700px]:tw-flex tw-items-center tw-gap-2">
-        <div className="tw-flex tw-items-center -tw-space-x-2">
-          {topVoters.map((voter) => (
-            <React.Fragment key={voter.profile.handle}>
-              <Link
-                href={`/${voter.profile.handle}`}
-                onClick={(e) => e.stopPropagation()}
-                data-tooltip-id={`voter-${voter.profile.handle}`}
-              >
-                {voter.profile.pfp ? (
-                  <img
-                    className="tw-w-6 tw-h-6 tw-rounded-md tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800 tw-object-contain"
-                    src={voter.profile.pfp}
-                    alt="Recent voter"
-                  />
-                ) : (
-                  <div className="tw-w-6 tw-h-6 tw-rounded-lg tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800" />
-                )}
-              </Link>
-              <Tooltip
-                id={`voter-${voter.profile.handle}`}
-                place="top"
-                offset={8}
-                opacity={1}
-                style={{
-                  padding: "4px 8px",
-                  background: "#37373E",
-                  color: "white",
-                  fontSize: "13px",
-                  fontWeight: 500,
-                  borderRadius: "6px",
-                  boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
-                  zIndex: 99999,
-                  pointerEvents: "none",
-                }}
-              >
-                {voter.profile.handle} - {formatNumberWithCommas(voter.rating)}
-              </Tooltip>
-            </React.Fragment>
-          ))}
+      {/* Keep voters and voting centered together, above the secondary summary. */}
+      <div
+        className="tw-flex tw-items-center tw-justify-between tw-gap-4 @[700px]:tw-justify-end"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className="tw-flex tw-items-center tw-gap-2">
+          {topVoters.length > 0 && (
+            <div className="tw-flex tw-items-center -tw-space-x-2">
+              {topVoters.map((voter) => {
+                const identity =
+                  voter.profile.handle ?? voter.profile.primary_address;
+                const tooltipId = `voter-${drop.id}-${identity}`;
+
+                return (
+                  <React.Fragment key={identity}>
+                    <Link
+                      href={`/${identity}`}
+                      onClick={(e) => e.stopPropagation()}
+                      data-tooltip-id={tooltipId}
+                      aria-label={t(locale, "waves.myVotes.voterAvatar", {
+                        profile: identity,
+                      })}
+                      className="tw-rounded-md focus-visible:tw-relative focus-visible:tw-z-10 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
+                    >
+                      {voter.profile.pfp ? (
+                        <Image
+                          className="tw-h-6 tw-w-6 tw-rounded-md tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800 tw-object-contain"
+                          src={getScaledImageUri(
+                            voter.profile.pfp,
+                            ImageScale.W_AUTO_H_50
+                          )}
+                          alt=""
+                          width={24}
+                          height={24}
+                        />
+                      ) : (
+                        <div className="tw-h-6 tw-w-6 tw-rounded-lg tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800" />
+                      )}
+                    </Link>
+                    <Tooltip
+                      id={tooltipId}
+                      place="top"
+                      offset={8}
+                      opacity={1}
+                      style={{
+                        padding: "4px 8px",
+                        background: "#37373E",
+                        color: "white",
+                        fontSize: "13px",
+                        fontWeight: 500,
+                        borderRadius: "6px",
+                        boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+                        zIndex: 99999,
+                        pointerEvents: "none",
+                      }}
+                    >
+                      {identity} - {formatNumberWithCommas(voter.rating)}
+                    </Tooltip>
+                  </React.Fragment>
+                );
+              })}
+            </div>
+          )}
+          <ParticipationDropVoteDetailsTrigger
+            drop={drop}
+            visualVariant="memes"
+          />
         </div>
-        <ParticipationDropVoteDetailsTrigger
-          drop={drop}
-          visualVariant="memes"
-        />
+        {voteButton}
       </div>
-      <DropLargestVote drop={drop} className="tw-w-full" />
+      <DropLargestVote drop={drop} className="@[700px]:tw-col-span-2" />
     </div>
   );
 };
