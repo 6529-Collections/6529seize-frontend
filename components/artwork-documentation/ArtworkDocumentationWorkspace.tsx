@@ -27,6 +27,7 @@ import DocumentationAuthGate, {
 import {
   DocumentationButton,
   DocumentationNotice,
+  panelClass,
   inputClass,
   useDocumentationMessages,
 } from "./DocumentationControls";
