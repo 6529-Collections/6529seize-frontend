@@ -32,18 +32,20 @@ remain explicitly Alchemy-backed until separately replaced.
 
 ## Frontend implementation scope
 
-1. Delete the unused Alchemy service facade, four unused implementation
-   modules, and their orphaned test.
-2. Keep the active Alchemy types and utilities.
-3. Add `ETHEREUM_RPC_URL` to server-side environment validation, samples, and
+1. [x] Delete the unused Alchemy service facade, four unused implementation
+   modules, and their orphaned test
+   ([frontend PR #3915](https://github.com/6529-Collections/6529seize-frontend/pull/3915)).
+2. [x] Keep the active Alchemy types and utilities; remove only exports made
+   obsolete by the cleanup in frontend PR #3915.
+3. [ ] Add `ETHEREUM_RPC_URL` to server-side environment validation, samples, and
    deployment configuration. Do not expose it through `NEXT_PUBLIC_*` or any
    browser runtime configuration.
-4. Provide one server-only construction path for ordinary mainnet reads.
-5. Migrate server-owned Open Graph block, ENS, and contract reads from default
+4. [ ] Provide one server-only construction path for ordinary mainnet reads.
+5. [ ] Migrate server-owned Open Graph block, ENS, and contract reads from default
    and hard-coded transports to that shared boundary.
-6. Keep active Alchemy NFT routes and metadata fallbacks on
+6. [ ] Keep active Alchemy NFT routes and metadata fallbacks on
    `ALCHEMY_API_KEY`.
-7. Add focused configuration and provider-boundary tests, including proof that
+7. [ ] Add focused configuration and provider-boundary tests, including proof that
    the RPC URL is not included in browser-visible configuration.
 
 ## Out of scope
