@@ -46,7 +46,6 @@ import {
   type SidebarPageEntry,
   useSidebarSections,
 } from "@/hooks/useSidebarSections";
-import { useWaves } from "@/hooks/useWaves";
 import { formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -73,6 +72,7 @@ import {
   type FilterableCategory,
 } from "./constants";
 import { HeaderSearchSiteResults } from "./HeaderSearchSiteResults";
+import { useHeaderSearchWaves } from "./useHeaderSearchWaves";
 import {
   getCompositePageSearchValues,
   getPageMatchPriority,
@@ -435,13 +435,7 @@ function ScopedHeaderSearchModal({
     isFetching: isFetchingWaves,
     error: wavesError,
     refetch: refetchWaves,
-  } = useWaves({
-    identity: null,
-    waveName: shouldSearchDefault ? trimmedDebouncedValue : null,
-    limit: 20,
-    enabled: shouldSearchDefault,
-    directMessage: false,
-  });
+  } = useHeaderSearchWaves(trimmedDebouncedValue, shouldSearchDefault);
 
   const pageResults = useMemo(
     () =>
