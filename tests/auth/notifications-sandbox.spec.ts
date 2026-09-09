@@ -404,7 +404,12 @@ test.describe("Notifications local sandbox @auth @medium @local-only", () => {
         name: "Reply",
         exact: true,
       });
-      const bounds = await card.boundingBox();
+      const content = card.getByRole("button", {
+        name: "Sandbox following notification drop.",
+        exact: true,
+      });
+      await content.scrollIntoViewIfNeeded();
+      const bounds = await content.boundingBox();
       expect(bounds).not.toBeNull();
       const touch = await page.context().newCDPSession(page);
       await touch.send("Input.dispatchTouchEvent", {
@@ -412,7 +417,7 @@ test.describe("Notifications local sandbox @auth @medium @local-only", () => {
         touchPoints: [
           {
             x: bounds!.x + bounds!.width / 2,
-            y: bounds!.y + Math.min(100, bounds!.height / 2),
+            y: bounds!.y + bounds!.height / 2,
           },
         ],
       });
