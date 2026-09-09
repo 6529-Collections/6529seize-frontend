@@ -99,12 +99,12 @@ export default function UserPageRepHeader({
         <div className="tw-absolute tw-bottom-0 tw-right-0 tw-top-0 tw-w-px tw-bg-gradient-to-b tw-from-transparent tw-via-blue-400/10 tw-to-transparent" />
 
         <div className="tw-relative tw-p-6">
-          <div className="tw-flex tw-items-end tw-justify-between tw-gap-6">
+          <div className="tw-flex tw-items-start tw-justify-between tw-gap-6">
             <div className="tw-min-w-0">
-              <h2 className="tw-mb-1 tw-text-xl tw-font-semibold tw-text-iron-100">
+              <h2 className="tw-mb-1 tw-mt-0 tw-text-xl tw-font-semibold tw-text-iron-100">
                 Rep
               </h2>
-              <p className="tw-mb-0 tw-text-sm tw-font-normal tw-leading-relaxed tw-text-iron-500">
+              <p className="tw-m-0 tw-text-sm tw-font-normal tw-leading-relaxed tw-text-iron-500">
                 {repDirection === "received"
                   ? "What others recognize this identity for."
                   : "What this identity recognizes others for."}
