@@ -287,10 +287,10 @@ export function ExploreWaveCard({
       href={waveHref}
       prefetch={false}
       className={clsx(
-        "tw-group tw-relative tw-flex tw-h-full tw-transform-gpu tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-bg-iron-950 tw-text-left tw-no-underline tw-transition-[transform,border-color,background-color] tw-duration-500 tw-ease-out focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/60 desktop-hover:hover:-tw-translate-y-1 desktop-hover:hover:tw-border-white/10 desktop-hover:hover:tw-bg-iron-900/70 motion-reduce:tw-transform-none motion-reduce:tw-transition-none",
+        "tw-group tw-relative tw-flex tw-h-full tw-transform-gpu tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-bg-iron-950 tw-text-left tw-no-underline tw-transition-[transform,border-color,background-color] tw-duration-500 tw-ease-out focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/60 desktop-hover:hover:-tw-translate-y-1 desktop-hover:hover:tw-bg-iron-900/70 motion-reduce:tw-transform-none motion-reduce:tw-transition-none",
         isDiscover
-          ? "tw-min-h-[22rem] tw-border-white/10"
-          : "tw-border-white/[0.04] tw-p-2"
+          ? "tw-min-h-[22rem] tw-border-iron-800/80 desktop-hover:hover:tw-border-iron-700"
+          : "tw-border-white/[0.04] tw-p-2 desktop-hover:hover:tw-border-white/10"
       )}
       aria-label={cardAriaLabel}
     >
@@ -324,7 +324,7 @@ export function ExploreWaveCard({
       {isDiscover && (
         <div
           aria-hidden="true"
-          className="tw-pointer-events-none tw-absolute tw-inset-0 tw-bg-gradient-to-t tw-from-black tw-from-[20%] tw-via-black/95 tw-via-[50%] tw-to-transparent"
+          className="tw-pointer-events-none tw-absolute tw-inset-0 tw-bg-gradient-to-t tw-from-iron-950 tw-from-[15%] tw-via-iron-950/85 tw-via-[50%] tw-to-transparent"
         />
       )}
 
