@@ -1,6 +1,8 @@
 import type { QueryClient } from "@tanstack/react-query";
 import type { ApiAttachment } from "@/generated/models/ApiAttachment";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import { ApiDropType } from "@/generated/models/ApiDropType";
+import type { ApiDropV2View } from "@/services/api/drop-v2-view.types";
 import { reconcileDropAuthenticatedPollVote } from "@/helpers/waves/poll-vote-reconciliation";
 import { QueryKey } from "../ReactQueryWrapper";
 import {
@@ -68,13 +70,61 @@ function isMatchingDrop(
 interface DropReplacementOptions {
   readonly mergeWithExisting?: boolean;
   readonly preferExistingPollVote?: boolean;
+  /** Rating updates cannot retain leaderboard-only allocation insights. */
+  readonly clearLargestVote?: boolean;
+}
+
+function reconcileCachedLargestVote(
+  drop: ApiDropV2View,
+  existingDrop: Partial<ApiDropV2View>,
+  clearLargestVote: boolean
+): ApiDropV2View {
+  const submissionContext = drop.submission_context;
+  if (
+    clearLargestVote ||
+    drop.drop_type !== ApiDropType.Participatory ||
+    drop.raters_count === 0
+  ) {
+    if (!submissionContext?.voting.largest_vote) {
+      return drop;
+    }
+
+    const voting = { ...submissionContext.voting };
+    delete voting.largest_vote;
+    return {
+      ...drop,
+      submission_context: { ...submissionContext, voting },
+    };
+  }
+
+  const previousContext = existingDrop.submission_context;
+  if (
+    submissionContext?.voting.largest_vote ||
+    !previousContext?.voting.largest_vote
+  ) {
+    return drop;
+  }
+
+  // Ordinary drop reads omit this leaderboard-only field. Non-vote updates
+  // retain it, using the incoming context when the response includes one.
+  const updatedContext = submissionContext ?? previousContext;
+  return {
+    ...drop,
+    submission_context: {
+      ...updatedContext,
+      voting: {
+        ...updatedContext.voting,
+        largest_vote: previousContext.voting.largest_vote,
+      },
+    },
+  };
 }
 
 function replaceMatchingDrop(
   value: Record<string, unknown>,
   drop: ApiDrop,
   options: DropReplacementOptions
-): ApiDrop {
+): ApiDropV2View {
   const dropWithFinalizedAttachments = reconcileFinalizedDropAttachments(
     drop,
     value
@@ -90,7 +140,7 @@ function replaceMatchingDrop(
           preferExistingVote: preferExistingPollVote,
         });
 
-  return {
+  const updatedDrop: ApiDropV2View = {
     ...reconciledDrop,
     ...(value["type"] !== undefined && { type: value["type"] }),
     ...(value["stableKey"] !== undefined && {
@@ -100,6 +150,11 @@ function replaceMatchingDrop(
       stableHash: value["stableHash"],
     }),
   };
+  return reconcileCachedLargestVote(
+    updatedDrop,
+    value as Partial<ApiDropV2View>,
+    options.clearLargestVote === true
+  );
 }
 
 function replaceDrop(

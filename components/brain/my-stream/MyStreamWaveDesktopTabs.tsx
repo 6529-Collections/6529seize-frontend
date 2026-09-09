@@ -21,7 +21,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { TabToggle } from "@/components/common/TabToggle";
 import { useSearchParams } from "next/navigation";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import { useWaveCurations } from "@/hooks/waves/useWaveCurations";
+import { useWaveCurationTabs } from "@/hooks/waves/useWaveCurationTabs";
 import { useWaveCurationReorderMutation } from "@/hooks/waves/useWaveCurationReorderMutation";
 import {
   useApproveWaveCustomTabLabels,
@@ -354,7 +354,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
       initialFutureWindow: 10,
     }
   );
-  const { data: curations = [] } = useWaveCurations({
+  const { data: curations = [] } = useWaveCurationTabs({
     waveId: wave.id,
   });
   const isConnectedProfileWaveAuthor = connectedProfile?.id === wave.author.id;

@@ -83,7 +83,7 @@ const getBackgroundClass = ({
     return PROPOSAL_CARD_SURFACE_CLASS;
   }
 
-  return "tw-bg-iron-950";
+  return "tw-bg-[var(--drop-card-background,theme(colors.iron.950))]";
 };
 
 export default function ParticipationDropContainer({

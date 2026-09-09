@@ -4,6 +4,7 @@ import WaveDropDeleteButton from "@/components/utils/button/WaveDropDeleteButton
 import VotingModal from "@/components/voting/VotingModal";
 import { useVotingModalState } from "@/components/voting/useVotingModalState";
 import { ApiDropType } from "@/generated/models/ApiDropType";
+import type { ApiDropVoteDistribution } from "@/generated/models/ApiDropVoteDistribution";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import { SingleWaveDropContent } from "./SingleWaveDropContent";
@@ -14,6 +15,7 @@ import { WaveDropVoteSummary } from "./WaveDropVoteSummary";
 
 interface SingleWaveDropInfoPanelProps {
   readonly drop: ExtendedDrop;
+  readonly voteDistribution?: ApiDropVoteDistribution | undefined;
   readonly isVotingClosed?: boolean | undefined;
   readonly isVotingControlsLocked?: boolean | undefined;
   readonly winningThreshold?: number | null | undefined;
@@ -21,6 +23,7 @@ interface SingleWaveDropInfoPanelProps {
 
 export const SingleWaveDropInfoPanel = ({
   drop,
+  voteDistribution,
   isVotingClosed = false,
   isVotingControlsLocked = false,
   winningThreshold,
@@ -63,7 +66,10 @@ export const SingleWaveDropInfoPanel = ({
 
             {!isChatWave && (
               <div className="tw-mt-6">
-                <SingleWaveDropInfoDetails drop={drop} />
+                <SingleWaveDropInfoDetails
+                  drop={drop}
+                  voteDistribution={voteDistribution}
+                />
               </div>
             )}
             {canDelete && drop.drop_type !== ApiDropType.Winner && (

@@ -4,6 +4,10 @@
 
 - Follow `ops/skills/deploy-6529/SKILL.md` for authorized staging and production
   work, using ordinary Git merges and the existing GitHub Actions workflows.
+- For new staging or direct production release intents that include frontend,
+  follow the skill's [Coordinator release recording](ops/skills/deploy-6529/SKILL.md#coordinator-release-recording)
+  step before release merges or deployments. Preserve this current integration
+  when changing deployment instructions; keep its details in the skill.
 - For staging, merge the development branch into the latest `1a-staging` and
   push. Frontend changes automatically start `Web Deploy - STAGING`; backend
   changes require dispatching `Deploy a service` for the required services.
@@ -124,6 +128,10 @@ All project commands must go through the repo-local `6529` wrapper.
 - Remove dependencies: `6529 remove <package>`.
 - Update dependencies: `6529 update [package]`.
 - Audit dependencies: `6529 audit` or `6529 audit:fix`.
+- If a dependency needs an install/build script, add it to `allowBuilds` in
+  `pnpm-workspace.yaml` and `ALLOWED_BUILD_DEPENDENCIES` in
+  `scripts/public-package-policy.cjs` in the same reviewed pull request. Do not
+  approve build scripts automatically.
 - Run app: `6529 run dev`. The default local app port is `3001`.
 - Run scripts: `6529 run <script>`.
 - Do not use plain `pnpm install`, `pnpm dev`, `npm run ...`,

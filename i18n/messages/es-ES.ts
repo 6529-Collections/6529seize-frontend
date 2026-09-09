@@ -1061,6 +1061,8 @@ export const ES_ES_MESSAGES = {
   "notifications.filter.ariaLabel": "Filtrar notificaciones: {selection}",
   "notifications.filter.selected": "{count} seleccionadas",
   "notifications.filter.sheetTitle": "Filtrar notificaciones",
+  "notifications.status.unread": "Sin leer",
+  "notifications.preview.expand": "Mostrar el drop completo",
   "notifications.filter.option.mentions": "Menciones",
   "notifications.filter.option.replies": "Respuestas",
   "notifications.filter.option.identity": "Identidad",

@@ -36,10 +36,13 @@ function ContextDetails({
       <span className="tw-mr-1 tw-text-xs tw-font-bold tw-text-iron-400">
         &#8226;
       </span>
-      <div className="tw-flex tw-flex-wrap tw-gap-x-3 tw-gap-y-1">
+      <div className="tw-flex tw-min-w-0 tw-max-w-full tw-flex-wrap tw-gap-x-3 tw-gap-y-1 [overflow-wrap:anywhere]">
         {displayableEntries.map(([key, value]) => (
-          <span key={key} className="tw-text-xs tw-text-iron-500">
-            <span className="tw-text-iron-600">{key}:</span> {value}
+          <span
+            key={key}
+            className="tw-min-w-0 tw-text-sm tw-leading-6 tw-text-iron-300"
+          >
+            <span className="tw-text-iron-400">{key}:</span> {value}
           </span>
         ))}
       </div>

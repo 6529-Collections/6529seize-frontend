@@ -280,7 +280,6 @@ jobs:
     permissions:
       contents: read
       issues: read
-      packages: read
     container:
       image: mcr.microsoft.com/playwright:v1.61.1-noble@sha256:5b8f294aff9041b7191c34a4bab3ac270157a28774d4b0660e9743297b697e48
       options: --ipc=host
@@ -334,7 +333,7 @@ jobs:
             ${{ runner.os }}-node22-pnpm-
 
       - name: Use cached pnpm store
-        run: ./bin/6529 exec pnpm config set store-dir ~/.pnpm-store
+        run: echo "npm_config_store_dir=$HOME/.pnpm-store" >> "$GITHUB_ENV"
 
       - name: Install Socket Firewall
         id: socket_firewall
@@ -347,7 +346,6 @@ jobs:
 
       - name: Install dependencies
         env:
-          NODE_AUTH_TOKEN: ${{ github.token }}
           SFW_BIN: ${{ steps.socket_firewall.outputs.firewall-path-binary }}
         run: ./bin/6529 ci
 
@@ -387,7 +385,6 @@ jobs:
     permissions:
       contents: read
       issues: read
-      packages: read
     strategy:
       fail-fast: true
       matrix: ${{ fromJSON(needs.plan.outputs.app_check_matrix) }}
@@ -480,7 +477,7 @@ jobs:
             ${{ runner.os }}-node22-pnpm-
 
       - name: Use cached pnpm store
-        run: ./bin/6529 exec pnpm config set store-dir ~/.pnpm-store
+        run: echo "npm_config_store_dir=$HOME/.pnpm-store" >> "$GITHUB_ENV"
 
       - name: Install Socket Firewall
         id: socket_firewall
@@ -493,7 +490,6 @@ jobs:
 
       - name: Install dependencies
         env:
-          NODE_AUTH_TOKEN: ${{ github.token }}
           SFW_BIN: ${{ steps.socket_firewall.outputs.firewall-path-binary }}
         run: ./bin/6529 ci
 

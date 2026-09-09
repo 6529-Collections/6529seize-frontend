@@ -5,6 +5,7 @@ import WaveDropActionsMore from "./WaveDropActionsMore";
 export const getWaveDropActionPresentation = ({
   drop,
   showStandaloneActionsButton,
+  standaloneQuickRemoveCuration,
   showInteractions,
   showReplyAndQuote,
   isMobileLayoutViewport,
@@ -14,6 +15,7 @@ export const getWaveDropActionPresentation = ({
 }: {
   readonly drop: WaveDropProps["drop"];
   readonly showStandaloneActionsButton: boolean;
+  readonly standaloneQuickRemoveCuration: WaveDropProps["standaloneQuickRemoveCuration"];
   readonly showInteractions: boolean;
   readonly showReplyAndQuote: boolean;
   readonly isMobileLayoutViewport: boolean;
@@ -40,16 +42,25 @@ export const getWaveDropActionPresentation = ({
     };
   }
 
+  const hasStandaloneAction =
+    Boolean(standaloneQuickRemoveCuration) && !drop.id.startsWith("temp-");
+
   return {
-    canUseMobileActionsSheet,
+    canUseMobileActionsSheet: canUseMobileActionsSheet && hasStandaloneAction,
     showActionsButton:
+      hasStandaloneAction &&
       showInteractions &&
       isMobileLayoutViewport &&
       !isEditing &&
       identityMode === "default",
     showActionsButtonOnMobile: isMobileLayoutViewport,
-    desktopActions: isMobileLayoutViewport ? undefined : (
-      <WaveDropActionsMore drop={drop} showOnlyQuickRemove />
-    ),
+    desktopActions:
+      isMobileLayoutViewport || !hasStandaloneAction ? undefined : (
+        <WaveDropActionsMore
+          drop={drop}
+          showOnlyQuickRemove
+          standaloneQuickRemoveCuration={standaloneQuickRemoveCuration}
+        />
+      ),
   };
 };

@@ -2,12 +2,11 @@
 
 import { useCompactMode } from "@/contexts/CompactModeContext";
 import { useEditingDrop } from "@/contexts/EditingDropContext";
-import type { ApiCreateDropPart } from "@/generated/models/ApiCreateDropPart";
 import type { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
 import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
 import { ApiDropType } from "@/generated/models/ApiDropType";
-import type { ApiUpdateDropRequest } from "@/generated/models/ApiUpdateDropRequest";
+import { buildDropUpdateRequest } from "@/helpers/waves/drop-update.helpers";
 import { useDropUpdateMutation } from "@/hooks/drops/useDropUpdateMutation";
 import useDropActionInteractionMode from "@/hooks/useDropActionInteractionMode";
 import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
@@ -80,6 +79,7 @@ const WaveDropInner = ({
   timestampLayout = "inline",
   showInteractions = true,
   showStandaloneActionsButton = false,
+  standaloneQuickRemoveCuration = null,
   inlineAuthorOnDesktop = false,
   mediaImageScale,
   fullWidthMedia = false,
@@ -189,6 +189,7 @@ const WaveDropInner = ({
   } = getWaveDropActionPresentation({
     drop,
     showStandaloneActionsButton,
+    standaloneQuickRemoveCuration,
     showInteractions: effectiveShowInteractions,
     showReplyAndQuote,
     isMobileLayoutViewport,
@@ -498,48 +499,13 @@ const WaveDropInner = ({
       _mentionedGroups?: ApiDropGroupMention[],
       mentionedWaves?: ApiMentionedWave[]
     ) => {
-      // Clean mentioned users to only include allowed fields for API
-      const cleanedMentions = (mentions ?? drop.mentioned_users).map(
-        (user) => ({
-          mentioned_profile_id: user.mentioned_profile_id,
-          handle_in_content: user.handle_in_content,
-          // Exclude current_handle as it's not allowed in update requests
-        })
-      );
-      const cleanedWaves = (mentionedWaves ?? drop.mentioned_waves).map(
-        (wave) => ({
-          wave_id: wave.wave_id,
-          wave_name_in_content: wave.wave_name_in_content,
-        })
-      );
-      const updatedParts: ApiCreateDropPart[] = drop.parts.map(
-        (part, index) => {
-          const attachments = (part.attachments ?? []).map((attachment) => ({
-            attachment_id: attachment.attachment_id,
-          }));
-          const requestPart: ApiCreateDropPart = {
-            content: index === activePartIndex ? newContent : part.content,
-            quoted_drop: part.quoted_drop ?? null,
-            media: part.media,
-          };
-
-          if (attachments.length) {
-            requestPart.attachments = attachments;
-          }
-
-          return requestPart;
-        }
-      );
-
-      const updateRequest: ApiUpdateDropRequest = {
-        parts: updatedParts,
-        title: drop.title,
-        metadata: drop.metadata,
-        referenced_nfts: drop.referenced_nfts,
-        mentioned_users: cleanedMentions,
-        mentioned_waves: cleanedWaves,
-        signature: null,
-      };
+      const updateRequest = buildDropUpdateRequest({
+        drop,
+        activePartIndex,
+        newContent,
+        mentions,
+        mentionedWaves,
+      });
 
       // Optimistically close the editor
       setEditingDropId(null);
@@ -645,6 +611,7 @@ const WaveDropInner = ({
     onEdit: handleOnEdit,
     onBoostAnimation: handleMobileBoostAnimation,
     showOnlyQuickRemove: showStandaloneActionsButton,
+    standaloneQuickRemoveCuration,
   });
 
   const dropClasses = getDropClasses(

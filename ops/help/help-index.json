@@ -5,6 +5,35 @@
   "base_url": "https://6529.io",
   "records": [
     {
+      "id": "waves.memes.submission-identity",
+      "kind": "workflow",
+      "title": "Memes submission profile and wallet confirmation",
+      "aliases": ["submitting as", "submit artwork", "Memes submission wallet"],
+      "keywords": [
+        "memes",
+        "submission",
+        "profile",
+        "wallet",
+        "eligible",
+        "amber",
+        "green"
+      ],
+      "facts": [
+        "Additional Information and Submission Preview show the authenticated submitting profile's avatar and handle beside grouped action buttons on desktop, even when its wallet is disconnected. On smaller screens, the buttons sit below the identity and can wrap. Normal eligibility is not labeled; eligibility checks, errors, and blocking explanations remain visible.",
+        "The connection dot on the avatar is amber when the active profile's wallet is not connected and green when it is connected. Hover, keyboard focus, or tap the avatar reveals Connect a wallet to submit or Wallet connected. The footer does not show a Submitting as label, wallet address, or wallet-provider name. Back actions use a quiet text style while Preview stays outlined and the primary action stays filled.",
+        "Connect Wallet replaces Submit Artwork when the active profile has no signing connection. Connecting never starts artwork submission automatically; review the profile and click Submit Artwork separately.",
+        "Connecting B's wallet while A remains the active authenticated profile leaves A in the strip with an amber dot. Explicitly switching the active profile updates the strip and checks that profile's eligibility before allowing submission.",
+        "The primary action stays disabled during upload, signing, and processing, with phase-specific progress text."
+      ],
+      "canonical_path": "/waves",
+      "related_paths": ["/waves"],
+      "tags": ["waves", "memes", "submission"],
+      "source_refs": [
+        "ops/docs/waves/memes/feature-memes-preview-and-submit-states.md",
+        "components/waves/memes/submission/ui/SubmissionIdentityPanel.tsx"
+      ]
+    },
+    {
       "id": "content-moderation.controls",
       "kind": "workflow",
       "title": "Content moderation and personal visibility controls",
@@ -3186,7 +3215,9 @@
         "memes main stage",
         "main stage submission",
         "can't submit to memes main stage",
-        "quick vote memes"
+        "quick vote memes",
+        "uncast power",
+        "change quick vote amount"
       ],
       "keywords": [
         "memes",
@@ -3212,6 +3243,11 @@
       ],
       "facts": [
         "Memes wave docs cover submission, preview/submit states, additional info fields, and quick voting.",
+        "Memes Quick Vote opens from the Uncast Power card or compact bolt-count trigger in supported Waves footers when an authenticated non-proxy profile has remaining voting power and unrated submissions.",
+        "The Quick Vote dialog shows submission counts at the top and remaining voting power above the bottom controls: Change vote amount on the left, Vote in the center, and Skip on the right.",
+        "Quick Vote custom entry starts closed. Open Change vote amount to type an amount, then select Vote or press Enter. Closing the editor retains the draft for reopening on the same submission; typing alone does not save it as a remembered amount. Selecting a remembered amount submits that vote.",
+        "In the native app's mobile layout, the Quick Vote dialog shrinks when the keyboard opens to keep the amount input and voting controls above it.",
+        "Quick Vote descriptions collapse to two lines in the mobile layout and four on desktop; See more appears only when text is hidden. Swipe chevrons appear only on touch screens in the mobile layout, where swiping right votes and swiping left skips. Use Vote and Skip in a narrow browser without touch input.",
         "The Memes - Main Stage is a Memes wave context, not the /the-memes collection browse or mint route.",
         "Submission availability depends on login, proxy mode, participation eligibility, the submission window, and per-user submission limits.",
         "If the submit control is hidden or shows a restriction icon or label, select or focus the restriction control to read why submission is unavailable, then recover by logging in, disabling proxy mode, waiting for the submission window, or freeing submission capacity.",
@@ -3228,6 +3264,7 @@
       "source_refs": [
         "ops/docs/waves/memes/README.md",
         "ops/docs/waves/memes/feature-memes-submission.md",
+        "ops/docs/waves/memes/feature-memes-quick-vote.md",
         "ops/docs/waves/leaderboard/feature-drop-entry-and-eligibility.md",
         "ops/docs/waves/troubleshooting-wave-navigation-and-posting.md"
       ]
@@ -4730,6 +4767,7 @@
       ],
       "facts": [
         "The notifications feed lives at /notifications.",
+        "Opening Notifications marks notifications read. Rows still reported as unread display an Unread label and dot; grouped reactions are unread while any notification in the group is unread. The label disappears when refreshed data confirms the notifications are read.",
         "A connected wallet without a profile sees the profile setup prompt and can open its profile setup route with Create profile.",
         "It supports a responsive multi-select feed filter, row actions, read state, paging, and navigation to related app content.",
         "The notification filter opens as a bottom sheet in the mobile layout and as an anchored dropdown on wider viewports.",
@@ -5382,7 +5420,10 @@
         "chat tabs",
         "gallery tab",
         "polls tab",
-        "poll results"
+        "poll results",
+        "switch curation",
+        "curation tabs",
+        "your curation view"
       ],
       "keywords": [
         "waves",
@@ -5391,12 +5432,17 @@
         "chat",
         "gallery",
         "polls",
-        "results"
+        "results",
+        "curation"
       ],
       "facts": [
         "Wave content tabs organize the visible wave content area.",
         "Some waves can switch between chat and gallery-style views.",
         "Available tabs depend on wave type, state, and content.",
+        "Named curations are collections of posts from a wave. Switch between them using their tabs below the wave header on desktop and mobile web, or alongside the main wave navigation tabs in the native app. Select a regular tab such as Chat to leave the curation view.",
+        "Curation navigation is available to viewers and admins through the tabs. Configuration contains admin-only curation management, with no separate curation view picker.",
+        "A single curation has its own named tab. When many tabs overflow the row, scroll horizontally or swipe on touch layouts; the active tab scrolls into view.",
+        "A valid ?curation={curationId} wave link opens that curation. If the curation was deleted or does not belong to this wave, the wave returns to its regular view after available curations load successfully. Loading or a failed request does not discard the linked curation.",
         "Native app Back restores the wave section from that visit, such as returning from an author profile to Leaderboard; normally opening another wave still uses its default section.",
         "Open unanswered polls can show a View results control so eligible readers can inspect counts and percentages before voting, then return to Vote while the poll is open."
       ],
@@ -5405,7 +5451,9 @@
       "tags": ["waves", "tabs"],
       "source_refs": [
         "ops/docs/waves/chat/feature-content-tabs.md",
-        "ops/docs/waves/header/feature-chat-gallery-toggle.md"
+        "ops/docs/waves/header/feature-chat-gallery-toggle.md",
+        "components/brain/my-stream/MyStreamWaveDesktopTabs.tsx",
+        "components/brain/mobile/BrainMobileTabs.tsx"
       ]
     },
     {
@@ -6099,17 +6147,51 @@
       "id": "waves.leaderboard.top-voters",
       "kind": "route",
       "title": "Wave top voters lists",
-      "aliases": ["top voters", "voter leaderboard", "who voted most"],
-      "keywords": ["waves", "leaderboard", "top", "voters", "votes"],
+      "aliases": [
+        "top voters",
+        "voter leaderboard",
+        "who voted most",
+        "largest vote",
+        "largest positive vote",
+        "largest negative vote",
+        "largest supporting vote",
+        "largest opposing vote",
+        "vote distribution"
+      ],
+      "keywords": [
+        "waves",
+        "leaderboard",
+        "top",
+        "voters",
+        "votes",
+        "positive",
+        "negative",
+        "support",
+        "opposition",
+        "others"
+      ],
       "facts": [
-        "Top voters lists are documented wave leaderboard surfaces.",
-        "They summarize voting participation where the wave exposes that data.",
+        "The right-sidebar Voters tab ranks voters across a rank wave; a single drop's collapsible Top voters section ranks voters for that drop. Both keep descending absolute totals and pagination. Single-drop rows show an explicit green plus for positive votes and coral minus for negative votes, both when both directions have amounts, and neither for zero-only rows. The adjacent number remains an absolute total, not a vote change. Wave-sidebar rows retain their colored markers.",
+        "Leaderboard List view items for participatory rank-wave drops can show Largest vote with a profile link and signed amount without opening Top voters. Grid cards do not show this highlight and keep their existing voter-count and voting controls. It is the largest current individual allocation by absolute size, so a negative vote can be selected.",
+        "A signed allocation belongs to one voter on this drop: plus is positive and minus is negative. It is not the voter's latest adjustment or their total across the wave.",
+        "In single-drop detail, an optional current-vote ribbon with Largest supporting vote (positive) and Largest opposing vote (negative) stays visible inside Top voters, beneath its header. Select the Top voters header row, apart from its separate download control, to toggle the voter rows below the summary; its indicator reads View voters when closed and Hide voters when open. Row ordering, absolute totals, and pagination are unchanged. Download All stays visible in the header, including when collapsed, and uses an icon-only button on narrow screens. It downloads all voters as CSV without toggling the list. The graph does not toggle the list, and collapsing the rows does not hide the summary.",
+        "Ribbon widths represent complete positive and negative allocation amounts before they offset each other. Each side highlights up to three individual allocations; the striped Others segment combines the remaining amount on that side, not a voter count.",
+        "Hover a ribbon segment to see its voter and exact signed amount; Others shows a combined amount. Tap or click anywhere on the ribbon, or keyboard-focus it, to see the complete breakdown, including very small segments. Largest supporting vote and Largest opposing vote are static summaries and do not open tooltips. Narrow screens show one Largest votes label above a single row of signed highlights; names shorten as needed while amounts remain visible. Escape or tapping outside dismisses the tooltip.",
+        "When one direction has no allocations, its sign and largest-voter highlight are hidden. A positive-only ribbon shows no minus sign, and a negative-only ribbon shows no plus sign.",
+        "Current allocation totals are separate from the calculated and projected score in the existing TDH Total strip. Time weighting can make those scores differ from the raw positive-plus-negative net; voting rules and leaderboard ranking are unchanged.",
+        "Largest-vote and distribution summaries are optional and limited to participatory RANK drops. They are omitted for winners, CHAT and APPROVE waves, or unavailable data. Missing summaries do not prove there are no votes or no negative votes.",
+        "An open drop's distribution refreshes after the user edits or resets a vote and when relevant real-time drop or vote updates arrive; closely spaced updates are grouped. Reopening detail can reuse a result for up to 60 seconds unless a vote update requests fresh data. There is no periodic polling, and the summary is not a live activity log.",
+        "Reactions and content updates preserve the latest available card highlight. The user's own or incoming real-time vote changes clear it until the leaderboard's next normal refresh. Voting does not force the leaderboard to reload or reorder.",
         "Top voters are distinct from winners, which are about submitted drops or outcomes."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves"],
       "tags": ["waves", "leaderboard", "voters"],
-      "source_refs": ["ops/docs/waves/leaderboard/feature-top-voters-lists.md"]
+      "source_refs": [
+        "ops/docs/waves/leaderboard/feature-top-voters-lists.md",
+        "ops/docs/waves/leaderboard/feature-gallery-cards.md",
+        "ops/docs/waves/drop-actions/feature-vote-summary-and-modal.md"
+      ]
     },
     {
       "id": "waves.leaderboard.sales",

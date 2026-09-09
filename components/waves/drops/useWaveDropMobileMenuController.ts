@@ -26,6 +26,7 @@ export const useWaveDropMobileMenuController = ({
   showReplyAndQuote,
   showVoting,
   showOnlyQuickRemove,
+  standaloneQuickRemoveCuration,
 }: WaveDropMobileMenuControllerInput) => {
   const mobileMenu = useWaveDropMobileMenu();
 
@@ -47,6 +48,7 @@ export const useWaveDropMobileMenuController = ({
       showCopyOption,
       showVoting,
       showOnlyQuickRemove,
+      standaloneQuickRemoveCuration,
     });
   }, [
     drop,
@@ -64,6 +66,7 @@ export const useWaveDropMobileMenuController = ({
     showReplyAndQuote,
     showVoting,
     showOnlyQuickRemove,
+    standaloneQuickRemoveCuration,
   ]);
 
   useEffect(() => {

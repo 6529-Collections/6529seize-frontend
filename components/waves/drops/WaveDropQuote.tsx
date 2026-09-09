@@ -162,14 +162,14 @@ function WaveDropQuoteBody({
             <WaveDropQuoteProfilePicture drop={drop} />
           </div>
         </div>
-        <div className="tw-flex tw-w-full tw-flex-col">
-          <div className="tw-flex tw-items-center tw-gap-x-2">
-            <div className="tw-flex tw-items-center tw-gap-x-2">
+        <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col">
+          <div className="tw-flex tw-min-h-6 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
+            <div className="tw-flex tw-min-w-0 tw-max-w-full tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
               {quoteAuthorLabel && (
-                <p className="tw-mb-0 tw-text-md tw-font-semibold tw-leading-none">
+                <p className="tw-m-0 tw-min-w-0 tw-max-w-full tw-text-md tw-font-semibold tw-leading-5 [overflow-wrap:anywhere]">
                   <Link
                     href={`/${quoteAuthorLabel}`}
-                    className="tw-text-iron-200 tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-500"
+                    className="tw-rounded-sm tw-text-iron-200 tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-500 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
                   >
                     {quoteAuthorLabel}
                   </Link>
@@ -185,17 +185,17 @@ function WaveDropQuoteBody({
             </div>
 
             {!!drop && (
-              <>
+              <div className="tw-flex tw-items-center tw-gap-x-2">
                 <div className="tw-size-[3px] tw-flex-shrink-0 tw-rounded-full tw-bg-iron-700"></div>
                 <WaveDropTime timestamp={drop.created_at} />
-              </>
+              </div>
             )}
           </div>
-          <div>
+          <div className="tw-mt-1">
             {drop && waveHref && (
               <Link
                 href={waveHref}
-                className="tw-leading-0 -tw-mt-1 tw-text-[11px] tw-text-iron-500 tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-300"
+                className="tw-block tw-rounded-sm tw-text-xs tw-leading-4 tw-text-iron-400 tw-no-underline tw-transition tw-duration-300 tw-ease-out [overflow-wrap:anywhere] hover:tw-text-iron-300 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
               >
                 {drop.wave.name}
               </Link>

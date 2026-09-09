@@ -10,6 +10,7 @@ import type {
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import type { ImageScale } from "@/helpers/image.helpers";
+import type { QuickCurationAction } from "@/hooks/drops/useCanShowDropCurationsAction";
 import { useMemo } from "react";
 import DropContext from "./DropContext";
 import { DropLocation } from "./drop.types";
@@ -44,6 +45,10 @@ interface DropProps {
   readonly timestampLayout?: DropTimestampLayout | undefined;
   readonly showInteractions?: boolean | undefined;
   readonly showStandaloneActionsButton?: boolean | undefined;
+  readonly standaloneQuickRemoveCuration?:
+    | QuickCurationAction
+    | null
+    | undefined;
   readonly inlineAuthorOnDesktop?: boolean | undefined;
   readonly mediaImageScale?: ImageScale | undefined;
   readonly fullWidthMedia?: boolean | undefined;
@@ -81,6 +86,7 @@ export default function Drop({
   timestampLayout,
   showInteractions = true,
   showStandaloneActionsButton = false,
+  standaloneQuickRemoveCuration,
   inlineAuthorOnDesktop,
   mediaImageScale,
   fullWidthMedia,
@@ -185,6 +191,7 @@ export default function Drop({
         timestampLayout={timestampLayout}
         showInteractions={showInteractions}
         showStandaloneActionsButton={showStandaloneActionsButton}
+        standaloneQuickRemoveCuration={standaloneQuickRemoveCuration}
         inlineAuthorOnDesktop={inlineAuthorOnDesktop}
         mediaImageScale={mediaImageScale}
         fullWidthMedia={fullWidthMedia}

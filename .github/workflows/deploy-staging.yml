@@ -11,7 +11,6 @@ on:
 permissions:
   actions: read
   contents: read
-  packages: read
 
 concurrency:
   group: staging-deploy
@@ -32,7 +31,6 @@ jobs:
     timeout-minutes: 60
     permissions:
       contents: read
-      packages: read
     env:
       NODE_ENV: production
       VERSION: ${{ github.sha }}
@@ -84,7 +82,7 @@ jobs:
             ${{ runner.os }}-node22-pnpm-
 
       - name: Use cached pnpm store
-        run: ./bin/6529 exec pnpm config set store-dir ~/.pnpm-store
+        run: echo "npm_config_store_dir=$HOME/.pnpm-store" >> "$GITHUB_ENV"
 
       - name: Install Socket Firewall
         id: socket-firewall
@@ -94,7 +92,6 @@ jobs:
 
       - name: Install frozen dependencies
         env:
-          NODE_AUTH_TOKEN: ${{ github.token }}
           SFW_BIN: ${{ steps.socket-firewall.outputs.firewall-path-binary }}
         run: ./bin/6529 ci
 

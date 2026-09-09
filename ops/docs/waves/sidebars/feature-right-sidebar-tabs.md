@@ -58,9 +58,8 @@ linked section pages.
   labels on Approve waves, and curation creation, editing, deletion, and ordering
   controls. Those shared controls are completely hidden from non-administrators.
   When chat is enabled, Your display lets each viewer choose how boosted-drop
-  cards appear for them. A final personal curation selector appears when the wave
-  has curations. Both personal controls include explanatory tooltips and change
-  only the current viewer's view.
+  cards appear for them, with an explanatory tooltip. Switch between curations
+  from the [wave content tabs](../chat/feature-content-tabs.md).
 - `Rank` and `Approve` waves add `Voters` and `Activity` after `Configuration`.
 - For `Rank` and `Approve` waves, participants still review and sign
   acceptance-required rules in the submit terms modal.

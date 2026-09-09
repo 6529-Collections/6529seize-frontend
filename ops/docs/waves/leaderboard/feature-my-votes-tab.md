@@ -44,6 +44,9 @@ The tab is available only on eligible rank-wave layouts:
 
 ## Common Scenarios
 
+- Rows use a subtle charcoal background. Hovering an unselected row lightens
+  it further and highlights the title in blue; focusing the title with the
+  keyboard also highlights it in blue.
 - Vote input accepts numeric text, including temporary empty and `-` while you
   edit.
 - Values outside the row's min/max range are clamped while editing, with a
