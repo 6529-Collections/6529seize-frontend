@@ -6,12 +6,52 @@ import {
   waitForRouteReady,
 } from "../testHelpers";
 import {
+  dismissNextDevTools,
   expectNoUnsafeSandboxMutations,
   fetchSandboxRequests,
   LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
   useLocalSandboxMutationGuard,
 } from "../support/localSandbox";
-import type { Page } from "@playwright/test";
+import { devices, type Locator, type Page } from "@playwright/test";
+import { DEFAULT_LONG_PRESS_DURATION_MS } from "../../hooks/useLongPressInteraction";
+
+async function expectTooltipBesideButton(page: Page, button: Locator) {
+  await button.hover();
+  const tooltip = page.getByRole("tooltip");
+  await expect(tooltip).toBeVisible();
+  await expect(tooltip).toHaveCSS("opacity", "1");
+  await expect(tooltip).toHaveCSS("pointer-events", "none");
+  expect(
+    await tooltip.evaluate((element) => element.parentElement === document.body)
+  ).toBe(true);
+  await expect
+    .poll(
+      async () => {
+        const anchor = await button.boundingBox();
+        const label = await tooltip.boundingBox();
+        const viewport = page.viewportSize();
+        if (!anchor || !label || !viewport) return false;
+        const aboveGap = anchor.y - label.y - label.height;
+        const belowGap = label.y - anchor.y - anchor.height;
+        return (
+          label.x >= 0 &&
+          label.y >= 0 &&
+          label.x + label.width <= viewport.width &&
+          label.y + label.height <= viewport.height &&
+          label.x < anchor.x + anchor.width &&
+          label.x + label.width > anchor.x &&
+          ((aboveGap >= 0 && aboveGap <= 16) ||
+            (belowGap >= 0 && belowGap <= 16))
+        );
+      },
+      {
+        message:
+          "Tooltip must stay beside its button without overlap or viewport clipping",
+      }
+    )
+    .toBe(true);
+  return tooltip;
+}
 
 async function clickReplyForDropText(page: Page, dropText: string) {
   const drop = page
@@ -252,5 +292,154 @@ test.describe("Notifications local sandbox @auth @medium @local-only", () => {
     });
     await expectNoHorizontalOverflow(page);
     await expectNoUnsafeSandboxMutations(baseURL);
+  });
+
+  test("keeps action tooltips beside notifications across the scroll clipping edge", async ({
+    baseURL,
+    page,
+  }, testInfo) => {
+    await page.setViewportSize({ width: 1280, height: 400 });
+    await page.goto("/notifications", { waitUntil: "domcontentloaded" });
+    await waitForRouteReady(page);
+    const cards = page.locator("[data-wave-drop-id]");
+    await expect(cards).toHaveCount(3, {
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
+    await dismissNextDevTools(page);
+    await expect(page.locator(".layout-main")).toHaveCSS(
+      "will-change",
+      "transform"
+    );
+
+    for (const card of await cards.all()) {
+      await card.scrollIntoViewIfNeeded();
+      await card.hover();
+      await expect(card).toHaveCSS("background-color", "rgb(19, 19, 22)");
+      for (const name of [
+        "Click to react",
+        "Add reaction to drop",
+        "Reply to drop",
+        "Edit",
+        "More actions",
+      ]) {
+        const button = card.getByRole("button", { name, exact: true }).first();
+        await expectTooltipBesideButton(page, button);
+        await page.keyboard.press("Escape");
+        await expect(page.getByRole("tooltip")).toHaveCount(0);
+      }
+    }
+
+    const middleCard = cards.nth(1);
+    await middleCard.scrollIntoViewIfNeeded();
+    const reply = middleCard.getByRole("button", { name: "Reply to drop" });
+    await reply.evaluate((button) => {
+      const scroller = button.closest("[data-wave-drops-scroll-container]");
+      if (!(scroller instanceof HTMLElement))
+        throw new Error("Missing notifications scroller");
+      scroller.scrollTop +=
+        button.getBoundingClientRect().top -
+        scroller.getBoundingClientRect().top -
+        4;
+    });
+    await middleCard.hover();
+    const tooltip = await expectTooltipBesideButton(page, reply);
+    const scroller = page.locator("[data-wave-drops-scroll-container]");
+    const scrollBounds = await scroller.boundingBox();
+    const tooltipBounds = await tooltip.boundingBox();
+    expect(scrollBounds).not.toBeNull();
+    expect(tooltipBounds).not.toBeNull();
+    expect(tooltipBounds!.y).toBeLessThan(scrollBounds!.y);
+    await captureSafeScreenshot(
+      page,
+      testInfo,
+      "notification-tooltip-above-scroll-edge"
+    );
+
+    await scroller.evaluate((element) => {
+      element.scrollTop -= 30;
+    });
+    await expect(page.getByRole("tooltip")).toHaveCount(0);
+    await expectNoHorizontalOverflow(page);
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
+
+  test.describe("touch action tooltips", () => {
+    test.skip(
+      ({ browserName }) => browserName !== "chromium",
+      "Long-press touch input uses Chromium CDP."
+    );
+    test.use({
+      hasTouch: true,
+      isMobile: true,
+      userAgent: devices["Pixel 7"].userAgent,
+      deviceScaleFactor: devices["Pixel 7"].deviceScaleFactor,
+      viewport: { width: 390, height: 844 },
+    });
+
+    test("keeps the long-press menu available without stuck tooltip labels", async ({
+      baseURL,
+      page,
+    }, testInfo) => {
+      // The shared sandbox predates the menu's drop-curation membership query.
+      await page.route("**/api/drops/*/curations", async (route) => {
+        if (route.request().method() === "GET") {
+          await route.fulfill({ json: [] });
+        } else {
+          await route.fallback();
+        }
+      });
+      await page.goto("/notifications", { waitUntil: "domcontentloaded" });
+      await waitForRouteReady(page);
+      await dismissNextDevTools(page);
+      const card = page
+        .locator("[data-wave-drop-id]")
+        .filter({ hasText: "Sandbox following notification drop." });
+      await expect(card).toBeVisible({
+        timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+      });
+      await card.tap({ position: { x: 10, y: 8 } });
+      await expect(page.getByRole("tooltip")).toHaveCount(0);
+
+      const replyAction = page.getByRole("button", {
+        name: "Reply",
+        exact: true,
+      });
+      const content = card.getByRole("button", {
+        name: "Sandbox following notification drop.",
+        exact: true,
+      });
+      await content.scrollIntoViewIfNeeded();
+      const bounds = await content.boundingBox();
+      expect(bounds).not.toBeNull();
+      const touch = await page.context().newCDPSession(page);
+      await touch.send("Input.dispatchTouchEvent", {
+        type: "touchStart",
+        touchPoints: [
+          {
+            x: bounds!.x + bounds!.width / 2,
+            y: bounds!.y + bounds!.height / 2,
+          },
+        ],
+      });
+      // Keep contact through the real long-press threshold before releasing it.
+      await page.waitForTimeout(DEFAULT_LONG_PRESS_DURATION_MS + 150);
+      await touch.send("Input.dispatchTouchEvent", {
+        type: "touchEnd",
+        touchPoints: [],
+      });
+      await touch.detach();
+      await expect(replyAction).toBeVisible({ timeout: 10000 });
+      await expect(page.getByRole("tooltip")).toHaveCount(0);
+      await captureSafeScreenshot(
+        page,
+        testInfo,
+        "notification-touch-menu-without-tooltip"
+      );
+      await page.keyboard.press("Escape");
+      await expect(replyAction).toBeHidden();
+      await expect(page.getByRole("tooltip")).toHaveCount(0);
+      await expectNoHorizontalOverflow(page);
+      await expectNoUnsafeSandboxMutations(baseURL);
+    });
   });
 });
