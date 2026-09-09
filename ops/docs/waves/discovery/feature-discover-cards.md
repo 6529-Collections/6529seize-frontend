@@ -48,6 +48,8 @@ from home discovery.
   distinguish the raw total from the score.
 - Description text is limited to two lines. Cards keep space for the preview
   when it is absent, with drop count and relative activity time aligned below.
+- Loading cards reuse the shared solid iron wave-card skeleton pattern while
+  reserving the Discover card height.
 - Artwork is subtly desaturated at rest and returns to full color on hover or
   keyboard focus. Touch cards retain full color.
 - Sort and score-filter groups share a row when space allows and wrap when
