@@ -159,7 +159,7 @@ function SourceReceipt({
                     context,
                     field.target_field.split(".")[0] ?? "",
                     field.target_field.split(".")[1] ?? ""
-                  )?.value
+                  )?.value as unknown
                 }
               />
             </div>
@@ -167,7 +167,9 @@ function SourceReceipt({
               <p className="tw-text-xs tw-font-medium tw-text-iron-400">
                 {msg("sourceProposal")}
               </p>
-              <DocumentationValueSummary value={field.answer.value} />
+              <DocumentationValueSummary
+                value={field.answer.value as unknown}
+              />
             </div>
           </div>
           {field.will_overwrite && (

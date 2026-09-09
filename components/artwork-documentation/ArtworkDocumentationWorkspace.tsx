@@ -4,6 +4,10 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import {
+  ApiArtworkDocumentationContextConfirmationStatusEnum,
+  ApiArtworkDocumentationContextLifecycleEnum,
+} from "@/generated/models/ApiArtworkDocumentationContext";
 import type { ApiArtworkDocumentationContext } from "@/generated/models/ApiArtworkDocumentationContext";
 import { useDocumentationDraft } from "@/hooks/artwork-documentation/useDocumentationDraft";
 import { documentationQueryKey } from "@/hooks/artwork-documentation/useArtworkDocumentationAccess";
@@ -142,6 +146,8 @@ function WorkspaceEditor({
       if (
         target &&
         controller.snapshot().dirty &&
+        // This synchronous native prompt must cancel captured link navigation before private unsaved edits are lost.
+        // eslint-disable-next-line no-alert
         !globalThis.confirm(msg("leave"))
       ) {
         event.preventDefault();
@@ -177,7 +183,8 @@ function WorkspaceEditor({
         </p>
       </header>
       <DocumentationSaveStatus snapshot={draft} controller={controller} />
-      {context.confirmation_status === "newer_draft" && (
+      {context.confirmation_status ===
+        ApiArtworkDocumentationContextConfirmationStatusEnum.NewerDraft && (
         <DocumentationNotice>{msg("newerDraft")}</DocumentationNotice>
       )}
       <details className="tw-rounded-lg tw-bg-iron-900 tw-p-4">
@@ -301,7 +308,10 @@ function WorkspaceEditor({
               onBlur={() => {
                 void controller.flush();
               }}
-              readOnly={context.lifecycle === "archived"}
+              readOnly={
+                context.lifecycle ===
+                ApiArtworkDocumentationContextLifecycleEnum.Archived
+              }
               assets={assets}
             />
           )}
@@ -333,13 +343,19 @@ function WorkspaceEditor({
                 void controller.mutate((current, signal) =>
                   changeDocumentationLifecycle(
                     current,
-                    current.lifecycle === "active" ? "archived" : "active",
+                    current.lifecycle ===
+                      ApiArtworkDocumentationContextLifecycleEnum.Active
+                      ? "archived"
+                      : "active",
                     signal
                   )
                 );
               }}
             >
-              {context.lifecycle === "active" ? msg("archive") : msg("restore")}
+              {context.lifecycle ===
+              ApiArtworkDocumentationContextLifecycleEnum.Active
+                ? msg("archive")
+                : msg("restore")}
             </DocumentationButton>
           )}
         </div>

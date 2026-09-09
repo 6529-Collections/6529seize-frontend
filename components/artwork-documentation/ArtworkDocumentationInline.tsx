@@ -57,7 +57,7 @@ interface ArtworkDocumentationInlineProps {
 export const ArtworkDocumentationInline = forwardRef<
   ArtworkDocumentationInlineHandle,
   ArtworkDocumentationInlineProps
->(function ArtworkDocumentationInline(props, ref) {
+>((props, ref) => {
   return (
     <DocumentationAuthGate>
       <InlineStart {...props} ref={ref} />
@@ -65,10 +65,12 @@ export const ArtworkDocumentationInline = forwardRef<
   );
 });
 
+ArtworkDocumentationInline.displayName = "ArtworkDocumentationInline";
+
 const InlineStart = forwardRef<
   ArtworkDocumentationInlineHandle,
   ArtworkDocumentationInlineProps
->(function InlineStart(props, ref) {
+>((props, ref) => {
   const { msg } = useDocumentationMessages();
   const [context, setContext] = useState<ApiArtworkDocumentationContext | null>(
     null
@@ -99,9 +101,9 @@ const InlineStart = forwardRef<
         props.onContextCreated?.(created);
       }
     } catch {
-      if (!abort.current?.signal.aborted) setError(true);
+      if (!abort.current.signal.aborted) setError(true);
     } finally {
-      if (!abort.current?.signal.aborted) setBusy(false);
+      if (!abort.current.signal.aborted) setBusy(false);
     }
   };
   return (
@@ -137,13 +139,15 @@ const InlineStart = forwardRef<
   );
 });
 
+InlineStart.displayName = "ArtworkDocumentationInlineStart";
+
 const InlineEditor = forwardRef<
   ArtworkDocumentationInlineHandle,
   {
     readonly initial: ApiArtworkDocumentationContext;
     readonly sourceProposal: ArtworkDocumentationInlineProps["sourceProposal"];
   }
->(function InlineEditor({ initial, sourceProposal }, ref) {
+>(({ initial, sourceProposal }, ref) => {
   const { msg } = useDocumentationMessages();
   const draft = useDocumentationDraft(initial);
   const { controller } = draft;
@@ -254,3 +258,4 @@ const InlineEditor = forwardRef<
     </div>
   );
 });
+InlineEditor.displayName = "ArtworkDocumentationInlineEditor";

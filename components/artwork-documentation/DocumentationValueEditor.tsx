@@ -45,85 +45,16 @@ const languageEntry: ValueEditor = {
 };
 
 export default function DocumentationValueEditor(props: Props) {
-  const {
-    id,
-    label,
-    editor,
-    value,
-    onChange,
-    disabled,
-    assets = [],
-    describedBy,
-  } = props;
+  const { id, label, editor, value, onChange, disabled, describedBy } = props;
   const { msg } = useDocumentationMessages();
   if (editor.kind === "object")
     return <ObjectEditor {...props} editor={editor} />;
   if (editor.kind === "list") return <ListEditor {...props} editor={editor} />;
-  if (editor.kind === "localized") {
-    const current = recordValue(value ?? initialValue(editor));
-    return (
-      <div className="tw-space-y-4">
-        <DocumentationValueEditor
-          id={`${id}-primary`}
-          label={msg("primaryLanguage")}
-          editor={{ kind: "text", max: 64 }}
-          value={current["primary_language"]}
-          disabled={disabled}
-          onChange={(language) =>
-            onChange({ ...current, primary_language: language })
-          }
-        />
-        <ListEditor
-          {...props}
-          editor={{ kind: "list", max: 10, item: languageEntry }}
-          value={current["versions"]}
-          onChange={(versions) => onChange({ ...current, versions })}
-        />
-      </div>
-    );
-  }
+  if (editor.kind === "localized")
+    return <LocalizedEditor {...props} editor={editor} />;
   if (editor.kind === "date") return <DateEditor {...props} />;
-  if (editor.kind === "asset") {
-    const selected = Array.isArray(value) ? value : [value];
-    return (
-      <div>
-        <label htmlFor={id} className="tw-sr-only">
-          {label}
-        </label>
-        <select
-          id={id}
-          className={inputClass}
-          disabled={disabled}
-          aria-describedby={describedBy}
-          multiple={editor.multiple}
-          value={
-            editor.multiple
-              ? selected.map(String)
-              : typeof value === "string"
-                ? value
-                : ""
-          }
-          onChange={(event) =>
-            onChange(
-              editor.multiple
-                ? Array.from(
-                    event.target.selectedOptions,
-                    (option) => option.value
-                  )
-                : event.target.value
-            )
-          }
-        >
-          {!editor.multiple && <option value="">{msg("choose")}</option>}
-          {assets.map((asset) => (
-            <option key={asset.id} value={asset.id}>
-              {asset.label}
-            </option>
-          ))}
-        </select>
-      </div>
-    );
-  }
+  if (editor.kind === "asset")
+    return <AssetEditor {...props} editor={editor} />;
   if (editor.kind === "boolean")
     return (
       <label className="tw-flex tw-min-h-11 tw-items-center tw-gap-3 tw-text-sm tw-text-iron-200">
@@ -164,6 +95,95 @@ export default function DocumentationValueEditor(props: Props) {
         </select>
       </div>
     );
+  return <ScalarEditor {...props} editor={editor} />;
+}
+
+function LocalizedEditor(
+  props: Props & {
+    readonly editor: Extract<ValueEditor, { kind: "localized" }>;
+  }
+) {
+  const { id, editor, value, onChange, disabled } = props;
+  const { msg } = useDocumentationMessages();
+  const current = recordValue(value ?? initialValue(editor));
+  return (
+    <div className="tw-space-y-4">
+      <DocumentationValueEditor
+        id={`${id}-primary`}
+        label={msg("primaryLanguage")}
+        editor={{ kind: "text", max: 64 }}
+        value={current["primary_language"]}
+        disabled={disabled}
+        onChange={(language) =>
+          onChange({ ...current, primary_language: language })
+        }
+      />
+      <ListEditor
+        {...props}
+        editor={{ kind: "list", max: 10, item: languageEntry }}
+        value={current["versions"]}
+        onChange={(versions) => onChange({ ...current, versions })}
+      />
+    </div>
+  );
+}
+
+function AssetEditor(
+  props: Props & { readonly editor: Extract<ValueEditor, { kind: "asset" }> }
+) {
+  const {
+    id,
+    label,
+    editor,
+    value,
+    onChange,
+    disabled,
+    assets = [],
+    describedBy,
+  } = props;
+  const { msg } = useDocumentationMessages();
+  const selected = Array.isArray(value) ? value : [value];
+  const singleValue = typeof value === "string" ? value : "";
+  return (
+    <div>
+      <label htmlFor={id} className="tw-sr-only">
+        {label}
+      </label>
+      <select
+        id={id}
+        className={inputClass}
+        disabled={disabled}
+        aria-describedby={describedBy}
+        multiple={editor.multiple}
+        value={editor.multiple ? selected.map(String) : singleValue}
+        onChange={(event) =>
+          onChange(
+            editor.multiple
+              ? Array.from(
+                  event.target.selectedOptions,
+                  (option) => option.value
+                )
+              : event.target.value
+          )
+        }
+      >
+        {!editor.multiple && <option value="">{msg("choose")}</option>}
+        {assets.map((asset) => (
+          <option key={asset.id} value={asset.id}>
+            {asset.label}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
+function ScalarEditor(
+  props: Props & {
+    readonly editor: Extract<ValueEditor, { kind: "text" | "number" }>;
+  }
+) {
+  const { id, label, editor, value, onChange, disabled, describedBy } = props;
   const shared = {
     id,
     className: inputClass,
@@ -190,16 +210,18 @@ export default function DocumentationValueEditor(props: Props) {
           {...shared}
           type={editor.kind === "number" ? "number" : "text"}
           min={editor.kind === "number" ? 1 : undefined}
-          onChange={(event) =>
+          onChange={(event) => {
+            if (editor.kind !== "number") {
+              onChange(event.target.value);
+              return;
+            }
+            const numberValue = event.target.valueAsNumber;
             onChange(
-              editor.kind === "number"
-                ? event.target.value === "" ||
-                  !Number.isFinite(event.target.valueAsNumber)
-                  ? ""
-                  : event.target.valueAsNumber
-                : event.target.value
-            )
-          }
+              event.target.value === "" || !Number.isFinite(numberValue)
+                ? ""
+                : numberValue
+            );
+          }}
         />
       )}
     </div>
@@ -252,8 +274,7 @@ function visibleObjectField(
   current: Record<string, FieldValue>
 ): boolean {
   if (key === "entries") return current["kind"] === "entries_supplied";
-  if (key === "text" && current["kind"] === "caption_reference") return false;
-  return true;
+  return !(key === "text" && current["kind"] === "caption_reference");
 }
 
 function ListEditor(

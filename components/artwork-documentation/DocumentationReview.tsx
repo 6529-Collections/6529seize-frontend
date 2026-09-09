@@ -3,6 +3,10 @@
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { useRef, useState } from "react";
+import {
+  ApiArtworkDocumentationContextConfirmationStatusEnum,
+  ApiArtworkDocumentationContextLifecycleEnum,
+} from "@/generated/models/ApiArtworkDocumentationContext";
 import type { ApiArtworkDocumentationContext } from "@/generated/models/ApiArtworkDocumentationContext";
 import type {
   DocumentationDraftController,
@@ -82,7 +86,7 @@ export default function DocumentationReview({
     context.capabilities.confirm_as_artist &&
     !missing.length &&
     saveState === "clean" &&
-    context.lifecycle === "active" &&
+    context.lifecycle === ApiArtworkDocumentationContextLifecycleEnum.Active &&
     confirmationCopyMatches(context.profile);
   const confirm = async () => {
     if (key.current.version !== context.draft_version)
@@ -189,7 +193,7 @@ export default function DocumentationReview({
             <h3 className="tw-mb-4 tw-text-lg tw-font-semibold">
               {msg("history")}
             </h3>
-            {!revisions.data?.data.length && (
+            {(revisions.data?.data.length ?? 0) === 0 && (
               <p className="tw-text-sm tw-text-iron-400">{msg("noHistory")}</p>
             )}
             <ul className="tw-m-0 tw-list-none tw-space-y-3 tw-p-0">
@@ -293,7 +297,11 @@ function DocumentationLaneReviews({
                 </label>
                 <div className="tw-flex tw-flex-wrap tw-gap-3">
                   <DocumentationButton
-                    disabled={busy || context.confirmation_status !== "current"}
+                    disabled={
+                      busy ||
+                      context.confirmation_status !==
+                        ApiArtworkDocumentationContextConfirmationStatusEnum.Current
+                    }
                     onClick={() => {
                       void decide(
                         lane,

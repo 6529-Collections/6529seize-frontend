@@ -1,6 +1,10 @@
 "use client";
 
 import type { ApiArtworkDocumentationProfile } from "@/generated/models/ApiArtworkDocumentationProfile";
+import {
+  ApiArtworkDocumentationAnswerStatusEnum,
+  ApiArtworkDocumentationAnswerIntendedVisibilityEnum,
+} from "@/generated/models/ApiArtworkDocumentationAnswer";
 import type { ApiArtworkDocumentationAnswer } from "@/generated/models/ApiArtworkDocumentationAnswer";
 import {
   documentationFieldLabel,
@@ -33,7 +37,7 @@ export function DocumentationValueSummary({
   if (Array.isArray(value))
     return (
       <ul className="tw-m-0 tw-space-y-3 tw-pl-5">
-        {value.map((entry, index) => (
+        {(value as readonly unknown[]).map((entry, index) => (
           <li key={index}>
             <DocumentationValueSummary
               value={entry}
@@ -45,7 +49,7 @@ export function DocumentationValueSummary({
     );
   return (
     <dl className="tw-m-0 tw-space-y-2">
-      {Object.entries(value).map(([key, item]) => (
+      {Object.entries(value as Record<string, unknown>).map(([key, item]) => (
         <div key={key}>
           <dt className="tw-text-xs tw-text-iron-400">
             {documentationFieldLabel(key)}
@@ -97,14 +101,14 @@ export default function DocumentationSummary({
           </h3>
           <dl className="tw-m-0 tw-space-y-5">
             {Object.entries(modules[id] ?? {}).map(([field, raw]) => {
-              const answer = raw as ApiArtworkDocumentationAnswer;
+              const answer = raw;
               return (
                 <div key={field}>
                   <dt className="tw-mb-2 tw-text-sm tw-font-medium tw-text-iron-100">
                     {(id === "interview"
                       ? (
                           profile ?? context.profile
-                        )?.interview_instrument?.prompts.find(
+                        )?.interview_instrument.prompts.find(
                           (prompt) => prompt.id === field
                         )?.text
                       : undefined) ?? documentationFieldLabel(field)}
@@ -116,8 +120,9 @@ export default function DocumentationSummary({
                       <>
                         <DocumentationValueSummary
                           value={
-                            answer.status === "provided"
-                              ? answer.value
+                            answer.status ===
+                            ApiArtworkDocumentationAnswerStatusEnum.Provided
+                              ? (answer.value as unknown)
                               : documentationOptionLabel(
                                   answer.status ?? "unknown"
                                 )
@@ -128,7 +133,8 @@ export default function DocumentationSummary({
                             {answer.explanation}
                           </p>
                         )}
-                        {answer.intended_visibility === "restricted" && (
+                        {answer.intended_visibility ===
+                          ApiArtworkDocumentationAnswerIntendedVisibilityEnum.Restricted && (
                           <p className="tw-mt-2 tw-text-xs tw-text-iron-400">
                             {msg("restricted")}
                           </p>

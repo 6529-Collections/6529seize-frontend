@@ -82,7 +82,7 @@ export default function DocumentationFeedback({
           }}
         />
       ))}
-      {!query.isLoading && !query.data?.data.length && (
+      {!query.isLoading && (query.data?.data.length ?? 0) === 0 && (
         <p className="tw-text-sm tw-text-iron-400">{msg("noFeedback")}</p>
       )}
       <label className="tw-block tw-text-sm tw-text-iron-300">

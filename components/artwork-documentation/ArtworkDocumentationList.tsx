@@ -54,6 +54,11 @@ function DocumentationListContent({
   readonly sourceDropId?: string | undefined;
 }) {
   const { msg, locale } = useDocumentationMessages();
+  const queueOptionLabel = (key: string, option: string) => {
+    if (key === "review_lane") return msg(`lane.${option}`);
+    if (key === "outstanding_action") return msg(`action.${option}`);
+    return documentationOptionLabel(option);
+  };
   const { connectedProfile, actorKey } = useDocumentationActor();
   const access = useArtworkDocumentationAccess();
   const router = useRouter();
@@ -226,11 +231,7 @@ function DocumentationListContent({
                     <option value="">{msg("all")}</option>
                     {options.map((option) => (
                       <option key={option} value={option}>
-                        {key === "review_lane"
-                          ? msg(`lane.${option}`)
-                          : key === "outstanding_action"
-                            ? msg(`action.${option}`)
-                            : documentationOptionLabel(option)}
+                        {queueOptionLabel(key, option)}
                       </option>
                     ))}
                   </select>
@@ -341,7 +342,7 @@ function DocumentationListContent({
                   </div>
                   {programId && (
                     <ul className="tw-m-0 tw-list-none tw-space-y-1 tw-p-0 tw-text-xs tw-text-iron-300">
-                      {record.reviews?.map((review) => (
+                      {record.reviews.map((review) => (
                         <li key={review.lane}>
                           {msg(`lane.${review.lane}`)}:{" "}
                           {msg(`review.${review.status}`)}

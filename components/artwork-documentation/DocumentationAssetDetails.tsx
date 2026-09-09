@@ -153,6 +153,10 @@ function ManifestEditor({
         patchDocumentationAssetLink(current, link.id, body, signal, key)
     );
   };
+  const intendedVisibility =
+    !restricted && value["intended_visibility"] === "public_record"
+      ? "public_record"
+      : "restricted";
   return (
     <div className="tw-space-y-3 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-p-3">
       <p className="tw-text-sm tw-font-medium">
@@ -169,13 +173,7 @@ function ManifestEditor({
         {msg("visibility")}
         <select
           className={`${inputClass} tw-mt-2`}
-          value={
-            restricted
-              ? "restricted"
-              : value["intended_visibility"] === "public_record"
-                ? "public_record"
-                : "restricted"
-          }
+          value={intendedVisibility}
           disabled={restricted}
           onChange={(event) =>
             change({ ...value, intended_visibility: event.target.value })

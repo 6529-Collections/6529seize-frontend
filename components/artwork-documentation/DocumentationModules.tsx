@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import { ApiArtworkDocumentationAnswerStatusEnum } from "@/generated/models/ApiArtworkDocumentationAnswer";
 import type { ApiArtworkDocumentationAnswer } from "@/generated/models/ApiArtworkDocumentationAnswer";
 import type { ApiArtworkDocumentationContext } from "@/generated/models/ApiArtworkDocumentationContext";
 import type { ApiArtworkDocumentationOperation } from "@/generated/models/ApiArtworkDocumentationOperation";
@@ -21,6 +22,7 @@ import {
   type DocumentationField,
   type DocumentationSection,
   type ModuleId,
+  type FieldValue,
 } from "@/lib/artwork-documentation/registry";
 import {
   DocumentationButton,
@@ -54,7 +56,7 @@ export default function DocumentationModules(props: Props) {
     <div className="tw-space-y-5" onBlur={props.onBlur}>
       {MODULE_IDS.flatMap((moduleId) => {
         const policy = props.context.profile.modules.find(
-          (module) => module.id === moduleId
+          (module) => String(module.id) === moduleId
         );
         if (!policy) return [];
         if (policy.version !== 1)
@@ -96,18 +98,20 @@ function DocumentationAnswerField(
   const { context, moduleId, field, onChange, edits, required } = props;
   const { msg } = useDocumentationMessages();
   const definition = context.profile.modules
-    .find((module) => module.id === moduleId)
+    .find((module) => String(module.id) === moduleId)
     ?.fields.find((entry) => entry.id === field.id);
   const answer = readAnswer(context, moduleId, field.id, edits);
   const redacted = isRedacted(context.modules[moduleId]?.answers[field.id]);
   const disabled =
-    props.readOnly ||
-    !context.capabilities.edit_modules.some((module) => module === moduleId) ||
+    (props.readOnly ?? false) ||
+    !context.capabilities.edit_modules.some(
+      (module) => String(module) === moduleId
+    ) ||
     redacted;
   const id = `documentation-${moduleId}-${field.id}`;
   const label =
     (moduleId === "interview"
-      ? context.profile.interview_instrument?.prompts.find(
+      ? context.profile.interview_instrument.prompts.find(
           (prompt) => prompt.id === field.id
         )?.text
       : undefined) ?? documentationFieldLabel(field.id);
@@ -136,7 +140,8 @@ function DocumentationAnswerField(
   if (!definition) return null;
   const visibility =
     answer?.intended_visibility ?? definition.default_visibility;
-  const status = answer?.status ?? "provided";
+  const status =
+    answer?.status ?? ApiArtworkDocumentationAnswerStatusEnum.Provided;
   const update = (next: Partial<ApiArtworkDocumentationAnswer>) => {
     const merged = {
       status,
@@ -144,7 +149,8 @@ function DocumentationAnswerField(
       ...answer,
       ...next,
     } as ApiArtworkDocumentationAnswer;
-    if (merged.status !== "provided") delete merged.value;
+    if (merged.status !== ApiArtworkDocumentationAnswerStatusEnum.Provided)
+      delete merged.value;
     if (merged.explanation === "") delete merged.explanation;
     onChange(moduleId, {
       op: "set",
@@ -224,12 +230,15 @@ function DocumentationAnswerField(
               </select>
             </label>
           )}
-          {status === "provided" ? (
+          {status === ApiArtworkDocumentationAnswerStatusEnum.Provided ? (
             <DocumentationValueEditor
               id={id}
               label={label}
               editor={field.editor}
-              value={answer?.value ?? initialValue(field.editor)}
+              value={
+                (answer?.value as FieldValue | undefined) ??
+                initialValue(field.editor)
+              }
               disabled={disabled}
               assets={choices}
               describedBy={field.help ? `${id}-help` : undefined}
