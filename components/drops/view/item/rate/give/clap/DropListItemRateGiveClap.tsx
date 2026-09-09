@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import styles from "./Clap.module.css";
 import mojs from "@mojs/core";
-import { formatLargeNumber } from "@/helpers/Helpers";
+import { formatLargeNumber, formatNumberWithCommas } from "@/helpers/Helpers";
 import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
-import { Tooltip } from "react-tooltip";
+import DropActionTooltip from "@/components/waves/drops/DropActionTooltip";
 import type { DropVoteState } from "@/hooks/drops/types";
 import { VOTE_STATE_ERRORS } from "../DropListItemRateGiveSubmit";
 
@@ -28,6 +28,7 @@ export default function DropListItemRateGiveClap({
   readonly onSubmit: () => void;
   readonly isMobile?: boolean | undefined;
 }) {
+  const descriptionId = useId();
   const positiveRgba = "rgba(39, 174, 96, 1)";
   const negativeRgba = "rgba(192, 57, 43, 1)";
 
@@ -222,16 +223,28 @@ export default function DropListItemRateGiveClap({
   }, [rate]);
 
   const svgSize = isMobile ? "tw-size-7" : "tw-h-[18px] tw-w-[18px]";
-  const tooltipId = `clap-tooltip-${randomID}`;
+  const voteError = VOTE_STATE_ERRORS[voteState];
+  const signedRate = `${rate > 0 ? "+" : ""}${formatNumberWithCommas(rate)}`;
+  const description = canVote ? signedRate : voteError;
 
   return (
-    <>
+    <DropActionTooltip
+      content={voteError}
+      disabled={isMobile || canVote || !voteError}
+      style={{
+        backgroundColor: "#1F2937",
+        color: "white",
+        padding: "4px 8px",
+        fontSize: "12px",
+        borderRadius: "4px",
+      }}
+    >
       <div className="tailwind-scope">
         <button
           disabled={!rate || !canVote}
           id={`clap-${randomID}`}
-          {...(canVote ? { "data-tooltip-id": tooltipId } : {})}
           aria-label="Clap for drop"
+          aria-describedby={description ? descriptionId : undefined}
           className={`${clapClasses} tw-relative tw-z-10 tw-flex tw-flex-shrink-0 tw-items-center tw-justify-center tw-border-none tw-bg-current tw-outline-1 tw-outline-transparent tw-transition tw-duration-300 tw-ease-out ${styles["clap"]}`}
           onClick={(e) => {
             e.stopPropagation();
@@ -260,23 +273,12 @@ export default function DropListItemRateGiveClap({
             {countShort}
           </span>
         </button>
+        {description && (
+          <span id={descriptionId} className="tw-sr-only">
+            {description}
+          </span>
+        )}
       </div>
-
-      {!canVote && (
-        <Tooltip
-          id={tooltipId}
-          place="top"
-          style={{
-            backgroundColor: "#1F2937",
-            color: "white",
-            padding: "4px 8px",
-            fontSize: "12px",
-            borderRadius: "4px",
-          }}
-        >
-          {VOTE_STATE_ERRORS[voteState]}
-        </Tooltip>
-      )}
-    </>
+    </DropActionTooltip>
   );
 }
