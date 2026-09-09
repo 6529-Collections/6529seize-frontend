@@ -30,7 +30,7 @@ export default function TDHProfile({
   const normalizedInput = input.trim().replace(/^@/, "");
   const [identity, setIdentity] = useState("");
   const query = useQuery({
-    queryKey: [QueryKey.TDH_PROFILE_SNAPSHOT, identity.toLowerCase()],
+    queryKey: [QueryKey.TDH_PROFILE_SNAPSHOT, identity],
     queryFn: async ({ signal }) =>
       tdhProfileSchema.parse(
         await commonApiFetch<ApiConsolidatedTdh>({
@@ -49,7 +49,7 @@ export default function TDHProfile({
     event.preventDefault();
     const value = normalizedInput;
     if (!value) return;
-    if (value.toLowerCase() === identity.toLowerCase()) void query.refetch();
+    if (value === identity) void query.refetch();
     else setIdentity(value);
   }
 
@@ -95,7 +95,12 @@ export default function TDHProfile({
           )}
           {query.isFetching && (
             <p className={TDH_TEXT}>
-              {t(locale, "network.tdh.profile.loading")}
+              {t(
+                locale,
+                query.data && !query.isError
+                  ? "network.tdh.profile.refreshing"
+                  : "network.tdh.profile.loading"
+              )}
             </p>
           )}
           {query.isError && !query.isFetching && (

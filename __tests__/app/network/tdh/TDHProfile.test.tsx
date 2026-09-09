@@ -78,6 +78,43 @@ describe("TDHProfile", () => {
     expect(screen.getByText("303")).toBeInTheDocument();
   });
 
+  it("uses the newly submitted casing for the cache and endpoint", async () => {
+    fetchMock.mockResolvedValue(profile);
+    const user = userEvent.setup();
+    renderProfile();
+    const input = screen.getByLabelText(/profile handle/i);
+
+    await user.type(input, "PublicName");
+    await user.click(screen.getByRole("button", { name: /explain tdh/i }));
+    await screen.findByRole("heading", { name: "TDH for PublicName" });
+
+    await user.clear(input);
+    await user.type(input, "publicname");
+    await user.click(screen.getByRole("button", { name: /explain tdh/i }));
+    await screen.findByRole("heading", { name: "TDH for publicname" });
+    expect(fetchMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({ endpoint: "tdh/consolidation/publicname" })
+    );
+  });
+
+  it("explains that a previous snapshot remains visible during a refresh", async () => {
+    fetchMock.mockResolvedValueOnce(profile);
+    const user = userEvent.setup();
+    renderProfile();
+    await user.type(screen.getByLabelText(/profile handle/i), "PublicName");
+    await user.click(screen.getByRole("button", { name: /explain tdh/i }));
+    await screen.findByRole("heading", { name: "TDH for PublicName" });
+
+    fetchMock.mockImplementationOnce(() => new Promise(() => {}));
+    await user.click(screen.getByRole("button", { name: /explain tdh/i }));
+    expect(
+      await screen.findByText(/previous snapshot stays visible/i)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "TDH for PublicName" })
+    ).toBeInTheDocument();
+  });
+
   it("shows not found for a public 404 and allows retry", async () => {
     const notFound = new Error("missing");
     fetchMock.mockRejectedValueOnce(notFound).mockResolvedValueOnce(profile);

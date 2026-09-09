@@ -84,6 +84,12 @@ describe("TDH snapshot reconciliation", () => {
     expect(
       tdhProfileSchema.safeParse({
         ...snapshot,
+        nextgen: [{ ...snapshot.memes[0], id: Number.MAX_SAFE_INTEGER + 1 }],
+      }).success
+    ).toBe(false);
+    expect(
+      tdhProfileSchema.safeParse({
+        ...snapshot,
         nextgen: [{ ...snapshot.memes[0], id: "1e10" }],
       }).success
     ).toBe(false);

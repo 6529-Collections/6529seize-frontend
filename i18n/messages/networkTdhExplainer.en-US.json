@@ -1,6 +1,7 @@
 {
   "network.tdh.explainer.title": "How TDH is calculated",
   "network.tdh.explainer.pageTitle": "How TDH is calculated | Network",
+  "network.tdh.explainer.metadataDescription": "Understand Total Days Held: holding days, edition weights, current boosts and an exact breakdown of your profile’s TDH.",
   "network.tdh.explainer.intro": "Total Days Held measures the art you hold and the time you have held it. Each daily snapshot turns whole holding days into a score, using edition weights and a boost for your collection.",
   "network.tdh.explainer.eligible": "Base TDH includes The Memes, Gradients and NextGen. Meme Lab and received xTDH are separate.",
   "network.tdh.explainer.nav": "On this page",

@@ -4,6 +4,7 @@
   "network.tdh.profile.input": "Profile handle, ENS name or wallet address",
   "network.tdh.profile.submit": "Explain TDH",
   "network.tdh.profile.loading": "Loading the TDH snapshot…",
+  "network.tdh.profile.refreshing": "Refreshing TDH… The previous snapshot stays visible until the update finishes.",
   "network.tdh.profile.empty": "Enter a profile or wallet to see its holding days, edition weights, boost and final total.",
   "network.tdh.profile.notFound": "No TDH snapshot was found for this profile or wallet. Check the name or address, or try again after the next daily calculation.",
   "network.tdh.profile.error": "The TDH snapshot could not be loaded. Try again in a moment.",

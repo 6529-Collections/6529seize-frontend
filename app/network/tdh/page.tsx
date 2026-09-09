@@ -1,4 +1,6 @@
 import { getAppMetadata } from "@/components/providers/metadata";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import TDHMainPage from "./page.client";
 
 export default function TDH() {
@@ -7,8 +9,7 @@ export default function TDH() {
 
 export const generateMetadata = () => {
   return getAppMetadata({
-    title: "How TDH is calculated | Network",
-    description:
-      "Understand Total Days Held: holding days, edition weights, current boosts and an exact breakdown of your profile’s TDH.",
+    title: t(DEFAULT_LOCALE, "network.tdh.explainer.pageTitle"),
+    description: t(DEFAULT_LOCALE, "network.tdh.explainer.metadataDescription"),
   });
 };

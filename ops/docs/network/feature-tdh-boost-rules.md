@@ -120,6 +120,13 @@ does not load, reopen it from `Network -> TDH` or use the direct route. Related
 destinations are `/network/definitions`, `/network/health/network-tdh`, and
 `/network/levels`.
 
+## Language Support
+
+The explainer, example, profile breakdown, and current-rules copy currently use
+the English fallback in all supported locales. Numbers and dates follow the
+browser locale. Page metadata uses English. Translation of these four sections
+is the remaining localization work.
+
 ## Related Pages
 
 - [Network Index](README.md)
