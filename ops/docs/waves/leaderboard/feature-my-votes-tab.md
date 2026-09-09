@@ -21,7 +21,8 @@ The tab is available only on eligible rank-wave layouts:
 
 - Open an eligible wave.
 - Switch to `My Votes` from the wave tab row.
-- Use row checkboxes, vote inputs, and `Explain` actions in the list.
+- Use rows or their checkboxes to select votes for reset, vote inputs to edit
+  votes, and `Explain` actions to explain them.
 
 ## User Journey
 
@@ -30,14 +31,15 @@ The tab is available only on eligible rank-wave layouts:
    `You haven't voted on any submissions in this wave yet.`
 3. Review each row: preview, title, rank (when available), author, total vote
    value, voter count, and your current vote input.
-4. Optional: click a row outside its controls to open that drop in the current
-   wave route. You can also use its artwork or title buttons, including with
-   `Enter` or `Space`. Checkboxes, vote controls, and profile links keep their
-   own actions; selecting text does not open the drop.
+4. Optional: click a row outside its controls to select or deselect its vote for
+   reset. Use its artwork or title buttons to open the drop in the current wave
+   route, including with `Enter` or `Space`. Checkboxes, vote controls, and
+   profile links keep their own actions; selecting text does not toggle the row.
 5. Edit a vote, then submit with `Vote` or `Enter`.
 6. Optional: select `Explain` to open an inline reply composer prefilled as
    `Vote rationale (...)`.
-7. Use the checkboxes beside the artwork, or `Select all` / `Deselect all`,
+7. Select rows by clicking outside their controls, using the checkboxes beside
+   the artwork, or using `Select all` / `Deselect all`,
    then `Reset votes`. Review the selected count in the confirmation dialog
    and confirm to set those votes to `0`, or cancel without changing them.
 8. Scroll to the bottom to load more rows.
@@ -45,8 +47,9 @@ The tab is available only on eligible rank-wave layouts:
 ## Common Scenarios
 
 - Rows use a subtle charcoal background. Hovering an unselected row lightens
-  it further and highlights the title in blue; focusing the title with the
-  keyboard also highlights it in blue.
+  it further. Hovering or focusing the title highlights it in blue.
+- Selecting a row checks its checkbox for reset; it does not change the vote
+  until you confirm `Reset votes`.
 - Vote input accepts numeric text, including temporary empty and `-` while you
   edit.
 - Values outside the row's min/max range are clamped while editing, with a
@@ -59,7 +62,7 @@ The tab is available only on eligible rank-wave layouts:
 - The prefilled reply includes the user's vote total at time of posting. If the
   current session just applied a vote change and that change differs from the
   total, the prefix includes both total and change.
-- During bulk reset, `Select all` and `Reset votes` are disabled.
+- During bulk reset, row selection, `Select all`, and `Reset votes` are disabled.
 - During bulk reset, row vote inputs are disabled and a
   `Resetting votes...` progress bar shows progress.
 - `Available in wave` is shown only when vote context includes a numeric max
@@ -72,6 +75,8 @@ The tab is available only on eligible rank-wave layouts:
   values.
 - If input blurs with empty, `-`, or unchanged value, it resets without submitting.
 - The tab can remain visible even when `Leaderboard` is no longer available.
+- When voting is closed, rows cannot be selected for reset; artwork and title
+  buttons still open the drop.
 - `Select all` affects loaded rows only; rows loaded later are not auto-selected.
 - Bulk reset runs one selected row at a time.
 

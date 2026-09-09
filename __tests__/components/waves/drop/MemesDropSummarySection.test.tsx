@@ -29,7 +29,7 @@ const renderSummary = (drop: ExtendedDrop) =>
   );
 
 describe("MemesDropSummarySection", () => {
-  it("shows a prominent mapped Meme card pill with the minted outcome", () => {
+  it("shows a compact mapped Meme card pill with the minted outcome", () => {
     renderSummary({
       submission_context: { meme_card_id: 521 },
     } as ExtendedDrop);
@@ -40,7 +40,7 @@ describe("MemesDropSummarySection", () => {
     });
 
     expect(memeCardLink).toHaveAttribute("href", "/the-memes/521");
-    expect(memeCardLink).toHaveClass("tw-min-h-9", "tw-px-4", "tw-text-base");
+    expect(memeCardLink).toHaveClass("tw-px-2.5", "tw-py-0.5", "tw-text-xs");
     expect(memeCardLink.parentElement).toHaveTextContent(
       "Minted on The MemesThe Memes #521"
     );

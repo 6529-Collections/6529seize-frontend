@@ -5,7 +5,6 @@ import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { t } from "@/i18n/messages";
 import {
   DROP_POLL_VOTED_NOTIFICATION_CAUSE,
@@ -72,7 +71,6 @@ function NotificationItemsComponent({
   onMarkGroupAsRead,
 }: NotificationItemsProps) {
   const locale = useBrowserLocale();
-  const { isApp } = useDeviceInfo();
   const { findCustomEmoji, findNativeEmoji } = useEmoji();
   const keyedItems = useMemo(
     () =>
@@ -94,7 +92,7 @@ function NotificationItemsComponent({
       return true;
     }
 
-    // Match the child renderers before adding a row label or divider.
+    // Match the child renderers before adding a row label.
     switch (item.cause) {
       case ApiNotificationCause.DropReacted: {
         if (!Array.isArray(item.related_drops) || !item.related_drops[0]) {
@@ -124,7 +122,7 @@ function NotificationItemsComponent({
   };
 
   return (
-    <div className="tw-flex tw-flex-col tw-pb-3">
+    <div className="tw-flex tw-flex-col tw-space-y-3 tw-pb-3">
       {keyedItems.map(({ item, key, domId }) => {
         if (!hasNotificationContent(item)) {
           return null;
@@ -141,9 +139,7 @@ function NotificationItemsComponent({
             key={key}
             id={domId}
             style={NOTIFICATION_ITEM_RENDERING_STYLE}
-            className={`tw-min-w-0 tw-border-0 tw-border-b tw-border-solid tw-py-3 first:tw-pt-1 last:tw-border-b-0 ${
-              isApp ? "tw-border-iron-700" : "tw-border-iron-800"
-            }`}
+            className="tw-min-w-0"
           >
             {isUnread && (
               <div className="tw-mb-2 tw-flex tw-items-center tw-gap-1.5 tw-text-xs tw-font-semibold tw-text-iron-200">
