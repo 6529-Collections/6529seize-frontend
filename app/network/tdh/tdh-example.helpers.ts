@@ -1,6 +1,6 @@
 export type TdhExampleDays = 0 | 30;
 
-export interface TdhExampleCard {
+interface TdhExampleCard {
   readonly id: "firstGm" | "nakamoto" | "gradient";
   readonly copies: number;
   readonly holdingDays: number;
@@ -12,7 +12,7 @@ export interface TdhExampleRow extends TdhExampleCard {
   readonly final: number;
 }
 
-export interface TdhExampleResult {
+interface TdhExampleResult {
   readonly rows: readonly TdhExampleRow[];
   readonly boost: number;
   readonly baseTotal: number;
