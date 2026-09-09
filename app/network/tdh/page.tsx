@@ -7,7 +7,8 @@ export default function TDH() {
 
 export const generateMetadata = () => {
   return getAppMetadata({
-    title: "TDH | Network",
-    description: "Network",
+    title: "How TDH is calculated | Network",
+    description:
+      "Understand Total Days Held: holding days, edition weights, current boosts and an exact breakdown of your profile’s TDH.",
   });
 };

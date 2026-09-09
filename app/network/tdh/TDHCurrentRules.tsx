@@ -1,335 +1,271 @@
+"use client";
+
+import { useQuery } from "@tanstack/react-query";
+import { QueryKey } from "@/components/react-query-wrapper/query-keys";
+import Button from "@/components/utils/button/Button";
 import ButtonLink from "@/components/utils/button/ButtonLink";
-import { formatInteger, formatNumber } from "@/i18n/format";
+import type { ApiTdhRules } from "@/generated/models/ApiTdhRules";
+import {
+  formatDate,
+  formatInteger,
+  formatList,
+  formatNumber,
+} from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
-import { t, type MessageKey } from "@/i18n/messages";
+import { t } from "@/i18n/messages";
+import { commonApiFetch } from "@/services/api/common-api";
+import TDHSection, { TDH_PANEL, TDH_TEXT } from "./TDHSection";
+import {
+  getTdhFutureCeiling,
+  tdhRulesSchema,
+  type TdhRules,
+} from "./tdh-rules.helpers";
 
-type TdhMessageKey = Extract<MessageKey, `network.tdh.${string}`>;
-
-interface AdditionalSetExample {
-  readonly exponent?: number;
-  readonly labelKey: TdhMessageKey;
-  readonly result: number;
-}
-
-const EDITORIAL_GRID_CLASS =
-  "tw-grid tw-grid-cols-1 tw-items-start tw-gap-4 lg:tw-grid-cols-[minmax(0,1fr)_minmax(0,2.5fr)] lg:tw-gap-12";
-const PANEL_CLASS =
-  "tw-rounded-xl tw-border tw-border-solid tw-border-iron-800/50 tw-bg-iron-900/55";
-
-const ADDITIONAL_SET_EXAMPLES: readonly AdditionalSetExample[] = [
-  {
-    labelKey: "network.tdh.current.categoryA.firstAdditional",
-    result: 0.05,
-  },
-  {
-    exponent: 1,
-    labelKey: "network.tdh.current.categoryA.secondAdditional",
-    result: 0.032645,
-  },
-  {
-    exponent: 2,
-    labelKey: "network.tdh.current.categoryA.thirdAdditional",
-    result: 0.021314,
-  },
-  {
-    exponent: 4,
-    labelKey: "network.tdh.current.categoryA.fifthAdditional",
-    result: 0.009086,
-  },
-  {
-    exponent: 9,
-    labelKey: "network.tdh.current.categoryA.tenthAdditional",
-    result: 0.001078,
-  },
-] as const;
-
-const SEASONS = Array.from({ length: 11 }, (_, index) => index + 2);
-
-const m = (
-  locale: SupportedLocale,
-  key: TdhMessageKey,
-  params: Parameters<typeof t>[2] = {}
-) => t(locale, key, params);
-
-const formatFixed = (
-  locale: SupportedLocale,
-  value: number,
-  fractionDigits: number
-) =>
-  formatNumber(locale, value, {
-    minimumFractionDigits: fractionDigits,
-    maximumFractionDigits: fractionDigits,
-  });
-
+const HEADING =
+  "tw-m-0 tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-100";
+const formatBonus = (locale: SupportedLocale, value: number) =>
+  formatNumber(locale, value, { maximumFractionDigits: 6 });
 const formatMultiplier = (locale: SupportedLocale, value: number) =>
-  m(locale, "network.tdh.value.multiplier", {
-    value: formatFixed(locale, value, 2),
+  formatNumber(locale, value, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   });
 
 export default function TDHCurrentRules({
-  effectiveDate,
   locale,
 }: {
-  readonly effectiveDate: string;
   readonly locale: SupportedLocale;
 }) {
+  const query = useQuery({
+    queryKey: [QueryKey.TDH_RULES],
+    queryFn: async ({ signal }) =>
+      tdhRulesSchema.parse(
+        await commonApiFetch<ApiTdhRules>({
+          endpoint: "tdh/rules",
+          signal,
+          errorMode: "structured",
+          includeWalletAuth: false,
+        })
+      ),
+    staleTime: 5 * 60_000,
+    retry: false,
+  });
   return (
-    <section
-      aria-labelledby="tdh-current-heading"
-      className={`${EDITORIAL_GRID_CLASS} tw-scroll-mt-24 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-py-8 sm:tw-py-12`}
+    <TDHSection
       id="tdh-1-4"
+      title={t(locale, "network.tdh.rules.title")}
+      description={t(locale, "network.tdh.rules.intro")}
     >
-      <div className="lg:tw-sticky lg:tw-top-28">
-        <h2
-          className="tw-m-0 tw-text-lg tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-100 focus:tw-outline-none sm:tw-text-xl"
-          id="tdh-current-heading"
-          tabIndex={-1}
-        >
-          {m(locale, "network.tdh.current.title", { date: effectiveDate })}
-        </h2>
-      </div>
-
-      <div className={`${PANEL_CLASS} tw-overflow-hidden tw-p-4 sm:tw-p-6`}>
-        <p className="tw-m-0 tw-border-0 tw-border-b tw-border-solid tw-border-white/[0.07] tw-pb-5 tw-text-sm tw-leading-6 tw-text-iron-400">
-          {m(locale, "network.tdh.current.intro")}
-        </p>
-
-        <CategoryA locale={locale} />
-        <CategoryB locale={locale} />
-        <CategoryC locale={locale} />
-        <RuleActions locale={locale} />
-      </div>
-    </section>
-  );
-}
-
-function CategoryA({ locale }: { readonly locale: SupportedLocale }) {
-  return (
-    <section aria-labelledby="tdh-category-a-heading" className="tw-pt-6">
-      <CategoryHeading
-        id="tdh-category-a-heading"
-        title={m(locale, "network.tdh.current.categoryA.title")}
-      />
-
-      <ul className="tw-m-0 tw-mt-4 tw-pl-5 tw-text-sm tw-leading-6 tw-text-iron-400 marker:tw-text-iron-600">
-        <li>
-          {m(locale, "network.tdh.current.categoryA.completeSet")}{" "}
-          <span className="tw-font-mono tw-font-medium tw-text-[#00f0ff]">
-            {formatMultiplier(locale, 1.6)}
-          </span>
-        </li>
-      </ul>
-
-      <p className="tw-mb-0 tw-mt-5 tw-text-sm tw-leading-6 tw-text-iron-400">
-        {m(locale, "network.tdh.current.categoryA.additionalTitle")}
-      </p>
-      <p
-        aria-label={m(locale, "network.tdh.current.categoryA.formulaAria")}
-        className="tw-mb-0 tw-mt-4 tw-w-fit tw-max-w-full tw-break-words tw-rounded-md tw-border tw-border-solid tw-border-white/[0.07] tw-bg-black/40 tw-px-4 tw-py-3 tw-font-mono tw-text-xs tw-font-medium tw-leading-6 tw-text-iron-200"
-      >
-        <span className="tw-font-sans tw-font-normal tw-text-iron-400">
-          {m(locale, "network.tdh.current.categoryA.formulaLabel")}{" "}
-        </span>
-        {formatFixed(locale, 0.05, 2)} &times; ({formatFixed(locale, 0.6529, 4)}
-        )<sup>(n-1)</sup>
-      </p>
-
-      <div className="tw-mt-5 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800/50 tw-bg-iron-900/45 tw-p-4">
-        <p className="tw-m-0 tw-text-xs tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500">
-          {m(locale, "network.tdh.current.categoryA.examplesTitle")}
-        </p>
-        <dl className="tw-mb-0 tw-mt-4 tw-space-y-2.5">
-          {ADDITIONAL_SET_EXAMPLES.map((example) => (
-            <div
-              className="tw-grid tw-grid-cols-1 tw-gap-1 sm:tw-grid-cols-[minmax(0,1fr)_auto] sm:tw-gap-4"
-              key={example.labelKey}
+      <div aria-live="polite">
+        {query.isPending && (
+          <p className={`${TDH_PANEL} ${TDH_TEXT} tw-p-5`}>
+            {t(locale, "network.tdh.rules.loading")}
+          </p>
+        )}
+        {query.isError && (
+          <div className={`${TDH_PANEL} tw-p-5`}>
+            <p className={TDH_TEXT}>{t(locale, "network.tdh.rules.error")}</p>
+            <Button
+              variant="tertiary"
+              size="sm"
+              className="tw-mt-3"
+              loading={query.isFetching}
+              onClick={() => void query.refetch()}
             >
-              <dt className="tw-text-xs tw-leading-5 tw-text-iron-500">
-                {m(locale, example.labelKey)}
-              </dt>
-              <dd className="tw-m-0 tw-break-words tw-font-mono tw-text-xs tw-font-medium tw-leading-5 tw-text-iron-300 sm:tw-text-right">
-                <AdditionalSetFormula example={example} locale={locale} />
-              </dd>
-            </div>
-          ))}
-        </dl>
+              {t(locale, "network.tdh.rules.retry")}
+            </Button>
+          </div>
+        )}
       </div>
-
-      <p className="tw-mb-0 tw-mt-5 tw-text-sm tw-leading-6 tw-text-iron-400">
-        {m(locale, "network.tdh.current.categoryA.maximumTitle")}{" "}
-        <span
-          aria-label={m(locale, "network.tdh.current.categoryA.maximumAria")}
-          className="tw-inline-block tw-break-words tw-rounded tw-border tw-border-solid tw-border-white/[0.06] tw-bg-black/30 tw-px-2 tw-py-1 tw-font-mono tw-text-xs tw-font-medium tw-text-iron-300"
+      {query.data && !query.isError && (
+        <Rules rules={query.data} locale={locale} />
+      )}
+      <nav
+        aria-label={t(locale, "network.tdh.rules.links")}
+        className="tw-mt-6 tw-flex tw-flex-wrap tw-gap-3"
+      >
+        <ButtonLink
+          variant="tertiary"
+          size="sm"
+          href="/network/tdh/historic-boosts"
         >
-          {formatFixed(locale, 0.6, 2)} + {formatFixed(locale, 0.05, 2)} / (1 -{" "}
-          {formatFixed(locale, 0.6529, 4)}) = {formatFixed(locale, 0.744051, 6)}
-        </span>
-      </p>
-    </section>
+          {t(locale, "network.tdh.related.historic.title")}
+        </ButtonLink>
+        <ButtonLink variant="tertiary" size="sm" href="/network/definitions">
+          {t(locale, "network.tdh.related.definitions.title")}
+        </ButtonLink>
+      </nav>
+    </TDHSection>
   );
 }
 
-function AdditionalSetFormula({
-  example,
+function Rules({
+  rules,
   locale,
 }: {
-  readonly example: AdditionalSetExample;
+  readonly rules: TdhRules;
   readonly locale: SupportedLocale;
 }) {
-  if (example.exponent === undefined) {
-    return formatFixed(locale, example.result, 2);
-  }
-
+  const { boost, snapshot } = rules;
   return (
-    <>
-      {formatFixed(locale, 0.05, 2)} &times; {formatFixed(locale, 0.6529, 4)}
-      {example.exponent > 1 ? <sup>{example.exponent}</sup> : null} ={" "}
-      {formatFixed(locale, example.result, 6)}
-    </>
+    <div className="tw-space-y-5">
+      <div className="tw-border-0 tw-border-l-2 tw-border-solid tw-border-iron-600 tw-pl-4">
+        <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-300">
+          {t(locale, "network.tdh.rules.snapshot", {
+            date: t(locale, "network.tdh.value.utcTime", {
+              time: formatDate(locale, snapshot.block_timestamp, {
+                dateStyle: "medium",
+                timeStyle: "medium",
+                timeZone: "UTC",
+              }),
+            }),
+            block: formatInteger(locale, snapshot.block_number),
+          })}
+        </p>
+        <p className="tw-mb-0 tw-mt-1 tw-text-xs tw-leading-5 tw-text-iron-400">
+          {t(locale, "network.tdh.rules.snapshotNote")}
+        </p>
+      </div>
+      <div className={`${TDH_PANEL} tw-space-y-4 tw-p-5`}>
+        <h3 className={HEADING}>{t(locale, "network.tdh.rules.full.title")}</h3>
+        <p className="tw-m-0 tw-font-mono tw-text-2xl tw-font-semibold tw-text-iron-50">
+          {t(locale, "network.tdh.rules.full.multiplier", {
+            value: formatMultiplier(
+              locale,
+              boost.base_multiplier + boost.full_collection.first_set_bonus
+            ),
+          })}
+        </p>
+        <p className={TDH_TEXT}>
+          {t(locale, "network.tdh.rules.full.body", {
+            count: formatInteger(locale, snapshot.eligible_memes_count),
+            bonus: formatBonus(locale, boost.full_collection.first_set_bonus),
+          })}
+        </p>
+        <p className={TDH_TEXT}>
+          {t(locale, "network.tdh.rules.full.extra", {
+            initial: formatBonus(
+              locale,
+              boost.full_collection.additional_set_initial_bonus
+            ),
+            decay: formatBonus(
+              locale,
+              boost.full_collection.additional_set_decay_ratio
+            ),
+            limit: formatBonus(
+              locale,
+              boost.full_collection.additional_sets_limit_bonus
+            ),
+          })}
+        </p>
+      </div>
+      <PartialSets rules={rules} locale={locale} />
+      <div className={`${TDH_PANEL} tw-space-y-3 tw-p-5`}>
+        <h3 className={HEADING}>
+          {t(locale, "network.tdh.rules.gradient.title")}
+        </h3>
+        <p className={TDH_TEXT}>
+          {t(locale, "network.tdh.rules.gradient.body", {
+            bonus: formatBonus(locale, boost.gradients.bonus_per_token),
+            count: formatInteger(locale, boost.gradients.max_count),
+            maximum: formatBonus(locale, boost.gradients.max_bonus),
+            decimals: formatInteger(locale, boost.final_rounding_decimals),
+          })}
+        </p>
+      </div>
+      <FutureSchedule rules={rules} locale={locale} />
+    </div>
   );
 }
 
-function CategoryB({ locale }: { readonly locale: SupportedLocale }) {
+function PartialSets({
+  rules: { boost },
+  locale,
+}: {
+  readonly rules: TdhRules;
+  readonly locale: SupportedLocale;
+}) {
   return (
-    <section
-      aria-labelledby="tdh-category-b-heading"
-      className="tw-mt-8 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.07] tw-pt-8"
-    >
-      <CategoryHeading
-        id="tdh-category-b-heading"
-        title={m(locale, "network.tdh.current.categoryB.title")}
-      />
-      <p className="tw-mb-0 tw-mt-4 tw-text-sm tw-leading-6 tw-text-iron-400">
-        {m(locale, "network.tdh.current.categoryB.applies")}
-      </p>
-
-      <div className="tw-mt-5 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800/50 tw-bg-iron-900/45 tw-p-4">
-        <div className="tw-border-0 tw-border-b tw-border-solid tw-border-white/[0.07] tw-pb-4">
-          <h4 className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-200">
-            {m(locale, "network.tdh.current.categoryB.szn1")}
-          </h4>
-          <ul className="tw-m-0 tw-mt-3 tw-space-y-2 tw-pl-5 tw-text-sm tw-leading-6 tw-text-iron-400 marker:tw-text-iron-600">
-            <li>
-              {m(locale, "network.tdh.current.categoryB.completeSet")}{" "}
-              <Multiplier locale={locale} value={1.05} />{" "}
-              {m(locale, "network.tdh.current.categoryB.or")}
-            </li>
-            <li>
-              {m(locale, "network.tdh.current.categoryB.genesisSet")}{" "}
-              <Multiplier locale={locale} value={1.01} />{" "}
-              {m(locale, "network.tdh.current.categoryB.and")}
-            </li>
-            <li>
-              {m(locale, "network.tdh.current.categoryB.nakamotoSet")}{" "}
-              <Multiplier locale={locale} value={1.01} />
-            </li>
-          </ul>
-        </div>
-
-        <ul className="tw-m-0 tw-mt-4 tw-grid tw-list-none tw-grid-cols-2 tw-gap-x-4 tw-gap-y-3 tw-p-0 sm:tw-grid-cols-3">
-          {SEASONS.map((season) => (
-            <li
-              className="tw-flex tw-min-w-0 tw-items-center tw-justify-between tw-gap-2 tw-font-mono tw-text-xs tw-leading-5 tw-text-iron-500"
-              key={season}
-            >
-              <span>
-                {m(locale, "network.tdh.current.categoryB.seasonLabel", {
-                  number: formatInteger(locale, season),
-                })}
-              </span>
-              <span className="tw-font-medium tw-text-[#00f0ff]">
-                {formatMultiplier(locale, 1.05)}
-              </span>
+    <div className={`${TDH_PANEL} tw-space-y-3 tw-p-5`}>
+      <h3 className={HEADING}>
+        {t(locale, "network.tdh.rules.partial.title")}
+      </h3>
+      <p className={TDH_TEXT}>{t(locale, "network.tdh.rules.partial.body")}</p>
+      {boost.season_sets.length ? (
+        <ul className="tw-m-0 tw-grid tw-list-none tw-grid-cols-1 tw-gap-x-5 tw-gap-y-2 tw-p-0 tw-text-sm tw-text-iron-200 sm:tw-grid-cols-2">
+          {boost.season_sets.map((season) => (
+            <li key={season.season}>
+              {t(locale, "network.tdh.rules.season", {
+                season: formatInteger(locale, season.season),
+                bonus: formatBonus(locale, season.bonus),
+              })}
             </li>
           ))}
         </ul>
-      </div>
-    </section>
-  );
-}
-
-function Multiplier({
-  locale,
-  value,
-}: {
-  readonly locale: SupportedLocale;
-  readonly value: number;
-}) {
-  return (
-    <span className="tw-font-mono tw-font-medium tw-text-[#00f0ff]">
-      {formatMultiplier(locale, value)}
-    </span>
-  );
-}
-
-function CategoryC({ locale }: { readonly locale: SupportedLocale }) {
-  return (
-    <section
-      aria-labelledby="tdh-category-c-heading"
-      className="tw-mt-8 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.07] tw-pt-8"
-    >
-      <CategoryHeading
-        id="tdh-category-c-heading"
-        title={m(locale, "network.tdh.current.categoryC.title")}
-      />
-      <ul className="tw-m-0 tw-mt-4 tw-pl-5 tw-text-sm tw-leading-6 tw-text-iron-400 marker:tw-text-iron-600">
-        <li>
-          {m(locale, "network.tdh.current.categoryC.gradientLead")}{" "}
-          <span className="tw-font-mono tw-font-medium tw-text-[#00f0ff]">
-            {formatMultiplier(locale, 1.02)}
-          </span>{" "}
-          {m(locale, "network.tdh.current.categoryC.gradientTail", {
-            count: formatInteger(locale, 5),
-          })}
-        </li>
+      ) : (
+        <p className={TDH_TEXT}>{t(locale, "network.tdh.rules.noSeasons")}</p>
+      )}
+      <ul className="tw-m-0 tw-space-y-2 tw-pl-5 tw-text-sm tw-leading-6 tw-text-iron-200">
+        {boost.season_one_partials.map((partial) => (
+          <li key={partial.key}>
+            {t(locale, `network.tdh.rules.partial.${partial.key}`, {
+              ids: formatList(
+                locale,
+                partial.token_ids.map((id) => formatInteger(locale, id))
+              ),
+              bonus: formatBonus(locale, partial.bonus),
+            })}
+          </li>
+        ))}
       </ul>
-    </section>
+      <p className={TDH_TEXT}>{t(locale, "network.tdh.rules.partial.note")}</p>
+    </div>
   );
 }
 
-function RuleActions({ locale }: { readonly locale: SupportedLocale }) {
-  return (
-    <nav
-      aria-label={m(locale, "network.tdh.related.ruleActionsAria")}
-      className="tw-mt-8 tw-flex tw-flex-wrap tw-gap-3 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.07] tw-pt-6"
-    >
-      <ButtonLink
-        variant="primary"
-        size="sm"
-        href="/network/tdh/historic-boosts"
-      >
-        {m(locale, "network.tdh.related.historic.title")}
-      </ButtonLink>
-      <ButtonLink
-        variant="tertiary"
-        size="sm"
-        href="/network/definitions"
-      >
-        {m(locale, "network.tdh.related.definitions.title")}
-      </ButtonLink>
-    </nav>
-  );
-}
-
-function CategoryHeading({
-  id,
-  title,
+function FutureSchedule({
+  rules,
+  locale,
 }: {
-  readonly id: string;
-  readonly title: string;
+  readonly rules: TdhRules;
+  readonly locale: SupportedLocale;
 }) {
+  const { boost } = rules;
   return (
-    <div className="tw-flex tw-items-center tw-gap-3">
-      <h3
-        className="tw-m-0 tw-text-base tw-font-medium tw-leading-6 tw-text-iron-100 sm:tw-text-lg"
-        id={id}
-      >
-        {title}
-      </h3>
-      <span
-        aria-hidden="true"
-        className="tw-h-px tw-flex-1 tw-bg-gradient-to-r tw-from-white/10 tw-to-transparent"
-      />
+    <div className={`${TDH_PANEL} tw-space-y-4 tw-p-5`}>
+      <h3 className={HEADING}>{t(locale, "network.tdh.rules.future.title")}</h3>
+      <p className={TDH_TEXT}>
+        {t(locale, "network.tdh.rules.future.body", {
+          lastSeason: formatInteger(
+            locale,
+            boost.season_schedule.last_boosted_season
+          ),
+          bonus: formatBonus(locale, boost.season_schedule.bonus_per_season),
+        })}
+      </p>
+      <p className={TDH_TEXT}>
+        {t(locale, "network.tdh.rules.future.full", {
+          count: formatInteger(
+            locale,
+            boost.season_schedule.last_boosted_season
+          ),
+          multiplier: formatMultiplier(
+            locale,
+            boost.base_multiplier + boost.season_schedule.max_bonus
+          ),
+        })}
+      </p>
+      <p className="tw-m-0 tw-font-mono tw-text-lg tw-font-semibold tw-leading-7 tw-text-iron-50">
+        {t(locale, "network.tdh.rules.future.ceiling", {
+          multiplier: formatMultiplier(locale, getTdhFutureCeiling(rules)),
+        })}
+      </p>
+      <p className={TDH_TEXT}>
+        {t(locale, "network.tdh.rules.future.condition", {
+          gradients: formatInteger(locale, boost.gradients.max_count),
+        })}
+      </p>
+      <p className={TDH_TEXT}>{t(locale, "network.tdh.rules.future.cards")}</p>
     </div>
   );
 }
