@@ -2,6 +2,7 @@ import Page, { generateMetadata } from "@/app/tools/subscriptions-report/page";
 import { AuthContext } from "@/components/auth/Auth";
 import { CookieConsentProvider } from "@/components/cookies/CookieConsentContext";
 import { publicEnv } from "@/config/env";
+import { ProfileConnectedStatus } from "@/entities/IProfile";
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
@@ -278,7 +279,18 @@ describe("Subscriptions report page", () => {
       jest.spyOn(navigator, "languages", "get").mockReturnValue([locale]);
       render(
         <AuthContext.Provider
-          value={{ setToast } as React.ContextType<typeof AuthContext>}
+          value={{
+            connectedProfile: null,
+            fetchingProfile: false,
+            connectionStatus: ProfileConnectedStatus.NOT_CONNECTED,
+            receivedProfileProxies: [],
+            activeProfileProxy: null,
+            showWaves: false,
+            sessionUpgradeRequired: false,
+            requestAuth: async () => ({ success: false }),
+            setActiveProfileProxy: jest.fn(),
+            setToast,
+          }}
         >
           <CookieConsentProvider>
             <Page />
