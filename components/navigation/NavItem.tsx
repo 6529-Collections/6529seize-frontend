@@ -325,7 +325,7 @@ const NavItemContent = ({
       onPointerLeave={clearPressed}
       onLostPointerCapture={clearPressed}
       onBlur={clearPressed}
-      prefetch={fullPrefetch ? true : undefined}
+      {...(fullPrefetch ? { prefetch: true } : {})}
       className={linkClassName}
     >
       {linkContent}
