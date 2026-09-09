@@ -13,8 +13,8 @@ boost rules.
 
 - Route: `/network/tdh`
 - Sidebar path: `Network -> TDH`
-- Page navigation anchors: `#tdh-example`, `#tdh-profile`, `#tdh-1-4`, and
-  `#tdh-exact`
+- Page navigation anchors: `#tdh-reference`, `#tdh-example`, `#tdh-profile`,
+  `#tdh-1-4`, and `#tdh-exact`
 - Related sections also use `#tdh-how`, `#tdh-changes`, and `#tdh-explore`.
 
 ## What Users Can Do
