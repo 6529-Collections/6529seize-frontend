@@ -9,6 +9,7 @@ import { commonApiFetch, commonApiPut } from "@/services/api/common-api";
 import { useMutation } from "@tanstack/react-query";
 import { useCallback, useEffect, useRef, useState } from "react";
 import Toggle from "react-toggle";
+import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 
 interface PushNotificationSettingsProps {
   readonly isOpen: boolean;
@@ -48,6 +49,7 @@ export default function PushNotificationSettings({
   onClose,
 }: PushNotificationSettingsProps) {
   const { setToast } = useAuth();
+  const { hideNftPurchasing } = useNftPurchasingVisibility();
   const [deviceId, setDeviceId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [originalSettings, setOriginalSettings] =
@@ -121,12 +123,12 @@ export default function PushNotificationSettings({
 
   const hasChanges = Boolean(
     currentSettings &&
-      originalSettings &&
-      Object.keys(originalSettings).some(
-        (key) =>
-          originalSettings[key as keyof ApiPushNotificationSettings] !==
-          currentSettings[key as keyof ApiPushNotificationSettings]
-      )
+    originalSettings &&
+    Object.keys(originalSettings).some(
+      (key) =>
+        originalSettings[key as keyof ApiPushNotificationSettings] !==
+        currentSettings[key as keyof ApiPushNotificationSettings]
+    )
   );
 
   const updateSetting = useCallback(
@@ -213,25 +215,30 @@ export default function PushNotificationSettings({
                 className="tw-h-full tw-overflow-y-auto tw-px-4 tw-pb-4 tw-pt-4 sm:tw-px-6"
               >
                 <div className="tw-divide-y tw-divide-iron-800/50 tw-overflow-hidden tw-rounded-lg tw-border tw-border-iron-800 tw-bg-iron-900/50">
-                  {settingKeys.map((key) => (
-                    <div
-                      key={key}
-                      className="tw-flex tw-items-center tw-justify-between tw-px-4 tw-py-3"
-                    >
-                      <label
-                        htmlFor={`toggle-${key}`}
-                        className="tw-text-sm tw-text-iron-300"
+                  {settingKeys
+                    .filter(
+                      (key) =>
+                        !hideNftPurchasing || key !== "subscription_coverage"
+                    )
+                    .map((key) => (
+                      <div
+                        key={key}
+                        className="tw-flex tw-items-center tw-justify-between tw-px-4 tw-py-3"
                       >
-                        {SETTINGS_LABELS[key]}
-                      </label>
-                      <Toggle
-                        id={`toggle-${key}`}
-                        checked={currentSettings[key]}
-                        icons={false}
-                        onChange={(e) => updateSetting(key, e.target.checked)}
-                      />
-                    </div>
-                  ))}
+                        <label
+                          htmlFor={`toggle-${key}`}
+                          className="tw-text-sm tw-text-iron-300"
+                        >
+                          {SETTINGS_LABELS[key]}
+                        </label>
+                        <Toggle
+                          id={`toggle-${key}`}
+                          checked={currentSettings[key]}
+                          icons={false}
+                          onChange={(e) => updateSetting(key, e.target.checked)}
+                        />
+                      </div>
+                    ))}
                 </div>
               </div>
               {canScrollDown && (

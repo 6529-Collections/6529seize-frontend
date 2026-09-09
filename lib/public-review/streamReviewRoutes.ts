@@ -1,4 +1,5 @@
 import { isPublicReviewEnabled } from "@/config/publicReviews";
+import { STREAM_REVIEW_CURRENT_PAGES } from "./streamReviewEntryGuides";
 import { getPublicReviewLifecycleCapabilities } from "@/lib/public-review/publicReviewLifecycle";
 import type { PublicReviewPageDefinition } from "@/lib/public-review/publicReviewTypes";
 import {
@@ -61,7 +62,13 @@ export function resolveStreamReviewRoute({
     return undefined;
   }
 
-  const page = getStreamReviewPage(params.page ?? "overview", displayedVersion);
+  const pageSlug = params.page ?? "overview";
+  const page =
+    params.version === undefined
+      ? STREAM_REVIEW_CURRENT_PAGES.find(
+          (candidate) => candidate.slug === pageSlug
+        )
+      : getStreamReviewPage(pageSlug, displayedVersion);
   if (!page) {
     return undefined;
   }

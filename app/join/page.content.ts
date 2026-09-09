@@ -17,6 +17,7 @@ export interface JoinLinks {
 }
 
 export interface TimelineItemSpec {
+  readonly requiresNftPurchasing?: boolean;
   readonly id: TimelineStepId;
   readonly titleKey: Join6529MessageKey;
   readonly bodyKey: Join6529MessageKey;
@@ -34,6 +35,8 @@ export interface FocusFeatureSpec {
 }
 
 interface FaqItemSpec {
+  readonly requiresNftPurchasing?: boolean;
+  readonly restrictedAnswerKey?: Join6529MessageKey;
   readonly id: string;
   readonly questionKey: Join6529MessageKey;
   readonly answerKey: Join6529MessageKey;
@@ -118,6 +121,7 @@ export const TIMELINE_ITEM_SPECS: readonly TimelineItemSpec[] = [
   },
   {
     id: "collect",
+    requiresNftPurchasing: true,
     titleKey: "join6529.joining.collect.title",
     bodyKey: "join6529.joining.collect.body",
     actionLabelKey: "join6529.action.viewCollections",
@@ -179,6 +183,7 @@ export const FOCUS_FEATURE_SPECS: readonly FocusFeatureSpec[] = [
 export const FAQ_ITEM_SPECS: readonly FaqItemSpec[] = [
   {
     id: "wallet-eth",
+    restrictedAnswerKey: "join6529.faq.walletEth.restrictedAnswer",
     questionKey: "join6529.faq.walletEth.question",
     answerKey: "join6529.faq.walletEth.answer",
     learnMoreHref: "/about/faq",
@@ -191,6 +196,7 @@ export const FAQ_ITEM_SPECS: readonly FaqItemSpec[] = [
   },
   {
     id: "meme-cost",
+    requiresNftPurchasing: true,
     questionKey: "join6529.faq.memeCost.question",
     answerKey: "join6529.faq.memeCost.answer",
     learnMoreHref: MEME_MINT_HREF,
@@ -198,6 +204,7 @@ export const FAQ_ITEM_SPECS: readonly FaqItemSpec[] = [
   {
     id: "subscriptions",
     questionKey: "join6529.faq.subscriptions.question",
+    requiresNftPurchasing: true,
     answerKey: "join6529.faq.subscriptions.answer",
     learnMoreHref: ABOUT_SUBSCRIPTIONS_HREF,
   },

@@ -75,10 +75,17 @@ describe("MyStreamWaveMyVote", () => {
   });
 
   it.each(["row", "total", "voters"] as const)(
-    "opens the submission once when clicking the %s",
+    "toggles reset selection once without opening the submission when clicking the %s",
     (target) => {
       const onDropClick = jest.fn();
-      render(<MyStreamWaveMyVote drop={drop} onDropClick={onDropClick} />);
+      const onToggleCheck = jest.fn();
+      const { rerender } = render(
+        <MyStreamWaveMyVote
+          drop={drop}
+          onDropClick={onDropClick}
+          onToggleCheck={onToggleCheck}
+        />
+      );
       const targets = {
         row: screen.getByRole("article", { name: "Drop Title" }),
         total: screen.getByTestId("votes"),
@@ -87,19 +94,41 @@ describe("MyStreamWaveMyVote", () => {
 
       fireEvent.click(targets[target]);
 
-      expect(onDropClick).toHaveBeenCalledTimes(1);
-      expect(onDropClick).toHaveBeenCalledWith(drop);
+      expect(onToggleCheck).toHaveBeenCalledTimes(1);
+      expect(onToggleCheck).toHaveBeenCalledWith("d1");
+      expect(onDropClick).not.toHaveBeenCalled();
+
+      rerender(
+        <MyStreamWaveMyVote
+          drop={drop}
+          onDropClick={onDropClick}
+          onToggleCheck={onToggleCheck}
+          isChecked
+        />
+      );
+      expect(screen.getByRole("checkbox")).toBeChecked();
+      fireEvent.click(targets[target]);
+      expect(onToggleCheck).toHaveBeenCalledTimes(2);
+      expect(onDropClick).not.toHaveBeenCalled();
     }
   );
 
-  it("does not open the row when text is selected", () => {
+  it("does not toggle or open the row when text is selected", () => {
     const onDropClick = jest.fn();
+    const onToggleCheck = jest.fn();
     (globalThis.getSelection as any) = () => ({ toString: () => "selected" });
-    render(<MyStreamWaveMyVote drop={drop} onDropClick={onDropClick} />);
+    render(
+      <MyStreamWaveMyVote
+        drop={drop}
+        onDropClick={onDropClick}
+        onToggleCheck={onToggleCheck}
+      />
+    );
 
     fireEvent.click(screen.getByRole("article", { name: "Drop Title" }));
 
     expect(onDropClick).not.toHaveBeenCalled();
+    expect(onToggleCheck).not.toHaveBeenCalled();
   });
 
   it.each(["Open Drop Title", "Drop Title"])(
@@ -107,7 +136,14 @@ describe("MyStreamWaveMyVote", () => {
     async (buttonName) => {
       const user = userEvent.setup();
       const onDropClick = jest.fn();
-      render(<MyStreamWaveMyVote drop={drop} onDropClick={onDropClick} />);
+      const onToggleCheck = jest.fn();
+      render(
+        <MyStreamWaveMyVote
+          drop={drop}
+          onDropClick={onDropClick}
+          onToggleCheck={onToggleCheck}
+        />
+      );
       const row = screen.getByRole("article", { name: "Drop Title" });
       expect(row).not.toHaveAttribute("tabindex");
       expect(
@@ -119,12 +155,20 @@ describe("MyStreamWaveMyVote", () => {
 
       expect(onDropClick).toHaveBeenCalledTimes(1);
       expect(onDropClick).toHaveBeenCalledWith(drop);
+      expect(onToggleCheck).not.toHaveBeenCalled();
     }
   );
 
-  it("keeps vote controls and their surrounding area separate from navigation", () => {
+  it("keeps vote controls and their surrounding area separate from row selection", () => {
     const onDropClick = jest.fn();
-    render(<MyStreamWaveMyVote drop={drop} onDropClick={onDropClick} />);
+    const onToggleCheck = jest.fn();
+    render(
+      <MyStreamWaveMyVote
+        drop={drop}
+        onDropClick={onDropClick}
+        onToggleCheck={onToggleCheck}
+      />
+    );
 
     fireEvent.click(screen.getByTestId("input"));
     fireEvent.click(screen.getByText("TDH"));
@@ -137,24 +181,38 @@ describe("MyStreamWaveMyVote", () => {
     fireEvent.click(screen.getByText("Disabled vote"));
 
     expect(onDropClick).not.toHaveBeenCalled();
+    expect(onToggleCheck).not.toHaveBeenCalled();
   });
 
   it("keeps the profile link separate from submission navigation", () => {
     const onDropClick = jest.fn();
+    const onToggleCheck = jest.fn();
     const openProfile = jest.spyOn(window, "open").mockReturnValue(null);
-    render(<MyStreamWaveMyVote drop={drop} onDropClick={onDropClick} />);
+    render(
+      <MyStreamWaveMyVote
+        drop={drop}
+        onDropClick={onDropClick}
+        onToggleCheck={onToggleCheck}
+      />
+    );
 
     fireEvent.click(screen.getByRole("link", { name: "alice" }));
 
     expect(openProfile).toHaveBeenCalledWith("/alice", "_blank");
     expect(onDropClick).not.toHaveBeenCalled();
+    expect(onToggleCheck).not.toHaveBeenCalled();
     openProfile.mockRestore();
   });
 
   it("keeps the media tooltip separate from submission navigation", () => {
     const onDropClick = jest.fn();
+    const onToggleCheck = jest.fn();
     const { container } = render(
-      <MyStreamWaveMyVote drop={drop} onDropClick={onDropClick} />
+      <MyStreamWaveMyVote
+        drop={drop}
+        onDropClick={onDropClick}
+        onToggleCheck={onToggleCheck}
+      />
     );
     const mediaBadge = container.querySelector(
       '[data-tooltip-id="format-badge-d1"]'
@@ -165,19 +223,26 @@ describe("MyStreamWaveMyVote", () => {
     fireEvent.keyDown(mediaBadge!, { key: "Enter" });
 
     expect(onDropClick).not.toHaveBeenCalled();
+    expect(onToggleCheck).not.toHaveBeenCalled();
   });
 
   it.each(["Open Drop Title", "Drop Title"])(
     "triggers onDropClick from %s when no text is selected",
     (buttonName) => {
       const onDropClick = jest.fn();
+      const onToggleCheck = jest.fn();
       (globalThis.getSelection as any) = () => ({ toString: () => "" });
       render(
-        <MyStreamWaveMyVote drop={drop} onDropClick={onDropClick} />
+        <MyStreamWaveMyVote
+          drop={drop}
+          onDropClick={onDropClick}
+          onToggleCheck={onToggleCheck}
+        />
       );
       fireEvent.click(screen.getByRole("button", { name: buttonName }));
       expect(onDropClick).toHaveBeenCalledTimes(1);
       expect(onDropClick).toHaveBeenCalledWith(drop);
+      expect(onToggleCheck).not.toHaveBeenCalled();
     }
   );
 
@@ -211,9 +276,60 @@ describe("MyStreamWaveMyVote", () => {
     });
     expect(checkbox).not.toBeChecked();
     fireEvent.click(checkbox);
+    expect(onToggleCheck).toHaveBeenCalledTimes(1);
     expect(onToggleCheck).toHaveBeenCalledWith("d1");
     expect(onDropClick).not.toHaveBeenCalled();
   });
+
+  it("toggles reset selection once with Space on the native checkbox", async () => {
+    const user = userEvent.setup();
+    const onToggleCheck = jest.fn();
+    const onDropClick = jest.fn();
+    render(
+      <MyStreamWaveMyVote
+        drop={drop}
+        onDropClick={onDropClick}
+        onToggleCheck={onToggleCheck}
+      />
+    );
+    screen.getByRole("checkbox").focus();
+
+    await user.keyboard(" ");
+
+    expect(onToggleCheck).toHaveBeenCalledTimes(1);
+    expect(onToggleCheck).toHaveBeenCalledWith("d1");
+    expect(onDropClick).not.toHaveBeenCalled();
+  });
+
+  it.each(["isResetting", "isVotingClosed"] as const)(
+    "blocks row selection while %s but keeps title and artwork navigation",
+    (disabledProp) => {
+      const onToggleCheck = jest.fn();
+      const onDropClick = jest.fn();
+      render(
+        <MyStreamWaveMyVote
+          drop={drop}
+          onDropClick={onDropClick}
+          onToggleCheck={onToggleCheck}
+          {...{ [disabledProp]: true }}
+        />
+      );
+
+      fireEvent.click(screen.getByRole("article", { name: "Drop Title" }));
+      const checkbox = screen.queryByRole("checkbox");
+      if (checkbox) {
+        expect(checkbox).toBeDisabled();
+        fireEvent.click(checkbox);
+      }
+      expect(onToggleCheck).not.toHaveBeenCalled();
+      expect(onDropClick).not.toHaveBeenCalled();
+
+      fireEvent.click(screen.getByRole("button", { name: "Drop Title" }));
+      fireEvent.click(screen.getByRole("button", { name: "Open Drop Title" }));
+      expect(onDropClick).toHaveBeenCalledTimes(2);
+      expect(onToggleCheck).not.toHaveBeenCalled();
+    }
+  );
 
   it("keeps the checkbox label click separate from submission navigation", () => {
     const onDropClick = jest.fn();

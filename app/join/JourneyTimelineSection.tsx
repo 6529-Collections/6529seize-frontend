@@ -75,12 +75,14 @@ const JOURNEY_HEADER_KEYS: Readonly<
 };
 
 export function JourneyTimelineSection({
+  hideNftPurchasing = false,
   links,
   locale,
   pageState,
   timelineProgress,
 }: {
   readonly links: JoinLinks;
+  readonly hideNftPurchasing?: boolean;
   readonly locale: SupportedLocale;
   readonly pageState: JoinPageState;
   readonly timelineProgress: TimelineProgress;
@@ -118,7 +120,9 @@ export function JourneyTimelineSection({
           aria-hidden="true"
           className="tw-absolute tw-bottom-0 tw-left-6 tw-top-6 tw-z-0 tw-w-px tw-bg-gradient-to-b tw-from-white/20 tw-to-white/[0.02] md:tw-left-1/2 md:-tw-translate-x-1/2"
         />
-        {TIMELINE_ITEM_SPECS.map((item, index) => (
+        {TIMELINE_ITEM_SPECS.filter(
+          (item) => !hideNftPurchasing || !item.requiresNftPurchasing
+        ).map((item, index) => (
           <Fragment key={item.id}>
             {item.id === OPTIONAL_TIMELINE_START_ID && (
               <TimelineGroupLabel

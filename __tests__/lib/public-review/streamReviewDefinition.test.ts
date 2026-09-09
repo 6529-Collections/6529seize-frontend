@@ -4,7 +4,10 @@ import path from "node:path";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { extractPublicReviewEvidenceStates } from "@/lib/public-review/editorialSections";
-import { PUBLIC_REVIEW_EVIDENCE_STATES } from "@/lib/public-review/publicReviewTypes";
+import {
+  PUBLIC_REVIEW_EVIDENCE_STATES,
+  type PublicReviewEvidenceState,
+} from "@/lib/public-review/publicReviewTypes";
 import {
   getStreamReviewFeedbackHref,
   STREAM_REVIEW_DEFINITION,
@@ -35,12 +38,12 @@ const EXPECTED_PAGE_TITLES = [
 
 describe("6529 Stream public review definition", () => {
   it("pins the active review version and exact source commit", () => {
-    expect(STREAM_REVIEW_VERSION).toBe("2026-08-01.1");
+    expect(STREAM_REVIEW_VERSION).toBe("2026-09-09.1");
     expect(STREAM_REVIEW_PREVIOUS_VERSION).toBe("2026-07-30.1");
     expect(STREAM_REVIEW_OLDER_VERSION).toBe("2026-07-27.1");
     expect(STREAM_REVIEW_LEGACY_VERSION).toBe("2026-07-26.1");
     expect(STREAM_REVIEW_SOURCE_COMMIT).toBe(
-      "513bd7e079eafe109df6ae1ae21bfbca6fec6786"
+      "92ea123380917032f01aae09691141a2a72df935"
     );
     expect(STREAM_REVIEW_DEFINITION.versions[0]?.source.commit).toBe(
       STREAM_REVIEW_SOURCE_COMMIT
@@ -73,7 +76,7 @@ describe("6529 Stream public review definition", () => {
       deploymentStatus: "NOT_DEPLOYED",
       auditStatus: "PRE_AUDIT",
       source: {
-        commit: STREAM_REVIEW_SOURCE_COMMIT,
+        commit: "513bd7e079eafe109df6ae1ae21bfbca6fec6786",
       },
     });
     expect(previous?.pages).toHaveLength(14);
@@ -122,7 +125,7 @@ describe("6529 Stream public review definition", () => {
     ).toBe(14);
 
     for (const page of STREAM_REVIEW_PAGES) {
-      const pageStates = new Set(page.evidenceStates);
+      const pageStates = new Set<PublicReviewEvidenceState>(page.evidenceStates);
       expect(page.evidenceStates).toEqual(
         PUBLIC_REVIEW_EVIDENCE_STATES.filter((state) => pageStates.has(state))
       );
@@ -159,8 +162,9 @@ describe("6529 Stream public review definition", () => {
         path.join(editorialRoot, page.editorialFile),
         "utf8"
       );
+      const pageStates = new Set<PublicReviewEvidenceState>(page.evidenceStates);
       const omittedStates = extractPublicReviewEvidenceStates(markdown).filter(
-        (state) => !page.evidenceStates.includes(state)
+        (state) => !pageStates.has(state)
       );
 
       return omittedStates.length === 0

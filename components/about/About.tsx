@@ -2,6 +2,7 @@
 
 import { useSetTitle } from "@/contexts/TitleContext";
 import { AboutSection } from "@/types/enums";
+import NftPurchasingGate from "@/components/common/NftPurchasingGate";
 
 // Section components
 import { DEFAULT_LOCALE } from "@/i18n/locales";
@@ -52,6 +53,20 @@ const ABOUT_LEGAL_CONTENT_CLASS = [
 ].join(" ");
 
 export default function About({ section }: { readonly section: AboutSection }) {
+  if (
+    section === AboutSection.MINTING ||
+    section === AboutSection.SUBSCRIPTIONS
+  ) {
+    return (
+      <NftPurchasingGate redirectTo="/about">
+        <AboutContent section={section} />
+      </NftPurchasingGate>
+    );
+  }
+  return <AboutContent section={section} />;
+}
+
+function AboutContent({ section }: { readonly section: AboutSection }) {
   const locale = DEFAULT_LOCALE;
   const sectionTitle = getAboutSectionDocumentTitle(section, locale);
   const usesFeatureLayout = isAboutFeatureSection(section);

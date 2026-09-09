@@ -5,7 +5,6 @@ import Drop, { DropLocation } from "@/components/waves/drops/Drop";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { convertApiDropToExtendedDrop } from "@/helpers/waves/drop.helpers";
-import useDeviceInfo from "@/hooks/useDeviceInfo";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import type { ReactNode } from "react";
 import CompactDropPreview from "./CompactDropPreview";
@@ -35,13 +34,10 @@ export default function NotificationDrop({
   onQuoteClick,
   onDropContentClick,
 }: NotificationDropProps) {
-  const { isApp } = useDeviceInfo();
   const extendedDrop = convertApiDropToExtendedDrop(drop);
 
   return (
-    <div
-      className={`tw-w-full tw-min-w-0 ${isApp ? "[--drop-card-background:theme(colors.iron.900)]" : ""}`}
-    >
+    <div className="tw-w-full tw-min-w-0">
       <Drop
         drop={extendedDrop}
         previousDrop={null}

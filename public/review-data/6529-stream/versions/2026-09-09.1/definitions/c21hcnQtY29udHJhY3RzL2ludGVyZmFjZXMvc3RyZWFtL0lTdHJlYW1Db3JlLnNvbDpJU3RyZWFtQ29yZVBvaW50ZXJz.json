@@ -1,0 +1,576 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/interfaces/stream/IStreamCore.sol:IStreamCorePointers#event:CoreSatellitePointerFrozen(uint16,bytes32,bytes32,address,bytes32)",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamCore.sol:IStreamCorePointers",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "pointerType",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "actionId",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "internalType": "address",
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "manifestHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "CoreSatellitePointerFrozen",
+          "signature": "CoreSatellitePointerFrozen(uint16,bytes32,bytes32,address,bytes32)",
+          "topic0": "0x08bb92ce6e33a2853c33ee2b8c70eb45f99aacc4c3baa3794494ce1e5984d380"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/interfaces/stream/IStreamCore.sol:IStreamCorePointers#event:CoreSatellitePointerUpdated(uint16,bytes32,bytes32,address,address)",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamCore.sol:IStreamCorePointers",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "pointerType",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "actionId",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "indexed": true,
+              "internalType": "address",
+              "name": "newTarget",
+              "type": "address"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "internalType": "address",
+              "name": "oldTarget",
+              "type": "address"
+            }
+          ],
+          "name": "CoreSatellitePointerUpdated",
+          "signature": "CoreSatellitePointerUpdated(uint16,bytes32,bytes32,address,address)",
+          "topic0": "0xa723bbdea55cffd0c5c0459a83524fb91e5620f4a9367ae98c76ca81ccf0128c"
+        }
+      ],
+      "functions": [
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamCore.sol:IStreamCorePointers#function:0xcdcdb71e",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamCore.sol:IStreamCorePointers",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "pointerType",
+              "type": "bytes32"
+            }
+          ],
+          "name": "freezeSatellitePointer",
+          "outputs": [],
+          "selector": "0xcdcdb71e",
+          "signature": "freezeSatellitePointer(bytes32)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamCore.sol:IStreamCorePointers#function:0x3528d53c",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamCore.sol:IStreamCorePointers",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "pointerType",
+              "type": "bytes32"
+            }
+          ],
+          "name": "getSatellitePointer",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "codeHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "internalType": "bool",
+              "name": "frozen",
+              "type": "bool"
+            },
+            {
+              "index": 3,
+              "internalType": "bytes32",
+              "name": "moduleType",
+              "type": "bytes32"
+            },
+            {
+              "index": 4,
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            },
+            {
+              "index": 5,
+              "internalType": "address",
+              "name": "registry",
+              "type": "address"
+            },
+            {
+              "index": 6,
+              "internalType": "uint8",
+              "name": "registryStatus",
+              "type": "uint8"
+            },
+            {
+              "index": 7,
+              "internalType": "bytes32",
+              "name": "moduleManifestHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 8,
+              "internalType": "bytes32",
+              "name": "deploymentManifestHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 9,
+              "internalType": "uint64",
+              "name": "revision",
+              "type": "uint64"
+            }
+          ],
+          "selector": "0x3528d53c",
+          "signature": "getSatellitePointer(bytes32)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamCore.sol:IStreamCorePointers#function:0xac1e5708",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamCore.sol:IStreamCorePointers",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "pointerType",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "newTarget",
+              "type": "address"
+            }
+          ],
+          "name": "updateSatellitePointer",
+          "outputs": [],
+          "selector": "0xac1e5708",
+          "signature": "updateSatellitePointer(bytes32,address)",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "first_party_candidate",
+    "classificationReason": "First-party protocol definition outside the release and published-interface catalogs.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [
+        {
+          "anonymous": false,
+          "astId": 86469,
+          "canonicalSignature": "CoreSatellitePointerUpdated(uint16,bytes32,bytes32,address,address)",
+          "displaySignature": "CoreSatellitePointerUpdated(uint16,bytes32,bytes32,address,address)",
+          "id": "smart-contracts/interfaces/stream/IStreamCore.sol:IStreamCorePointers#event:CoreSatellitePointerUpdated(uint16,bytes32,bytes32,address,address)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "pointerType",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "name": "actionId",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "indexed": true,
+              "name": "newTarget",
+              "type": "address"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "name": "oldTarget",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVyZmFjZXMvc3RyZWFtL0lTdHJlYW1Db3JlLnNvbDpJU3RyZWFtQ29yZVBvaW50ZXJzI2V2ZW50OkNvcmVTYXRlbGxpdGVQb2ludGVyVXBkYXRlZCh1aW50MTYsYnl0ZXMzMixieXRlczMyLGFkZHJlc3MsYWRkcmVzcyk",
+          "kind": "event",
+          "name": "CoreSatellitePointerUpdated",
+          "natspec": "",
+          "range": {
+            "byteLength": 203,
+            "byteStart": 5463,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamCore.sol#L175-L181",
+            "lineEnd": 181,
+            "lineStart": 175,
+            "snippetSha256": "sha256:218adf3b11b48e085115c765c3e0381b2bad058970fcdff3231ee76a1c9c2cda",
+            "sourceSha256": "sha256:082c59056a4073595d4a99bd2ae546db42c8b4b17570f9f70fc0f2c36a37ad71"
+          },
+          "topic0": "0xa723bbdea55cffd0c5c0459a83524fb91e5620f4a9367ae98c76ca81ccf0128c"
+        },
+        {
+          "anonymous": false,
+          "astId": 86481,
+          "canonicalSignature": "CoreSatellitePointerFrozen(uint16,bytes32,bytes32,address,bytes32)",
+          "displaySignature": "CoreSatellitePointerFrozen(uint16,bytes32,bytes32,address,bytes32)",
+          "id": "smart-contracts/interfaces/stream/IStreamCore.sol:IStreamCorePointers#event:CoreSatellitePointerFrozen(uint16,bytes32,bytes32,address,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "pointerType",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "name": "actionId",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "name": "manifestHash",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVyZmFjZXMvc3RyZWFtL0lTdHJlYW1Db3JlLnNvbDpJU3RyZWFtQ29yZVBvaW50ZXJzI2V2ZW50OkNvcmVTYXRlbGxpdGVQb2ludGVyRnJvemVuKHVpbnQxNixieXRlczMyLGJ5dGVzMzIsYWRkcmVzcyxieXRlczMyKQ",
+          "kind": "event",
+          "name": "CoreSatellitePointerFrozen",
+          "natspec": "",
+          "range": {
+            "byteLength": 194,
+            "byteStart": 5672,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamCore.sol#L183-L189",
+            "lineEnd": 189,
+            "lineStart": 183,
+            "snippetSha256": "sha256:5391bf0d2b0e67d6e61892818c7bb5abfc3cf496264d08c2ab5f56cb2e436edc",
+            "sourceSha256": "sha256:082c59056a4073595d4a99bd2ae546db42c8b4b17570f9f70fc0f2c36a37ad71"
+          },
+          "topic0": "0x08bb92ce6e33a2853c33ee2b8c70eb45f99aacc4c3baa3794494ce1e5984d380"
+        }
+      ],
+      "functions": [
+        {
+          "canonicalSignature": "getSatellitePointer(bytes32)",
+          "displaySignature": "getSatellitePointer(bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/interfaces/stream/IStreamCore.sol:IStreamCorePointers#function:0x3528d53c",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "pointerType",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVyZmFjZXMvc3RyZWFtL0lTdHJlYW1Db3JlLnNvbDpJU3RyZWFtQ29yZVBvaW50ZXJzI2Z1bmN0aW9uOjB4MzUyOGQ1M2M",
+          "kind": "function",
+          "modifiers": [],
+          "name": "getSatellitePointer",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "codeHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "frozen",
+              "type": "bool"
+            },
+            {
+              "index": 3,
+              "name": "moduleType",
+              "type": "bytes32"
+            },
+            {
+              "index": 4,
+              "name": "interfaceId",
+              "type": "bytes4"
+            },
+            {
+              "index": 5,
+              "name": "registry",
+              "type": "address"
+            },
+            {
+              "index": 6,
+              "name": "registryStatus",
+              "type": "uint8"
+            },
+            {
+              "index": 7,
+              "name": "moduleManifestHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 8,
+              "name": "deploymentManifestHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 9,
+              "name": "revision",
+              "type": "uint64"
+            }
+          ],
+          "range": {
+            "byteLength": 431,
+            "byteStart": 5872,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamCore.sol#L191-L205",
+            "lineEnd": 205,
+            "lineStart": 191,
+            "snippetSha256": "sha256:766d252e95343aac04a793dd79ccf2c9058895d9b134d15d3e5a012ecf1cd87e",
+            "sourceSha256": "sha256:082c59056a4073595d4a99bd2ae546db42c8b4b17570f9f70fc0f2c36a37ad71"
+          },
+          "selector": "0x3528d53c",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "updateSatellitePointer(bytes32,address)",
+          "displaySignature": "updateSatellitePointer(bytes32,address)",
+          "functionKind": "function",
+          "id": "smart-contracts/interfaces/stream/IStreamCore.sol:IStreamCorePointers#function:0xac1e5708",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "pointerType",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "newTarget",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVyZmFjZXMvc3RyZWFtL0lTdHJlYW1Db3JlLnNvbDpJU3RyZWFtQ29yZVBvaW50ZXJzI2Z1bmN0aW9uOjB4YWMxZTU3MDg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "updateSatellitePointer",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 81,
+            "byteStart": 6309,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamCore.sol#L207",
+            "lineEnd": 207,
+            "lineStart": 207,
+            "snippetSha256": "sha256:3d41ff5be96d3f09f5949507d29b5f9ab3fba9246daaafb8c46aeff7b3ef597a",
+            "sourceSha256": "sha256:082c59056a4073595d4a99bd2ae546db42c8b4b17570f9f70fc0f2c36a37ad71"
+          },
+          "selector": "0xac1e5708",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "freezeSatellitePointer(bytes32)",
+          "displaySignature": "freezeSatellitePointer(bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/interfaces/stream/IStreamCore.sol:IStreamCorePointers#function:0xcdcdb71e",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "pointerType",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVyZmFjZXMvc3RyZWFtL0lTdHJlYW1Db3JlLnNvbDpJU3RyZWFtQ29yZVBvaW50ZXJzI2Z1bmN0aW9uOjB4Y2RjZGI3MWU",
+          "kind": "function",
+          "modifiers": [],
+          "name": "freezeSatellitePointer",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 62,
+            "byteStart": 6396,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamCore.sol#L209",
+            "lineEnd": 209,
+            "lineStart": 209,
+            "snippetSha256": "sha256:1080949812ae278285735622691f93786ef028bcf69e3c21c403af5fe5e65a64",
+            "sourceSha256": "sha256:082c59056a4073595d4a99bd2ae546db42c8b4b17570f9f70fc0f2c36a37ad71"
+          },
+          "selector": "0xcdcdb71e",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/interfaces/stream/IStreamCore.sol:IStreamCorePointers",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "c21hcnQtY29udHJhY3RzL2ludGVyZmFjZXMvc3RyZWFtL0lTdHJlYW1Db3JlLnNvbDpJU3RyZWFtQ29yZVBvaW50ZXJz",
+    "kind": "interface",
+    "linearizedDefinitionIds": [
+      "smart-contracts/interfaces/stream/IStreamCore.sol:IStreamCorePointers"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "IStreamCorePointers",
+    "natspec": "",
+    "range": {
+      "byteLength": 1033,
+      "byteStart": 5427,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamCore.sol#L174-L210",
+      "lineEnd": 210,
+      "lineStart": 174,
+      "snippetSha256": "sha256:bd60ea371dbf6cf82c1a646549a3f6c804bf3375a3f502b0f83e1ada210c3ebd",
+      "sourceSha256": "sha256:082c59056a4073595d4a99bd2ae546db42c8b4b17570f9f70fc0f2c36a37ad71"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/interfaces/stream/IStreamCore.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-09-09.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 4
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 3
+    },
+    "totalCount": 4
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "smart-contracts/interfaces/stream/IStreamCore.sol:IStreamCorePointers",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/interfaces/stream/IStreamCore.sol:IStreamCorePointers#function:0x3528d53c",
+      "definitionId": "smart-contracts/interfaces/stream/IStreamCore.sol:IStreamCorePointers",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/interfaces/stream/IStreamCore.sol:IStreamCorePointers#function:0xac1e5708",
+      "definitionId": "smart-contracts/interfaces/stream/IStreamCore.sol:IStreamCorePointers",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/interfaces/stream/IStreamCore.sol:IStreamCorePointers#function:0xcdcdb71e",
+      "definitionId": "smart-contracts/interfaces/stream/IStreamCore.sol:IStreamCorePointers",
+      "severity": "advisory"
+    }
+  ]
+}

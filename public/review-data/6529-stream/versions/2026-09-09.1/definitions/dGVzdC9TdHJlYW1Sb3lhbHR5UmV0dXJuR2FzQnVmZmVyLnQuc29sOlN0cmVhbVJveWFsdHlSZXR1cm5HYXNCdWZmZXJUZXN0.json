@@ -1,0 +1,1333 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest#function:0x0a9254e4",
+          "declaringDefinitionId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "setUp",
+          "outputs": [],
+          "selector": "0x0a9254e4",
+          "signature": "setUp()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest#function:0x02cf7f1a",
+          "declaringDefinitionId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testBelowAtAndAboveThresholdForAllThreeConsumers",
+          "outputs": [],
+          "selector": "0x02cf7f1a",
+          "signature": "testBelowAtAndAboveThresholdForAllThreeConsumers()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest#function:0x29857c66",
+          "declaringDefinitionId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testExactlyThreeRowsAndOneSharedBufferConsumerInput",
+          "outputs": [],
+          "selector": "0x29857c66",
+          "signature": "testExactlyThreeRowsAndOneSharedBufferConsumerInput()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest#function:0xfdacec6c",
+          "declaringDefinitionId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testFullRoyaltyStipendBurnCompletesAndReturnsTotalMulDiv",
+          "outputs": [],
+          "selector": "0xfdacec6c",
+          "signature": "testFullRoyaltyStipendBurnCompletesAndReturnsTotalMulDiv()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest#function:0x213fe116",
+          "declaringDefinitionId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testIndependentRepeatedTwoXRaiseOrderingsAndMaxChain",
+          "outputs": [],
+          "selector": "0x213fe116",
+          "signature": "testIndependentRepeatedTwoXRaiseOrderingsAndMaxChain()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest#function:0xef5b771a",
+          "declaringDefinitionId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testMalformedAndOversizedRoyaltyFailSafe",
+          "outputs": [],
+          "selector": "0xef5b771a",
+          "signature": "testMalformedAndOversizedRoyaltyFailSafe()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest#function:0xad78a65f",
+          "declaringDefinitionId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testMaximumMetadataReturndataCompletesForTokenAndContract",
+          "outputs": [],
+          "selector": "0xad78a65f",
+          "signature": "testMaximumMetadataReturndataCompletesForTokenAndContract()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest#function:0x28175fa5",
+          "declaringDefinitionId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testMeasureContractUriFallbackCompletion",
+          "outputs": [],
+          "selector": "0x28175fa5",
+          "signature": "testMeasureContractUriFallbackCompletion()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest#function:0xed425b9b",
+          "declaringDefinitionId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testMeasureContractUriMaximumCompletion",
+          "outputs": [],
+          "selector": "0xed425b9b",
+          "signature": "testMeasureContractUriMaximumCompletion()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest#function:0x5787e087",
+          "declaringDefinitionId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testMeasureRoyaltyFallbackCompletion",
+          "outputs": [],
+          "selector": "0x5787e087",
+          "signature": "testMeasureRoyaltyFallbackCompletion()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest#function:0x6e1bbf63",
+          "declaringDefinitionId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testMeasureRoyaltySuccessCompletion",
+          "outputs": [],
+          "selector": "0x6e1bbf63",
+          "signature": "testMeasureRoyaltySuccessCompletion()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest#function:0x5bc5c4cc",
+          "declaringDefinitionId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testMeasureTokenUriFallbackCompletion",
+          "outputs": [],
+          "selector": "0x5bc5c4cc",
+          "signature": "testMeasureTokenUriFallbackCompletion()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest#function:0xc3c85af7",
+          "declaringDefinitionId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testMeasureTokenUriMaximumCompletion",
+          "outputs": [],
+          "selector": "0xc3c85af7",
+          "signature": "testMeasureTokenUriMaximumCompletion()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest#function:0xfd559982",
+          "declaringDefinitionId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testMetadataLimitRepeatedTwoXMaxChainFailsClosed",
+          "outputs": [],
+          "selector": "0xfd559982",
+          "signature": "testMetadataLimitRepeatedTwoXMaxChainFailsClosed()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest#function:0xa6b9e6d3",
+          "declaringDefinitionId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testOversizedMalformedAndRevertingMetadataFailSafe",
+          "outputs": [],
+          "selector": "0xa6b9e6d3",
+          "signature": "testOversizedMalformedAndRevertingMetadataFailSafe()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest#function:0x874e0783",
+          "declaringDefinitionId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testResolverLimitRepeatedTwoXMaxChainFailsClosed",
+          "outputs": [],
+          "selector": "0x874e0783",
+          "signature": "testResolverLimitRepeatedTwoXMaxChainFailsClosed()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest#function:0xa133b959",
+          "declaringDefinitionId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testThresholdHandlesResiduesZeroOneAndSixtyTwo",
+          "outputs": [],
+          "selector": "0xa133b959",
+          "signature": "testThresholdHandlesResiduesZeroOneAndSixtyTwo()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest#function:0xa47f73fd",
+          "declaringDefinitionId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testThresholdNearUint256MaxFailsClosedWithoutRevert",
+          "outputs": [],
+          "selector": "0xa47f73fd",
+          "signature": "testThresholdNearUint256MaxFailsClosedWithoutRevert()",
+          "stateMutability": "view"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "setUp()",
+          "displaySignature": "setUp()",
+          "functionKind": "function",
+          "id": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest#function:0x0a9254e4",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Sb3lhbHR5UmV0dXJuR2FzQnVmZmVyLnQuc29sOlN0cmVhbVJveWFsdHlSZXR1cm5HYXNCdWZmZXJUZXN0I2Z1bmN0aW9uOjB4MGE5MjU0ZTQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setUp",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 102,
+            "byteStart": 772,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamRoyaltyReturnGasBuffer.t.sol#L22-L24",
+            "lineEnd": 24,
+            "lineStart": 22,
+            "snippetSha256": "sha256:8503c5844ad804737057cf3a9e9332efc4ba3ce7f3be8ca186448373a264d48f",
+            "sourceSha256": "sha256:71d5e198e8f31c2752e32039539dbc37857b786ad54477e21087103870d5dfde"
+          },
+          "selector": "0x0a9254e4",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testExactlyThreeRowsAndOneSharedBufferConsumerInput()",
+          "displaySignature": "testExactlyThreeRowsAndOneSharedBufferConsumerInput()",
+          "functionKind": "function",
+          "id": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest#function:0x29857c66",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Sb3lhbHR5UmV0dXJuR2FzQnVmZmVyLnQuc29sOlN0cmVhbVJveWFsdHlSZXR1cm5HYXNCdWZmZXJUZXN0I2Z1bmN0aW9uOjB4Mjk4NTdjNjY",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testExactlyThreeRowsAndOneSharedBufferConsumerInput",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 780,
+            "byteStart": 880,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamRoyaltyReturnGasBuffer.t.sol#L26-L37",
+            "lineEnd": 37,
+            "lineStart": 26,
+            "snippetSha256": "sha256:516edaf97e84d2ec0404060763e9cff98c86f5e36380c8bff31e4bceba26048d",
+            "sourceSha256": "sha256:71d5e198e8f31c2752e32039539dbc37857b786ad54477e21087103870d5dfde"
+          },
+          "selector": "0x29857c66",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testBelowAtAndAboveThresholdForAllThreeConsumers()",
+          "displaySignature": "testBelowAtAndAboveThresholdForAllThreeConsumers()",
+          "functionKind": "function",
+          "id": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest#function:0x02cf7f1a",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Sb3lhbHR5UmV0dXJuR2FzQnVmZmVyLnQuc29sOlN0cmVhbVJveWFsdHlSZXR1cm5HYXNCdWZmZXJUZXN0I2Z1bmN0aW9uOjB4MDJjZjdmMWE",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testBelowAtAndAboveThresholdForAllThreeConsumers",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 340,
+            "byteStart": 1666,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamRoyaltyReturnGasBuffer.t.sol#L39-L44",
+            "lineEnd": 44,
+            "lineStart": 39,
+            "snippetSha256": "sha256:0c15b06b2078f8e7a8fb8d1a9d767cf578aee80f0ab5d50a9d0ddcface3d4f51",
+            "sourceSha256": "sha256:71d5e198e8f31c2752e32039539dbc37857b786ad54477e21087103870d5dfde"
+          },
+          "selector": "0x02cf7f1a",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testThresholdHandlesResiduesZeroOneAndSixtyTwo()",
+          "displaySignature": "testThresholdHandlesResiduesZeroOneAndSixtyTwo()",
+          "functionKind": "function",
+          "id": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest#function:0xa133b959",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Sb3lhbHR5UmV0dXJuR2FzQnVmZmVyLnQuc29sOlN0cmVhbVJveWFsdHlSZXR1cm5HYXNCdWZmZXJUZXN0I2Z1bmN0aW9uOjB4YTEzM2I5NTk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testThresholdHandlesResiduesZeroOneAndSixtyTwo",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 249,
+            "byteStart": 2012,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamRoyaltyReturnGasBuffer.t.sol#L46-L51",
+            "lineEnd": 51,
+            "lineStart": 46,
+            "snippetSha256": "sha256:d232f4f0def8df5ee87137d84b146823de45dc26ad0f2cf2a27c679bcb244afd",
+            "sourceSha256": "sha256:71d5e198e8f31c2752e32039539dbc37857b786ad54477e21087103870d5dfde"
+          },
+          "selector": "0xa133b959",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testThresholdNearUint256MaxFailsClosedWithoutRevert()",
+          "displaySignature": "testThresholdNearUint256MaxFailsClosedWithoutRevert()",
+          "functionKind": "function",
+          "id": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest#function:0xa47f73fd",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Sb3lhbHR5UmV0dXJuR2FzQnVmZmVyLnQuc29sOlN0cmVhbVJveWFsdHlSZXR1cm5HYXNCdWZmZXJUZXN0I2Z1bmN0aW9uOjB4YTQ3ZjczZmQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testThresholdNearUint256MaxFailsClosedWithoutRevert",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 637,
+            "byteStart": 2267,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamRoyaltyReturnGasBuffer.t.sol#L53-L62",
+            "lineEnd": 62,
+            "lineStart": 53,
+            "snippetSha256": "sha256:560c2d3df59731aefa97bc942c353151f8c7caead3ae1a220901ef09f9b88118",
+            "sourceSha256": "sha256:71d5e198e8f31c2752e32039539dbc37857b786ad54477e21087103870d5dfde"
+          },
+          "selector": "0xa47f73fd",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testFullRoyaltyStipendBurnCompletesAndReturnsTotalMulDiv()",
+          "displaySignature": "testFullRoyaltyStipendBurnCompletesAndReturnsTotalMulDiv()",
+          "functionKind": "function",
+          "id": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest#function:0xfdacec6c",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Sb3lhbHR5UmV0dXJuR2FzQnVmZmVyLnQuc29sOlN0cmVhbVJveWFsdHlSZXR1cm5HYXNCdWZmZXJUZXN0I2Z1bmN0aW9uOjB4ZmRhY2VjNmM",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testFullRoyaltyStipendBurnCompletesAndReturnsTotalMulDiv",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 635,
+            "byteStart": 2910,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamRoyaltyReturnGasBuffer.t.sol#L64-L73",
+            "lineEnd": 73,
+            "lineStart": 64,
+            "snippetSha256": "sha256:272f953f3e88e3fa25fcd66becdd6c727197318b6fcb69e8c9850c33b53306bc",
+            "sourceSha256": "sha256:71d5e198e8f31c2752e32039539dbc37857b786ad54477e21087103870d5dfde"
+          },
+          "selector": "0xfdacec6c",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testMaximumMetadataReturndataCompletesForTokenAndContract()",
+          "displaySignature": "testMaximumMetadataReturndataCompletesForTokenAndContract()",
+          "functionKind": "function",
+          "id": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest#function:0xad78a65f",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Sb3lhbHR5UmV0dXJuR2FzQnVmZmVyLnQuc29sOlN0cmVhbVJveWFsdHlSZXR1cm5HYXNCdWZmZXJUZXN0I2Z1bmN0aW9uOjB4YWQ3OGE2NWY",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testMaximumMetadataReturndataCompletesForTokenAndContract",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1044,
+            "byteStart": 3551,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamRoyaltyReturnGasBuffer.t.sol#L75-L94",
+            "lineEnd": 94,
+            "lineStart": 75,
+            "snippetSha256": "sha256:c8190bf6a825d4e3f00b99e3c994a7f1a22c83d1f6fb1a6cef3fe616770500b5",
+            "sourceSha256": "sha256:71d5e198e8f31c2752e32039539dbc37857b786ad54477e21087103870d5dfde"
+          },
+          "selector": "0xad78a65f",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testOversizedMalformedAndRevertingMetadataFailSafe()",
+          "displaySignature": "testOversizedMalformedAndRevertingMetadataFailSafe()",
+          "functionKind": "function",
+          "id": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest#function:0xa6b9e6d3",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Sb3lhbHR5UmV0dXJuR2FzQnVmZmVyLnQuc29sOlN0cmVhbVJveWFsdHlSZXR1cm5HYXNCdWZmZXJUZXN0I2Z1bmN0aW9uOjB4YTZiOWU2ZDM",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testOversizedMalformedAndRevertingMetadataFailSafe",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1672,
+            "byteStart": 4601,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamRoyaltyReturnGasBuffer.t.sol#L96-L118",
+            "lineEnd": 118,
+            "lineStart": 96,
+            "snippetSha256": "sha256:0311214f7407e4536315f0288a85595d9a294e430c5b6ea058312d09942ed5d2",
+            "sourceSha256": "sha256:71d5e198e8f31c2752e32039539dbc37857b786ad54477e21087103870d5dfde"
+          },
+          "selector": "0xa6b9e6d3",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testMalformedAndOversizedRoyaltyFailSafe()",
+          "displaySignature": "testMalformedAndOversizedRoyaltyFailSafe()",
+          "functionKind": "function",
+          "id": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest#function:0xef5b771a",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Sb3lhbHR5UmV0dXJuR2FzQnVmZmVyLnQuc29sOlN0cmVhbVJveWFsdHlSZXR1cm5HYXNCdWZmZXJUZXN0I2Z1bmN0aW9uOjB4ZWY1Yjc3MWE",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testMalformedAndOversizedRoyaltyFailSafe",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 820,
+            "byteStart": 6279,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamRoyaltyReturnGasBuffer.t.sol#L120-L131",
+            "lineEnd": 131,
+            "lineStart": 120,
+            "snippetSha256": "sha256:4328a74a6df6092c6dbd2516083bd071bf3a2ff634912608583d9fa05b680fb8",
+            "sourceSha256": "sha256:71d5e198e8f31c2752e32039539dbc37857b786ad54477e21087103870d5dfde"
+          },
+          "selector": "0xef5b771a",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testIndependentRepeatedTwoXRaiseOrderingsAndMaxChain()",
+          "displaySignature": "testIndependentRepeatedTwoXRaiseOrderingsAndMaxChain()",
+          "functionKind": "function",
+          "id": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest#function:0x213fe116",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Sb3lhbHR5UmV0dXJuR2FzQnVmZmVyLnQuc29sOlN0cmVhbVJveWFsdHlSZXR1cm5HYXNCdWZmZXJUZXN0I2Z1bmN0aW9uOjB4MjEzZmUxMTY",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testIndependentRepeatedTwoXRaiseOrderingsAndMaxChain",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2717,
+            "byteStart": 7105,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamRoyaltyReturnGasBuffer.t.sol#L133-L191",
+            "lineEnd": 191,
+            "lineStart": 133,
+            "snippetSha256": "sha256:520022c18ab0eb3c5fee9c558dd5d7329018e2c1bb57036d35f1ecec406303dc",
+            "sourceSha256": "sha256:71d5e198e8f31c2752e32039539dbc37857b786ad54477e21087103870d5dfde"
+          },
+          "selector": "0x213fe116",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testResolverLimitRepeatedTwoXMaxChainFailsClosed()",
+          "displaySignature": "testResolverLimitRepeatedTwoXMaxChainFailsClosed()",
+          "functionKind": "function",
+          "id": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest#function:0x874e0783",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Sb3lhbHR5UmV0dXJuR2FzQnVmZmVyLnQuc29sOlN0cmVhbVJveWFsdHlSZXR1cm5HYXNCdWZmZXJUZXN0I2Z1bmN0aW9uOjB4ODc0ZTA3ODM",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testResolverLimitRepeatedTwoXMaxChainFailsClosed",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 639,
+            "byteStart": 9828,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamRoyaltyReturnGasBuffer.t.sol#L193-L203",
+            "lineEnd": 203,
+            "lineStart": 193,
+            "snippetSha256": "sha256:c9d4256eccd55fa51e16b9b0e7b3b7c18e871e6ec06d21dfd0d099b3c729048d",
+            "sourceSha256": "sha256:71d5e198e8f31c2752e32039539dbc37857b786ad54477e21087103870d5dfde"
+          },
+          "selector": "0x874e0783",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testMetadataLimitRepeatedTwoXMaxChainFailsClosed()",
+          "displaySignature": "testMetadataLimitRepeatedTwoXMaxChainFailsClosed()",
+          "functionKind": "function",
+          "id": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest#function:0xfd559982",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Sb3lhbHR5UmV0dXJuR2FzQnVmZmVyLnQuc29sOlN0cmVhbVJveWFsdHlSZXR1cm5HYXNCdWZmZXJUZXN0I2Z1bmN0aW9uOjB4ZmQ1NTk5ODI",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testMetadataLimitRepeatedTwoXMaxChainFailsClosed",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 628,
+            "byteStart": 10473,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamRoyaltyReturnGasBuffer.t.sol#L205-L214",
+            "lineEnd": 214,
+            "lineStart": 205,
+            "snippetSha256": "sha256:a51c7f8099ea9fbc70edd1c8334219c94774813e9ab54b7a8fbc839a7f9393fb",
+            "sourceSha256": "sha256:71d5e198e8f31c2752e32039539dbc37857b786ad54477e21087103870d5dfde"
+          },
+          "selector": "0xfd559982",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testMeasureRoyaltySuccessCompletion()",
+          "displaySignature": "testMeasureRoyaltySuccessCompletion()",
+          "functionKind": "function",
+          "id": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest#function:0x6e1bbf63",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Sb3lhbHR5UmV0dXJuR2FzQnVmZmVyLnQuc29sOlN0cmVhbVJveWFsdHlSZXR1cm5HYXNCdWZmZXJUZXN0I2Z1bmN0aW9uOjB4NmUxYmJmNjM",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testMeasureRoyaltySuccessCompletion",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 267,
+            "byteStart": 11107,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamRoyaltyReturnGasBuffer.t.sol#L216-L221",
+            "lineEnd": 221,
+            "lineStart": 216,
+            "snippetSha256": "sha256:bca966375e7cf5ad5a74f3de72d6130c7e537f6d8b96d7fbf8a55b96ac5e52fc",
+            "sourceSha256": "sha256:71d5e198e8f31c2752e32039539dbc37857b786ad54477e21087103870d5dfde"
+          },
+          "selector": "0x6e1bbf63",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testMeasureRoyaltyFallbackCompletion()",
+          "displaySignature": "testMeasureRoyaltyFallbackCompletion()",
+          "functionKind": "function",
+          "id": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest#function:0x5787e087",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Sb3lhbHR5UmV0dXJuR2FzQnVmZmVyLnQuc29sOlN0cmVhbVJveWFsdHlSZXR1cm5HYXNCdWZmZXJUZXN0I2Z1bmN0aW9uOjB4NTc4N2UwODc",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testMeasureRoyaltyFallbackCompletion",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 238,
+            "byteStart": 11380,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamRoyaltyReturnGasBuffer.t.sol#L223-L228",
+            "lineEnd": 228,
+            "lineStart": 223,
+            "snippetSha256": "sha256:62c55bef8d568f67efa005a9917a65b5a5c03f7a1dd1a1329f1899c96cd5647c",
+            "sourceSha256": "sha256:71d5e198e8f31c2752e32039539dbc37857b786ad54477e21087103870d5dfde"
+          },
+          "selector": "0x5787e087",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testMeasureTokenUriMaximumCompletion()",
+          "displaySignature": "testMeasureTokenUriMaximumCompletion()",
+          "functionKind": "function",
+          "id": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest#function:0xc3c85af7",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Sb3lhbHR5UmV0dXJuR2FzQnVmZmVyLnQuc29sOlN0cmVhbVJveWFsdHlSZXR1cm5HYXNCdWZmZXJUZXN0I2Z1bmN0aW9uOjB4YzNjODVhZjc",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testMeasureTokenUriMaximumCompletion",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 243,
+            "byteStart": 11624,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamRoyaltyReturnGasBuffer.t.sol#L230-L235",
+            "lineEnd": 235,
+            "lineStart": 230,
+            "snippetSha256": "sha256:981176f3b20c4abfc6ad97cee2d7c231d12875ce0397368d4b16c7ce1b04c17b",
+            "sourceSha256": "sha256:71d5e198e8f31c2752e32039539dbc37857b786ad54477e21087103870d5dfde"
+          },
+          "selector": "0xc3c85af7",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testMeasureTokenUriFallbackCompletion()",
+          "displaySignature": "testMeasureTokenUriFallbackCompletion()",
+          "functionKind": "function",
+          "id": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest#function:0x5bc5c4cc",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Sb3lhbHR5UmV0dXJuR2FzQnVmZmVyLnQuc29sOlN0cmVhbVJveWFsdHlSZXR1cm5HYXNCdWZmZXJUZXN0I2Z1bmN0aW9uOjB4NWJjNWM0Y2M",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testMeasureTokenUriFallbackCompletion",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 237,
+            "byteStart": 11873,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamRoyaltyReturnGasBuffer.t.sol#L237-L242",
+            "lineEnd": 242,
+            "lineStart": 237,
+            "snippetSha256": "sha256:7c6b2074a381aca4ea234d6a15a90119f13334250b5e11da5e5d6917b18df590",
+            "sourceSha256": "sha256:71d5e198e8f31c2752e32039539dbc37857b786ad54477e21087103870d5dfde"
+          },
+          "selector": "0x5bc5c4cc",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testMeasureContractUriMaximumCompletion()",
+          "displaySignature": "testMeasureContractUriMaximumCompletion()",
+          "functionKind": "function",
+          "id": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest#function:0xed425b9b",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Sb3lhbHR5UmV0dXJuR2FzQnVmZmVyLnQuc29sOlN0cmVhbVJveWFsdHlSZXR1cm5HYXNCdWZmZXJUZXN0I2Z1bmN0aW9uOjB4ZWQ0MjViOWI",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testMeasureContractUriMaximumCompletion",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 244,
+            "byteStart": 12116,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamRoyaltyReturnGasBuffer.t.sol#L244-L249",
+            "lineEnd": 249,
+            "lineStart": 244,
+            "snippetSha256": "sha256:71e002a45263a020f8ca06d761228b7ab6721cdda0d6069bffd6f36672482a2c",
+            "sourceSha256": "sha256:71d5e198e8f31c2752e32039539dbc37857b786ad54477e21087103870d5dfde"
+          },
+          "selector": "0xed425b9b",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testMeasureContractUriFallbackCompletion()",
+          "displaySignature": "testMeasureContractUriFallbackCompletion()",
+          "functionKind": "function",
+          "id": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest#function:0x28175fa5",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Sb3lhbHR5UmV0dXJuR2FzQnVmZmVyLnQuc29sOlN0cmVhbVJveWFsdHlSZXR1cm5HYXNCdWZmZXJUZXN0I2Z1bmN0aW9uOjB4MjgxNzVmYTU",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testMeasureContractUriFallbackCompletion",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 238,
+            "byteStart": 12366,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamRoyaltyReturnGasBuffer.t.sol#L251-L256",
+            "lineEnd": 256,
+            "lineStart": 251,
+            "snippetSha256": "sha256:e23459d7bb9f84847539197a14a8b38cce05836cf7b63d3d78f09d9310b00346",
+            "sourceSha256": "sha256:71d5e198e8f31c2752e32039539dbc37857b786ad54477e21087103870d5dfde"
+          },
+          "selector": "0x28175fa5",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertThreshold(uint256,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest#function:_assertThreshold(uint256,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "gasLimit",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "buffer",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Sb3lhbHR5UmV0dXJuR2FzQnVmZmVyLnQuc29sOlN0cmVhbVJveWFsdHlSZXR1cm5HYXNCdWZmZXJUZXN0I2Z1bmN0aW9uOl9hc3NlcnRUaHJlc2hvbGQodWludDI1Nix1aW50MjU2KQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertThreshold",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 135,
+            "byteStart": 12610,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamRoyaltyReturnGasBuffer.t.sol#L258-L260",
+            "lineEnd": 260,
+            "lineStart": 258,
+            "snippetSha256": "sha256:c0b286e77dbe8b7f6e9e3a057f20122d7225ec901b33722044c17aae0a86c92d",
+            "sourceSha256": "sha256:71d5e198e8f31c2752e32039539dbc37857b786ad54477e21087103870d5dfde"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertThresholdOn(StreamRoyaltyReturnGasBufferHarness,uint256,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest#function:_assertThresholdOn(StreamRoyaltyReturnGasBufferHarness,uint256,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "target",
+              "type": "StreamRoyaltyReturnGasBufferHarness"
+            },
+            {
+              "index": 1,
+              "name": "gasLimit",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "buffer",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Sb3lhbHR5UmV0dXJuR2FzQnVmZmVyLnQuc29sOlN0cmVhbVJveWFsdHlSZXR1cm5HYXNCdWZmZXJUZXN0I2Z1bmN0aW9uOl9hc3NlcnRUaHJlc2hvbGRPbihTdHJlYW1Sb3lhbHR5UmV0dXJuR2FzQnVmZmVySGFybmVzcyx1aW50MjU2LHVpbnQyNTYp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertThresholdOn",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 594,
+            "byteStart": 12751,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamRoyaltyReturnGasBuffer.t.sol#L262-L273",
+            "lineEnd": 273,
+            "lineStart": 262,
+            "snippetSha256": "sha256:a7282a1dbb0106c186e5d0b97d9ebbc6af0cc7d199b0895e31b21c7973c2d818",
+            "sourceSha256": "sha256:71d5e198e8f31c2752e32039539dbc37857b786ad54477e21087103870d5dfde"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_raise(MockGovernedParameterAuthority,StreamRoyaltyReturnGasBufferHarness,bytes32,uint256,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest#function:_raise(MockGovernedParameterAuthority,StreamRoyaltyReturnGasBufferHarness,bytes32,uint256,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "authority",
+              "type": "MockGovernedParameterAuthority"
+            },
+            {
+              "index": 1,
+              "name": "target",
+              "type": "StreamRoyaltyReturnGasBufferHarness"
+            },
+            {
+              "index": 2,
+              "name": "parameterId",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "name": "newValue",
+              "type": "uint256"
+            },
+            {
+              "index": 4,
+              "name": "actionNonce",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Sb3lhbHR5UmV0dXJuR2FzQnVmZmVyLnQuc29sOlN0cmVhbVJveWFsdHlSZXR1cm5HYXNCdWZmZXJUZXN0I2Z1bmN0aW9uOl9yYWlzZShNb2NrR292ZXJuZWRQYXJhbWV0ZXJBdXRob3JpdHksU3RyZWFtUm95YWx0eVJldHVybkdhc0J1ZmZlckhhcm5lc3MsYnl0ZXMzMix1aW50MjU2LHVpbnQyNTYp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_raise",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 582,
+            "byteStart": 13351,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamRoyaltyReturnGasBuffer.t.sol#L275-L289",
+            "lineEnd": 289,
+            "lineStart": 275,
+            "snippetSha256": "sha256:446150ba46f2d57244c3015018d591a8d0aa19c9dff3eb20b94471ded5b64d6f",
+            "sourceSha256": "sha256:71d5e198e8f31c2752e32039539dbc37857b786ad54477e21087103870d5dfde"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_raiseToMax(MockGovernedParameterAuthority,StreamRoyaltyReturnGasBufferHarness,bytes32,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest#function:_raiseToMax(MockGovernedParameterAuthority,StreamRoyaltyReturnGasBufferHarness,bytes32,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "authority",
+              "type": "MockGovernedParameterAuthority"
+            },
+            {
+              "index": 1,
+              "name": "target",
+              "type": "StreamRoyaltyReturnGasBufferHarness"
+            },
+            {
+              "index": 2,
+              "name": "parameterId",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "name": "actionNonce",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Sb3lhbHR5UmV0dXJuR2FzQnVmZmVyLnQuc29sOlN0cmVhbVJveWFsdHlSZXR1cm5HYXNCdWZmZXJUZXN0I2Z1bmN0aW9uOl9yYWlzZVRvTWF4KE1vY2tHb3Zlcm5lZFBhcmFtZXRlckF1dGhvcml0eSxTdHJlYW1Sb3lhbHR5UmV0dXJuR2FzQnVmZmVySGFybmVzcyxieXRlczMyLHVpbnQyNTYp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_raiseToMax",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "value",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 596,
+            "byteStart": 13939,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamRoyaltyReturnGasBuffer.t.sol#L291-L306",
+            "lineEnd": 306,
+            "lineStart": 291,
+            "snippetSha256": "sha256:894101fe42256c9a5397e7127352b7daa717f35c466ca8973b3e576215ac25f7",
+            "sourceSha256": "sha256:71d5e198e8f31c2752e32039539dbc37857b786ad54477e21087103870d5dfde"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_transitionHashes(StreamRoyaltyReturnGasBufferHarness,bytes32,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest#function:_transitionHashes(StreamRoyaltyReturnGasBufferHarness,bytes32,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "target",
+              "type": "StreamRoyaltyReturnGasBufferHarness"
+            },
+            {
+              "index": 1,
+              "name": "parameterId",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "newValue",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Sb3lhbHR5UmV0dXJuR2FzQnVmZmVyLnQuc29sOlN0cmVhbVJveWFsdHlSZXR1cm5HYXNCdWZmZXJUZXN0I2Z1bmN0aW9uOl90cmFuc2l0aW9uSGFzaGVzKFN0cmVhbVJveWFsdHlSZXR1cm5HYXNCdWZmZXJIYXJuZXNzLGJ5dGVzMzIsdWludDI1Nik",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_transitionHashes",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "scopeHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "oldStateHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "newStateHash",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 764,
+            "byteStart": 14541,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamRoyaltyReturnGasBuffer.t.sol#L308-L323",
+            "lineEnd": 323,
+            "lineStart": 308,
+            "snippetSha256": "sha256:63f8db1e059965fe80fb89e9b937ed7e7d198896272127dcda758e69c5f67891",
+            "sourceSha256": "sha256:71d5e198e8f31c2752e32039539dbc37857b786ad54477e21087103870d5dfde"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_maximumCanonicalStringReturn()",
+          "functionKind": "function",
+          "id": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest#function:_maximumCanonicalStringReturn()",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Sb3lhbHR5UmV0dXJuR2FzQnVmZmVyLnQuc29sOlN0cmVhbVJveWFsdHlSZXR1cm5HYXNCdWZmZXJUZXN0I2Z1bmN0aW9uOl9tYXhpbXVtQ2Fub25pY2FsU3RyaW5nUmV0dXJuKCk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_maximumCanonicalStringReturn",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "returnData",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "range": {
+            "byteLength": 328,
+            "byteStart": 15311,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamRoyaltyReturnGasBuffer.t.sol#L325-L332",
+            "lineEnd": 332,
+            "lineStart": 325,
+            "snippetSha256": "sha256:48d8ffc3d2f879db4e83ff4add08f48af5ff799f7fefc16ff79d810abf6978da",
+            "sourceSha256": "sha256:71d5e198e8f31c2752e32039539dbc37857b786ad54477e21087103870d5dfde"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_malformedStringReturn()",
+          "functionKind": "function",
+          "id": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest#function:_malformedStringReturn()",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Sb3lhbHR5UmV0dXJuR2FzQnVmZmVyLnQuc29sOlN0cmVhbVJveWFsdHlSZXR1cm5HYXNCdWZmZXJUZXN0I2Z1bmN0aW9uOl9tYWxmb3JtZWRTdHJpbmdSZXR1cm4oKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_malformedStringReturn",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "returnData",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "range": {
+            "byteLength": 307,
+            "byteStart": 15645,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamRoyaltyReturnGasBuffer.t.sol#L334-L341",
+            "lineEnd": 341,
+            "lineStart": 334,
+            "snippetSha256": "sha256:c5d84f7d3f39673215521c842df3acb47633abd97148c1a8819a1733c9c28a94",
+            "sourceSha256": "sha256:71d5e198e8f31c2752e32039539dbc37857b786ad54477e21087103870d5dfde"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_lastWord(bytes)",
+          "functionKind": "function",
+          "id": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest#function:_lastWord(bytes)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "value",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Sb3lhbHR5UmV0dXJuR2FzQnVmZmVyLnQuc29sOlN0cmVhbVJveWFsdHlSZXR1cm5HYXNCdWZmZXJUZXN0I2Z1bmN0aW9uOl9sYXN0V29yZChieXRlcyk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_lastWord",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "word",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 201,
+            "byteStart": 15958,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamRoyaltyReturnGasBuffer.t.sol#L343-L347",
+            "lineEnd": 347,
+            "lineStart": 343,
+            "snippetSha256": "sha256:7ae588fabbf1710334b196df56f87c29f5303de62b89fa99bf26d099cfc3c07e",
+            "sourceSha256": "sha256:71d5e198e8f31c2752e32039539dbc37857b786ad54477e21087103870d5dfde"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_GAS_SCOPE_DOMAIN",
+          "natspec": "",
+          "range": {
+            "byteLength": 119,
+            "byteStart": 463,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamRoyaltyReturnGasBuffer.t.sol#L15-L16",
+            "lineEnd": 16,
+            "lineStart": 15,
+            "snippetSha256": "sha256:dbfff2828ebcefdf6686328e94914d3a8a6b67839e5f464dde154c517f615e4d",
+            "sourceSha256": "sha256:71d5e198e8f31c2752e32039539dbc37857b786ad54477e21087103870d5dfde"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 66,
+            "byteStart": 516,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamRoyaltyReturnGasBuffer.t.sol#L16",
+            "lineEnd": 16,
+            "lineStart": 16,
+            "snippetSha256": "sha256:54dbcffdf0605b50d194000cb97fa20055db2ec9138cfb86c6fddd9436604c39",
+            "sourceSha256": "sha256:71d5e198e8f31c2752e32039539dbc37857b786ad54477e21087103870d5dfde"
+          },
+          "valueSource": "0x9533611d402c2b44cf950a4a8900d25f6829bfac541dc4d5353094f966bb1a71",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_GAS_STATE_DOMAIN",
+          "natspec": "",
+          "range": {
+            "byteLength": 119,
+            "byteStart": 588,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamRoyaltyReturnGasBuffer.t.sol#L17-L18",
+            "lineEnd": 18,
+            "lineStart": 17,
+            "snippetSha256": "sha256:237c058f185bc4e69059d7da274b037f5a606e184b41b7e0ca8db93991b01e69",
+            "sourceSha256": "sha256:71d5e198e8f31c2752e32039539dbc37857b786ad54477e21087103870d5dfde"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 66,
+            "byteStart": 641,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamRoyaltyReturnGasBuffer.t.sol#L18",
+            "lineEnd": 18,
+            "lineStart": 18,
+            "snippetSha256": "sha256:992665ffee98da588ba4fad23f5bfc2d9d4546486e47720e0dc0292e1dc8347d",
+            "sourceSha256": "sha256:71d5e198e8f31c2752e32039539dbc37857b786ad54477e21087103870d5dfde"
+          },
+          "valueSource": "0x5059a253d3f7dd63b5d9fd1f0568caf72967f501a3db678b31cefe911334159c",
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "harness",
+          "natspec": "",
+          "range": {
+            "byteLength": 51,
+            "byteStart": 714,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamRoyaltyReturnGasBuffer.t.sol#L20",
+            "lineEnd": 20,
+            "lineStart": 20,
+            "snippetSha256": "sha256:e64e4c75214a72b218b4fb1ee2e72cb44e9df90a20d3c31c0e20b90fb1fe6a30",
+            "sourceSha256": "sha256:71d5e198e8f31c2752e32039539dbc37857b786ad54477e21087103870d5dfde"
+          },
+          "selector": null,
+          "type": "StreamRoyaltyReturnGasBufferHarness",
+          "typeString": "contract StreamRoyaltyReturnGasBufferHarness",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest",
+    "inheritance": [
+      {
+        "definitionId": "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase",
+        "name": "CharacterizationTestBase"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1Sb3lhbHR5UmV0dXJuR2FzQnVmZmVyLnQuc29sOlN0cmVhbVJveWFsdHlSZXR1cm5HYXNCdWZmZXJUZXN0",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest",
+      "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamRoyaltyReturnGasBufferTest",
+    "natspec": "",
+    "range": {
+      "byteLength": 15907,
+      "byteStart": 254,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamRoyaltyReturnGasBuffer.t.sol#L9-L348",
+      "lineEnd": 348,
+      "lineStart": 9,
+      "snippetSha256": "sha256:26d2b9dcbfe61b58295b003b0148169d8aaa836c17980d6d28bfc7d3e8797a93",
+      "sourceSha256": "sha256:71d5e198e8f31c2752e32039539dbc37857b786ad54477e21087103870d5dfde"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamRoyaltyReturnGasBuffer.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-09-09.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 19
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 18
+    },
+    "totalCount": 19
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest#function:0x02cf7f1a",
+      "definitionId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest#function:0x0a9254e4",
+      "definitionId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest#function:0x213fe116",
+      "definitionId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest#function:0x28175fa5",
+      "definitionId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest#function:0x29857c66",
+      "definitionId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest#function:0x5787e087",
+      "definitionId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest#function:0x5bc5c4cc",
+      "definitionId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest#function:0x6e1bbf63",
+      "definitionId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest#function:0x874e0783",
+      "definitionId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest#function:0xa133b959",
+      "definitionId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest#function:0xa47f73fd",
+      "definitionId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest#function:0xa6b9e6d3",
+      "definitionId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest#function:0xad78a65f",
+      "definitionId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest#function:0xc3c85af7",
+      "definitionId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest#function:0xed425b9b",
+      "definitionId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest#function:0xef5b771a",
+      "definitionId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest#function:0xfd559982",
+      "definitionId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest#function:0xfdacec6c",
+      "definitionId": "test/StreamRoyaltyReturnGasBuffer.t.sol:StreamRoyaltyReturnGasBufferTest",
+      "severity": "advisory"
+    }
+  ]
+}

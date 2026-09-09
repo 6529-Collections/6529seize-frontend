@@ -215,6 +215,32 @@ is available, use it; otherwise read the relevant files in
   plain-CSS modules are the fallback where Tailwind cannot express a selector
   cleanly.
 
+## Capacitor iOS NFT purchasing visibility
+
+- Preserve the current regional rule: restrict first-party minting and paid
+  Meme subscription surfaces on Capacitor iOS when the IP-derived country is
+  not `US`. An unknown country is restricted. This is the current product rule;
+  do not silently replace it with all-iOS blocking or App Store storefront logic.
+- Use `useNftPurchasingVisibility` for new or changed surfaces and
+  `NftPurchasingGate` to keep restricted components from mounting. Preserve the
+  existing `shouldHideSubscriptions` country normalization.
+- Completely omit restricted sections, copy, cards, actions, navigation/search
+  entries, and subscription-coverage notification controls. Do not leave empty
+  cards, disabled purchase buttons, or an unavailable banner.
+- Direct and deep-linked restricted pages redirect to an appropriate allowed
+  destination: profile subscriptions to Identity, NextGen mint to its collection,
+  and About Minting/Subscriptions to `/about`. Do not mount purchasing content
+  or start its requests/contract hooks before redirecting; keep it hidden during
+  server rendering and hydration too.
+- Check inbound first-party links as well as the destination. Apply the same
+  checks to new mint/subscription promotions and notification entry points.
+- Preserve US iOS, Android, and web behavior. Ordinary user-authored posts and
+  links, NFT browsing/history, calendar invitations, and open-data reports are
+  not subject to blanket word or link suppression. Hide purchase promotions
+  embedded in otherwise allowed pages without removing those pages.
+- Cover restricted iOS, unknown country, US iOS, Android, web, and direct-link
+  behavior in focused tests. See the mobile-testing skill's purchasing checklist.
+
 ## Architecture Boundaries
 
 - Generated API models come from `openapi.yaml` through `6529 run generate`.

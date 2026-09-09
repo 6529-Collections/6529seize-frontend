@@ -21,7 +21,6 @@ import WaveDropMobileMenuCopyLink from "@/components/waves/drops/WaveDropMobileM
 import WaveDropMobileMenuOpen from "@/components/waves/drops/WaveDropMobileMenuOpen";
 import WaveDropTime from "@/components/waves/drops/time/WaveDropTime";
 import { DropAuthorBadges } from "@/components/waves/drops/DropAuthorBadges";
-import { getRankHoverBorderClass } from "@/components/waves/drops/dropRankStyles";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
 import type { ApiDropV2View } from "@/services/api/drop-v2-view.types";
@@ -54,10 +53,6 @@ interface MemesWaveWinnersDropProps {
   readonly wave: ApiWave;
   readonly onDropClick: (drop: ExtendedDrop) => void;
 }
-
-const getRankHoverClass = (place: number | null): string => {
-  return getRankHoverBorderClass(place);
-};
 
 const isClickFromCardDom = (
   event: React.MouseEvent<HTMLDivElement>
@@ -220,10 +215,10 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
       className="touch-select-none tw-w-full tw-cursor-pointer tw-rounded-xl tw-transition-all tw-duration-300 tw-ease-out"
     >
       <div
-        className={`tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.08] tw-bg-iron-950/85 tw-shadow-[0_18px_45px_-32px_rgba(0,0,0,0.95)] tw-transition-all tw-duration-200 tw-ease-out ${getRankHoverClass(winner.place)}`}
+        className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-900 tw-bg-iron-950 tw-transition-all tw-duration-200 tw-ease-out desktop-hover:hover:tw-border-white/10"
       >
         <div className="tw-flex tw-flex-col" {...touchHandlers}>
-          <div className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.05] tw-bg-black/10 tw-px-[13px] tw-py-[8px]">
+          <div className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/5 tw-px-[13px] tw-py-[8px]">
             <div className="tw-flex tw-items-center tw-justify-between tw-gap-[13px]">
               <div className="tw-flex tw-gap-x-2">
                 <WaveWinnersDropHeaderAuthorPfp winner={winner} size="sm" />
@@ -320,7 +315,7 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
           />
 
           {artworkMedia && (
-            <div className="tw-flex tw-h-96 tw-justify-center tw-bg-iron-950">
+            <div className="tw-flex tw-h-96 tw-justify-center tw-bg-iron-900/30">
               <DropListItemContentMedia
                 media_mime_type={artworkMedia.mime_type}
                 media_url={artworkMedia.url}
@@ -332,7 +327,7 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
           )}
 
           {/* Footer Section: Traits + Vote Summary */}
-          <div className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.05] tw-bg-black/10 tw-px-[13px] tw-py-3 lg:tw-space-y-[13px]">
+          <div className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-bg-iron-900/30 tw-px-[13px] tw-py-3 lg:tw-space-y-[13px]">
             <MemeDropTraits drop={winner.drop} />
 
             <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-x-[13px] tw-gap-y-[8px]">

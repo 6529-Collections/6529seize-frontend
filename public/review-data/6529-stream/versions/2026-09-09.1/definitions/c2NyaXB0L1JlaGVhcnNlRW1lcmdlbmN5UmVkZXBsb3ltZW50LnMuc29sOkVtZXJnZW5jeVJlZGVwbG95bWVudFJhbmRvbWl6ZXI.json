@@ -1,0 +1,379 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "script/RehearseEmergencyRedeployment.s.sol:EmergencyRedeploymentRandomizer#function:0xbf1b89d3",
+          "declaringDefinitionId": "script/RehearseEmergencyRedeployment.s.sol:EmergencyRedeploymentRandomizer",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "mintIndex",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "saltfunO",
+              "type": "uint256"
+            }
+          ],
+          "name": "calculateTokenHash",
+          "outputs": [],
+          "selector": "0xbf1b89d3",
+          "signature": "calculateTokenHash(uint256,uint256,uint256)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "script/RehearseEmergencyRedeployment.s.sol:EmergencyRedeploymentRandomizer#function:0xcf5466ad",
+          "declaringDefinitionId": "script/RehearseEmergencyRedeployment.s.sol:EmergencyRedeploymentRandomizer",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "mintIndex",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "saltfunO",
+              "type": "uint256"
+            }
+          ],
+          "name": "deterministicHash",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0xcf5466ad",
+          "signature": "deterministicHash(uint256,uint256,uint256)",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "script/RehearseEmergencyRedeployment.s.sol:EmergencyRedeploymentRandomizer#function:0x4cf0c697",
+          "declaringDefinitionId": "script/RehearseEmergencyRedeployment.s.sol:EmergencyRedeploymentRandomizer",
+          "inherited": false,
+          "inputs": [],
+          "name": "isRandomizerContract",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x4cf0c697",
+          "signature": "isRandomizerContract()",
+          "stateMutability": "pure"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "deployment_or_operational_source",
+    "classificationReason": "Declared under the pinned deployment-script source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": null,
+          "displaySignature": "constructor(address)",
+          "functionKind": "constructor",
+          "id": "script/RehearseEmergencyRedeployment.s.sol:EmergencyRedeploymentRandomizer#function:constructor(address)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "core_",
+              "type": "address"
+            }
+          ],
+          "key": "c2NyaXB0L1JlaGVhcnNlRW1lcmdlbmN5UmVkZXBsb3ltZW50LnMuc29sOkVtZXJnZW5jeVJlZGVwbG95bWVudFJhbmRvbWl6ZXIjZnVuY3Rpb246Y29uc3RydWN0b3IoYWRkcmVzcyk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "constructor",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 75,
+            "byteStart": 871,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/script/RehearseEmergencyRedeployment.s.sol#L23-L25",
+            "lineEnd": 25,
+            "lineStart": 23,
+            "snippetSha256": "sha256:ffd157406487cd4fb9c742887320e7609c0124d4b643528ea4d3404b1ff2eb8b",
+            "sourceSha256": "sha256:79a306a866415c8045fbd4f8e9fafca2ef8187cd4cfc561923c0863b0fc90917"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "calculateTokenHash(uint256,uint256,uint256)",
+          "displaySignature": "calculateTokenHash(uint256,uint256,uint256)",
+          "functionKind": "function",
+          "id": "script/RehearseEmergencyRedeployment.s.sol:EmergencyRedeploymentRandomizer#function:0xbf1b89d3",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "mintIndex",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "saltfunO",
+              "type": "uint256"
+            }
+          ],
+          "key": "c2NyaXB0L1JlaGVhcnNlRW1lcmdlbmN5UmVkZXBsb3ltZW50LnMuc29sOkVtZXJnZW5jeVJlZGVwbG95bWVudFJhbmRvbWl6ZXIjZnVuY3Rpb246MHhiZjFiODlkMw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "calculateTokenHash",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 243,
+            "byteStart": 952,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/script/RehearseEmergencyRedeployment.s.sol#L27-L33",
+            "lineEnd": 33,
+            "lineStart": 27,
+            "snippetSha256": "sha256:f8a31398e8b04f4c11a3ebb0eb249a0bb6a77ebe19c35e55477ec110daa7ed62",
+            "sourceSha256": "sha256:79a306a866415c8045fbd4f8e9fafca2ef8187cd4cfc561923c0863b0fc90917"
+          },
+          "selector": "0xbf1b89d3",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "deterministicHash(uint256,uint256,uint256)",
+          "displaySignature": "deterministicHash(uint256,uint256,uint256)",
+          "functionKind": "function",
+          "id": "script/RehearseEmergencyRedeployment.s.sol:EmergencyRedeploymentRandomizer#function:0xcf5466ad",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "mintIndex",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "saltfunO",
+              "type": "uint256"
+            }
+          ],
+          "key": "c2NyaXB0L1JlaGVhcnNlRW1lcmdlbmN5UmVkZXBsb3ltZW50LnMuc29sOkVtZXJnZW5jeVJlZGVwbG95bWVudFJhbmRvbWl6ZXIjZnVuY3Rpb246MHhjZjU0NjZhZA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "deterministicHash",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 278,
+            "byteStart": 1201,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/script/RehearseEmergencyRedeployment.s.sol#L35-L43",
+            "lineEnd": 43,
+            "lineStart": 35,
+            "snippetSha256": "sha256:d3182b365e3ff61c675cb15bb696ca93a6c6ed0322702efba248d2baaf88adaa",
+            "sourceSha256": "sha256:79a306a866415c8045fbd4f8e9fafca2ef8187cd4cfc561923c0863b0fc90917"
+          },
+          "selector": "0xcf5466ad",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "isRandomizerContract()",
+          "displaySignature": "isRandomizerContract()",
+          "functionKind": "function",
+          "id": "script/RehearseEmergencyRedeployment.s.sol:EmergencyRedeploymentRandomizer#function:0x4cf0c697",
+          "inputs": [],
+          "key": "c2NyaXB0L1JlaGVhcnNlRW1lcmdlbmN5UmVkZXBsb3ltZW50LnMuc29sOkVtZXJnZW5jeVJlZGVwbG95bWVudFJhbmRvbWl6ZXIjZnVuY3Rpb246MHg0Y2YwYzY5Nw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "isRandomizerContract",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 89,
+            "byteStart": 1485,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/script/RehearseEmergencyRedeployment.s.sol#L45-L47",
+            "lineEnd": 47,
+            "lineStart": 45,
+            "snippetSha256": "sha256:daac779faad038f7e020f880d90a485c144831fcda6e8d6215dd3aa976335c75",
+            "sourceSha256": "sha256:79a306a866415c8045fbd4f8e9fafca2ef8187cd4cfc561923c0863b0fc90917"
+          },
+          "selector": "0x4cf0c697",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": true,
+          "name": "core",
+          "natspec": "",
+          "range": {
+            "byteLength": 40,
+            "byteStart": 824,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/script/RehearseEmergencyRedeployment.s.sol#L21",
+            "lineEnd": 21,
+            "lineStart": 21,
+            "snippetSha256": "sha256:482b3524f5cda7074a5f170a5e660e3a124fdd6a216c36c2b10e2682fd3a50a2",
+            "sourceSha256": "sha256:79a306a866415c8045fbd4f8e9fafca2ef8187cd4cfc561923c0863b0fc90917"
+          },
+          "selector": null,
+          "type": "IStreamLegacyCore",
+          "typeString": "contract IStreamLegacyCore",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "script/RehearseEmergencyRedeployment.s.sol:EmergencyRedeploymentRandomizer",
+    "inheritance": [
+      {
+        "definitionId": "smart-contracts/interfaces/stream/IRandomizer.sol:IRandomizer",
+        "name": "IRandomizer"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "c2NyaXB0L1JlaGVhcnNlRW1lcmdlbmN5UmVkZXBsb3ltZW50LnMuc29sOkVtZXJnZW5jeVJlZGVwbG95bWVudFJhbmRvbWl6ZXI",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "script/RehearseEmergencyRedeployment.s.sol:EmergencyRedeploymentRandomizer",
+      "smart-contracts/interfaces/stream/IRandomizer.sol:IRandomizer"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "EmergencyRedeploymentRandomizer",
+    "natspec": "",
+    "range": {
+      "byteLength": 814,
+      "byteStart": 762,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/script/RehearseEmergencyRedeployment.s.sol#L20-L48",
+      "lineEnd": 48,
+      "lineStart": 20,
+      "snippetSha256": "sha256:40a50dd70a706e7c643dac9abcead669ec6161a2c09af644acf2cce3a7a2889a",
+      "sourceSha256": "sha256:79a306a866415c8045fbd4f8e9fafca2ef8187cd4cfc561923c0863b0fc90917"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "script",
+    "sourcePath": "script/RehearseEmergencyRedeployment.s.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-09-09.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 5
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 4
+    },
+    "totalCount": 5
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "script/RehearseEmergencyRedeployment.s.sol:EmergencyRedeploymentRandomizer",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "script/RehearseEmergencyRedeployment.s.sol:EmergencyRedeploymentRandomizer#function:0x4cf0c697",
+      "definitionId": "script/RehearseEmergencyRedeployment.s.sol:EmergencyRedeploymentRandomizer",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "script/RehearseEmergencyRedeployment.s.sol:EmergencyRedeploymentRandomizer#function:0xbf1b89d3",
+      "definitionId": "script/RehearseEmergencyRedeployment.s.sol:EmergencyRedeploymentRandomizer",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "script/RehearseEmergencyRedeployment.s.sol:EmergencyRedeploymentRandomizer#function:0xcf5466ad",
+      "definitionId": "script/RehearseEmergencyRedeployment.s.sol:EmergencyRedeploymentRandomizer",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "script/RehearseEmergencyRedeployment.s.sol:EmergencyRedeploymentRandomizer#function:constructor(address)",
+      "definitionId": "script/RehearseEmergencyRedeployment.s.sol:EmergencyRedeploymentRandomizer",
+      "severity": "advisory"
+    }
+  ]
+}

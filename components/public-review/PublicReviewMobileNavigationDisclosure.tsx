@@ -24,6 +24,23 @@ export function PublicReviewMobileNavigationDisclosure({
     }
 
     disclosure.open = false;
+    const closeAfterFollowingSectionLink = (event: MouseEvent): void => {
+      const link =
+        event.target instanceof Element
+          ? event.target.closest("a[href]")
+          : null;
+      if (
+        event.button === 0 &&
+        !event.ctrlKey &&
+        !event.metaKey &&
+        !event.shiftKey &&
+        !event.altKey &&
+        link?.getAttribute("href")?.startsWith("#")
+      ) {
+        disclosure.open = false;
+      }
+    };
+    disclosure.addEventListener("click", closeAfterFollowingSectionLink);
     const mobileNavigationQuery = window.matchMedia(MOBILE_NAVIGATION_QUERY);
     const closeWhenEnteringMobileLayout = (
       event: MediaQueryListEvent
@@ -38,6 +55,7 @@ export function PublicReviewMobileNavigationDisclosure({
       closeWhenEnteringMobileLayout
     );
     return () => {
+      disclosure.removeEventListener("click", closeAfterFollowingSectionLink);
       mobileNavigationQuery.removeEventListener(
         "change",
         closeWhenEnteringMobileLayout

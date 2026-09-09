@@ -1,0 +1,286 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/mocks/MockRandomizer.sol:ImmediateRandomizer#function:0xbf1b89d3",
+          "declaringDefinitionId": "test/mocks/MockRandomizer.sol:ImmediateRandomizer",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "mintIndex",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "saltfunO",
+              "type": "uint256"
+            }
+          ],
+          "name": "calculateTokenHash",
+          "outputs": [],
+          "selector": "0xbf1b89d3",
+          "signature": "calculateTokenHash(uint256,uint256,uint256)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/mocks/MockRandomizer.sol:ImmediateRandomizer#function:0x4cf0c697",
+          "declaringDefinitionId": "test/mocks/MockRandomizer.sol:ImmediateRandomizer",
+          "inherited": false,
+          "inputs": [],
+          "name": "isRandomizerContract",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x4cf0c697",
+          "signature": "isRandomizerContract()",
+          "stateMutability": "pure"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": null,
+          "displaySignature": "constructor(address)",
+          "functionKind": "constructor",
+          "id": "test/mocks/MockRandomizer.sol:ImmediateRandomizer#function:constructor(address)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "core_",
+              "type": "address"
+            }
+          ],
+          "key": "dGVzdC9tb2Nrcy9Nb2NrUmFuZG9taXplci5zb2w6SW1tZWRpYXRlUmFuZG9taXplciNmdW5jdGlvbjpjb25zdHJ1Y3RvcihhZGRyZXNzKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "constructor",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 75,
+            "byteStart": 301,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/mocks/MockRandomizer.sol#L10-L12",
+            "lineEnd": 12,
+            "lineStart": 10,
+            "snippetSha256": "sha256:ffd157406487cd4fb9c742887320e7609c0124d4b643528ea4d3404b1ff2eb8b",
+            "sourceSha256": "sha256:623cbcb8db59e100ea7ccc84270f7f4597b87a24b3b5be4a57cd6815630fc893"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "calculateTokenHash(uint256,uint256,uint256)",
+          "displaySignature": "calculateTokenHash(uint256,uint256,uint256)",
+          "functionKind": "function",
+          "id": "test/mocks/MockRandomizer.sol:ImmediateRandomizer#function:0xbf1b89d3",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "mintIndex",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "saltfunO",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9tb2Nrcy9Nb2NrUmFuZG9taXplci5zb2w6SW1tZWRpYXRlUmFuZG9taXplciNmdW5jdGlvbjoweGJmMWI4OWQz",
+          "kind": "function",
+          "modifiers": [],
+          "name": "calculateTokenHash",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 264,
+            "byteStart": 382,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/mocks/MockRandomizer.sol#L14-L19",
+            "lineEnd": 19,
+            "lineStart": 14,
+            "snippetSha256": "sha256:9f7f9ca14d5c32e1391cf5eebc41ff1800a0f0f0f1a75cba8ba95c2489d6ec99",
+            "sourceSha256": "sha256:623cbcb8db59e100ea7ccc84270f7f4597b87a24b3b5be4a57cd6815630fc893"
+          },
+          "selector": "0xbf1b89d3",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "isRandomizerContract()",
+          "displaySignature": "isRandomizerContract()",
+          "functionKind": "function",
+          "id": "test/mocks/MockRandomizer.sol:ImmediateRandomizer#function:0x4cf0c697",
+          "inputs": [],
+          "key": "dGVzdC9tb2Nrcy9Nb2NrUmFuZG9taXplci5zb2w6SW1tZWRpYXRlUmFuZG9taXplciNmdW5jdGlvbjoweDRjZjBjNjk3",
+          "kind": "function",
+          "modifiers": [],
+          "name": "isRandomizerContract",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 89,
+            "byteStart": 652,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/mocks/MockRandomizer.sol#L21-L23",
+            "lineEnd": 23,
+            "lineStart": 21,
+            "snippetSha256": "sha256:daac779faad038f7e020f880d90a485c144831fcda6e8d6215dd3aa976335c75",
+            "sourceSha256": "sha256:623cbcb8db59e100ea7ccc84270f7f4597b87a24b3b5be4a57cd6815630fc893"
+          },
+          "selector": "0x4cf0c697",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": true,
+          "name": "core",
+          "natspec": "",
+          "range": {
+            "byteLength": 40,
+            "byteStart": 254,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/mocks/MockRandomizer.sol#L8",
+            "lineEnd": 8,
+            "lineStart": 8,
+            "snippetSha256": "sha256:482b3524f5cda7074a5f170a5e660e3a124fdd6a216c36c2b10e2682fd3a50a2",
+            "sourceSha256": "sha256:623cbcb8db59e100ea7ccc84270f7f4597b87a24b3b5be4a57cd6815630fc893"
+          },
+          "selector": null,
+          "type": "IStreamLegacyCore",
+          "typeString": "contract IStreamLegacyCore",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/mocks/MockRandomizer.sol:ImmediateRandomizer",
+    "inheritance": [
+      {
+        "definitionId": "smart-contracts/interfaces/stream/IRandomizer.sol:IRandomizer",
+        "name": "IRandomizer"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9tb2Nrcy9Nb2NrUmFuZG9taXplci5zb2w6SW1tZWRpYXRlUmFuZG9taXplcg",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/mocks/MockRandomizer.sol:ImmediateRandomizer",
+      "smart-contracts/interfaces/stream/IRandomizer.sol:IRandomizer"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "ImmediateRandomizer",
+    "natspec": "",
+    "range": {
+      "byteLength": 539,
+      "byteStart": 204,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/mocks/MockRandomizer.sol#L7-L24",
+      "lineEnd": 24,
+      "lineStart": 7,
+      "snippetSha256": "sha256:adbe2d05fc1a09bb3f951612bad6e8285f6aa80f2735e178870182d7aa6e78af",
+      "sourceSha256": "sha256:623cbcb8db59e100ea7ccc84270f7f4597b87a24b3b5be4a57cd6815630fc893"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/mocks/MockRandomizer.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-09-09.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 4
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 3
+    },
+    "totalCount": 4
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/mocks/MockRandomizer.sol:ImmediateRandomizer",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/mocks/MockRandomizer.sol:ImmediateRandomizer#function:0x4cf0c697",
+      "definitionId": "test/mocks/MockRandomizer.sol:ImmediateRandomizer",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/mocks/MockRandomizer.sol:ImmediateRandomizer#function:0xbf1b89d3",
+      "definitionId": "test/mocks/MockRandomizer.sol:ImmediateRandomizer",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/mocks/MockRandomizer.sol:ImmediateRandomizer#function:constructor(address)",
+      "definitionId": "test/mocks/MockRandomizer.sol:ImmediateRandomizer",
+      "severity": "advisory"
+    }
+  ]
+}

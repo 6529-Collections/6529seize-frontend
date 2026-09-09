@@ -40,6 +40,7 @@ interface UseNotificationsQueryProps {
    * The cause of the notifications to fetch (include filter).
    */
   readonly cause?: NotificationCause[] | null | undefined;
+  readonly causeExclude?: NotificationCause[] | null | undefined;
 }
 
 export function useNotificationsQuery({
@@ -48,6 +49,7 @@ export function useNotificationsQuery({
   activeProfileProxy = false,
   limit = NOTIFICATIONS_PAGE_LIMIT,
   cause = null,
+  causeExclude = null,
 }: UseNotificationsQueryProps) {
   const prefetch = usePrefetchNotifications();
   const normalizedIdentity = identity?.trim().toLowerCase() ?? null;
@@ -61,8 +63,8 @@ export function useNotificationsQuery({
       return;
     }
 
-    prefetch({ identity, limit, cause, pages: 1 });
-  }, [prefetch, identity, activeProfileProxy, limit, cause]);
+    prefetch({ identity, limit, cause, causeExclude, pages: 1 });
+  }, [prefetch, identity, activeProfileProxy, limit, cause, causeExclude]);
 
   /**
    * Now the actual Infinite Query for notifications
@@ -72,6 +74,7 @@ export function useNotificationsQuery({
       identity,
       limit,
       cause,
+      causeExclude,
     }),
     enabled: !!identity && !activeProfileProxy,
     placeholderData: (previousData, previousQuery) => {
@@ -143,11 +146,13 @@ export function usePrefetchNotifications() {
     ({
       identity,
       cause = null,
+      causeExclude = null,
       limit = NOTIFICATIONS_PAGE_LIMIT,
       pages = 3,
     }: {
       identity: string | null;
       cause?: NotificationCause[] | null | undefined;
+      causeExclude?: NotificationCause[] | null | undefined;
       limit?: string | undefined;
       pages?: number | undefined;
     }) => {
@@ -159,6 +164,7 @@ export function usePrefetchNotifications() {
           identity,
           limit,
           cause: (cause?.length ?? 0) > 0 ? cause : null,
+          causeExclude,
         }),
         pages,
       });

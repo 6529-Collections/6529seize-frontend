@@ -14,6 +14,7 @@ import {
   normalizeMemeTokenId,
 } from "./SubscriptionsReport.utils";
 import AboutSubscriptionsProfileButton from "@/components/about/AboutSubscriptionsProfileButton";
+import NftPurchasingGate from "@/components/common/NftPurchasingGate";
 import { useAuth } from "@/components/auth/Auth";
 import CircleLoader, {
   CircleLoaderSize,
@@ -37,6 +38,8 @@ import { getAuthJwt, getStagingAuth } from "@/services/auth/auth.utils";
 import { sanitizeErrorForUser } from "@/utils/error-sanitizer";
 import Link from "next/link";
 import useDownloader from "@/hooks/useDownloader";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import {
   ArrowDownTrayIcon,
   ChevronDownIcon,
@@ -54,8 +57,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 const PAGE_SIZE = 10;
 const UPCOMING_PAGE_SIZE = 5;
-const REPORT_SECTION_HEADING_CLASS_NAME =
-  SUBSCRIPTIONS_SECTION_HEADING_CLASS;
+const REPORT_SECTION_HEADING_CLASS_NAME = SUBSCRIPTIONS_SECTION_HEADING_CLASS;
 const REPORT_MAJOR_SECTION_GAP_CLASS_NAME = "tw-pt-[34px]";
 const REPORT_SECTION_CONTENT_GAP_CLASS_NAME = "tw-pt-[13px]";
 const REPORT_TABLE_HEADER_CLASS_NAME = `tw-hidden tw-gap-4 tw-border-b tw-border-x-0 tw-border-t-0 tw-border-solid tw-border-iron-800 tw-px-4 tw-py-2 tw-text-left tw-font-semibold tw-text-iron-400 sm:tw-grid sm:tw-px-6 sm:tw-py-3 ${DATA_TABLE_HEADER_TEXT_CLASS_NAME}`;
@@ -159,6 +161,7 @@ async function fetchReportActiveMintNumber(now: Date) {
 }
 
 export default function SubscriptionsReportComponent() {
+  const locale = useBrowserLocale();
   const { setToast } = useAuth();
   const pastDropsTarget = useRef<HTMLDivElement>(null);
   const upcomingToggleRef = useRef<HTMLDivElement>(null);
@@ -364,17 +367,15 @@ export default function SubscriptionsReportComponent() {
     fetchData();
   }, [redeemedPage]);
 
-  function renderEmptyState(loading: boolean, type: string) {
+  function renderEmptyState(loading: boolean, type: "upcoming" | "past") {
     if (loading) {
       return (
-        <output
-          className="tw-animate-pulse tw-text-sm tw-text-iron-400 motion-reduce:tw-animate-none"
-        >
-          Loading {type} drops...
+        <output className="tw-animate-pulse tw-text-sm tw-text-iron-400 motion-reduce:tw-animate-none">
+          {t(locale, `tools.subscriptionsReport.loading.${type}`)}
         </output>
       );
     }
-    return <>No Subscriptions Found</>;
+    return <>{t(locale, "tools.subscriptionsReport.empty")}</>;
   }
 
   const selectedSeason =
@@ -449,17 +450,22 @@ export default function SubscriptionsReportComponent() {
       <div>
         <div className="tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
           <h1 className={ABOUT_DOCUMENTATION_PAGE_TITLE_CLASS_NAME}>
-            Subscriptions Report
+            {t(locale, "tools.contents.pages.subscriptionsReport")}
           </h1>
           <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-justify-center tw-gap-x-4 tw-gap-y-3 sm:tw-w-auto sm:tw-justify-end">
-            <AboutSubscriptionsProfileButton />
-            <Link
-              href="/about/subscriptions"
-              className="hover:tw-text-primary-200 tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-leading-5 tw-text-primary-300 tw-no-underline hover:tw-underline"
-              aria-label="Learn more about The Memes subscriptions"
-            >
-              Learn More
-            </Link>
+            <NftPurchasingGate>
+              <AboutSubscriptionsProfileButton />
+              <Link
+                href="/about/subscriptions"
+                className="hover:tw-text-primary-200 tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-leading-5 tw-text-primary-300 tw-no-underline hover:tw-underline"
+                aria-label={t(
+                  locale,
+                  "tools.subscriptionsReport.learnMore.ariaLabel"
+                )}
+              >
+                {t(locale, "tools.subscriptionsReport.learnMore.label")}
+              </Link>
+            </NftPurchasingGate>
           </div>
         </div>
       </div>

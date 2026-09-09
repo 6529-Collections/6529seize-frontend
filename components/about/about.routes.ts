@@ -126,7 +126,9 @@ const ABOUT_CONTENTS_NAV_GROUPS: readonly AboutContentsNavGroup[] = [
     }),
     aboutSectionItem(AboutSection.MEME_LAB, "memeLab"),
     aboutSectionItem(AboutSection.GRADIENTS, "gradient"),
-    aboutSectionItem(AboutSection.MINTING, "minting"),
+    aboutSectionItem(AboutSection.MINTING, "minting", {
+      requiresVisibleSubscriptions: true,
+    }),
   ]),
   aboutGroup("networkReputation", [
     aboutRouteItem("network-identities", "/network", "networkIdentities"),
@@ -356,6 +358,10 @@ export function getVisibleAboutNavGroups(
 
   return ABOUT_CONTENTS_NAV_GROUPS.map((group) => ({
     ...group,
+    labelKey:
+      visibilityOptions.hideSubscriptions && group.id === "collectionsMinting"
+        ? ("about.contents.groups.collections" as const)
+        : group.labelKey,
     items: group.items.filter((item) =>
       isAboutNavItemVisible(item, visibilityOptions)
     ),
