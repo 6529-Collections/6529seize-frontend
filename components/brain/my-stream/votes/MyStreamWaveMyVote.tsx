@@ -166,6 +166,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
     artWork?.mime_type ?? curationPreviewMedia?.mimeType ?? DEFAULT_MIME_TYPE;
   const badgeMimeType = artWork?.mime_type ?? curationPreviewMedia?.mimeType;
   const isSelected = !isVotingClosed && isChecked;
+  const isSelectionDisabled = isVotingClosed || isResetting || !onToggleCheck;
   const selectionInputId = `my-vote-reset-selection-${drop.id}`;
   const titleId = `my-vote-title-${drop.id}`;
 
@@ -176,14 +177,21 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
     onDropClick(drop);
   };
 
-  // Row clicks extend the native artwork/title buttons' pointer target.
-  // Those buttons provide keyboard activation; other controls stay independent.
+  const handleSelectionChange = () => {
+    if (!isSelectionDisabled) {
+      onToggleCheck(drop.id);
+    }
+  };
+
+  // Row clicks extend the native checkbox's pointer target.
+  // The checkbox provides keyboard selection; other controls stay independent.
   const handleRowClick = (event: React.MouseEvent<HTMLElement>) => {
     const target = event.target;
     if (
       event.defaultPrevented ||
       !(target instanceof Element) ||
-      !event.currentTarget.contains(target)
+      !event.currentTarget.contains(target) ||
+      window.getSelection()?.toString()
     ) {
       return;
     }
@@ -195,31 +203,25 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
       return;
     }
 
-    handleOpenDrop();
+    handleSelectionChange();
   };
 
   const handleExplainVote = (voteTotal: number, voteChange: number) => {
     onExplainVote?.(drop, voteTotal, voteChange);
   };
 
-  const handleSelectionChange = () => {
-    if (isVotingClosed || isResetting) {
-      return;
-    }
-
-    if (onToggleCheck) {
-      onToggleCheck(drop.id);
-    }
-  };
-
   return (
-    <article // NOSONAR -- S1082/S6847: native artwork/title buttons provide keyboard activation.
+    <article // NOSONAR -- S1082/S6847: the native checkbox provides keyboard selection.
       aria-labelledby={titleId}
       onClick={handleRowClick}
-      className={`tw-group/my-vote tw-cursor-pointer tw-px-2 tw-py-5 tw-transition-colors tw-duration-200 tw-@container/my-vote motion-reduce:tw-transition-none sm:tw-px-4 sm:tw-py-6 ${
-        isSelected
-          ? "tw-bg-primary-500/10"
-          : "tw-bg-iron-950 desktop-hover:hover:tw-bg-iron-900"
+      className={`tw-px-2 tw-py-5 tw-transition-colors tw-duration-200 tw-@container/my-vote motion-reduce:tw-transition-none sm:tw-px-4 sm:tw-py-6 ${
+        isSelectionDisabled ? "" : "tw-cursor-pointer"
+      } ${
+        isSelected ? "tw-bg-primary-500/10" : "tw-bg-iron-950"
+      } ${
+        !isSelected && !isSelectionDisabled
+          ? "desktop-hover:hover:tw-bg-iron-900"
+          : ""
       }`}
     >
       <div
@@ -240,7 +242,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
                 type="checkbox"
                 checked={isSelected}
                 onChange={handleSelectionChange}
-                disabled={isResetting}
+                disabled={isSelectionDisabled}
                 className="tw-peer tw-absolute tw-inset-0 tw-m-0 tw-cursor-pointer tw-opacity-0 disabled:tw-cursor-not-allowed"
               />
               <span className="tw-sr-only">
@@ -319,7 +321,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
               <button
                 type="button"
                 onClick={handleOpenDrop}
-                className="tw-max-w-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-50 tw-transition-colors tw-duration-200 [overflow-wrap:anywhere] focus-visible:tw-rounded-sm focus-visible:tw-text-primary-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:group-hover/my-vote:tw-text-primary-400 motion-reduce:tw-transition-none"
+                className="tw-max-w-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-50 tw-transition-colors tw-duration-200 [overflow-wrap:anywhere] focus-visible:tw-rounded-sm focus-visible:tw-text-primary-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-primary-400 motion-reduce:tw-transition-none"
               >
                 {dropTitle}
               </button>
