@@ -253,6 +253,7 @@ describe("waves-v2-api", () => {
           {
             id: "legacy-wave",
             name: "Legacy Wave",
+            author: { handle: "legacy-author", primary_address: "0x1" },
             created_at: 100,
             picture: null,
             contributors_overview: [],
@@ -292,6 +293,7 @@ describe("waves-v2-api", () => {
     expect(result[0]).toMatchObject({
       id: "legacy-wave",
       name: "Legacy Wave",
+      creator: { handle: "legacy-author", primary_address: "0x1" },
     });
   });
 

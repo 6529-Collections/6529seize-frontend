@@ -2598,6 +2598,9 @@ const COLLECTION_DELEGATION_MESSAGES = objectMessages("delegation.collection", {
 } as const);
 
 const HEADER_SEARCH_MESSAGES = objectMessages("headerSearch", {
+  "wave.byAuthor": "by {author}",
+  "wave.serial": "Wave #{serial}",
+  "wave.label": "Wave",
   "category.all": "All",
   "category.nfts": "NFTs",
   "category.pages": "Pages",

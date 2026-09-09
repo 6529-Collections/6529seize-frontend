@@ -1,19 +1,3 @@
-import type { SupportedChain } from "@/types/nft";
-
-export type ContractOverviewParams = {
-  address: `0x${string}`;
-  chain?: SupportedChain | undefined;
-  signal?: AbortSignal | undefined;
-};
-
-export type TokenMetadataParams = {
-  address?: `0x${string}` | undefined;
-  tokenIds?: readonly string[] | undefined;
-  tokens?: readonly { contract: string; tokenId: string }[] | undefined;
-  chain?: SupportedChain | undefined;
-  signal?: AbortSignal | undefined;
-};
-
 export type AlchemyContractMetadata = {
   address?: string | null | undefined;
   name?: string | null | undefined;

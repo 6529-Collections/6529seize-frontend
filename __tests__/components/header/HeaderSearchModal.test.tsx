@@ -1,5 +1,8 @@
 import HeaderSearchModal from "@/components/header/header-search/HeaderSearchModal";
-import type { HeaderSearchModalItemType } from "@/components/header/header-search/HeaderSearchModalItem";
+import type {
+  HeaderSearchModalItemType,
+  HeaderSearchWave,
+} from "@/components/header/header-search/HeaderSearchModalItem";
 import type { SidebarSection } from "@/components/navigation/navTypes";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiWave } from "@/generated/models/ApiWave";
@@ -17,7 +20,6 @@ const useQueryMock = jest.fn();
 const useRouter = jest.fn();
 const usePathname = jest.fn();
 const useSearchParams = jest.fn();
-const useWaves = jest.fn();
 const useLocalPreference = jest.fn();
 const mockUseDeviceInfo = jest.fn();
 const useAppWalletsMock = jest.fn();
@@ -27,13 +29,14 @@ const capacitorMock = jest.fn();
 const useDropForgePermissionsMock = jest.fn();
 const mockUseMyStreamOptional = jest.fn();
 const useAuthMock = jest.fn();
+const useSeizeConnectMock = jest.fn();
 type HeaderSearchModalItemProps = {
   readonly isSelected: boolean;
   readonly searchValue: string;
   readonly content: HeaderSearchModalItemType;
   readonly onHover: (state: boolean) => void;
   readonly onClose: () => void;
-  readonly onWaveSelect?: ((wave: ApiWave) => void) | undefined;
+  readonly onWaveSelect?: ((wave: HeaderSearchWave) => void) | undefined;
 };
 const mockHeaderSearchModalItem = jest.fn(
   (props: HeaderSearchModalItemProps) => {
@@ -111,9 +114,6 @@ jest.mock("@/hooks/useDeviceInfo", () => ({
   __esModule: true,
   default: () => mockUseDeviceInfo(),
 }));
-jest.mock("@/hooks/useWaves", () => ({
-  useWaves: (...args: any[]) => useWaves(...args),
-}));
 jest.mock(
   "@/hooks/useLocalPreference",
   () =>
@@ -125,6 +125,9 @@ jest.mock("@/components/app-wallets/AppWalletsContext", () => ({
 }));
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: () => useAuthMock(),
+}));
+jest.mock("@/components/auth/SeizeConnectContext", () => ({
+  useSeizeConnectContext: () => useSeizeConnectMock(),
 }));
 jest.mock("@/components/cookies/CookieConsentContext", () => ({
   useCookieConsent: () => useCookieConsentMock(),
@@ -154,11 +157,13 @@ jest.mock("@/components/header/header-search/HeaderSearchModalItem", () => {
   return {
     __esModule: true,
     default: MockHeaderSearchModalItem,
-    getHeaderSearchWavePath: ({ wave }: { readonly wave: ApiWave }) =>
+    getHeaderSearchWavePath: ({ wave }: { readonly wave: HeaderSearchWave }) =>
       `/waves/${wave.id}`,
     getNftCollectionMap: () => ({}),
-    isHeaderSearchWaveDirectMessage: (wave: ApiWave) =>
-      Boolean(wave.chat?.scope?.group?.is_direct_message),
+    isHeaderSearchWaveDirectMessage: (wave: HeaderSearchWave) =>
+      "isDirectMessage" in wave
+        ? wave.isDirectMessage
+        : Boolean(wave.chat?.scope?.group?.is_direct_message),
   };
 });
 
@@ -304,55 +309,56 @@ function setup(options: SetupOptions = {}) {
   useDropForgePermissionsMock.mockReturnValue(
     dropForgePermissions ?? { ...DEFAULT_DROP_FORGE_PERMISSIONS }
   );
-  useWaves.mockReturnValue(
-    wavesReturn ?? {
-      waves: [],
-      isFetching: false,
-      error: null,
-      refetch: wavesRefetch,
-    }
-  );
   useLocalPreference.mockReturnValue([selectedCategory, jest.fn()]);
-  if (queryImpl) {
-    useQueryMock.mockImplementation(({ queryKey, enabled }) =>
-      queryImpl({
+  useQueryMock.mockImplementation(({ queryKey, enabled }) => {
+    if (queryKey[0] === QueryKey.WAVES_SEARCH) {
+      const waveState = wavesReturn ?? {
+        waves: [],
+        isFetching: false,
+        error: null,
+        refetch: wavesRefetch,
+      };
+      return {
+        isFetching: enabled === false ? false : waveState.isFetching,
+        data: enabled === false ? undefined : waveState.waves,
+        error: enabled === false ? undefined : waveState.error,
+        refetch: waveState.refetch,
+      };
+    }
+    if (queryImpl) {
+      return queryImpl({
         queryKey: queryKey as [QueryKey, string],
         profilesRefetch,
         nftsRefetch,
         enabled,
-      })
-    );
-  } else {
-    useQueryMock.mockImplementation(({ queryKey, enabled }) => {
-      if (enabled === false) {
-        const refetch =
-          queryKey[0] === QueryKey.PROFILE_SEARCH
-            ? profilesRefetch
-            : nftsRefetch;
-        return {
-          isFetching: false,
-          data: undefined,
-          error: undefined,
-          refetch,
-        };
-      }
-
-      if (queryKey[0] === QueryKey.PROFILE_SEARCH) {
-        return {
-          isFetching: false,
-          data: [profile],
-          error: undefined,
-          refetch: profilesRefetch,
-        };
-      }
+      });
+    }
+    if (enabled === false) {
+      const refetch =
+        queryKey[0] === QueryKey.PROFILE_SEARCH ? profilesRefetch : nftsRefetch;
       return {
         isFetching: false,
-        data: [],
+        data: undefined,
         error: undefined,
-        refetch: nftsRefetch,
+        refetch,
       };
-    });
-  }
+    }
+
+    if (queryKey[0] === QueryKey.PROFILE_SEARCH) {
+      return {
+        isFetching: false,
+        data: [profile],
+        error: undefined,
+        refetch: profilesRefetch,
+      };
+    }
+    return {
+      isFetching: false,
+      data: [],
+      error: undefined,
+      refetch: nftsRefetch,
+    };
+  });
   const renderResult = render(
     <HeaderSearchModal onClose={onClose} wave={null} />
   );
@@ -377,6 +383,7 @@ describe("HeaderSearchModal", () => {
     pendingDebounce = null;
     mockUseMyStreamOptional.mockReturnValue(null);
     useAuthMock.mockReturnValue({ connectedProfile: null });
+    useSeizeConnectMock.mockReturnValue({ address: undefined });
   });
 
   it("associates the search input with an accessible label", () => {
@@ -449,6 +456,25 @@ describe("HeaderSearchModal", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("searches waves with the settled modal query", () => {
+    setup();
+    fireEvent.change(getSearchInput(), { target: { value: "signers" } });
+
+    expect(useQueryMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        queryKey: [
+          QueryKey.WAVES_SEARCH,
+          expect.objectContaining({
+            name: "signers",
+            surface: "header",
+            page_size: 20,
+          }),
+        ],
+        enabled: true,
+      })
+    );
+  });
+
   it("keeps the modal header stable when results load", () => {
     const scrollIntoViewMock = HTMLElement.prototype
       .scrollIntoView as jest.Mock;
@@ -504,17 +530,32 @@ describe("HeaderSearchModal", () => {
     });
   });
 
-  it("requests only non-direct-message waves for site search", () => {
+  it("uses the non-direct-message search service for site search", async () => {
     setup();
 
     fireEvent.change(getSearchInput(), { target: { value: "wave" } });
 
-    expect(useWaves).toHaveBeenLastCalledWith({
-      identity: null,
-      waveName: "wave",
-      limit: 20,
-      enabled: true,
-      directMessage: false,
+    const query = useQueryMock.mock.calls.find(
+      ([options]) =>
+        options.queryKey[0] === QueryKey.WAVES_SEARCH &&
+        options.queryKey[1].name === "wave"
+    )?.[0];
+    expect(query).toBeDefined();
+    (commonApiFetch as jest.Mock).mockResolvedValueOnce({
+      data: [],
+      page: 1,
+      next: false,
+    });
+    await query.queryFn();
+    expect(commonApiFetch).toHaveBeenCalledWith({
+      endpoint: "v2/waves",
+      params: expect.objectContaining({
+        name: "wave",
+        direct_message: "false",
+        page_size: "20",
+        view: "SEARCH",
+      }),
+      headers: undefined,
     });
   });
 

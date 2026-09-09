@@ -14,7 +14,7 @@ const useQueryMock = jest.fn();
 const useRouterMock = jest.fn();
 const usePathnameMock = jest.fn();
 const useSearchParamsMock = jest.fn();
-const useWavesMock = jest.fn();
+const useHeaderSearchWavesMock = jest.fn();
 const useLocalPreferenceMock = jest.fn();
 const useKeyMock = useKey as jest.MockedFunction<typeof useKey>;
 const useClickAwayMock = useClickAway as jest.MockedFunction<
@@ -52,9 +52,13 @@ jest.mock("next/navigation", () => ({
   useSearchParams: () => useSearchParamsMock(),
 }));
 
-jest.mock("@/hooks/useWaves", () => ({
-  useWaves: (...args: any[]) => useWavesMock(...args),
-}));
+jest.mock(
+  "@/components/header/header-search/header-search-modal/useHeaderSearchWaves",
+  () => ({
+    useHeaderSearchWaves: (name: string, enabled: boolean) =>
+      useHeaderSearchWavesMock(name, enabled),
+  })
+);
 
 jest.mock("@/hooks/useLocalPreference", () => ({
   __esModule: true,
@@ -153,7 +157,7 @@ beforeEach(() => {
   useRouterMock.mockReturnValue({ push: jest.fn() });
   usePathnameMock.mockReturnValue("/");
   useSearchParamsMock.mockReturnValue(new URLSearchParams());
-  useWavesMock.mockReturnValue({
+  useHeaderSearchWavesMock.mockReturnValue({
     waves: [],
     isFetching: false,
     error: null,
