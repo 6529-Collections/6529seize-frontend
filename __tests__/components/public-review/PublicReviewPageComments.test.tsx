@@ -66,71 +66,91 @@ const record: PublicReviewFeedbackRecord = {
 };
 
 describe("PublicReviewPageComments", () => {
-  it("shows the section targeted by structured page feedback", () => {
-    const queryClient = new QueryClient({
-      defaultOptions: { queries: { retry: false, staleTime: Infinity } },
-    });
-    queryClient.setQueryData(
-      getPublicReviewLedgerQueryKey({ config, destination, pageSize: 50 }),
-      {
-        pages: [
-          {
-            destination,
-            records: [record],
-            warnings: [
-              {
-                code: "INVALID_REVIEW_METADATA",
-                dropId: "drop-from-another-page",
-                reason: "Feedback metadata is not canonical.",
-              },
-            ],
-            nextCursor: null,
-            rawDropCount: 1,
-          },
-        ],
-        pageParams: [null],
-      }
-    );
-
-    render(
-      <QueryClientProvider client={queryClient}>
-        <PublicReviewPageComments
-          config={config}
-          destination={destination}
-          locale="en-US"
-          page={{
-            pageId: "overview",
-            pageTitle: "Overview",
-            canonicalPath: "/reviews/6529-stream",
-          }}
-          sections={[
+  it.each([
+    undefined,
+    "/reviews/6529-stream/versions/2026-07-27.1#permanent-core",
+  ])(
+    "shows the targeted section and its saved-page link when supplied: %s",
+    (href) => {
+      const queryClient = new QueryClient({
+        defaultOptions: { queries: { retry: false, staleTime: Infinity } },
+      });
+      queryClient.setQueryData(
+        getPublicReviewLedgerQueryKey({ config, destination, pageSize: 50 }),
+        {
+          pages: [
             {
-              id: "permanent-core",
-              title: "A permanent Core anchors identity",
+              destination,
+              records: [record],
+              warnings: [
+                {
+                  code: "INVALID_REVIEW_METADATA",
+                  dropId: "drop-from-another-page",
+                  reason: "Feedback metadata is not canonical.",
+                },
+              ],
+              nextCursor: null,
+              rawDropCount: 1,
             },
-          ]}
-        />
-      </QueryClientProvider>
-    );
+          ],
+          pageParams: [null],
+        }
+      );
 
-    expect(
-      screen.getByText("Section: A permanent Core anchors identity")
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText("How does the permanent Core constrain successors?")
-    ).toBeInTheDocument();
-    const commentArticle = screen
-      .getByText("How does the permanent Core constrain successors?")
-      .closest("article");
-    expect(commentArticle).toHaveClass("tw-py-4");
-    expect(commentArticle).not.toHaveClass(
-      "tw-rounded-lg",
-      "tw-border-white/[0.12]"
-    );
-    expect(
-      screen.queryByText(/Wave messages could not be included/)
-    ).not.toBeInTheDocument();
-  });
+      render(
+        <QueryClientProvider client={queryClient}>
+          <PublicReviewPageComments
+            config={config}
+            destination={destination}
+            locale="en-US"
+            page={{
+              pageId: "overview",
+              pageTitle: "Overview",
+              canonicalPath: "/reviews/6529-stream",
+            }}
+            sections={[
+              {
+                id: "permanent-core",
+                title: "A permanent Core anchors identity",
+                ...(href ? { href } : {}),
+              },
+            ]}
+          />
+        </QueryClientProvider>
+      );
+
+      expect(
+        screen.getByText("Section: A permanent Core anchors identity")
+      ).toBeInTheDocument();
+      if (href) {
+        expect(
+          screen.getByRole("link", {
+            name: "Section: A permanent Core anchors identity",
+          })
+        ).toHaveAttribute("href", href);
+      } else {
+        expect(
+          screen.queryByRole("link", {
+            name: "Section: A permanent Core anchors identity",
+          })
+        ).not.toBeInTheDocument();
+      }
+      expect(
+        screen.getByText("How does the permanent Core constrain successors?")
+      ).toBeInTheDocument();
+      const commentArticle = screen
+        .getByText("How does the permanent Core constrain successors?")
+        .closest("article");
+      expect(commentArticle).toHaveClass("tw-py-4");
+      expect(commentArticle).not.toHaveClass(
+        "tw-rounded-lg",
+        "tw-border-white/[0.12]"
+      );
+      expect(
+        screen.queryByText(/Wave messages could not be included/)
+      ).not.toBeInTheDocument();
+    }
+  );
 
   it("shows only feedback matching the exact technical page reference", () => {
     const queryClient = new QueryClient({

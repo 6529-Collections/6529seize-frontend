@@ -1,0 +1,317 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamArtistArchiveV2.t.sol:StreamArtistArchiveV2Writer#function:0x895422ab",
+          "declaringDefinitionId": "test/StreamArtistArchiveV2.t.sol:StreamArtistArchiveV2Writer",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "evidenceId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint64",
+              "name": "evidenceVersion",
+              "type": "uint64"
+            },
+            {
+              "index": 2,
+              "internalType": "bytes",
+              "name": "evidence",
+              "type": "bytes"
+            }
+          ],
+          "name": "append",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "contentHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "pointer",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "internalType": "bool",
+              "name": "appended",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x895422ab",
+          "signature": "append(bytes32,uint64,bytes)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamArtistArchiveV2.t.sol:StreamArtistArchiveV2Writer#function:0x02a21460",
+          "declaringDefinitionId": "test/StreamArtistArchiveV2.t.sol:StreamArtistArchiveV2Writer",
+          "inherited": false,
+          "inputs": [],
+          "name": "archive",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "contract StreamArtistArchiveV2",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "selector": "0x02a21460",
+          "signature": "archive()",
+          "stateMutability": "view"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "archive()",
+          "displaySignature": "archive()",
+          "functionKind": "getter",
+          "id": "test/StreamArtistArchiveV2.t.sol:StreamArtistArchiveV2Writer#function:0x02a21460",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BcnRpc3RBcmNoaXZlVjIudC5zb2w6U3RyZWFtQXJ0aXN0QXJjaGl2ZVYyV3JpdGVyI2Z1bmN0aW9uOjB4MDJhMjE0NjA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "archive",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "contract StreamArtistArchiveV2",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 46,
+            "byteStart": 391,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamArtistArchiveV2.t.sol#L11",
+            "lineEnd": 11,
+            "lineStart": 11,
+            "snippetSha256": "sha256:a656fb18f1e4e3851efbf492b9018e0629d4e21ab515b767053b3246065b583f",
+            "sourceSha256": "sha256:f8938223b678a65cbc2d7726e6dbfcb197f5a8fdc5303b3d7c5ca9eec9e57898"
+          },
+          "selector": "0x02a21460",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "constructor(address)",
+          "functionKind": "constructor",
+          "id": "test/StreamArtistArchiveV2.t.sol:StreamArtistArchiveV2Writer#function:constructor(address)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "artistRegistry",
+              "type": "address"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1BcnRpc3RBcmNoaXZlVjIudC5zb2w6U3RyZWFtQXJ0aXN0QXJjaGl2ZVYyV3JpdGVyI2Z1bmN0aW9uOmNvbnN0cnVjdG9yKGFkZHJlc3Mp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "constructor",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 119,
+            "byteStart": 444,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamArtistArchiveV2.t.sol#L13-L15",
+            "lineEnd": 15,
+            "lineStart": 13,
+            "snippetSha256": "sha256:0fef68b0540704e54b54fb12084aa93c5c6e588e760c98c3923e16b7cf611e9e",
+            "sourceSha256": "sha256:f8938223b678a65cbc2d7726e6dbfcb197f5a8fdc5303b3d7c5ca9eec9e57898"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "append(bytes32,uint64,bytes)",
+          "displaySignature": "append(bytes32,uint64,bytes)",
+          "functionKind": "function",
+          "id": "test/StreamArtistArchiveV2.t.sol:StreamArtistArchiveV2Writer#function:0x895422ab",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "evidenceId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "evidenceVersion",
+              "type": "uint64"
+            },
+            {
+              "index": 2,
+              "name": "evidence",
+              "storageLocation": "calldata",
+              "type": "bytes"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1BcnRpc3RBcmNoaXZlVjIudC5zb2w6U3RyZWFtQXJ0aXN0QXJjaGl2ZVYyV3JpdGVyI2Z1bmN0aW9uOjB4ODk1NDIyYWI",
+          "kind": "function",
+          "modifiers": [],
+          "name": "append",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "contentHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "pointer",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "appended",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 269,
+            "byteStart": 569,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamArtistArchiveV2.t.sol#L17-L22",
+            "lineEnd": 22,
+            "lineStart": 17,
+            "snippetSha256": "sha256:512fe92d4ce43db85038360c89f18ec1604df6611f29239c80b1362a293b18a3",
+            "sourceSha256": "sha256:f8938223b678a65cbc2d7726e6dbfcb197f5a8fdc5303b3d7c5ca9eec9e57898"
+          },
+          "selector": "0x895422ab",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": false,
+          "getterDeclarationId": "test/StreamArtistArchiveV2.t.sol:StreamArtistArchiveV2Writer#function:0x02a21460",
+          "immutable": true,
+          "name": "archive",
+          "natspec": "",
+          "range": {
+            "byteLength": 46,
+            "byteStart": 391,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamArtistArchiveV2.t.sol#L11",
+            "lineEnd": 11,
+            "lineStart": 11,
+            "snippetSha256": "sha256:a656fb18f1e4e3851efbf492b9018e0629d4e21ab515b767053b3246065b583f",
+            "sourceSha256": "sha256:f8938223b678a65cbc2d7726e6dbfcb197f5a8fdc5303b3d7c5ca9eec9e57898"
+          },
+          "selector": "0x02a21460",
+          "type": "StreamArtistArchiveV2",
+          "typeString": "contract StreamArtistArchiveV2",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamArtistArchiveV2.t.sol:StreamArtistArchiveV2Writer",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1BcnRpc3RBcmNoaXZlVjIudC5zb2w6U3RyZWFtQXJ0aXN0QXJjaGl2ZVYyV3JpdGVy",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamArtistArchiveV2.t.sol:StreamArtistArchiveV2Writer"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamArtistArchiveV2Writer",
+    "natspec": "",
+    "range": {
+      "byteLength": 492,
+      "byteStart": 348,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamArtistArchiveV2.t.sol#L10-L23",
+      "lineEnd": 23,
+      "lineStart": 10,
+      "snippetSha256": "sha256:c938e42b70ddcce891271cf7bc8330282698c3f9005fb172b9047ea030c2190e",
+      "sourceSha256": "sha256:f8938223b678a65cbc2d7726e6dbfcb197f5a8fdc5303b3d7c5ca9eec9e57898"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamArtistArchiveV2.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-09-09.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 4
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 3
+    },
+    "totalCount": 4
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamArtistArchiveV2.t.sol:StreamArtistArchiveV2Writer",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamArtistArchiveV2.t.sol:StreamArtistArchiveV2Writer#function:0x02a21460",
+      "definitionId": "test/StreamArtistArchiveV2.t.sol:StreamArtistArchiveV2Writer",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamArtistArchiveV2.t.sol:StreamArtistArchiveV2Writer#function:0x895422ab",
+      "definitionId": "test/StreamArtistArchiveV2.t.sol:StreamArtistArchiveV2Writer",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamArtistArchiveV2.t.sol:StreamArtistArchiveV2Writer#function:constructor(address)",
+      "definitionId": "test/StreamArtistArchiveV2.t.sol:StreamArtistArchiveV2Writer",
+      "severity": "advisory"
+    }
+  ]
+}

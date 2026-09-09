@@ -1,0 +1,318 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamMetadataRouter.sol:IStreamMetadataRouter#function:0xafdcf2fc",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamMetadataRouter.sol:IStreamMetadataRouter",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "core",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "name": "contractURIForCollection",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "string",
+              "name": "",
+              "type": "string"
+            }
+          ],
+          "selector": "0xafdcf2fc",
+          "signature": "contractURIForCollection(address,uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamMetadataRouter.sol:IStreamMetadataRouter#function:0x642dd5ae",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamMetadataRouter.sol:IStreamMetadataRouter",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "core",
+              "type": "address"
+            }
+          ],
+          "name": "contractURIForCore",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "string",
+              "name": "",
+              "type": "string"
+            }
+          ],
+          "selector": "0x642dd5ae",
+          "signature": "contractURIForCore(address)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/vendor/openzeppelin/IERC165.sol:IERC165#function:0x01ffc9a7",
+          "declaringDefinitionId": "smart-contracts/vendor/openzeppelin/IERC165.sol:IERC165",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "name": "supportsInterface",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x01ffc9a7",
+          "signature": "supportsInterface(bytes4)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamMetadataRouter.sol:IStreamMetadataRouter#function:0xe9dc6375",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamMetadataRouter.sol:IStreamMetadataRouter",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "core",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "tokenURI",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "string",
+              "name": "",
+              "type": "string"
+            }
+          ],
+          "selector": "0xe9dc6375",
+          "signature": "tokenURI(address,uint256)",
+          "stateMutability": "view"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "published_interface",
+    "classificationReason": "Listed in release-artifacts/contracts.json interfaces.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "tokenURI(address,uint256)",
+          "displaySignature": "tokenURI(address,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/interfaces/stream/IStreamMetadataRouter.sol:IStreamMetadataRouter#function:0xe9dc6375",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "core",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVyZmFjZXMvc3RyZWFtL0lTdHJlYW1NZXRhZGF0YVJvdXRlci5zb2w6SVN0cmVhbU1ldGFkYXRhUm91dGVyI2Z1bmN0aW9uOjB4ZTlkYzYzNzU",
+          "kind": "function",
+          "modifiers": [],
+          "name": "tokenURI",
+          "natspec": "@notice Returns the token metadata URI for one Core identity.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "range": {
+            "byteLength": 87,
+            "byteStart": 473,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamMetadataRouter.sol#L11",
+            "lineEnd": 11,
+            "lineStart": 11,
+            "snippetSha256": "sha256:63c5434d9f0a378858bec84f1411a3e96b4e85a6e9b4947aa0b61c1b7641e338",
+            "sourceSha256": "sha256:d954e858aeb13e7f9cf760ade0b1956e48415a7d1f7065a9045d575d2859edfc"
+          },
+          "selector": "0xe9dc6375",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "contractURIForCore(address)",
+          "displaySignature": "contractURIForCore(address)",
+          "functionKind": "function",
+          "id": "smart-contracts/interfaces/stream/IStreamMetadataRouter.sol:IStreamMetadataRouter#function:0x642dd5ae",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "core",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVyZmFjZXMvc3RyZWFtL0lTdHJlYW1NZXRhZGF0YVJvdXRlci5zb2w6SVN0cmVhbU1ldGFkYXRhUm91dGVyI2Z1bmN0aW9uOjB4NjQyZGQ1YWU",
+          "kind": "function",
+          "modifiers": [],
+          "name": "contractURIForCore",
+          "natspec": "@notice Returns ERC-7572 contract metadata for one Core.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "range": {
+            "byteLength": 80,
+            "byteStart": 631,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamMetadataRouter.sol#L14",
+            "lineEnd": 14,
+            "lineStart": 14,
+            "snippetSha256": "sha256:337325b705825004879f10b9c97bcfba4c947de8a35abf9d9e7870f6e6cc04a2",
+            "sourceSha256": "sha256:d954e858aeb13e7f9cf760ade0b1956e48415a7d1f7065a9045d575d2859edfc"
+          },
+          "selector": "0x642dd5ae",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "contractURIForCollection(address,uint256)",
+          "displaySignature": "contractURIForCollection(address,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/interfaces/stream/IStreamMetadataRouter.sol:IStreamMetadataRouter#function:0xafdcf2fc",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "core",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVyZmFjZXMvc3RyZWFtL0lTdHJlYW1NZXRhZGF0YVJvdXRlci5zb2w6SVN0cmVhbU1ldGFkYXRhUm91dGVyI2Z1bmN0aW9uOjB4YWZkY2YyZmM",
+          "kind": "function",
+          "modifiers": [],
+          "name": "contractURIForCollection",
+          "natspec": "@notice Returns collection-scoped contract metadata for one Core collection.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "range": {
+            "byteLength": 132,
+            "byteStart": 802,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamMetadataRouter.sol#L17-L20",
+            "lineEnd": 20,
+            "lineStart": 17,
+            "snippetSha256": "sha256:9ce1e7de2f0fc87409bc0ee32a6551e8dae33a6aec12348ce7570e5600ae4673",
+            "sourceSha256": "sha256:d954e858aeb13e7f9cf760ade0b1956e48415a7d1f7065a9045d575d2859edfc"
+          },
+          "selector": "0xafdcf2fc",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/interfaces/stream/IStreamMetadataRouter.sol:IStreamMetadataRouter",
+    "inheritance": [
+      {
+        "definitionId": "smart-contracts/vendor/openzeppelin/IERC165.sol:IERC165",
+        "name": "IERC165"
+      }
+    ],
+    "interface": {
+      "abiSha256": "sha256:4ef1b0a840190aee1aa36dc59bd6294a8e3bb93fff011b6936e95c15e07503a3",
+      "interfaceId": "0x23d28d80",
+      "interfaceIdSource": "selector_xor",
+      "published": true
+    },
+    "key": "c21hcnQtY29udHJhY3RzL2ludGVyZmFjZXMvc3RyZWFtL0lTdHJlYW1NZXRhZGF0YVJvdXRlci5zb2w6SVN0cmVhbU1ldGFkYXRhUm91dGVy",
+    "kind": "interface",
+    "linearizedDefinitionIds": [
+      "smart-contracts/interfaces/stream/IStreamMetadataRouter.sol:IStreamMetadataRouter",
+      "smart-contracts/vendor/openzeppelin/IERC165.sol:IERC165"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": "published_interface"
+    },
+    "name": "IStreamMetadataRouter",
+    "natspec": "@notice Permanent Core-facing metadata routing surface.\n @dev Implementations may expose richer configuration and finality reads, but these three\n      selectors are the stable interface Core and collection clients bind through ERC-165.",
+    "range": {
+      "byteLength": 582,
+      "byteStart": 354,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamMetadataRouter.sol#L9-L21",
+      "lineEnd": 21,
+      "lineStart": 9,
+      "snippetSha256": "sha256:430fc21cc3e2e2c34859a114ca9061bee1c52d613244506e30789cb822ae35be",
+      "sourceSha256": "sha256:d954e858aeb13e7f9cf760ade0b1956e48415a7d1f7065a9045d575d2859edfc"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/interfaces/stream/IStreamMetadataRouter.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-09-09.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {},
+    "byCode": {},
+    "totalCount": 0
+  },
+  "warnings": []
+}

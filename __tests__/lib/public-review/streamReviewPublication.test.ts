@@ -42,8 +42,13 @@ describe("Stream public-review version identities", () => {
       },
       {
         version: "2026-08-01.1",
-        lifecycleState: "PUBLIC_REVIEW",
+        lifecycleState: "REVIEW_CLOSED",
         sourceCommit: SOURCE_COMMIT,
+      },
+      {
+        version: "2026-09-09.1",
+        lifecycleState: "PUBLIC_REVIEW",
+        sourceCommit: "92ea123380917032f01aae09691141a2a72df935",
       },
     ]);
   });

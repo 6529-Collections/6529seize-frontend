@@ -4,16 +4,15 @@ import { SUPPORTED_LOCALES } from "@/i18n/locales";
 import { loadStreamEditorialContent } from "@/lib/public-review/editorialContent";
 import {
   getStreamReviewVersion,
-  STREAM_REVIEW_DEFINITION,
+  STREAM_REVIEW_AUGUST_VERSION,
 } from "@/lib/public-review/streamReviewDefinition";
 import { getCurrentSalesAndAuctionsEditorialMarkdown } from "@/lib/public-review/streamReviewSalesAndAuctionsPage";
 
 async function loadSalesAndAuctionsEditorial() {
-  const reviewVersion = getStreamReviewVersion(
-    STREAM_REVIEW_DEFINITION.activeVersion
-  );
+  // These legacy transformers are bound to the August editorial snapshot.
+  const reviewVersion = getStreamReviewVersion(STREAM_REVIEW_AUGUST_VERSION);
   if (reviewVersion === undefined) {
-    throw new Error("The active Stream review version is unavailable.");
+    throw new Error("The August Stream review fixture is unavailable.");
   }
   const page = reviewVersion.pages.find(
     (candidate) => candidate.id === "fixed-price-sales-and-auctions"

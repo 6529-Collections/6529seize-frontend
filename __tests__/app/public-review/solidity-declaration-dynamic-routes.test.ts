@@ -1,7 +1,7 @@
 jest.mock("next/dist/compiled/server-only", () => ({}), { virtual: true });
 jest.mock("next/server", () => ({ connection: jest.fn() }));
 
-import activeManifest from "@/public/review-data/6529-stream/versions/2026-08-01.1/reference-manifest.json";
+import activeManifest from "@/public/review-data/6529-stream/versions/2026-09-09.1/reference-manifest.json";
 import historicalManifest from "@/public/review-data/6529-stream/versions/2026-07-26.1/reference-manifest.json";
 import ActiveFunctionPage from "@/app/reviews/[review]/reference/definitions/[definitionKey]/functions/[declarationKey]/page";
 import HistoricalFunctionPage from "@/app/reviews/[review]/versions/[version]/reference/definitions/[definitionKey]/functions/[declarationKey]/page";
@@ -107,7 +107,7 @@ describe("Stream declaration routes without static parameter enumeration", () =>
         baseEndpoint: "http://localhost:3001",
         params: activeParams,
       })
-    ).toEqual({ version: "2026-08-01.1" });
+    ).toEqual({ version: activeManifest.reviewVersion });
     expect(
       resolveStreamReferenceRouteOrNotFound({
         baseEndpoint: "http://localhost:3001",
