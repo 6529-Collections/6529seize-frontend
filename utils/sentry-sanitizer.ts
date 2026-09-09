@@ -39,6 +39,15 @@ const HOST_VALUE_KEY_PATTERN = /^(?:http\.host|server\.address|url\.domain)$/i;
 const HOST_ATTRIBUTION_VALUES = new Set(
   `first-party first-party-api first-party-app ${THIRD_PARTY}`.split(" ")
 );
+const HTTP_REQUEST_METHOD_KEYS = [
+  "http.method",
+  "http.request.method",
+  "http.request_method",
+] as const;
+const HEAD_RESPONSE_BODY_SIZE_KEYS = new Set([
+  "http.response_content_length",
+  "http.response.body.size",
+]);
 const OMIT_SANITIZED_VALUE = Symbol("omit-sanitized-value");
 
 const SENSITIVE_KEY_FRAGMENT_PATTERN =
@@ -684,10 +693,14 @@ function parseHttpMethodDescription(
 
 function sanitizeSpanData(
   data: Record<string, unknown>,
-  kind: SentryPathKind
+  kind: SentryPathKind,
+  omitHeadResponseBodySize: boolean
 ): Record<string, unknown> {
   const nextData: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(data)) {
+    if (omitHeadResponseBodySize && HEAD_RESPONSE_BODY_SIZE_KEYS.has(key)) {
+      continue;
+    }
     if (URL_DETAIL_KEY_PATTERN.test(key)) {
       continue;
     }
@@ -705,6 +718,10 @@ function sanitizeSpanData(
   return nextData;
 }
 
+function hasHeadRequestMethod(data: Record<string, unknown>): boolean {
+  return HTTP_REQUEST_METHOD_KEYS.some((key) => data[key] === "HEAD");
+}
+
 export function sanitizeSentrySpan<T extends SanitizableSentrySpan>(
   span: T
 ): T {
@@ -715,7 +732,9 @@ export function sanitizeSentrySpan<T extends SanitizableSentrySpan>(
     next.description = sanitizeSpanDescription(next.description, kind);
   }
   if (next.data) {
-    next.data = sanitizeSpanData(next.data, kind);
+    const omitHeadResponseBodySize =
+      next.op === "http.client" && hasHeadRequestMethod(next.data);
+    next.data = sanitizeSpanData(next.data, kind, omitHeadResponseBodySize);
   }
 
   return next;

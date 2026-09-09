@@ -422,6 +422,55 @@ describe("sentry-sanitizer", () => {
     expect(payload).not.toContain("#private");
   });
 
+  it.each(["http.method", "http.request.method", "http.request_method"])(
+    "removes misleading HEAD response body sizes for the %s method attribute",
+    (methodKey) => {
+      const input = {
+        op: "http.client",
+        data: {
+          [methodKey]: "HEAD",
+          "http.response_content_length": 3_569_517,
+          "http.response.body.size": 3_569_517,
+          "http.response.status_code": 200,
+          "http.response_transfer_size": 512,
+        },
+      };
+
+      const span = sanitizeSentrySpan(input);
+
+      expect(span.data).toEqual({
+        [methodKey]: "HEAD",
+        "http.response.status_code": 200,
+        "http.response_transfer_size": 512,
+      });
+      expect(input.data).toEqual(
+        expect.objectContaining({
+          "http.response_content_length": 3_569_517,
+          "http.response.body.size": 3_569_517,
+        })
+      );
+    }
+  );
+
+  it.each([
+    ["a GET span", "http.client", "GET", true],
+    ["a POST span", "http.client", "POST", true],
+    ["a non-HTTP client span", "resource.video", "HEAD", true],
+    ["a HEAD span without body-size attributes", "http.client", "HEAD", false],
+  ])("preserves response metadata for %s", (_case, op, method, hasBodySize) => {
+    const data: Record<string, unknown> = {
+      "http.method": method,
+      "http.response.status_code": 200,
+    };
+    if (hasBodySize) {
+      data["http.response_content_length"] = 4_096;
+      data["http.response.body.size"] = 4_096;
+    }
+    const input = { op, data };
+
+    expect(sanitizeSentrySpan(input)).toEqual(input);
+  });
+
   it("keeps automatic span sanitization idempotent across SDK hooks", () => {
     const once = sanitizeSentrySpan({
       op: "http.client",
