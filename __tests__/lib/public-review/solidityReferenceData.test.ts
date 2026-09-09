@@ -193,10 +193,12 @@ describeFixture("generated Stream Solidity reference fixture", () => {
   it("keeps overloaded declarations distinct beneath their definition", async () => {
     const { shard } = await reader.loadDefinition(
       STREAM_REVIEW_VERSION,
-      encodeSoliditySemanticId("smart-contracts/StreamCore.sol:StreamCore")
+      encodeSoliditySemanticId(
+        "smart-contracts/vendor/openzeppelin/ERC721.sol:ERC721"
+      )
     );
     const overloads = shard.definition.declarations.functions.filter(
-      (declaration) => declaration.name === "artistSignature"
+      (declaration) => declaration.name === "safeTransferFrom"
     );
 
     expect(overloads).toHaveLength(2);
@@ -212,6 +214,7 @@ describeFixture("generated Stream Solidity reference fixture", () => {
   it("loads exact source bytes and rejects traversal before filesystem access", async () => {
     const { document } = await reader.loadSource(STREAM_REVIEW_VERSION, [
       "smart-contracts",
+      "core",
       "StreamCore.sol",
     ]);
     expect(document.file.sha256).toMatch(/^sha256:[0-9a-f]{64}$/);

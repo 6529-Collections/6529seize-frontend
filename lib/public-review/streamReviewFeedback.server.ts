@@ -7,6 +7,15 @@ import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { loadStreamEditorialContent } from "@/lib/public-review/editorialContent";
 import { extractPublicReviewSections } from "@/lib/public-review/editorialSections";
+import {
+  STREAM_REVIEW_LEGACY_ENTRY_FEEDBACK_VERSION,
+  STREAM_REVIEW_LEGACY_ENTRY_SECTIONS,
+} from "./streamReviewLegacyEntryFeedback";
+import {
+  STREAM_REVIEW_ENTRY_PAGES,
+  STREAM_REVIEW_ENTRY_GUIDE_VERSION,
+  getStreamReviewEntryMarkdown,
+} from "./streamReviewEntryGuides";
 import type {
   PublicReviewPageDefinition,
   PublicReviewSectionDefinition,
@@ -170,12 +179,30 @@ async function loadEditorialPageOptions(
   const pending = Promise.all(
     reviewVersion.pages.map(async (page) => {
       const markdown = await loadStreamEditorialContent(page, version);
+      const entryMarkdown =
+        version === STREAM_REVIEW_ENTRY_GUIDE_VERSION
+          ? getStreamReviewEntryMarkdown({
+              pageId: page.id,
+              version,
+              source: reviewVersion.source,
+            })
+          : undefined;
       return {
         value: page.id,
         label: t(DEFAULT_LOCALE, page.titleKey),
-        sectionValues: extractPublicReviewSections(markdown).map(
-          (section) => section.id
-        ),
+        sectionValues: [
+          ...new Set(
+            [
+              ...extractPublicReviewSections(markdown),
+              ...extractPublicReviewSections(entryMarkdown ?? ""),
+              ...(version === STREAM_REVIEW_LEGACY_ENTRY_FEEDBACK_VERSION
+                ? (STREAM_REVIEW_LEGACY_ENTRY_SECTIONS[page.id] ?? []).map(
+                    (id) => ({ id })
+                  )
+                : []),
+            ].map((section) => section.id)
+          ),
+        ],
       } satisfies PublicReviewPageOption;
     })
   );
@@ -253,6 +280,29 @@ export async function createStreamReviewFeedbackConfig({
     severityOptions: STREAM_REVIEW_FEEDBACK_SEVERITIES,
     pages: [
       ...(await loadEditorialPageOptions(manifest.reviewVersion)),
+      ...([
+        STREAM_REVIEW_ENTRY_GUIDE_VERSION,
+        STREAM_REVIEW_LEGACY_ENTRY_FEEDBACK_VERSION,
+      ].includes(manifest.reviewVersion)
+        ? STREAM_REVIEW_ENTRY_PAGES.filter(
+            (page) =>
+              !reviewVersion.pages.some((existing) => existing.id === page.id)
+          ).map((page) => ({
+            value: page.id,
+            label: t(DEFAULT_LOCALE, page.titleKey),
+            sectionValues:
+              manifest.reviewVersion ===
+              STREAM_REVIEW_LEGACY_ENTRY_FEEDBACK_VERSION
+                ? (STREAM_REVIEW_LEGACY_ENTRY_SECTIONS[page.id] ?? [])
+                : extractPublicReviewSections(
+                    getStreamReviewEntryMarkdown({
+                      pageId: page.id,
+                      version: manifest.reviewVersion,
+                      source: reviewVersion.source,
+                    }) ?? ""
+                  ).map((section) => section.id),
+          }))
+        : []),
       ...STREAM_REVIEW_TECHNICAL_FEEDBACK_PAGES,
     ],
     ...(source ? { source } : {}),
@@ -279,12 +329,30 @@ export function createStreamEditorialFeedbackPageContext({
   page,
   section,
   version,
+  currentRoute = false,
 }: {
   readonly page: PublicReviewPageDefinition;
   readonly section?: PublicReviewSectionDefinition | undefined;
   readonly version: string;
+  readonly currentRoute?: boolean;
 }): PublicReviewPageContext {
   const reviewVersion = getStreamReviewVersion(version);
+  const currentEntry =
+    currentRoute && version === STREAM_REVIEW_DEFINITION.activeVersion
+      ? STREAM_REVIEW_ENTRY_PAGES.find(
+          (entry) => entry.id === page.id && entry.slug === page.slug
+        )
+      : undefined;
+  if (currentEntry) {
+    return {
+      pageId: currentEntry.id,
+      pageTitle: t(DEFAULT_LOCALE, currentEntry.titleKey),
+      canonicalPath: getStreamReviewPageHref({ page: currentEntry }),
+      ...(section
+        ? { sectionId: section.id, sectionTitle: section.title }
+        : {}),
+    };
+  }
   const versionPage = reviewVersion?.pages.find(
     (candidate) => candidate.id === page.id && candidate.slug === page.slug
   );

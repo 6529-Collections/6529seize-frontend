@@ -1,4 +1,4 @@
-import { act, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 
 import { PublicReviewMobileNavigationDisclosure } from "@/components/public-review/PublicReviewMobileNavigationDisclosure";
 
@@ -68,5 +68,23 @@ describe("PublicReviewMobileNavigationDisclosure", () => {
     );
 
     expect(disclosure.open).toBe(false);
+  });
+
+  it("closes when following a section link so the heading is not covered", () => {
+    render(
+      <PublicReviewMobileNavigationDisclosure resetKey="overview">
+        <summary>Contents</summary>
+        <a href="#formats">Artwork formats</a>
+      </PublicReviewMobileNavigationDisclosure>
+    );
+    const disclosure = screen.getByText("Contents").closest("details")!;
+    disclosure.open = true;
+    fireEvent.click(screen.getByRole("link", { name: "Artwork formats" }));
+    expect(disclosure.open).toBe(false);
+    disclosure.open = true;
+    fireEvent.click(screen.getByRole("link", { name: "Artwork formats" }), {
+      metaKey: true,
+    });
+    expect(disclosure.open).toBe(true);
   });
 });

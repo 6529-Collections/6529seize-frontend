@@ -1,0 +1,112 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": []
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": null,
+          "displaySignature": "fallback()",
+          "functionKind": "fallback",
+          "id": "test/helpers/StreamRoyaltyReturnGasBufferHarness.sol:StreamOversizedMetadataReturnTarget#function:fallback()",
+          "inputs": [],
+          "key": "dGVzdC9oZWxwZXJzL1N0cmVhbVJveWFsdHlSZXR1cm5HYXNCdWZmZXJIYXJuZXNzLnNvbDpTdHJlYW1PdmVyc2l6ZWRNZXRhZGF0YVJldHVyblRhcmdldCNmdW5jdGlvbjpmYWxsYmFjaygp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "fallback",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 146,
+            "byteStart": 10758,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/helpers/StreamRoyaltyReturnGasBufferHarness.sol#L275-L280",
+            "lineEnd": 280,
+            "lineStart": 275,
+            "snippetSha256": "sha256:8c9f41be54c8d9295d1ea06f15ab42ba3ff9562bcf8f969ee26e7abe92e657ef",
+            "sourceSha256": "sha256:9db942d3a0bd25fa67c1e004798079420949ed3a4fd060490154306f2647bd92"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/helpers/StreamRoyaltyReturnGasBufferHarness.sol:StreamOversizedMetadataReturnTarget",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9oZWxwZXJzL1N0cmVhbVJveWFsdHlSZXR1cm5HYXNCdWZmZXJIYXJuZXNzLnNvbDpTdHJlYW1PdmVyc2l6ZWRNZXRhZGF0YVJldHVyblRhcmdldA",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/helpers/StreamRoyaltyReturnGasBufferHarness.sol:StreamOversizedMetadataReturnTarget"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamOversizedMetadataReturnTarget",
+    "natspec": "",
+    "range": {
+      "byteLength": 199,
+      "byteStart": 10707,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/helpers/StreamRoyaltyReturnGasBufferHarness.sol#L274-L281",
+      "lineEnd": 281,
+      "lineStart": 274,
+      "snippetSha256": "sha256:5daac648e7960843cef1da9aa4418e18050f91e7e8b7ea3789e1dc93c2d3fe28",
+      "sourceSha256": "sha256:9db942d3a0bd25fa67c1e004798079420949ed3a4fd060490154306f2647bd92"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/helpers/StreamRoyaltyReturnGasBufferHarness.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-09-09.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 2
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 1
+    },
+    "totalCount": 2
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/helpers/StreamRoyaltyReturnGasBufferHarness.sol:StreamOversizedMetadataReturnTarget",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/helpers/StreamRoyaltyReturnGasBufferHarness.sol:StreamOversizedMetadataReturnTarget#function:fallback()",
+      "definitionId": "test/helpers/StreamRoyaltyReturnGasBufferHarness.sol:StreamOversizedMetadataReturnTarget",
+      "severity": "advisory"
+    }
+  ]
+}

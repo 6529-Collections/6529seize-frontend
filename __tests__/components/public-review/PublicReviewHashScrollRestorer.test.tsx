@@ -72,4 +72,27 @@ describe("PublicReviewHashScrollRestorer", () => {
       })
     );
   });
+
+  it("opens all closed details containing a bookmarked section", () => {
+    const { container } = render(
+      <>
+        <PublicReviewHashScrollRestorer />
+        <details>
+          <summary>Full artist details</summary>
+          <details>
+            <summary>Approval details</summary>
+            <h2 id="solidity-global-declarations">Approval evidence</h2>
+          </details>
+        </details>
+      </>
+    );
+    expect(
+      [...container.querySelectorAll("details")].every(
+        (details) => details.open
+      )
+    ).toBe(true);
+    expect(
+      document.getElementById("solidity-global-declarations")?.scrollIntoView
+    ).toHaveBeenCalled();
+  });
 });

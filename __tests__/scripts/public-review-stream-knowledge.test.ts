@@ -13,17 +13,16 @@ const {
 
 const REPO_ROOT = path.resolve(__dirname, "..", "..");
 const REVIEW_ID = "6529-stream";
-const ACTIVE_VERSION = "2026-08-01.1";
+const FIXTURE_VERSION = "2026-08-01.1";
 const HISTORICAL_VERSION = "2026-07-30.1";
 const PINNED_COMMIT = "513bd7e079eafe109df6ae1ae21bfbca6fec6786";
-const DEVELOPMENT_COMMIT = "5021c8060950c3fef995271e674ed4b2007fee6d";
 const KNOWLEDGE_ROOT = path.join(
   REPO_ROOT,
   "ops",
   "public-review-knowledge",
   REVIEW_ID,
   "versions",
-  ACTIVE_VERSION,
+  FIXTURE_VERSION,
   "knowledge"
 );
 
@@ -124,17 +123,17 @@ type ValidatedKnowledgePack = {
 };
 
 describe("Stream knowledge pack", () => {
-  let active: ValidatedKnowledgePack;
+  let fixture: ValidatedKnowledgePack;
   let historical: ValidatedKnowledgePack;
   let searchById: Map<string, SearchRecord>;
   let evidenceById: Map<string, EvidenceRecord>;
 
   beforeAll(() => {
-    active = validateKnowledgePack({
+    fixture = validateKnowledgePack({
       repoRoot: REPO_ROOT,
       reviewId: REVIEW_ID,
-      reviewVersion: ACTIVE_VERSION,
-      requireCurrentGenerator: true,
+      reviewVersion: FIXTURE_VERSION,
+      requireCurrentGenerator: false,
     }) as ValidatedKnowledgePack;
     historical = validateKnowledgePack({
       repoRoot: REPO_ROOT,
@@ -142,56 +141,96 @@ describe("Stream knowledge pack", () => {
       reviewVersion: HISTORICAL_VERSION,
     }) as ValidatedKnowledgePack;
     searchById = new Map(
-      active.searchIndex.records.map((record) => [record.id, record])
+      fixture.searchIndex.records.map((record) => [record.id, record])
     );
-    evidenceById = new Map(active.records.map((record) => [record.id, record]));
+    evidenceById = new Map(
+      fixture.records.map((record) => [record.id, record])
+    );
+  });
+
+  it("binds the new active knowledge to current code, chapters, and launch evidence", () => {
+    const current = validateKnowledgePack({
+      repoRoot: REPO_ROOT,
+      reviewId: REVIEW_ID,
+      reviewVersion: "2026-09-09.1",
+      requireCurrentGenerator: true,
+    }) as ValidatedKnowledgePack;
+    expect(current.manifest).toMatchObject({
+      reviewVersion: "2026-09-09.1",
+      source: { commit: "92ea123380917032f01aae09691141a2a72df935" },
+      publication: {
+        lifecycleState: "PUBLIC_REVIEW",
+        auditStatus: "PRE_AUDIT",
+      },
+      editorial: { pageCount: 14 },
+      developmentStatus: {
+        checkedAt: "2026-09-09T00:00:00.000Z",
+        source: { commit: "92ea123380917032f01aae09691141a2a72df935" },
+      },
+    });
+    expect(
+      current.records.find(
+        (record) => record.id === "status:latest-development"
+      )
+    ).toMatchObject({
+      canonicalPath:
+        "/reviews/6529-stream/security-testing-and-known-limitations#stream-launch-readiness",
+    });
+    expect(current.manifest.counts.byKind["readiness_requirement"]).toBe(20);
+    const editorialPaths = new Set(
+      current.records
+        .filter((record) => record.category === "editorial")
+        .map((record) => record.canonicalPath)
+    );
+    const statusRecords = current.records.filter(
+      (record) =>
+        record.category === "status" && record.kind !== "development_status"
+    );
+    expect(statusRecords).toHaveLength(37);
+    expect(
+      statusRecords
+        .filter((record) => !editorialPaths.has(record.canonicalPath))
+        .map((record) => ({ id: record.id, canonicalPath: record.canonicalPath }))
+    ).toEqual([]);
   });
 
   it("carries versioned identity, integrity, counts, and deterministic paths", () => {
-    expect(active.manifest).toMatchObject({
+    expect(fixture.manifest).toMatchObject({
       schemaVersion: KNOWLEDGE_MANIFEST_SCHEMA,
       reviewId: REVIEW_ID,
-      reviewVersion: ACTIVE_VERSION,
+      reviewVersion: FIXTURE_VERSION,
       source: {
         repository: "6529-Collections/6529Stream",
         commit: PINNED_COMMIT,
       },
       publication: {
-        lifecycleState: "PUBLIC_REVIEW",
+        lifecycleState: "REVIEW_CLOSED",
         deploymentStatus: "NOT_DEPLOYED",
         auditStatus: "PRE_AUDIT",
       },
-      developmentStatus: {
-        checkedAt: "2026-08-01T00:00:00.000Z",
-        source: {
-          repository: "6529-Collections/6529Stream",
-          commit: DEVELOPMENT_COMMIT,
-        },
-        configPath: "config/public-reviews/6529-stream.development-status.json",
-      },
       searchIndex: {
-        path: `/review-data/${REVIEW_ID}/versions/${ACTIVE_VERSION}/knowledge/search-index.json`,
+        path: `/review-data/${REVIEW_ID}/versions/${FIXTURE_VERSION}/knowledge/search-index.json`,
       },
     });
-    expect(active.searchIndex.schemaVersion).toBe(KNOWLEDGE_INDEX_SCHEMA);
-    expect(active.manifest.knowledgeSha256).toMatch(/^sha256:[0-9a-f]{64}$/);
-    expect(active.manifest.reference.bundleSha256).toMatch(
+    expect(fixture.searchIndex.schemaVersion).toBe(KNOWLEDGE_INDEX_SCHEMA);
+    expect(fixture.manifest.knowledgeSha256).toMatch(/^sha256:[0-9a-f]{64}$/);
+    expect(fixture.manifest.reference.bundleSha256).toMatch(
       /^sha256:[0-9a-f]{64}$/
     );
-    expect(active.manifest.editorial.corpusSha256).toMatch(
+    expect(fixture.manifest.editorial.corpusSha256).toMatch(
       /^sha256:[0-9a-f]{64}$/
     );
-    expect(active.manifest.counts.total).toBe(
-      active.searchIndex.records.length
+    expect(fixture.manifest.counts.total).toBe(
+      fixture.searchIndex.records.length
     );
-    expect(active.manifest.recordShards).toHaveLength(
-      Math.ceil(active.manifest.counts.total / 160)
+    expect(fixture.manifest.recordShards).toHaveLength(
+      Math.ceil(fixture.manifest.counts.total / 160)
     );
     expect(
-      active.manifest.recordShards.every(
+      fixture.manifest.recordShards.every(
         (shard: { path: string; sha256: string }) =>
           shard.path.startsWith(
-            `/review-data/${REVIEW_ID}/versions/${ACTIVE_VERSION}/knowledge/records/`
+            `/review-data/${REVIEW_ID}/versions/${FIXTURE_VERSION}/knowledge/records/`
           ) && /^sha256:[0-9a-f]{64}$/.test(shard.sha256)
       )
     ).toBe(true);
@@ -199,11 +238,11 @@ describe("Stream knowledge pack", () => {
   });
 
   it("splits editorial pages by semantic Markdown headings and canonical anchors", () => {
-    expect(active.manifest.editorial.pageCount).toBe(14);
-    expect(active.manifest.editorial.sectionCount).toBeGreaterThan(
-      active.manifest.editorial.pageCount
+    expect(fixture.manifest.editorial.pageCount).toBe(14);
+    expect(fixture.manifest.editorial.sectionCount).toBeGreaterThan(
+      fixture.manifest.editorial.pageCount
     );
-    const saleModes = active.records.find(
+    const saleModes = fixture.records.find(
       (record) =>
         record.id ===
         "editorial:curation-and-tdh-authorization:why-each-field-exists:price-and-sale-mode"
@@ -212,12 +251,12 @@ describe("Stream knowledge pack", () => {
       category: "editorial",
       kind: "editorial_section",
       provenance: {
-        reviewVersion: ACTIVE_VERSION,
+        reviewVersion: FIXTURE_VERSION,
         sourceCommit: PINNED_COMMIT,
       },
     });
     expect(saleModes?.canonicalPath).toContain(
-      `/reviews/${REVIEW_ID}/versions/${ACTIVE_VERSION}/curation-and-tdh-authorization#`
+      `/reviews/${REVIEW_ID}/versions/${FIXTURE_VERSION}/curation-and-tdh-authorization#`
     );
     expect(saleModes?.text).toContain("fixed-price authorization");
 
@@ -232,7 +271,7 @@ describe("Stream knowledge pack", () => {
       ].join("\n"),
       page: { id: "sample", title: "Sample", file: "sample.md" },
       reviewId: REVIEW_ID,
-      reviewVersion: ACTIVE_VERSION,
+      reviewVersion: FIXTURE_VERSION,
       sourceCommit: PINNED_COMMIT,
     });
     expect(headingId("5. Curation becomes a bound authorization")).toBe(
@@ -276,15 +315,15 @@ describe("Stream knowledge pack", () => {
     expect(evidence?.bodyExcerpt).toContain("withdrawBidderCredit");
     expect(evidence?.bodyExcerpt?.length).toBeLessThanOrEqual(1_200);
     expect(evidence?.canonicalPath).toContain(
-      `/reviews/${REVIEW_ID}/versions/${ACTIVE_VERSION}/reference/definitions/`
+      `/reviews/${REVIEW_ID}/versions/${FIXTURE_VERSION}/reference/definitions/`
     );
     expect(evidence?.sourceLink).toContain(
-      `/reviews/${REVIEW_ID}/versions/${ACTIVE_VERSION}/reference/sources/smart-contracts/AuctionContract.sol#L`
+      `/reviews/${REVIEW_ID}/versions/${FIXTURE_VERSION}/reference/sources/smart-contracts/AuctionContract.sol#L`
     );
   });
 
   it("truncates source evidence only between complete source lines", () => {
-    const truncatedRecords = active.records.filter((record) =>
+    const truncatedRecords = fixture.records.filter((record) =>
       record.bodyExcerpt?.includes("\n…\n")
     );
 
@@ -303,7 +342,7 @@ describe("Stream knowledge pack", () => {
         "review-data",
         REVIEW_ID,
         "versions",
-        ACTIVE_VERSION,
+        FIXTURE_VERSION,
         "sources",
         ...record.sourcePath.split("/")
       );
@@ -348,7 +387,7 @@ describe("Stream knowledge pack", () => {
   });
 
   it("redacts test signing-key values while preserving declaration metadata", () => {
-    for (const pack of [active, historical]) {
+    for (const pack of [fixture, historical]) {
       const signingKeys = pack.records.filter((record) =>
         /(?:private.*key|signer.*key)/i.test(record.name ?? "")
       );
@@ -367,7 +406,7 @@ describe("Stream knowledge pack", () => {
     const errorId =
       "declaration:smart-contracts/SSTORE2.sol:SSTORE2#error:0xd8415944";
 
-    for (const pack of [active, historical]) {
+    for (const pack of [fixture, historical]) {
       const harness = pack.records.find((record) => record.id === definitionId);
       expect(harness?.technical?.abiSurfaceCounts?.errors).toBe(1);
       expect(harness?.relationships?.relatedDeclarationIds).toContain(errorId);
@@ -385,17 +424,17 @@ describe("Stream knowledge pack", () => {
   });
 
   it("indexes functions, events, errors, topics, selectors, and source classifications", () => {
-    const bidderEvent = active.searchIndex.records.find(
+    const bidderEvent = fixture.searchIndex.records.find(
       (record) =>
         record.title ===
         "StreamAuctions.BidderCreditWithdrawn(address,address,uint256)"
     );
-    const callerError = active.searchIndex.records.find(
+    const callerError = fixture.searchIndex.records.find(
       (record) =>
         record.title ===
         "IStreamArtworkFinalityRegistry.FinalityCallerNotFinalityAdmin(address)"
     );
-    const sepolia = active.searchIndex.records.find(
+    const sepolia = fixture.searchIndex.records.find(
       (record) => record.title === "RehearseDeployment.runSepolia()"
     );
 
@@ -418,7 +457,7 @@ describe("Stream knowledge pack", () => {
       evidenceById.get(sepolia!.id)?.bodyExcerpt?.length
     ).toBeLessThanOrEqual(700);
     expect(
-      active.records
+      fixture.records
         .filter((record) => record.scope === "test")
         .every((record) => !record.bodyExcerpt)
     ).toBe(true);
@@ -433,7 +472,7 @@ describe("Stream knowledge pack", () => {
           "review-data",
           REVIEW_ID,
           "versions",
-          ACTIVE_VERSION,
+          FIXTURE_VERSION,
           "reference-manifest.json"
         ),
         "utf8"
@@ -464,7 +503,7 @@ describe("Stream knowledge pack", () => {
     const searchIndexPath = path.join(KNOWLEDGE_ROOT, "search-index.json");
     expect(fs.statSync(searchIndexPath).size).toBeLessThanOrEqual(8_000_000);
     expect(
-      active.manifest.recordShards.every(
+      fixture.manifest.recordShards.every(
         (shard: { path: string }) =>
           fs.statSync(knowledgeArtifactPath(shard.path)).size <= 1_000_000
       )
@@ -472,47 +511,32 @@ describe("Stream knowledge pack", () => {
   });
 
   it("retains explicit implementation, audit, readiness, risk, and deployment evidence", () => {
-    expect(active.manifest.counts.byKind).toMatchObject({
-      development_status: 1,
+    expect(fixture.manifest.counts.byKind).toMatchObject({
       review_status: 1,
       readiness_requirement: 20,
       risk: 14,
       release_evidence: 2,
     });
     const reviewState = evidenceById.get(
-      `status:${ACTIVE_VERSION}:review-state`
+      `status:${FIXTURE_VERSION}:review-state`
     );
     expect(reviewState?.structured).toMatchObject({
-      lifecycleState: "PUBLIC_REVIEW",
+      lifecycleState: "REVIEW_CLOSED",
       deploymentStatus: "NOT_DEPLOYED",
       auditStatus: "PRE_AUDIT",
     });
-    expect(evidenceById.get("status:latest-development")).toMatchObject({
-      kind: "development_status",
-      canonicalPath: "/reviews/6529-stream#development-update",
-      provenance: {
-        sourceCommit: DEVELOPMENT_COMMIT,
-        sourcePath: "config/public-reviews/6529-stream.development-status.json",
-      },
-      structured: {
-        checkedAt: "2026-08-01T00:00:00.000Z",
-        evidenceSummary: {
-          requirements: { complete: 2, pending: 3, missing: 15 },
-          openReleaseBlockers: 10,
-        },
-      },
-    });
+    expect(evidenceById.has("status:latest-development")).toBe(false);
   });
 
   it("uses the declared shard schema for every content shard", () => {
-    for (const shard of active.manifest.recordShards as Array<{
+    for (const shard of fixture.manifest.recordShards as Array<{
       path: string;
     }>) {
       const parsed = JSON.parse(
         fs.readFileSync(knowledgeArtifactPath(shard.path), "utf8")
       );
       expect(parsed.schemaVersion).toBe(KNOWLEDGE_SHARD_SCHEMA);
-      expect(parsed.reviewVersion).toBe(ACTIVE_VERSION);
+      expect(parsed.reviewVersion).toBe(FIXTURE_VERSION);
     }
   });
 
@@ -534,7 +558,7 @@ describe("Stream knowledge pack", () => {
         validateKnowledgePack({
           repoRoot: REPO_ROOT,
           reviewId: REVIEW_ID,
-          reviewVersion: ACTIVE_VERSION,
+          reviewVersion: FIXTURE_VERSION,
           knowledgeRootOverride: temporaryRoot,
         })
       ).toThrow("knowledge manifest record shards are invalid");

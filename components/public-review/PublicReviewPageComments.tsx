@@ -29,6 +29,10 @@ import type {
   PublicReviewReferenceSelection,
 } from "@/services/api/public-review/types";
 
+export interface PublicReviewCommentSection extends PublicReviewSectionDefinition {
+  readonly href?: string;
+}
+
 export function PublicReviewPageComments({
   api,
   config,
@@ -46,7 +50,7 @@ export function PublicReviewPageComments({
   readonly page: PublicReviewPageContext;
   readonly pageSize?: number | undefined;
   readonly referenceSelection?: PublicReviewReferenceSelection | undefined;
-  readonly sections: readonly PublicReviewSectionDefinition[];
+  readonly sections: readonly PublicReviewCommentSection[];
 }) {
   const isPanelOpen = usePublicReviewCommentPanelOpen();
   const ledgerQuery = useInfiniteQuery({
@@ -148,9 +152,14 @@ export function PublicReviewPageComments({
             const primaryComment = getPublicReviewFeedbackPrimaryComment(
               record.body
             );
-            const sectionLabel = record.sectionId
-              ? (sections.find((section) => section.id === record.sectionId)
-                  ?.title ?? record.sectionId)
+            const commentSection = sections.find(
+              (section) => section.id === record.sectionId
+            );
+            const sectionLabel = commentSection?.title ?? record.sectionId;
+            const sectionContext = sectionLabel
+              ? t(locale, "publicReview.feedback.sectionContext", {
+                  section: sectionLabel,
+                })
               : undefined;
 
             return (
@@ -189,9 +198,16 @@ export function PublicReviewPageComments({
                       </div>
                       {sectionLabel ? (
                         <p className="tw-mb-0 tw-mt-2 tw-text-[0.68rem] tw-font-medium tw-leading-4 tw-text-iron-300">
-                          {t(locale, "publicReview.feedback.sectionContext", {
-                            section: sectionLabel,
-                          })}
+                          {commentSection?.href ? (
+                            <Link
+                              href={commentSection.href}
+                              className="tw-inline-flex tw-min-h-6 tw-items-center tw-text-iron-300 tw-underline tw-underline-offset-4 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
+                            >
+                              {sectionContext}
+                            </Link>
+                          ) : (
+                            sectionContext
+                          )}
                         </p>
                       ) : null}
                       <p className="tw-mb-0 tw-mt-2 tw-whitespace-pre-wrap tw-break-words tw-text-sm tw-leading-6 tw-text-iron-200">

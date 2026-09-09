@@ -2477,7 +2477,9 @@ function validateProtocolSurface(definitions, artifacts, compilerOutput) {
           inputs: (constructor.inputs ?? []).map((input, index) => ({
             index,
             name: input.name ?? "",
-            type: canonicalAbiType(input),
+            // The source-verification artifact preserves ABI JSON types (including
+            // tuple/tuple[]); the full ABI checksum above binds their components.
+            type: input.type,
             internal_type: input.internalType ?? input.type,
           })),
         }

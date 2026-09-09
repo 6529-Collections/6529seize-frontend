@@ -1,0 +1,186 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamMintManager.t.sol:MintOperationRelayer#function:0x004021f6",
+          "declaringDefinitionId": "test/StreamMintManager.t.sol:MintOperationRelayer",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "contract MintOperationAdapter",
+              "name": "adapter",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "struct IStreamMintManager.MintBatch",
+              "name": "batch",
+              "type": "(uint256,bytes32,address,address,address[],address[],bytes[],bytes32[],bytes32,bytes32,bytes32,bytes)"
+            },
+            {
+              "index": 2,
+              "internalType": "bytes",
+              "name": "gateData",
+              "type": "bytes"
+            }
+          ],
+          "name": "preview",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "operationRoot",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32[]",
+              "name": "operationIds",
+              "type": "bytes32[]"
+            }
+          ],
+          "selector": "0x004021f6",
+          "signature": "preview(address,(uint256,bytes32,address,address,address[],address[],bytes[],bytes32[],bytes32,bytes32,bytes32,bytes),bytes)",
+          "stateMutability": "view"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "preview(address,(uint256,bytes32,address,address,address[],address[],bytes[],bytes32[],bytes32,bytes32,bytes32,bytes),bytes)",
+          "displaySignature": "preview(MintOperationAdapter,IStreamMintManager.MintBatch,bytes)",
+          "functionKind": "function",
+          "id": "test/StreamMintManager.t.sol:MintOperationRelayer#function:0x004021f6",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "adapter",
+              "type": "MintOperationAdapter"
+            },
+            {
+              "index": 1,
+              "name": "batch",
+              "storageLocation": "calldata",
+              "type": "IStreamMintManager.MintBatch"
+            },
+            {
+              "index": 2,
+              "name": "gateData",
+              "storageLocation": "calldata",
+              "type": "bytes"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1NaW50TWFuYWdlci50LnNvbDpNaW50T3BlcmF0aW9uUmVsYXllciNmdW5jdGlvbjoweDAwNDAyMWY2",
+          "kind": "function",
+          "modifiers": [],
+          "name": "preview",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "operationRoot",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "operationIds",
+              "storageLocation": "memory",
+              "type": "bytes32[]"
+            }
+          ],
+          "range": {
+            "byteLength": 280,
+            "byteStart": 5285,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamMintManager.t.sol#L143-L149",
+            "lineEnd": 149,
+            "lineStart": 143,
+            "snippetSha256": "sha256:607baa7c4c6a87b4ac4947636a1cb8b5122bbe2de2637d8d8c3e1c66b44e2844",
+            "sourceSha256": "sha256:3e732239dead3e8af8f0f42af9b411b7d61770618395ac874ba3a138f34bdb3a"
+          },
+          "selector": "0x004021f6",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamMintManager.t.sol:MintOperationRelayer",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1NaW50TWFuYWdlci50LnNvbDpNaW50T3BlcmF0aW9uUmVsYXllcg",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamMintManager.t.sol:MintOperationRelayer"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "MintOperationRelayer",
+    "natspec": "",
+    "range": {
+      "byteLength": 318,
+      "byteStart": 5249,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamMintManager.t.sol#L142-L150",
+      "lineEnd": 150,
+      "lineStart": 142,
+      "snippetSha256": "sha256:97172ace73c6e82baa4f9b26ca98f225d2fd60536b9d5cbb6ddb60d02d39cb1e",
+      "sourceSha256": "sha256:3e732239dead3e8af8f0f42af9b411b7d61770618395ac874ba3a138f34bdb3a"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamMintManager.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-09-09.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 2
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 1
+    },
+    "totalCount": 2
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamMintManager.t.sol:MintOperationRelayer",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintManager.t.sol:MintOperationRelayer#function:0x004021f6",
+      "definitionId": "test/StreamMintManager.t.sol:MintOperationRelayer",
+      "severity": "advisory"
+    }
+  ]
+}

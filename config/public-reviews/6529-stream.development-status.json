@@ -2,14 +2,14 @@
   "schemaVersion": "public-review.development-status.v1",
   "reviewId": "6529-stream",
   "locale": "en-US",
-  "checkedAt": "2026-08-01T00:00:00.000Z",
+  "checkedAt": "2026-09-09T00:00:00.000Z",
   "source": {
     "repository": "6529-Collections/6529Stream",
-    "commit": "5021c8060950c3fef995271e674ed4b2007fee6d"
+    "commit": "92ea123380917032f01aae09691141a2a72df935"
   },
   "state": "PRE_AUDIT_DEVELOPMENT",
   "headline": "The permanent Core now meets its size target. Stream is being prepared for external audit and launch evidence.",
-  "summary": "Development has continued since the contract snapshot reviewed on these pages. This update follows the latest checked Stream commit while keeping the review record exact.",
+  "summary": "This update and the active review describe the same pinned Stream source. Built components and retained local checks do not establish a complete launch deployment.",
   "recentlyCompleted": [
     {
       "id": "permanent-core-size",

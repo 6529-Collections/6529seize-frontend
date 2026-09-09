@@ -1,0 +1,189 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/helpers/StreamPostEntropyCompletionGasHarness.sol:StreamNoopEntropyCoordinator#function:0xff604afb",
+          "declaringDefinitionId": "test/helpers/StreamPostEntropyCompletionGasHarness.sol:StreamNoopEntropyCoordinator",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "name": "onTokenMinted",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "entryGas",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "remainingGas",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0xff604afb",
+          "signature": "onTokenMinted(uint256,uint256,bytes32)",
+          "stateMutability": "view"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "onTokenMinted(uint256,uint256,bytes32)",
+          "displaySignature": "onTokenMinted(uint256,uint256,bytes32)",
+          "functionKind": "function",
+          "id": "test/helpers/StreamPostEntropyCompletionGasHarness.sol:StreamNoopEntropyCoordinator#function:0xff604afb",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL1N0cmVhbVBvc3RFbnRyb3B5Q29tcGxldGlvbkdhc0hhcm5lc3Muc29sOlN0cmVhbU5vb3BFbnRyb3B5Q29vcmRpbmF0b3IjZnVuY3Rpb246MHhmZjYwNGFmYg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "onTokenMinted",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "entryGas",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "remainingGas",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 212,
+            "byteStart": 8043,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/helpers/StreamPostEntropyCompletionGasHarness.sol#L210-L217",
+            "lineEnd": 217,
+            "lineStart": 210,
+            "snippetSha256": "sha256:a6b830a298b09421d617a86b198d445b996e812f196fb8a96b5361562bb5b202",
+            "sourceSha256": "sha256:84fe1db03e74d3e662bfea1695cc8d725a1fd51a7f031f0b0b9c6fcb1a382251"
+          },
+          "selector": "0xff604afb",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/helpers/StreamPostEntropyCompletionGasHarness.sol:StreamNoopEntropyCoordinator",
+    "inheritance": [
+      {
+        "definitionId": "test/helpers/StreamPostEntropyCompletionGasHarness.sol:IStreamPostEntropyMintCoordinator",
+        "name": "IStreamPostEntropyMintCoordinator"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9oZWxwZXJzL1N0cmVhbVBvc3RFbnRyb3B5Q29tcGxldGlvbkdhc0hhcm5lc3Muc29sOlN0cmVhbU5vb3BFbnRyb3B5Q29vcmRpbmF0b3I",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/helpers/StreamPostEntropyCompletionGasHarness.sol:StreamNoopEntropyCoordinator",
+      "test/helpers/StreamPostEntropyCompletionGasHarness.sol:IStreamPostEntropyMintCoordinator"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamNoopEntropyCoordinator",
+    "natspec": "",
+    "range": {
+      "byteLength": 295,
+      "byteStart": 7962,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/helpers/StreamPostEntropyCompletionGasHarness.sol#L209-L218",
+      "lineEnd": 218,
+      "lineStart": 209,
+      "snippetSha256": "sha256:7f9a66244014507a6dc03976fc387da479addd0bbf6ffa665c17cecce7ce8769",
+      "sourceSha256": "sha256:84fe1db03e74d3e662bfea1695cc8d725a1fd51a7f031f0b0b9c6fcb1a382251"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/helpers/StreamPostEntropyCompletionGasHarness.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-09-09.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 2
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 1
+    },
+    "totalCount": 2
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/helpers/StreamPostEntropyCompletionGasHarness.sol:StreamNoopEntropyCoordinator",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/helpers/StreamPostEntropyCompletionGasHarness.sol:StreamNoopEntropyCoordinator#function:0xff604afb",
+      "definitionId": "test/helpers/StreamPostEntropyCompletionGasHarness.sol:StreamNoopEntropyCoordinator",
+      "severity": "advisory"
+    }
+  ]
+}

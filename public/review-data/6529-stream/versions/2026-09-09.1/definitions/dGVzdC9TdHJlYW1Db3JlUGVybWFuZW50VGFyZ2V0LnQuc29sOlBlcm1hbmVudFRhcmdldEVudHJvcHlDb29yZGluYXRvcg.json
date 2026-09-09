@@ -1,0 +1,1073 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetEntropyCoordinator#function:0x4b28f9a2",
+          "declaringDefinitionId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetEntropyCoordinator",
+          "inherited": false,
+          "inputs": [],
+          "name": "callCount",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x4b28f9a2",
+          "signature": "callCount()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetEntropyCoordinator#function:0x1f9f020d",
+          "declaringDefinitionId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetEntropyCoordinator",
+          "inherited": false,
+          "inputs": [],
+          "name": "entryGas",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x1f9f020d",
+          "signature": "entryGas()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetEntropyCoordinator#function:0x53bc2b32",
+          "declaringDefinitionId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetEntropyCoordinator",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "name": "fulfillEntropy",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "outcome",
+              "type": "uint8"
+            }
+          ],
+          "selector": "0x53bc2b32",
+          "signature": "fulfillEntropy(bytes32,bytes32)",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetEntropyCoordinator#function:0x0a81feab",
+          "declaringDefinitionId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetEntropyCoordinator",
+          "inherited": false,
+          "inputs": [],
+          "name": "lastCallHash",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x0a81feab",
+          "signature": "lastCallHash()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetEntropyCoordinator#function:0x714ae638",
+          "declaringDefinitionId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetEntropyCoordinator",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "address",
+              "name": "recipient",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "internalType": "bytes32",
+              "name": "mintCommitment",
+              "type": "bytes32"
+            }
+          ],
+          "name": "onTokenMinted",
+          "outputs": [],
+          "selector": "0x714ae638",
+          "signature": "onTokenMinted(uint256,uint256,address,bytes32)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetEntropyCoordinator#function:0x5c77f5e5",
+          "declaringDefinitionId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetEntropyCoordinator",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "uint8",
+              "name": "",
+              "type": "uint8"
+            },
+            {
+              "index": 2,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "name": "registerEntropyScope",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "scopeId",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x5c77f5e5",
+          "signature": "registerEntropyScope(uint256,uint8,bytes32)",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetEntropyCoordinator#function:0x68feeeab",
+          "declaringDefinitionId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetEntropyCoordinator",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "name": "requestEntropy",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "requestKey",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "providerRequestId",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x68feeeab",
+          "signature": "requestEntropy(uint256)",
+          "stateMutability": "payable"
+        },
+        {
+          "declarationId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetEntropyCoordinator#function:0x81e4413b",
+          "declaringDefinitionId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetEntropyCoordinator",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "name": "requestScopeEntropy",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "requestKey",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "providerRequestId",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x81e4413b",
+          "signature": "requestScopeEntropy(bytes32,bytes32)",
+          "stateMutability": "payable"
+        },
+        {
+          "declarationId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetEntropyCoordinator#function:0xebddbaf6",
+          "declaringDefinitionId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetEntropyCoordinator",
+          "inherited": false,
+          "inputs": [],
+          "name": "returnData",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0xebddbaf6",
+          "signature": "returnData()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetEntropyCoordinator#function:0xd5e4a680",
+          "declaringDefinitionId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetEntropyCoordinator",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "shouldRevert_",
+              "type": "bool"
+            },
+            {
+              "index": 1,
+              "internalType": "bool",
+              "name": "returnData_",
+              "type": "bool"
+            }
+          ],
+          "name": "setBehavior",
+          "outputs": [],
+          "selector": "0xd5e4a680",
+          "signature": "setBehavior(bool,bool)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetEntropyCoordinator#function:0xd3072d82",
+          "declaringDefinitionId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetEntropyCoordinator",
+          "inherited": false,
+          "inputs": [],
+          "name": "shouldRevert",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0xd3072d82",
+          "signature": "shouldRevert()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetEntropyCoordinator#function:0x01ffc9a7",
+          "declaringDefinitionId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetEntropyCoordinator",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "name": "supportsInterface",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x01ffc9a7",
+          "signature": "supportsInterface(bytes4)",
+          "stateMutability": "pure"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "shouldRevert()",
+          "displaySignature": "shouldRevert()",
+          "functionKind": "getter",
+          "id": "test/StreamCorePermanentTarget.t.sol:PermanentTargetEntropyCoordinator#function:0xd3072d82",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Db3JlUGVybWFuZW50VGFyZ2V0LnQuc29sOlBlcm1hbmVudFRhcmdldEVudHJvcHlDb29yZGluYXRvciNmdW5jdGlvbjoweGQzMDcyZDgy",
+          "kind": "function",
+          "modifiers": [],
+          "name": "shouldRevert",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 24,
+            "byteStart": 8022,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L242",
+            "lineEnd": 242,
+            "lineStart": 242,
+            "snippetSha256": "sha256:029b3bad31e18f08d8ac1a030d8f0c8e8ba98b3fc0dd6aff6f05195c1876e860",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": "0xd3072d82",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "returnData()",
+          "displaySignature": "returnData()",
+          "functionKind": "getter",
+          "id": "test/StreamCorePermanentTarget.t.sol:PermanentTargetEntropyCoordinator#function:0xebddbaf6",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Db3JlUGVybWFuZW50VGFyZ2V0LnQuc29sOlBlcm1hbmVudFRhcmdldEVudHJvcHlDb29yZGluYXRvciNmdW5jdGlvbjoweGViZGRiYWY2",
+          "kind": "function",
+          "modifiers": [],
+          "name": "returnData",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 22,
+            "byteStart": 8052,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L243",
+            "lineEnd": 243,
+            "lineStart": 243,
+            "snippetSha256": "sha256:ac7b3513b6d8a534d4683112e454e34bebf13caf2f9ff485a3ae4bbc3bb0992f",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": "0xebddbaf6",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "callCount()",
+          "displaySignature": "callCount()",
+          "functionKind": "getter",
+          "id": "test/StreamCorePermanentTarget.t.sol:PermanentTargetEntropyCoordinator#function:0x4b28f9a2",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Db3JlUGVybWFuZW50VGFyZ2V0LnQuc29sOlBlcm1hbmVudFRhcmdldEVudHJvcHlDb29yZGluYXRvciNmdW5jdGlvbjoweDRiMjhmOWEy",
+          "kind": "function",
+          "modifiers": [],
+          "name": "callCount",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 24,
+            "byteStart": 8080,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L244",
+            "lineEnd": 244,
+            "lineStart": 244,
+            "snippetSha256": "sha256:2b71e23541a92a14b439daa26bf2a41196dd91bce3a3d4d2c8f393d2ff613983",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": "0x4b28f9a2",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "entryGas()",
+          "displaySignature": "entryGas()",
+          "functionKind": "getter",
+          "id": "test/StreamCorePermanentTarget.t.sol:PermanentTargetEntropyCoordinator#function:0x1f9f020d",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Db3JlUGVybWFuZW50VGFyZ2V0LnQuc29sOlBlcm1hbmVudFRhcmdldEVudHJvcHlDb29yZGluYXRvciNmdW5jdGlvbjoweDFmOWYwMjBk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "entryGas",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 23,
+            "byteStart": 8110,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L245",
+            "lineEnd": 245,
+            "lineStart": 245,
+            "snippetSha256": "sha256:f8979c5b1759a842b1f1e77d393fdda4ed1b552951a024291f7022a3113b1887",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": "0x1f9f020d",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "lastCallHash()",
+          "displaySignature": "lastCallHash()",
+          "functionKind": "getter",
+          "id": "test/StreamCorePermanentTarget.t.sol:PermanentTargetEntropyCoordinator#function:0x0a81feab",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Db3JlUGVybWFuZW50VGFyZ2V0LnQuc29sOlBlcm1hbmVudFRhcmdldEVudHJvcHlDb29yZGluYXRvciNmdW5jdGlvbjoweDBhODFmZWFi",
+          "kind": "function",
+          "modifiers": [],
+          "name": "lastCallHash",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 27,
+            "byteStart": 8139,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L246",
+            "lineEnd": 246,
+            "lineStart": 246,
+            "snippetSha256": "sha256:2e20a7dcf344299433991ae2ce611bd0960df50be827f1e7e4bfdb9f995c6323",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": "0x0a81feab",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "supportsInterface(bytes4)",
+          "displaySignature": "supportsInterface(bytes4)",
+          "functionKind": "function",
+          "id": "test/StreamCorePermanentTarget.t.sol:PermanentTargetEntropyCoordinator#function:0x01ffc9a7",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Db3JlUGVybWFuZW50VGFyZ2V0LnQuc29sOlBlcm1hbmVudFRhcmdldEVudHJvcHlDb29yZGluYXRvciNmdW5jdGlvbjoweDAxZmZjOWE3",
+          "kind": "function",
+          "modifiers": [],
+          "name": "supportsInterface",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 199,
+            "byteStart": 8173,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L248-L251",
+            "lineEnd": 251,
+            "lineStart": 248,
+            "snippetSha256": "sha256:1e158bede0585eccb038f7ac96ca5ab135914e44a136f620d2c8eb9c4c7969c6",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": "0x01ffc9a7",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "setBehavior(bool,bool)",
+          "displaySignature": "setBehavior(bool,bool)",
+          "functionKind": "function",
+          "id": "test/StreamCorePermanentTarget.t.sol:PermanentTargetEntropyCoordinator#function:0xd5e4a680",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "shouldRevert_",
+              "type": "bool"
+            },
+            {
+              "index": 1,
+              "name": "returnData_",
+              "type": "bool"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Db3JlUGVybWFuZW50VGFyZ2V0LnQuc29sOlBlcm1hbmVudFRhcmdldEVudHJvcHlDb29yZGluYXRvciNmdW5jdGlvbjoweGQ1ZTRhNjgw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setBehavior",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 147,
+            "byteStart": 8378,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L253-L256",
+            "lineEnd": 256,
+            "lineStart": 253,
+            "snippetSha256": "sha256:dcaec31ed5594c4f0a707ed35b305fa1f1d8a381b51aeb355369db4797bebf58",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": "0xd5e4a680",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "onTokenMinted(uint256,uint256,address,bytes32)",
+          "displaySignature": "onTokenMinted(uint256,uint256,address,bytes32)",
+          "functionKind": "function",
+          "id": "test/StreamCorePermanentTarget.t.sol:PermanentTargetEntropyCoordinator#function:0x714ae638",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "recipient",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "name": "mintCommitment",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Db3JlUGVybWFuZW50VGFyZ2V0LnQuc29sOlBlcm1hbmVudFRhcmdldEVudHJvcHlDb29yZGluYXRvciNmdW5jdGlvbjoweDcxNGFlNjM4",
+          "kind": "function",
+          "modifiers": [],
+          "name": "onTokenMinted",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 521,
+            "byteStart": 8531,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L258-L274",
+            "lineEnd": 274,
+            "lineStart": 258,
+            "snippetSha256": "sha256:cce5f192f8734eb678bde9d7d487447ab3276e3ce3d2472982c50ee4fedc6089",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": "0x714ae638",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "requestEntropy(uint256)",
+          "displaySignature": "requestEntropy(uint256)",
+          "functionKind": "function",
+          "id": "test/StreamCorePermanentTarget.t.sol:PermanentTargetEntropyCoordinator#function:0x68feeeab",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Db3JlUGVybWFuZW50VGFyZ2V0LnQuc29sOlBlcm1hbmVudFRhcmdldEVudHJvcHlDb29yZGluYXRvciNmdW5jdGlvbjoweDY4ZmVlZWFi",
+          "kind": "function",
+          "modifiers": [],
+          "name": "requestEntropy",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "requestKey",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "providerRequestId",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 173,
+            "byteStart": 9058,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L276-L282",
+            "lineEnd": 282,
+            "lineStart": 276,
+            "snippetSha256": "sha256:8c61ea683ae2ae3ffa186b0aecbf1b7014828e6ea78e85a63d3881b7dc5b1e8c",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": "0x68feeeab",
+          "stateMutability": "payable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "registerEntropyScope(uint256,uint8,bytes32)",
+          "displaySignature": "registerEntropyScope(uint256,uint8,bytes32)",
+          "functionKind": "function",
+          "id": "test/StreamCorePermanentTarget.t.sol:PermanentTargetEntropyCoordinator#function:0x5c77f5e5",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "",
+              "type": "uint8"
+            },
+            {
+              "index": 2,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Db3JlUGVybWFuZW50VGFyZ2V0LnQuc29sOlBlcm1hbmVudFRhcmdldEVudHJvcHlDb29yZGluYXRvciNmdW5jdGlvbjoweDVjNzdmNWU1",
+          "kind": "function",
+          "modifiers": [],
+          "name": "registerEntropyScope",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "scopeId",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 129,
+            "byteStart": 9237,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L284-L286",
+            "lineEnd": 286,
+            "lineStart": 284,
+            "snippetSha256": "sha256:4e9ee3ede713dea65fcd3248337d152416c254f6f1e9ad9f60d0f6980591fb72",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": "0x5c77f5e5",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "requestScopeEntropy(bytes32,bytes32)",
+          "displaySignature": "requestScopeEntropy(bytes32,bytes32)",
+          "functionKind": "function",
+          "id": "test/StreamCorePermanentTarget.t.sol:PermanentTargetEntropyCoordinator#function:0x81e4413b",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Db3JlUGVybWFuZW50VGFyZ2V0LnQuc29sOlBlcm1hbmVudFRhcmdldEVudHJvcHlDb29yZGluYXRvciNmdW5jdGlvbjoweDgxZTQ0MTNi",
+          "kind": "function",
+          "modifiers": [],
+          "name": "requestScopeEntropy",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "requestKey",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "providerRequestId",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 187,
+            "byteStart": 9372,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L288-L294",
+            "lineEnd": 294,
+            "lineStart": 288,
+            "snippetSha256": "sha256:74ba804427a0c4c5607f376fa091ac86eac3c11b49f0561a24ac38972eabb78d",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": "0x81e4413b",
+          "stateMutability": "payable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "fulfillEntropy(bytes32,bytes32)",
+          "displaySignature": "fulfillEntropy(bytes32,bytes32)",
+          "functionKind": "function",
+          "id": "test/StreamCorePermanentTarget.t.sol:PermanentTargetEntropyCoordinator#function:0x53bc2b32",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Db3JlUGVybWFuZW50VGFyZ2V0LnQuc29sOlBlcm1hbmVudFRhcmdldEVudHJvcHlDb29yZGluYXRvciNmdW5jdGlvbjoweDUzYmMyYjMy",
+          "kind": "function",
+          "modifiers": [],
+          "name": "fulfillEntropy",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "outcome",
+              "type": "uint8"
+            }
+          ],
+          "range": {
+            "byteLength": 105,
+            "byteStart": 9565,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L296-L298",
+            "lineEnd": 298,
+            "lineStart": 296,
+            "snippetSha256": "sha256:5a5dbeed5fa1c5ea9ba399d21f9afc81d453e07f751c1035127b87d0c0930fdf",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": "0x53bc2b32",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": false,
+          "getterDeclarationId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetEntropyCoordinator#function:0xd3072d82",
+          "immutable": false,
+          "name": "shouldRevert",
+          "natspec": "",
+          "range": {
+            "byteLength": 24,
+            "byteStart": 8022,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L242",
+            "lineEnd": 242,
+            "lineStart": 242,
+            "snippetSha256": "sha256:029b3bad31e18f08d8ac1a030d8f0c8e8ba98b3fc0dd6aff6f05195c1876e860",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": "0xd3072d82",
+          "type": "bool",
+          "typeString": "bool",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetEntropyCoordinator#function:0xebddbaf6",
+          "immutable": false,
+          "name": "returnData",
+          "natspec": "",
+          "range": {
+            "byteLength": 22,
+            "byteStart": 8052,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L243",
+            "lineEnd": 243,
+            "lineStart": 243,
+            "snippetSha256": "sha256:ac7b3513b6d8a534d4683112e454e34bebf13caf2f9ff485a3ae4bbc3bb0992f",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": "0xebddbaf6",
+          "type": "bool",
+          "typeString": "bool",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetEntropyCoordinator#function:0x4b28f9a2",
+          "immutable": false,
+          "name": "callCount",
+          "natspec": "",
+          "range": {
+            "byteLength": 24,
+            "byteStart": 8080,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L244",
+            "lineEnd": 244,
+            "lineStart": 244,
+            "snippetSha256": "sha256:2b71e23541a92a14b439daa26bf2a41196dd91bce3a3d4d2c8f393d2ff613983",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": "0x4b28f9a2",
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetEntropyCoordinator#function:0x1f9f020d",
+          "immutable": false,
+          "name": "entryGas",
+          "natspec": "",
+          "range": {
+            "byteLength": 23,
+            "byteStart": 8110,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L245",
+            "lineEnd": 245,
+            "lineStart": 245,
+            "snippetSha256": "sha256:f8979c5b1759a842b1f1e77d393fdda4ed1b552951a024291f7022a3113b1887",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": "0x1f9f020d",
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetEntropyCoordinator#function:0x0a81feab",
+          "immutable": false,
+          "name": "lastCallHash",
+          "natspec": "",
+          "range": {
+            "byteLength": 27,
+            "byteStart": 8139,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L246",
+            "lineEnd": 246,
+            "lineStart": 246,
+            "snippetSha256": "sha256:2e20a7dcf344299433991ae2ce611bd0960df50be827f1e7e4bfdb9f995c6323",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": "0x0a81feab",
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamCorePermanentTarget.t.sol:PermanentTargetEntropyCoordinator",
+    "inheritance": [
+      {
+        "definitionId": "smart-contracts/interfaces/stream/IStreamEntropyCoordinator.sol:IStreamEntropyCoordinator",
+        "name": "IStreamEntropyCoordinator"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1Db3JlUGVybWFuZW50VGFyZ2V0LnQuc29sOlBlcm1hbmVudFRhcmdldEVudHJvcHlDb29yZGluYXRvcg",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamCorePermanentTarget.t.sol:PermanentTargetEntropyCoordinator",
+      "smart-contracts/interfaces/stream/IStreamEntropyCoordinator.sol:IStreamEntropyCoordinator",
+      "smart-contracts/vendor/openzeppelin/IERC165.sol:IERC165"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "PermanentTargetEntropyCoordinator",
+    "natspec": "",
+    "range": {
+      "byteLength": 1728,
+      "byteStart": 7944,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L241-L299",
+      "lineEnd": 299,
+      "lineStart": 241,
+      "snippetSha256": "sha256:ddf26fe0df4753f62ff14f9ede4200a818bdfba77e4270bb29717abda6f36d54",
+      "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamCorePermanentTarget.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-09-09.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 13
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 12
+    },
+    "totalCount": 13
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetEntropyCoordinator",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetEntropyCoordinator#function:0x01ffc9a7",
+      "definitionId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetEntropyCoordinator",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetEntropyCoordinator#function:0x0a81feab",
+      "definitionId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetEntropyCoordinator",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetEntropyCoordinator#function:0x1f9f020d",
+      "definitionId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetEntropyCoordinator",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetEntropyCoordinator#function:0x4b28f9a2",
+      "definitionId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetEntropyCoordinator",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetEntropyCoordinator#function:0x53bc2b32",
+      "definitionId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetEntropyCoordinator",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetEntropyCoordinator#function:0x5c77f5e5",
+      "definitionId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetEntropyCoordinator",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetEntropyCoordinator#function:0x68feeeab",
+      "definitionId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetEntropyCoordinator",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetEntropyCoordinator#function:0x714ae638",
+      "definitionId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetEntropyCoordinator",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetEntropyCoordinator#function:0x81e4413b",
+      "definitionId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetEntropyCoordinator",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetEntropyCoordinator#function:0xd3072d82",
+      "definitionId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetEntropyCoordinator",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetEntropyCoordinator#function:0xd5e4a680",
+      "definitionId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetEntropyCoordinator",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetEntropyCoordinator#function:0xebddbaf6",
+      "definitionId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetEntropyCoordinator",
+      "severity": "advisory"
+    }
+  ]
+}

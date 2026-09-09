@@ -1,0 +1,775 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamPostEntropyCompletionGas.t.sol:StreamPostEntropyCompletionGasTest#function:0x0a9254e4",
+          "declaringDefinitionId": "test/StreamPostEntropyCompletionGas.t.sol:StreamPostEntropyCompletionGasTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "setUp",
+          "outputs": [],
+          "selector": "0x0a9254e4",
+          "signature": "setUp()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamPostEntropyCompletionGas.t.sol:StreamPostEntropyCompletionGasTest#function:0xeaf77c61",
+          "declaringDefinitionId": "test/StreamPostEntropyCompletionGas.t.sol:StreamPostEntropyCompletionGasTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testContractReceiverGasIsOutsideTheFixedEoaTailGuarantee",
+          "outputs": [],
+          "selector": "0xeaf77c61",
+          "signature": "testContractReceiverGasIsOutsideTheFixedEoaTailGuarantee()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamPostEntropyCompletionGas.t.sol:StreamPostEntropyCompletionGasTest#function:0x1c854d94",
+          "declaringDefinitionId": "test/StreamPostEntropyCompletionGas.t.sol:StreamPostEntropyCompletionGasTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testCoordinatorFailureRollsBackIdentitySupplyOwnershipAndEvents",
+          "outputs": [],
+          "selector": "0x1c854d94",
+          "signature": "testCoordinatorFailureRollsBackIdentitySupplyOwnershipAndEvents()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamPostEntropyCompletionGas.t.sol:StreamPostEntropyCompletionGasTest#function:0x31f99db0",
+          "declaringDefinitionId": "test/StreamPostEntropyCompletionGas.t.sol:StreamPostEntropyCompletionGasTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testHighParentGasFullStipendCoordinatorStillCompletesFirstEoaMint",
+          "outputs": [],
+          "selector": "0x31f99db0",
+          "signature": "testHighParentGasFullStipendCoordinatorStillCompletesFirstEoaMint()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamPostEntropyCompletionGas.t.sol:StreamPostEntropyCompletionGasTest#function:0x2880d04f",
+          "declaringDefinitionId": "test/StreamPostEntropyCompletionGas.t.sol:StreamPostEntropyCompletionGasTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testMeasureWorstCaseEoaPostCoordinatorTail",
+          "outputs": [],
+          "selector": "0x2880d04f",
+          "signature": "testMeasureWorstCaseEoaPostCoordinatorTail()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamPostEntropyCompletionGas.t.sol:StreamPostEntropyCompletionGasTest#function:0xeb118578",
+          "declaringDefinitionId": "test/StreamPostEntropyCompletionGas.t.sol:StreamPostEntropyCompletionGasTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testPlanningFormulaRejectsZeroAndOverflowingModels",
+          "outputs": [],
+          "selector": "0xeb118578",
+          "signature": "testPlanningFormulaRejectsZeroAndOverflowingModels()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamPostEntropyCompletionGas.t.sol:StreamPostEntropyCompletionGasTest#function:0x54b6e078",
+          "declaringDefinitionId": "test/StreamPostEntropyCompletionGas.t.sol:StreamPostEntropyCompletionGasTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testPlanningFormulaUsesCeilingEip150Retention",
+          "outputs": [],
+          "selector": "0x54b6e078",
+          "signature": "testPlanningFormulaUsesCeilingEip150Retention()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamPostEntropyCompletionGas.t.sol:StreamPostEntropyCompletionGasTest#function:0x83809e27",
+          "declaringDefinitionId": "test/StreamPostEntropyCompletionGas.t.sol:StreamPostEntropyCompletionGasTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testPlanningPredicateAcceptsAtFormulaResult",
+          "outputs": [],
+          "selector": "0x83809e27",
+          "signature": "testPlanningPredicateAcceptsAtFormulaResult()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamPostEntropyCompletionGas.t.sol:StreamPostEntropyCompletionGasTest#function:0xce28cb0c",
+          "declaringDefinitionId": "test/StreamPostEntropyCompletionGas.t.sol:StreamPostEntropyCompletionGasTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testPlanningPredicateAcceptsJustAboveFormulaResult",
+          "outputs": [],
+          "selector": "0xce28cb0c",
+          "signature": "testPlanningPredicateAcceptsJustAboveFormulaResult()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamPostEntropyCompletionGas.t.sol:StreamPostEntropyCompletionGasTest#function:0xe331e883",
+          "declaringDefinitionId": "test/StreamPostEntropyCompletionGas.t.sol:StreamPostEntropyCompletionGasTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testPlanningPredicateRejectsJustBelowFormulaResult",
+          "outputs": [],
+          "selector": "0xe331e883",
+          "signature": "testPlanningPredicateRejectsJustBelowFormulaResult()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamPostEntropyCompletionGas.t.sol:StreamPostEntropyCompletionGasTest#function:0xcdb1dba4",
+          "declaringDefinitionId": "test/StreamPostEntropyCompletionGas.t.sol:StreamPostEntropyCompletionGasTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testReceiverFailureRollsBackIdentityMetadataSupplyAndOwnership",
+          "outputs": [],
+          "selector": "0xcdb1dba4",
+          "signature": "testReceiverFailureRollsBackIdentityMetadataSupplyAndOwnership()",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "setUp()",
+          "displaySignature": "setUp()",
+          "functionKind": "function",
+          "id": "test/StreamPostEntropyCompletionGas.t.sol:StreamPostEntropyCompletionGasTest#function:0x0a9254e4",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Qb3N0RW50cm9weUNvbXBsZXRpb25HYXMudC5zb2w6U3RyZWFtUG9zdEVudHJvcHlDb21wbGV0aW9uR2FzVGVzdCNmdW5jdGlvbjoweDBhOTI1NGU0",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setUp",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 156,
+            "byteStart": 804,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamPostEntropyCompletionGas.t.sol#L22-L25",
+            "lineEnd": 25,
+            "lineStart": 22,
+            "snippetSha256": "sha256:3eb9cd86d97963f0c081992cbbafec1be9f377018c0d26c17d3c705f6590111f",
+            "sourceSha256": "sha256:7b37c85b5c2b864a68666a049e3be5bd025dcb4510aa899123f951919ed1fbc8"
+          },
+          "selector": "0x0a9254e4",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testPlanningPredicateRejectsJustBelowFormulaResult()",
+          "displaySignature": "testPlanningPredicateRejectsJustBelowFormulaResult()",
+          "functionKind": "function",
+          "id": "test/StreamPostEntropyCompletionGas.t.sol:StreamPostEntropyCompletionGasTest#function:0xe331e883",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Qb3N0RW50cm9weUNvbXBsZXRpb25HYXMudC5zb2w6U3RyZWFtUG9zdEVudHJvcHlDb21wbGV0aW9uR2FzVGVzdCNmdW5jdGlvbjoweGUzMzFlODgz",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testPlanningPredicateRejectsJustBelowFormulaResult",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 334,
+            "byteStart": 966,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamPostEntropyCompletionGas.t.sol#L27-L31",
+            "lineEnd": 31,
+            "lineStart": 27,
+            "snippetSha256": "sha256:5b06c9748160be4be4aee043c00576a6a4e157fb0a44bfcf970f663e5134088d",
+            "sourceSha256": "sha256:7b37c85b5c2b864a68666a049e3be5bd025dcb4510aa899123f951919ed1fbc8"
+          },
+          "selector": "0xe331e883",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testPlanningPredicateAcceptsAtFormulaResult()",
+          "displaySignature": "testPlanningPredicateAcceptsAtFormulaResult()",
+          "functionKind": "function",
+          "id": "test/StreamPostEntropyCompletionGas.t.sol:StreamPostEntropyCompletionGasTest#function:0x83809e27",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Qb3N0RW50cm9weUNvbXBsZXRpb25HYXMudC5zb2w6U3RyZWFtUG9zdEVudHJvcHlDb21wbGV0aW9uR2FzVGVzdCNmdW5jdGlvbjoweDgzODA5ZTI3",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testPlanningPredicateAcceptsAtFormulaResult",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 311,
+            "byteStart": 1306,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamPostEntropyCompletionGas.t.sol#L33-L37",
+            "lineEnd": 37,
+            "lineStart": 33,
+            "snippetSha256": "sha256:7af2808587e0e13a8eb4909c2d92d95ae0d108d6a6d076220ca074c6ff81d2a9",
+            "sourceSha256": "sha256:7b37c85b5c2b864a68666a049e3be5bd025dcb4510aa899123f951919ed1fbc8"
+          },
+          "selector": "0x83809e27",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testPlanningPredicateAcceptsJustAboveFormulaResult()",
+          "displaySignature": "testPlanningPredicateAcceptsJustAboveFormulaResult()",
+          "functionKind": "function",
+          "id": "test/StreamPostEntropyCompletionGas.t.sol:StreamPostEntropyCompletionGasTest#function:0xce28cb0c",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Qb3N0RW50cm9weUNvbXBsZXRpb25HYXMudC5zb2w6U3RyZWFtUG9zdEVudHJvcHlDb21wbGV0aW9uR2FzVGVzdCNmdW5jdGlvbjoweGNlMjhjYjBj",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testPlanningPredicateAcceptsJustAboveFormulaResult",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 333,
+            "byteStart": 1623,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamPostEntropyCompletionGas.t.sol#L39-L43",
+            "lineEnd": 43,
+            "lineStart": 39,
+            "snippetSha256": "sha256:d7f546919e7ad1d94ccae71b2bde5f9aa5e7c54756749aec92748481ab38fe17",
+            "sourceSha256": "sha256:7b37c85b5c2b864a68666a049e3be5bd025dcb4510aa899123f951919ed1fbc8"
+          },
+          "selector": "0xce28cb0c",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testPlanningFormulaUsesCeilingEip150Retention()",
+          "displaySignature": "testPlanningFormulaUsesCeilingEip150Retention()",
+          "functionKind": "function",
+          "id": "test/StreamPostEntropyCompletionGas.t.sol:StreamPostEntropyCompletionGasTest#function:0x54b6e078",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Qb3N0RW50cm9weUNvbXBsZXRpb25HYXMudC5zb2w6U3RyZWFtUG9zdEVudHJvcHlDb21wbGV0aW9uR2FzVGVzdCNmdW5jdGlvbjoweDU0YjZlMDc4",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testPlanningFormulaUsesCeilingEip150Retention",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 432,
+            "byteStart": 1962,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamPostEntropyCompletionGas.t.sol#L45-L53",
+            "lineEnd": 53,
+            "lineStart": 45,
+            "snippetSha256": "sha256:bf1032edbd7c045818bb8afe268fa4a2c2eb9b75639e7abcf4ccb5b59dfccfbd",
+            "sourceSha256": "sha256:7b37c85b5c2b864a68666a049e3be5bd025dcb4510aa899123f951919ed1fbc8"
+          },
+          "selector": "0x54b6e078",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testPlanningFormulaRejectsZeroAndOverflowingModels()",
+          "displaySignature": "testPlanningFormulaRejectsZeroAndOverflowingModels()",
+          "functionKind": "function",
+          "id": "test/StreamPostEntropyCompletionGas.t.sol:StreamPostEntropyCompletionGasTest#function:0xeb118578",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Qb3N0RW50cm9weUNvbXBsZXRpb25HYXMudC5zb2w6U3RyZWFtUG9zdEVudHJvcHlDb21wbGV0aW9uR2FzVGVzdCNmdW5jdGlvbjoweGViMTE4NTc4",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testPlanningFormulaRejectsZeroAndOverflowingModels",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 459,
+            "byteStart": 2400,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamPostEntropyCompletionGas.t.sol#L55-L65",
+            "lineEnd": 65,
+            "lineStart": 55,
+            "snippetSha256": "sha256:5ac9b30e709d3d38ac032c91c1e2603e607cc02ccba136ec4950e08ac5659dc6",
+            "sourceSha256": "sha256:7b37c85b5c2b864a68666a049e3be5bd025dcb4510aa899123f951919ed1fbc8"
+          },
+          "selector": "0xeb118578",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testHighParentGasFullStipendCoordinatorStillCompletesFirstEoaMint()",
+          "displaySignature": "testHighParentGasFullStipendCoordinatorStillCompletesFirstEoaMint()",
+          "functionKind": "function",
+          "id": "test/StreamPostEntropyCompletionGas.t.sol:StreamPostEntropyCompletionGasTest#function:0x31f99db0",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Qb3N0RW50cm9weUNvbXBsZXRpb25HYXMudC5zb2w6U3RyZWFtUG9zdEVudHJvcHlDb21wbGV0aW9uR2FzVGVzdCNmdW5jdGlvbjoweDMxZjk5ZGIw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testHighParentGasFullStipendCoordinatorStillCompletesFirstEoaMint",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1352,
+            "byteStart": 2865,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamPostEntropyCompletionGas.t.sol#L67-L96",
+            "lineEnd": 96,
+            "lineStart": 67,
+            "snippetSha256": "sha256:d1c0e4805d360c001a30ac548ff85fae0aea5d7025ff1d130551bc69ff13e36e",
+            "sourceSha256": "sha256:7b37c85b5c2b864a68666a049e3be5bd025dcb4510aa899123f951919ed1fbc8"
+          },
+          "selector": "0x31f99db0",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testCoordinatorFailureRollsBackIdentitySupplyOwnershipAndEvents()",
+          "displaySignature": "testCoordinatorFailureRollsBackIdentitySupplyOwnershipAndEvents()",
+          "functionKind": "function",
+          "id": "test/StreamPostEntropyCompletionGas.t.sol:StreamPostEntropyCompletionGasTest#function:0x1c854d94",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Qb3N0RW50cm9weUNvbXBsZXRpb25HYXMudC5zb2w6U3RyZWFtUG9zdEVudHJvcHlDb21wbGV0aW9uR2FzVGVzdCNmdW5jdGlvbjoweDFjODU0ZDk0",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testCoordinatorFailureRollsBackIdentitySupplyOwnershipAndEvents",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1214,
+            "byteStart": 4223,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamPostEntropyCompletionGas.t.sol#L98-L125",
+            "lineEnd": 125,
+            "lineStart": 98,
+            "snippetSha256": "sha256:a1847c63b3339785612462ac0862ffe71d199c95ec34e3ac16bd6714ccf40e95",
+            "sourceSha256": "sha256:7b37c85b5c2b864a68666a049e3be5bd025dcb4510aa899123f951919ed1fbc8"
+          },
+          "selector": "0x1c854d94",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testContractReceiverGasIsOutsideTheFixedEoaTailGuarantee()",
+          "displaySignature": "testContractReceiverGasIsOutsideTheFixedEoaTailGuarantee()",
+          "functionKind": "function",
+          "id": "test/StreamPostEntropyCompletionGas.t.sol:StreamPostEntropyCompletionGasTest#function:0xeaf77c61",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Qb3N0RW50cm9weUNvbXBsZXRpb25HYXMudC5zb2w6U3RyZWFtUG9zdEVudHJvcHlDb21wbGV0aW9uR2FzVGVzdCNmdW5jdGlvbjoweGVhZjc3YzYx",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testContractReceiverGasIsOutsideTheFixedEoaTailGuarantee",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 717,
+            "byteStart": 5443,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamPostEntropyCompletionGas.t.sol#L127-L143",
+            "lineEnd": 143,
+            "lineStart": 127,
+            "snippetSha256": "sha256:9569ce9bddddfc92a4b94c756ba191a88061b7b2d841ed20697d25c74d1f8710",
+            "sourceSha256": "sha256:7b37c85b5c2b864a68666a049e3be5bd025dcb4510aa899123f951919ed1fbc8"
+          },
+          "selector": "0xeaf77c61",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testReceiverFailureRollsBackIdentityMetadataSupplyAndOwnership()",
+          "displaySignature": "testReceiverFailureRollsBackIdentityMetadataSupplyAndOwnership()",
+          "functionKind": "function",
+          "id": "test/StreamPostEntropyCompletionGas.t.sol:StreamPostEntropyCompletionGasTest#function:0xcdb1dba4",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Qb3N0RW50cm9weUNvbXBsZXRpb25HYXMudC5zb2w6U3RyZWFtUG9zdEVudHJvcHlDb21wbGV0aW9uR2FzVGVzdCNmdW5jdGlvbjoweGNkYjFkYmE0",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testReceiverFailureRollsBackIdentityMetadataSupplyAndOwnership",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1315,
+            "byteStart": 6166,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamPostEntropyCompletionGas.t.sol#L145-L171",
+            "lineEnd": 171,
+            "lineStart": 145,
+            "snippetSha256": "sha256:63ad633bc8e05b260c12ec28cad0eca01a41b9fe5aff122c78c9af8710b02e3e",
+            "sourceSha256": "sha256:7b37c85b5c2b864a68666a049e3be5bd025dcb4510aa899123f951919ed1fbc8"
+          },
+          "selector": "0xcdb1dba4",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testMeasureWorstCaseEoaPostCoordinatorTail()",
+          "displaySignature": "testMeasureWorstCaseEoaPostCoordinatorTail()",
+          "functionKind": "function",
+          "id": "test/StreamPostEntropyCompletionGas.t.sol:StreamPostEntropyCompletionGasTest#function:0x2880d04f",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Qb3N0RW50cm9weUNvbXBsZXRpb25HYXMudC5zb2w6U3RyZWFtUG9zdEVudHJvcHlDb21wbGV0aW9uR2FzVGVzdCNmdW5jdGlvbjoweDI4ODBkMDRm",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testMeasureWorstCaseEoaPostCoordinatorTail",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 437,
+            "byteStart": 7487,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamPostEntropyCompletionGas.t.sol#L173-L185",
+            "lineEnd": 185,
+            "lineStart": 173,
+            "snippetSha256": "sha256:d76ba6e46b336a0573cfb3ab27cd2d2f532680ce6782c4ff7aac9333bfaf23ef",
+            "sourceSha256": "sha256:7b37c85b5c2b864a68666a049e3be5bd025dcb4510aa899123f951919ed1fbc8"
+          },
+          "selector": "0x2880d04f",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "COLLECTION_ID",
+          "natspec": "",
+          "range": {
+            "byteLength": 42,
+            "byteStart": 383,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamPostEntropyCompletionGas.t.sol#L13",
+            "lineEnd": 13,
+            "lineStart": 13,
+            "snippetSha256": "sha256:cba8ff5a3b4148cc54bed7e4899604a5bc39c7815d1a23162a647a4813b0e087",
+            "sourceSha256": "sha256:7b37c85b5c2b864a68666a049e3be5bd025dcb4510aa899123f951919ed1fbc8"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 424,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamPostEntropyCompletionGas.t.sol#L13",
+            "lineEnd": 13,
+            "lineStart": 13,
+            "snippetSha256": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+            "sourceSha256": "sha256:7b37c85b5c2b864a68666a049e3be5bd025dcb4510aa899123f951919ed1fbc8"
+          },
+          "valueSource": "1",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "TOKEN_ID",
+          "natspec": "",
+          "range": {
+            "byteLength": 37,
+            "byteStart": 431,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamPostEntropyCompletionGas.t.sol#L14",
+            "lineEnd": 14,
+            "lineStart": 14,
+            "snippetSha256": "sha256:c73d15ab01ba31af3abe0a3398754b34011adc910a4aba23a00a8a747263c4fa",
+            "sourceSha256": "sha256:7b37c85b5c2b864a68666a049e3be5bd025dcb4510aa899123f951919ed1fbc8"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 467,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamPostEntropyCompletionGas.t.sol#L14",
+            "lineEnd": 14,
+            "lineStart": 14,
+            "snippetSha256": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+            "sourceSha256": "sha256:7b37c85b5c2b864a68666a049e3be5bd025dcb4510aa899123f951919ed1fbc8"
+          },
+          "valueSource": "1",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "REGISTRATION_GAS_LIMIT",
+          "natspec": "",
+          "range": {
+            "byteLength": 57,
+            "byteStart": 474,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamPostEntropyCompletionGas.t.sol#L15",
+            "lineEnd": 15,
+            "lineStart": 15,
+            "snippetSha256": "sha256:91898fc16d78f03a1db2191add320660ef178b92241e235dd19a7794471694df",
+            "sourceSha256": "sha256:7b37c85b5c2b864a68666a049e3be5bd025dcb4510aa899123f951919ed1fbc8"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 7,
+            "byteStart": 524,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamPostEntropyCompletionGas.t.sol#L15",
+            "lineEnd": 15,
+            "lineStart": 15,
+            "snippetSha256": "sha256:45d730e468aecab5ce28900412c712dceb6cede999dac9de9621a46844593cfe",
+            "sourceSha256": "sha256:7b37c85b5c2b864a68666a049e3be5bd025dcb4510aa899123f951919ed1fbc8"
+          },
+          "valueSource": "120_000",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "MINT_COMMITMENT",
+          "natspec": "",
+          "range": {
+            "byteLength": 81,
+            "byteStart": 537,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamPostEntropyCompletionGas.t.sol#L16",
+            "lineEnd": 16,
+            "lineStart": 16,
+            "snippetSha256": "sha256:4ffbb495b348456b79246924984c6a500b3b65aaa32e7768357d658cf4fbe4db",
+            "sourceSha256": "sha256:7b37c85b5c2b864a68666a049e3be5bd025dcb4510aa899123f951919ed1fbc8"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 38,
+            "byteStart": 580,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamPostEntropyCompletionGas.t.sol#L16",
+            "lineEnd": 16,
+            "lineStart": 16,
+            "snippetSha256": "sha256:e04c861cfc2a0c4c382768764a1b92ad8a2671c3da425e459df8849d46d1a01f",
+            "sourceSha256": "sha256:7b37c85b5c2b864a68666a049e3be5bd025dcb4510aa899123f951919ed1fbc8"
+          },
+          "valueSource": "keccak256(\"issue-672-mint-commitment\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "EOA_RECIPIENT",
+          "natspec": "",
+          "range": {
+            "byteLength": 55,
+            "byteStart": 624,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamPostEntropyCompletionGas.t.sol#L17",
+            "lineEnd": 17,
+            "lineStart": 17,
+            "snippetSha256": "sha256:c7a15596f16c20c8b4b39ea77fcff65aaba89864a98884cf9ca7a933e4acff5f",
+            "sourceSha256": "sha256:7b37c85b5c2b864a68666a049e3be5bd025dcb4510aa899123f951919ed1fbc8"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 14,
+            "byteStart": 665,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamPostEntropyCompletionGas.t.sol#L17",
+            "lineEnd": 17,
+            "lineStart": 17,
+            "snippetSha256": "sha256:f41e79023728a3fa7aea8c5ff8f626f6763c9e2e03a580eb651ba09a11b6d173",
+            "sourceSha256": "sha256:7b37c85b5c2b864a68666a049e3be5bd025dcb4510aa899123f951919ed1fbc8"
+          },
+          "valueSource": "address(0x672)",
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "harness",
+          "natspec": "",
+          "range": {
+            "byteLength": 53,
+            "byteStart": 686,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamPostEntropyCompletionGas.t.sol#L19",
+            "lineEnd": 19,
+            "lineStart": 19,
+            "snippetSha256": "sha256:38f80e58e84ca18480cdb04d68463d14eeb5b211a1bc0e42090a1cfa9511dc6e",
+            "sourceSha256": "sha256:7b37c85b5c2b864a68666a049e3be5bd025dcb4510aa899123f951919ed1fbc8"
+          },
+          "selector": null,
+          "type": "StreamPostEntropyCompletionGasHarness",
+          "typeString": "contract StreamPostEntropyCompletionGasHarness",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "noopCoordinator",
+          "natspec": "",
+          "range": {
+            "byteLength": 52,
+            "byteStart": 745,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamPostEntropyCompletionGas.t.sol#L20",
+            "lineEnd": 20,
+            "lineStart": 20,
+            "snippetSha256": "sha256:b28f1a2928189bbc0e41f44eeb4fc318e01b30ae588527c900cc94e1163be0c0",
+            "sourceSha256": "sha256:7b37c85b5c2b864a68666a049e3be5bd025dcb4510aa899123f951919ed1fbc8"
+          },
+          "selector": null,
+          "type": "StreamNoopEntropyCoordinator",
+          "typeString": "contract StreamNoopEntropyCoordinator",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamPostEntropyCompletionGas.t.sol:StreamPostEntropyCompletionGasTest",
+    "inheritance": [
+      {
+        "definitionId": "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase",
+        "name": "CharacterizationTestBase"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1Qb3N0RW50cm9weUNvbXBsZXRpb25HYXMudC5zb2w6U3RyZWFtUG9zdEVudHJvcHlDb21wbGV0aW9uR2FzVGVzdA",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamPostEntropyCompletionGas.t.sol:StreamPostEntropyCompletionGasTest",
+      "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamPostEntropyCompletionGasTest",
+    "natspec": "",
+    "range": {
+      "byteLength": 7721,
+      "byteStart": 205,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamPostEntropyCompletionGas.t.sol#L8-L186",
+      "lineEnd": 186,
+      "lineStart": 8,
+      "snippetSha256": "sha256:1e1c090e23d2b0fce4d349c4a18d56f963cbd5d2ab3b715458ebe1b5f7c12ba7",
+      "sourceSha256": "sha256:7b37c85b5c2b864a68666a049e3be5bd025dcb4510aa899123f951919ed1fbc8"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamPostEntropyCompletionGas.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-09-09.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 12
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 11
+    },
+    "totalCount": 12
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamPostEntropyCompletionGas.t.sol:StreamPostEntropyCompletionGasTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamPostEntropyCompletionGas.t.sol:StreamPostEntropyCompletionGasTest#function:0x0a9254e4",
+      "definitionId": "test/StreamPostEntropyCompletionGas.t.sol:StreamPostEntropyCompletionGasTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamPostEntropyCompletionGas.t.sol:StreamPostEntropyCompletionGasTest#function:0x1c854d94",
+      "definitionId": "test/StreamPostEntropyCompletionGas.t.sol:StreamPostEntropyCompletionGasTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamPostEntropyCompletionGas.t.sol:StreamPostEntropyCompletionGasTest#function:0x2880d04f",
+      "definitionId": "test/StreamPostEntropyCompletionGas.t.sol:StreamPostEntropyCompletionGasTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamPostEntropyCompletionGas.t.sol:StreamPostEntropyCompletionGasTest#function:0x31f99db0",
+      "definitionId": "test/StreamPostEntropyCompletionGas.t.sol:StreamPostEntropyCompletionGasTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamPostEntropyCompletionGas.t.sol:StreamPostEntropyCompletionGasTest#function:0x54b6e078",
+      "definitionId": "test/StreamPostEntropyCompletionGas.t.sol:StreamPostEntropyCompletionGasTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamPostEntropyCompletionGas.t.sol:StreamPostEntropyCompletionGasTest#function:0x83809e27",
+      "definitionId": "test/StreamPostEntropyCompletionGas.t.sol:StreamPostEntropyCompletionGasTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamPostEntropyCompletionGas.t.sol:StreamPostEntropyCompletionGasTest#function:0xcdb1dba4",
+      "definitionId": "test/StreamPostEntropyCompletionGas.t.sol:StreamPostEntropyCompletionGasTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamPostEntropyCompletionGas.t.sol:StreamPostEntropyCompletionGasTest#function:0xce28cb0c",
+      "definitionId": "test/StreamPostEntropyCompletionGas.t.sol:StreamPostEntropyCompletionGasTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamPostEntropyCompletionGas.t.sol:StreamPostEntropyCompletionGasTest#function:0xe331e883",
+      "definitionId": "test/StreamPostEntropyCompletionGas.t.sol:StreamPostEntropyCompletionGasTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamPostEntropyCompletionGas.t.sol:StreamPostEntropyCompletionGasTest#function:0xeaf77c61",
+      "definitionId": "test/StreamPostEntropyCompletionGas.t.sol:StreamPostEntropyCompletionGasTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamPostEntropyCompletionGas.t.sol:StreamPostEntropyCompletionGasTest#function:0xeb118578",
+      "definitionId": "test/StreamPostEntropyCompletionGas.t.sol:StreamPostEntropyCompletionGasTest",
+      "severity": "advisory"
+    }
+  ]
+}

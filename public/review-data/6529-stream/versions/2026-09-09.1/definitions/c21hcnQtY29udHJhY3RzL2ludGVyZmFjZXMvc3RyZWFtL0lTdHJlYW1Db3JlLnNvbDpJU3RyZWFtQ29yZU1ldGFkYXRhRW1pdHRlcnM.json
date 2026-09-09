@@ -1,0 +1,468 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/interfaces/stream/IStreamCore.sol:IStreamCoreMetadataEmitters#event:BatchMetadataUpdate(uint256,uint256)",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamCore.sol:IStreamCoreMetadataEmitters",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "fromTokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "toTokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "BatchMetadataUpdate",
+          "signature": "BatchMetadataUpdate(uint256,uint256)",
+          "topic0": "0x6bd5c950a8d8df17f772f5af37cb3655737899cbf903264b9795592da439661c"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/interfaces/stream/IStreamCore.sol:IStreamCoreMetadataEmitters#event:MetadataUpdate(uint256)",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamCore.sol:IStreamCoreMetadataEmitters",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "MetadataUpdate",
+          "signature": "MetadataUpdate(uint256)",
+          "topic0": "0xf8e1a15aba9398e019f0b49df1a4fde98ee17ae345cb5f6b5e2c27f5033e8ce7"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/interfaces/stream/IStreamCore.sol:IStreamCoreMetadataEmitters#event:StreamMetadataRefresh(uint16,bytes32,uint256,uint256)",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamCore.sol:IStreamCoreMetadataEmitters",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "reasonHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "fromTokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "toTokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "StreamMetadataRefresh",
+          "signature": "StreamMetadataRefresh(uint16,bytes32,uint256,uint256)",
+          "topic0": "0x167c8dd2305074833e7698077c46d5d3f848b5f53506dc2a72101a217c55bb04"
+        }
+      ],
+      "functions": [
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamCore.sol:IStreamCoreMetadataEmitters#function:0x908c18bd",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamCore.sol:IStreamCoreMetadataEmitters",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "fromTokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "toTokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "bytes32",
+              "name": "reasonHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "emitBatchMetadataUpdate",
+          "outputs": [],
+          "selector": "0x908c18bd",
+          "signature": "emitBatchMetadataUpdate(uint256,uint256,bytes32)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamCore.sol:IStreamCoreMetadataEmitters#function:0x7f377036",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamCore.sol:IStreamCoreMetadataEmitters",
+          "inherited": false,
+          "inputs": [],
+          "name": "emitContractURIUpdated",
+          "outputs": [],
+          "selector": "0x7f377036",
+          "signature": "emitContractURIUpdated()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamCore.sol:IStreamCoreMetadataEmitters#function:0xb826aa0c",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamCore.sol:IStreamCoreMetadataEmitters",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "reasonHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "emitMetadataUpdate",
+          "outputs": [],
+          "selector": "0xb826aa0c",
+          "signature": "emitMetadataUpdate(uint256,bytes32)",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "first_party_candidate",
+    "classificationReason": "First-party protocol definition outside the release and published-interface catalogs.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [
+        {
+          "anonymous": false,
+          "astId": 86560,
+          "canonicalSignature": "MetadataUpdate(uint256)",
+          "displaySignature": "MetadataUpdate(uint256)",
+          "id": "smart-contracts/interfaces/stream/IStreamCore.sol:IStreamCoreMetadataEmitters#event:MetadataUpdate(uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVyZmFjZXMvc3RyZWFtL0lTdHJlYW1Db3JlLnNvbDpJU3RyZWFtQ29yZU1ldGFkYXRhRW1pdHRlcnMjZXZlbnQ6TWV0YWRhdGFVcGRhdGUodWludDI1Nik",
+          "kind": "event",
+          "name": "MetadataUpdate",
+          "natspec": "",
+          "range": {
+            "byteLength": 38,
+            "byteStart": 7037,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamCore.sol#L232",
+            "lineEnd": 232,
+            "lineStart": 232,
+            "snippetSha256": "sha256:a0a32fdc87e94f47befa72607cd8d15fc5d738b8f5fe31a8bc85a3e761ecde29",
+            "sourceSha256": "sha256:082c59056a4073595d4a99bd2ae546db42c8b4b17570f9f70fc0f2c36a37ad71"
+          },
+          "topic0": "0xf8e1a15aba9398e019f0b49df1a4fde98ee17ae345cb5f6b5e2c27f5033e8ce7"
+        },
+        {
+          "anonymous": false,
+          "astId": 86566,
+          "canonicalSignature": "BatchMetadataUpdate(uint256,uint256)",
+          "displaySignature": "BatchMetadataUpdate(uint256,uint256)",
+          "id": "smart-contracts/interfaces/stream/IStreamCore.sol:IStreamCoreMetadataEmitters#event:BatchMetadataUpdate(uint256,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "name": "fromTokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "indexed": false,
+              "name": "toTokenId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVyZmFjZXMvc3RyZWFtL0lTdHJlYW1Db3JlLnNvbDpJU3RyZWFtQ29yZU1ldGFkYXRhRW1pdHRlcnMjZXZlbnQ6QmF0Y2hNZXRhZGF0YVVwZGF0ZSh1aW50MjU2LHVpbnQyNTYp",
+          "kind": "event",
+          "name": "BatchMetadataUpdate",
+          "natspec": "",
+          "range": {
+            "byteLength": 66,
+            "byteStart": 7080,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamCore.sol#L233",
+            "lineEnd": 233,
+            "lineStart": 233,
+            "snippetSha256": "sha256:37d5587b894b46e043ab0384fb9a7bfefaba351d23230bae206840bf13eb6703",
+            "sourceSha256": "sha256:082c59056a4073595d4a99bd2ae546db42c8b4b17570f9f70fc0f2c36a37ad71"
+          },
+          "topic0": "0x6bd5c950a8d8df17f772f5af37cb3655737899cbf903264b9795592da439661c"
+        },
+        {
+          "anonymous": false,
+          "astId": 86576,
+          "canonicalSignature": "StreamMetadataRefresh(uint16,bytes32,uint256,uint256)",
+          "displaySignature": "StreamMetadataRefresh(uint16,bytes32,uint256,uint256)",
+          "id": "smart-contracts/interfaces/stream/IStreamCore.sol:IStreamCoreMetadataEmitters#event:StreamMetadataRefresh(uint16,bytes32,uint256,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "reasonHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "name": "fromTokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "indexed": true,
+              "name": "toTokenId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVyZmFjZXMvc3RyZWFtL0lTdHJlYW1Db3JlLnNvbDpJU3RyZWFtQ29yZU1ldGFkYXRhRW1pdHRlcnMjZXZlbnQ6U3RyZWFtTWV0YWRhdGFSZWZyZXNoKHVpbnQxNixieXRlczMyLHVpbnQyNTYsdWludDI1Nik",
+          "kind": "event",
+          "name": "StreamMetadataRefresh",
+          "natspec": "",
+          "range": {
+            "byteLength": 172,
+            "byteStart": 7152,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamCore.sol#L235-L240",
+            "lineEnd": 240,
+            "lineStart": 235,
+            "snippetSha256": "sha256:b737e1fac2c9b28c1e08a8b35903ad97bb89fc85f2e7b2a9be65b41f2a5b40ff",
+            "sourceSha256": "sha256:082c59056a4073595d4a99bd2ae546db42c8b4b17570f9f70fc0f2c36a37ad71"
+          },
+          "topic0": "0x167c8dd2305074833e7698077c46d5d3f848b5f53506dc2a72101a217c55bb04"
+        }
+      ],
+      "functions": [
+        {
+          "canonicalSignature": "emitMetadataUpdate(uint256,bytes32)",
+          "displaySignature": "emitMetadataUpdate(uint256,bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/interfaces/stream/IStreamCore.sol:IStreamCoreMetadataEmitters#function:0xb826aa0c",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "reasonHash",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVyZmFjZXMvc3RyZWFtL0lTdHJlYW1Db3JlLnNvbDpJU3RyZWFtQ29yZU1ldGFkYXRhRW1pdHRlcnMjZnVuY3Rpb246MHhiODI2YWEwYw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "emitMetadataUpdate",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 74,
+            "byteStart": 7330,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamCore.sol#L242",
+            "lineEnd": 242,
+            "lineStart": 242,
+            "snippetSha256": "sha256:85898da81f5a29fd5afc48212cca69a3027bc3057068868d70d1fe0389b93321",
+            "sourceSha256": "sha256:082c59056a4073595d4a99bd2ae546db42c8b4b17570f9f70fc0f2c36a37ad71"
+          },
+          "selector": "0xb826aa0c",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "emitBatchMetadataUpdate(uint256,uint256,bytes32)",
+          "displaySignature": "emitBatchMetadataUpdate(uint256,uint256,bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/interfaces/stream/IStreamCore.sol:IStreamCoreMetadataEmitters#function:0x908c18bd",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "fromTokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "toTokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "reasonHash",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVyZmFjZXMvc3RyZWFtL0lTdHJlYW1Db3JlLnNvbDpJU3RyZWFtQ29yZU1ldGFkYXRhRW1pdHRlcnMjZnVuY3Rpb246MHg5MDhjMThiZA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "emitBatchMetadataUpdate",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 110,
+            "byteStart": 7410,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamCore.sol#L244-L245",
+            "lineEnd": 245,
+            "lineStart": 244,
+            "snippetSha256": "sha256:0071059250113d09566e851e31fd349fd12bfdffb2b5218884fb7d109d6633ef",
+            "sourceSha256": "sha256:082c59056a4073595d4a99bd2ae546db42c8b4b17570f9f70fc0f2c36a37ad71"
+          },
+          "selector": "0x908c18bd",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "emitContractURIUpdated()",
+          "displaySignature": "emitContractURIUpdated()",
+          "functionKind": "function",
+          "id": "smart-contracts/interfaces/stream/IStreamCore.sol:IStreamCoreMetadataEmitters#function:0x7f377036",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVyZmFjZXMvc3RyZWFtL0lTdHJlYW1Db3JlLnNvbDpJU3RyZWFtQ29yZU1ldGFkYXRhRW1pdHRlcnMjZnVuY3Rpb246MHg3ZjM3NzAzNg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "emitContractURIUpdated",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 43,
+            "byteStart": 7526,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamCore.sol#L247",
+            "lineEnd": 247,
+            "lineStart": 247,
+            "snippetSha256": "sha256:4eb41541095fec801c91f1251e21969b19175b4539cf4128bfa45f03d501c387",
+            "sourceSha256": "sha256:082c59056a4073595d4a99bd2ae546db42c8b4b17570f9f70fc0f2c36a37ad71"
+          },
+          "selector": "0x7f377036",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/interfaces/stream/IStreamCore.sol:IStreamCoreMetadataEmitters",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "c21hcnQtY29udHJhY3RzL2ludGVyZmFjZXMvc3RyZWFtL0lTdHJlYW1Db3JlLnNvbDpJU3RyZWFtQ29yZU1ldGFkYXRhRW1pdHRlcnM",
+    "kind": "interface",
+    "linearizedDefinitionIds": [
+      "smart-contracts/interfaces/stream/IStreamCore.sol:IStreamCoreMetadataEmitters"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "IStreamCoreMetadataEmitters",
+    "natspec": "",
+    "range": {
+      "byteLength": 578,
+      "byteStart": 6993,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamCore.sol#L231-L248",
+      "lineEnd": 248,
+      "lineStart": 231,
+      "snippetSha256": "sha256:1cf6ca65af45e187fb5999355fae9dd6f086e6c60f5ad11f225b5edc082c23a9",
+      "sourceSha256": "sha256:082c59056a4073595d4a99bd2ae546db42c8b4b17570f9f70fc0f2c36a37ad71"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/interfaces/stream/IStreamCore.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-09-09.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 4
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 3
+    },
+    "totalCount": 4
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "smart-contracts/interfaces/stream/IStreamCore.sol:IStreamCoreMetadataEmitters",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/interfaces/stream/IStreamCore.sol:IStreamCoreMetadataEmitters#function:0x7f377036",
+      "definitionId": "smart-contracts/interfaces/stream/IStreamCore.sol:IStreamCoreMetadataEmitters",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/interfaces/stream/IStreamCore.sol:IStreamCoreMetadataEmitters#function:0x908c18bd",
+      "definitionId": "smart-contracts/interfaces/stream/IStreamCore.sol:IStreamCoreMetadataEmitters",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/interfaces/stream/IStreamCore.sol:IStreamCoreMetadataEmitters#function:0xb826aa0c",
+      "definitionId": "smart-contracts/interfaces/stream/IStreamCore.sol:IStreamCoreMetadataEmitters",
+      "severity": "advisory"
+    }
+  ]
+}

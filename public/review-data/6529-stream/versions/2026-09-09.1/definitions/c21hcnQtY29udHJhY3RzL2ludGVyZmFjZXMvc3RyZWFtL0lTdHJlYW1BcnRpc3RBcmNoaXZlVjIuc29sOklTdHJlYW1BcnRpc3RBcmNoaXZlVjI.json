@@ -1,0 +1,1358 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2#error:0xc0dc11f0",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "blockNumber",
+              "type": "uint256"
+            }
+          ],
+          "name": "ArtistArchiveBlockNumberOverflow",
+          "selector": "0xc0dc11f0",
+          "signature": "ArtistArchiveBlockNumberOverflow(uint256)"
+        },
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2#error:0x25cb8a4c",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "evidenceId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint64",
+              "name": "evidenceVersion",
+              "type": "uint64"
+            }
+          ],
+          "name": "ArtistArchiveEmptyEvidence",
+          "selector": "0x25cb8a4c",
+          "signature": "ArtistArchiveEmptyEvidence(bytes32,uint64)"
+        },
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2#error:0x1970b3ea",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "evidenceId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint64",
+              "name": "evidenceVersion",
+              "type": "uint64"
+            },
+            {
+              "index": 2,
+              "internalType": "bytes32",
+              "name": "storedContentHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "internalType": "bytes32",
+              "name": "suppliedContentHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "ArtistArchiveEvidenceConflict",
+          "selector": "0x1970b3ea",
+          "signature": "ArtistArchiveEvidenceConflict(bytes32,uint64,bytes32,bytes32)"
+        },
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2#error:0x59b35098",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "evidenceId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint64",
+              "name": "evidenceVersion",
+              "type": "uint64"
+            },
+            {
+              "index": 2,
+              "internalType": "bytes32",
+              "name": "expectedHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "internalType": "bytes32",
+              "name": "observedHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "ArtistArchiveEvidenceCorrupted",
+          "selector": "0x59b35098",
+          "signature": "ArtistArchiveEvidenceCorrupted(bytes32,uint64,bytes32,bytes32)"
+        },
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2#error:0xb36bce5b",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "observedBytes",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "maximumBytes",
+              "type": "uint256"
+            }
+          ],
+          "name": "ArtistArchiveEvidenceTooLarge",
+          "selector": "0xb36bce5b",
+          "signature": "ArtistArchiveEvidenceTooLarge(uint256,uint256)"
+        },
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2#error:0xfaa9281c",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "evidenceId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint64",
+              "name": "evidenceVersion",
+              "type": "uint64"
+            }
+          ],
+          "name": "ArtistArchiveEvidenceUnavailable",
+          "selector": "0xfaa9281c",
+          "signature": "ArtistArchiveEvidenceUnavailable(bytes32,uint64)"
+        },
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2#error:0xcd13f3b4",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "artistRegistry",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "operationCoordinator",
+              "type": "address"
+            }
+          ],
+          "name": "ArtistArchiveInvalidBinding",
+          "selector": "0xcd13f3b4",
+          "signature": "ArtistArchiveInvalidBinding(address,address)"
+        },
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2#error:0x58aea5c3",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "evidenceId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint64",
+              "name": "evidenceVersion",
+              "type": "uint64"
+            }
+          ],
+          "name": "ArtistArchiveInvalidEvidenceKey",
+          "selector": "0x58aea5c3",
+          "signature": "ArtistArchiveInvalidEvidenceKey(bytes32,uint64)"
+        },
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2#error:0x73dce5fa",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "caller",
+              "type": "address"
+            }
+          ],
+          "name": "ArtistArchiveUnauthorizedWriter",
+          "selector": "0x73dce5fa",
+          "signature": "ArtistArchiveUnauthorizedWriter(address)"
+        }
+      ],
+      "events": [
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2#event:ArtistArchiveEvidenceAppendedV2(bytes32,uint64,bytes32,address,uint256)",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "evidenceId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "uint64",
+              "name": "evidenceVersion",
+              "type": "uint64"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "contentHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "internalType": "address",
+              "name": "pointer",
+              "type": "address"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "payloadSize",
+              "type": "uint256"
+            }
+          ],
+          "name": "ArtistArchiveEvidenceAppendedV2",
+          "signature": "ArtistArchiveEvidenceAppendedV2(bytes32,uint64,bytes32,address,uint256)",
+          "topic0": "0x5240c686ea6d391abba38d01bf42c2af4b92a159bf40061b4eaba5de398615f8"
+        }
+      ],
+      "functions": [
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2#function:0xcb65ceb0",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "evidenceId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint64",
+              "name": "evidenceVersion",
+              "type": "uint64"
+            },
+            {
+              "index": 2,
+              "internalType": "bytes",
+              "name": "evidence",
+              "type": "bytes"
+            }
+          ],
+          "name": "appendArtistEvidenceV2",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "contentHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "pointer",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "internalType": "bool",
+              "name": "appended",
+              "type": "bool"
+            }
+          ],
+          "selector": "0xcb65ceb0",
+          "signature": "appendArtistEvidenceV2(bytes32,uint64,bytes)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2#function:0x493df1f9",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2",
+          "inherited": false,
+          "inputs": [],
+          "name": "artistArchiveBindingHashV2",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x493df1f9",
+          "signature": "artistArchiveBindingHashV2()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2#function:0x2cc37be8",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2",
+          "inherited": false,
+          "inputs": [],
+          "name": "artistArchiveMarkerV2",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x2cc37be8",
+          "signature": "artistArchiveMarkerV2()",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2#function:0x70da16df",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2",
+          "inherited": false,
+          "inputs": [],
+          "name": "artistArchiveMaxEvidenceBytesV2",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x70da16df",
+          "signature": "artistArchiveMaxEvidenceBytesV2()",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2#function:0x31c8c693",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2",
+          "inherited": false,
+          "inputs": [],
+          "name": "artistArchiveSchemaV2",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint16",
+              "name": "",
+              "type": "uint16"
+            }
+          ],
+          "selector": "0x31c8c693",
+          "signature": "artistArchiveSchemaV2()",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2#function:0xa535232f",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "evidenceId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint64",
+              "name": "evidenceVersion",
+              "type": "uint64"
+            }
+          ],
+          "name": "artistEvidenceBytesV2",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes",
+              "name": "evidence",
+              "type": "bytes"
+            }
+          ],
+          "selector": "0xa535232f",
+          "signature": "artistEvidenceBytesV2(bytes32,uint64)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2#function:0xaa62d348",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "evidenceId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint64",
+              "name": "evidenceVersion",
+              "type": "uint64"
+            }
+          ],
+          "name": "artistEvidenceMetadataV2",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "contentHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "pointer",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "internalType": "uint32",
+              "name": "payloadSize",
+              "type": "uint32"
+            },
+            {
+              "index": 3,
+              "internalType": "uint64",
+              "name": "appendedAtBlock",
+              "type": "uint64"
+            }
+          ],
+          "selector": "0xaa62d348",
+          "signature": "artistEvidenceMetadataV2(bytes32,uint64)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2#function:0x81703be7",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2",
+          "inherited": false,
+          "inputs": [],
+          "name": "artistRegistry",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "selector": "0x81703be7",
+          "signature": "artistRegistry()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2#function:0x4c683143",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2",
+          "inherited": false,
+          "inputs": [],
+          "name": "operationCoordinator",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "selector": "0x4c683143",
+          "signature": "operationCoordinator()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/vendor/openzeppelin/IERC165.sol:IERC165#function:0x01ffc9a7",
+          "declaringDefinitionId": "smart-contracts/vendor/openzeppelin/IERC165.sol:IERC165",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "name": "supportsInterface",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x01ffc9a7",
+          "signature": "supportsInterface(bytes4)",
+          "stateMutability": "view"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "published_interface",
+    "classificationReason": "Listed in release-artifacts/contracts.json interfaces.",
+    "declarations": {
+      "enums": [],
+      "errors": [
+        {
+          "astId": 84455,
+          "canonicalSignature": "ArtistArchiveInvalidBinding(address,address)",
+          "displaySignature": "ArtistArchiveInvalidBinding(address,address)",
+          "id": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2#error:0xcd13f3b4",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "artistRegistry",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "operationCoordinator",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVyZmFjZXMvc3RyZWFtL0lTdHJlYW1BcnRpc3RBcmNoaXZlVjIuc29sOklTdHJlYW1BcnRpc3RBcmNoaXZlVjIjZXJyb3I6MHhjZDEzZjNiNA",
+          "kind": "error",
+          "name": "ArtistArchiveInvalidBinding",
+          "natspec": "@notice The immutable Registry or Coordinator binding is zero.",
+          "range": {
+            "byteLength": 88,
+            "byteStart": 585,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol#L12",
+            "lineEnd": 12,
+            "lineStart": 12,
+            "snippetSha256": "sha256:b41291adc08d8e10e73ee9b07a0f08ee1aed494b32f6c74d1e2614080eb9e27d",
+            "sourceSha256": "sha256:2e488c13527383b63864eb484203e2fed6349def941043ca9435cc728a29a80e"
+          },
+          "selector": "0xcd13f3b4"
+        },
+        {
+          "astId": 84460,
+          "canonicalSignature": "ArtistArchiveUnauthorizedWriter(address)",
+          "displaySignature": "ArtistArchiveUnauthorizedWriter(address)",
+          "id": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2#error:0x73dce5fa",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "caller",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVyZmFjZXMvc3RyZWFtL0lTdHJlYW1BcnRpc3RBcmNoaXZlVjIuc29sOklTdHJlYW1BcnRpc3RBcmNoaXZlVjIjZXJyb3I6MHg3M2RjZTVmYQ",
+          "kind": "error",
+          "name": "ArtistArchiveUnauthorizedWriter",
+          "natspec": "@notice A caller other than the immutable Coordinator attempted to append evidence.\n @dev This is a transport-integrity gate only and is not semantic authorization.",
+          "range": {
+            "byteLength": 54,
+            "byteStart": 859,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol#L16",
+            "lineEnd": 16,
+            "lineStart": 16,
+            "snippetSha256": "sha256:675a12c28b8cbccf1d0258237e992087137b8a0b4bf545b303347dad0ed89d11",
+            "sourceSha256": "sha256:2e488c13527383b63864eb484203e2fed6349def941043ca9435cc728a29a80e"
+          },
+          "selector": "0x73dce5fa"
+        },
+        {
+          "astId": 84467,
+          "canonicalSignature": "ArtistArchiveInvalidEvidenceKey(bytes32,uint64)",
+          "displaySignature": "ArtistArchiveInvalidEvidenceKey(bytes32,uint64)",
+          "id": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2#error:0x58aea5c3",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "evidenceId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "evidenceVersion",
+              "type": "uint64"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVyZmFjZXMvc3RyZWFtL0lTdHJlYW1BcnRpc3RBcmNoaXZlVjIuc29sOklTdHJlYW1BcnRpc3RBcmNoaXZlVjIjZXJyb3I6MHg1OGFlYTVjMw",
+          "kind": "error",
+          "name": "ArtistArchiveInvalidEvidenceKey",
+          "natspec": "@notice The exact evidence key uses a zero id or zero version.",
+          "range": {
+            "byteLength": 82,
+            "byteStart": 990,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol#L19",
+            "lineEnd": 19,
+            "lineStart": 19,
+            "snippetSha256": "sha256:0bf074775f268922cc717a7312471c01981b54db914ceef1e93812435d86d882",
+            "sourceSha256": "sha256:2e488c13527383b63864eb484203e2fed6349def941043ca9435cc728a29a80e"
+          },
+          "selector": "0x58aea5c3"
+        },
+        {
+          "astId": 84474,
+          "canonicalSignature": "ArtistArchiveEmptyEvidence(bytes32,uint64)",
+          "displaySignature": "ArtistArchiveEmptyEvidence(bytes32,uint64)",
+          "id": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2#error:0x25cb8a4c",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "evidenceId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "evidenceVersion",
+              "type": "uint64"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVyZmFjZXMvc3RyZWFtL0lTdHJlYW1BcnRpc3RBcmNoaXZlVjIuc29sOklTdHJlYW1BcnRpc3RBcmNoaXZlVjIjZXJyb3I6MHgyNWNiOGE0Yw",
+          "kind": "error",
+          "name": "ArtistArchiveEmptyEvidence",
+          "natspec": "@notice Evidence bytes must not be empty.",
+          "range": {
+            "byteLength": 77,
+            "byteStart": 1128,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol#L22",
+            "lineEnd": 22,
+            "lineStart": 22,
+            "snippetSha256": "sha256:b48b38bf4ba559e77279aaf219d3623077aea7d7628d0e4c6173abff8dfe5a26",
+            "sourceSha256": "sha256:2e488c13527383b63864eb484203e2fed6349def941043ca9435cc728a29a80e"
+          },
+          "selector": "0x25cb8a4c"
+        },
+        {
+          "astId": 84481,
+          "canonicalSignature": "ArtistArchiveEvidenceTooLarge(uint256,uint256)",
+          "displaySignature": "ArtistArchiveEvidenceTooLarge(uint256,uint256)",
+          "id": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2#error:0xb36bce5b",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "observedBytes",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "maximumBytes",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVyZmFjZXMvc3RyZWFtL0lTdHJlYW1BcnRpc3RBcmNoaXZlVjIuc29sOklTdHJlYW1BcnRpc3RBcmNoaXZlVjIjZXJyb3I6MHhiMzZiY2U1Yg",
+          "kind": "error",
+          "name": "ArtistArchiveEvidenceTooLarge",
+          "natspec": "@notice Evidence bytes exceed the immutable archive payload bound.",
+          "range": {
+            "byteLength": 81,
+            "byteStart": 1286,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol#L25",
+            "lineEnd": 25,
+            "lineStart": 25,
+            "snippetSha256": "sha256:7a05bc8596f64386917730de16dbc44b44c9d5163a86dac3e6755e691b014799",
+            "sourceSha256": "sha256:2e488c13527383b63864eb484203e2fed6349def941043ca9435cc728a29a80e"
+          },
+          "selector": "0xb36bce5b"
+        },
+        {
+          "astId": 84486,
+          "canonicalSignature": "ArtistArchiveBlockNumberOverflow(uint256)",
+          "displaySignature": "ArtistArchiveBlockNumberOverflow(uint256)",
+          "id": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2#error:0xc0dc11f0",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "blockNumber",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVyZmFjZXMvc3RyZWFtL0lTdHJlYW1BcnRpc3RBcmNoaXZlVjIuc29sOklTdHJlYW1BcnRpc3RBcmNoaXZlVjIjZXJyb3I6MHhjMGRjMTFmMA",
+          "kind": "error",
+          "name": "ArtistArchiveBlockNumberOverflow",
+          "natspec": "@notice The append block cannot be represented by the frozen receipt schema.",
+          "range": {
+            "byteLength": 60,
+            "byteStart": 1458,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol#L28",
+            "lineEnd": 28,
+            "lineStart": 28,
+            "snippetSha256": "sha256:d646a84c849e225cfb122fbbcbc561604d2dedf4700c47a0946f62b2df480cdb",
+            "sourceSha256": "sha256:2e488c13527383b63864eb484203e2fed6349def941043ca9435cc728a29a80e"
+          },
+          "selector": "0xc0dc11f0"
+        },
+        {
+          "astId": 84497,
+          "canonicalSignature": "ArtistArchiveEvidenceConflict(bytes32,uint64,bytes32,bytes32)",
+          "displaySignature": "ArtistArchiveEvidenceConflict(bytes32,uint64,bytes32,bytes32)",
+          "id": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2#error:0x1970b3ea",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "evidenceId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "evidenceVersion",
+              "type": "uint64"
+            },
+            {
+              "index": 2,
+              "name": "storedContentHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "name": "suppliedContentHash",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVyZmFjZXMvc3RyZWFtL0lTdHJlYW1BcnRpc3RBcmNoaXZlVjIuc29sOklTdHJlYW1BcnRpc3RBcmNoaXZlVjIjZXJyb3I6MHgxOTcwYjNlYQ",
+          "kind": "error",
+          "name": "ArtistArchiveEvidenceConflict",
+          "natspec": "@notice Different evidence bytes already occupy the exact id/version key.",
+          "range": {
+            "byteLength": 174,
+            "byteStart": 1606,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol#L31-L36",
+            "lineEnd": 36,
+            "lineStart": 31,
+            "snippetSha256": "sha256:04d31ddb128676514bac9be573700818c3b47e53cb81b101e30019d25d0dac5d",
+            "sourceSha256": "sha256:2e488c13527383b63864eb484203e2fed6349def941043ca9435cc728a29a80e"
+          },
+          "selector": "0x1970b3ea"
+        },
+        {
+          "astId": 84504,
+          "canonicalSignature": "ArtistArchiveEvidenceUnavailable(bytes32,uint64)",
+          "displaySignature": "ArtistArchiveEvidenceUnavailable(bytes32,uint64)",
+          "id": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2#error:0xfaa9281c",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "evidenceId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "evidenceVersion",
+              "type": "uint64"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVyZmFjZXMvc3RyZWFtL0lTdHJlYW1BcnRpc3RBcmNoaXZlVjIuc29sOklTdHJlYW1BcnRpc3RBcmNoaXZlVjIjZXJyb3I6MHhmYWE5MjgxYw",
+          "kind": "error",
+          "name": "ArtistArchiveEvidenceUnavailable",
+          "natspec": "@notice No evidence has been appended at the exact id/version key.",
+          "range": {
+            "byteLength": 83,
+            "byteStart": 1861,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol#L39",
+            "lineEnd": 39,
+            "lineStart": 39,
+            "snippetSha256": "sha256:afd5d7d39348cd90db5e954fca4e2ea2fdaf5c4a74f7aa1faf349ba8ad62f13d",
+            "sourceSha256": "sha256:2e488c13527383b63864eb484203e2fed6349def941043ca9435cc728a29a80e"
+          },
+          "selector": "0xfaa9281c"
+        },
+        {
+          "astId": 84515,
+          "canonicalSignature": "ArtistArchiveEvidenceCorrupted(bytes32,uint64,bytes32,bytes32)",
+          "displaySignature": "ArtistArchiveEvidenceCorrupted(bytes32,uint64,bytes32,bytes32)",
+          "id": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2#error:0x59b35098",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "evidenceId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "evidenceVersion",
+              "type": "uint64"
+            },
+            {
+              "index": 2,
+              "name": "expectedHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "name": "observedHash",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVyZmFjZXMvc3RyZWFtL0lTdHJlYW1BcnRpc3RBcmNoaXZlVjIuc29sOklTdHJlYW1BcnRpc3RBcmNoaXZlVjIjZXJyb3I6MHg1OWIzNTA5OA",
+          "kind": "error",
+          "name": "ArtistArchiveEvidenceCorrupted",
+          "natspec": "@notice The immutable payload bytes no longer match their append receipt.",
+          "range": {
+            "byteLength": 139,
+            "byteStart": 2032,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol#L42-L44",
+            "lineEnd": 44,
+            "lineStart": 42,
+            "snippetSha256": "sha256:b8ead24fee20128fe1b956e654cf58d038c3cd6c86c069d007ead2f00cfd6800",
+            "sourceSha256": "sha256:2e488c13527383b63864eb484203e2fed6349def941043ca9435cc728a29a80e"
+          },
+          "selector": "0x59b35098"
+        }
+      ],
+      "events": [
+        {
+          "anonymous": false,
+          "astId": 84528,
+          "canonicalSignature": "ArtistArchiveEvidenceAppendedV2(bytes32,uint64,bytes32,address,uint256)",
+          "displaySignature": "ArtistArchiveEvidenceAppendedV2(bytes32,uint64,bytes32,address,uint256)",
+          "id": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2#event:ArtistArchiveEvidenceAppendedV2(bytes32,uint64,bytes32,address,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "name": "evidenceId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "evidenceVersion",
+              "type": "uint64"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "name": "contentHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "name": "pointer",
+              "type": "address"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "name": "payloadSize",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVyZmFjZXMvc3RyZWFtL0lTdHJlYW1BcnRpc3RBcmNoaXZlVjIuc29sOklTdHJlYW1BcnRpc3RBcmNoaXZlVjIjZXZlbnQ6QXJ0aXN0QXJjaGl2ZUV2aWRlbmNlQXBwZW5kZWRWMihieXRlczMyLHVpbnQ2NCxieXRlczMyLGFkZHJlc3MsdWludDI1Nik",
+          "kind": "event",
+          "name": "ArtistArchiveEvidenceAppendedV2",
+          "natspec": "@notice Evidence-only receipt for the first append at an exact id/version key.\n @dev This event is non-normative and cannot substitute for an owner-domain event.",
+          "range": {
+            "byteLength": 211,
+            "byteStart": 2354,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol#L48-L54",
+            "lineEnd": 54,
+            "lineStart": 48,
+            "snippetSha256": "sha256:36822c2a7e6de8292b8bf0e0dde2ea920ed95b0db2ed5ca63ea0e7cea3b50917",
+            "sourceSha256": "sha256:2e488c13527383b63864eb484203e2fed6349def941043ca9435cc728a29a80e"
+          },
+          "topic0": "0x5240c686ea6d391abba38d01bf42c2af4b92a159bf40061b4eaba5de398615f8"
+        }
+      ],
+      "functions": [
+        {
+          "canonicalSignature": "artistArchiveMarkerV2()",
+          "displaySignature": "artistArchiveMarkerV2()",
+          "functionKind": "function",
+          "id": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2#function:0x2cc37be8",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVyZmFjZXMvc3RyZWFtL0lTdHJlYW1BcnRpc3RBcmNoaXZlVjIuc29sOklTdHJlYW1BcnRpc3RBcmNoaXZlVjIjZnVuY3Rpb246MHgyY2MzN2JlOA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "artistArchiveMarkerV2",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 65,
+            "byteStart": 2571,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol#L56",
+            "lineEnd": 56,
+            "lineStart": 56,
+            "snippetSha256": "sha256:d58deebd6dd0a955b247c2ee528eeb2af3402513edb59eac4fcd2f8baf37a63f",
+            "sourceSha256": "sha256:2e488c13527383b63864eb484203e2fed6349def941043ca9435cc728a29a80e"
+          },
+          "selector": "0x2cc37be8",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "artistArchiveSchemaV2()",
+          "displaySignature": "artistArchiveSchemaV2()",
+          "functionKind": "function",
+          "id": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2#function:0x31c8c693",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVyZmFjZXMvc3RyZWFtL0lTdHJlYW1BcnRpc3RBcmNoaXZlVjIuc29sOklTdHJlYW1BcnRpc3RBcmNoaXZlVjIjZnVuY3Rpb246MHgzMWM4YzY5Mw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "artistArchiveSchemaV2",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint16"
+            }
+          ],
+          "range": {
+            "byteLength": 64,
+            "byteStart": 2642,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol#L58",
+            "lineEnd": 58,
+            "lineStart": 58,
+            "snippetSha256": "sha256:77dae5140f6f6679062fb2572e3daa298c4e491694f6ee6a57c6ba4c20681b1d",
+            "sourceSha256": "sha256:2e488c13527383b63864eb484203e2fed6349def941043ca9435cc728a29a80e"
+          },
+          "selector": "0x31c8c693",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "artistArchiveMaxEvidenceBytesV2()",
+          "displaySignature": "artistArchiveMaxEvidenceBytesV2()",
+          "functionKind": "function",
+          "id": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2#function:0x70da16df",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVyZmFjZXMvc3RyZWFtL0lTdHJlYW1BcnRpc3RBcmNoaXZlVjIuc29sOklTdHJlYW1BcnRpc3RBcmNoaXZlVjIjZnVuY3Rpb246MHg3MGRhMTZkZg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "artistArchiveMaxEvidenceBytesV2",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 75,
+            "byteStart": 2712,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol#L60",
+            "lineEnd": 60,
+            "lineStart": 60,
+            "snippetSha256": "sha256:f8a16e25c08229736b47d7afb02038a12c2252b9f457b1d3808de615521584a4",
+            "sourceSha256": "sha256:2e488c13527383b63864eb484203e2fed6349def941043ca9435cc728a29a80e"
+          },
+          "selector": "0x70da16df",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "artistRegistry()",
+          "displaySignature": "artistRegistry()",
+          "functionKind": "function",
+          "id": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2#function:0x81703be7",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVyZmFjZXMvc3RyZWFtL0lTdHJlYW1BcnRpc3RBcmNoaXZlVjIuc29sOklTdHJlYW1BcnRpc3RBcmNoaXZlVjIjZnVuY3Rpb246MHg4MTcwM2JlNw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "artistRegistry",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 58,
+            "byteStart": 2793,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol#L62",
+            "lineEnd": 62,
+            "lineStart": 62,
+            "snippetSha256": "sha256:d7357cb51b436a2990233eec50f0e490ea3b939fddfca7bce084bf577e7530ac",
+            "sourceSha256": "sha256:2e488c13527383b63864eb484203e2fed6349def941043ca9435cc728a29a80e"
+          },
+          "selector": "0x81703be7",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "operationCoordinator()",
+          "displaySignature": "operationCoordinator()",
+          "functionKind": "function",
+          "id": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2#function:0x4c683143",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVyZmFjZXMvc3RyZWFtL0lTdHJlYW1BcnRpc3RBcmNoaXZlVjIuc29sOklTdHJlYW1BcnRpc3RBcmNoaXZlVjIjZnVuY3Rpb246MHg0YzY4MzE0Mw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "operationCoordinator",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 64,
+            "byteStart": 2857,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol#L64",
+            "lineEnd": 64,
+            "lineStart": 64,
+            "snippetSha256": "sha256:42b326f1b14b7a5a6c474d0b83db99592c7474f08b7a5031f3299bcd399504fb",
+            "sourceSha256": "sha256:2e488c13527383b63864eb484203e2fed6349def941043ca9435cc728a29a80e"
+          },
+          "selector": "0x4c683143",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "artistArchiveBindingHashV2()",
+          "displaySignature": "artistArchiveBindingHashV2()",
+          "functionKind": "function",
+          "id": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2#function:0x493df1f9",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVyZmFjZXMvc3RyZWFtL0lTdHJlYW1BcnRpc3RBcmNoaXZlVjIuc29sOklTdHJlYW1BcnRpc3RBcmNoaXZlVjIjZnVuY3Rpb246MHg0OTNkZjFmOQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "artistArchiveBindingHashV2",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 70,
+            "byteStart": 2927,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol#L66",
+            "lineEnd": 66,
+            "lineStart": 66,
+            "snippetSha256": "sha256:bd8c4241ca6f84b318f19b8830755b11c669f2782f92e2da5b9438f252d54f0a",
+            "sourceSha256": "sha256:2e488c13527383b63864eb484203e2fed6349def941043ca9435cc728a29a80e"
+          },
+          "selector": "0x493df1f9",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "appendArtistEvidenceV2(bytes32,uint64,bytes)",
+          "displaySignature": "appendArtistEvidenceV2(bytes32,uint64,bytes)",
+          "functionKind": "function",
+          "id": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2#function:0xcb65ceb0",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "evidenceId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "evidenceVersion",
+              "type": "uint64"
+            },
+            {
+              "index": 2,
+              "name": "evidence",
+              "storageLocation": "calldata",
+              "type": "bytes"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVyZmFjZXMvc3RyZWFtL0lTdHJlYW1BcnRpc3RBcmNoaXZlVjIuc29sOklTdHJlYW1BcnRpc3RBcmNoaXZlVjIjZnVuY3Rpb246MHhjYjY1Y2ViMA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "appendArtistEvidenceV2",
+          "natspec": "@notice Appends immutable bytes at one caller-selected exact version.\n @dev A same-content retry returns the original receipt with `appended == false`. This\n      idempotency is evidence-write behavior only; it is not semantic replay protection.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "contentHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "pointer",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "appended",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 202,
+            "byteStart": 3271,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol#L71-L75",
+            "lineEnd": 75,
+            "lineStart": 71,
+            "snippetSha256": "sha256:4abc4f25429580066d9d9c15507ff433d5e7299161eed6e290899a6c9279c099",
+            "sourceSha256": "sha256:2e488c13527383b63864eb484203e2fed6349def941043ca9435cc728a29a80e"
+          },
+          "selector": "0xcb65ceb0",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "artistEvidenceMetadataV2(bytes32,uint64)",
+          "displaySignature": "artistEvidenceMetadataV2(bytes32,uint64)",
+          "functionKind": "function",
+          "id": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2#function:0xaa62d348",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "evidenceId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "evidenceVersion",
+              "type": "uint64"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVyZmFjZXMvc3RyZWFtL0lTdHJlYW1BcnRpc3RBcmNoaXZlVjIuc29sOklTdHJlYW1BcnRpc3RBcmNoaXZlVjIjZnVuY3Rpb246MHhhYTYyZDM0OA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "artistEvidenceMetadataV2",
+          "natspec": "@notice Reads metadata for one exact evidence id/version.\n @dev No enumeration, count, tip, current, or latest surface is exposed.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "contentHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "pointer",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "payloadSize",
+              "type": "uint32"
+            },
+            {
+              "index": 3,
+              "name": "appendedAtBlock",
+              "type": "uint64"
+            }
+          ],
+          "range": {
+            "byteLength": 207,
+            "byteStart": 3625,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol#L79-L82",
+            "lineEnd": 82,
+            "lineStart": 79,
+            "snippetSha256": "sha256:fc547f91d58994d90d7ee3c3dd38fbd89454ad90c9fabec99a0fefa72da9595a",
+            "sourceSha256": "sha256:2e488c13527383b63864eb484203e2fed6349def941043ca9435cc728a29a80e"
+          },
+          "selector": "0xaa62d348",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "artistEvidenceBytesV2(bytes32,uint64)",
+          "displaySignature": "artistEvidenceBytesV2(bytes32,uint64)",
+          "functionKind": "function",
+          "id": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2#function:0xa535232f",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "evidenceId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "evidenceVersion",
+              "type": "uint64"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVyZmFjZXMvc3RyZWFtL0lTdHJlYW1BcnRpc3RBcmNoaXZlVjIuc29sOklTdHJlYW1BcnRpc3RBcmNoaXZlVjIjZnVuY3Rpb246MHhhNTM1MjMyZg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "artistEvidenceBytesV2",
+          "natspec": "@notice Reads immutable bytes for one exact evidence id/version.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "evidence",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "range": {
+            "byteLength": 145,
+            "byteStart": 3911,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol#L85-L88",
+            "lineEnd": 88,
+            "lineStart": 85,
+            "snippetSha256": "sha256:7a140544c6cb1d50640a596af4dc476ab00c18f10b74d702ab7442b702ff4af4",
+            "sourceSha256": "sha256:2e488c13527383b63864eb484203e2fed6349def941043ca9435cc728a29a80e"
+          },
+          "selector": "0xa535232f",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2",
+    "inheritance": [
+      {
+        "definitionId": "smart-contracts/vendor/openzeppelin/IERC165.sol:IERC165",
+        "name": "IERC165"
+      }
+    ],
+    "interface": {
+      "abiSha256": "sha256:42980fb15ed6fbc27163e076cb362948be2a8420677b70743e5399f1eebc5465",
+      "interfaceId": "0x2dc66e2e",
+      "interfaceIdSource": "configured",
+      "published": true
+    },
+    "key": "c21hcnQtY29udHJhY3RzL2ludGVyZmFjZXMvc3RyZWFtL0lTdHJlYW1BcnRpc3RBcmNoaXZlVjIuc29sOklTdHJlYW1BcnRpc3RBcmNoaXZlVjI",
+    "kind": "interface",
+    "linearizedDefinitionIds": [
+      "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2",
+      "smart-contracts/vendor/openzeppelin/IERC165.sol:IERC165"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": "published_interface"
+    },
+    "name": "IStreamArtistArchiveV2",
+    "natspec": "@notice Append-only, versioned evidence storage for the artist-authority successor.\n @dev Archive evidence is never authorization, replay protection, current state, or latest\n      state. Consumers must request an exact evidence id and version and independently bind\n      that evidence to the authoritative owner state and composite manifest.",
+    "range": {
+      "byteLength": 3594,
+      "byteStart": 464,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol#L10-L89",
+      "lineEnd": 89,
+      "lineStart": 10,
+      "snippetSha256": "sha256:268addd2ada211a7ed2c425366bc9a45868e1057173ebb1f39187294b27016a1",
+      "sourceSha256": "sha256:2e488c13527383b63864eb484203e2fed6349def941043ca9435cc728a29a80e"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-09-09.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 6
+    },
+    "byCode": {
+      "MISSING_FUNCTION_NATSPEC": 6
+    },
+    "totalCount": 6
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2#function:0x2cc37be8",
+      "definitionId": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2#function:0x31c8c693",
+      "definitionId": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2#function:0x493df1f9",
+      "definitionId": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2#function:0x4c683143",
+      "definitionId": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2#function:0x70da16df",
+      "definitionId": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2#function:0x81703be7",
+      "definitionId": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol:IStreamArtistArchiveV2",
+      "severity": "advisory"
+    }
+  ]
+}

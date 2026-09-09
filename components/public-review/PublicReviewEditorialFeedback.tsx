@@ -11,7 +11,10 @@ import {
 
 import PublicReviewFeedbackComposer from "@/components/public-review/PublicReviewFeedbackComposer";
 import { PublicReviewSelect } from "@/components/public-review/PublicReviewFormControls";
-import { PublicReviewPageComments } from "@/components/public-review/PublicReviewPageComments";
+import {
+  PublicReviewPageComments,
+  type PublicReviewCommentSection,
+} from "@/components/public-review/PublicReviewPageComments";
 import { registerWaveComposerDock } from "@/components/waves/WaveComposerDockVisibility";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -27,11 +30,13 @@ export function PublicReviewEditorialFeedback({
   destination,
   page,
   sections,
+  commentSections,
 }: {
   readonly config: PublicReviewFeedbackConfig;
   readonly destination: PublicReviewDiscussionDestination;
   readonly page: PublicReviewPageContext;
   readonly sections: readonly PublicReviewSectionDefinition[];
+  readonly commentSections?: readonly PublicReviewCommentSection[];
 }) {
   const [sectionId, setSectionId] = useState("");
   const composerDisclosureRef = useRef<HTMLDetailsElement>(null);
@@ -99,7 +104,7 @@ export function PublicReviewEditorialFeedback({
           destination={destination}
           locale={DEFAULT_LOCALE}
           page={page}
-          sections={sections}
+          sections={commentSections ?? sections}
         />
       </div>
       <details
