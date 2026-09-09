@@ -19,6 +19,7 @@ import TDHProfile from "./TDHProfile";
 import TDHSection, { TDH_FOCUS, TDH_PANEL, TDH_TEXT } from "./TDHSection";
 
 const NAVIGATION = [
+  { id: "tdh-reference", key: "reference" },
   { id: "tdh-example", key: "example" },
   { id: "tdh-profile", key: "profile" },
   { id: "tdh-1-4", key: "rules" },
@@ -86,6 +87,22 @@ export default function TDHMainPage() {
             ))}
           </nav>
         </header>
+        <TDHSection
+          id="tdh-reference"
+          title={t(locale, "network.tdh.explainer.reference.title")}
+        >
+          <div className={`${TDH_PANEL} tw-space-y-4 tw-p-5`}>
+            <p className={TDH_TEXT}>
+              {t(locale, "network.tdh.explainer.reference.body")}
+            </p>
+            <p className="tw-m-0 tw-font-mono tw-text-base tw-font-medium tw-leading-7 tw-text-iron-100">
+              {t(locale, "network.tdh.explainer.reference.unit")}
+            </p>
+            <p className={TDH_TEXT}>
+              {t(locale, "network.tdh.explainer.reference.weight")}
+            </p>
+          </div>
+        </TDHSection>
         <HowTDHWorks locale={locale} />
         <TDHExample locale={locale} />
         <TDHProfile locale={locale} />

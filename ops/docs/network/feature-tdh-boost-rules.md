@@ -59,6 +59,24 @@ or transfer outside that group removes the outgoing contribution; a later
 external purchase starts a new holding period. Delegation alone does not
 consolidate wallets.
 
+## Edition Weight and Burns
+
+FirstGM (Meme #8) was designed to establish the one-TDH reference: one copy held
+for one complete day earns one base TDH before boosts. Its open-mint design is
+central to this role. The page introduces FirstGM before the three calculation
+steps and provides a `Why FirstGM matters` link to `#tdh-reference`.
+
+The implementation derives edition rates from the largest eligible effective
+Meme edition. FirstGM's intended reference role and this implementation rule are
+explained separately from its special burn adjustment.
+
+TDH normally uses copies minted through the snapshot, rather than the copies
+remaining after burns, to determine edition weight. Burning copies does not
+automatically increase the remaining copies' rate. FirstGM (Meme #8) has a fixed
+exception: subtract 2,588 from its 6,529 minted copies, giving 3,941. The effective
+edition is the greater of the resulting count and the stored edition-size floor.
+This adjustment does not apply to other burns.
+
 ## Current Boost Model
 
 The boost is deterministic for a particular snapshot once the eligible cards,

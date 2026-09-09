@@ -1663,11 +1663,13 @@
         "TDH is 6529's time-weighted holding metric for eligible NFTs.",
         "Conceptually, TDH measures long-term participation and skin in the 6529 ecosystem.",
         "Each eligible NFT contributes value based on how long it has been held; that base holding time is then adjusted by edition-size weighting and by collection boosters.",
+        "FirstGM (Meme #8) was designed to establish the one-TDH reference: one copy held for one complete day earns one base TDH before boosts. Its open-mint design is central to its role as the original reference card, explained near the start of the TDH page at #tdh-reference.",
+        "Ordinary burns do not reduce the minted count used for TDH edition weighting. FirstGM (Meme #8) has a fixed exception that subtracts 2,588 from its 6,529 minted copies, giving 3,941 before the edition-size floor is applied.",
         "The calculation has three layers: unweighted days, edition weighting, and boosts.",
         "Unweighted days means each NFT contributes 1 unit per day it is held.",
-        "Edition weighting means days held are multiplied by a HODL or edition-size rate; on the frontend TDH page, FirstGM with edition size 3,941 is the 1.0 baseline.",
+        "Edition weighting means days held are multiplied by a HODL or edition-size rate. The calculator derives rates from the largest eligible effective Meme edition.",
         "Boosts multiply weighted TDH by active boosters based on what the holder owns.",
-        "The TDH page has anchors for a fixed worked example, profile lookup, current boosts, and exact calculation details.",
+        "The TDH page has anchors for FirstGM's reference role, a fixed worked example, profile lookup, current boosts, and exact calculation details.",
         "The worked example compares Today and +30 days and can remove Nakamoto #4 before the snapshot; it demonstrates that a sale removes both the card contribution and any boost component it supplied.",
         "Profile lookup accepts a public handle or wallet-like identity without requiring wallet authentication, and shows loading, empty, not-found, retryable error, snapshot, holdings, boost breakdown, and paginated collection states.",
         "The daily snapshot uses the Ethereum block at or immediately before 00:00 UTC; holding age uses that block timestamp, while a displayed API date can reflect later processing time.",
@@ -1973,7 +1975,7 @@
       ],
       "facts": [
         "TDH (unboosted) is TDH weighted by edition size before boosters are applied.",
-        "FirstGM with edition size 3,941 is the 1.0 baseline for edition weighting on the TDH page."
+        "FirstGM (Meme #8) was designed as the original one-TDH reference: one copy held for one complete day earns one base TDH before boosts. The calculator derives edition rates from the largest eligible effective Meme edition."
       ],
       "canonical_path": "/network/definitions",
       "related_paths": ["/network/tdh", "/network/health/network-tdh"],

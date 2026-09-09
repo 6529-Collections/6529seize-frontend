@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import TDHSection, { TDH_FOCUS, TDH_TEXT } from "./TDHSection";
@@ -46,9 +47,18 @@ export default function TDHCalculationDetails({
                 {t(locale, `network.tdh.explainer.exact.${key}.body`)}
               </p>
               {key === "weights" && (
-                <p className={TDH_TEXT}>
-                  {t(locale, "network.tdh.explainer.exact.weights.floor")}
-                </p>
+                <>
+                  <p className={TDH_TEXT}>
+                    {t(locale, "network.tdh.explainer.exact.weights.burns", {
+                      adjustment: formatInteger(locale, 2_588),
+                      minted: formatInteger(locale, 6_529),
+                      adjusted: formatInteger(locale, 3_941),
+                    })}
+                  </p>
+                  <p className={TDH_TEXT}>
+                    {t(locale, "network.tdh.explainer.exact.weights.floor")}
+                  </p>
+                </>
               )}
               {key === "rounding" && (
                 <p className="tw-m-0 tw-rounded-lg tw-bg-iron-900 tw-p-4 tw-font-mono tw-text-sm tw-leading-6 tw-text-iron-100">
