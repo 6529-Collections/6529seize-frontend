@@ -1,4 +1,4 @@
-import type { Suggestion, SupportedChain } from "@/types/nft";
+import type { Suggestion } from "@/types/nft";
 
 export type SearchContractsResult = {
   items: Suggestion[];
