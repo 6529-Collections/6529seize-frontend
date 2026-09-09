@@ -78,10 +78,14 @@ const MemesLeaderboardDropVoteSummary: React.FC<
           {topVoters.length > 0 && (
             <div className="tw-flex tw-items-center -tw-space-x-2">
               {topVoters.map((voter) => {
-                const address = voter.profile.primary_address?.trim();
-                const identity =
-                  voter.profile.handle?.trim() ||
-                  (address && address !== "UNKNOWN" ? address : voter.profile.id);
+                const address = voter.profile.primary_address.trim();
+                const handle = voter.profile.handle?.trim();
+                let identity = voter.profile.id;
+                if (handle) {
+                  identity = handle;
+                } else if (address && address !== "UNKNOWN") {
+                  identity = address;
+                }
                 const tooltipId = `voter-${drop.id}-${voter.profile.id}`;
 
                 return (

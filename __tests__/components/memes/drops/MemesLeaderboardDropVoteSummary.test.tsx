@@ -23,7 +23,7 @@ jest.mock("@/hooks/useIsTouchDevice", () => ({
 
 describe("MemesLeaderboardDropVoteSummary", () => {
   const voter = {
-    profile: { id: "profile-bob", handle: "bob", pfp: "" },
+    profile: { id: "profile-bob", handle: "bob", primary_address: "0x123", pfp: "" },
     rating: 2,
   } as any;
   it("shows positive current value and voter count text", () => {
