@@ -2,7 +2,7 @@ import type { LinkPreviewResponse } from "@/services/api/link-preview-api";
 import { decodeEventLog, getAddress, type Address } from "viem";
 
 import { cTokenAbi, cometAbi, comptrollerAbi } from "./abis";
-import { publicClient } from "./client";
+import { getPublicClient } from "./client";
 import {
   compoundRegistry,
   v2MarketsByAddress,
@@ -39,7 +39,7 @@ async function fetchV2Account(address: Address): Promise<LinkPreviewResponse> {
   const positionsRaw = await Promise.all(
     states.map(async (state) => {
       const cToken = state.config.address as Address;
-      const [balanceResult, borrowResult] = await publicClient.multicall({
+      const [balanceResult, borrowResult] = await getPublicClient().multicall({
         allowFailure: false,
         contracts: [
           {
@@ -101,7 +101,7 @@ async function fetchV2Account(address: Address): Promise<LinkPreviewResponse> {
     .filter((position) => position.hasPosition)
     .map(({ hasPosition: _ignored, ...rest }) => rest);
 
-  const [liquidityRaw, shortfallRaw] = await publicClient.readContract({
+  const [liquidityRaw, shortfallRaw] = await getPublicClient().readContract({
     address: compoundRegistry.comptroller as Address,
     abi: comptrollerAbi,
     functionName: "getAccountLiquidity",
@@ -122,7 +122,7 @@ async function fetchV2Account(address: Address): Promise<LinkPreviewResponse> {
 
   let compAccrued: bigint | null = null;
   try {
-    compAccrued = await publicClient.readContract({
+    compAccrued = await getPublicClient().readContract({
       address: compoundRegistry.comptroller as Address,
       abi: comptrollerAbi,
       functionName: "compAccrued",
@@ -187,7 +187,7 @@ async function fetchV3Account(address: Address): Promise<{
   const v3Positions = await Promise.all(
     states.map(async (state) => {
       const comet = state.config.address as Address;
-      const [balanceResult, borrowResult] = await publicClient.multicall({
+      const [balanceResult, borrowResult] = await getPublicClient().multicall({
         allowFailure: false,
         contracts: [
           {
@@ -229,7 +229,7 @@ async function fetchV3Account(address: Address): Promise<{
         state.collaterals.map(async (collateral) => {
           let balance = BIGINT_ZERO;
           try {
-            balance = await publicClient.readContract({
+            balance = await getPublicClient().readContract({
               address: comet,
               abi: cometAbi,
               functionName: "collateralBalanceOf",

@@ -102,6 +102,9 @@ curl() { command cat "$REPO_DIR/.deploy/current/version.json"; }
         PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64: "e30=",
         SSR_CLIENT_ID_B64: "Y2xpZW50",
         SSR_CLIENT_SECRET_B64: "c2VjcmV0",
+        ETHEREUM_RPC_URL_B64: Buffer.from(
+          "https://eth-mainnet.example.test"
+        ).toString("base64"),
         TEST_PM2_JSON: JSON.stringify(pm2Processes),
         TEST_LOCK_HELD: String(lockHeld),
       },
@@ -311,7 +314,7 @@ describe("staging immutable artifact deployment", () => {
     expect(script).not.toMatch(/\beval\b/u);
   });
 
-  it("loads required SSR credentials from deployment secrets", () => {
+  it("loads required server runtime values from deployment secrets", () => {
     expect(script).toContain(
       'runtime_secrets_file="$release_root/runtime-secrets.json"'
     );
@@ -325,11 +328,17 @@ describe("staging immutable artifact deployment", () => {
     expect(script).toContain(
       "['SSR_CLIENT_SECRET']: requireRuntimeEnv('SSR_CLIENT_SECRET')"
     );
+    expect(script).toContain(
+      "['ETHEREUM_RPC_URL']: requireRuntimeEnv('ETHEREUM_RPC_URL')"
+    );
     expect(workflowSource).toContain(
       "STAGING_SSR_CLIENT_ID: ${{ secrets.STAGING_SSR_CLIENT_ID }}"
     );
     expect(workflowSource).toContain(
       "STAGING_SSR_CLIENT_SECRET: ${{ secrets.STAGING_SSR_CLIENT_SECRET }}"
+    );
+    expect(workflowSource).toContain(
+      "STAGING_ETHEREUM_RPC_URL: ${{ secrets.STAGING_ETHEREUM_RPC_URL }}"
     );
     expect(workflowSource).not.toContain("secrets.SSR_CLIENT_");
     expect(workflowSource).toContain(
@@ -337,6 +346,9 @@ describe("staging immutable artifact deployment", () => {
     );
     expect(workflowSource).toContain(
       'SSR_CLIENT_SECRET_B64="$SSR_CLIENT_SECRET_B64" \\'
+    );
+    expect(workflowSource).toContain(
+      'ETHEREUM_RPC_URL_B64="$ETHEREUM_RPC_URL_B64" \\'
     );
     expect(
       workflowSource.indexOf(

@@ -354,12 +354,14 @@ jobs:
           RUN_AS: ${{ env.STAGING_RUN_AS }}
           STAGING_SSR_CLIENT_ID: ${{ secrets.STAGING_SSR_CLIENT_ID }}
           STAGING_SSR_CLIENT_SECRET: ${{ secrets.STAGING_SSR_CLIENT_SECRET }}
+          STAGING_ETHEREUM_RPC_URL: ${{ secrets.STAGING_ETHEREUM_RPC_URL }}
           GITHUB_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
 
           test -n "$STAGING_SSR_CLIENT_ID"
           test -n "$STAGING_SSR_CLIENT_SECRET"
+          test -n "$STAGING_ETHEREUM_RPC_URL"
 
           jq -e '
             type == "object" and
@@ -385,6 +387,9 @@ jobs:
           ssr_client_secret_b64_q="$(
             printf '%q' "$(printf '%s' "$STAGING_SSR_CLIENT_SECRET" | base64 -w0)"
           )"
+          ethereum_rpc_url_b64_q="$(
+            printf '%q' "$(printf '%s' "$STAGING_ETHEREUM_RPC_URL" | base64 -w0)"
+          )"
 
           remote_script="$(
             cat <<REMOTE_SCRIPT_VARS
@@ -398,6 +403,7 @@ jobs:
           PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64=$public_review_destinations_b64_q
           SSR_CLIENT_ID_B64=$ssr_client_id_b64_q
           SSR_CLIENT_SECRET_B64=$ssr_client_secret_b64_q
+          ETHEREUM_RPC_URL_B64=$ethereum_rpc_url_b64_q
           REMOTE_SCRIPT_VARS
             cat <<'REMOTE_SCRIPT_BODY'
 
@@ -452,6 +458,7 @@ jobs:
           RUN_AS="$RUN_AS" \
           SSR_CLIENT_ID_B64="$SSR_CLIENT_ID_B64" \
           SSR_CLIENT_SECRET_B64="$SSR_CLIENT_SECRET_B64" \
+          ETHEREUM_RPC_URL_B64="$ETHEREUM_RPC_URL_B64" \
             bash ops/scripts/deploy-staging-artifact.sh
           REMOTE_SCRIPT_BODY
           )"

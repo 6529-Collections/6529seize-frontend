@@ -36,6 +36,7 @@ jobs:
       target_sha: ${{ github.sha }}
     secrets:
       ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
+      ETHEREUM_RPC_URL: ${{ secrets.ETHEREUM_RPC_URL }}
       AWS_RUM_APP_ID: ${{ secrets.AWS_RUM_APP_ID }}
       AWS_RUM_REGION: ${{ secrets.AWS_RUM_REGION }}
       AWS_RUM_SAMPLE_RATE: ${{ secrets.AWS_RUM_SAMPLE_RATE }}
@@ -223,10 +224,13 @@ jobs:
           SSR_CLIENT_ID: ${{ secrets.SSR_CLIENT_ID }}
           SSR_CLIENT_SECRET: ${{ secrets.SSR_CLIENT_SECRET }}
           ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
+          ETHEREUM_RPC_URL: ${{ secrets.ETHEREUM_RPC_URL }}
           GITHUB_LINK_STATUS_PREVIEW_TOKEN: ${{ secrets.LINK_STATUS_PREVIEW_GITHUB_TOKEN }}
           PUBLIC_REVIEW_DISCUSSION_DESTINATIONS: ${{ secrets.PUBLIC_REVIEW_PRODUCTION_DISCUSSION_DESTINATIONS }}
         run: |
           set -euo pipefail
+          test -n "$ETHEREUM_RPC_URL"
+          [[ "$ETHEREUM_RPC_URL" =~ ^https?:// ]]
           jq -e '
             type == "object" and
             keys == ["production"] and
@@ -237,12 +241,14 @@ jobs:
             --arg ssr_client_id "$SSR_CLIENT_ID" \
             --arg ssr_client_secret "$SSR_CLIENT_SECRET" \
             --arg alchemy_api_key "$ALCHEMY_API_KEY" \
+            --arg ethereum_rpc_url "$ETHEREUM_RPC_URL" \
             --arg github_link_status_preview_token "$GITHUB_LINK_STATUS_PREVIEW_TOKEN" \
             --arg public_review_discussion_destinations "$PUBLIC_REVIEW_DISCUSSION_DESTINATIONS" '
               [
                 {Namespace:"aws:elasticbeanstalk:application:environment",OptionName:"SSR_CLIENT_ID",Value:$ssr_client_id},
                 {Namespace:"aws:elasticbeanstalk:application:environment",OptionName:"SSR_CLIENT_SECRET",Value:$ssr_client_secret},
                 {Namespace:"aws:elasticbeanstalk:application:environment",OptionName:"ALCHEMY_API_KEY",Value:$alchemy_api_key},
+                {Namespace:"aws:elasticbeanstalk:application:environment",OptionName:"ETHEREUM_RPC_URL",Value:$ethereum_rpc_url},
                 {Namespace:"aws:elasticbeanstalk:application:environment",OptionName:"GITHUB_LINK_STATUS_PREVIEW_TOKEN",Value:$github_link_status_preview_token},
                 {Namespace:"aws:elasticbeanstalk:application:environment",OptionName:"PUBLIC_REVIEW_DISCUSSION_DESTINATIONS",Value:$public_review_discussion_destinations},
                 {Namespace:"aws:elasticbeanstalk:application:environment",OptionName:"SENTRY_SERVER_INSTRUMENTATION",Value:"false"}

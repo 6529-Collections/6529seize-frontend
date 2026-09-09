@@ -1,15 +1,23 @@
 import { createCompoundPlan } from "@/app/api/open-graph/compound/service";
 
 jest.mock("@/app/api/open-graph/compound/client", () => ({
-  publicClient: {
+  __mockPublicClient: {
     multicall: jest.fn(),
     readContract: jest.fn(),
   },
+  getPublicClient: jest.fn(() => {
+    const { __mockPublicClient } = jest.requireMock(
+      "@/app/api/open-graph/compound/client"
+    );
+    return __mockPublicClient;
+  }),
 }));
 
 describe("createCompoundPlan", () => {
   const txHash = `0x${"a".repeat(64)}`;
-  const { publicClient } = require("@/app/api/open-graph/compound/client");
+  const {
+    __mockPublicClient: publicClient,
+  } = require("@/app/api/open-graph/compound/client");
 
   beforeEach(() => {
     jest.clearAllMocks();

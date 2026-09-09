@@ -435,6 +435,7 @@ collect_all_inputs() {
 
   # Required / optional keys
   prompt_input_required ALCHEMY_API_KEY "Enter ALCHEMY_API_KEY"
+  prompt_input_required ETHEREUM_RPC_URL "Enter ETHEREUM_RPC_URL"
   exec 3</dev/tty || true
   read -u 3 -r -p "Enter GIPHY_API_KEY (optional, can be empty): " GIPHY_API_KEY || true
   exec 3<&- || true
@@ -493,6 +494,7 @@ BASE_ENDPOINT=$base_endpoint
 
 # API KEYS
 ALCHEMY_API_KEY=$ALCHEMY_API_KEY
+ETHEREUM_RPC_URL=$ETHEREUM_RPC_URL
 
 # GIPHY API KEY (optional)
 GIPHY_API_KEY=$GIPHY_API_KEY

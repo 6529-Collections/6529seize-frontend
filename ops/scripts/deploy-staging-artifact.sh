@@ -4,7 +4,7 @@ set -euo pipefail
 
 for name in ARTIFACT_URL EXPECTED_DIGEST EXPECTED_SHA \
   PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64 REPO_DIR RUN_AS \
-  SSR_CLIENT_ID_B64 SSR_CLIENT_SECRET_B64; do
+  SSR_CLIENT_ID_B64 SSR_CLIENT_SECRET_B64 ETHEREUM_RPC_URL_B64; do
   if [[ -z "${!name:-}" ]]; then
     echo "Required deployment value $name is missing." >&2
     exit 1
@@ -49,8 +49,10 @@ sudo -H -u "$RUN_AS" pm2 --version >/dev/null 2>&1 || {
 
 ssr_client_id="$(printf '%s' "$SSR_CLIENT_ID_B64" | base64 -d)"
 ssr_client_secret="$(printf '%s' "$SSR_CLIENT_SECRET_B64" | base64 -d)"
-[[ -n "$ssr_client_id" && -n "$ssr_client_secret" ]] || {
-  echo "Decoded staging SSR credentials must be non-empty." >&2
+ethereum_rpc_url="$(printf '%s' "$ETHEREUM_RPC_URL_B64" | base64 -d)"
+[[ -n "$ssr_client_id" && -n "$ssr_client_secret" && \
+  "$ethereum_rpc_url" =~ ^https?:// ]] || {
+  echo "Decoded staging runtime values are missing or invalid." >&2
   exit 1
 }
 
@@ -275,7 +277,8 @@ retain_destinations_file=false
 runtime_secrets_tmp=""
 cleanup() {
   unset review_destinations PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64 \
-    ssr_client_id SSR_CLIENT_ID_B64 ssr_client_secret SSR_CLIENT_SECRET_B64
+    ssr_client_id SSR_CLIENT_ID_B64 ssr_client_secret SSR_CLIENT_SECRET_B64 \
+    ethereum_rpc_url ETHEREUM_RPC_URL_B64
   rm -f "$artifact_tmp"
   if [[ -n "$staging_app" && -d "$staging_app" ]]; then
     rm -rf -- "$staging_app"
@@ -330,13 +333,15 @@ runtime_secrets_tmp="$(mktemp "$release_root/runtime-secrets.XXXXXX.json")"
 jq -n \
   --arg ssr_client_id "$ssr_client_id" \
   --arg ssr_client_secret "$ssr_client_secret" \
-  '{SSR_CLIENT_ID:$ssr_client_id,SSR_CLIENT_SECRET:$ssr_client_secret}' \
+  --arg ethereum_rpc_url "$ethereum_rpc_url" \
+  '{SSR_CLIENT_ID:$ssr_client_id,SSR_CLIENT_SECRET:$ssr_client_secret,ETHEREUM_RPC_URL:$ethereum_rpc_url}' \
   > "$runtime_secrets_tmp"
 chown "$RUN_AS:$RUN_AS" "$runtime_secrets_tmp"
 chmod 600 "$runtime_secrets_tmp"
 mv -f "$runtime_secrets_tmp" "$runtime_secrets_file"
 runtime_secrets_tmp=""
-unset ssr_client_id SSR_CLIENT_ID_B64 ssr_client_secret SSR_CLIENT_SECRET_B64
+unset ssr_client_id SSR_CLIENT_ID_B64 ssr_client_secret SSR_CLIENT_SECRET_B64 \
+  ethereum_rpc_url ETHEREUM_RPC_URL_B64
 
 ln -sfn "$release_app" "$current_link"
 cat > "$release_root/ecosystem.config.cjs" <<'PM2_CONFIG'
@@ -384,6 +389,7 @@ module.exports = {
       NODE_ENV: 'production',
       ['SSR_CLIENT_ID']: requireRuntimeEnv('SSR_CLIENT_ID'),
       ['SSR_CLIENT_SECRET']: requireRuntimeEnv('SSR_CLIENT_SECRET'),
+      ['ETHEREUM_RPC_URL']: requireRuntimeEnv('ETHEREUM_RPC_URL'),
       ...(publicReviewDiscussionDestinations
         ? {
             PUBLIC_REVIEW_DISCUSSION_DESTINATIONS:

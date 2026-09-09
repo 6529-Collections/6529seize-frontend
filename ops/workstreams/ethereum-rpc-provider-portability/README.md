@@ -1,6 +1,6 @@
 # Ethereum RPC provider portability
 
-Status: Proposed
+Status: Implemented in [frontend PR #3911](https://github.com/6529-Collections/6529seize-frontend/pull/3911)
 
 The cross-repository architecture decision and complete migration plan are
 owned by the backend repository:
@@ -37,16 +37,26 @@ remain explicitly Alchemy-backed until separately replaced.
    ([frontend PR #3915](https://github.com/6529-Collections/6529seize-frontend/pull/3915)).
 2. [x] Keep the active Alchemy types and utilities; remove only exports made
    obsolete by the cleanup in frontend PR #3915.
-3. [ ] Add `ETHEREUM_RPC_URL` to server-side environment validation, samples, and
+3. [x] Add `ETHEREUM_RPC_URL` to server-side environment validation, samples, and
    deployment configuration. Do not expose it through `NEXT_PUBLIC_*` or any
    browser runtime configuration.
-4. [ ] Provide one server-only construction path for ordinary mainnet reads.
-5. [ ] Migrate server-owned Open Graph block, ENS, and contract reads from default
+4. [x] Provide one server-only construction path for ordinary mainnet reads.
+5. [x] Migrate server-owned Open Graph block, ENS, and contract reads from default
    and hard-coded transports to that shared boundary.
-6. [ ] Keep active Alchemy NFT routes and metadata fallbacks on
+6. [x] Keep active Alchemy NFT routes and metadata fallbacks on
    `ALCHEMY_API_KEY`.
-7. [ ] Add focused configuration and provider-boundary tests, including proof that
+7. [x] Add focused configuration and provider-boundary tests, including proof that
    the RPC URL is not included in browser-visible configuration.
+
+## Deployment configuration
+
+- Production uses the `ETHEREUM_RPC_URL` GitHub Actions secret and installs it
+  as a server runtime environment value in Elastic Beanstalk.
+- Staging uses the `STAGING_ETHEREUM_RPC_URL` GitHub Actions secret and passes
+  it into the PM2 runtime secret store.
+- Both values should initially be Alchemy Ethereum mainnet HTTPS JSON-RPC URLs.
+  A later ordinary-RPC provider change requires updating only the corresponding
+  secret and redeploying.
 
 ## Out of scope
 

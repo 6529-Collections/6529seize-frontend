@@ -16,6 +16,8 @@ on:
     secrets:
       ALCHEMY_API_KEY:
         required: false
+      ETHEREUM_RPC_URL:
+        required: true
       AWS_RUM_APP_ID:
         required: false
       AWS_RUM_REGION:
@@ -230,6 +232,7 @@ jobs:
           NODE_ENV: "production"
           VERSION: ${{ inputs.target_sha }}
           ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
+          ETHEREUM_RPC_URL: ${{ secrets.ETHEREUM_RPC_URL }}
           GIPHY_API_KEY: ${{ vars.GIPHY_API_KEY || secrets.GIPHY_API_KEY }}
           AWS_RUM_APP_ID: ${{ secrets.AWS_RUM_APP_ID }}
           AWS_RUM_REGION: ${{ secrets.AWS_RUM_REGION }}
