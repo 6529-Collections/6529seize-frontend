@@ -94,7 +94,7 @@ handoff does not behave as expected.
 - `/open-mobile` only shows one store action:
   expected on detected iOS (App Store only) or Android (Play Store only).
 - `Back to 6529.io` on `/open-mobile` returns to `/`:
-  happens when no decoded `path` is available.
+  happens when `path` is missing or is not a valid internal route.
 
 ## Edge Cases
 

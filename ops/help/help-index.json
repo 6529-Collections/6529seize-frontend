@@ -4578,6 +4578,7 @@
       "facts": [
         "The open-mobile route handles mobile app handoff and landing behavior.",
         "Use /open-mobile when users ask how to open the 6529 app from the web.",
+        "A valid internal path is used for the app handoff and Back to 6529.io, including query and fragment. A missing or invalid path skips app handoff and Back to 6529.io returns home.",
         "Mobile navigation and push notification behavior are documented separately."
       ],
       "canonical_path": "/open-mobile",
