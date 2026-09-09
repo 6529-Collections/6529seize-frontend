@@ -36,10 +36,12 @@ const BENTO_THING_HEADING_CLASS =
 const BENTO_THING_IDS: readonly ThingsToDoId[] = ["delegation", "help"];
 
 export function FocusSections({
+  hideNftPurchasing = false,
   links,
   locale,
 }: {
   readonly links: JoinLinks;
+  readonly hideNftPurchasing?: boolean;
   readonly locale: SupportedLocale;
 }) {
   return (
@@ -69,18 +71,23 @@ export function FocusSections({
         >
           <BentoWatermark variant="waves" />
         </FeatureCard>
-        <FeatureCard
-          className="sm:tw-col-span-2 md:tw-col-span-12 lg:tw-col-span-4 lg:tw-min-h-[260px] xl:tw-col-span-6 xl:tw-min-h-[300px]"
-          feature={getFocusFeature("subscriptions")}
-          links={links}
-          locale={locale}
-          size="showcase"
-        >
-          <BentoWatermark variant="subscriptions" />
-        </FeatureCard>
+        {!hideNftPurchasing && (
+          <FeatureCard
+            className="sm:tw-col-span-2 md:tw-col-span-12 lg:tw-col-span-4 lg:tw-min-h-[260px] xl:tw-col-span-6 xl:tw-min-h-[300px]"
+            feature={getFocusFeature("subscriptions")}
+            links={links}
+            locale={locale}
+            size="showcase"
+          >
+            <BentoWatermark variant="subscriptions" />
+          </FeatureCard>
+        )}
         {BENTO_THING_IDS.map(getThingToDo).map((item) => (
           <ThingCard
-            className="sm:tw-col-span-1 md:tw-col-span-6 lg:tw-col-span-4 lg:tw-min-h-[260px] xl:tw-col-span-3 xl:tw-min-h-[300px]"
+            className={cx(
+              "sm:tw-col-span-1 md:tw-col-span-6 lg:tw-min-h-[260px] xl:tw-min-h-[300px]",
+              !hideNftPurchasing && "lg:tw-col-span-4 xl:tw-col-span-3"
+            )}
             item={item}
             key={item.id}
             links={links}

@@ -27,6 +27,12 @@ import {
   LOAD_TIMEOUT_MS,
 } from "../utils/constants";
 import { getNotificationErrorDetails } from "../utils/getNotificationErrorDetails";
+import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
+import {
+  getVisibleNotificationCauses,
+  getExcludedNotificationCauses,
+  isNotificationVisible,
+} from "../utils/notificationVisibility";
 
 interface NotificationsContentState {
   readonly isLoadingProfile: boolean;
@@ -62,6 +68,7 @@ interface UseNotificationsControllerResult {
 
 export const useNotificationsController =
   (): UseNotificationsControllerResult => {
+    const { hideNftPurchasing } = useNftPurchasingVisibility();
     const {
       connectedProfile,
       isAuthenticated: isAuthContextAuthenticated,
@@ -144,8 +151,14 @@ export const useNotificationsController =
       }
     }, [isAuthenticated]);
 
+    const visibleCauses = useMemo(
+      () =>
+        getVisibleNotificationCauses(activeFilter?.cause, hideNftPurchasing),
+      [activeFilter?.cause, hideNftPurchasing]
+    );
+
     const {
-      items,
+      items: queryItems,
       rawItems: rawItemsFromQuery,
       isFetching,
       isFetchingNextPage,
@@ -160,9 +173,23 @@ export const useNotificationsController =
       activeProfileProxy: !!activeProfileProxy,
       limit: "30",
       reverse: true,
-      cause: activeFilter?.cause?.length ? activeFilter.cause : null,
+      cause: visibleCauses,
+      causeExclude: getExcludedNotificationCauses(hideNftPurchasing),
     });
-    const rawItems = rawItemsFromQuery ?? items;
+    const items = useMemo(
+      () =>
+        queryItems.filter((item) =>
+          isNotificationVisible(item, hideNftPurchasing)
+        ),
+      [queryItems, hideNftPurchasing]
+    );
+    const rawItems = useMemo(
+      () =>
+        rawItemsFromQuery.filter((item) =>
+          isNotificationVisible(item, hideNftPurchasing)
+        ),
+      [rawItemsFromQuery, hideNftPurchasing]
+    );
 
     const { mutateAsync: markNotificationIdsAsRead } = useMutation({
       mutationFn: async (ids: number[]) => {

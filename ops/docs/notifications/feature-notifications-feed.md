@@ -47,6 +47,12 @@ with a multi-select cause filter, grouped reactions, and inline drop previews.
 
 ## Feed Filters
 
+- On native iOS when the detected country is not `US` or is unknown, subscription
+  coverage alerts, the Subscriptions filter, and the device's Subscription
+  Coverage settings entry are hidden. Social follow notifications remain
+  available. This concerns the app feed and controls, not previously delivered
+  system push notifications.
+
 - The app header supplies the visible `Notifications` title. Desktop and mobile
   web show the title beside the filter; the app keeps that page heading
   available to screen readers without repeating it visually.

@@ -40,6 +40,7 @@ const knownNotificationCauses = new Set<string>([
 type FetchNotificationsV2Params = {
   readonly limit: string;
   readonly cause?: NotificationCause[] | null | undefined;
+  readonly causeExclude?: NotificationCause[] | null | undefined;
   readonly pageParam?: number | null | undefined;
   readonly signal?: AbortSignal | undefined;
   readonly headers?: Record<string, string> | undefined;
@@ -485,11 +486,12 @@ const mapNotificationsV2Response = (
 const buildNotificationsV2Params = ({
   limit,
   cause,
+  causeExclude,
   pageParam,
-}: Pick<FetchNotificationsV2Params, "limit" | "cause" | "pageParam">): Record<
-  string,
-  string
-> => {
+}: Pick<
+  FetchNotificationsV2Params,
+  "limit" | "cause" | "causeExclude" | "pageParam"
+>): Record<string, string> => {
   const params: Record<string, string> = { limit };
 
   if (pageParam !== null && pageParam !== undefined) {
@@ -499,6 +501,13 @@ const buildNotificationsV2Params = ({
   if (cause !== null && cause !== undefined && cause.length > 0) {
     params["cause"] = cause.join(",");
   }
+  if (
+    causeExclude !== null &&
+    causeExclude !== undefined &&
+    causeExclude.length > 0
+  ) {
+    params["cause_exclude"] = causeExclude.join(",");
+  }
 
   return params;
 };
@@ -506,13 +515,19 @@ const buildNotificationsV2Params = ({
 export const fetchNotificationsV2 = async ({
   limit,
   cause,
+  causeExclude,
   pageParam,
   signal,
   headers,
 }: FetchNotificationsV2Params): Promise<TypedNotificationsResponse> => {
   const response = await commonApiFetch<ApiNotificationsResponseV2>({
     endpoint: "v2/notifications",
-    params: buildNotificationsV2Params({ limit, cause, pageParam }),
+    params: buildNotificationsV2Params({
+      limit,
+      cause,
+      causeExclude,
+      pageParam,
+    }),
     signal,
     headers,
     cache: "no-store",
