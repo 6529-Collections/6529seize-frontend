@@ -514,8 +514,17 @@ export * from '../models/ApiSubscriptionCoverageStatus';
 export * from '../models/ApiSubscriptionCoverageUnknownReason';
 export * from '../models/ApiSubwavesSort';
 export * from '../models/ApiTargetAndSubscriptionActions';
+export * from '../models/ApiTdhBoostRules';
 export * from '../models/ApiTdhEdition';
 export * from '../models/ApiTdhEditionsPage';
+export * from '../models/ApiTdhFullCollectionRule';
+export * from '../models/ApiTdhGradientRule';
+export * from '../models/ApiTdhRules';
+export * from '../models/ApiTdhRulesSnapshot';
+export * from '../models/ApiTdhSeasonOnePartialKey';
+export * from '../models/ApiTdhSeasonOnePartialRule';
+export * from '../models/ApiTdhSeasonScheduleRule';
+export * from '../models/ApiTdhSeasonSetRule';
 export * from '../models/ApiToggleHideLinkPreviewRequest';
 export * from '../models/ApiTokenTdh';
 export * from '../models/ApiTokenTdhRank';
@@ -1209,8 +1218,17 @@ import { ApiSubscriptionCoverageStatus } from '../models/ApiSubscriptionCoverage
 import { ApiSubscriptionCoverageUnknownReason } from '../models/ApiSubscriptionCoverageUnknownReason';
 import { ApiSubwavesSort } from '../models/ApiSubwavesSort';
 import { ApiTargetAndSubscriptionActions } from '../models/ApiTargetAndSubscriptionActions';
+import { ApiTdhBoostRules } from '../models/ApiTdhBoostRules';
 import { ApiTdhEdition } from '../models/ApiTdhEdition';
 import { ApiTdhEditionsPage } from '../models/ApiTdhEditionsPage';
+import { ApiTdhFullCollectionRule } from '../models/ApiTdhFullCollectionRule';
+import { ApiTdhGradientRule } from '../models/ApiTdhGradientRule';
+import { ApiTdhRules } from '../models/ApiTdhRules';
+import { ApiTdhRulesSnapshot } from '../models/ApiTdhRulesSnapshot';
+import { ApiTdhSeasonOnePartialKey } from '../models/ApiTdhSeasonOnePartialKey';
+import { ApiTdhSeasonOnePartialRule    } from '../models/ApiTdhSeasonOnePartialRule';
+import { ApiTdhSeasonScheduleRule } from '../models/ApiTdhSeasonScheduleRule';
+import { ApiTdhSeasonSetRule } from '../models/ApiTdhSeasonSetRule';
 import { ApiToggleHideLinkPreviewRequest } from '../models/ApiToggleHideLinkPreviewRequest';
 import { ApiTokenTdh } from '../models/ApiTokenTdh';
 import { ApiTokenTdhRank } from '../models/ApiTokenTdhRank';
@@ -1530,6 +1548,7 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiSubscriptionCoverageStatus",
     "ApiSubscriptionCoverageUnknownReason",
     "ApiSubwavesSort",
+    "ApiTdhSeasonOnePartialKey",
     "ApiUpcomingMemeSubscriptionStatusSourceEnum",
     "ApiUpdateProfilePreferencesDirectMessagePolicyEnum",
     "ApiUpdateProfilePreferencesNotificationLevelEnum",
@@ -2021,8 +2040,16 @@ let typeMap: {[index: string]: any} = {
     "ApiSubscriptionCoveragePoint": ApiSubscriptionCoveragePoint,
     "ApiSubscriptionCoverageRecommendedTopUp": ApiSubscriptionCoverageRecommendedTopUp,
     "ApiTargetAndSubscriptionActions": ApiTargetAndSubscriptionActions,
+    "ApiTdhBoostRules": ApiTdhBoostRules,
     "ApiTdhEdition": ApiTdhEdition,
     "ApiTdhEditionsPage": ApiTdhEditionsPage,
+    "ApiTdhFullCollectionRule": ApiTdhFullCollectionRule,
+    "ApiTdhGradientRule": ApiTdhGradientRule,
+    "ApiTdhRules": ApiTdhRules,
+    "ApiTdhRulesSnapshot": ApiTdhRulesSnapshot,
+    "ApiTdhSeasonOnePartialRule": ApiTdhSeasonOnePartialRule,
+    "ApiTdhSeasonScheduleRule": ApiTdhSeasonScheduleRule,
+    "ApiTdhSeasonSetRule": ApiTdhSeasonSetRule,
     "ApiToggleHideLinkPreviewRequest": ApiToggleHideLinkPreviewRequest,
     "ApiTokenTdh": ApiTokenTdh,
     "ApiTokenTdhRank": ApiTokenTdhRank,
