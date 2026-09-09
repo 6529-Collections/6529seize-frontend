@@ -3922,7 +3922,13 @@ describe("sentry-client-filters", () => {
         },
       },
     },
-    ...["auth", "rate-limit", "endpoint-contract", "server"].map(
+    ...[
+      "auth",
+      "rate-limit",
+      "endpoint-contract",
+      "server",
+      "timeout",
+    ].map(
       (errorKind) => ({
         name: `${errorKind} error kind`,
         overrides: {
