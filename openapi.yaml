@@ -9416,12 +9416,14 @@ paths:
     get:
       tags:
         - TDH
-      summary: Get the TDH boost rules for the latest completed snapshot
+      summary: Get current TDH boost definitions evaluated for the latest completed snapshot
       description: >-
-        Returns the boost inputs used by the latest completed TDH snapshot,
-        including the snapshot block, eligible Meme count, season set bonuses,
-        full-collection bonuses, Season 1 partial bonuses, Gradient bonus, and
-        the complete configured season bonus schedule.
+        Returns the current TDH boost definitions evaluated against the latest
+        completed snapshot's eligible Meme card range, including the snapshot
+        block, season set bonuses, full-collection bonuses, Season 1 partial
+        bonuses, Gradient bonus, and the complete configured season bonus
+        schedule. Rule definitions are current server configuration, not
+        historical or versioned inputs persisted with that snapshot.
       operationId: getTdhRules
       security: []
       x-6529-router:
@@ -9433,7 +9435,7 @@ paths:
           name: handleGetTdhRules
       responses:
         "200":
-          description: TDH rules for the latest completed snapshot
+          description: Current TDH rules evaluated for the latest completed snapshot
           content:
             application/json:
               schema:

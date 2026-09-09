@@ -57,10 +57,8 @@ function Collection({
   readonly locale: SupportedLocale;
 }) {
   const [page, setPage] = useState(0);
-  const currentPage = Math.min(
-    page,
-    Math.max(0, Math.ceil(tokens.length / PAGE_SIZE) - 1)
-  );
+  const lastPage = Math.max(0, Math.ceil(tokens.length / PAGE_SIZE) - 1);
+  const currentPage = Math.min(page, lastPage);
   const start = currentPage * PAGE_SIZE;
   const visible = tokens.slice(start, start + PAGE_SIZE);
   const collectionName = t(
@@ -167,7 +165,11 @@ function Collection({
                   variant="tertiary"
                   size="sm"
                   disabled={currentPage === 0}
-                  onClick={() => setPage(currentPage - 1)}
+                  onClick={() =>
+                    setPage((previous) =>
+                      Math.max(0, Math.min(previous, lastPage) - 1)
+                    )
+                  }
                 >
                   {t(locale, "network.tdh.profile.previous")}
                 </Button>
@@ -175,7 +177,9 @@ function Collection({
                   variant="tertiary"
                   size="sm"
                   disabled={start + PAGE_SIZE >= tokens.length}
-                  onClick={() => setPage(currentPage + 1)}
+                  onClick={() =>
+                    setPage((previous) => Math.min(previous + 1, lastPage))
+                  }
                 >
                   {t(locale, "network.tdh.profile.next")}
                 </Button>

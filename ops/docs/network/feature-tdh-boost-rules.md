@@ -66,6 +66,10 @@ ownership history, edition rates, and active season configuration are known.
 It is recalculated from the holdings that still exist; past daily multipliers
 are not banked.
 
+The rules panel evaluates current rule and season definitions against the latest
+completed snapshot's eligible card range. It does not archive the rule definitions
+used by earlier calculations. The profile panel shows stored calculation results.
+
 - The current highest eligible season is excluded from season bonuses. Seasons
   1 through 20 are configured for `+0.05`; later indexed seasons currently have
   no automatic `+0.05` extrapolation.

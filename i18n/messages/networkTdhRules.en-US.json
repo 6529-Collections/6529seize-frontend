@@ -5,7 +5,7 @@
   "network.tdh.rules.error": "Current rules are temporarily unavailable. Try again to load the snapshot and boost schedule.",
   "network.tdh.rules.retry": "Reload rules",
   "network.tdh.rules.snapshot": "Snapshot: {date} · Ethereum block {block}",
-  "network.tdh.rules.snapshotNote": "The block time identifies the holding cutoff. Eligible cards and seasons below are evaluated for that snapshot.",
+  "network.tdh.rules.snapshotNote": "The block time identifies the holding cutoff. The rules below use current definitions with that snapshot’s eligible card range.",
   "network.tdh.rules.full.title": "A full Meme collection",
   "network.tdh.rules.full.multiplier": "{value}× before Gradients",
   "network.tdh.rules.full.body": "Hold at least one of every eligible Meme card—{count} token IDs in this snapshot, including the current season’s eligible cards. The first full collection earns +{bonus}, the sum of eligible season bonuses.",
