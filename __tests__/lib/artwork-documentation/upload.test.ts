@@ -21,14 +21,20 @@ const file = (value: string) =>
     name: "original.tif",
     lastModified: 0,
   }) as File;
-const session = (): ApiArtworkDocumentationUploadSession =>
-  ({
-    upload_id: "upload",
-    asset: { id: "upload", size_bytes: 6 },
-    policy: { part_size_bytes: 3, parallel_parts: 3 },
-    received_parts: [],
-    expires_at: 2000000000000,
-  }) as ApiArtworkDocumentationUploadSession;
+const session = (): ApiArtworkDocumentationUploadSession => ({
+  upload_id: "upload",
+  asset: {
+    id: "upload",
+    filename: "original.tif",
+    size_bytes: 6,
+    state: "uploading",
+    role: "artwork_final",
+    intended_visibility: "restricted",
+  },
+  policy: { part_size_bytes: 3, parallel_parts: 3 },
+  received_parts: [],
+  expires_at: 2000000000000,
+});
 
 describe("archival file transfer", () => {
   beforeEach(() => {
@@ -57,8 +63,8 @@ describe("archival file transfer", () => {
         })),
       }));
     jest.mocked(completeDocumentationUpload).mockResolvedValue({
-      asset: { id: "upload", state: "processing" },
-    } as Awaited<ReturnType<typeof completeDocumentationUpload>>);
+      asset: { ...session().asset, state: "processing" },
+    });
   });
 
   it("checks accepted bytes before reusing parts and finalizes in part order", async () => {

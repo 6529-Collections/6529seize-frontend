@@ -28,6 +28,15 @@ jest.mock(
   "@/components/artwork-documentation/ArtworkDocumentationInline",
   () => {
     const React = jest.requireActual<typeof import("react")>("react");
+    const ReadyEditor = React.forwardRef<ArtworkDocumentationInlineHandle>(
+      function ReadyEditor(_props, ref) {
+        React.useImperativeHandle(ref, () => ({
+          onDropSubmitted: mockLink,
+          flush: mockFlush,
+        }));
+        return null;
+      }
+    );
     return {
       __esModule: true,
       ArtworkDocumentationInline: React.forwardRef<
@@ -38,21 +47,21 @@ jest.mock(
         React.useEffect(() => {
           mockMounted();
         }, []);
-        React.useImperativeHandle(ref, () =>
-          editorReady ? { onDropSubmitted: mockLink, flush: mockFlush } : null
-        );
         return (
-          <button
-            onClick={() => {
-              props.onContextCreated?.({
-                id: "context",
-                work_id: "work",
-              } as ApiArtworkDocumentationContext);
-              setEditorReady(true);
-            }}
-          >
-            Start test documentation
-          </button>
+          <>
+            <button
+              onClick={() => {
+                props.onContextCreated?.({
+                  id: "context",
+                  work_id: "work",
+                } as ApiArtworkDocumentationContext);
+                setEditorReady(true);
+              }}
+            >
+              Start test documentation
+            </button>
+            {editorReady && <ReadyEditor ref={ref} />}
+          </>
         );
       }),
     };

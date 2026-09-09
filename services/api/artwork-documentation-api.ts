@@ -66,6 +66,7 @@ export const documentationProfileKey = (
   JSON.stringify([
     profile.profile_id,
     profile.program_id ?? null,
+    profile.wave_id ?? null,
     profile.version,
   ]);
 export const documentationWorkspacePath = (workId: string, contextId: string) =>
