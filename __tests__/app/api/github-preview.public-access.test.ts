@@ -24,7 +24,7 @@ type GithubRoute = typeof import("../../../app/api/github-preview/route");
 const API_BASE = "https://api.github.com";
 const PRIVATE_MARKER = "confidential fixture metadata";
 const PUBLIC_TITLE = "Public issue";
-const CLASSIC_TOKEN = "ghp_preview_test_fixture";
+const CLASSIC_TOKEN = "ghp_test";
 const issueUrl = "https://github.com/o/r/issues/1";
 const jsonResponse = (body: unknown, scopes?: string) =>
   new Response(JSON.stringify(body), {
@@ -71,8 +71,8 @@ describe("GitHub preview public access boundary", () => {
   });
 
   it.each([
-    "github_pat_fine_grained_fixture",
-    "ghs_installation_fixture",
+    "github_pat_test",
+    "ghs_test",
     "unrecognized-token-fixture",
   ])("uses anonymous REST for unverified token type %s", async (token) => {
     mockGithubToken = token;
