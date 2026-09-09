@@ -187,10 +187,15 @@ describe("Notifications component", () => {
     expect(screen.getByTestId("no-items")).toBeInTheDocument();
     expect(screen.queryByTestId("wrapper")).not.toBeInTheDocument();
     const causes = useNotificationsQueryMock.mock.calls[0][0].cause;
-    expect(causes).not.toContain(ApiNotificationCause.SubscriptionCoverage);
-    expect(causes).toContain(ApiNotificationCause.IdentitySubscribed);
+    expect(causes).toBeNull();
+    const excludedCauses =
+      useNotificationsQueryMock.mock.calls[0][0].causeExclude;
+    expect(excludedCauses).toEqual([ApiNotificationCause.SubscriptionCoverage]);
     rerender(<Notifications activeDrop={null} setActiveDrop={jest.fn()} />);
     expect(useNotificationsQueryMock.mock.lastCall[0].cause).toBe(causes);
+    expect(useNotificationsQueryMock.mock.lastCall[0].causeExclude).toBe(
+      excludedCauses
+    );
   });
 
   it("shows loader when fetching and no items", async () => {

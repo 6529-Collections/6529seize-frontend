@@ -186,6 +186,7 @@ describe("NotificationsCauseFilter", () => {
     expect(prefetch).toHaveBeenCalledWith({
       identity: "tester",
       cause: [ApiNotificationCause.SubscriptionCoverage],
+      causeExclude: null,
       pages: 1,
     });
   });
@@ -203,6 +204,25 @@ describe("NotificationsCauseFilter", () => {
     expect(
       screen.queryByRole("button", { name: "Profile Preferences" })
     ).not.toBeInTheDocument();
+  });
+
+  it("preserves the coverage exclusion when prefetching a restricted category", async () => {
+    jest
+      .mocked(useNftPurchasingVisibility)
+      .mockReturnValue({ hideNftPurchasing: true, shouldRedirect: true });
+    const user = userEvent.setup();
+    render(<FilterHarness />, { wrapper: Wrapper });
+    await user.click(
+      screen.getByRole("button", { name: "Filter notifications: All" })
+    );
+    await user.hover(
+      screen.getByRole("menuitemcheckbox", { name: "Mentions" })
+    );
+    expect(prefetch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        causeExclude: [ApiNotificationCause.SubscriptionCoverage],
+      })
+    );
   });
 
   it("keeps mobile multi-selection open and restores focus after dismissal", async () => {

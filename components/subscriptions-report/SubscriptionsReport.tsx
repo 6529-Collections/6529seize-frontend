@@ -38,6 +38,8 @@ import { getAuthJwt, getStagingAuth } from "@/services/auth/auth.utils";
 import { sanitizeErrorForUser } from "@/utils/error-sanitizer";
 import Link from "next/link";
 import useDownloader from "@/hooks/useDownloader";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import {
   ArrowDownTrayIcon,
   ChevronDownIcon,
@@ -159,6 +161,7 @@ async function fetchReportActiveMintNumber(now: Date) {
 }
 
 export default function SubscriptionsReportComponent() {
+  const locale = useBrowserLocale();
   const { setToast } = useAuth();
   const pastDropsTarget = useRef<HTMLDivElement>(null);
   const upcomingToggleRef = useRef<HTMLDivElement>(null);
@@ -364,15 +367,15 @@ export default function SubscriptionsReportComponent() {
     fetchData();
   }, [redeemedPage]);
 
-  function renderEmptyState(loading: boolean, type: string) {
+  function renderEmptyState(loading: boolean, type: "upcoming" | "past") {
     if (loading) {
       return (
         <output className="tw-animate-pulse tw-text-sm tw-text-iron-400 motion-reduce:tw-animate-none">
-          Loading {type} drops...
+          {t(locale, `tools.subscriptionsReport.loading.${type}`)}
         </output>
       );
     }
-    return <>No Subscriptions Found</>;
+    return <>{t(locale, "tools.subscriptionsReport.empty")}</>;
   }
 
   const selectedSeason =
@@ -447,7 +450,7 @@ export default function SubscriptionsReportComponent() {
       <div>
         <div className="tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
           <h1 className={ABOUT_DOCUMENTATION_PAGE_TITLE_CLASS_NAME}>
-            Subscriptions Report
+            {t(locale, "tools.contents.pages.subscriptionsReport")}
           </h1>
           <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-justify-center tw-gap-x-4 tw-gap-y-3 sm:tw-w-auto sm:tw-justify-end">
             <NftPurchasingGate>
@@ -455,9 +458,12 @@ export default function SubscriptionsReportComponent() {
               <Link
                 href="/about/subscriptions"
                 className="hover:tw-text-primary-200 tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-leading-5 tw-text-primary-300 tw-no-underline hover:tw-underline"
-                aria-label="Learn more about The Memes subscriptions"
+                aria-label={t(
+                  locale,
+                  "tools.subscriptionsReport.learnMore.ariaLabel"
+                )}
               >
-                Learn More
+                {t(locale, "tools.subscriptionsReport.learnMore.label")}
               </Link>
             </NftPurchasingGate>
           </div>

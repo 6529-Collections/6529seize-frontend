@@ -9,6 +9,7 @@ import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 import { usePrefetchNotifications } from "@/hooks/useNotificationsQuery";
+import { getExcludedNotificationCauses } from "./utils/notificationVisibility";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import {
@@ -263,6 +264,7 @@ export default function NotificationsCauseFilter({
     prefetchNotifications({
       identity: connectedProfile.handle,
       cause: filter.cause,
+      causeExclude: getExcludedNotificationCauses(hideNftPurchasing),
       pages: 1,
     });
   };

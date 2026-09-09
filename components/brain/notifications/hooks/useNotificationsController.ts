@@ -30,6 +30,7 @@ import { getNotificationErrorDetails } from "../utils/getNotificationErrorDetail
 import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import {
   getVisibleNotificationCauses,
+  getExcludedNotificationCauses,
   isNotificationVisible,
 } from "../utils/notificationVisibility";
 
@@ -173,6 +174,7 @@ export const useNotificationsController =
       limit: "30",
       reverse: true,
       cause: visibleCauses,
+      causeExclude: getExcludedNotificationCauses(hideNftPurchasing),
     });
     const items = useMemo(
       () =>
@@ -181,8 +183,12 @@ export const useNotificationsController =
         ),
       [queryItems, hideNftPurchasing]
     );
-    const rawItems = rawItemsFromQuery.filter((item) =>
-      isNotificationVisible(item, hideNftPurchasing)
+    const rawItems = useMemo(
+      () =>
+        rawItemsFromQuery.filter((item) =>
+          isNotificationVisible(item, hideNftPurchasing)
+        ),
+      [rawItemsFromQuery, hideNftPurchasing]
     );
 
     const { mutateAsync: markNotificationIdsAsRead } = useMutation({

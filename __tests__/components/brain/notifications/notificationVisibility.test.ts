@@ -1,5 +1,6 @@
 import {
   getVisibleNotificationCauses,
+  getExcludedNotificationCauses,
   isNotificationVisible,
 } from "@/components/brain/notifications/utils/notificationVisibility";
 import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
@@ -11,10 +12,12 @@ it("excludes coverage from the default query and a stale coverage-only selection
     [ApiNotificationCause.SubscriptionCoverage],
   ]) {
     const visible = getVisibleNotificationCauses(causes, true);
-    expect(visible).not.toContain(ApiNotificationCause.SubscriptionCoverage);
-    expect(visible).toContain(ApiNotificationCause.IdentitySubscribed);
-    expect(visible).toContain(ApiNotificationCause.DropPollVoted);
+    expect(visible).toBeNull();
   }
+  expect(getExcludedNotificationCauses(true)).toEqual([
+    ApiNotificationCause.SubscriptionCoverage,
+  ]);
+  expect(getExcludedNotificationCauses(false)).toBeNull();
 });
 
 it("preserves ordinary selected notification causes", () => {
