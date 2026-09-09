@@ -7,7 +7,6 @@ import {
   getTopReactions,
   subscribeToReactionStore,
 } from "@/helpers/reactions/reactionHistory";
-import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useDropReaction } from "@/hooks/drops/useDropReaction";
 import Image from "next/image";
@@ -17,7 +16,7 @@ import React, {
   useMemo,
   useSyncExternalStore,
 } from "react";
-import { Tooltip } from "react-tooltip";
+import DropActionTooltip from "./DropActionTooltip";
 
 const MAX_QUICK_REACTIONS = 3;
 const DEFAULT_QUICK_REACTION_ID = "+1";
@@ -54,7 +53,6 @@ const WaveDropActionsQuickReact: React.FC<{
     <QuickReactButton
       key={code}
       reactionCode={code}
-      dropId={drop.id}
       canReact={canReact}
       onReact={handleReaction}
       isMobile={isMobile}
@@ -74,11 +72,10 @@ const WaveDropActionsQuickReact: React.FC<{
 
 const QuickReactButton: React.FC<{
   readonly reactionCode: string;
-  readonly dropId: string;
   readonly canReact: boolean;
   readonly onReact: (code: string) => void;
   readonly isMobile?: boolean;
-}> = ({ reactionCode, dropId, canReact, onReact, isMobile = false }) => {
+}> = ({ reactionCode, canReact, onReact, isMobile = false }) => {
   const { emojiMap, findNativeEmoji, loadEmojiData } = useEmoji();
 
   const emojiId = useMemo(
@@ -155,8 +152,6 @@ const QuickReactButton: React.FC<{
     onReact(reactionCode);
   }, [onReact, reactionCode]);
 
-  const tooltipId = `quick-react-${dropId}-${emojiId}`;
-
   if (isMobile) {
     return (
       <button
@@ -173,7 +168,10 @@ const QuickReactButton: React.FC<{
   }
 
   return (
-    <>
+    <DropActionTooltip
+      content={<span className="tw-text-xs">Click to react</span>}
+      disabled={!canReact}
+    >
       <button
         className={`tw-flex tw-h-7 tw-w-7 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-400 tw-transition-colors tw-duration-200 tw-ease-out desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-[#FFCC22] ${
           canReact ? "tw-cursor-pointer" : "tw-cursor-default tw-opacity-50"
@@ -181,7 +179,6 @@ const QuickReactButton: React.FC<{
         onClick={handleClick}
         disabled={!canReact}
         aria-label="Click to react"
-        {...(canReact ? { "data-tooltip-id": tooltipId } : {})}
       >
         <div
           className={`tw-flex tw-size-5 tw-flex-shrink-0 tw-items-center tw-justify-center tw-transition tw-duration-300 tw-ease-out ${
@@ -191,19 +188,7 @@ const QuickReactButton: React.FC<{
           {emojiNode}
         </div>
       </button>
-      {canReact && (
-        <Tooltip
-          id={tooltipId}
-          place="top"
-          positionStrategy="fixed"
-          offset={8}
-          opacity={1}
-          style={TOOLTIP_STYLES}
-        >
-          <span className="tw-text-xs">Click to react</span>
-        </Tooltip>
-      )}
-    </>
+    </DropActionTooltip>
   );
 };
 
