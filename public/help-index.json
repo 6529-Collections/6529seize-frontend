@@ -7473,6 +7473,37 @@
       "related_paths": ["/restricted"],
       "tags": ["access", "navigation"],
       "source_refs": ["app/access/page.tsx", "app/access/page.client.tsx"]
+    },
+    {
+      "id": "profiles.cms-pages",
+      "kind": "business_rule",
+      "title": "Published custom profile pages",
+      "aliases": [
+        "custom profile page",
+        "profile website",
+        "published CMS page"
+      ],
+      "keywords": [
+        "profile",
+        "cms",
+        "published",
+        "page",
+        "route",
+        "capitalization"
+      ],
+      "facts": [
+        "Published custom profile pages use paths ending in /index.html under the profile handle.",
+        "Profile handles in custom page links are case-insensitive; page names after the handle remain case-sensitive.",
+        "If a custom page is not found, use a link from the published site and preserve its page-name capitalization."
+      ],
+      "canonical_path": "/{user}",
+      "related_paths": ["/{user}/cms/builder"],
+      "tags": ["profiles", "cms"],
+      "source_refs": [
+        "app/[user]/[...cmsPath]/page.tsx",
+        "lib/profile-cms/runtime/routes.ts",
+        "ops/docs/profiles/troubleshooting/troubleshooting-routes-and-tabs.md"
+      ]
     }
   ]
 }
