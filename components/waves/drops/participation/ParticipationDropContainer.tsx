@@ -83,7 +83,7 @@ const getBackgroundClass = ({
     return PROPOSAL_CARD_SURFACE_CLASS;
   }
 
-  return "tw-bg-iron-950";
+  return "tw-bg-[var(--drop-card-background,theme(colors.iron.950))]";
 };
 
 export default function ParticipationDropContainer({
@@ -117,7 +117,9 @@ export default function ParticipationDropContainer({
 
   return (
     <div
-      className={`${location === DropLocation.WAVE ? "tw-px-4 tw-py-1" : ""} tw-w-full`}
+      className={`${location === DropLocation.WAVE ? "tw-px-4 tw-py-1" : ""} ${
+        location === DropLocation.PROFILE ? "tw-mb-3" : ""
+      } tw-w-full`}
     >
       <div className="tw-group tw-relative tw-w-full">
         {floatingActions}

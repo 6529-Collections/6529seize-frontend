@@ -6,6 +6,10 @@ import { useSearchParams } from "next/navigation";
 import { useActiveGroup } from "@/contexts/ActiveGroupContext";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import NetworkPageLayoutApp from "./NetworkPageLayoutApp";
+import {
+  NETWORK_PAGE_HORIZONTAL_GUTTERS,
+  NETWORK_PAGE_SURFACE_CLASSES,
+} from "./networkPageLayoutClasses";
 
 export default function NetworkPageLayout({
   children,
@@ -35,10 +39,12 @@ export default function NetworkPageLayout({
   }
 
   return (
-    <main className="tailwind-scope tw-overflow-x-hidden tw-bg-black">
-      <div className="tailwind-scope tw-mx-auto tw-mt-6 tw-min-h-dvh tw-bg-black tw-pb-6 lg:tw-mt-8">
+    <main className={`${NETWORK_PAGE_SURFACE_CLASSES} tw-overflow-x-hidden`}>
+      <div className="tw-mx-auto tw-min-h-dvh tw-bg-[#0D0D0F] tw-pb-6">
         <div className="tw-w-full">
-          <div className="tw-mt-4 tw-px-3 lg:tw-px-6 xl:tw-px-8">
+          <div
+            className={`${NETWORK_PAGE_HORIZONTAL_GUTTERS} tw-pt-6 lg:tw-pt-8`}
+          >
             {isReady && children}
           </div>
         </div>

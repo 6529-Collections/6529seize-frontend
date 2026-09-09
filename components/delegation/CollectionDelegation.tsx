@@ -9,18 +9,24 @@ import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { DelegationCenterSection } from "@/types/enums";
 import Button from "@/components/utils/button/Button";
-import { faCircleArrowLeft } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import { CollectionDelegationLocks } from "./collection-delegation/CollectionDelegationLocks";
 import { CollectionDelegationSections } from "./collection-delegation/CollectionDelegationSections";
-import { getCollectionScopeDescription } from "./collection-delegation/collection-delegation-helpers";
+import {
+  COLLECTION_PANEL_CLASS,
+  getCollectionScopeDescription,
+} from "./collection-delegation/collection-delegation-helpers";
 import type { SubDelegationForm } from "./collection-delegation/IncomingDelegationsTable";
 import { useCollectionDelegationReads } from "./collection-delegation/useCollectionDelegationReads";
 import { useCollectionLocks } from "./collection-delegation/useCollectionLocks";
 import { useDelegationRevocation } from "./collection-delegation/useDelegationRevocation";
 import type { DelegationCollection } from "./delegation-constants";
+import {
+  DELEGATION_PAGE_DESCRIPTION_CLASS_NAME,
+  DELEGATION_PAGE_TITLE_CLASS_NAME,
+} from "./delegation-ui";
 import { DelegationToast, useDelegationToast } from "./DelegationToast";
 import NewAssignPrimaryAddress from "./NewAssignPrimaryAddress";
 import NewConsolidationComponent from "./NewConsolidation";
@@ -204,37 +210,41 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
       <div className="tw-w-full">
         <button
           type="button"
-          className="tw-group tw-mb-4 tw-inline-flex tw-items-center tw-gap-2 tw-rounded-md tw-border-0 tw-bg-transparent tw-p-0 tw-text-sm tw-font-semibold tw-text-iron-300 tw-transition-colors hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+          className="tw-group tw-mb-5 tw-inline-flex tw-min-h-10 tw-items-center tw-gap-2 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-1 tw-py-2 tw-text-sm tw-font-medium tw-text-iron-300 tw-transition-colors hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
           onClick={() => props.setSection(DelegationCenterSection.CENTER)}
         >
-          <FontAwesomeIcon
-            icon={faCircleArrowLeft}
-            className="tw-h-5 tw-w-5 tw-flex-none"
+          <ArrowLeftIcon
+            aria-hidden="true"
+            className="tw-size-5 tw-flex-none"
           />
           <span>{t(locale, "delegation.collection.navigation.back")}</span>
         </button>
-        <header className="tw-mb-6">
-          <div className="tw-flex tw-items-center tw-gap-4">
-            <span className="tw-relative tw-h-14 tw-w-14 tw-flex-none tw-overflow-hidden tw-rounded-lg tw-bg-iron-800">
+        <header className="tw-mb-8 tw-border-0 tw-border-b tw-border-solid tw-border-white/[0.06] tw-pb-8">
+          <div className="tw-flex tw-items-start tw-gap-4 sm:tw-gap-5">
+            <span className="tw-relative tw-size-14 tw-flex-none tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.08] tw-bg-iron-900 sm:tw-size-16">
               <Image
                 unoptimized
                 className="tw-object-cover"
                 loading="eager"
                 priority
                 fill
-                sizes="56px"
+                sizes="(min-width: 640px) 64px, 56px"
                 src={props.collection.preview}
                 alt=""
                 aria-hidden="true"
               />
             </span>
-            <h1 className="tw-m-0 tw-text-3xl tw-font-bold tw-text-white">
-              {props.collection.title}
-            </h1>
+            <div className="tw-min-w-0">
+              <h1 className={DELEGATION_PAGE_TITLE_CLASS_NAME}>
+                {props.collection.title}
+              </h1>
+              <p
+                className={`${DELEGATION_PAGE_DESCRIPTION_CLASS_NAME} tw-mt-1 sm:tw-mt-2`}
+              >
+                {getCollectionScopeDescription(props.collection, locale)}
+              </p>
+            </div>
           </div>
-          <p className="tw-mb-0 tw-mt-3 tw-text-base tw-leading-6 tw-text-iron-300">
-            {getCollectionScopeDescription(props.collection, locale)}
-          </p>
         </header>
         {!showUpdateDelegation &&
           !showCreateNewDelegationWithSub &&
@@ -245,7 +255,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
             <>
               {!accountResolution.isConnected ? (
                 <section
-                  className="tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900 tw-p-5 sm:tw-p-6"
+                  className={COLLECTION_PANEL_CLASS}
                   aria-labelledby="collection-connect-heading"
                 >
                   <h2
@@ -256,7 +266,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                       collection: props.collection.title,
                     })}
                   </h2>
-                  <p className="tw-mb-4 tw-text-base tw-leading-6 tw-text-iron-300">
+                  <p className="tw-mb-5 tw-mt-0 tw-text-base tw-leading-6 tw-text-iron-300">
                     {t(locale, "delegation.collection.connect.description")}
                   </p>
                   <Button

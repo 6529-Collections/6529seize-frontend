@@ -8,10 +8,18 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { commonApiDelete } from "@/services/api/common-api";
+import {
+  Description,
+  Dialog,
+  DialogBackdrop,
+  DialogPanel,
+  DialogTitle,
+  Transition,
+  TransitionChild,
+} from "@headlessui/react";
 import { useMutation } from "@tanstack/react-query";
-import { useContext, useRef, useState } from "react";
+import { Fragment, useContext, useState } from "react";
 import { createPortal } from "react-dom";
-import { useClickAway, useKeyPressEvent } from "react-use";
 
 export default function DropsListItemDeleteDropModal({
   drop,
@@ -25,14 +33,11 @@ export default function DropsListItemDeleteDropModal({
   const { requestAuth, setToast } = useContext(AuthContext);
   const { invalidateDrops } = useContext(ReactQueryWrapperContext);
   const { processDropRemoved } = useMyStream();
-  const modalRef = useRef<HTMLDivElement>(null);
-  useClickAway(modalRef, closeModal);
-  useKeyPressEvent("Escape", closeModal);
 
   const contentType =
     drop.drop_type === ApiDropType.Participatory ? "Drop" : "Post";
 
-  const [mutating, setMutating] = useState<boolean>(false);
+  const [mutating, setMutating] = useState(false);
   const deleteDropMutation = useMutation({
     mutationFn: async () =>
       await commonApiDelete({
@@ -63,6 +68,7 @@ export default function DropsListItemDeleteDropModal({
       setMutating(false);
     },
   });
+
   const onDelete = async () => {
     if (mutating) {
       return;
@@ -73,28 +79,50 @@ export default function DropsListItemDeleteDropModal({
       setMutating(false);
       return;
     }
-    await deleteDropMutation.mutateAsync();
+    try {
+      await deleteDropMutation.mutateAsync();
+    } catch {
+      // The mutation callbacks own the visible error state and reset loading.
+    }
   };
 
   return createPortal(
-    <div className="tw-relative tw-z-50 tw-cursor-default">
-      <div className="tw-fixed tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50"></div>
-      <div className="tw-fixed tw-inset-0 tw-z-50 tw-overflow-y-auto">
-        <div className="tw-flex tw-min-h-full tw-items-end tw-justify-center tw-p-4 tw-text-center sm:tw-items-center sm:tw-p-0">
-          <div
-            ref={modalRef}
-            className="tw-relative tw-w-full tw-transform tw-rounded-xl tw-bg-iron-950 tw-p-6 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-w-full sm:tw-max-w-xl"
-          >
-            <div className="tw-flex tw-justify-between">
-              <div className="tw-max-w-xl sm:tw-flex sm:tw-space-x-4">
-                <div>
-                  <span className="tw-inline-flex tw-h-11 tw-w-11 tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-red/10 tw-bg-red/10">
+    <Transition appear show as={Fragment}>
+      <Dialog
+        className="tailwind-scope tw-fixed tw-inset-0 tw-z-[1020] tw-cursor-default"
+        onClose={mutating ? () => undefined : closeModal}
+      >
+        <TransitionChild
+          as={Fragment}
+          enter="tw-transition-opacity tw-duration-200 tw-ease-out motion-reduce:tw-transition-none"
+          enterFrom="tw-opacity-0"
+          enterTo="tw-opacity-100"
+          leave="tw-transition-opacity tw-duration-150 tw-ease-in motion-reduce:tw-transition-none"
+          leaveFrom="tw-opacity-100"
+          leaveTo="tw-opacity-0"
+        >
+          <DialogBackdrop className="tw-fixed tw-inset-0 tw-bg-gray-600/50" />
+        </TransitionChild>
+
+        <div className="tw-fixed tw-inset-0 tw-overflow-y-auto">
+          <div className="tw-flex tw-min-h-full tw-items-end tw-justify-center tw-p-4 tw-text-center sm:tw-items-center sm:tw-p-6">
+            <TransitionChild
+              as={Fragment}
+              enter="tw-transform tw-transition tw-duration-200 tw-ease-out motion-reduce:tw-transition-none"
+              enterFrom="tw-translate-y-4 tw-opacity-0 sm:tw-translate-y-0 sm:tw-scale-95"
+              enterTo="tw-translate-y-0 tw-opacity-100 sm:tw-scale-100"
+              leave="tw-transform tw-transition tw-duration-150 tw-ease-in motion-reduce:tw-transition-none"
+              leaveFrom="tw-translate-y-0 tw-opacity-100 sm:tw-scale-100"
+              leaveTo="tw-translate-y-4 tw-opacity-0 sm:tw-translate-y-0 sm:tw-scale-95"
+            >
+              <DialogPanel className="tw-relative tw-w-full tw-transform tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-p-5 tw-text-left tw-shadow-2xl tw-shadow-black/30 sm:tw-max-w-lg sm:tw-p-6">
+                <div className="tw-flex tw-items-start tw-gap-3 tw-pr-12 sm:tw-gap-4">
+                  <span className="tw-inline-flex tw-size-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-red/10 tw-bg-red/10">
                     <svg
-                      className="tw-h-6 tw-w-6 tw-flex-shrink-0 tw-text-red tw-transition tw-duration-300 tw-ease-out"
+                      className="tw-size-5 tw-flex-shrink-0 tw-text-red"
                       viewBox="0 0 24 24"
                       fill="none"
                       aria-hidden="true"
-                      xmlns="http://www.w3.org/2000/svg"
                     >
                       <path
                         d="M16 6V5.2C16 4.0799 16 3.51984 15.782 3.09202C15.5903 2.71569 15.2843 2.40973 14.908 2.21799C14.4802 2 13.9201 2 12.8 2H11.2C10.0799 2 9.51984 2 9.09202 2.21799C8.71569 2.40973 8.40973 2.71569 8.21799 3.09202C8 3.51984 8 4.0799 8 5.2V6M10 11.5V16.5M14 11.5V16.5M3 6H21M19 6V17.2C19 18.8802 19 19.7202 18.673 20.362C18.3854 20.9265 17.9265 21.3854 17.362 21.673C16.7202 22 15.8802 22 14.2 22H9.8C8.11984 22 7.27976 22 6.63803 21.673C6.07354 21.3854 5.6146 20.9265 5.32698 20.362C5 19.7202 5 18.8802 5 17.2V6"
@@ -105,97 +133,73 @@ export default function DropsListItemDeleteDropModal({
                       />
                     </svg>
                   </span>
-                </div>
-                <div className="tw-mt-3 tw-flex tw-flex-col sm:tw-mt-0 sm:tw-max-w-sm">
-                  <p className="tw-mb-0 tw-text-lg tw-font-medium tw-text-iron-50">
-                    Delete {contentType}
-                  </p>
-                  <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-text-iron-400">
-                    Are you sure you want to delete this{" "}
-                    {contentType.toLowerCase()}?
-                  </p>
-                </div>
-              </div>
-              <div className="tw-absolute tw-right-4 tw-top-4 tw-flex tw-items-center tw-justify-between">
-                <button
-                  onClick={closeModal}
-                  type="button"
-                  className="tw-flex tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-950 tw-p-2.5 tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-50 focus:tw-outline-none"
-                >
-                  <span className="tw-sr-only tw-text-sm">Close</span>
-                  <svg
-                    className="tw-h-6 tw-w-6"
-                    aria-hidden="true"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth="1.5"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
-                </button>
-              </div>
-            </div>
-            <form>
-              <div className="tw-mt-8">
-                <div className="tw-gap-x-3 sm:tw-flex sm:tw-flex-row-reverse">
-                  <Button
-                    disabled={mutating}
-                    onClick={onDelete}
-                    type="button"
-                    variant="destructive"
-                    size="lg"
-                    fullWidth
-                    className="tw-relative sm:tw-w-auto"
-                  >
-                    <div
-                      style={{ visibility: mutating ? "hidden" : "visible" }}
+                  <div className="tw-min-w-0 tw-flex-1">
+                    <DialogTitle className="tw-m-0 tw-text-lg tw-font-semibold tw-leading-6 tw-text-iron-50">
+                      Delete {contentType}
+                    </DialogTitle>
+                    <Description className="tw-mb-0 tw-mt-1 tw-text-pretty tw-text-sm tw-leading-5 tw-text-iron-400">
+                      Are you sure you want to delete this{" "}
+                      {contentType.toLowerCase()}?
+                    </Description>
+                  </div>
+                  <div className="tw-absolute tw-right-5 tw-top-5 sm:tw-right-6 sm:tw-top-6">
+                    <button
+                      type="button"
+                      onClick={closeModal}
+                      disabled={mutating}
+                      className="tw-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-950 tw-p-2 tw-text-iron-400 tw-transition tw-duration-200 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-text-iron-50"
                     >
-                      Delete
-                    </div>
-                    {mutating && (
+                      <span className="tw-sr-only tw-text-sm">Close</span>
                       <svg
+                        className="tw-h-6 tw-w-6"
                         aria-hidden="true"
-                        role="output"
-                        className="tw-absolute tw-inline tw-h-5 tw-w-5 tw-animate-spin tw-text-[#F04438]"
-                        viewBox="0 0 100 101"
                         fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        strokeWidth="1.5"
+                        stroke="currentColor"
                       >
                         <path
-                          className="tw-text-iron-600"
-                          d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
-                          fill="currentColor"
-                        ></path>
-                        <path
-                          d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
-                          fill="currentColor"
-                        ></path>
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M6 18L18 6M6 6l12 12"
+                        />
                       </svg>
-                    )}
-                  </Button>
-                  <Button
-                    disabled={mutating}
-                    onClick={closeModal}
-                    type="button"
-                    variant="secondary"
-                    size="lg"
-                    fullWidth
-                    className="tw-mt-3 sm:tw-mt-0 sm:tw-w-auto"
-                  >
-                    Cancel
-                  </Button>
+                    </button>
+                  </div>
                 </div>
-              </div>
-            </form>
+
+                <div className="tw-mt-6">
+                  <div className="tw-gap-x-3 sm:tw-flex sm:tw-flex-row-reverse">
+                    <Button
+                      onClick={onDelete}
+                      loading={mutating}
+                      variant="destructive"
+                      size="md"
+                      fullWidth
+                      hideChildrenWhenLoading
+                      className="sm:tw-w-auto"
+                    >
+                      Delete
+                    </Button>
+                    <Button
+                      data-autofocus
+                      disabled={mutating}
+                      onClick={closeModal}
+                      variant="secondary"
+                      size="md"
+                      fullWidth
+                      className="tw-mt-3 sm:tw-mt-0 sm:tw-w-auto"
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
+              </DialogPanel>
+            </TransitionChild>
           </div>
         </div>
-      </div>
-    </div>,
+      </Dialog>
+    </Transition>,
     document.body
   );
 }

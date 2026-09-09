@@ -15,7 +15,6 @@ Choose one primary mode, then add others only when the work requires it:
 - **PR review manager**: Inspect reviewer, CodeRabbit, Claude, CI, and local findings; fix valid feedback; push updates when requested. Use `ops/skills/write-prs/SKILL.md` for PR creation, bot iteration, readiness, and merge preparation. Use `ops/skills/deploy-6529/SKILL.md` when the user requests merge/deploy execution.
 - **Docs/skills manager**: Create or update user-facing docs under `ops/docs/` and repo-local skills under `ops/skills/`, keeping current-state language and navigable structure.
 - **Release manager**: Carry an already-approved change through merge, staging, production, and smoke validation only when explicitly asked. Use `ops/skills/deploy-6529/SKILL.md` as the authority for merge, deployment, E2E validation, backend coordination, and cross-agent coordination.
-- **Deployment-bus manager**: Own a shared staging or production lane for a batch of PRs, assign validation slices to PR owners, keep the candidate SHA and included release set explicit, and use `ops/docs/developer/simple-release-bus-v2.md` plus `ops/skills/deploy-6529/SKILL.md` as the authority.
 - **Investigation manager**: Diagnose an issue, gather evidence, identify ownership, and turn findings into a concrete fix or handoff.
 
 ## Load Order
@@ -40,7 +39,7 @@ Before planning or editing, read only the context that matters:
 
 - Use the repo-local `6529` wrapper for project commands.
 - Do not run plain `pnpm install`, `pnpm dev`, `npm run ...`, `npx react-doctor`, or direct package scripts outside the wrapper.
-- Install with `6529 install`; add dependencies with `6529 add <package>` or `6529 add -D <package>`.
+- Install with `6529 ci`; add dependencies with `6529 add <package>` or `6529 add -D <package>`.
 - Run the app with `6529 run dev`; the default local app port is `3001`.
 - Before committing, verify the Git identity and use `git commit -s ...`. Do not sign off for another person.
 - Keep generated files in sync by regenerating from source instead of hand-editing generated outputs.

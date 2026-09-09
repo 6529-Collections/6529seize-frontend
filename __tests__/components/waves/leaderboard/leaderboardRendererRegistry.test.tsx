@@ -5,6 +5,21 @@ import { DefaultWaveSmallLeaderboardDrop } from "@/components/waves/small-leader
 import { useWaveLeaderboardRendererSet } from "@/components/waves/leaderboard/leaderboardRendererRegistry";
 import { useWaveProposalCardPresentation } from "@/hooks/waves/useWaveProposalCardPresentation";
 
+jest.mock("@/components/content-moderation/ContentModerationDropGate", () => ({
+  __esModule: true,
+  default: ({
+    children,
+    compact,
+  }: {
+    readonly children: React.ReactNode;
+    readonly compact?: boolean;
+  }) => (
+    <div data-testid={compact ? "moderation-gate-compact" : "moderation-gate"}>
+      {children}
+    </div>
+  ),
+}));
+
 jest.mock("@/contexts/SeizeSettingsContext", () => ({
   useSeizeSettings: jest.fn(),
 }));
@@ -69,11 +84,19 @@ describe("useWaveLeaderboardRendererSet", () => {
     const { result } = renderHook(() =>
       useWaveLeaderboardRendererSet("another-wave")
     );
+    const SmallLeaderboardDrop = result.current.SmallLeaderboardDrop;
 
     expect(result.current.variant).toBe("default");
-    expect(result.current.SmallLeaderboardDrop).toBe(
-      DefaultWaveSmallLeaderboardDrop
+    const { getByTestId } = render(
+      <SmallLeaderboardDrop
+        {...({
+          drop: { id: "drop-1" },
+          onDropClick: jest.fn(),
+        } as any)}
+      />
     );
+    expect(getByTestId("moderation-gate-compact")).toBeInTheDocument();
+    expect(DefaultWaveSmallLeaderboardDrop).toHaveBeenCalled();
   });
 
   it("uses the same proposal-card presentation in full and small lists", () => {
@@ -84,7 +107,7 @@ describe("useWaveLeaderboardRendererSet", () => {
     const LeaderboardDrop = result.current.LeaderboardDrop;
     const SmallLeaderboardDrop = result.current.SmallLeaderboardDrop;
 
-    render(
+    const { getByTestId, getAllByTestId } = render(
       <>
         <LeaderboardDrop
           {...({
@@ -101,6 +124,9 @@ describe("useWaveLeaderboardRendererSet", () => {
         />
       </>
     );
+
+    expect(getByTestId("moderation-gate")).toBeInTheDocument();
+    expect(getAllByTestId("moderation-gate-compact")).toHaveLength(1);
 
     expect(DefaultWaveLeaderboardDrop).toHaveBeenCalledWith(
       expect.objectContaining({ contentPresentation: "proposalCard" }),

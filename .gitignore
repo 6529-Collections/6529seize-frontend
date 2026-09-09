@@ -13,7 +13,11 @@
 /playwright-report/
 /playwright/.cache/
 /.playwright-mcp/
-/.release-bus-e2e-output/
+/.deployment-e2e-output/
+# Keep retired local operational artifacts out of commits.
+/.release-coordinator/
+/.deploy
+# Existing staging host storage, until its physical migration is complete.
 /storageState.json
 /playwright/.auth/
 storageState.json
@@ -115,7 +119,10 @@ CLAUDE.md
 # absolute path when the checkout itself lives under .claude/worktrees/<wt>
 # (agent worktrees) — producing ~23 false unused-file/export findings.
 /.claude/
-.codex
+/.codex/*
+!/.codex/environments/
+/.codex/environments/*
+!/.codex/environments/environment.toml
 .gemini
 .windsurfrules
 .agent

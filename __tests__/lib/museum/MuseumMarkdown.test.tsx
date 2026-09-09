@@ -33,6 +33,22 @@ describe("MuseumMarkdown public links", () => {
     );
   });
 
+  it("routes a program work manuscript to its canonical Work page", () => {
+    renderMarkdown(
+      "[Next work](sina-beizavi-in-brazil.md)",
+      "records/programs/6529NM-AP-01/public/works/take-the-key.md",
+      {
+        "records/programs/6529NM-AP-01/public/works/sina-beizavi-in-brazil.md":
+          "/museum/network/works/6529NM-W-0009",
+      }
+    );
+
+    expect(screen.getByRole("link", { name: "Next work" })).toHaveAttribute(
+      "href",
+      "/museum/network/works/6529NM-W-0009"
+    );
+  });
+
   it("does not manufacture a Work route when the canonical join is absent", () => {
     renderMarkdown("[Object](6529NM.2026.001.01.md)", SOURCE_PATH, {});
 
@@ -47,7 +63,7 @@ describe("MuseumMarkdown public links", () => {
 
     expect(screen.getByRole("link", { name: "Gift essay" })).toHaveAttribute(
       "href",
-      "/museum/network/gifts/6529NM.2026.001#casey-reas-collection-essay"
+      "/museum/network/acquisitions/the-system-in-seven-states#casey-reas-collection-essay"
     );
   });
 
@@ -62,7 +78,7 @@ describe("MuseumMarkdown public links", () => {
 
     expect(screen.getByRole("link", { name: "Gift" })).toHaveAttribute(
       "href",
-      "/museum/network/gifts/6529NM.2026.001#gift-narrative-title"
+      "/museum/network/acquisitions/the-system-in-seven-states#gift-narrative-title"
     );
     expect(screen.getByRole("link", { name: "Project" })).toHaveAttribute(
       "href",
@@ -79,7 +95,7 @@ describe("MuseumMarkdown public links", () => {
 
     expect(screen.getByRole("link", { name: "Certificate" })).toHaveAttribute(
       "href",
-      "/museum/network/gifts/6529NM.2026.001#accession-certificate"
+      "/museum/network/acquisitions/the-system-in-seven-states#accession-certificate"
     );
   });
 
@@ -135,6 +151,68 @@ describe("MuseumMarkdown public links", () => {
       "scope",
       "col"
     );
+    expect(screen.getByRole("table")).toHaveClass("tw-table-fixed");
+    expect(screen.getAllByText("Fact")[1]).toHaveClass("lg:tw-hidden");
+  });
+
+  it("stacks table cells with their source headers on narrow screens", () => {
+    renderMarkdown(
+      "| Field | Value | Note |\n| --- | --- | --- |\n| Status | Selected | No token yet |"
+    );
+
+    expect(screen.getByRole("table")).toHaveClass("tw-block");
+    expect(screen.getAllByText("Field")).toHaveLength(2);
+    expect(screen.getAllByText("Value")).toHaveLength(2);
+    expect(screen.getAllByText("Note")).toHaveLength(2);
+  });
+
+  it("wraps long inline identifiers only at safe mobile break points", () => {
+    const exactIdentifier =
+      "eip155:1/erc721:0x1234567890abcdef1234567890abcdef12345678/1234567890";
+    renderMarkdown(`\`${exactIdentifier}\`\n\n\`\`\`text\nexact line\n\`\`\``);
+
+    const codeNodes = screen.getAllByText(/eip155|exact line/u);
+    const inlineCode = codeNodes[0]!;
+    const blockCode = codeNodes[1]!;
+    expect(inlineCode).toHaveClass(
+      "tw-inline-block",
+      "tw-max-w-full",
+      "tw-whitespace-normal",
+      "sm:tw-overflow-x-auto",
+      "sm:tw-whitespace-nowrap"
+    );
+    expect(inlineCode).not.toHaveClass("tw-break-all");
+    expect(inlineCode).toHaveTextContent(exactIdentifier);
+    expect(inlineCode.querySelectorAll("wbr").length).toBeGreaterThan(5);
+    expect(blockCode).not.toHaveClass("tw-break-all");
+  });
+
+  it("preserves uppercase hexadecimal prefixes byte for byte", () => {
+    const exactIdentifier = `0X${"ABCDEF12".repeat(4)}`;
+    const { container } = renderMarkdown(`\`${exactIdentifier}\``);
+
+    expect(container.querySelector("code")?.textContent).toBe(exactIdentifier);
+  });
+
+  it("presents an unusually long research manuscript as open editorial text", () => {
+    const longRecord = `# Long record\n\n${"Complete source paragraph. ".repeat(1_400)}`;
+
+    renderMarkdown(longRecord);
+
+    expect(
+      screen.queryByText("Read the complete research manuscript")
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByText(/Complete source paragraph\./u)
+    ).toBeInTheDocument();
+  });
+
+  it("does not add a disclosure to ordinary-length Markdown", () => {
+    renderMarkdown("# Short record\n\nA concise source record.");
+
+    expect(
+      screen.queryByText("Read the complete research manuscript")
+    ).not.toBeInTheDocument();
   });
 
   it("renders protocol-relative URLs as inert text", () => {
@@ -144,6 +222,15 @@ describe("MuseumMarkdown public links", () => {
     expect(
       screen.queryByRole("link", { name: "Protocol relative" })
     ).not.toBeInTheDocument();
+  });
+
+  it("keeps arbitrary Markdown images inert", () => {
+    renderMarkdown("![Unapproved source](https://example.com/source.jpg)");
+
+    expect(screen.queryByRole("img")).not.toBeInTheDocument();
+    expect(
+      screen.getByText("Media omitted from the record view: Unapproved source.")
+    ).toBeInTheDocument();
   });
 
   it("routes the closed institutional-practice package onsite", () => {
@@ -246,6 +333,26 @@ describe("MuseumMarkdown public links", () => {
     expect(screen.queryByRole("heading", { level: 1 })).not.toBeInTheDocument();
     expect(
       screen.getByRole("heading", { level: 2, name: "Body title" })
+    ).toBeInTheDocument();
+  });
+
+  it("nests manuscript headings beneath an editorial section heading", () => {
+    render(
+      <MuseumMarkdown
+        documentHeadings
+        nestedDocumentHeadings
+        sourceCommit={SOURCE_COMMIT}
+        sourcePath="records/institutional-practice/profiles/met.md"
+      >
+        {"## Demonstrated practices\n\n### Object records"}
+      </MuseumMarkdown>
+    );
+
+    expect(
+      screen.getByRole("heading", { level: 3, name: "Demonstrated practices" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { level: 4, name: "Object records" })
     ).toBeInTheDocument();
   });
 });

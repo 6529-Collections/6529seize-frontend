@@ -8,19 +8,26 @@ import type {
 } from "@/lib/museum/publication/ia";
 import { t } from "@/i18n/messages";
 
+function acquisitionAccessionNumber(
+  acquisition: MuseumAcquisitionViewModel
+): string | null {
+  for (const path of acquisition.sourcePaths) {
+    const match = /records\/accessions\/(6529NM\.\d{4}\.\d{3})(?:\/|$)/u.exec(
+      path
+    );
+    if (match?.[1] !== undefined) return match[1];
+  }
+  return null;
+}
+
 export function MuseumAcquisitionRecordHeader({
   acquisition,
   context,
-  artFirst,
-  curatorialDocumentCount,
-  workCount,
 }: {
   readonly acquisition: MuseumAcquisitionViewModel;
   readonly context: MuseumEntityContextModel;
-  readonly artFirst: boolean;
-  readonly curatorialDocumentCount: number;
-  readonly workCount: number;
 }) {
+  const accessionNumber = acquisitionAccessionNumber(acquisition);
   return (
     <>
       <MuseumBreadcrumbs
@@ -46,57 +53,74 @@ export function MuseumAcquisitionRecordHeader({
         <p className="tw-m-0 tw-mt-5 tw-max-w-3xl tw-text-base tw-leading-7 tw-text-iron-300">
           {acquisition.thesis}
         </p>
+        <p className="tw-m-0 tw-mt-4 tw-text-sm tw-leading-6 tw-text-iron-400">
+          {acquisition.acquisitionMethod === "gift" ||
+          acquisition.acquisitionMethod === "donation"
+            ? t(DEFAULT_LOCALE, "museum.network.acquisitions.methodGift")
+            : acquisition.acquisitionMethod}
+          {accessionNumber === null ? null : ` · Accession ${accessionNumber}`}
+        </p>
       </header>
+    </>
+  );
+}
 
-      {artFirst ? (
-        <MuseumEntityContext
-          context={context}
-          labels={{
-            ariaLabel: t(
-              DEFAULT_LOCALE,
-              "museum.network.accessibility.entityContext"
-            ),
-            status: t(DEFAULT_LOCALE, "museum.network.entity.status"),
-            statusAsOf: t(DEFAULT_LOCALE, "museum.network.entity.statusAsOf"),
-          }}
-        />
-      ) : null}
-
-      {artFirst ? (
-        <nav
-          aria-label={t(DEFAULT_LOCALE, "museum.network.acquisitions.title")}
-          className="tw-mt-8 tw-flex tw-flex-wrap tw-gap-x-5 tw-gap-y-2 tw-border-y tw-border-solid tw-border-iron-800 tw-py-3 tw-text-sm"
-        >
-          {workCount === 0 ? null : (
-            <a
-              href="#acquisition-works"
-              className="hover:tw-text-primary-200 tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
-            >
-              {t(DEFAULT_LOCALE, "museum.network.acquisitions.works")}
-            </a>
-          )}
-          {curatorialDocumentCount === 0 ? null : (
-            <a
-              href="#acquisition-curatorial-reading"
-              className="hover:tw-text-primary-200 tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
-            >
-              {t(
-                DEFAULT_LOCALE,
-                "museum.network.acquisitions.curatorialReading"
-              )}
-            </a>
-          )}
+export function MuseumAcquisitionRecordContext({
+  context,
+  artFirst,
+  curatorialDocumentCount,
+  workCount,
+}: {
+  readonly context: MuseumEntityContextModel;
+  readonly artFirst: boolean;
+  readonly curatorialDocumentCount: number;
+  readonly workCount: number;
+}) {
+  if (!artFirst) return null;
+  return (
+    <>
+      <MuseumEntityContext
+        context={context}
+        labels={{
+          ariaLabel: t(
+            DEFAULT_LOCALE,
+            "museum.network.accessibility.entityContext"
+          ),
+          status: t(DEFAULT_LOCALE, "museum.network.entity.status"),
+          statusAsOf: t(DEFAULT_LOCALE, "museum.network.entity.statusAsOf"),
+          source: t(DEFAULT_LOCALE, "museum.network.entity.sources"),
+        }}
+      />
+      <nav
+        aria-label={t(DEFAULT_LOCALE, "museum.network.acquisitions.onThisPage")}
+        className="tw-mt-8 tw-flex tw-flex-wrap tw-gap-x-5 tw-gap-y-2 tw-border-y tw-border-solid tw-border-iron-800 tw-py-3 tw-text-sm"
+      >
+        {workCount === 0 ? null : (
           <a
-            href="#acquisition-record"
+            href="#acquisition-works"
             className="hover:tw-text-primary-200 tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
           >
-            {t(
-              DEFAULT_LOCALE,
-              "museum.network.acquisitions.acquisitionRecordAndSources"
-            )}
+            {t(DEFAULT_LOCALE, "museum.network.acquisitions.works")}
           </a>
-        </nav>
-      ) : null}
+        )}
+        {curatorialDocumentCount === 0 ? null : (
+          <a
+            href="#acquisition-curatorial-reading"
+            className="hover:tw-text-primary-200 tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+          >
+            {t(DEFAULT_LOCALE, "museum.network.acquisitions.curatorialReading")}
+          </a>
+        )}
+        <a
+          href="#acquisition-record"
+          className="hover:tw-text-primary-200 tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+        >
+          {t(
+            DEFAULT_LOCALE,
+            "museum.network.acquisitions.acquisitionRecordAndSources"
+          )}
+        </a>
+      </nav>
     </>
   );
 }

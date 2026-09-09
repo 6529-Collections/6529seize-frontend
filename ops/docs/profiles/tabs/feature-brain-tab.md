@@ -7,12 +7,12 @@ replies.
 The `Activity` card above the feed is documented separately in
 [Profile Brain Activity Heatmap](feature-brain-activity-heatmap.md).
 Clicking a drop body or quote preview opens that thread in Waves or Messages.
-The companion `Created Waves` and `Most Active In` surfaces inside this tab are
-documented separately in
+The companion `Created Waves` and `Recently Active In` surfaces inside this tab
+are documented separately in
 [Profile Brain Tab Wave Sidebar](feature-brain-wave-sidebar.md).
 On your own profile, the compact `Quick Tags` section appears beneath
-`Activity` and opens a dialog for creating and managing personal mention
-shortcuts.
+`Activity`. Its manager stays in the card; create and edit forms use a mobile
+bottom sheet and remain inline on wider screens.
 
 ## Location in the Site
 
@@ -40,18 +40,23 @@ shortcuts.
 5. If the viewed profile exposes a Brain identity, the `Activity` card renders
    above the feed.
 6. On your own profile, use the `Quick Tags` section beneath `Activity` to open
-   the Quick Tags manager.
+   the inline manager or a create/edit form. Mobile create and edit forms open
+   in a bottom sheet while the Brain page stays in place.
 7. Select a drop or quote preview to open its thread:
    - public wave drop: `/waves/{waveId}?serialNo={serialNo}`
    - direct-message drop: `/messages/{waveId}?serialNo={serialNo}`
-7. Scroll to load older drops.
+8. Scroll to load older drops.
 
 ## Common Scenarios
 
 - Visit someone else's profile Brain tab to read latest drops.
 - Visit your own profile Brain tab to review recent drops.
-- On your own profile, see up to three Quick Tags in one compact row; `+N more`
-  indicates additional tags and opens the manager.
+- On your own profile, see up to three Quick Tags in the compact section; the
+  controls wrap at narrow widths, and `+N more` indicates additional tags and
+  opens the inline manager.
+- On mobile, selecting `New Quick Tag` or a Quick Tag to edit opens a
+  bottom-anchored sheet. Cancelling or dismissing it returns to the preceding
+  compact summary or manager without changing the Brain page.
 - Open a shared `/{user}/brain` link directly and stay on that route while the
   app decides whether Waves is available for the current viewer.
 - If Waves becomes available during that access check, the same

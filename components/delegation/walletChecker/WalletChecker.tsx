@@ -1,7 +1,7 @@
 "use client";
 
 import EnsAddressInput from "@/components/utils/input/ens-address/EnsAddressInput";
-import PrimaryButton from "@/components/utils/button/PrimaryButton";
+import Button from "@/components/utils/button/Button";
 import SecondaryButton from "@/components/utils/button/SecondaryButton";
 import { publicEnv } from "@/config/env";
 import { DELEGATION_ALL_ADDRESS, MEMES_CONTRACT } from "@/constants/constants";
@@ -26,6 +26,11 @@ import WalletCheckerResults, {
   type ConsolidatedWallet,
   type ConsolidationDisplay,
 } from "./WalletCheckerResults";
+import {
+  DELEGATION_CARD_CLASS_NAME,
+  DELEGATION_PAGE_DESCRIPTION_CLASS_NAME,
+  DELEGATION_PAGE_TITLE_CLASS_NAME,
+} from "../delegation-ui";
 
 function resolveConsolidationDisplay(
   wallet: string,
@@ -115,10 +120,8 @@ function WalletCheckerView(props: Readonly<WalletCheckerViewProps>) {
   return (
     <div className="tw-w-full">
       <header className="tw-mb-10 sm:tw-mb-12">
-        <h1 className="tw-m-0 tw-text-[22px] tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-[26px]">
-          Wallet Checker
-        </h1>
-        <p className="tw-mb-0 tw-mt-2 tw-max-w-3xl tw-text-base tw-font-normal tw-leading-7 tw-text-iron-300">
+        <h1 className={DELEGATION_PAGE_TITLE_CLASS_NAME}>Wallet Checker</h1>
+        <p className={DELEGATION_PAGE_DESCRIPTION_CLASS_NAME}>
           Check delegation, delegation manager, and consolidation records for a
           wallet. This is read-only and does not require wallet connection.
         </p>
@@ -126,7 +129,7 @@ function WalletCheckerView(props: Readonly<WalletCheckerViewProps>) {
 
       <form onSubmit={handleSubmit}>
         {!props.fetchedAddress ? (
-          <section className="tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.04] tw-bg-[#111115] tw-p-5 sm:tw-p-6">
+          <section className={`${DELEGATION_CARD_CLASS_NAME} tw-p-5 sm:tw-p-6`}>
             <label
               htmlFor="wallet-checker-address"
               className="tw-mb-2 tw-block tw-text-sm tw-font-semibold tw-text-iron-200"
@@ -138,7 +141,8 @@ function WalletCheckerView(props: Readonly<WalletCheckerViewProps>) {
                 id="wallet-checker-address"
                 autoFocus
                 placeholder="0x... or ENS"
-                className="!tw-h-11 !tw-min-w-0 !tw-flex-1 !tw-rounded-lg !tw-border-white/[0.08] !tw-bg-black/25 !tw-px-4 !tw-py-2.5 !tw-text-iron-100 !tw-shadow-none placeholder:!tw-text-iron-600 focus:!tw-border-primary-400/70 focus:!tw-bg-black/30 focus:!tw-text-iron-50 focus:!tw-ring-primary-400/20 disabled:!tw-bg-black/20"
+                variant="dark"
+                className="tw-flex-1"
                 ariaDescribedBy="wallet-checker-feedback"
                 value={props.walletInputValue}
                 onAddressChange={(address) =>
@@ -156,14 +160,16 @@ function WalletCheckerView(props: Readonly<WalletCheckerViewProps>) {
                 >
                   Clear
                 </SecondaryButton>
-                <PrimaryButton
+                <Button
+                  type="submit"
+                  variant="action"
+                  size="lg"
                   loading={props.checking}
                   disabled={props.formDisabled}
-                  onClicked={props.onSubmit}
-                  className="tw-h-11 tw-w-full !tw-bg-primary-500 !tw-text-white !tw-ring-primary-400 hover:!tw-bg-primary-600 hover:!tw-ring-primary-500 sm:tw-w-auto sm:tw-min-w-32"
+                  className="tw-w-full sm:tw-w-auto sm:tw-min-w-32"
                 >
                   {props.checking ? "Checking..." : "Check Wallet"}
-                </PrimaryButton>
+                </Button>
               </div>
             </div>
             <div
@@ -180,7 +186,7 @@ function WalletCheckerView(props: Readonly<WalletCheckerViewProps>) {
             </div>
           </section>
         ) : (
-          <section className="tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.04] tw-bg-[#111115] tw-p-5 sm:tw-p-6">
+          <section className={`${DELEGATION_CARD_CLASS_NAME} tw-p-5 sm:tw-p-6`}>
             <div className="tw-flex tw-flex-col tw-gap-4 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
               <div className="tw-min-w-0">
                 <p className="tw-mb-1.5 tw-text-[11px] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-widest tw-text-primary-300">
@@ -218,14 +224,17 @@ function WalletCheckerView(props: Readonly<WalletCheckerViewProps>) {
                 >
                   Clear
                 </SecondaryButton>
-                <PrimaryButton
+                <Button
+                  type="button"
+                  variant="action"
+                  size="md"
                   loading={props.refreshing}
                   disabled={props.refreshing}
-                  onClicked={props.onRefresh}
-                  className="tw-w-full !tw-bg-primary-500 !tw-text-white !tw-ring-primary-400 hover:!tw-bg-primary-600 hover:!tw-ring-primary-500 sm:tw-w-auto"
+                  onClick={props.onRefresh}
+                  className="tw-w-full sm:tw-w-auto"
                 >
                   {props.refreshing ? "Refreshing..." : "Refresh"}
-                </PrimaryButton>
+                </Button>
               </div>
             </div>
           </section>

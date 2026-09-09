@@ -4,8 +4,8 @@ import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { normalizeGroupNftOwnerships } from "@/helpers/groups/group-nft-ownership";
 import { commonApiPost } from "@/services/api/common-api";
 
-const GROUP_INCLUDE_LIMIT = 10000;
-const GROUP_EXCLUDE_LIMIT = 1000;
+export const GROUP_INCLUDE_LIMIT = 10000;
+export const GROUP_EXCLUDE_LIMIT = 1000;
 
 export type ValidationIssue =
   | "INCLUDE_LIMIT"

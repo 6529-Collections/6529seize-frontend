@@ -1,7 +1,8 @@
 # Notifications
 
-Notifications docs cover two user-facing surfaces:
-the `/notifications` feed and app-only push notification controls.
+Notifications docs cover three user-facing surfaces:
+the `/notifications` feed, profile-level notification preferences, and app-only
+push notification controls.
 
 ## Overview
 
@@ -39,6 +40,7 @@ the `/notifications` feed and app-only push notification controls.
 ## Features
 
 - [Notifications Feed](feature-notifications-feed.md)
+- [Profile Privacy and Notification Preferences](feature-profile-preferences.md)
 - [Mobile Push Notifications](feature-mobile-push-notifications.md)
 
 ## Flows

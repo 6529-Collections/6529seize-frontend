@@ -2,6 +2,11 @@ import React from "react";
 import { render, screen } from "@testing-library/react";
 import { WaveWinnersDrops } from "@/components/waves/winners/drops/WaveWinnersDrops";
 
+jest.mock("@/components/content-moderation/ContentModerationDropGate", () => ({
+  __esModule: true,
+  default: ({ children }: any) => children,
+}));
+
 const mockWaveWinnersDrop = jest.fn((props: any) => (
   <div data-testid={`drop-${props.winner.drop.id}`} />
 ));

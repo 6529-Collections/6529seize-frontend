@@ -27,14 +27,6 @@ export function resolveNetwork(chain: SupportedChain = "ethereum"): string {
   return NETWORK_MAP[chain];
 }
 
-export function ensureQuery(query: string): string {
-  const trimmed = query.trim();
-  if (!trimmed) {
-    throw new Error("Query must not be empty");
-  }
-  return trimmed;
-}
-
 function toSafelist(status: string | null | undefined): Suggestion["safelist"] {
   if (!status) {
     return undefined;

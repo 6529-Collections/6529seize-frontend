@@ -1,4 +1,4 @@
-name: Verify One-Click Production Artifact
+name: Verify Production Artifact
 
 on:
   workflow_call:
@@ -6,97 +6,53 @@ on:
       target_sha:
         type: string
         required: true
-        description: Frozen production source SHA selected by the orchestrator.
-      operation_id:
-        type: string
-        required: true
-        description: Immutable one-click operation identity.
+        description: Exact production source SHA.
       artifact_run_id:
         type: string
         required: true
-        description: Exact successful production builder workflow run ID from the controller.
+        description: Workflow run that built the artifact.
       artifact_run_attempt:
         type: string
         required: true
-        description: Exact successful builder run attempt from the controller.
+        description: Exact builder run attempt.
       artifact_id:
         type: string
         required: true
-        description: Exact GitHub artifact ID from artifact_run_id.
-      artifact_api_digest:
+        description: Exact GitHub artifact ID.
+      artifact_digest:
         type: string
         required: true
-        description: Exact GitHub artifact API digest from trusted controller evidence.
+        description: GitHub artifact API digest.
       artifact_name:
         type: string
         required: true
-        description: Exact target-and-operation-bound builder artifact name.
+        description: Exact target-and-run-bound artifact name.
       artifact_workflow_sha:
         type: string
         required: true
-        description: Exact builder workflow head SHA bound to the artifact.
+        description: Exact workflow head SHA bound to the artifact.
     outputs:
-      selection_artifact_run_id:
-        description: Workflow run containing the immutable selection artifact.
-        value: ${{ jobs.verify.outputs.selection_artifact_run_id }}
-      selection_artifact_id:
-        description: Exact GitHub artifact ID for the immutable selection.
-        value: ${{ jobs.verify.outputs.selection_artifact_id }}
-      selection_artifact_name:
-        description: Exact name of the immutable selection artifact.
-        value: ${{ jobs.verify.outputs.selection_artifact_name }}
-      selection_artifact_digest:
-        description: GitHub API SHA256 digest of the selection artifact archive.
-        value: ${{ jobs.verify.outputs.selection_artifact_digest }}
-      selection_artifact_run_attempt:
-        description: Exact verifier workflow run attempt containing the selection artifact.
-        value: ${{ jobs.verify.outputs.selection_artifact_run_attempt }}
-      selection_digest:
-        description: SHA256 digest embedded in selection.json.
-        value: ${{ jobs.verify.outputs.selection_digest }}
+      package_sha256:
+        description: Verified SHA-256 digest of target/package.zip.
+        value: ${{ jobs.verify.outputs.package_sha256 }}
   workflow_dispatch:
     inputs:
-      target_sha:
-        type: string
-        required: true
-        description: Frozen production source SHA selected by the orchestrator.
-      operation_id:
-        type: string
-        required: true
-        description: Immutable one-click operation identity.
-      artifact_run_id:
-        type: string
-        required: true
-        description: Exact successful production builder workflow run ID from the controller.
-      artifact_run_attempt:
-        type: string
-        required: true
-        description: Exact successful builder run attempt from the controller.
-      artifact_id:
-        type: string
-        required: true
-        description: Exact GitHub artifact ID from artifact_run_id.
-      artifact_api_digest:
-        type: string
-        required: true
-        description: Exact GitHub artifact API digest from trusted controller evidence.
-      artifact_name:
-        type: string
-        required: true
-        description: Exact target-and-operation-bound builder artifact name.
-      artifact_workflow_sha:
-        type: string
-        required: true
-        description: Exact builder workflow head SHA bound to the artifact.
+      target_sha: { type: string, required: true }
+      artifact_run_id: { type: string, required: true }
+      artifact_run_attempt: { type: string, required: true }
+      artifact_id: { type: string, required: true }
+      artifact_digest: { type: string, required: true }
+      artifact_name: { type: string, required: true }
+      artifact_workflow_sha: { type: string, required: true }
 
 permissions:
   actions: read
   contents: read
 
-run-name: Verify production artifact ${{ inputs.target_sha }} [${{ inputs.operation_id }}] [builder ${{ inputs.artifact_run_id }}/${{ inputs.artifact_run_attempt }} ${{ inputs.artifact_id }} ${{ inputs.artifact_api_digest }} ${{ inputs.artifact_workflow_sha }}]
+run-name: Verify production artifact ${{ inputs.target_sha }} [artifact ${{ inputs.artifact_id }}]
 
 concurrency:
-  group: one-click-production-verifier-${{ inputs.operation_id }}
+  group: production-artifact-verifier-${{ inputs.artifact_id }}
   cancel-in-progress: false
 
 jobs:
@@ -108,21 +64,17 @@ jobs:
       actions: read
       contents: read
     outputs:
-      selection_artifact_run_id: ${{ steps.selection-result.outputs.selection_artifact_run_id }}
-      selection_artifact_id: ${{ steps.selection-result.outputs.selection_artifact_id }}
-      selection_artifact_name: ${{ steps.selection-result.outputs.selection_artifact_name }}
-      selection_artifact_digest: ${{ steps.selection-result.outputs.selection_artifact_digest }}
-      selection_artifact_run_attempt: ${{ steps.selection-result.outputs.selection_artifact_run_attempt }}
-      selection_digest: ${{ steps.selection-result.outputs.selection_digest }}
+      package_sha256: ${{ steps.verify.outputs.package_sha256 }}
+
     steps:
-      - name: Check out immutable verifier helper
+      - name: Check out immutable artifact safety helper
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           ref: ${{ github.workflow_sha }}
           persist-credentials: false
           path: trusted-verifier
           sparse-checkout: |
-            ops/scripts/verify-production-artifact-selection.cjs
+            ops/scripts/verify-production-artifact.cjs
             ops/scripts/cli-args.cjs
           sparse-checkout-cone-mode: false
 
@@ -131,87 +83,120 @@ jobs:
         with:
           node-version: "22.17.1"
 
-      - name: Validate frozen verifier inputs
+      - name: Validate exact artifact inputs
         env:
+          ARTIFACT_DIGEST: ${{ inputs.artifact_digest }}
           ARTIFACT_ID: ${{ inputs.artifact_id }}
-          ARTIFACT_API_DIGEST: ${{ inputs.artifact_api_digest }}
           ARTIFACT_NAME: ${{ inputs.artifact_name }}
           ARTIFACT_RUN_ATTEMPT: ${{ inputs.artifact_run_attempt }}
           ARTIFACT_RUN_ID: ${{ inputs.artifact_run_id }}
           ARTIFACT_WORKFLOW_SHA: ${{ inputs.artifact_workflow_sha }}
-          OPERATION_ID: ${{ inputs.operation_id }}
-          REPOSITORY: ${{ github.repository }}
           TARGET_SHA: ${{ inputs.target_sha }}
-          TOOL: ${{ github.workspace }}/trusted-verifier/ops/scripts/verify-production-artifact-selection.cjs
         run: |
           set -euo pipefail
-          node "$TOOL" validate-inputs \
-            --target-sha "$TARGET_SHA" \
-            --operation-id "$OPERATION_ID" \
-            --artifact-run-id "$ARTIFACT_RUN_ID" \
-            --artifact-run-attempt "$ARTIFACT_RUN_ATTEMPT" \
-            --artifact-id "$ARTIFACT_ID" \
-            --artifact-api-digest "$ARTIFACT_API_DIGEST" \
-            --artifact-name "$ARTIFACT_NAME" \
-            --repository "$REPOSITORY" >/dev/null
+          [[ "$TARGET_SHA" =~ ^[a-f0-9]{40}$ ]]
           [[ "$ARTIFACT_WORKFLOW_SHA" =~ ^[a-f0-9]{40}$ ]]
+          [[ "$ARTIFACT_RUN_ID" =~ ^[1-9][0-9]{0,19}$ ]]
+          [[ "$ARTIFACT_RUN_ATTEMPT" =~ ^[1-9][0-9]{0,8}$ ]]
+          [[ "$ARTIFACT_ID" =~ ^[1-9][0-9]{0,19}$ ]]
+          [[ "$ARTIFACT_DIGEST" =~ ^sha256:[a-f0-9]{64}$ ]]
+          test "$ARTIFACT_NAME" = "production-frontend-${TARGET_SHA}-${ARTIFACT_RUN_ID}"
           test "$GITHUB_REF" = refs/heads/main
 
       - name: Read exact builder run and artifact metadata
         env:
           ARTIFACT_ID: ${{ inputs.artifact_id }}
-          ARTIFACT_API_DIGEST: ${{ inputs.artifact_api_digest }}
           ARTIFACT_RUN_ATTEMPT: ${{ inputs.artifact_run_attempt }}
           ARTIFACT_RUN_ID: ${{ inputs.artifact_run_id }}
           GH_TOKEN: ${{ github.token }}
-          RUN_METADATA: ${{ runner.temp }}/one-click-production-verifier/artifact-run.json
-          ARTIFACT_METADATA: ${{ runner.temp }}/one-click-production-verifier/artifact.json
         run: |
           set -euo pipefail
-          mkdir -p "$(dirname "$RUN_METADATA")"
+          mkdir -p "$RUNNER_TEMP/production-artifact-verifier"
           gh api \
             -H 'Accept: application/vnd.github+json' \
             -H 'X-GitHub-Api-Version: 2022-11-28' \
             "repos/${GITHUB_REPOSITORY}/actions/runs/${ARTIFACT_RUN_ID}/attempts/${ARTIFACT_RUN_ATTEMPT}" \
-            > "$RUN_METADATA"
+            > "$RUNNER_TEMP/production-artifact-verifier/run.json"
+          gh api --paginate \
+            -H 'Accept: application/vnd.github+json' \
+            -H 'X-GitHub-Api-Version: 2022-11-28' \
+            "repos/${GITHUB_REPOSITORY}/actions/runs/${ARTIFACT_RUN_ID}/attempts/${ARTIFACT_RUN_ATTEMPT}/jobs?per_page=100" \
+            --jq '.jobs' | jq -s 'add' \
+            > "$RUNNER_TEMP/production-artifact-verifier/jobs.json"
           gh api \
             -H 'Accept: application/vnd.github+json' \
             -H 'X-GitHub-Api-Version: 2022-11-28' \
             "repos/${GITHUB_REPOSITORY}/actions/artifacts/${ARTIFACT_ID}" \
-            > "$ARTIFACT_METADATA"
+            > "$RUNNER_TEMP/production-artifact-verifier/artifact.json"
 
-      - name: Verify exact builder workflow and artifact identity
+      - name: Verify builder and artifact identity
         env:
+          ARTIFACT_DIGEST: ${{ inputs.artifact_digest }}
           ARTIFACT_ID: ${{ inputs.artifact_id }}
-          ARTIFACT_API_DIGEST: ${{ inputs.artifact_api_digest }}
           ARTIFACT_NAME: ${{ inputs.artifact_name }}
           ARTIFACT_RUN_ATTEMPT: ${{ inputs.artifact_run_attempt }}
           ARTIFACT_RUN_ID: ${{ inputs.artifact_run_id }}
-          ARTIFACT_METADATA: ${{ runner.temp }}/one-click-production-verifier/artifact.json
-          OPERATION_ID: ${{ inputs.operation_id }}
-          REPOSITORY: ${{ github.repository }}
-          RUN_METADATA: ${{ runner.temp }}/one-click-production-verifier/artifact-run.json
-          TARGET_SHA: ${{ inputs.target_sha }}
-          TOOL: ${{ github.workspace }}/trusted-verifier/ops/scripts/verify-production-artifact-selection.cjs
+          ARTIFACT_WORKFLOW_SHA: ${{ inputs.artifact_workflow_sha }}
         run: |
           set -euo pipefail
-          node "$TOOL" verify-metadata \
-            --target-sha "$TARGET_SHA" \
-            --operation-id "$OPERATION_ID" \
-            --artifact-run-id "$ARTIFACT_RUN_ID" \
-            --artifact-run-attempt "$ARTIFACT_RUN_ATTEMPT" \
-            --artifact-id "$ARTIFACT_ID" \
-            --artifact-api-digest "$ARTIFACT_API_DIGEST" \
-            --artifact-name "$ARTIFACT_NAME" \
-            --repository "$REPOSITORY" \
-            --run-metadata "$RUN_METADATA" \
-            --artifact-metadata "$ARTIFACT_METADATA" >/dev/null
+          run_file="$RUNNER_TEMP/production-artifact-verifier/run.json"
+          artifact_file="$RUNNER_TEMP/production-artifact-verifier/artifact.json"
+          jq -e \
+            --arg repository "$GITHUB_REPOSITORY" \
+            --arg run_id "$ARTIFACT_RUN_ID" \
+            --argjson run_attempt "$ARTIFACT_RUN_ATTEMPT" \
+            --arg workflow_sha "$ARTIFACT_WORKFLOW_SHA" '
+              .id == ($run_id | tonumber) and
+              .run_attempt == $run_attempt and
+              (
+                .path == ".github/workflows/production-build-artifact.yml" or
+                (
+                  .path == ".github/workflows/build-upload-deploy-prod.yml" and
+                  (.referenced_workflows | type == "array") and
+                  any(.referenced_workflows[]?;
+                    (.path | split("@")[0]) == ($repository + "/.github/workflows/production-build-artifact.yml") and
+                    .sha == $workflow_sha
+                  )
+                )
+              ) and
+              .event == "workflow_dispatch" and
+              .head_branch == "main" and
+              .head_sha == $workflow_sha and
+              .repository.full_name == $repository and
+              .head_repository.full_name == $repository
+            ' "$run_file" >/dev/null
+          # A later job may have failed in the original attempt. Reuse its
+          # artifact only when the exact builder job itself succeeded.
+          jq -e \
+            --arg run_id "$ARTIFACT_RUN_ID" \
+            --arg workflow_sha "$ARTIFACT_WORKFLOW_SHA" '
+              [.[] | select(
+                .name == "Build exact production artifact" or
+                .name == "Build exact production artifact / Build exact production artifact"
+              )] as $builders |
+              ($builders | length) == 1 and
+              ($builders[0] |
+                (.run_id | tostring) == $run_id and
+                .head_sha == $workflow_sha and
+                .status == "completed" and .conclusion == "success"
+              )
+            ' "$RUNNER_TEMP/production-artifact-verifier/jobs.json" >/dev/null
+          jq -e \
+            --arg digest "$ARTIFACT_DIGEST" \
+            --arg id "$ARTIFACT_ID" \
+            --arg name "$ARTIFACT_NAME" \
+            --arg run_id "$ARTIFACT_RUN_ID" '
+              .id == ($id | tonumber) and
+              .name == $name and
+              .expired == false and
+              .digest == $digest and
+              (.workflow_run.id | tostring) == $run_id
+            ' "$artifact_file" >/dev/null
 
       - name: Download exact artifact archive by ID
         env:
           ARTIFACT_ID: ${{ inputs.artifact_id }}
           GH_TOKEN: ${{ github.token }}
-          ARCHIVE: ${{ runner.temp }}/one-click-production-verifier/artifact.zip
         run: |
           set -euo pipefail
           curl --fail-with-body --silent --show-error --location \
@@ -220,175 +205,85 @@ jobs:
             -H 'X-GitHub-Api-Version: 2022-11-28' \
             -H "Authorization: Bearer ${GH_TOKEN}" \
             "${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}/actions/artifacts/${ARTIFACT_ID}/zip" \
-            --output "$ARCHIVE"
+            --output "$RUNNER_TEMP/production-artifact-verifier/artifact.zip"
 
-      - name: Validate archive member paths before extraction
+      - name: Validate and extract archive safely
         env:
-          ARCHIVE: ${{ runner.temp }}/one-click-production-verifier/artifact.zip
-          ARCHIVE_MEMBERS: ${{ runner.temp }}/one-click-production-verifier/archive-members.txt
-          TOOL: ${{ github.workspace }}/trusted-verifier/ops/scripts/verify-production-artifact-selection.cjs
+          TOOL: ${{ github.workspace }}/trusted-verifier/ops/scripts/verify-production-artifact.cjs
         run: |
           set -euo pipefail
-          unzip -Z1 "$ARCHIVE" > "$ARCHIVE_MEMBERS"
-          node "$TOOL" validate-archive-members \
-            --archive-members "$ARCHIVE_MEMBERS" >/dev/null
+          root="$RUNNER_TEMP/production-artifact-verifier"
+          unzip -Z1 "$root/artifact.zip" > "$root/archive-members.txt"
+          node "$TOOL" validate-archive-members --archive-members "$root/archive-members.txt" >/dev/null
+          mkdir -p "$root/artifact"
+          unzip -q "$root/artifact.zip" -d "$root/artifact"
+          node "$TOOL" validate-extracted-artifact --artifact-root "$root/artifact" >/dev/null
 
-      - name: Extract exact artifact into a fresh verifier directory
+      - name: Read current protected main ancestry
         env:
-          ARCHIVE: ${{ runner.temp }}/one-click-production-verifier/artifact.zip
-          ARTIFACT_ROOT: ${{ runner.temp }}/one-click-production-verifier/artifact
-        run: |
-          set -euo pipefail
-          mkdir -p "$ARTIFACT_ROOT"
-          unzip -q "$ARCHIVE" -d "$ARTIFACT_ROOT"
-
-      - name: Validate extracted entries before reading manifest
-        env:
-          ARTIFACT_ROOT: ${{ runner.temp }}/one-click-production-verifier/artifact
-          TOOL: ${{ github.workspace }}/trusted-verifier/ops/scripts/verify-production-artifact-selection.cjs
-        run: |
-          set -euo pipefail
-          node "$TOOL" validate-extracted-artifact \
-            --artifact-root "$ARTIFACT_ROOT" >/dev/null
-
-      - name: Read protected main and exact ancestry evidence
-        env:
-          ARTIFACT_ROOT: ${{ runner.temp }}/one-click-production-verifier/artifact
           GH_TOKEN: ${{ github.token }}
-          PROTECTED_MAIN_ANCESTRY: ${{ runner.temp }}/one-click-production-verifier/protected-main-ancestry.json
-          PROTECTED_MAIN_REF: ${{ runner.temp }}/one-click-production-verifier/protected-main-ref.json
-          TARGET_ANCESTRY: ${{ runner.temp }}/one-click-production-verifier/target-ancestry.json
           TARGET_SHA: ${{ inputs.target_sha }}
         run: |
           set -euo pipefail
-          gh api \
-            -H 'Accept: application/vnd.github+json' \
-            -H 'X-GitHub-Api-Version: 2022-11-28' \
-            "repos/${GITHUB_REPOSITORY}/git/ref/heads/main" \
-            > "$PROTECTED_MAIN_REF"
-          current_main_sha="$(jq -er 'select(.ref == "refs/heads/main" and .object.type == "commit") | .object.sha' "$PROTECTED_MAIN_REF")"
-          [[ "$current_main_sha" =~ ^[a-f0-9]{40}$ ]]
-          [[ "$TARGET_SHA" =~ ^[a-f0-9]{40}$ ]]
-          protected_main_sha="$(jq -er '.protected_main_sha' "$ARTIFACT_ROOT/manifest.json")"
+          root="$RUNNER_TEMP/production-artifact-verifier"
+          protected_main_sha="$(jq -er .protected_main_sha "$root/artifact/manifest.json")"
           [[ "$protected_main_sha" =~ ^[a-f0-9]{40}$ ]]
-          gh api \
-            -H 'Accept: application/vnd.github+json' \
-            -H 'X-GitHub-Api-Version: 2022-11-28' \
-            "repos/${GITHUB_REPOSITORY}/compare/${TARGET_SHA}...${current_main_sha}" \
-            > "$TARGET_ANCESTRY"
-          gh api \
-            -H 'Accept: application/vnd.github+json' \
-            -H 'X-GitHub-Api-Version: 2022-11-28' \
-            "repos/${GITHUB_REPOSITORY}/compare/${protected_main_sha}...${current_main_sha}" \
-            > "$PROTECTED_MAIN_ANCESTRY"
+          gh api "repos/${GITHUB_REPOSITORY}/git/ref/heads/main" > "$root/main-ref.json"
+          current_main_sha="$(jq -er 'select(.ref == "refs/heads/main" and .object.type == "commit") | .object.sha' "$root/main-ref.json")"
+          gh api "repos/${GITHUB_REPOSITORY}/compare/${TARGET_SHA}...${current_main_sha}" > "$root/target-ancestry.json"
+          gh api "repos/${GITHUB_REPOSITORY}/compare/${protected_main_sha}...${current_main_sha}" > "$root/protected-main-ancestry.json"
+          jq -e '.status == "identical" or .status == "ahead"' "$root/target-ancestry.json" >/dev/null
+          jq -e '.status == "identical" or .status == "ahead"' "$root/protected-main-ancestry.json" >/dev/null
 
-      - name: Verify archive digest, manifest, checksums, and package bytes
-        id: verified-selection
+      - name: Verify checksums, manifest, and package bytes
+        id: verify
         env:
-          ARCHIVE: ${{ runner.temp }}/one-click-production-verifier/artifact.zip
-          ARTIFACT_ID: ${{ inputs.artifact_id }}
-          ARTIFACT_API_DIGEST: ${{ inputs.artifact_api_digest }}
-          ARTIFACT_METADATA: ${{ runner.temp }}/one-click-production-verifier/artifact.json
+          ARTIFACT_DIGEST: ${{ inputs.artifact_digest }}
           ARTIFACT_NAME: ${{ inputs.artifact_name }}
-          ARTIFACT_ROOT: ${{ runner.temp }}/one-click-production-verifier/artifact
           ARTIFACT_RUN_ATTEMPT: ${{ inputs.artifact_run_attempt }}
           ARTIFACT_RUN_ID: ${{ inputs.artifact_run_id }}
-          CHECKSUMS_OUTPUT: ${{ runner.temp }}/one-click-production-verifier/selection/SHA256SUMS
-          OPERATION_ID: ${{ inputs.operation_id }}
-          OUTPUT: ${{ runner.temp }}/one-click-production-verifier/selection/selection.json
-          PROTECTED_MAIN_ANCESTRY: ${{ runner.temp }}/one-click-production-verifier/protected-main-ancestry.json
-          PROTECTED_MAIN_REF: ${{ runner.temp }}/one-click-production-verifier/protected-main-ref.json
-          REPOSITORY: ${{ github.repository }}
-          RUN_METADATA: ${{ runner.temp }}/one-click-production-verifier/artifact-run.json
-          TARGET_ANCESTRY: ${{ runner.temp }}/one-click-production-verifier/target-ancestry.json
-          TARGET_SHA: ${{ inputs.target_sha }}
-          VERIFIER_REF: ${{ github.ref }}
-          VERIFIER_RUN_ID: ${{ github.run_id }}
-          VERIFIER_RUN_ATTEMPT: ${{ github.run_attempt }}
-          VERIFIER_WORKFLOW_SHA: ${{ github.workflow_sha }}
-          TOOL: ${{ github.workspace }}/trusted-verifier/ops/scripts/verify-production-artifact-selection.cjs
-        run: |
-          set -euo pipefail
-          node "$TOOL" verify-artifact \
-            --target-sha "$TARGET_SHA" \
-            --operation-id "$OPERATION_ID" \
-            --artifact-run-id "$ARTIFACT_RUN_ID" \
-            --artifact-run-attempt "$ARTIFACT_RUN_ATTEMPT" \
-            --artifact-id "$ARTIFACT_ID" \
-            --artifact-api-digest "$ARTIFACT_API_DIGEST" \
-            --artifact-name "$ARTIFACT_NAME" \
-            --repository "$REPOSITORY" \
-            --run-metadata "$RUN_METADATA" \
-            --artifact-metadata "$ARTIFACT_METADATA" \
-            --archive "$ARCHIVE" \
-            --artifact-root "$ARTIFACT_ROOT" \
-            --protected-main-ref "$PROTECTED_MAIN_REF" \
-            --target-ancestry "$TARGET_ANCESTRY" \
-            --protected-main-ancestry "$PROTECTED_MAIN_ANCESTRY" \
-            --verifier-run-id "$VERIFIER_RUN_ID" \
-            --verifier-run-attempt "$VERIFIER_RUN_ATTEMPT" \
-            --verifier-workflow-sha "$VERIFIER_WORKFLOW_SHA" \
-            --verifier-ref "$VERIFIER_REF" \
-            --output "$OUTPUT" \
-            --checksums-output "$CHECKSUMS_OUTPUT" >/dev/null
-          selection_digest="$(jq -er '.selection_digest' "$OUTPUT")"
-          selection_name="$(jq -er '.selection_artifact_name' "$OUTPUT")"
-          selection_run_attempt="$(jq -er '.verifier_run_attempt' "$OUTPUT")"
-          {
-            echo "selection_digest=$selection_digest"
-            echo "selection_artifact_name=$selection_name"
-            echo "selection_artifact_run_id=$VERIFIER_RUN_ID"
-            echo "selection_artifact_run_attempt=$selection_run_attempt"
-          } >> "$GITHUB_OUTPUT"
-
-      - name: Independently recheck verified SHA256SUMS
-        env:
-          ARTIFACT_ROOT: ${{ runner.temp }}/one-click-production-verifier/artifact
-        run: |
-          set -euo pipefail
-          (cd "$ARTIFACT_ROOT" && sha256sum -c SHA256SUMS)
-          unzip -t "$ARTIFACT_ROOT/target/package.zip" >/dev/null
-
-      - name: Upload immutable production artifact selection
-        id: upload-selection
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        with:
-          name: ${{ steps.verified-selection.outputs.selection_artifact_name }}
-          path: ${{ runner.temp }}/one-click-production-verifier/selection
-          if-no-files-found: error
-          retention-days: 30
-
-      - name: Publish immutable selection identity
-        id: selection-result
-        env:
-          SELECTION_ARTIFACT_DIGEST: sha256:${{ steps.upload-selection.outputs.artifact-digest }}
-          SELECTION_ARTIFACT_ID: ${{ steps.upload-selection.outputs.artifact-id }}
-          SELECTION_ARTIFACT_NAME: ${{ steps.verified-selection.outputs.selection_artifact_name }}
-          SELECTION_ARTIFACT_RUN_ATTEMPT: ${{ steps.verified-selection.outputs.selection_artifact_run_attempt }}
-          SELECTION_ARTIFACT_RUN_ID: ${{ steps.verified-selection.outputs.selection_artifact_run_id }}
-          SELECTION_DIGEST: ${{ steps.verified-selection.outputs.selection_digest }}
+          ARTIFACT_WORKFLOW_SHA: ${{ inputs.artifact_workflow_sha }}
           TARGET_SHA: ${{ inputs.target_sha }}
         run: |
           set -euo pipefail
-          [[ "$SELECTION_ARTIFACT_ID" =~ ^[1-9][0-9]{0,19}$ ]]
-          [[ "$SELECTION_ARTIFACT_RUN_ID" =~ ^[1-9][0-9]{0,19}$ ]]
-          [[ "$SELECTION_ARTIFACT_RUN_ATTEMPT" =~ ^[1-9][0-9]*$ ]]
-          [[ "$SELECTION_ARTIFACT_DIGEST" =~ ^sha256:[a-f0-9]{64}$ ]]
-          [[ "$SELECTION_DIGEST" =~ ^[a-f0-9]{64}$ ]]
-          {
-            echo "selection_artifact_run_id=$SELECTION_ARTIFACT_RUN_ID"
-            echo "selection_artifact_id=$SELECTION_ARTIFACT_ID"
-            echo "selection_artifact_name=$SELECTION_ARTIFACT_NAME"
-            echo "selection_artifact_digest=$SELECTION_ARTIFACT_DIGEST"
-            echo "selection_artifact_run_attempt=$SELECTION_ARTIFACT_RUN_ATTEMPT"
-            echo "selection_digest=$SELECTION_DIGEST"
-          } >> "$GITHUB_OUTPUT"
-          {
-            echo "### Immutable production artifact selection"
-            echo
-            printf '%s\n' "- target SHA: \`$TARGET_SHA\`"
-            printf '%s\n' "- selection artifact run ID: \`$SELECTION_ARTIFACT_RUN_ID\`"
-            printf '%s\n' "- selection artifact ID: \`$SELECTION_ARTIFACT_ID\`"
-            printf '%s\n' "- selection artifact digest: \`$SELECTION_ARTIFACT_DIGEST\`"
-            printf '%s\n' "- selection digest: \`$SELECTION_DIGEST\`"
-          } >> "$GITHUB_STEP_SUMMARY"
+          root="$RUNNER_TEMP/production-artifact-verifier"
+          artifact_root="$root/artifact"
+          test "$(sha256sum "$root/artifact.zip" | cut -d' ' -f1)" = "${ARTIFACT_DIGEST#sha256:}"
+          (cd "$artifact_root" && sha256sum -c SHA256SUMS)
+          unzip -t "$artifact_root/target/package.zip" >/dev/null
+          jq -e \
+            --arg artifact_name "$ARTIFACT_NAME" \
+            --arg run_id "$ARTIFACT_RUN_ID" \
+            --argjson run_attempt "$ARTIFACT_RUN_ATTEMPT" \
+            --arg target_sha "$TARGET_SHA" \
+            --arg workflow_sha "$ARTIFACT_WORKFLOW_SHA" '
+              .schema_version == 1 and
+              .artifact_contract == "production-deployment-v1" and
+              .repository == "frontend" and
+              .environment == "production" and
+              .artifact_name == $artifact_name and
+              .target_sha == $target_sha and
+              .source_sha == $target_sha and
+              .workflow_sha == $workflow_sha and
+              (.workflow_run_id | tostring) == $run_id and
+              .run_attempt == $run_attempt and
+              (.protected_main_sha | test("^[a-f0-9]{40}$")) and
+              (.package_sha256 | test("^[a-f0-9]{64}$"))
+            ' "$artifact_root/manifest.json" >/dev/null
+          package_digest="$(sha256sum "$artifact_root/target/package.zip" | cut -d' ' -f1)"
+          test "$package_digest" = "$(jq -r .package_sha256 "$artifact_root/manifest.json")"
+          jq -e \
+            --arg source_sha "$TARGET_SHA" \
+            --arg package_sha256 "$package_digest" '
+              .schema_version == "artifact-portability.v1" and
+              .contract == "artifact-portability-v1" and
+              .environment == "production" and
+              .source.git_sha == $source_sha and
+              .digests.package_sha256 == $package_sha256 and
+              .portability.status == "NOT_PORTABLE" and
+              .portability.portable == false and
+              .portability.reuse_authorized == false and
+              .portability.promotion_authorized == false
+            ' "$artifact_root/artifact-portability.json" >/dev/null
+          test "$(stat -c%s "$artifact_root/target/package.zip")" -le $((500 * 1024 * 1024))
+          echo "package_sha256=$package_digest" >> "$GITHUB_OUTPUT"

@@ -21,6 +21,10 @@ rolls back if the request fails.
 ## Entry Points
 
 - Use quick-react buttons in the action bar/menu.
+- On desktop, hover an action or reach it with keyboard focus to read its label
+  beside the control. Labels stay within the viewport in notifications, My
+  Stream, profiles, and wave threads. Moving away, scrolling, resizing, pressing
+  Escape, or clicking dismisses them. Touch uses the drop action menu.
 - Use `Add Reaction` / `Update Reaction` to open the emoji picker.
 - Click or tap a reaction chip to toggle that same reaction.
 - Open reaction details from:
@@ -49,6 +53,7 @@ rolls back if the request fails.
 - Touch move inside the mobile emoji picker stays inside the picker dialog.
 - Reactions added or removed by other people appear live while the wave or
   direct-message thread is open.
+- Viewers can react even when a wave's chat group does not permit them to post.
 - Repeated clap taps in a short burst are merged into one rating request.
 - Rating values are clamped to each drop's allowed min/max range.
 
@@ -56,8 +61,9 @@ rolls back if the request fails.
 
 - Temporary drops (`temp-*`) cannot be reacted to and do not show rating actions.
 - Reaction controls are disabled while a proxy profile is active.
-- Reaction controls are disabled when the current wave does not allow chatting
-  and reactions.
+- Reaction controls are disabled only when chatting and reacting are disabled
+  for the entire wave. A chat-group restriction alone does not disable
+  reactions for viewers.
 - Light placeholder drops do not render reaction or rating controls.
 - Chat drops do not show clap rating controls.
 - Memes-wave participatory drops hide clap rating controls.
@@ -91,6 +97,12 @@ rolls back if the request fails.
   to vote).
 - If rating is visible but the viewer has no available credit, clap stays visible
   in a disabled state with a tooltip.
+
+### Localization fallback debt
+
+- Drop action labels use the existing English copy across supported locales.
+  The frontend i18n backlog owns moving these labels and their accessible names
+  into a shared message family; tooltip placement does not add new copy.
 
 ## Related Pages
 

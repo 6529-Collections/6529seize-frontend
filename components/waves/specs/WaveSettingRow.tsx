@@ -3,6 +3,7 @@
 import PencilIcon, {
   PencilIconSize,
 } from "@/components/utils/icons/PencilIcon";
+import { Cog6ToothIcon } from "@heroicons/react/24/outline";
 import { isTouchFirstEnvironment } from "@/helpers/touch-first.helpers";
 import type { ReactNode } from "react";
 import {
@@ -17,6 +18,7 @@ import { createPortal } from "react-dom";
 
 interface WaveSettingRowProps {
   readonly canEdit: boolean;
+  readonly editIcon?: "gear" | "pencil" | undefined;
   readonly editLabel: string;
   readonly label: string;
   readonly onOpen: () => void;
@@ -24,6 +26,7 @@ interface WaveSettingRowProps {
     readonly closeEditor: () => void;
   }) => ReactNode;
   readonly valueLabel: ReactNode;
+  readonly variant?: "content" | "row" | undefined;
 }
 
 const VIEWPORT_PADDING_PX = 16;
@@ -56,11 +59,13 @@ const isInsideElement = (
 
 export default function WaveSettingRow({
   canEdit,
+  editIcon = "pencil",
   editLabel,
   label,
   onOpen,
   renderEditor,
   valueLabel,
+  variant = "row",
 }: WaveSettingRowProps) {
   const editorId = useId();
   const [isEditorOpen, setIsEditorOpen] = useState(false);
@@ -100,7 +105,9 @@ export default function WaveSettingRow({
     };
 
     globalThis.document.addEventListener("mousedown", handlePointerDown);
-    globalThis.document.addEventListener("touchstart", handlePointerDown);
+    globalThis.document.addEventListener("touchstart", handlePointerDown, {
+      passive: true,
+    });
     globalThis.document.addEventListener("keydown", handleKeyDown);
 
     return () => {
@@ -251,8 +258,46 @@ export default function WaveSettingRow({
     ? createPortal(selectedEditorSurface, globalThis.document.body)
     : null;
   const rowGridClasses = canEdit
-    ? "tw-grid-cols-[minmax(5.5rem,0.7fr)_minmax(0,1.3fr)_1.5rem]"
+    ? "tw-grid-cols-[minmax(5.5rem,0.7fr)_minmax(0,1.3fr)_2.75rem] sm:tw-grid-cols-[minmax(5.5rem,0.7fr)_minmax(0,1.3fr)_1.75rem]"
     : "tw-grid-cols-[minmax(5.5rem,0.7fr)_minmax(0,1.3fr)]";
+  const editIconContent =
+    editIcon === "gear" ? (
+      <Cog6ToothIcon aria-hidden="true" className="tw-size-5" />
+    ) : (
+      <PencilIcon size={PencilIconSize.SMALL} />
+    );
+  const editButton = canEdit ? (
+    <button
+      ref={editButtonRef}
+      type="button"
+      aria-label={editLabel}
+      aria-controls={editorId}
+      aria-expanded={isEditorOpen}
+      aria-haspopup="dialog"
+      title={editLabel}
+      onClick={toggleEditor}
+      className="tw-flex tw-size-11 tw-shrink-0 tw-items-center tw-justify-center tw-justify-self-end tw-rounded-lg tw-border-none tw-bg-transparent tw-p-0 tw-text-iron-500 tw-transition-all tw-duration-300 tw-ease-out hover:tw-bg-iron-800 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-text-iron-300 sm:tw-size-7"
+    >
+      {editIconContent}
+    </button>
+  ) : null;
+
+  if (variant === "content") {
+    return (
+      <section className="tw-px-4 tw-py-4">
+        <div className="tw-flex tw-min-h-7 tw-items-center tw-justify-between tw-gap-x-4">
+          <h2 className="tw-mb-0 !tw-text-[0.6875rem] !tw-font-semibold tw-uppercase !tw-leading-4 tw-tracking-[0.06em] !tw-text-iron-400 sm:tw-tracking-[0.1em]">
+            {label}
+          </h2>
+          {editButton}
+        </div>
+        <div className="tw-mt-3 tw-min-w-0 tw-break-words tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-pt-3 tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-100">
+          {valueLabel}
+        </div>
+        {editorSurface}
+      </section>
+    );
+  }
 
   return (
     <div
@@ -264,21 +309,7 @@ export default function WaveSettingRow({
       <span className="tw-min-w-0 tw-break-words tw-py-0.5 tw-text-right tw-font-medium tw-leading-5 tw-text-iron-50">
         {valueLabel}
       </span>
-      {canEdit && (
-        <button
-          ref={editButtonRef}
-          type="button"
-          aria-label={editLabel}
-          aria-controls={editorId}
-          aria-expanded={isEditorOpen}
-          aria-haspopup="dialog"
-          title={editLabel}
-          onClick={toggleEditor}
-          className="tw-flex tw-h-6 tw-w-6 tw-shrink-0 tw-items-center tw-justify-center tw-justify-self-end tw-rounded-lg tw-border-none tw-bg-transparent tw-p-0 tw-text-iron-500 tw-transition-all tw-duration-300 tw-ease-out hover:tw-bg-iron-800 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-text-iron-300"
-        >
-          <PencilIcon size={PencilIconSize.SMALL} />
-        </button>
-      )}
+      {editButton}
 
       {editorSurface}
     </div>

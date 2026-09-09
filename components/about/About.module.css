@@ -28,6 +28,10 @@
   font-family: "Montserrat", sans-serif !important;
 }
 
+.htmlContainer.ensContent h4 {
+  color: #f5f5f5;
+}
+
 .gdrcContent {
   max-width: 64rem;
   color: #cecfd4;
@@ -123,101 +127,4 @@
 .gdrcContent a:focus-visible {
   color: #84adff;
   text-decoration-color: currentcolor;
-}
-
-.faqContainer {
-  color: #cecfd4;
-}
-
-.faqContainer h2,
-.faqContainer h3 {
-  float: none;
-  color: white;
-  font-family: "Montserrat", sans-serif !important;
-}
-
-.faqContainer h2 {
-  margin-top: 0;
-  margin-bottom: 1.5rem;
-}
-
-.faqContainer h3 {
-  margin-bottom: 0.75rem;
-  font-size: 1.25rem;
-  line-height: 1.35;
-}
-
-.faqContainer p,
-.faqContainer li,
-.faqContainer dd {
-  line-height: 1.65;
-}
-
-.faqContainer p,
-.faqContainer ul,
-.faqContainer ol,
-.faqContainer dl {
-  margin-bottom: 1rem;
-}
-
-.faqContainer ul,
-.faqContainer ol {
-  padding-left: 1.5rem;
-}
-
-.faqContainer dt {
-  margin-top: 1rem;
-  margin-bottom: 0.35rem;
-  color: #efeff1;
-  font-weight: 700;
-}
-
-.faqContainer dd {
-  margin-left: 0;
-}
-
-.faqContainer a {
-  color: #528bff;
-  overflow-wrap: anywhere;
-  font-weight: 600;
-  text-decoration-color: rgb(82 139 255 / 45%);
-  text-underline-offset: 0.18em;
-}
-
-.faqContainer a:hover,
-.faqContainer a:focus-visible {
-  color: #84adff;
-  text-decoration-color: currentColor;
-}
-
-.faqList {
-  padding-left: 1.75rem;
-}
-
-.faqList > li {
-  margin-bottom: 2rem;
-  padding-left: 0.25rem;
-}
-
-.faqList > li::marker {
-  font-size: 1.2rem;
-  font-weight: 700;
-}
-
-.faqImage {
-  display: block;
-  width: 100%;
-  height: auto;
-  margin-top: 1.25rem;
-  margin-bottom: 1.5rem;
-  border-radius: 6px;
-}
-
-.faqBonus,
-.walletSection {
-  margin-top: 2.5rem;
-}
-
-.walletSection {
-  scroll-margin-top: 5rem;
 }

@@ -1,4 +1,4 @@
-import type { Page } from "@playwright/test";
+import type { Locator, Page } from "@playwright/test";
 
 import {
   expect,
@@ -29,6 +29,19 @@ const CASEY_WORK_HREFS = Array.from(
 const LOCAL_SHELL_ALLOWED_CONSOLE_ERROR_PATTERNS = [
   /^Analytics SDK: TypeError: Failed to fetch(?:\n|$)/,
 ];
+
+async function revealTieredContent(target: Locator): Promise<void> {
+  await target.evaluate((element) => {
+    let ancestor = element.parentElement;
+
+    while (ancestor) {
+      if (ancestor instanceof HTMLDetailsElement) {
+        ancestor.open = true;
+      }
+      ancestor = ancestor.parentElement;
+    }
+  });
+}
 
 if (
   REQUIRED_SOURCE_COMMIT !== null &&
@@ -88,7 +101,7 @@ const PROFILES = [
 const INDEX_ROUTE: StudyRoute = {
   path: STUDY_PATH,
   sourcePath: "records/institutional-practice/a-field-of-practice.md",
-  title: "A field of practice",
+  title: "Museums to learn from",
 };
 
 const SOURCE_ROUTE: StudyRoute = {
@@ -198,7 +211,7 @@ async function expectFreshExactSource(
   );
   await expect(sourcePanel).toBeVisible();
   await expect(sourcePanel).toContainText(
-    /Published from the Museum's public record at commit [a-f0-9]{12}\./u
+    "Published from the Museum's public record."
   );
   await expect(sourcePanel).not.toContainText(
     /latest verified release|temporarily unavailable|Page-level source: unassigned/iu
@@ -304,19 +317,17 @@ test.describe("Museum institutional-practice publication @surface @large @readon
     await expectStudyRoute(page, INDEX_ROUTE, REQUIRED_SOURCE_COMMIT);
 
     for (const profile of PROFILE_ROUTES) {
-      await expect(
-        page.locator(`a[href="${profile.path}"]`).first()
-      ).toBeVisible();
+      const profileLink = page.locator(`a[href="${profile.path}"]`).first();
+      await revealTieredContent(profileLink);
+      await expect(profileLink).toBeVisible();
     }
-    await expect(
-      page.locator(`a[href="${SOURCE_ROUTE.path}"]`).first()
-    ).toBeVisible();
-    await expect(
-      page.locator(`a[href="${ADJACENT_ROUTE.path}"]`).first()
-    ).toBeVisible();
-    await expect(
-      page.locator(`a[href="${EDITORIAL_ROUTE.path}"]`).first()
-    ).toBeVisible();
+    const supportingLinks = [SOURCE_ROUTE, ADJACENT_ROUTE, EDITORIAL_ROUTE].map(
+      (route) => page.locator(`a[href="${route.path}"]`).first()
+    );
+    for (const supportingLink of supportingLinks) {
+      await revealTieredContent(supportingLink);
+      await expect(supportingLink).toBeVisible();
+    }
     await expect(page.locator("body")).not.toContainText(
       /For this edition|retains fourteen|adds thirteen/iu
     );
@@ -351,11 +362,12 @@ test.describe("Museum institutional-practice publication @surface @large @readon
     page,
   }) => {
     await expectStudyRoute(page, EDITORIAL_ROUTE, REQUIRED_SOURCE_COMMIT);
-    await expect(
-      page.getByText("3.3 Forms demonstrated in the comparative study", {
-        exact: true,
-      })
-    ).toBeVisible();
+    const demonstratedForms = page.getByText(
+      "3.3 Forms demonstrated in the comparative study",
+      { exact: true }
+    );
+    await revealTieredContent(demonstratedForms);
+    await expect(demonstratedForms).toBeVisible();
     await expect(page.locator(`a[href="${STUDY_PATH}"]`).first()).toBeVisible();
   });
 
@@ -372,9 +384,6 @@ test.describe("Museum institutional-practice publication @surface @large @readon
   }) => {
     await expectStudyRoute(page, CASEY_ARTIST_ROUTE, REQUIRED_SOURCE_COMMIT);
     await expect(page.locator("body")).not.toContainText(/Standfirst/iu);
-    await expect(
-      page.locator('main a[href^="/museum/network/works/"]')
-    ).toHaveCount(7);
     await expect(page.locator("main figure img")).toHaveCount(7);
     for (const href of CASEY_WORK_HREFS) {
       await expect(
@@ -400,7 +409,9 @@ test.describe("Museum institutional-practice publication @surface @large @readon
     await expect(page.locator("body")).not.toContainText(
       /shared source, chronology, and factual-boundary matrix/iu
     );
-    await expect(page.locator("main table").first()).toBeVisible();
+    const sourceTable = page.locator("main table").first();
+    await revealTieredContent(sourceTable);
+    await expect(sourceTable).toBeVisible();
   });
 
   test("publishes Keys and Gates as an art-led program", async ({ page }) => {
@@ -408,24 +419,26 @@ test.describe("Museum institutional-practice publication @surface @large @readon
     await expect(
       page.getByRole("heading", {
         level: 2,
-        name: "Works selected through this program",
+        name: "Works acquired or selected through this program",
       })
     ).toBeVisible();
     await expect(
+      page.getByText("Selected through an acquisition program; unminted", {
+        exact: true,
+      })
+    ).toHaveCount(16);
+    await expect(
       page.getByText(
-        "Selected through an acquisition program; acquisition pending",
-        {
-          exact: true,
-        }
+        "Selected and unminted. Acquisition and accession remain pending.",
+        { exact: true }
       )
     ).toHaveCount(16);
-    await expect(
-      page.getByText("Not yet minted or accessioned.", { exact: true })
-    ).toHaveCount(16);
-    await expect(
-      page.locator('main a[href^="/museum/network/works/"]')
-    ).toHaveCount(16);
     await expect(page.locator("main figure img")).toHaveCount(16);
+    await expect(
+      page.locator(
+        'main figure:has(img):has(a[href^="/museum/network/works/"])'
+      )
+    ).toHaveCount(16);
   });
 
   test("publishes each Keys and Gates selection as a complete work page", async ({
@@ -443,15 +456,15 @@ test.describe("Museum institutional-practice publication @surface @large @readon
       })
     ).toBeVisible();
     await expect(
-      page.getByText(
-        "Selected through an acquisition program; acquisition pending",
-        {
-          exact: true,
-        }
-      )
+      page.getByText("Selected through an acquisition program; unminted", {
+        exact: true,
+      })
     ).toBeVisible();
     await expect(
-      page.getByText("Not yet minted or accessioned.", { exact: true })
+      page.getByText(
+        "Selected and unminted. Acquisition and accession remain pending.",
+        { exact: true }
+      )
     ).toBeVisible();
     await expect(
       page.getByText("No public image is available for this record.", {

@@ -61,4 +61,25 @@ describe("CreateWaveLayout", () => {
     );
     expect(footer?.className).toContain("lg:tw-pb-5");
   });
+
+  it("fills the flow height on mobile so actions stay at the bottom", () => {
+    render(
+      <CreateWaveLayout
+        config={config}
+        step={CreateWaveStep.OVERVIEW}
+        showActions={true}
+        submitting={false}
+        setStep={jest.fn()}
+        onComplete={async () => {}}
+      >
+        <div>content</div>
+      </CreateWaveLayout>
+    );
+
+    const layout = screen.getByText("content").closest(".tw-min-h-full");
+
+    expect(layout).toHaveClass("tw-flex");
+    expect(layout).toHaveClass("tw-h-max");
+    expect(layout).toHaveClass("tw-shrink-0");
+  });
 });

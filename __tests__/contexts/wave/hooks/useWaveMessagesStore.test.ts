@@ -35,7 +35,7 @@ describe("useWaveMessagesStore", () => {
     );
   });
 
-  it("notifies normal updates when a profile switch precedes deferred delivery", async () => {
+  it("clears normal updates when a profile switch precedes deferred delivery", async () => {
     const { result } = renderHook(() => useWaveMessagesStore());
     const listener = jest.fn();
 
@@ -47,16 +47,13 @@ describe("useWaveMessagesStore", () => {
       globalThis.dispatchEvent(new CustomEvent(PROFILE_SWITCHED_EVENT));
     });
 
-    expect(result.current.getData("wave1")?.drops[0]?.id).toBe("d1");
-    await waitFor(() =>
-      expect(listener).toHaveBeenCalledWith(
-        expect.objectContaining({
-          drops: expect.arrayContaining([
-            expect.objectContaining({ id: "d1" }),
-          ]),
-        })
-      )
-    );
+    expect(result.current.getData("wave1")).toBeUndefined();
+    expect(listener).toHaveBeenCalledTimes(1);
+    expect(listener).toHaveBeenCalledWith(undefined);
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+    expect(listener).toHaveBeenCalledTimes(1);
   });
 
   it("removes drops and exposes updated state", async () => {
@@ -449,7 +446,7 @@ describe("useWaveMessagesStore", () => {
     expect(listener).not.toHaveBeenCalled();
   });
 
-  it("does not replay queued old-profile updates after seed invalidation", async () => {
+  it("does not replay any queued old-profile updates after profile invalidation", async () => {
     const { result } = renderHook(() => useWaveMessagesStore());
     const seedPromise = Promise.resolve({
       ok: false,
@@ -482,12 +479,11 @@ describe("useWaveMessagesStore", () => {
       globalThis.dispatchEvent(new CustomEvent(PROFILE_SWITCHED_EVENT));
     });
 
-    await waitFor(() =>
-      expect(result.current.getData("sentinel-wave")?.drops[0]?.id).toBe(
-        "queue-sentinel"
-      )
-    );
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
     expect(result.current.getData("wave1")).toBeUndefined();
+    expect(result.current.getData("sentinel-wave")).toBeUndefined();
   });
 
   it("clears already seeded data on profile switch before a current-auth refresh", async () => {

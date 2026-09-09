@@ -12,6 +12,7 @@ import { ChatRestriction } from "@/hooks/useDropPriviledges";
 import type { ApiDropReaction } from "@/generated/models/ApiDropReaction";
 import { formatLargeNumber } from "@/helpers/Helpers";
 import { recordReaction } from "@/helpers/reactions/reactionHistory";
+import { enqueueDropReactionRequest } from "@/helpers/reactions/dropReactionRequestQueue";
 import { buildTooltipId } from "@/helpers/tooltip.helpers";
 import type { Drop } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
@@ -250,15 +251,17 @@ function WaveDropReaction({
   const isEligibleToChat =
     waveEligibility?.authenticated_user_eligible_to_chat ??
     drop.wave.authenticated_user_eligible_to_chat;
-  const isSlowModeOnlyBlock =
+  const isChatOnlyRestriction =
     isEligibleToChat === false &&
-    waveEligibility?.authenticated_user_chat_restriction ===
-      ChatRestriction.SLOW_MODE;
+    (waveEligibility?.authenticated_user_chat_restriction ===
+      ChatRestriction.SLOW_MODE ||
+      waveEligibility?.authenticated_user_chat_restriction ===
+        ChatRestriction.NO_PERMISSION);
   const canReact =
     !isRecoveryPending &&
     Boolean(connectedProfile?.handle) &&
     !activeProfileProxy &&
-    (isEligibleToChat !== false || isSlowModeOnlyBlock);
+    (isEligibleToChat !== false || isChatOnlyRestriction);
   const updateEligibilityAfterExpectedDisabledReaction = useCallback(
     (error: unknown, method: "DELETE" | "POST") => {
       if (
@@ -274,6 +277,7 @@ function WaveDropReaction({
 
       updateEligibility(drop.wave.id, {
         authenticated_user_eligible_to_chat: false,
+        authenticated_user_chat_restriction: ChatRestriction.DISABLED,
       });
     },
     [drop.id, drop.wave.id, updateEligibility]
@@ -601,17 +605,21 @@ function WaveDropReaction({
     }
 
     try {
-      const body = { reaction: reaction.reaction };
-      if (selected) {
-        recordReactionRequestSent(mutation, {
-          endpoint,
-          method: "DELETE",
-        });
-        await commonApiDelete({
-          endpoint,
-          errorMode: "structured",
-        });
-      } else {
+      await enqueueDropReactionRequest(drop.id, async (signal) => {
+        const body = { reaction: reaction.reaction };
+        if (selected) {
+          recordReactionRequestSent(mutation, {
+            endpoint,
+            method: "DELETE",
+          });
+          await commonApiDelete({
+            endpoint,
+            errorMode: "structured",
+            signal,
+          });
+          return;
+        }
+
         recordReactionRequestSent(mutation, {
           endpoint,
           method: "POST",
@@ -620,8 +628,9 @@ function WaveDropReaction({
           endpoint,
           body,
           errorMode: "structured",
+          signal,
         });
-      }
+      });
       const result = recordReactionRequestSucceeded(mutation);
       if (result.isLatestMutation) {
         clearRollbackForMutation(rollbackRef, mutation.mutationId);

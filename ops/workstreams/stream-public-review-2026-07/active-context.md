@@ -53,10 +53,9 @@ with signed merge commit `1c821faee`.
 
 ## Evidence
 
-- Simple Release Bus v2 before the redesign:
-  `PRODUCTION`, with `STAGING` running and `ALL` and `PRODUCTION` paused.
-- Staging must use the v2 exact-candidate route after `ALL` is running; no
-  production action is authorized.
+- The release-state observations in the dated run log are historical.
+  Staging uses `ops/docs/developer/deployment.md`; no production action is
+  authorized for this workstream.
 - Browser comparison against `/about/mission`, `/waves`, `/the-memes`, and a
   Meme detail page confirmed that the current review overuses framed metadata
   panels and pill-shaped status labels relative to native 6529 surfaces.
@@ -85,7 +84,8 @@ with signed merge commit `1c821faee`.
 ## Next Actions
 
 1. Push the combined candidate to PR #3475 and iterate current-head bots and CI.
-2. Register the exact green combined head through Release Bus v2.
+2. Merge the reviewed development branch into `1a-staging` and follow its
+   automatic deployment and Staging E2E.
 3. Validate the exact staged SHA, the active review, current implementation and
    readiness, technical reference, feedback ledger, and staging Wave links.
 4. Finalize the staging review in the user's browser with no production action.

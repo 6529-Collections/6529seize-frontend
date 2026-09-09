@@ -209,6 +209,7 @@ async function runNativeInitialBackfill({
         },
       }
     );
+    throwIfAborted(controller.signal);
 
     if (backfillDrops === null) {
       const failureError = fetchFailureError ?? createWaveFeedUnavailableError();
@@ -702,6 +703,7 @@ export function useWaveDataFetching({
             updateEligibility,
             initialFetchOptions
           );
+          throwIfAborted(controller.signal);
           const fetchedDrops = handleFetchSuccess(waveId, drops);
           if (fetchedDrops === null) {
             const failureError =

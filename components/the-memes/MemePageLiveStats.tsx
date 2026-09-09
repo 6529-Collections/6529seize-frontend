@@ -370,13 +370,13 @@ export function MemeArtworkDetails({
       : [{ handle: null, display: unavailableLabel }];
   const isAligned = layout === "aligned";
   const rowClassName = isAligned
-    ? "tw-grid tw-grid-cols-1 tw-items-start tw-gap-x-8 tw-gap-y-6 sm:tw-grid-cols-2"
+    ? "tw-grid tw-grid-cols-2 tw-items-start tw-gap-x-4 tw-gap-y-6 sm:tw-gap-x-8"
     : DETAIL_STATS_GRID_CLASS;
   const creatorClassName = isAligned
     ? "tw-min-w-0"
     : "tw-col-span-1 tw-min-w-0 lg:tw-col-span-2";
   const itemClassName = isAligned
-    ? "tw-min-w-[8.5rem] sm:tw-justify-self-end sm:tw-text-right"
+    ? "tw-min-w-0 sm:tw-min-w-[8.5rem] sm:tw-justify-self-end sm:tw-text-right"
     : "tw-col-start-2 tw-min-w-0 lg:tw-col-start-3";
   const mintDateClassName = isAligned
     ? "tw-flex tw-h-7 tw-flex-wrap tw-items-center sm:tw-justify-end"

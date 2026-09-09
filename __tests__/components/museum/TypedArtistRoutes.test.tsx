@@ -3,6 +3,7 @@ import type {
   MuseumProject,
   MuseumPublicWork,
 } from "@/lib/museum/publication/types";
+import { MuseumArtistRecordSummary } from "@/app/museum/network/artists/[slug]/MuseumArtistRecordSummary";
 import { TypedArtistProjects } from "@/app/museum/network/artists/[slug]/TypedArtistProjects";
 import { TypedArtistWorks } from "@/app/museum/network/artists/[slug]/TypedArtistWorks";
 
@@ -46,6 +47,38 @@ const WORK = {
 } satisfies MuseumPublicWork;
 
 describe("typed artist route components", () => {
+  it("labels artist relationships, acquisition, and profile links separately", () => {
+    render(
+      <MuseumArtistRecordSummary
+        relationshipSummary="Permanent Collection"
+        workCount={7}
+        acquisition={{
+          label: "The System in Seven States",
+          href: "/museum/network/acquisitions/the-system-in-seven-states",
+        }}
+        profileHref="#artist-profile-title"
+        sourceHref="https://github.com/6529-Collections/6529networkmuseum/blob/main/artist.json"
+      />
+    );
+
+    expect(
+      screen.getByRole("region", { name: "Artist record" })
+    ).toBeInTheDocument();
+    expect(screen.getByText("Collection relationship")).toBeInTheDocument();
+    expect(screen.getByText("7 works")).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "The System in Seven States" })
+    ).toHaveAttribute(
+      "href",
+      "/museum/network/acquisitions/the-system-in-seven-states"
+    );
+    expect(
+      screen.getByRole("link", { name: "Read the artist profile" })
+    ).toHaveAttribute("href", "#artist-profile-title");
+    expect(screen.getByText("Source record")).toBeInTheDocument();
+    expect(screen.queryByText("6529NM.2026.001")).not.toBeInTheDocument();
+  });
+
   it("localizes project work counts and exposes a visible focus ring", () => {
     const { rerender } = render(
       <TypedArtistProjects projects={[buildProject(1), buildProject(2)]} />

@@ -1,5 +1,13 @@
 # Reengineering the Museum release path
 
+**Historical design; deployment sections superseded on 2026-09-03.**
+Current deployments follow [Deployment](../../docs/developer/deployment.md)
+and the existing GitHub Actions workflows. The bus restoration, shared lease,
+and coordinator requirements below no longer apply. Retain the recorded
+performance findings, incident evidence, and applicable artifact/test design
+for context; this document does not authorize restoring retired automation.
+
+
 ## Decision
 
 The current release system has strong integrity controls and an unsuitable

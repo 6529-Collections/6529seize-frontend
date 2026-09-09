@@ -24,11 +24,11 @@ const TAB_SKELETON_ITEMS = [
 
 export function MemePageTitleSkeleton() {
   return (
-    <div className="tw-mb-0 tw-flex tw-min-w-0 tw-flex-wrap tw-items-baseline tw-gap-x-2 tw-gap-y-1 md:tw-flex-nowrap md:tw-gap-x-0">
+    <div className="tw-mb-0 tw-flex tw-min-w-0 tw-flex-wrap tw-items-baseline tw-gap-y-1 md:tw-flex-nowrap">
       <MemePageSkeletonBlock className="tw-h-7 tw-w-20 sm:tw-h-8 sm:tw-w-24" />
       <span
         aria-hidden="true"
-        className="tw-mx-3 tw-h-5 tw-w-px tw-self-center tw-bg-white/[0.16] sm:tw-h-6"
+        className="tw-mx-2.5 tw-h-5 tw-w-px tw-self-center tw-bg-white/[0.16] sm:tw-h-6 md:tw-mx-3"
       />
       <MemePageSkeletonBlock className="tw-h-7 tw-w-48 tw-max-w-[60vw] sm:tw-h-8 sm:tw-w-72 md:tw-max-w-sm" />
     </div>

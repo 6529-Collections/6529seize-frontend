@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { CREATE_WAVE_FORM_STYLES } from "../utils/createWaveFormStyles";
 
 export function getVotingSettingInputClasses({
   hasError,
@@ -9,12 +10,12 @@ export function getVotingSettingInputClasses({
 }) {
   const stateClasses = hasError
     ? "tw-caret-error tw-ring-error focus:tw-ring-error"
-    : "tw-caret-primary-400 tw-ring-white/5 hover:tw-ring-white/10 focus:tw-ring-primary-400";
+    : "tw-caret-primary-400 tw-ring-white/10 desktop-hover:hover:tw-ring-white/15 desktop-hover:hover:focus:tw-ring-primary-400 focus:tw-ring-primary-400";
   const valueClasses = hasValue
     ? "tw-text-primary-400 focus:tw-text-white"
     : "tw-text-white";
 
-  return `${stateClasses} ${valueClasses} tw-form-input tw-block tw-h-11 tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-bg-black/20 tw-px-3 tw-py-2.5 tw-text-base tw-font-semibold tw-shadow-inner tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-500 focus:tw-bg-black/20 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset sm:tw-text-sm`;
+  return `${stateClasses} ${valueClasses} tw-form-input tw-block tw-h-11 tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-bg-iron-950 tw-px-3 tw-py-2.5 tw-text-base tw-font-medium tw-shadow-inner tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-500 focus:tw-border-primary-400 focus:tw-bg-iron-950 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-inset sm:tw-text-sm`;
 }
 
 export default function VotingSettingBox({
@@ -26,6 +27,7 @@ export default function VotingSettingBox({
   helpText,
   inputId,
   label,
+  surface = "primary",
 }: {
   readonly children: ReactNode;
   readonly errorId: string;
@@ -35,19 +37,32 @@ export default function VotingSettingBox({
   readonly helpText: ReactNode;
   readonly inputId: string;
   readonly label: string;
+  readonly surface?: "primary" | "nested" | "plain";
 }) {
-  const stateClasses = hasError
-    ? "tw-border-error tw-ring-error focus-within:tw-border-error focus-within:tw-ring-error"
-    : "tw-border-white/5 tw-ring-white/5 hover:tw-border-white/10 hover:tw-ring-white/10 focus-within:tw-border-primary-400 focus-within:tw-ring-primary-400";
+  const isPlain = surface === "plain";
+  let stateClasses = "";
+  let surfaceClasses = "";
+
+  if (!isPlain) {
+    stateClasses = hasError
+      ? "tw-border-error focus-within:tw-border-error"
+      : "tw-border-white/5 desktop-hover:hover:tw-border-white/10 focus-within:tw-border-primary-400";
+    surfaceClasses =
+      surface === "nested" ? "tw-bg-iron-950/40" : "tw-bg-iron-900/60";
+  }
+  const containerClasses = isPlain
+    ? ""
+    : "tw-rounded-xl tw-border tw-border-solid tw-p-4 tw-shadow-inner";
 
   return (
     <div
       data-testid={`${inputId}-setting`}
-      className={`${stateClasses} tw-rounded-xl tw-border tw-border-solid tw-bg-iron-900 tw-p-4 tw-shadow-inner tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out`}
+      data-surface={surface}
+      className={`${stateClasses} ${surfaceClasses} ${containerClasses} tw-transition tw-duration-300 tw-ease-out`}
     >
       <label
         htmlFor={inputId}
-        className={`tw-mb-2 tw-block tw-text-sm tw-font-semibold ${
+        className={`tw-mb-2 tw-block ${CREATE_WAVE_FORM_STYLES.fieldLabel} ${
           hasError ? "tw-text-error" : "tw-text-iron-100"
         }`}
       >
@@ -81,7 +96,7 @@ export default function VotingSettingBox({
       )}
       <p
         id={helpId}
-        className="tw-mb-0 tw-mt-3 tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400"
+        className={`tw-mt-3 ${CREATE_WAVE_FORM_STYLES.supportingText}`}
       >
         {helpText}
       </p>

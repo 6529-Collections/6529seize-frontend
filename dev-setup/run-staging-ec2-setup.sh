@@ -349,7 +349,7 @@ install_dependencies() {
     color yellow "Removing existing node_modules for a clean install…"
     rm -rf "$REPO_ROOT/node_modules"
   fi
-  ( cd "$REPO_ROOT" && ./bin/6529 install:frozen )
+  ( cd "$REPO_ROOT" && ./bin/6529 ci )
   color green "Dependencies installed."
   return 0
 }
@@ -517,6 +517,9 @@ EOF
 # ---------- Main ----------
 
 main() {
+  # Private-package tokens are no longer needed and must not reach builds or PM2.
+  unset NODE_AUTH_TOKEN NPM_TOKEN
+
   # 0) Gather ALL user input up front (single interaction)
   collect_all_inputs
   create_env_file

@@ -7,16 +7,14 @@ import {
 
 export default function AboutLicense() {
   return (
-    <Container className="!tw-px-0">
+    <Container fluid horizontalPadding={false}>
       <Row>
         <Col>
           <h1>License</h1>
         </Col>
       </Row>
       <Row>
-        <Col
-          className="tw-pb-3 tw-pt-2 tw-text-left tw-text-sm tw-leading-6 tw-text-iron-500"
-        >
+        <Col className="tw-pb-3 tw-pt-2 tw-text-left tw-text-sm tw-leading-6 tw-text-iron-500">
           Last Updated: February 23, 2023
         </Col>
       </Row>

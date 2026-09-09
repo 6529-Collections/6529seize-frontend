@@ -66,6 +66,7 @@ describe("Museum acquisition program status projection", () => {
           statusAsOf: "2026-01-01T00:00:00Z",
           programIds: ["6529NM-AP-ENT-0002"],
           acquisitionIds: [],
+          documentIds: [],
           sourcePaths: ["records/entities/6529NM-W-0020.json"],
           media: [
             {
@@ -93,6 +94,17 @@ describe("Museum acquisition program status projection", () => {
             },
           ],
         },
+        {
+          id: "6529NM-W-0024",
+          title: "An accessioned Magnum Work",
+          status: "accessioned_into_permanent_collection",
+          statusAsOf: "2026-08-12T00:00:00Z",
+          programIds: ["6529NM-AP-ENT-0002"],
+          acquisitionIds: [],
+          documentIds: [],
+          sourcePaths: ["records/entities/6529NM-W-0024.json"],
+          media: [],
+        },
       ],
       documents: [],
       artworks: [],
@@ -119,6 +131,12 @@ describe("Museum acquisition program status projection", () => {
       expect.objectContaining({
         status: "Selection complete",
         statusAsOf: "2026-08-08T12:00:00Z",
+        primaryRelations: expect.arrayContaining([
+          expect.objectContaining({
+            id: "6529NM-W-0024",
+            relation: "Accessioned through",
+          }),
+        ]),
       })
     );
     expect(context?.status).not.toContain("Acquisition pending");
@@ -129,13 +147,15 @@ describe("Museum acquisition program status projection", () => {
       )
     ).toBe("2026-08-08T12:00:00Z");
     expect(
-      screen.getByText(
-        "Selected through an acquisition program; acquisition pending",
-        { exact: true }
-      )
+      screen.getByText("Selected through an acquisition program; unminted", {
+        exact: true,
+      })
     ).toBeInTheDocument();
     expect(
-      screen.getByText("Not yet minted or accessioned.", { exact: true })
+      screen.getByText(
+        "Selected and unminted. Acquisition and accession remain pending.",
+        { exact: true }
+      )
     ).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: "A divergent first Work" })

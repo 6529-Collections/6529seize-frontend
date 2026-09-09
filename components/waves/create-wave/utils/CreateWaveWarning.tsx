@@ -6,10 +6,10 @@ export default function CreateWaveWarning({
   readonly description: string;
 }) {
   return (
-    <div className="tw-text-[#fef08a] tw-text-xs tw-font-medium">
+    <div className="tw-text-xs tw-font-medium tw-text-yellow-100">
       <div className="tw-flex tw-items-center tw-gap-x-2">
         <svg
-          className="tw-size-5 tw-flex-shrink-0 tw-text-[#fef08a]"
+          className="tw-size-5 tw-flex-shrink-0 tw-text-yellow-100"
           viewBox="0 0 24 24"
           fill="none"
           aria-hidden="true"
@@ -23,9 +23,9 @@ export default function CreateWaveWarning({
             strokeLinejoin="round"
           />
         </svg>
-        <span className="tw-text-normal tw-font-bold">{title}</span>
+        <span className="tw-font-bold">{title}</span>
       </div>
-      <span>{description}</span>
+      <span className="tw-mt-1 tw-block tw-pl-7">{description}</span>
     </div>
   );
 }

@@ -8,6 +8,12 @@ import type {
   MuseumPublication,
   MuseumSourceDocument,
 } from "./types";
+import {
+  MARTIN_GRASSER_ARTIST_SLUG,
+  VERA_MOLNAR_ARTIST_SLUG,
+  VERA_MOLNAR_OBJECT_ID,
+  VERA_MOLNAR_PUBLIC_PATHS,
+} from "./veraMolnarPublication";
 
 interface MuseumTypedDocumentProjectionInput {
   readonly graph: MuseumPublicEntityGraph;
@@ -161,8 +167,24 @@ function candidatePaths(
   graph: MuseumPublicEntityGraph,
   sourceDocuments: ReadonlyMap<string, MuseumSourceDocument>
 ): readonly string[] {
+  const veraPaths = veraMolnarCandidatePaths(entity, graph);
   if (entity.entityType === "WORK") {
-    return workCandidatePaths(entity, sourceDocuments);
+    return uniquePaths([
+      ...workCandidatePaths(entity, sourceDocuments),
+      ...veraPaths,
+    ]).filter((path) => sourceDocuments.has(path));
+  }
+  if (entity.entityType === "ARTIST") {
+    return uniquePaths([
+      ...artistCandidatePaths(entity, sourceDocuments),
+      ...veraPaths,
+    ]).filter((path) => sourceDocuments.has(path));
+  }
+  if (entity.entityType === "PROJECT_OR_SERIES") {
+    return uniquePaths([
+      ...projectCandidatePaths(entity, sourceDocuments),
+      ...veraPaths,
+    ]).filter((path) => sourceDocuments.has(path));
   }
   const paths = new Set<string>();
   collectRepositoryPaths(entity.profile, paths);
@@ -175,9 +197,108 @@ function candidatePaths(
   compatibilityDocumentPaths(entity, sourceDocuments).forEach((path) =>
     paths.add(path)
   );
+  return uniquePaths([...paths, ...veraPaths])
+    .filter((path) => sourceDocuments.has(path))
+    .sort((left, right) => left.localeCompare(right));
+}
+
+function uniquePaths(paths: readonly string[]): readonly string[] {
+  return [...new Set(paths)];
+}
+
+function veraMolnarCandidatePaths(
+  entity: MuseumPublicEntityRecord,
+  graph: MuseumPublicEntityGraph
+): readonly string[] {
+  const veraWork = graph.entities.find(
+    (candidate) =>
+      candidate.entityType === "WORK" &&
+      candidate.sourceRecordIds.includes(VERA_MOLNAR_OBJECT_ID)
+  );
+  if (veraWork === undefined) return [];
+  if (entity.id === veraWork.id) {
+    return [
+      VERA_MOLNAR_PUBLIC_PATHS.objectEntry,
+      VERA_MOLNAR_PUBLIC_PATHS.sourceChronology,
+    ];
+  }
+  const related = graph.relations.some((relation) => {
+    if (
+      relation.targetEntityId !== veraWork.id ||
+      relation.sourceEntityId !== entity.id
+    ) {
+      return false;
+    }
+    return (
+      (entity.entityType === "ARTIST" &&
+        relation.relationType === "ARTIST_CREATES_WORK") ||
+      (entity.entityType === "PROJECT_OR_SERIES" &&
+        relation.relationType === "PROJECT_CONTEXTUALIZES_WORK") ||
+      (entity.entityType === "CURATED_ACQUISITION" &&
+        relation.relationType === "CURATED_ACQUISITION_BRINGS_TOGETHER_WORK")
+    );
+  });
+  if (!related) return [];
+  if (entity.entityType === "ARTIST") {
+    if (entity.slug === MARTIN_GRASSER_ARTIST_SLUG) {
+      return [VERA_MOLNAR_PUBLIC_PATHS.collaboratorPractice];
+    }
+    return entity.slug === VERA_MOLNAR_ARTIST_SLUG
+      ? [VERA_MOLNAR_PUBLIC_PATHS.artistPractice]
+      : [];
+  }
+  if (entity.entityType === "PROJECT_OR_SERIES") {
+    return [VERA_MOLNAR_PUBLIC_PATHS.projectEssay];
+  }
+  if (entity.entityType === "CURATED_ACQUISITION") {
+    return [VERA_MOLNAR_PUBLIC_PATHS.acquisitionEssay];
+  }
+  return [];
+}
+
+function entityScopedCandidatePaths(
+  entity: MuseumPublicEntityRecord,
+  sourceDocuments: ReadonlyMap<string, MuseumSourceDocument>,
+  publicPathMatches: (path: string, slug: string) => boolean
+): readonly string[] {
+  const paths = new Set<string>();
+  if (sourceDocuments.has(entity.sourcePath)) paths.add(entity.sourcePath);
+  collectRepositoryPaths(entity.profile, paths);
+  const slug = entitySlug(entity);
+  for (const path of sourceDocuments.keys()) {
+    if (slug !== null && publicPathMatches(path.toLocaleLowerCase(), slug)) {
+      paths.add(path);
+    }
+  }
   return [...paths]
     .filter((path) => sourceDocuments.has(path))
     .sort((left, right) => left.localeCompare(right));
+}
+
+function artistCandidatePaths(
+  entity: MuseumPublicEntityRecord,
+  sourceDocuments: ReadonlyMap<string, MuseumSourceDocument>
+): readonly string[] {
+  return entityScopedCandidatePaths(
+    entity,
+    sourceDocuments,
+    (path, slug) =>
+      path.endsWith(`/public/artists/${slug}.md`) ||
+      path.endsWith(`/public/scholarship/artists/${slug}.md`)
+  );
+}
+
+function projectCandidatePaths(
+  entity: MuseumPublicEntityRecord,
+  sourceDocuments: ReadonlyMap<string, MuseumSourceDocument>
+): readonly string[] {
+  return entityScopedCandidatePaths(
+    entity,
+    sourceDocuments,
+    (path, slug) =>
+      path.endsWith(`/projects/${slug}.md`) ||
+      path.endsWith(`/public/scholarship/entities/${slug}.md`)
+  );
 }
 
 function documentStem(value: string): string {
@@ -222,18 +343,32 @@ function isWorkManuscriptPath(
   if (!normalizedPath.endsWith(".md")) return false;
   if (/\/public\/scholarship\/works\/\d{2}-[^/]+\.md$/u.test(normalizedPath)) {
     const number = workNumber(sourceRecordIds);
+    const sharesProposalContext = [...sourceRecordIds].some(
+      (sourceRecordId) =>
+        sourceRecordId.startsWith("6529NM-PG-") &&
+        normalizedPath.includes(sourceRecordId.toLocaleLowerCase())
+    );
     return (
+      sharesProposalContext &&
       number !== null &&
       normalizedPath.split("/").at(-1)?.startsWith(`${number}-`) === true
     );
   }
   if (/\/public\/works\/[^/]+\.md$/u.test(normalizedPath)) {
     const expectedStem = documentStem(title);
-    return normalizedPath.split("/").at(-1) === `${expectedStem}.md`;
+    const fileStem = normalizedPath.split("/").at(-1)?.slice(0, -3);
+    return (
+      fileStem !== undefined &&
+      (fileStem === expectedStem || expectedStem.endsWith(`-${fileStem}`))
+    );
   }
   if (/\/public\/\d{4}nm\.\d{4}\.\d{3}\.\d{2}\.md$/u.test(normalizedPath)) {
-    return [...sourceRecordIds].some((sourceRecordId) =>
-      normalizedPath.includes(sourceRecordId.toLocaleLowerCase())
+    const sourceRecordId = normalizedPath.split("/").at(-1)?.slice(0, -3);
+    return (
+      sourceRecordId !== undefined &&
+      [...sourceRecordIds].some(
+        (candidate) => candidate.toLocaleLowerCase() === sourceRecordId
+      )
     );
   }
   return false;
@@ -257,7 +392,27 @@ function workCandidatePaths(
     if (isWorkManuscriptPath(path, title, sourceRecordIds)) paths.add(path);
   }
   for (const path of sourceDocuments.keys()) {
-    if (isWorkPublicDocumentPath(path, title, sourceRecordIds)) paths.add(path);
+    if (isWorkPublicDocumentPath(path, title, sourceRecordIds)) {
+      paths.add(path);
+      continue;
+    }
+    const source = sourceDocuments.get(path);
+    const outcomeIds = [...sourceRecordIds].filter((id) =>
+      /-(?:OUT|OBJ)-\d{3}$/u.test(id)
+    );
+    if (
+      path.includes("/public/works/") &&
+      source !== undefined &&
+      outcomeIds.some((id) => {
+        const outcomeSuffix = /((?:OUT|OBJ)-\d{3})$/u.exec(id)?.[1];
+        return (
+          source.text.includes(id) ||
+          (outcomeSuffix !== undefined && source.text.includes(outcomeSuffix))
+        );
+      })
+    ) {
+      paths.add(path);
+    }
   }
   return [...paths].sort((left, right) => left.localeCompare(right));
 }
@@ -309,6 +464,21 @@ function documentKind(
   entityType: MuseumPublicEntityType
 ): MuseumPublicDocument["kind"] {
   if (path.endsWith(".json")) return "source_record";
+  if (path === VERA_MOLNAR_PUBLIC_PATHS.artistPractice) {
+    return "artist_practice";
+  }
+  if (path === VERA_MOLNAR_PUBLIC_PATHS.collaboratorPractice) {
+    return "artist_practice";
+  }
+  if (path === VERA_MOLNAR_PUBLIC_PATHS.projectEssay) {
+    return "project_essay";
+  }
+  if (path === VERA_MOLNAR_PUBLIC_PATHS.acquisitionEssay) {
+    return "acquisition_essay";
+  }
+  if (path === VERA_MOLNAR_PUBLIC_PATHS.sourceChronology) {
+    return "source_chronology_matrix";
+  }
   if (/\/public\/\d{4}NM\.\d{4}\.\d{3}\.\d{2}\.md$/u.test(path)) {
     return "object_entry";
   }
@@ -318,7 +488,10 @@ function documentKind(
   ) {
     return "object_entry";
   }
-  if (path.includes("/public/scholarship/artists/")) {
+  if (
+    path.includes("/public/scholarship/artists/") ||
+    path.includes("/public/artists/")
+  ) {
     return "artist_practice";
   }
   if (path.includes("/public/scholarship/essays/")) {
@@ -377,7 +550,37 @@ function mergeDocument(
   const existing = [...documents.values()].find(
     (document) => document.sourcePath === path
   );
-  if (existing !== undefined) return existing.id;
+  if (existing !== undefined) {
+    const addEntity = (
+      values: readonly string[],
+      entityType: MuseumPublicEntityType
+    ): readonly string[] =>
+      entity.entityType === entityType
+        ? [...new Set([...values, entity.id])]
+        : values;
+    documents.set(existing.id, {
+      ...existing,
+      artistIds: addEntity(existing.artistIds, "ARTIST"),
+      projectIds: addEntity(existing.projectIds, "PROJECT_OR_SERIES"),
+      workIds: addEntity(existing.workIds ?? [], "WORK"),
+      acquisitionIds: addEntity(
+        existing.acquisitionIds ?? [],
+        "CURATED_ACQUISITION"
+      ),
+      programIds: addEntity(existing.programIds ?? [], "ACQUISITION_PROGRAM"),
+      organizationIds: addEntity(
+        existing.organizationIds ?? [],
+        "ORGANIZATION"
+      ),
+      sourceRecordIds: [
+        ...new Set([
+          ...(existing.sourceRecordIds ?? []),
+          ...entity.sourceRecordIds,
+        ]),
+      ],
+    });
+    return existing.id;
+  }
   const document = generatedDocument(path, source, entity);
   documents.set(document.id, document);
   return document.id;
@@ -434,6 +637,8 @@ export function selectMuseumPublicWorkDocuments(
   return documents.filter(
     (document) =>
       documentIds.has(document.id) &&
+      ((document.workIds?.length ?? 0) === 0 ||
+        document.workIds?.includes(work.id) === true) &&
       isWorkPublicDocumentPath(document.sourcePath, work.title, sourceRecordIds)
   );
 }

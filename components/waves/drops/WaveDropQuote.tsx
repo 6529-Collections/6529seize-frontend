@@ -22,6 +22,7 @@ import {
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import ProposalCardContent from "./proposal/ProposalCardContent";
 import { useWaveProposalCardPresentation } from "@/hooks/waves/useWaveProposalCardPresentation";
+import ContentModerationDropGate from "@/components/content-moderation/ContentModerationDropGate";
 
 interface WaveDropQuoteProps {
   readonly drop: ApiDrop | null;
@@ -40,6 +41,74 @@ interface WaveDropQuoteProps {
 
 interface WaveDropQuoteProfilePictureProps {
   readonly drop: ApiDrop | null;
+}
+
+function getQuotedWaveHref(drop: ApiDrop | null): string {
+  if (drop === null) return "";
+  const waveDetails = drop.wave as unknown as {
+    chat?:
+      | {
+          scope?:
+            | {
+                group?: { is_direct_message?: boolean | undefined } | undefined;
+              }
+            | undefined;
+        }
+      | undefined;
+  };
+  return getWaveRoute({
+    waveId: drop.wave.id,
+    isDirectMessage: waveDetails.chat?.scope?.group?.is_direct_message ?? false,
+    isApp: false,
+  });
+}
+
+function getEffectiveQuotePath(
+  drop: ApiDrop | null,
+  quotePath: readonly string[] | undefined
+): string[] {
+  const path = quotePath ? [...quotePath] : [];
+  if (drop?.wave.id === undefined) return path;
+  const currentQuoteKey = `${drop.wave.id}:${drop.serial_no}`;
+  if (!path.includes(currentQuoteKey)) path.push(currentQuoteKey);
+  return path;
+}
+
+function handleQuoteClick(
+  event: React.MouseEvent<HTMLDivElement>,
+  isInteractive: boolean,
+  goToQuoteDrop: () => void
+) {
+  event.stopPropagation();
+  if (isInteractive) goToQuoteDrop();
+}
+
+function handleQuoteKeyDown(
+  event: React.KeyboardEvent<HTMLDivElement>,
+  goToQuoteDrop: () => void
+) {
+  if (event.key !== "Enter" && event.key !== " ") return;
+  event.preventDefault();
+  event.stopPropagation();
+  goToQuoteDrop();
+}
+
+function getQuoteContainerAccessibility(
+  isInteractive: boolean,
+  goToQuoteDrop: () => void
+): {
+  readonly onKeyDown?:
+    | ((event: React.KeyboardEvent<HTMLDivElement>) => void)
+    | undefined;
+  readonly role?: "button" | undefined;
+  readonly tabIndex?: 0 | undefined;
+} {
+  if (!isInteractive) return {};
+  return {
+    onKeyDown: (event) => handleQuoteKeyDown(event, goToQuoteDrop),
+    role: "button",
+    tabIndex: 0,
+  };
 }
 
 const WaveDropQuoteProfilePicture: React.FC<
@@ -93,14 +162,14 @@ function WaveDropQuoteBody({
             <WaveDropQuoteProfilePicture drop={drop} />
           </div>
         </div>
-        <div className="tw-flex tw-w-full tw-flex-col">
-          <div className="tw-flex tw-items-center tw-gap-x-2">
-            <div className="tw-flex tw-items-center tw-gap-x-2">
+        <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col">
+          <div className="tw-flex tw-min-h-6 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
+            <div className="tw-flex tw-min-w-0 tw-max-w-full tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
               {quoteAuthorLabel && (
-                <p className="tw-mb-0 tw-text-md tw-font-semibold tw-leading-none">
+                <p className="tw-m-0 tw-min-w-0 tw-max-w-full tw-text-md tw-font-semibold tw-leading-5 [overflow-wrap:anywhere]">
                   <Link
                     href={`/${quoteAuthorLabel}`}
-                    className="tw-text-iron-200 tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-500"
+                    className="tw-rounded-sm tw-text-iron-200 tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-500 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
                   >
                     {quoteAuthorLabel}
                   </Link>
@@ -116,17 +185,17 @@ function WaveDropQuoteBody({
             </div>
 
             {!!drop && (
-              <>
+              <div className="tw-flex tw-items-center tw-gap-x-2">
                 <div className="tw-size-[3px] tw-flex-shrink-0 tw-rounded-full tw-bg-iron-700"></div>
                 <WaveDropTime timestamp={drop.created_at} />
-              </>
+              </div>
             )}
           </div>
-          <div>
+          <div className="tw-mt-1">
             {drop && waveHref && (
               <Link
                 href={waveHref}
-                className="tw-leading-0 -tw-mt-1 tw-text-[11px] tw-text-iron-500 tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-300"
+                className="tw-block tw-rounded-sm tw-text-xs tw-leading-4 tw-text-iron-400 tw-no-underline tw-transition tw-duration-300 tw-ease-out [overflow-wrap:anywhere] hover:tw-text-iron-300 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
               >
                 {drop.wave.name}
               </Link>
@@ -139,7 +208,24 @@ function WaveDropQuoteBody({
   );
 }
 
-const WaveDropQuote: React.FC<WaveDropQuoteProps> = ({
+const WaveDropQuote: React.FC<WaveDropQuoteProps> = (props) => {
+  const drop = props.drop;
+  if (drop === null) {
+    return <WaveDropQuoteContent {...props} />;
+  }
+
+  return (
+    <ContentModerationDropGate
+      drop={drop}
+      compact
+      onGlobalTombstoneClick={() => props.onQuoteClick(drop)}
+    >
+      <WaveDropQuoteContent {...props} />
+    </ContentModerationDropGate>
+  );
+};
+
+const WaveDropQuoteContent: React.FC<WaveDropQuoteProps> = ({
   drop,
   partId,
   onQuoteClick,
@@ -157,10 +243,7 @@ const WaveDropQuote: React.FC<WaveDropQuoteProps> = ({
     drop?.wave.id
   );
   const quotedPart = useMemo<ApiDropPart | null>(() => {
-    if (!drop) {
-      return null;
-    }
-
+    if (!drop) return null;
     return drop.parts.find((part) => part.part_id === partId) ?? null;
   }, [drop, partId]);
 
@@ -170,44 +253,11 @@ const WaveDropQuote: React.FC<WaveDropQuoteProps> = ({
     }
   };
 
-  const waveHref = useMemo(() => {
-    if (!drop) return "";
-
-    const waveDetails = drop.wave as unknown as {
-      chat?:
-        | {
-            scope?:
-              | {
-                  group?:
-                    | { is_direct_message?: boolean | undefined }
-                    | undefined;
-                }
-              | undefined;
-          }
-        | undefined;
-    };
-
-    const isDirectMessage =
-      waveDetails.chat?.scope?.group?.is_direct_message ?? false;
-
-    return getWaveRoute({
-      waveId: drop.wave.id,
-      isDirectMessage,
-      isApp: false,
-    });
-  }, [drop]);
-
-  const effectiveQuotePath = useMemo(() => {
-    const path = quotePath ? [...quotePath] : [];
-    if (drop?.wave.id) {
-      const currentQuoteKey = `${drop.wave.id}:${drop.serial_no}`;
-      if (!path.includes(currentQuoteKey)) {
-        path.push(currentQuoteKey);
-      }
-    }
-
-    return path;
-  }, [drop, quotePath]);
+  const waveHref = useMemo(() => getQuotedWaveHref(drop), [drop]);
+  const effectiveQuotePath = useMemo(
+    () => getEffectiveQuotePath(drop, quotePath),
+    [drop, quotePath]
+  );
 
   const resolvedOnLinkCardActionsActiveChange =
     onLinkCardActionsActiveChange ?? onCardActionsActiveChange;
@@ -222,21 +272,12 @@ const WaveDropQuote: React.FC<WaveDropQuoteProps> = ({
   const handleQuoteContainerClick = (
     event: React.MouseEvent<HTMLDivElement>
   ) => {
-    event.stopPropagation();
-
-    if (isInteractive) {
-      goToQuoteDrop();
-    }
+    handleQuoteClick(event, isInteractive, goToQuoteDrop);
   };
-  const handleQuoteContainerKeyDown = isInteractive
-    ? (event: React.KeyboardEvent<HTMLDivElement>) => {
-        if (event.key === "Enter" || event.key === " ") {
-          event.preventDefault();
-          event.stopPropagation();
-          goToQuoteDrop();
-        }
-      }
-    : undefined;
+  const quoteContainerAccessibility = getQuoteContainerAccessibility(
+    isInteractive,
+    goToQuoteDrop
+  );
   const quoteContainerClassName = `tw-mt-1 ${
     isInteractive ? "tw-cursor-pointer" : ""
   } tw-rounded-xl tw-bg-iron-950 tw-px-3 tw-py-3 tw-ring-1 tw-ring-inset tw-ring-iron-800`;
@@ -287,9 +328,9 @@ const WaveDropQuote: React.FC<WaveDropQuoteProps> = ({
     <div
       className={quoteContainerClassName}
       onClick={handleQuoteContainerClick}
-      onKeyDown={handleQuoteContainerKeyDown}
-      role={isInteractive ? "button" : undefined}
-      tabIndex={isInteractive ? 0 : undefined}
+      onKeyDown={quoteContainerAccessibility.onKeyDown}
+      role={quoteContainerAccessibility.role}
+      tabIndex={quoteContainerAccessibility.tabIndex}
     >
       <WaveDropQuoteBody
         drop={drop}

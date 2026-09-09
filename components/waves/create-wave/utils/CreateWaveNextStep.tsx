@@ -17,20 +17,20 @@ export default function CreateWaveNextStep({
   readonly onClick: () => void;
 }) {
   const locale = useBrowserLocale();
-  const isCompleteStep = step === CreateWaveStep.DESCRIPTION;
+  const isCompleteStep = step === CreateWaveStep.REVIEW;
 
   return (
     <Button
       variant="primary"
       size="md"
       onClick={onClick}
-      disabled={isCompleteStep ? submitting : disabled}
-      loading={isCompleteStep && submitting}
+      disabled={disabled || submitting}
+      loading={submitting}
     >
       {t(
         locale,
         isCompleteStep
-          ? "waves.create.actions.complete"
+          ? "waves.create.review.submit"
           : "waves.create.actions.next"
       )}
     </Button>

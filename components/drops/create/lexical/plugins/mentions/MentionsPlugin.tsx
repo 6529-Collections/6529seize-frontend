@@ -57,6 +57,9 @@ const AtSignMentionsRegex =
 const AtSignMentionsRegexAliasRegex =
   /(^|\s|\()(@((?:[^@.,+*?$|#{}()^\-[\]\\/!%'"~=<>_:;\s]){0,50}))$/;
 
+const mayContainPlainMentionAlias = (text: string): boolean =>
+  /(^|[\s(])@[^\s@]+/m.test(text);
+
 // At most, 5 suggestions are shown in the popup.
 const SUGGESTION_LIST_LENGTH_LIMIT = 5;
 // Keep mentions above single-drop mobile chat menus/dialogs while below global modal layers.
@@ -346,7 +349,7 @@ const NewMentionsPlugin = forwardRef<
       {
         group: ApiDropGroupMention.Contributors,
         display: t(locale, "waves.composer.groupMentions.contributors"),
-        allowed: true,
+        allowed: canMentionAll,
       },
       {
         group: ApiDropGroupMention.Admins,
@@ -434,6 +437,16 @@ const NewMentionsPlugin = forwardRef<
     () => ({
       isMentionsOpen: () => isOpen && options.length > 0,
       expandMentionAliases: async () => {
+        const editorState = editor.getEditorState();
+        const mayContainAlias = editorState.read(() =>
+          mayContainPlainMentionAlias($getRoot().getTextContent())
+        );
+        if (!mayContainAlias) {
+          return {
+            completed: true,
+            editorState,
+          };
+        }
         let aliasesForExpansion = aliases;
         if (enabled && (!isFetched || isError)) {
           const result = await refetch();

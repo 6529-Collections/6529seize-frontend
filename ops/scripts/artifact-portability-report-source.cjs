@@ -5,42 +5,32 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 const PROVENANCE_SCHEMA_VERSION = "artifact-portability-source-provenance.v1";
-const RELEASE_BUS_PREFLIGHT_WORKFLOW =
-  ".github/workflows/release-bus-v2-preflight.yml";
 const STAGING_WORKFLOW = ".github/workflows/deploy-staging.yml";
 const PRODUCTION_BUILD_WORKFLOW =
   ".github/workflows/production-build-artifact.yml";
 
-const RELEASE_BUS_PRODUCER = Object.freeze({
-  events: Object.freeze(["workflow_dispatch"]),
-  branches: Object.freeze(["main"]),
-  artifactPattern:
-    /^release-bus-frontend-[A-Za-z\d._-]{1,100}-r(?:[1-9]\d{0,8}|rollback-[1-9]\d{0,8})$/,
-  artifactContracts: Object.freeze({
-    "environment-bound-v3": "environment-bound-v1",
-  }),
-});
 const TRUSTED_REPORT_PRODUCERS = Object.freeze({
   staging: Object.freeze({
-    [RELEASE_BUS_PREFLIGHT_WORKFLOW]: RELEASE_BUS_PRODUCER,
     [STAGING_WORKFLOW]: Object.freeze({
       events: Object.freeze(["push", "workflow_dispatch"]),
       branches: Object.freeze(["1a-staging"]),
-      artifactPattern: /^manual-staging-frontend-[1-9]\d{0,19}$/,
+      artifactPattern:
+        /^(?:staging-frontend|manual-staging-frontend)-[1-9]\d{0,19}$/,
       artifactContracts: Object.freeze({
+        "environment-bound-v3": "environment-bound-v1",
+        "staging-deployment-v1": "staging-deployment-v1",
         "manual-staging-v1": "manual-staging-v1",
       }),
     }),
   }),
   production: Object.freeze({
-    [RELEASE_BUS_PREFLIGHT_WORKFLOW]: RELEASE_BUS_PRODUCER,
     [PRODUCTION_BUILD_WORKFLOW]: Object.freeze({
-      events: Object.freeze(["push", "workflow_dispatch"]),
+      events: Object.freeze(["workflow_dispatch"]),
       branches: Object.freeze(["main"]),
-      artifactPattern:
-        // eslint-disable-next-line security/detect-unsafe-regex -- Fully anchored and bounded: the only variable suffix is capped at 80 characters.
-        /^production-frontend-[a-f0-9]{40}(?:-[A-Za-z0-9][A-Za-z0-9._-]{0,79})?$/,
+      artifactPattern: /^production-frontend-[a-f0-9]{40}-[1-9]\d{0,19}$/,
       artifactContracts: Object.freeze({
+        "environment-bound-v3": "environment-bound-v1",
+        "production-deployment-v1": "production-deployment-v1",
         "production-prebuild-v1": "production-prebuild-v1",
         "production-prebuild-v2": "production-prebuild-v2",
       }),
@@ -353,21 +343,17 @@ function verifyReportRun(options, context) {
   );
   if (options.expectedWorkflowPath === STAGING_WORKFLOW) {
     invariant(
-      options.artifactName ===
-        `manual-staging-frontend-${options.expectedRunId}`,
-      "manual staging artifact name does not bind the source run"
+      options.artifactName === `staging-frontend-${options.expectedRunId}` ||
+        options.artifactName ===
+          `manual-staging-frontend-${options.expectedRunId}`,
+      "staging artifact name does not bind the source run"
     );
   }
   if (options.expectedWorkflowPath === PRODUCTION_BUILD_WORKFLOW) {
-    const legacyName = `production-frontend-${options.expectedSourceSha}`;
-    const operationBoundPrefix = `${legacyName}-`;
     invariant(
-      options.artifactName === legacyName ||
-        (options.artifactName.startsWith(operationBoundPrefix) &&
-          /^[A-Za-z0-9][A-Za-z0-9._-]{0,79}$/.test(
-            options.artifactName.slice(operationBoundPrefix.length)
-          )),
-      "production artifact name does not bind the source SHA"
+      options.artifactName ===
+        `production-frontend-${options.expectedSourceSha}-${options.expectedRunId}`,
+      "production artifact name does not bind the source SHA and run"
     );
   }
   const run = options.run;

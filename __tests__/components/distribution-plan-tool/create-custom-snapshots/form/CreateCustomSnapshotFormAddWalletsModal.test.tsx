@@ -29,7 +29,6 @@ describe('CreateCustomSnapshotFormAddWalletsModal', () => {
     setManualWallet: jest.fn(),
     addManualWallet: jest.fn(),
     onRemoveToken: jest.fn(),
-    onClose: jest.fn(),
   };
 
   it('updates manual wallet and adds it', () => {
@@ -43,14 +42,11 @@ describe('CreateCustomSnapshotFormAddWalletsModal', () => {
   });
 
 
-  it('passes tokens to table and handles close', () => {
-    const onClose = jest.fn();
-    const props = { ...defaultProps, tokens: [{ owner: '0x1' } as any], onClose };
+  it('passes tokens to the table', () => {
+    const props = { ...defaultProps, tokens: [{ owner: '0x1' } as any] };
     render(<CreateCustomSnapshotFormAddWalletsModal {...props} />);
     expect(tableMock).toHaveBeenCalledWith(
       expect.objectContaining({ tokens: props.tokens, onRemoveToken: props.onRemoveToken })
     );
-    fireEvent.click(screen.getByRole('button', { name: 'Close' }));
-    expect(onClose).toHaveBeenCalled();
   });
 });

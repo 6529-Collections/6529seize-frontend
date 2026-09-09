@@ -6,12 +6,11 @@ import {
   CheckIcon,
   ChevronDoubleLeftIcon,
   ChevronDownIcon,
-  EllipsisHorizontalIcon,
   LinkIcon,
   MagnifyingGlassIcon,
   ShareIcon,
 } from "@heroicons/react/24/outline";
-import { CompactMenu, type CompactMenuItem } from "@/components/compact-menu";
+import type { CompactMenuItem } from "@/components/compact-menu";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/auth/Auth";
@@ -32,6 +31,10 @@ import { WaveTrustSignals } from "@/components/waves/WaveTrustSignals";
 import MyStreamActionTooltip from "../MyStreamActionTooltip";
 import { useSidebarState } from "../../../../hooks/useSidebarState";
 import WaveRepButton from "@/components/waves/header/rep/WaveRepButton";
+import WaveParentNavigation from "@/components/waves/header/WaveParentNavigation";
+import CompactWaveActions from "./CompactWaveActions";
+import { waveRightPanelText } from "@/helpers/waves/wave-right-panel.helpers";
+import { BRAIN_RIGHT_SIDEBAR_ID } from "@/components/brain/right-sidebar/BrainRightSidebarTypes";
 
 const TRUNCATION_EPSILON_PX = 1;
 const WAVE_SCORE_LEARN_MORE_HREF = "/network/wave-score";
@@ -144,9 +147,7 @@ function MyStreamWaveHeaderIdentity({
         mode="summary"
         learnMoreHref={waveScoreLearnMoreHref}
       />
-      {showWaveRepAction && (
-        <WaveRepButton wave={wave} variant="compact" />
-      )}
+      {showWaveRepAction && <WaveRepButton wave={wave} variant="compact" />}
     </span>
   ) : null;
 
@@ -181,6 +182,10 @@ function MyStreamWaveHeaderIdentity({
         />
       </div>
       <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col">
+        <WaveParentNavigation
+          parentWave={wave.parent_wave}
+          variant={isCompact ? "compact-header" : "header"}
+        />
         {showDescriptionPreview ? (
           <>
             <WaveDescriptionPopover
@@ -333,11 +338,11 @@ export default function MyStreamWaveTabsHeader({
       : "tw-text-emerald-300";
   const searchMessagesLabel = "Search messages in this wave";
   const rightSidebarActionLabel = isRightSidebarOpen
-    ? "Hide right sidebar"
-    : "Show right sidebar";
+    ? waveRightPanelText("waves.sidebar.rightPanel.controls.hide")
+    : waveRightPanelText("waves.sidebar.rightPanel.controls.show");
   const rightSidebarCompactLabel = isRightSidebarOpen
-    ? "Hide details"
-    : "Wave details";
+    ? waveRightPanelText("waves.sidebar.rightPanel.controls.hideDetails")
+    : waveRightPanelText("waves.sidebar.rightPanel.controls.openDetails");
   const renderWaveLinkActionIcon = () => {
     if (waveLinkActionFeedbackState !== "idle") {
       return <CheckIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />;
@@ -369,19 +374,6 @@ export default function MyStreamWaveTabsHeader({
               },
             ]
           : []),
-        {
-          id: "wave-details",
-          label: rightSidebarCompactLabel,
-          icon: (
-            <ChevronDoubleLeftIcon
-              strokeWidth={2}
-              className={`tw-h-4 tw-w-4 tw-flex-shrink-0 tw-transition ${
-                isRightSidebarOpen ? "tw-rotate-180" : "tw-rotate-0"
-              }`}
-            />
-          ),
-          onSelect: toggleRightSidebar,
-        },
       ]
     : [];
   const compactMenuItems = [
@@ -442,7 +434,7 @@ export default function MyStreamWaveTabsHeader({
             <button
               type="button"
               onClick={handleMobileBack}
-              className="tw-flex tw-h-full tw-items-center tw-border-0 tw-bg-transparent tw-p-0 tw-px-1.5 tw-text-iron-300 tw-transition-colors hover:tw-text-iron-50 sm:-tw-ml-2.5 sm:tw-px-2.5"
+              className="tw-flex tw-h-9 tw-items-center tw-self-start tw-border-0 tw-bg-transparent tw-p-0 tw-px-1.5 tw-text-iron-300 tw-transition-colors hover:tw-text-iron-50 sm:-tw-ml-2.5 sm:tw-px-2.5"
               aria-label="Go back"
             >
               <ArrowLeftIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0 sm:tw-h-6 sm:tw-w-6" />
@@ -476,6 +468,9 @@ export default function MyStreamWaveTabsHeader({
               {renderWaveLinkActionIcon()}
             </button>
           )}
+          {isCompact && compactMenuItems.length > 0 && (
+            <CompactWaveActions items={compactMenuItems} />
+          )}
           <button
             type="button"
             onClick={() => setOpenSearch("wave")}
@@ -486,40 +481,33 @@ export default function MyStreamWaveTabsHeader({
           >
             <MagnifyingGlassIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
           </button>
-          {!isCompact && (
-            <button
-              type="button"
-              onClick={toggleRightSidebar}
-              data-tooltip-id={headerActionsTooltipId}
-              data-tooltip-content={rightSidebarActionLabel}
-              className="tw-group tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-white/[0.05] tw-transition-colors tw-duration-150 desktop-hover:hover:tw-border-white/10 desktop-hover:hover:tw-bg-white/[0.08]"
-              aria-label={rightSidebarActionLabel}
-            >
-              <ChevronDoubleLeftIcon
-                strokeWidth={2}
-                className={`tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-200 tw-transition tw-duration-300 ${
-                  isRightSidebarOpen
-                    ? "tw-rotate-180 desktop-hover:group-hover:tw-translate-x-0.5"
-                    : "tw-rotate-0 desktop-hover:group-hover:-tw-translate-x-0.5"
-                }`}
-              />
-            </button>
-          )}
-          {isCompact && compactMenuItems.length > 0 && (
-            <CompactMenu
-              aria-label="More wave actions"
-              unstyledTrigger
-              triggerClassName="tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-white/[0.05] tw-text-iron-200 tw-transition-colors tw-duration-150 hover:tw-border-white/10 hover:tw-bg-white/[0.08] hover:tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/60 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950"
-              trigger={
-                <>
-                  <span className="tw-sr-only">More wave actions</span>
-                  <EllipsisHorizontalIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
-                </>
-              }
-              items={compactMenuItems}
-              menuWidthClassName="tw-w-52"
+          <button
+            type="button"
+            onClick={toggleRightSidebar}
+            data-tooltip-id={headerActionsTooltipId}
+            data-tooltip-content={
+              isCompact ? rightSidebarCompactLabel : rightSidebarActionLabel
+            }
+            className="tw-group tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-white/[0.05] tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-border-white/10 desktop-hover:hover:tw-bg-white/[0.08]"
+            aria-label={
+              isCompact ? rightSidebarCompactLabel : rightSidebarActionLabel
+            }
+            aria-controls={
+              isRightSidebarOpen ? BRAIN_RIGHT_SIDEBAR_ID : undefined
+            }
+            aria-expanded={isRightSidebarOpen}
+            aria-pressed={isRightSidebarOpen}
+          >
+            <ChevronDoubleLeftIcon
+              strokeWidth={2}
+              aria-hidden="true"
+              className={`tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-200 tw-transition tw-duration-300 ${
+                isRightSidebarOpen
+                  ? "tw-rotate-180 desktop-hover:group-hover:tw-translate-x-0.5"
+                  : "tw-rotate-0 desktop-hover:group-hover:-tw-translate-x-0.5"
+              }`}
             />
-          )}
+          </button>
         </div>
       </div>
       <MyStreamActionTooltip id={headerActionsTooltipId} />

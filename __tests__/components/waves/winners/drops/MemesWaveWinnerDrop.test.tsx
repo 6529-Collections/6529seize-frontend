@@ -68,8 +68,25 @@ jest.mock("@/hooks/useLongPressInteraction", () => ({
   default: jest.fn(),
 }));
 jest.mock("@/components/waves/drops/WaveDropActionsOpen", () => () => (
-  <div data-testid="actions" />
+  <button
+    type="button"
+    data-testid="desktop-open-action"
+    onClick={(event) => event.stopPropagation()}
+  >
+    Open drop
+  </button>
 ));
+jest.mock(
+  "@/components/content-moderation/ContentModerationDropActions",
+  () => ({
+    __esModule: true,
+    default: () => null,
+  })
+);
+jest.mock("@/components/content-moderation/ReportDropModal", () => ({
+  __esModule: true,
+  default: () => null,
+}));
 jest.mock(
   "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper",
   () => (p: any) =>
@@ -194,7 +211,26 @@ describe("MemesWaveWinnersDrop", () => {
     expect(screen.getByText("5")).toBeInTheDocument();
     expect(screen.getByTestId("author-badges")).toBeInTheDocument();
     expect(screen.getByTestId("identity")).toBeInTheDocument();
+    expect(screen.getByTestId("desktop-open-action")).toBeInTheDocument();
+    expect(screen.queryByTestId("more-actions")).not.toBeInTheDocument();
     expect(screen.getByAltText("alice's profile picture")).toBeInTheDocument();
+  });
+
+  it("opens from the direct action without triggering the winner card", async () => {
+    const user = userEvent.setup();
+    const onDropClick = jest.fn();
+
+    render(
+      <MemesWaveWinnersDrop
+        winner={winner}
+        wave={wave}
+        onDropClick={onDropClick}
+      />
+    );
+
+    await user.click(screen.getByTestId("desktop-open-action"));
+
+    expect(onDropClick).not.toHaveBeenCalled();
   });
 
   it("opens the mapped Meme card without opening the winner drop", async () => {
@@ -261,10 +297,7 @@ describe("MemesWaveWinnersDrop", () => {
       expect(await screen.findByText("Mint date:")).toBeInTheDocument();
       const mintDate = await screen.findByText(expectedMintDate);
       expect(mintDate.tagName).toBe("TIME");
-      expect(mintDate).toHaveAttribute(
-        "datetime",
-        mintInstant.toISOString()
-      );
+      expect(mintDate).toHaveAttribute("datetime", mintInstant.toISOString());
     } finally {
       if (originalLanguagesDescriptor) {
         Object.defineProperty(
@@ -279,9 +312,12 @@ describe("MemesWaveWinnersDrop", () => {
   });
 
   it.each([
-    ["throws", () => {
-      throw new Error("schedule unavailable");
-    }],
+    [
+      "throws",
+      () => {
+        throw new Error("schedule unavailable");
+      },
+    ],
     ["returns an invalid date", () => ({ instantUtc: new Date(Number.NaN) })],
   ])("omits the mint date when the schedule %s", async (_case, schedule) => {
     getMintTimelineDetailsMock.mockImplementation(
@@ -383,7 +419,7 @@ describe("MemesWaveWinnersDrop", () => {
     ).toHaveClass(
       "tw-rounded-md",
       "tw-border",
-      "tw-border-white/[0.06]",
+      "tw-border-iron-700",
       "tw-bg-white/[0.05]"
     );
   });

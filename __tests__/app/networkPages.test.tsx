@@ -1,9 +1,6 @@
 import DefinitionsPage, {
   generateMetadata as generateDefinitionsMetadata,
 } from "@/app/network/definitions/page";
-import GroupsPage, {
-  generateMetadata as generateGroupsMetadata,
-} from "@/app/network/groups/page";
 import TDHPage, {
   generateMetadata as generateTDHMetadata,
 } from "@/app/network/tdh/page";
@@ -28,12 +25,6 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
 
 jest.mock("@/components/app-wallets/AppWalletsContext", () => ({
   useAppWallets: () => ({ appWalletsSupported: false }),
-}));
-
-// ✅ Mock Groups component
-jest.mock("@/components/groups/page/Groups", () => ({
-  __esModule: true,
-  default: () => <div data-testid="groups-component">Groups Component</div>,
 }));
 
 // ✅ AuthContext mock
@@ -73,11 +64,6 @@ describe("network pages render", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-  });
-
-  it("renders Groups page", () => {
-    renderWithAuth(<GroupsPage />);
-    expect(screen.getByTestId("groups-component")).toBeInTheDocument();
   });
 
   it("renders TDH page", () => {
@@ -132,12 +118,6 @@ describe("network pages render", () => {
       "href",
       "/waves/test-wave"
     );
-  });
-
-  it("generates metadata for Groups page", async () => {
-    const metadata = await generateGroupsMetadata();
-    expect(metadata.title).toEqual("Groups | Network");
-    expect(metadata.description).toEqual(`Network | ${domain}`);
   });
 
   it("generates metadata for TDH page", async () => {

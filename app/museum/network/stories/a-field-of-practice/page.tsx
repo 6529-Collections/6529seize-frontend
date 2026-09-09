@@ -3,16 +3,18 @@ import Link from "next/link";
 import { permanentRedirect } from "next/navigation";
 import {
   InstitutionalPracticeDirectory,
-  InstitutionalPracticeManuscript,
   InstitutionalPracticePublicationLine,
   institutionalPracticePublicationIsComplete,
   projectInstitutionalPracticeManuscript,
 } from "@/components/museum/InstitutionalPracticeReadingRoom";
 import { MuseumPublicationUnavailable } from "@/components/museum/MuseumPublicationUnavailable";
+import { MuseumResearchEditorialFigure } from "@/components/museum/research/MuseumResearchEditorialFigure";
+import { MuseumResearchReading } from "@/components/museum/research/MuseumResearchReading";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { getMuseumPublicationState } from "@/lib/museum/publication/runtime";
+import { projectMuseumResearchReading } from "@/lib/museum/researchEditorialProjection";
 
 export const metadata: Metadata = getAppMetadata({
   title: t(DEFAULT_LOCALE, "museum.network.institutionalPractice.title"),
@@ -34,6 +36,25 @@ export async function renderMuseumInstitutionalPracticePage() {
   if (projection?.title !== document.title) {
     return <MuseumPublicationUnavailable />;
   }
+  const selectedReading = projectMuseumResearchReading(projection.body, [
+    "Overview",
+    "Thematic pathways",
+    "1. Work, interface, and access",
+    "2. Preservation, reconstruction, and technical care",
+    "3. Records, archives, and public data",
+    "Working lessons",
+    "Describe the encounter before the interpretation",
+    "Publish loss and missingness",
+    "Connect the object to its research paths",
+    "Keep revisions visible",
+  ]);
+  if (selectedReading === null) return <MuseumPublicationUnavailable />;
+  const labelledSelectedReading = selectedReading
+    .replace(
+      /^## Thematic pathways$/m,
+      "## Selected thematic pathways"
+    )
+    .replace(/^## Working lessons$/m, "## Selected working lessons");
 
   return (
     <article className="tw-min-w-0">
@@ -49,7 +70,7 @@ export async function renderMuseumInstitutionalPracticePage() {
           {t(DEFAULT_LOCALE, "museum.network.institutionalPractice.eyebrow")}
         </p>
         <h1 className="tw-m-0 tw-mt-3 tw-text-4xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-5xl">
-          {projection.title}
+          {t(DEFAULT_LOCALE, "museum.network.institutionalPractice.title")}
         </h1>
         {projection.subtitle === null ? null : (
           <p className="tw-m-0 tw-mt-5 tw-max-w-3xl tw-text-lg tw-leading-8 tw-text-iron-300">
@@ -59,13 +80,38 @@ export async function renderMuseumInstitutionalPracticePage() {
         <InstitutionalPracticePublicationLine projection={projection} />
       </header>
 
-      <div className="tw-mt-12 tw-max-w-4xl tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-2">
-        <InstitutionalPracticeManuscript
-          projection={projection}
-          sourceCommit={publication.identity.commit}
-          sourcePath={document.sourcePath}
-        />
-      </div>
+      <MuseumResearchEditorialFigure
+        src="/museum/research/editorial/museums-to-learn-1600.webp"
+        srcSet="/museum/research/editorial/museums-to-learn-800.webp 800w, /museum/research/editorial/museums-to-learn-1600.webp 1600w"
+        width={1600}
+        height={1275}
+        alt="Visitors in the Gallery of Art in the Smithsonian Institution Building in 1857."
+        credit="United States National Museum Photographic Laboratory, Gallery of Art, Smithsonian Institution Building, 1857 (copied in the 1950s); the source mount labels the depicted gallery ‘ca. 1860.’ Smithsonian Institution Archives. CC0."
+        sourceHref="https://siarchives.si.edu/collections/siris_arc_401640"
+      />
+
+      <MuseumResearchReading
+        selectedMarkdown={labelledSelectedReading}
+        completeMarkdown={projection.body}
+        sourceCommit={publication.identity.commit}
+        sourcePath={document.sourcePath}
+        selectedTitle={t(
+          DEFAULT_LOCALE,
+          "museum.network.research.selectedReading"
+        )}
+        selectedDescription={t(
+          DEFAULT_LOCALE,
+          "museum.network.research.institutionalReadingDescription"
+        )}
+        completeLabel={t(
+          DEFAULT_LOCALE,
+          "museum.network.research.completeStudy"
+        )}
+        completeDescription={t(
+          DEFAULT_LOCALE,
+          "museum.network.research.completeStudyDescription"
+        )}
+      />
 
       <section
         className="tw-mt-14 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-10"
@@ -88,9 +134,25 @@ export async function renderMuseumInstitutionalPracticePage() {
             )}
           </p>
         </div>
-        <InstitutionalPracticeDirectory
-          practice={publication.institutionalPractice}
-        />
+        <details className="tw-group tw-mt-7 tw-border-x-0 tw-border-y tw-border-solid tw-border-iron-800 tw-py-1">
+          <summary className="hover:tw-text-primary-200 tw-flex tw-min-h-16 tw-cursor-pointer tw-list-none tw-items-center tw-justify-between tw-gap-4 tw-py-4 tw-text-base tw-font-semibold tw-text-primary-300 marker:tw-hidden focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 [&::-webkit-details-marker]:tw-hidden">
+            <span>
+              {t(
+                DEFAULT_LOCALE,
+                "museum.network.research.openInstitutionDirectory"
+              )}
+            </span>
+            <span
+              aria-hidden="true"
+              className="tw-text-xl tw-text-iron-400 group-open:tw-rotate-45"
+            >
+              +
+            </span>
+          </summary>
+          <InstitutionalPracticeDirectory
+            practice={publication.institutionalPractice}
+          />
+        </details>
       </section>
 
       <nav

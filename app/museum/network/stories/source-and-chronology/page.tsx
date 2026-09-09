@@ -1,14 +1,16 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { permanentRedirect } from "next/navigation";
-import { MuseumMarkdown } from "@/components/museum/MuseumMarkdown";
 import { MuseumPublicationUnavailable } from "@/components/museum/MuseumPublicationUnavailable";
+import { MuseumResearchEditorialFigure } from "@/components/museum/research/MuseumResearchEditorialFigure";
+import { MuseumResearchReading } from "@/components/museum/research/MuseumResearchReading";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { getMuseumPublicationState } from "@/lib/museum/publication/runtime";
 import { buildImmutableMuseumBlobUrl } from "@/lib/museum/publication/security";
 import { projectSourceMatrixForVisitors } from "@/lib/museum/publication/sourceMatrixProjection";
+import { projectMuseumResearchReading } from "@/lib/museum/researchEditorialProjection";
 
 export const metadata: Metadata = getAppMetadata({
   title: t(DEFAULT_LOCALE, "museum.network.research.title"),
@@ -38,7 +40,15 @@ export async function renderMuseumSourceAndChronologyPage() {
   if (sourceUrl === null) {
     return <MuseumPublicationUnavailable />;
   }
-
+  const selectedReading = projectMuseumResearchReading(visitorResearch, [
+    "2. Canonical accession facts",
+    "6. Chronology of life, practice, tools, and institutions",
+    "9. Conflicts, naming problems, and distinctions to preserve",
+    "9.1 Phototaxis date",
+    "9.2 923 versus 924",
+    "9.7 Artist name typography",
+    "9.9 Token, artwork, image, code",
+  ]);
   return (
     <article className="tw-min-w-0">
       <Link
@@ -71,25 +81,39 @@ export async function renderMuseumSourceAndChronologyPage() {
           </a>
         </p>
       </header>
-      <section
-        className="tw-mt-12 tw-max-w-5xl tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-10"
-        aria-labelledby="museum-research-record-title"
-      >
-        <h2
-          id="museum-research-record-title"
-          className="tw-m-0 tw-text-2xl tw-font-semibold tw-text-iron-50"
-        >
-          {t(DEFAULT_LOCALE, "museum.network.research.recordHeading")}
-        </h2>
-        <MuseumMarkdown
-          className="tw-mt-6"
-          embeddedDocument
-          sourceCommit={publication.identity.commit}
-          sourcePath={sourceMatrix.sourcePath}
-        >
-          {visitorResearch}
-        </MuseumMarkdown>
-      </section>
+      <MuseumResearchEditorialFigure
+        src="/museum/research/editorial/sources-and-chronology-1600.webp"
+        srcSet="/museum/research/editorial/sources-and-chronology-800.webp 800w, /museum/research/editorial/sources-and-chronology-1600.webp 1600w"
+        width={1218}
+        height={1600}
+        alt="A scholar studies a luminous diagram among papers and books."
+        credit="Rembrandt van Rijn, A Scholar in His Study ('Faust'), c. 1652. The Metropolitan Museum of Art. Public Domain."
+        sourceHref="https://www.metmuseum.org/art/collection/search/373045"
+      />
+      <MuseumResearchReading
+        {...(selectedReading === null
+          ? {}
+          : { selectedMarkdown: selectedReading })}
+        completeMarkdown={visitorResearch}
+        sourceCommit={publication.identity.commit}
+        sourcePath={sourceMatrix.sourcePath}
+        selectedTitle={t(
+          DEFAULT_LOCALE,
+          "museum.network.research.recordHeading"
+        )}
+        selectedDescription={t(
+          DEFAULT_LOCALE,
+          "museum.network.research.sourceReadingDescription"
+        )}
+        completeLabel={t(
+          DEFAULT_LOCALE,
+          "museum.network.research.completeSourceRecord"
+        )}
+        completeDescription={t(
+          DEFAULT_LOCALE,
+          "museum.network.research.completeSourceRecordDescription"
+        )}
+      />
     </article>
   );
 }

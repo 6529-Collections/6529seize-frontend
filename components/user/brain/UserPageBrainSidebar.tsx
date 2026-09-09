@@ -1,112 +1,151 @@
 "use client";
 
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import { useFavouriteWavesOfIdentity } from "@/hooks/useFavouriteWavesOfIdentity";
-import { useProfileWaveActivity } from "@/hooks/useProfileWaveActivity";
-import { useWaves } from "@/hooks/useWaves";
+import { ApiProfileWaveActivityType } from "@/generated/models/ApiProfileWaveActivityType";
+import { shortenAddress } from "@/helpers/address.helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useProfileWaveActivityWaves } from "@/hooks/useProfileWaveActivityWaves";
 import { useWaveCreatorPreviewModal } from "@/hooks/useWaveCreatorPreviewModal";
-import { WaveCreatorPreviewModal } from "@/components/waves/drops/WaveCreatorPreviewModal";
-import { useMemo } from "react";
+import { useEffect, useRef, type KeyboardEvent } from "react";
 import UserPageBrainSidebarCreated from "./UserPageBrainSidebarCreated";
+import UserPageBrainSidebarCreatedModal from "./UserPageBrainSidebarCreatedModal";
 import UserPageBrainSidebarMobileStrip from "./UserPageBrainSidebarMobileStrip";
-import UserPageBrainSidebarMostActive from "./UserPageBrainSidebarMostActive";
+import UserPageBrainSidebarRecentlyActive from "./UserPageBrainSidebarRecentlyActive";
+import styles from "./UserPageBrainSidebar.module.css";
 import { getProfileWaveIdentity } from "./userPageBrainSidebar.helpers";
 import { getUserPageBrainSidebarMessage } from "./userPageBrainSidebar.messages";
 
-const SIDEBAR_SKELETON_ITEMS = [0, 1, 2, 3, 4] as const;
+const CREATED_PAGE_SIZE = 20;
+const RECENT_PAGE_SIZE = 5;
+const SCROLL_BOUNDARY_TOLERANCE_PX = 1;
+const KEYBOARD_SCROLL_STEP_PX = 40;
 
-function UserPageBrainSidebarLoading() {
-  const loadingLabel = getUserPageBrainSidebarMessage(
-    "user.brain.sidebar.loadingWaveContext"
-  );
+const canScrollVertically = (element: HTMLDivElement): boolean =>
+  element.scrollHeight - element.clientHeight > SCROLL_BOUNDARY_TOLERANCE_PX;
 
-  return (
-    <>
-      <output className="tw-sr-only" aria-live="polite">
-        {loadingLabel}
-      </output>
+const isAtVerticalScrollBoundary = (
+  element: HTMLDivElement,
+  direction: -1 | 1
+): boolean => {
+  if (direction < 0) {
+    return element.scrollTop <= SCROLL_BOUNDARY_TOLERANCE_PX;
+  }
 
-      <div className="tw-mb-4 lg:tw-hidden">
-        <div className="tw-mb-2 tw-h-2.5 tw-w-24 tw-animate-pulse tw-rounded tw-bg-white/[0.06] motion-reduce:tw-animate-none" />
-        <div className="tw-flex tw-gap-2 tw-overflow-hidden">
-          {SIDEBAR_SKELETON_ITEMS.map((key) => (
-            <div
-              key={key}
-              className="tw-flex tw-h-9 tw-w-32 tw-shrink-0 tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-950/70 tw-p-1 tw-pr-3"
-            >
-              <div className="tw-h-7 tw-w-7 tw-shrink-0 tw-animate-pulse tw-rounded-full tw-bg-white/[0.07] motion-reduce:tw-animate-none" />
-              <div className="tw-h-3 tw-flex-1 tw-animate-pulse tw-rounded tw-bg-white/[0.07] motion-reduce:tw-animate-none" />
-            </div>
-          ))}
-        </div>
-      </div>
+  const remainingScroll =
+    element.scrollHeight - element.clientHeight - element.scrollTop;
+  return remainingScroll <= SCROLL_BOUNDARY_TOLERANCE_PX;
+};
 
-      <div className="tw-hidden lg:tw-block">
-        <div className="tw-mb-3 tw-h-3 tw-w-28 tw-animate-pulse tw-rounded tw-bg-white/[0.06] motion-reduce:tw-animate-none" />
-        <div className="tw-space-y-2.5">
-          {SIDEBAR_SKELETON_ITEMS.map((key) => (
-            <div
-              key={key}
-              className="tw-flex tw-items-center tw-gap-3 tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-white/5 tw-p-3 tw-shadow-inner"
-            >
-              <div className="tw-h-10 tw-w-10 tw-shrink-0 tw-animate-pulse tw-rounded-full tw-bg-white/[0.06] motion-reduce:tw-animate-none" />
-              <div className="tw-min-w-0 tw-flex-1 tw-space-y-1.5">
-                <div className="tw-h-3 tw-w-2/3 tw-animate-pulse tw-rounded tw-bg-white/[0.06] motion-reduce:tw-animate-none" />
-                <div className="tw-h-2.5 tw-w-1/2 tw-animate-pulse tw-rounded tw-bg-white/[0.05] motion-reduce:tw-animate-none" />
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </>
-  );
-}
+const getKeyboardScrollTop = (
+  event: KeyboardEvent<HTMLDivElement>
+): number | null => {
+  const sidebar = event.currentTarget;
+  const pageScrollDistance = sidebar.clientHeight * 0.8;
+
+  switch (event.key) {
+    case "ArrowUp":
+      return sidebar.scrollTop - KEYBOARD_SCROLL_STEP_PX;
+    case "ArrowDown":
+      return sidebar.scrollTop + KEYBOARD_SCROLL_STEP_PX;
+    case "PageUp":
+      return sidebar.scrollTop - pageScrollDistance;
+    case "PageDown":
+      return sidebar.scrollTop + pageScrollDistance;
+    case "Home":
+      return 0;
+    case "End":
+      return sidebar.scrollHeight - sidebar.clientHeight;
+    case " ":
+      if (event.target === sidebar) {
+        return (
+          sidebar.scrollTop +
+          (event.shiftKey ? -pageScrollDistance : pageScrollDistance)
+        );
+      }
+      return null;
+    default:
+      return null;
+  }
+};
 
 export default function UserPageBrainSidebar({
   profile,
 }: {
   readonly profile: ApiIdentity;
 }) {
-  const identity = getProfileWaveIdentity(profile);
+  const locale = useBrowserLocale();
+  const desktopSidebarRef = useRef<HTMLDivElement>(null);
+  const identity = getProfileWaveIdentity(profile).trim();
   const hasIdentity = identity.length > 0;
-  const { waves: createdWaves, status: createdStatus } = useWaves({
-    identity,
-    waveName: null,
-    enabled: hasIdentity,
-    directMessage: false,
-    limit: 20,
+  const createdState = useProfileWaveActivityWaves({
+    identity: hasIdentity ? identity : null,
+    activityType: ApiProfileWaveActivityType.Created,
+    limit: CREATED_PAGE_SIZE,
   });
-  const { waves: mostActiveWaves, status: mostActiveStatus } =
-    useFavouriteWavesOfIdentity({
-      identityKey: identity,
-      limit: 5,
-      enabled: hasIdentity,
-    });
-  const mostActiveWaveIds = useMemo(
-    () => mostActiveWaves.map((wave) => wave.id),
-    [mostActiveWaves]
-  );
-  const latestProfileActivityByWaveId = useProfileWaveActivity({
-    identity,
-    waveIds: mostActiveWaveIds,
-    enabled: hasIdentity && mostActiveStatus === "success",
+  const recentState = useProfileWaveActivityWaves({
+    identity: hasIdentity ? identity : null,
+    activityType: ApiProfileWaveActivityType.Recent,
+    limit: RECENT_PAGE_SIZE,
   });
   const { isModalOpen, handleBadgeClick, handleModalClose } =
     useWaveCreatorPreviewModal();
-  const modalUser = useMemo(
-    () => ({
-      handle: profile.handle,
-      primary_address: profile.primary_wallet,
-    }),
-    [profile.handle, profile.primary_wallet]
-  );
-  const hasCreatedWaves = createdWaves.length > 0;
-  const hasMostActiveWaves = mostActiveWaves.length > 0;
-  const isLoading =
-    hasIdentity &&
-    (createdStatus === "pending" || mostActiveStatus === "pending");
+  const profileDisplayName =
+    profile.handle ?? shortenAddress(profile.primary_wallet);
+  const isInitiallyLoading =
+    createdState.isInitialLoading || recentState.isInitialLoading;
+  const isLoadingMore =
+    createdState.isFetchingNextPage || recentState.isFetchingNextPage;
+  let liveMessage = "";
+  if (isInitiallyLoading) {
+    liveMessage = getUserPageBrainSidebarMessage(
+      locale,
+      "user.brain.sidebar.loadingWaveActivity"
+    );
+  } else if (isLoadingMore) {
+    liveMessage = getUserPageBrainSidebarMessage(
+      locale,
+      "user.brain.sidebar.loadingMoreWaveActivity"
+    );
+  }
 
-  if (!isLoading && !hasCreatedWaves && !hasMostActiveWaves) {
+  useEffect(() => {
+    const sidebar = desktopSidebarRef.current;
+    if (!sidebar) {
+      return;
+    }
+
+    // React delegates wheel events passively, so the boundary guard needs a
+    // native listener to keep Chromium from handing the gesture to the feed.
+    const handleWheel = (event: WheelEvent) => {
+      if (!canScrollVertically(sidebar) || event.deltaY === 0) {
+        return;
+      }
+
+      const direction = event.deltaY < 0 ? -1 : 1;
+      if (isAtVerticalScrollBoundary(sidebar, direction)) {
+        event.preventDefault();
+      }
+    };
+
+    sidebar.addEventListener("wheel", handleWheel, { passive: false });
+    return () => sidebar.removeEventListener("wheel", handleWheel);
+  }, [hasIdentity]);
+
+  const handleDesktopSidebarKeyDown = (
+    event: KeyboardEvent<HTMLDivElement>
+  ) => {
+    const sidebar = event.currentTarget;
+    const nextScrollTop = getKeyboardScrollTop(event);
+    if (nextScrollTop === null || !canScrollVertically(sidebar)) {
+      return;
+    }
+
+    const maxScrollTop = sidebar.scrollHeight - sidebar.clientHeight;
+    event.preventDefault();
+    sidebar.scrollTop = Math.min(Math.max(nextScrollTop, 0), maxScrollTop);
+  };
+
+  if (!hasIdentity) {
     return null;
   }
 
@@ -115,36 +154,37 @@ export default function UserPageBrainSidebar({
       className="tw-order-1 tw-min-w-0 tw-self-start lg:tw-sticky lg:tw-top-8 lg:tw-order-2"
       data-testid="brain-sidebar"
     >
-      {isLoading ? (
-        <UserPageBrainSidebarLoading />
-      ) : (
-        <>
-          <UserPageBrainSidebarMobileStrip
-            createdWaves={createdWaves}
-            mostActiveWaves={mostActiveWaves}
-            onOpenCreatedWaves={handleBadgeClick}
-          />
+      <output className="tw-sr-only" aria-live="polite" aria-atomic="true">
+        {liveMessage}
+      </output>
 
-          <div
-            className="tw-hidden tw-space-y-6 lg:tw-block"
-            data-testid="brain-sidebar-desktop"
-          >
-            <UserPageBrainSidebarCreated
-              identity={identity}
-              waves={createdWaves}
-            />
-            <UserPageBrainSidebarMostActive
-              latestProfileActivityByWaveId={latestProfileActivityByWaveId}
-              waves={mostActiveWaves}
-            />
-          </div>
-        </>
-      )}
+      <UserPageBrainSidebarMobileStrip
+        createdState={createdState}
+        recentState={recentState}
+        onOpenCreatedWaves={handleBadgeClick}
+      />
 
-      <WaveCreatorPreviewModal
+      <section
+        aria-label={getUserPageBrainSidebarMessage(
+          locale,
+          "user.brain.sidebar.desktopScrollRegionLabel"
+        )}
+        className={`${styles["desktopScrollRegion"] ?? ""} tw-hidden tw-space-y-6 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 lg:tw-block lg:tw-max-h-[calc(100dvh-4rem)] lg:tw-overflow-y-auto lg:tw-overflow-x-hidden lg:tw-overscroll-y-contain lg:tw-pb-1 lg:tw-pr-1 lg:tw-scrollbar-thin lg:tw-scrollbar-track-transparent lg:tw-scrollbar-thumb-iron-700/70 desktop-hover:hover:lg:tw-scrollbar-thumb-iron-500`}
+        data-brain-sidebar-scroll-region
+        data-testid="brain-sidebar-desktop"
+        onKeyDown={handleDesktopSidebarKeyDown}
+        ref={desktopSidebarRef}
+        tabIndex={0}
+      >
+        <UserPageBrainSidebarCreated identity={identity} state={createdState} />
+        <UserPageBrainSidebarRecentlyActive state={recentState} />
+      </section>
+
+      <UserPageBrainSidebarCreatedModal
         isOpen={isModalOpen}
         onClose={handleModalClose}
-        user={modalUser}
+        profileDisplayName={profileDisplayName}
+        state={createdState}
       />
     </aside>
   );

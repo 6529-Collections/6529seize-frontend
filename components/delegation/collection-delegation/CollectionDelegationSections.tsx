@@ -2,6 +2,13 @@
 
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
+import {
+  faLink,
+  faUserGear,
+  faWallet,
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useMemo, type Dispatch, type SetStateAction } from "react";
 
 import type { ContractDelegation } from "../CollectionDelegation.utils";
@@ -23,6 +30,10 @@ import {
 import { OutgoingDelegationsTable } from "./OutgoingDelegationsTable";
 import type { CollectionDelegationReads } from "./useCollectionDelegationReads";
 import type { DelegationRevocation } from "./useDelegationRevocation";
+import {
+  COLLECTION_PANEL_CLASS,
+  COLLECTION_PANEL_ICON_CLASS,
+} from "./collection-delegation-helpers";
 
 interface DisclosureState {
   delegationKeys: string[];
@@ -55,6 +66,30 @@ function groupDelegationsByType(delegations: ContractDelegation[]) {
         delegation.useCase.use_case === CONSOLIDATION_USE_CASE.use_case
     ),
   };
+}
+
+function CollectionSectionHeader(
+  props: Readonly<{
+    description: string;
+    icon: IconDefinition;
+    title: string;
+  }>
+) {
+  return (
+    <div className="tw-mb-5 tw-flex tw-items-start tw-gap-4">
+      <span className={COLLECTION_PANEL_ICON_CLASS} aria-hidden="true">
+        <FontAwesomeIcon icon={props.icon} className="tw-size-4" />
+      </span>
+      <div className="tw-min-w-0">
+        <h2 className="tw-m-0 tw-text-xl tw-font-semibold tw-leading-7 tw-text-iron-100">
+          {props.title}
+        </h2>
+        <p className="tw-mb-0 tw-mt-1 tw-max-w-4xl tw-text-base tw-leading-6 tw-text-iron-400">
+          {props.description}
+        </p>
+      </div>
+    </div>
+  );
 }
 
 /**
@@ -191,13 +226,15 @@ export function CollectionDelegationSections(
 
   function printDelegations() {
     return (
-      <section className="tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900 tw-p-4 sm:tw-p-6">
-        <h2 className="tw-mb-2 tw-mt-0 tw-text-xl tw-font-semibold tw-text-white">
-          {t(locale, "delegation.collection.sections.delegations.title")}
-        </h2>
-        <p className="tw-mb-5 tw-text-base tw-leading-6 tw-text-iron-300">
-          {t(locale, "delegation.collection.sections.delegations.description")}
-        </p>
+      <section className={COLLECTION_PANEL_CLASS}>
+        <CollectionSectionHeader
+          description={t(
+            locale,
+            "delegation.collection.sections.delegations.description"
+          )}
+          icon={faWallet}
+          title={t(locale, "delegation.collection.sections.delegations.title")}
+        />
         <div className="tw-space-y-3">
           <DelegationDisclosurePanel
             title={t(
@@ -244,13 +281,15 @@ export function CollectionDelegationSections(
 
   function printSubDelegations() {
     return (
-      <section className="tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900 tw-p-4 sm:tw-p-6">
-        <h2 className="tw-mb-2 tw-mt-0 tw-text-xl tw-font-semibold tw-text-white">
-          {t(locale, "delegation.collection.sections.managers.title")}
-        </h2>
-        <p className="tw-mb-5 tw-text-base tw-leading-6 tw-text-iron-300">
-          {t(locale, "delegation.collection.sections.managers.description")}
-        </p>
+      <section className={COLLECTION_PANEL_CLASS}>
+        <CollectionSectionHeader
+          description={t(
+            locale,
+            "delegation.collection.sections.managers.description"
+          )}
+          icon={faUserGear}
+          title={t(locale, "delegation.collection.sections.managers.title")}
+        />
         <div className="tw-space-y-3">
           <DelegationDisclosurePanel
             title={t(
@@ -298,16 +337,18 @@ export function CollectionDelegationSections(
 
   function printConsolidations() {
     return (
-      <section className="tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900 tw-p-4 sm:tw-p-6">
-        <h2 className="tw-mb-2 tw-mt-0 tw-text-xl tw-font-semibold tw-text-white">
-          {t(locale, "delegation.collection.sections.consolidations.title")}
-        </h2>
-        <p className="tw-mb-5 tw-text-base tw-leading-6 tw-text-iron-300">
-          {t(
+      <section className={COLLECTION_PANEL_CLASS}>
+        <CollectionSectionHeader
+          description={t(
             locale,
             "delegation.collection.sections.consolidations.description"
           )}
-        </p>
+          icon={faLink}
+          title={t(
+            locale,
+            "delegation.collection.sections.consolidations.title"
+          )}
+        />
         <div className="tw-space-y-3">
           <DelegationDisclosurePanel
             title={t(
@@ -353,7 +394,7 @@ export function CollectionDelegationSections(
   }
 
   return (
-    <div className="tw-space-y-6">
+    <div className="tw-space-y-4">
       {printDelegations()}
       {printConsolidations()}
       {printSubDelegations()}

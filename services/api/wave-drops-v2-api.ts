@@ -34,8 +34,10 @@ import {
   normalizeWaveMin,
 } from "@/services/api/drop-v2-mappers";
 import {
+  DEFAULT_WAVE_DROPS_RETRY_OPTIONS,
   getDropApprovalTiming,
   getDropEndpointId,
+  getNormalizedDropId,
   getDropType,
   getWinningContext,
   rethrowAbortFetchError,
@@ -60,6 +62,7 @@ import type {
 } from "./wave-drops-v2.types";
 
 export { fetchDropReactionDetailsV2 } from "./wave-drop-reactions-v2-api";
+export { fetchWaveSearchAuthors } from "./wave-search-authors-api";
 
 export type {
   ApiWaveDropsV2PageFeed,
@@ -67,13 +70,6 @@ export type {
   WavePollsSort,
   WavePollsState,
 } from "./wave-drops-v2.types";
-
-const DEFAULT_RETRY_OPTIONS = {
-  maxRetries: 2,
-  initialDelayMs: 300,
-  backoffFactor: 1.5,
-  jitter: 0.1,
-} as const;
 
 const fetchDropPartV2 = async ({
   dropId,
@@ -271,6 +267,8 @@ const hydrateDropV2 = async ({
     top_raters: topRaters,
     raters_count: voting?.voters_count ?? 0,
     context_profile_context: getContextProfileContext(drop),
+    ...(drop.viewer_context ? { viewer_context: drop.viewer_context } : {}),
+    ...(drop.moderation ? { moderation: drop.moderation } : {}),
     subscribed_actions: [],
     is_signed: drop.is_signed,
     reactions: mapDropReactionCountersV2(drop),
@@ -324,6 +322,8 @@ export const mapLeaderboardDropV2 = ({
     top_raters: [],
     raters_count: voting?.voters_count ?? 0,
     context_profile_context: getContextProfileContext(drop),
+    ...(drop.viewer_context ? { viewer_context: drop.viewer_context } : {}),
+    ...(drop.moderation ? { moderation: drop.moderation } : {}),
     subscribed_actions: [],
     is_signed: drop.is_signed,
     reactions: mapDropReactionCountersV2(drop),
@@ -411,14 +411,6 @@ const hydrateDropsWithEmbeddedWavesV2 = async ({
     .map((result) => result.value);
 };
 
-const getNormalizedDropId = (dropId: string): string => {
-  const normalizedDropId = dropId.trim();
-  if (!normalizedDropId) {
-    throw new Error("Cannot fetch drop without a drop id");
-  }
-  return normalizedDropId;
-};
-
 const fetchDropAndWaveV2 = async (
   dropId: string,
   signal?: AbortSignal
@@ -466,7 +458,7 @@ export async function fetchWaveDropsFeedV2({
   const data = withRetry
     ? await commonApiFetchWithRetry<ApiWaveDropsFeedV2>({
         ...request,
-        retryOptions: DEFAULT_RETRY_OPTIONS,
+        retryOptions: DEFAULT_WAVE_DROPS_RETRY_OPTIONS,
       })
     : await commonApiFetch<ApiWaveDropsFeedV2>(request);
 
@@ -511,6 +503,9 @@ export async function fetchWaveLeaderboardV2({
 export async function fetchWaveDropsSearchV2({
   wave,
   term,
+  authorId,
+  after,
+  before,
   page,
   size,
   signal,
@@ -519,7 +514,10 @@ export async function fetchWaveDropsSearchV2({
   const response = await commonApiFetch<ApiDropV2PageWithoutCount>({
     endpoint: `v2/waves/${waveMin.id}/search`,
     params: {
-      term,
+      ...(term ? { term } : {}),
+      ...(authorId ? { author_id: authorId } : {}),
+      ...(after !== undefined ? { after: after.toString() } : {}),
+      ...(before !== undefined ? { before: before.toString() } : {}),
       page: page.toString(),
       size: size.toString(),
     },

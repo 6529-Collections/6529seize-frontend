@@ -1,4 +1,4 @@
-import { render } from "@testing-library/react";
+import { act, render } from "@testing-library/react";
 import React from "react";
 import WaveDropQuoteWithDropId from "@/components/waves/drops/WaveDropQuoteWithDropId";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
@@ -131,10 +131,13 @@ describe("WaveDropQuoteWithDropId", () => {
       stableKey: "d1",
       stableHash: "d1",
     };
+    const waveMessages = { drops: [waveDrop] };
     useMyStreamOptional.mockReturnValue({
       activeWave: { id: "w1" },
       waveMessagesStore: {
-        getData: jest.fn(() => ({ drops: [waveDrop] })),
+        getData: jest.fn(() => waveMessages),
+        subscribe: jest.fn(),
+        unsubscribe: jest.fn(),
       },
     });
     useQuery.mockImplementation((opts: any) => {
@@ -155,6 +158,60 @@ describe("WaveDropQuoteWithDropId", () => {
     const call = useQuery.mock.calls[0][0];
     expect(call.enabled).toBe(false);
     expect(call.initialData).toBe(waveDrop);
+  });
+
+  it("keeps active-wave hydration neutral until the moderated record arrives", () => {
+    const listeners = new Set<() => void>();
+    let waveMessages: any = { isLoading: true, drops: [] };
+    const staleCachedDrop = {
+      id: "d1",
+      wave: { id: "w1" },
+      parts: [{ part_id: 1, content: "Stale original content" }],
+    };
+    const moderatedDrop = {
+      id: "d1",
+      wave: { id: "w1" },
+      type: "FULL",
+      moderation: { status: "MODERATOR_REMOVED", can_view: false },
+    };
+    getQueryData.mockReturnValue(staleCachedDrop);
+    useMyStreamOptional.mockReturnValue({
+      activeWave: { id: "w1" },
+      waveMessagesStore: {
+        getData: jest.fn(() => waveMessages),
+        subscribe: jest.fn((_waveId: string, listener: () => void) => {
+          listeners.add(listener);
+        }),
+        unsubscribe: jest.fn((_waveId: string, listener: () => void) => {
+          listeners.delete(listener);
+        }),
+      },
+    });
+    useQuery.mockReturnValue({
+      data: staleCachedDrop,
+      error: new Error("Drop d1 not found"),
+    });
+
+    render(
+      <WaveDropQuoteWithDropId
+        dropId="d1"
+        partId={1}
+        maybeDrop={null}
+        waveId="w1"
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    expect(capturedProps.drop).toBeNull();
+    expect(capturedProps.isNotFound).toBe(false);
+
+    act(() => {
+      waveMessages = { isLoading: false, drops: [moderatedDrop] };
+      listeners.forEach((listener) => listener());
+    });
+
+    expect(capturedProps.drop).toBe(moderatedDrop);
+    expect(capturedProps.isNotFound).toBe(false);
   });
 
   it("passes not-found state when the refresh returns the not-found message", () => {

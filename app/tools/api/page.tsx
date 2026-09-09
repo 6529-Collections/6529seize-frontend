@@ -11,10 +11,10 @@ import {
   AboutCol as Col,
   AboutContainer as Container,
   AboutRow as Row,
+  ABOUT_DOCUMENTATION_PAGE_TITLE_CLASS_NAME,
+  ABOUT_SECTION_HEADING_CLASS_NAME,
   CONTENT_PAGE_CONTAINER_CLASS,
   CONTENT_PAGE_MAIN_CLASS,
-  CONTENT_PAGE_SECTION_HEADING_CLASS,
-  CONTENT_PAGE_TITLE_CLASS,
 } from "@/components/about/AboutLayout";
 
 const API_PAGE_LOCALE = DEFAULT_LOCALE;
@@ -22,8 +22,8 @@ const API_AUTHENTICATION_PATH = "/tools/api/authentication";
 const API_LINK_CLASS_NAME =
   "hover:tw-text-primary-200 tw-font-semibold tw-text-primary-300 tw-no-underline focus-visible:tw-rounded-sm focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400";
 const API_SECTION_CLASS_NAME =
-  "tw-w-full tw-max-w-4xl tw-text-base tw-leading-7 tw-text-iron-300 [&_b]:tw-font-semibold [&_b]:tw-text-iron-100 [&_li]:tw-mb-3 [&_li::marker]:tw-text-iron-600 [&_ol]:tw-mb-0 [&_ol]:tw-mt-5 [&_ol]:tw-pl-6 [&_p]:tw-mb-5 [&_ul]:tw-mb-0 [&_ul]:tw-mt-5 [&_ul]:tw-pl-6";
-const API_SECTION_HEADING_CLASS_NAME = `${CONTENT_PAGE_SECTION_HEADING_CLASS} tw-mb-3`;
+  "tw-w-full tw-text-base tw-leading-7 tw-text-iron-300 [&_b]:tw-font-semibold [&_b]:tw-text-iron-100 [&_li]:tw-mb-3 [&_li::marker]:tw-text-iron-600 [&_ol]:tw-mb-0 [&_ol]:tw-mt-5 [&_ol]:tw-pl-6 [&>p]:tw-mb-5 [&_ul]:tw-mb-0 [&_ul]:tw-mt-5 [&_ul]:tw-pl-6";
+const API_SECTION_HEADING_CLASS_NAME = `${ABOUT_SECTION_HEADING_CLASS_NAME} tw-mb-3`;
 
 const nodeJsMediaDropExample = `import fetch from "node-fetch";
 import {readFile} from "fs/promises";
@@ -202,10 +202,15 @@ run().catch((err) => {
 export default function AboutApi() {
   return (
     <main className={clsx(styles["main"], CONTENT_PAGE_MAIN_CLASS)}>
-      <Container fluid className={CONTENT_PAGE_CONTAINER_CLASS}>
+      <Container
+        fluid
+        className={`${CONTENT_PAGE_CONTAINER_CLASS} tw-max-w-3xl sm:tw-pt-12`}
+      >
         <Row>
-          <Col className="tw-max-w-4xl">
-            <h1 className={CONTENT_PAGE_TITLE_CLASS}>6529.io API</h1>
+          <Col>
+            <h1 className={ABOUT_DOCUMENTATION_PAGE_TITLE_CLASS_NAME}>
+              6529.io API
+            </h1>
           </Col>
         </Row>
         <Row className="tw-pt-5">
@@ -244,12 +249,12 @@ export default function AboutApi() {
                 if the user is authenticated.
               </p>
 
-              <div className="tw-mb-0 tw-flex tw-items-center tw-gap-3 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-p-5 tw-font-medium tw-text-iron-200">
+              <div className="tw-mb-0 tw-flex tw-items-start tw-gap-3 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-p-5 tw-font-medium tw-text-iron-200">
                 <InformationCircleIcon
                   aria-hidden="true"
-                  className="tw-size-5 tw-flex-none tw-text-primary-300"
+                  className="tw-mt-0.5 tw-size-5 tw-flex-none tw-text-primary-300"
                 />
-                <p className="!tw-mb-0 !tw-mt-0">
+                <p className="tw-m-0 tw-leading-6">
                   Some routes are still undocumented. We plan to expand the
                   documentation over time.
                 </p>
@@ -262,7 +267,7 @@ export default function AboutApi() {
           <Col>
             <section
               aria-labelledby="api-authentication-guide-heading"
-              className="tw-w-full tw-max-w-4xl tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-p-5 tw-text-base tw-leading-7 tw-text-iron-300"
+              className="tw-w-full tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-p-5 tw-text-base tw-leading-7 tw-text-iron-300"
             >
               <h2
                 id="api-authentication-guide-heading"

@@ -13,20 +13,23 @@ The supported entrypoint is the repo-local `6529` command:
 
 ```bash
 6529 bootstrap
-6529 install
-6529 install:frozen
+6529 ci
 6529 install:prod
-6529 update
-6529 update:all
+6529 add <package>
+6529 remove <package>
+6529 update [package]
+6529 audit
+6529 audit:fix
 6529 run dev
 6529 run build
-6529 approve-builds
 6529 staging
 6529 run test
 6529 run lint
 ```
 
-Plain `pnpm install` and direct package-manager script execution are intentionally rejected by the repo guard. Use `6529 run <script>` for package.json scripts.
+Plain `pnpm install`, direct package-manager script execution, and unsupported
+wrapper commands are intentionally rejected by the repo guard. Use
+`6529 run <script>` for package.json scripts.
 
 If you use the repo's `.envrc`, the local `bin/` directory is added to `PATH`
 so the `6529` shorthand commands above work directly inside the repository.
@@ -50,23 +53,47 @@ shell after running it, or activate it immediately in the current shell:
 source <(./bin/6529 bootstrap --print-export)
 ```
 
-Then install dependencies:
+### Public release-request package
+
+`@6529-collections/release-request` is installed from public npm at the exact
+version in `package.json` and `pnpm-lock.yaml`. Developers and CI do not need a
+package token, a private registry, or operating-system credential setup.
+
+The package is allowed to bypass the normal seven-day dependency-age delay
+because it comes from the trusted 6529 Coordinator repository and npm records
+its GitHub provenance. Every version still needs a reviewed frontend pull
+request, an exact version pin, and the expected lockfile integrity before it is
+used here.
+
+`6529 ci` is the normal deterministic installation path. It runs the secure
+pnpm install with `--frozen-lockfile`, so routine setup cannot change
+`pnpm-lock.yaml`. Bare `6529 install` and `6529 i` are rejected because they
+are ambiguous between frozen setup and dependency mutation. The redundant
+`6529 install:frozen` alias is also rejected so `6529 ci` remains the single
+frozen-install vocabulary.
+
+The public-package policy checks the committed `.npmrc`, the exact Coordinator
+package version and integrity, the age exception, package command arguments,
+and package-manager environment overrides before pnpm starts. It rejects
+registry, credential, proxy, TLS, hook, and project-root overrides. Package
+traffic stays behind Socket Firewall; no registry bypass is needed.
+
+To report or apply audit fixes, use the same secure wrapper path:
 
 ```bash
-6529 install
+6529 audit
+6529 audit:fix
 ```
 
-To apply audit fixes, use the same secure wrapper path:
+For an intentional dependency update, use:
 
 ```bash
-6529 update
+6529 update [package]
 ```
 
-For an intentional broader pnpm update, use:
-
-```bash
-6529 update:all
-```
+Coordinator package upgrades remain deliberate. The exact package version,
+policy constants, and lockfile integrity must change together in a reviewed
+pull request.
 
 After bootstrap, prefer the bare `6529` command for day-to-day work while you
 are inside this repository. Outside the repo, `6529` should remain unavailable.
@@ -95,11 +122,10 @@ wrapper as JavaScript:
 pm2 start bash --name=6529seize -- -lc 'cd /path/to/repo && ./bin/6529 run start:standalone'
 ```
 
-If pnpm reports ignored install/build scripts, use:
-
-```bash
-6529 approve-builds
-```
+If a new dependency needs an install/build script, add it to `allowBuilds` in
+`pnpm-workspace.yaml` and `ALLOWED_BUILD_DEPENDENCIES` in
+`scripts/public-package-policy.cjs` in the same reviewed pull request. Then run
+`6529 ci`. Build approvals are never accepted automatically.
 
 ## GitHub workflow helpers
 
@@ -157,9 +183,8 @@ workflow has a hard guard that rejects every non-`main` ref. Before triggering
 If those checks pass, it asks for confirmation before running the production
 workflow against `main`.
 
-For release-lane ownership, shared validation, backend coordination, and
-production promotion gates, use
-[`simple-release-bus-v2.md`](simple-release-bus-v2.md).
+For staging/production merges, deployment workflows, backend ordering, and
+automatic validation, use [Deployment](deployment.md).
 
 ## Guardrails in this repo
 
@@ -210,7 +235,8 @@ Socket Firewall Free is still wrapper mode. That means:
 - It only protects commands that are actually prefixed with `sfw`.
 - It blocks confirmed malware, but AI-flagged packages may only warn.
 - It does not provide true centralized enforcement by itself.
-- It does not support private/custom registries in Free mode.
+- It does not inspect private/custom registries in Free mode. This repository
+  now uses the public npm registry only.
 - It cannot block already-cached artifacts when no network request is made.
 
 Because of those limits, the strongest enforcement in this repo comes from:

@@ -13,6 +13,8 @@ import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { GroupsRequestParams } from "@/entities/IGroup";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import type { Mutable, NonNullableNotRequired } from "@/helpers/Types";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { commonApiFetch } from "@/services/api/common-api";
 
 const MAX_RESULTS = 7;
@@ -258,6 +260,7 @@ export function useCreateWaveGroupSearch({
   onSelect,
   wrapperRef,
 }: CreateWaveGroupSearchParams) {
+  const locale = useBrowserLocale();
   const baseId = useId();
   const inputId = `${baseId}-input`;
   const listboxId = `${baseId}-listbox`;
@@ -371,7 +374,11 @@ export function useCreateWaveGroupSearch({
   });
 
   const hasValue = inputValue.trim().length > 0;
-  const helperText = `Current group: ${selectedGroup?.name ?? defaultLabel}`;
+  const helperText = selectedGroup
+    ? t(locale, "waves.create.groups.currentGroupWithName", {
+        name: selectedGroup.name,
+      })
+    : defaultLabel;
   const showClearButton =
     allowClear && (hasValue || !!selectedGroup) && !disabled;
   const showNoResults = !isFetching && isOpen && suggestions.length === 0;

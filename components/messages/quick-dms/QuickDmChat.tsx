@@ -7,11 +7,11 @@ import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { getMessagePathRoute } from "@/helpers/navigation.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { useMarkWaveNotificationsRead } from "@/hooks/useMarkWaveNotificationsRead";
 import { useWaveData } from "@/hooks/useWaveData";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { getDropQueryKey } from "@/services/api/drop-api";
+import { useDmUnreadConversation } from "@/services/dm-unread/DmUnreadStateProvider";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import type React from "react";
@@ -24,7 +24,6 @@ import {
 import {
   getFormattedWaveName,
   getQuickDmAvatarSource,
-  getUnreadCount,
 } from "./QuickDirectMessagesUtils";
 
 interface QuickDmChatProps {
@@ -56,13 +55,13 @@ export const QuickDmChat = ({
   const { directMessages, registerWave } = useMyStream();
   const markDirectMessageRead = directMessages.markWaveRead;
   const { updateEligibility } = useWaveEligibility();
-  const markWaveNotificationsRead = useMarkWaveNotificationsRead();
   const { data: wave, isFetching, isError } = useWaveData({ waveId });
+  const unreadConversation = useDmUnreadConversation(waveId);
   const title = getFormattedWaveName({
     name: wave?.name ?? listWave?.name ?? "",
   });
   const avatar = getQuickDmAvatarSource(title, listWave, wave);
-  const listUnreadCount = listWave ? getUnreadCount(listWave) : 0;
+  const listUnreadCount = unreadConversation?.unread_count ?? 0;
   const hasMarkedInitialReadRef = useRef<string | null>(null);
   let chatContent: React.ReactNode = null;
 
@@ -74,9 +73,12 @@ export const QuickDmChat = ({
       return;
     }
 
-    markDirectMessageRead(waveId);
-    void markWaveNotificationsRead(waveId).catch(() => undefined);
-  }, [markDirectMessageRead, markWaveNotificationsRead, waveId]);
+    markDirectMessageRead(waveId, unreadConversation?.latest_drop_serial_no);
+  }, [
+    markDirectMessageRead,
+    unreadConversation?.latest_drop_serial_no,
+    waveId,
+  ]);
 
   useEffect(() => {
     const shouldMarkRead =

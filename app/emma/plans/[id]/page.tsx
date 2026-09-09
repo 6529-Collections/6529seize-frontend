@@ -15,12 +15,12 @@ export default async function DistributionPlanToolPlan({
   return (
     <DistributionPlanToolWrapper>
       <DistributionPlanToolContextWrapper>
-        <div className="tw-flex tw-h-full tw-min-h-screen">
-          <div className="tw-flex-1 tw-min-w-0 tw-pt-8 tw-space-y-8 tw-pb-12 tw-px-2 lg:tw-px-4 xl:tw-px-8">
+        <div className="tw-flex tw-h-full tw-min-h-screen tw-flex-col xl:tw-flex-row-reverse">
+          <DistributionPlanToolSidebar />
+          <div className="tw-min-w-0 tw-w-full tw-flex-1 tw-space-y-8 tw-px-4 tw-pb-12 tw-pt-6 sm:tw-px-6 sm:tw-pt-8 xl:tw-px-8">
             <DistributionPlanWarnings />
             <DistributionPlanToolPage id={id} />
           </div>
-          <DistributionPlanToolSidebar />
         </div>
       </DistributionPlanToolContextWrapper>
     </DistributionPlanToolWrapper>

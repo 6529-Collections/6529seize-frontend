@@ -14,6 +14,8 @@ export default function UserPageProfileWavePicker({
   hasActiveProfileProxy,
   selectedWaveId,
   submittingWaveId,
+  profileHref,
+  onCreateProfileCuration,
   onSelectWave,
   variant = "panel",
 }: {
@@ -24,6 +26,8 @@ export default function UserPageProfileWavePicker({
   readonly hasActiveProfileProxy: boolean;
   readonly selectedWaveId: string | null;
   readonly submittingWaveId: string | null;
+  readonly profileHref: string;
+  readonly onCreateProfileCuration: () => void;
   readonly onSelectWave: (waveId: string) => void;
   readonly variant?: "panel" | "dropdown" | "mobile-sheet";
 }) {
@@ -71,6 +75,8 @@ export default function UserPageProfileWavePicker({
       <UserPageProfileWavePickerNonReady
         state={state}
         variant={variant}
+        profileHref={profileHref}
+        onCreateProfileCuration={onCreateProfileCuration}
         onRetry={retryWavePickerLoad}
       />
     );
@@ -82,6 +88,7 @@ export default function UserPageProfileWavePicker({
       title={title}
       selectedWaveId={selectedWaveId}
       submittingWaveId={submittingWaveId}
+      onCreateProfileCuration={onCreateProfileCuration}
       onSelectWave={onSelectWave}
       variant={variant}
     />

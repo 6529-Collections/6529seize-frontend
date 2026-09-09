@@ -1,3 +1,7 @@
+import { CREATE_WAVE_FORM_STYLES } from "../utils/createWaveFormStyles";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t, type MessageKey } from "@/i18n/messages";
+
 interface NegativeVotingToggleProps {
   readonly allowNegativeVotes: boolean;
   readonly onChange: (allowNegativeVotes: boolean) => void;
@@ -9,20 +13,31 @@ export default function NegativeVotingToggle({
   onChange,
   isDisabled = true,
 }: NegativeVotingToggleProps) {
+  const locale = useBrowserLocale();
   const handleToggle = () => {
     if (!isDisabled) {
       onChange(!allowNegativeVotes);
     }
   };
+  let descriptionKey: MessageKey;
+  if (allowNegativeVotes) {
+    descriptionKey = isDisabled
+      ? "waves.create.voting.negative.enabledLockedDescription"
+      : "waves.create.voting.negative.enabledDescription";
+  } else {
+    descriptionKey = isDisabled
+      ? "waves.create.voting.negative.disabledLockedDescription"
+      : "waves.create.voting.negative.disabledDescription";
+  }
 
   return (
-    <section className="tw-mt-6 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700 tw-pt-6">
+    <section className="tw-mt-6 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-pt-6">
       <div className="tw-flex tw-items-center tw-gap-3">
         <h3
           id="negative-votes-label"
-          className="tw-m-0 tw-text-lg tw-font-semibold tw-leading-6 tw-text-iron-100"
+          className={CREATE_WAVE_FORM_STYLES.sectionTitle}
         >
-          Allow Negative Votes
+          {t(locale, "waves.create.voting.negative.title")}
         </h3>
         <label
           htmlFor="toggle-negative-votes"
@@ -64,14 +79,11 @@ export default function NegativeVotingToggle({
       </div>
       <p
         id="negative-votes-description"
-        className={`tw-m-0 tw-mt-1 tw-text-pretty tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400 ${
+        className={`tw-mt-1 tw-text-pretty ${CREATE_WAVE_FORM_STYLES.supportingText} ${
           isDisabled ? "tw-opacity-70" : ""
         }`}
       >
-        {allowNegativeVotes
-          ? "Users can submit negative votes for drops. This allows for more nuanced voting but may lead to more contentious results."
-          : "Only positive votes are allowed. This encourages constructive voting and simplifies the voting dynamics."}
-        {isDisabled && " This setting cannot be changed."}
+        {t(locale, descriptionKey)}
       </p>
     </section>
   );

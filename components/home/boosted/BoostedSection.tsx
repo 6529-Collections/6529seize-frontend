@@ -7,6 +7,7 @@ import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useRouter } from "next/navigation";
 import { useCallback, useMemo } from "react";
 import BoostedDropCardHome from "./BoostedDropCardHome";
+import ContentModerationDropGate from "@/components/content-moderation/ContentModerationDropGate";
 
 const BOOSTED_DROPS_LIMIT = 50;
 const MAX_ROWS = 3;
@@ -97,10 +98,12 @@ export function BoostedSection() {
         <div className="tw-grid tw-grid-cols-1 tw-gap-4 sm:tw-grid-cols-2 lg:tw-grid-cols-3 xl:tw-gap-6">
           {visibleDrops.map((drop) => (
             <div key={drop.id}>
-              <BoostedDropCardHome
-                drop={drop}
-                onClick={() => handleDropClick(drop)}
-              />
+              <ContentModerationDropGate drop={drop} compact>
+                <BoostedDropCardHome
+                  drop={drop}
+                  onClick={() => handleDropClick(drop)}
+                />
+              </ContentModerationDropGate>
             </div>
           ))}
         </div>

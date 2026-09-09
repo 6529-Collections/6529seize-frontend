@@ -6,7 +6,11 @@ import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { findReviewedProgramMediaMatch } from "@/lib/museum/normalize";
 import { buildMuseumSignedWaveStormDropUrl } from "@/lib/museum/publication";
-import { selectMuseumStillMedia } from "@/lib/museum/publication/mediaSelection";
+import {
+  museumMediaResponsiveImage,
+  selectMuseumStillMedia,
+} from "@/lib/museum/publication/mediaSelection";
+import { MUSEUM_MAGNUM_ACQUISITION_ID } from "@/lib/museum/publication/collectionSemantics";
 import { museumWorkHref } from "@/lib/museum/publication/routes";
 import type { MuseumPublicWork } from "@/lib/museum/publication/types";
 import type { MuseumView } from "@/lib/museum/types";
@@ -34,6 +38,7 @@ export function TypedArtistWorkCard({
       : null;
   const presentation = work.presentationMedia?.[0];
   if (media !== undefined) {
+    const responsive = museumMediaResponsiveImage(media);
     const altText = media.altText;
     if (altText === null || altText.trim() === "") {
       throw new Error("museum_artist_work_alt_text_missing");
@@ -41,7 +46,10 @@ export function TypedArtistWorkCard({
     return (
       <MuseumPublicMediaFigure
         key={work.id}
-        src={media.url}
+        src={responsive.src}
+        {...(responsive.srcSet === undefined
+          ? {}
+          : { srcSet: responsive.srcSet })}
         width={media.width}
         height={media.height}
         alt={altText}
@@ -94,6 +102,7 @@ export function TypedArtistWorkCard({
               width={presentation.width}
               height={presentation.height}
               sourceByteSize={presentation.sourceByteSize}
+              variants={presentation.variants}
               {...(sourceHref === null || !canOpenPresentation
                 ? {}
                 : {
@@ -122,7 +131,10 @@ export function TypedArtistWorkCard({
             {presentation.credit.creditLine} ·{" "}
             {t(
               DEFAULT_LOCALE,
-              "museum.network.acquisitions.presentationRights"
+              presentation.source.contextEntityId ===
+                MUSEUM_MAGNUM_ACQUISITION_ID
+                ? "museum.network.rights.magnumInstitutionalDisplayCaption"
+                : "museum.network.acquisitions.presentationRights"
             )}
           </span>
         </figcaption>
@@ -132,7 +144,7 @@ export function TypedArtistWorkCard({
   return (
     <p
       key={work.id}
-      className="tw-m-0 tw-border-b tw-border-solid tw-border-iron-800 tw-py-4"
+      className="tw-m-0 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-py-4"
     >
       <Link
         href={museumWorkHref(work.id)}

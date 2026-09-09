@@ -15,6 +15,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Fragment } from "react";
 import { ALL_USE_CASES, SUPPORTED_COLLECTIONS } from "../delegation-constants";
+import { DELEGATION_CARD_CLASS_NAME } from "../delegation-ui";
 
 const TABLE_CLASS =
   "tw-w-full tw-min-w-[720px] tw-border-separate tw-border-spacing-y-1.5 tw-text-sm [&_tbody_tr]:tw-bg-black/25 [&_tbody_tr]:tw-transition-colors hover:[&_tbody_tr]:tw-bg-black/40";
@@ -23,8 +24,7 @@ const TABLE_HEADER_CELL_CLASS =
 const TABLE_CELL_CLASS =
   "tw-px-4 tw-py-3.5 tw-align-middle tw-font-normal tw-leading-6 tw-text-iron-300 first:tw-rounded-l-lg last:tw-rounded-r-lg";
 const TABLE_CENTER_CELL_CLASS = `${TABLE_CELL_CLASS} tw-text-center`;
-const RESULT_SECTION_CLASS =
-  "tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.04] tw-bg-[#111115] tw-p-5 sm:tw-p-6";
+const RESULT_SECTION_CLASS = `${DELEGATION_CARD_CLASS_NAME} tw-p-5 sm:tw-p-6`;
 const RESULT_TITLE_CLASS =
   "tw-mb-4 tw-mt-0 tw-text-lg tw-font-semibold tw-leading-7 tw-text-iron-100";
 const RESULT_EMPTY_CLASS =

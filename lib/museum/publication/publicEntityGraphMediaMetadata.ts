@@ -45,7 +45,9 @@ export function mediaLicenseLabel(
   }
   const notes = rights["notes"];
   if (typeof notes !== "string") return null;
-  const match = /^Source rights label:\s*(.+?)(?:\.|$)/u.exec(notes);
+  const match = /^Source rights label:\s*(.+?)(?:\.\s+Rights state\b|$)/u.exec(
+    notes
+  );
   return match?.[1] === undefined || match[1].trim().length === 0
     ? null
     : match[1].trim();

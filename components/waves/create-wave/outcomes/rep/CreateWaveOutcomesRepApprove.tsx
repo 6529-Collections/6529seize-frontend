@@ -8,6 +8,12 @@ import { getRepCategoryViolation } from "@/components/utils/input/rep-category/r
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import CreateWaveOutcomesRepCategoryField from "./CreateWaveOutcomesRepCategoryField";
+import {
+  CREATE_WAVE_OUTCOME_FLOATING_LABEL_CLASSES,
+  CREATE_WAVE_OUTCOME_LIGHT_INPUT_CLASSES,
+  getCreateWaveOutcomeInputStateClasses,
+  getCreateWaveOutcomeLabelStateClasses,
+} from "../createWaveOutcomeStyles";
 
 export default function CreateWaveOutcomesRepApprove({
   onOutcome,
@@ -29,6 +35,7 @@ export default function CreateWaveOutcomesRepApprove({
   const [showCategoryRequired, setShowCategoryRequired] =
     useState<boolean>(false);
   const [creditError, setCreditError] = useState<boolean>(false);
+  const creditErrorId = "outcome-rep-credit-error";
 
   // Same category rules the rep-assignment flow enforces (mirrors the
   // backend); named live so an invalid category never survives to submit.
@@ -51,14 +58,17 @@ export default function CreateWaveOutcomesRepApprove({
 
   const setCredit = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newCredit = parseFloat(e.target.value);
-    const isValid = !isNaN(newCredit) && newCredit >= 0;
+    const isValid = Number.isFinite(newCredit) && newCredit >= 0;
     setOutcome({ ...outcome, credit: isValid ? newCredit : null });
     setCreditError(false);
   };
 
   const onSubmit = () => {
     const dontHaveCategorySet = !outcome.category;
-    const dontHaveCreditSet = !outcome.credit;
+    const dontHaveCreditSet =
+      outcome.credit === null ||
+      !Number.isFinite(outcome.credit) ||
+      outcome.credit <= 0;
     setShowCategoryRequired(dontHaveCategorySet);
     setCreditError(dontHaveCreditSet);
 
@@ -74,7 +84,7 @@ export default function CreateWaveOutcomesRepApprove({
 
   return (
     <div className="tw-col-span-full">
-      <div className="tw-flex tw-flex-col tw-gap-y-5">
+      <div className="tw-flex tw-flex-col tw-gap-y-6">
         <div className="tw-flex tw-w-full tw-flex-col tw-gap-4 tw-pt-[0.5px] sm:tw-flex-row">
           <CreateWaveOutcomesRepCategoryField
             category={outcome.category}
@@ -93,30 +103,29 @@ export default function CreateWaveOutcomesRepApprove({
                 onChange={setCredit}
                 id="outcome-rep-credit"
                 autoComplete="off"
-                className={`${
-                  creditError
-                    ? "tw-caret-error tw-ring-error focus:tw-border-error focus:tw-ring-error"
-                    : "tw-caret-primary-400 tw-ring-iron-650 focus:tw-border-blue-500 focus:tw-ring-primary-400"
-                } ${
-                  outcome.credit
-                    ? "tw-text-primary-400 focus:tw-text-white"
-                    : "tw-text-white"
-                } tw-peer tw-form-input tw-block tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-border-iron-600 tw-bg-iron-900 tw-px-4 tw-pb-3 tw-pt-4 tw-text-base tw-font-medium tw-shadow-sm tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-500 focus:tw-bg-iron-900 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset sm:tw-text-sm`}
+                aria-invalid={creditError}
+                aria-describedby={creditError ? creditErrorId : undefined}
+                className={`${getCreateWaveOutcomeInputStateClasses({
+                  hasError: creditError,
+                  hasValue: outcome.credit !== null,
+                })} ${CREATE_WAVE_OUTCOME_LIGHT_INPUT_CLASSES}`}
                 placeholder=" "
               />
               <label
                 htmlFor="outcome-rep-credit"
-                className={`${
+                className={`${getCreateWaveOutcomeLabelStateClasses(
                   creditError
-                    ? "peer-focus:tw-text-error"
-                    : "peer-focus:tw-text-primary-400"
-                } tw-absolute tw-start-1 tw-top-2 tw-origin-[0] -tw-translate-y-4 tw-scale-75 tw-transform tw-cursor-text tw-bg-iron-900 tw-px-2 tw-text-base tw-font-normal tw-text-iron-500 tw-duration-300 peer-placeholder-shown:tw-top-1/2 peer-placeholder-shown:-tw-translate-y-1/2 peer-placeholder-shown:tw-scale-100 peer-focus:tw-top-2 peer-focus:-tw-translate-y-4 peer-focus:tw-scale-75 peer-focus:tw-bg-iron-900 peer-focus:tw-px-2 rtl:peer-focus:tw-left-auto rtl:peer-focus:tw-translate-x-1/4`}
+                )} ${CREATE_WAVE_OUTCOME_FLOATING_LABEL_CLASSES}`}
               >
                 Rep
               </label>
             </div>
             {creditError && (
-              <div className="tw-flex tw-items-center tw-gap-x-2 tw-pt-1.5">
+              <div
+                id={creditErrorId}
+                role="alert"
+                className="tw-flex tw-items-center tw-gap-x-2 tw-pt-1.5"
+              >
                 <svg
                   className="tw-size-5 tw-flex-shrink-0 tw-text-error"
                   viewBox="0 0 24 24"
@@ -133,7 +142,7 @@ export default function CreateWaveOutcomesRepApprove({
                   />
                 </svg>
                 <div className="tw-text-xs tw-font-medium tw-text-error">
-                  Rep must be a positive number
+                  {t(locale, "waves.create.outcomes.repPositiveError")}
                 </div>
               </div>
             )}
@@ -141,19 +150,11 @@ export default function CreateWaveOutcomesRepApprove({
         </div>
 
         <div className="tw-flex tw-justify-end tw-gap-x-3">
-          <Button
-            variant="secondary"
-            size="lg"
-            onClick={onCancel}
-          >
-            Cancel
+          <Button variant="secondary" size="md" onClick={onCancel}>
+            {t(locale, "waves.create.actions.cancel")}
           </Button>
-          <Button
-            variant="primary"
-            size="lg"
-            onClick={onSubmit}
-          >
-            Save
+          <Button variant="primary" size="md" onClick={onSubmit}>
+            {t(locale, "waves.create.actions.save")}
           </Button>
         </div>
       </div>

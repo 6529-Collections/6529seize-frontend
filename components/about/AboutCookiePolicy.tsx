@@ -40,22 +40,20 @@ export default function AboutCookiePolicy() {
   };
 
   return (
-    <Container className="!tw-px-0">
+    <Container fluid horizontalPadding={false}>
       <Row>
         <Col>
           <h1>Cookie Policy</h1>
         </Col>
       </Row>
       <Row>
-        <Col
-          className="tw-pb-3 tw-pt-2 tw-text-left tw-text-sm tw-leading-6 tw-text-iron-500"
-        >
+        <Col className="tw-pb-3 tw-pt-2 tw-text-left tw-text-sm tw-leading-6 tw-text-iron-500">
           Last Updated: June 04, 2024
         </Col>
       </Row>
       <Row>
         <Col>
-          <Container className="!tw-px-0">
+          <Container fluid horizontalPadding={false}>
             <Row className="tw-pb-3">
               <Col>
                 <h2 className="tw-mb-0">Cookie List</h2>
@@ -78,13 +76,10 @@ export default function AboutCookiePolicy() {
       </Row>
       <Row className="tw-pb-3 tw-pt-3">
         <Col>
-          <Container className="!tw-px-0">
+          <Container fluid horizontalPadding={false}>
             <Row className="tw-pb-3">
               <Col>
-                <h3
-                  id="strictly-necessary-cookies-heading"
-                  className="tw-mb-0"
-                >
+                <h3 id="strictly-necessary-cookies-heading" className="tw-mb-0">
                   Strictly Necessary Cookies
                 </h3>
               </Col>
@@ -100,7 +95,7 @@ export default function AboutCookiePolicy() {
                 information.
               </Col>
             </Row>
-            <Row>
+            <Row className="tw-pt-5">
               <Col
                 role="region"
                 aria-labelledby="strictly-necessary-cookies-heading"
@@ -174,7 +169,7 @@ export default function AboutCookiePolicy() {
       </Row>
       <Row className="tw-pb-3 tw-pt-3">
         <Col>
-          <Container className="!tw-px-0">
+          <Container fluid horizontalPadding={false}>
             <Row className="tw-pb-3">
               <Col className="tw-flex tw-items-center tw-justify-between">
                 <h3 id="performance-cookies-heading" className="tw-mb-0">
@@ -213,7 +208,7 @@ export default function AboutCookiePolicy() {
                 its performance.
               </Col>
             </Row>
-            <Row>
+            <Row className="tw-pt-5">
               <Col
                 role="region"
                 aria-labelledby="performance-cookies-heading"
@@ -287,7 +282,7 @@ export default function AboutCookiePolicy() {
             </Row>
             <Row className="tw-pt-2">
               <Col>
-                <Container className="!tw-px-0">
+                <Container fluid horizontalPadding={false}>
                   <Row className="tw-pb-3">
                     <Col>
                       <h4 className="tw-mb-0">Retention Policy</h4>

@@ -15,6 +15,7 @@ import { ApiDropContextProfileContext } from '../models/ApiDropContextProfileCon
 import { ApiDropGroupMention } from '../models/ApiDropGroupMention';
 import { ApiDropMentionedUser } from '../models/ApiDropMentionedUser';
 import { ApiDropMetadataResponse } from '../models/ApiDropMetadataResponse';
+import { ApiDropModeration } from '../models/ApiDropModeration';
 import { ApiDropNftLink } from '../models/ApiDropNftLink';
 import { ApiDropPart } from '../models/ApiDropPart';
 import { ApiDropPoll } from '../models/ApiDropPoll';
@@ -23,6 +24,7 @@ import { ApiDropReaction } from '../models/ApiDropReaction';
 import { ApiDropReferencedNFT } from '../models/ApiDropReferencedNFT';
 import { ApiDropSubscriptionTargetAction } from '../models/ApiDropSubscriptionTargetAction';
 import { ApiDropType } from '../models/ApiDropType';
+import { ApiDropViewerModerationContext } from '../models/ApiDropViewerModerationContext';
 import { ApiDropWinningContext } from '../models/ApiDropWinningContext';
 import { ApiMentionedWave } from '../models/ApiMentionedWave';
 import { ApiProfileMin } from '../models/ApiProfileMin';
@@ -67,6 +69,8 @@ export class ApiDrop {
     'top_raters': Array<ApiDropRater>;
     'raters_count': number;
     'context_profile_context': ApiDropContextProfileContext | null;
+    'viewer_context'?: ApiDropViewerModerationContext;
+    'moderation'?: ApiDropModeration;
     'subscribed_actions': Array<ApiDropSubscriptionTargetAction>;
     'is_signed': boolean;
     'reactions': Array<ApiDropReaction>;
@@ -223,6 +227,18 @@ export class ApiDrop {
             "name": "context_profile_context",
             "baseName": "context_profile_context",
             "type": "ApiDropContextProfileContext",
+            "format": ""
+        },
+        {
+            "name": "viewer_context",
+            "baseName": "viewer_context",
+            "type": "ApiDropViewerModerationContext",
+            "format": ""
+        },
+        {
+            "name": "moderation",
+            "baseName": "moderation",
+            "type": "ApiDropModeration",
             "format": ""
         },
         {

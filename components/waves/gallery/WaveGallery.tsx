@@ -6,6 +6,7 @@ import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { WaveGalleryItem } from "./WaveGalleryItem";
 import { useWaveGalleryDrops } from "@/hooks/useWaveGalleryDrops";
 import InfiniteScrollTrigger from "@/components/utils/infinite-scroll/InfiniteScrollTrigger";
+import ContentModerationDropGate from "@/components/content-moderation/ContentModerationDropGate";
 
 interface WaveGalleryProps {
   readonly wave: ApiWave;
@@ -72,11 +73,9 @@ export const WaveGallery: React.FC<WaveGalleryProps> = ({
       <div className="tw-p-3 tw-@container sm:tw-p-4">
         <div className="tw-grid tw-grid-cols-2 tw-gap-2 @lg:tw-grid-cols-3 @3xl:tw-grid-cols-4 @5xl:tw-grid-cols-5 sm:tw-gap-3">
           {drops.map((drop) => (
-            <WaveGalleryItem
-              key={drop.stableKey}
-              drop={drop}
-              onDropClick={onDropClick}
-            />
+            <ContentModerationDropGate key={drop.stableKey} drop={drop} compact>
+              <WaveGalleryItem drop={drop} onDropClick={onDropClick} />
+            </ContentModerationDropGate>
           ))}
         </div>
 

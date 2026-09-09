@@ -30,6 +30,7 @@ interface MuseumRelatedEntitiesProps {
   readonly entities: readonly MuseumEntityRef[];
   readonly headingId: string;
   readonly title: string;
+  readonly entityNotes?: Readonly<Record<string, string>>;
 }
 
 const PUBLIC_ACQUISITION_STATUSES: readonly MuseumPublicAcquisitionStatus[] = [
@@ -56,6 +57,7 @@ export function MuseumRelatedEntities({
   entities,
   headingId,
   title,
+  entityNotes = {},
 }: MuseumRelatedEntitiesProps) {
   const visibleEntities = entities.filter(
     (entity) => entity.href.trim().length > 0 && entity.label.trim().length > 0
@@ -72,15 +74,23 @@ export function MuseumRelatedEntities({
       >
         {title}
       </h2>
-      <ul className="tw-m-0 tw-mt-5 tw-list-none tw-divide-y tw-divide-iron-800 tw-border-y tw-border-solid tw-border-iron-800 tw-p-0 sm:tw-grid sm:tw-grid-cols-2 sm:tw-divide-x sm:tw-divide-y-0 xl:tw-grid-cols-3">
+      <ul className="tw-m-0 tw-mt-5 tw-grid tw-list-none tw-gap-x-8 tw-gap-y-10 tw-p-0 sm:tw-grid-cols-2 xl:tw-grid-cols-3">
         {visibleEntities.map((entity) => {
           const media = entity.media;
           const dimensions = imageDimensions(media);
+          const responsiveMedia: Pick<
+            MuseumManagedImageProps,
+            "srcSet" | "sizes"
+          > = {
+            ...(media?.srcSet === undefined ? {} : { srcSet: media.srcSet }),
+            ...(media?.sizes === undefined ? {} : { sizes: media.sizes }),
+          };
           const mediaContent =
             media === undefined ? null : (
               <span className="tw-block tw-aspect-[4/3] tw-overflow-hidden tw-bg-black">
                 <MuseumManagedImage
                   src={media.src}
+                  {...responsiveMedia}
                   {...dimensions}
                   alt={media.alt}
                   loading="lazy"
@@ -96,10 +106,10 @@ export function MuseumRelatedEntities({
           return (
             <li
               key={`${entity.kind}:${entity.id}:${entity.href}`}
-              className="tw-min-w-0 tw-border-solid tw-border-iron-800 sm:tw-border-b sm:tw-border-b-0 sm:tw-border-r-0 sm:tw-border-t-0 sm:tw-px-5 first:sm:tw-pl-0 last:sm:tw-pr-0"
+              className="tw-min-w-0 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-pb-5"
               data-museum-entity-kind={entity.kind}
             >
-              <div className="tw-group tw-flex tw-min-w-0 tw-flex-col tw-gap-3 tw-py-4 tw-text-sm">
+              <div className="tw-group tw-flex tw-min-w-0 tw-flex-col tw-gap-3 tw-text-sm">
                 {mediaContent}
                 <span className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-iron-500">
                   {entity.relation}
@@ -111,6 +121,11 @@ export function MuseumRelatedEntities({
                 >
                   {entity.label}
                 </Link>
+                {entityNotes[entity.id] === undefined ? null : (
+                  <span className="tw-text-xs tw-leading-5 tw-text-iron-500">
+                    {entityNotes[entity.id]}
+                  </span>
+                )}
                 {entity.status === undefined &&
                 (entity.statusAsOf === null ||
                   entity.statusAsOf === undefined) ? null : (

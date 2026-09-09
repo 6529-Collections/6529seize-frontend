@@ -4,13 +4,18 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { DELEGATION_ABI } from "@/abis/abis";
+import TooltipIconButton from "@/components/common/TooltipIconButton";
 import Button from "@/components/utils/button/Button";
+import PrimaryButton from "@/components/utils/button/PrimaryButton";
+import type { CommonSelectItem } from "@/components/utils/select/CommonSelect";
+import CommonDropdown from "@/components/utils/select/dropdown/CommonDropdown";
 import {
   DELEGATION_ALL_ADDRESS,
   DELEGATION_CONTRACT,
 } from "@/constants/constants";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import {
   faInfoCircle,
@@ -18,13 +23,13 @@ import {
   faLockOpen,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Tooltip } from "react-tooltip";
 import type { DelegationCollection } from "../delegation-constants";
 import { ALL_USE_CASES, ANY_COLLECTION_PATH } from "../delegation-constants";
 import type { DelegationToastState } from "../DelegationToast";
 import {
   BUTTON_ICON_CLASS,
-  LOCK_SELECT_CLASS,
+  COLLECTION_PANEL_CLASS,
+  COLLECTION_PANEL_ICON_CLASS,
 } from "./collection-delegation-helpers";
 import type { CollectionLocks } from "./useCollectionLocks";
 
@@ -52,21 +57,35 @@ function getLockStatus(
   return typeof result === "boolean" ? result : undefined;
 }
 
-function CollectionLockUseCaseOptions(
-  props: Readonly<{ locks: CollectionLocks }>
-) {
-  const locale = useBrowserLocale();
+function getCollectionLockUseCaseItems(
+  locks: CollectionLocks,
+  locale: SupportedLocale
+): CommonSelectItem<number>[] {
+  const placeholder = t(
+    locale,
+    "delegation.collection.locks.useCase.placeholder"
+  );
+  const collectionLockMarker =
+    Boolean(locks.collectionLockRead.data) ||
+    Boolean(locks.collectionLockReadGlobal.data)
+      ? " *"
+      : "";
+  const items: CommonSelectItem<number>[] = [
+    {
+      key: "collection-delegation-select-use-case-0",
+      label: `${placeholder}${collectionLockMarker}`,
+      value: 0,
+    },
+  ];
 
-  return ALL_USE_CASES.map((useCase, index) => {
-    if (useCase.use_case === 1) return null;
+  for (const [index, useCase] of ALL_USE_CASES.entries()) {
+    if (useCase.use_case === 1) continue;
     const isLockedGlobally =
-      getLockStatus(props.locks.useCaseLockStatusesGlobal.data, index) === true;
+      getLockStatus(locks.useCaseLockStatusesGlobal.data, index) === true;
     const isLocked =
-      getLockStatus(props.locks.useCaseLockStatuses.data, index) === true;
+      getLockStatus(locks.useCaseLockStatuses.data, index) === true;
     const lockDisplay =
-      isLocked ||
-      isLockedGlobally ||
-      Boolean(props.locks.collectionLockRead.data)
+      isLocked || isLockedGlobally || Boolean(locks.collectionLockRead.data)
         ? t(locale, "delegation.collection.locks.option.locked", {
             useCase: useCase.use_case,
             name: useCase.display,
@@ -77,15 +96,14 @@ function CollectionLockUseCaseOptions(
             name: useCase.display,
           });
 
-    return (
-      <option
-        key={`collection-delegation-select-use-case-${useCase.use_case}`}
-        value={useCase.use_case}
-      >
-        {lockDisplay}
-      </option>
-    );
-  });
+    items.push({
+      key: `collection-delegation-select-use-case-${useCase.use_case}`,
+      label: lockDisplay,
+      value: useCase.use_case,
+    });
+  }
+
+  return items;
 }
 
 function CollectionWalletLockButton(
@@ -96,16 +114,14 @@ function CollectionWalletLockButton(
   const { showDelegationToast } = props;
 
   return (
-    <Button
-      type="button"
+    <PrimaryButton
       disabled={Boolean(locks.collectionLockReadGlobal.data)}
       loading={
         locks.collectionLockWrite.isPending ||
         locks.waitCollectionLockWrite.isLoading
       }
-      variant="primary"
       size="lg"
-      onClick={() => {
+      onClicked={() => {
         const title = t(
           locale,
           locks.collectionLockRead.data
@@ -137,7 +153,7 @@ function CollectionWalletLockButton(
     >
       <FontAwesomeIcon
         icon={locks.collectionLockRead.data ? faLock : faLockOpen}
-        className={BUTTON_ICON_CLASS}
+        className={`-tw-ml-1 ${BUTTON_ICON_CLASS}`}
       />
       {t(
         locale,
@@ -149,7 +165,7 @@ function CollectionWalletLockButton(
       !areEqualAddresses(collection.contract, DELEGATION_ALL_ADDRESS)
         ? ` *`
         : ``}
-    </Button>
+    </PrimaryButton>
   );
 }
 
@@ -175,6 +191,7 @@ export function CollectionDelegationLocks(
   const collectionLocked =
     Boolean(locks.collectionLockRead.data) ||
     Boolean(locks.collectionLockReadGlobal.data);
+  const lockUseCaseItems = getCollectionLockUseCaseItems(locks, locale);
   const canManageSelectedUseCase =
     !collectionLocked && !selectedUseCaseLockedGlobally;
   let useCaseAction: ReactNode;
@@ -269,68 +286,55 @@ export function CollectionDelegationLocks(
   }
 
   return (
-    <section className="tw-mt-6 tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900 tw-p-4 sm:tw-p-6">
-      <div>
-        <h2 className="tw-mb-2 tw-mt-0 tw-flex tw-items-center tw-text-xl tw-font-semibold tw-text-white">
-          {t(locale, "delegation.collection.locks.title")}
-          <FontAwesomeIcon
-            className="tw-ml-2 tw-h-4 tw-w-4 tw-cursor-help tw-text-iron-400"
-            icon={faInfoCircle}
-            data-tooltip-id="locks-info"
-          />
-          <Tooltip
-            id="locks-info"
-            style={{
-              backgroundColor: "#1F2937",
-              color: "white",
-              padding: "4px 8px",
-            }}
-          >
-            {t(locale, "delegation.collection.locks.tooltip")}
-          </Tooltip>
-        </h2>
-        <p className="tw-mb-5 tw-text-base tw-leading-6 tw-text-iron-300">
-          {t(locale, "delegation.collection.locks.description")}
-        </p>
-      </div>
-      <div className="tw-flex tw-flex-col tw-gap-4">
-        <div>
-          <CollectionWalletLockButton {...props} />
-        </div>
-        <div className="tw-grid tw-grid-cols-1 tw-gap-3 md:tw-grid-cols-3">
-          <div className="md:tw-col-span-1">
-            <select
-              aria-label={t(
-                locale,
-                "delegation.collection.locks.useCase.ariaLabel"
-              )}
-              disabled={collectionLocked}
-              className={LOCK_SELECT_CLASS}
-              value={locks.lockUseCaseValue}
-              onChange={(e) => {
-                const value = Number.parseInt(e.target.value);
-                locks.setLockUseCaseValue(value);
-                locks.setLockUseCaseIndex(getLockUseCaseIndex(value));
-                locks.setUseCaseLockToastTitle(
-                  t(locale, "delegation.collection.toast.lockingWallet")
-                );
-                locks.useCaseLockWrite.reset();
-              }}
-            >
-              <option value={0}>
-                {t(locale, "delegation.collection.locks.useCase.placeholder")}
-                {Boolean(locks.collectionLockRead.data) ||
-                Boolean(locks.collectionLockReadGlobal.data)
-                  ? ` *`
-                  : ``}
-              </option>
-              <CollectionLockUseCaseOptions locks={locks} />
-            </select>
+    <section className={`tw-mt-4 ${COLLECTION_PANEL_CLASS}`}>
+      <div className="tw-mb-5 tw-flex tw-items-start tw-gap-4">
+        <span className={COLLECTION_PANEL_ICON_CLASS} aria-hidden="true">
+          <FontAwesomeIcon icon={faLock} className="tw-size-4" />
+        </span>
+        <div className="tw-min-w-0">
+          <div className="tw-flex tw-items-center tw-gap-1">
+            <h2 className="tw-m-0 tw-text-xl tw-font-semibold tw-leading-7 tw-text-iron-100">
+              {t(locale, "delegation.collection.locks.title")}
+            </h2>
+            <TooltipIconButton
+              icon={faInfoCircle}
+              tooltipText={t(locale, "delegation.collection.locks.tooltip")}
+              tooltipWidth="tw-w-64"
+              buttonSizeClassName="tw-size-8"
+              buttonShapeClassName="tw-rounded-lg"
+              className="tw-text-iron-400 tw-transition-colors hover:tw-bg-white/[0.05] hover:tw-text-iron-200"
+              iconClassName="tw-size-4 tw-text-current"
+            />
           </div>
+          <p className="tw-mb-0 tw-mt-1 tw-max-w-4xl tw-text-base tw-leading-6 tw-text-iron-400">
+            {t(locale, "delegation.collection.locks.description")}
+          </p>
+        </div>
+      </div>
+      <div className="tw-grid tw-grid-cols-1 tw-items-start tw-gap-3 sm:tw-grid-cols-[max-content_minmax(0,32rem)]">
+        <CollectionWalletLockButton {...props} />
+        <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-3">
+          <CommonDropdown
+            items={lockUseCaseItems}
+            activeItem={locks.lockUseCaseValue}
+            filterLabel={t(
+              locale,
+              "delegation.collection.locks.useCase.ariaLabel"
+            )}
+            disabled={collectionLocked}
+            theme="dark"
+            size="md"
+            setSelected={(value) => {
+              locks.setLockUseCaseValue(value);
+              locks.setLockUseCaseIndex(getLockUseCaseIndex(value));
+              locks.setUseCaseLockToastTitle(
+                t(locale, "delegation.collection.toast.lockingWallet")
+              );
+              locks.useCaseLockWrite.reset();
+            }}
+          />
           {locks.lockUseCaseValue !== 0 && useCaseAction && (
-            <div className="tw-flex tw-items-center md:tw-col-span-2">
-              {useCaseAction}
-            </div>
+            <div className="tw-flex tw-items-center">{useCaseAction}</div>
           )}
         </div>
       </div>

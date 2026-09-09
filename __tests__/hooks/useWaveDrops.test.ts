@@ -16,10 +16,20 @@ jest.mock("@/services/websocket/useWebSocketMessage", () => ({
 const useInfiniteQueryMock = useInfiniteQuery as jest.Mock;
 const useQueryClientMock = useQueryClient as jest.Mock;
 const fetchWaveDropsFeedV2Mock = fetchWaveDropsFeedV2 as jest.Mock;
+let mockConnectedProfileId: string | null = "viewer-1";
+
+jest.mock("@/components/auth/Auth", () => ({
+  useAuth: () => ({
+    connectedProfile: mockConnectedProfileId
+      ? { id: mockConnectedProfileId }
+      : null,
+  }),
+}));
 
 describe("useWaveDrops", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockConnectedProfileId = "viewer-1";
     useQueryClientMock.mockReturnValue({
       getQueryCache: jest.fn(() => ({ findAll: jest.fn(() => []) })),
       setQueriesData: jest.fn(),
@@ -55,11 +65,37 @@ describe("useWaveDrops", () => {
             containsMedia: false,
             curationId: null,
             context: "wave-drops",
+            viewerProfileId: "viewer-1",
           },
         ],
         enabled: true,
       })
     );
+  });
+
+  it("does not reuse placeholder drops across viewer profiles", () => {
+    renderHook(() => useWaveDrops({ waveId: "wave-1" }));
+    const firstOptions = useInfiniteQueryMock.mock.calls[0][0];
+    const previousData = { pages: [{ drops: [{ id: "old-viewer" }] }] };
+    const previousQuery = {
+      queryKey: [
+        QueryKey.DROPS,
+        { viewerProfileId: "viewer-1" },
+      ],
+    };
+
+    expect(
+      firstOptions.placeholderData(previousData, previousQuery)
+    ).toBe(previousData);
+
+    mockConnectedProfileId = "viewer-2";
+    renderHook(() => useWaveDrops({ waveId: "wave-1" }));
+    const secondOptions = useInfiniteQueryMock.mock.calls.at(-1)[0];
+
+    expect(
+      secondOptions.placeholderData(previousData, previousQuery)
+    ).toBeUndefined();
+    expect(secondOptions.queryKey[1].viewerProfileId).toBe("viewer-2");
   });
 
   it("calls the v2 wave drops endpoint with wave and drop type filters", async () => {

@@ -249,7 +249,7 @@ function HighlyRatedWavePreviewScoreBadge({
   return (
     <span
       aria-hidden="true"
-      className={`tw-absolute ${isTouchPreview ? "-tw-bottom-1.5 -tw-right-2" : "-tw-bottom-1 -tw-right-1.5"} tw-z-20 tw-inline-flex tw-h-6 tw-w-7 tw-cursor-pointer tw-items-center tw-justify-center tw-overflow-visible tw-drop-shadow-[0_5px_9px_rgba(0,0,0,0.50)]`}
+      className={`tw-absolute ${isTouchPreview ? "-tw-bottom-1.5 -tw-right-2" : "-tw-bottom-1 -tw-right-1.5"} tw-z-20 tw-inline-flex tw-h-6 tw-w-7 tw-cursor-pointer tw-items-center tw-justify-center tw-overflow-visible tw-drop-shadow-[0_3px_6px_rgba(0,0,0,0.35)]`}
     >
       <svg
         aria-hidden="true"
@@ -258,14 +258,8 @@ function HighlyRatedWavePreviewScoreBadge({
       >
         <path
           d="M16 2.15 28 6.15v6.7c0 5.45-4.35 9.5-12 11.2-7.65-1.7-12-5.75-12-11.2v-6.7L16 2.15Z"
-          className="tw-fill-iron-800 tw-stroke-iron-950"
-          strokeWidth="2.4"
-          strokeLinejoin="round"
-        />
-        <path
-          d="M16 4.7 25.35 7.75v5.1c0 4.15-3.2 7.15-9.35 8.75-6.15-1.6-9.35-4.6-9.35-8.75v-5.1L16 4.7Z"
-          className="tw-fill-none tw-stroke-white/20"
-          strokeWidth="1"
+          className="tw-fill-iron-900 tw-stroke-white/25"
+          strokeWidth="1.2"
           strokeLinejoin="round"
         />
         <text
@@ -373,10 +367,12 @@ function HighlyRatedWavePreviewLink({
 
 export function HighlyRatedWavesToggle({
   isTouchPreview = false,
+  compactTouchPadding = false,
   paddingClassName,
   previewItems,
 }: {
   readonly isTouchPreview?: boolean | undefined;
+  readonly compactTouchPadding?: boolean | undefined;
   readonly paddingClassName: string;
   readonly previewItems: readonly HighlyRatedWavePreviewItem[];
 }) {
@@ -435,7 +431,7 @@ export function HighlyRatedWavesToggle({
 
   return (
     <div
-      className={`${paddingClassName} ${isTouchPreview ? "tw-pb-3 tw-pt-1" : "tw-pb-1"}`}
+      className={`${paddingClassName} tw-pt-1 ${isTouchPreview && !compactTouchPadding ? "tw-pb-3" : "tw-pb-1"}`}
     >
       <div
         ref={previewStripRef}

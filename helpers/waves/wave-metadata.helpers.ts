@@ -441,6 +441,7 @@ export const getApproveWaveDisplayMetadataUpdate = ({
 
     if (latestValue !== request.data_value) {
       create.push(request);
+      deleteIds.push(...rows.map((row) => row.id));
     }
   }
 

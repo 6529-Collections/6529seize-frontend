@@ -130,13 +130,13 @@ export function WaveChatSubmitDropModal({
         tabIndex={-1}
       />
       <LazyMotion features={domAnimation}>
-        <div className="tw-relative tw-z-10 tw-flex tw-h-full tw-items-start tw-justify-center tw-px-4 tw-pb-4 tw-pt-[calc(env(safe-area-inset-top,0px)+1rem)] lg:tw-items-center">
+        <div className="tw-relative tw-z-10 tw-flex tw-h-full tw-items-end tw-justify-center tw-pt-[calc(env(safe-area-inset-top,0px)+1rem)] sm:tw-items-center sm:tw-px-4 sm:tw-pb-4">
           <m.div
             ref={panelRef}
             initial={{ opacity: 0, y: 12, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className="tw-max-h-[90vh] tw-w-full tw-max-w-3xl tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-shadow-2xl"
+            className="tw-max-h-[calc(100dvh-env(safe-area-inset-top,0px)-1rem)] tw-w-full tw-max-w-3xl tw-overflow-hidden tw-rounded-t-2xl tw-border tw-border-b-0 tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-shadow-2xl sm:tw-max-h-[90vh] sm:tw-rounded-xl sm:tw-border-b"
             data-testid="chat-submit-drop-modal-panel"
             tabIndex={-1}
           >
@@ -161,7 +161,7 @@ export function WaveChatSubmitDropModal({
             </div>
 
             <div className="tw-max-h-[calc(90vh-88px)] tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 hover:tw-scrollbar-thumb-iron-300">
-              <div className="tw-px-6 tw-pb-6 tw-pt-5">
+              <div className="tw-px-4 tw-pb-[calc(env(safe-area-inset-bottom,0px)+1.5rem)] tw-pt-5 sm:tw-px-6 sm:tw-pb-6">
                 <WaveDropCreate
                   wave={wave}
                   onCancel={onClose}

@@ -3,8 +3,10 @@
 import { publicEnv } from "@/config/env";
 import { API_AUTH_COOKIE } from "@/constants/constants";
 import { useSetTitle } from "@/contexts/TitleContext";
+import { useNativeKeyboard } from "@/hooks/useNativeKeyboard";
 import { getStagingAuth } from "@/services/auth/auth.utils";
 import styles from "@/styles/Home.module.css";
+import clsx from "clsx";
 import Cookies from "js-cookie";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -12,6 +14,7 @@ import { useEffect, useState } from "react";
 
 export default function AccessPage() {
   useSetTitle("Access Page");
+  useNativeKeyboard();
   const router = useRouter();
   const [image, setImage] = useState<string>();
   const [inputDisabled, setInputDisabled] = useState(false);
@@ -59,7 +62,12 @@ export default function AccessPage() {
   return (
     <main className={styles["login"]}>
       {image && <LoginImage image={image} alt="access" />}
-      <div className={styles["loginPrompt"]}>
+      <div
+        className={clsx(
+          styles["loginPrompt"],
+          styles["loginPromptKeyboardAware"]
+        )}
+      >
         <input
           disabled={inputDisabled}
           type="text"

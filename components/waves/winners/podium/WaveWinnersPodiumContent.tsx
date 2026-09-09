@@ -2,6 +2,21 @@ import React from "react";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
 import { WavePodiumItem } from "./WavePodiumItem";
+import ContentModerationDropGate from "@/components/content-moderation/ContentModerationDropGate";
+
+function ModeratedPodiumItem({
+  winner,
+  ...props
+}: React.ComponentProps<typeof WavePodiumItem>) {
+  if (!winner) {
+    return <WavePodiumItem winner={winner} {...props} />;
+  }
+  return (
+    <ContentModerationDropGate drop={winner.drop} compact>
+      <WavePodiumItem winner={winner} {...props} />
+    </ContentModerationDropGate>
+  );
+}
 
 interface WaveWinnersPodiumContentProps {
   readonly onDropClick: (drop: ExtendedDrop) => void;
@@ -27,7 +42,7 @@ export const WaveWinnersPodiumContent: React.FC<
       <div className="tw-mx-auto md:tw-max-w-3xl">
         <div className="tw-grid tw-grid-cols-3 tw-items-end tw-gap-x-2 lg:tw-gap-x-4">
           <div>
-            <WavePodiumItem
+            <ModeratedPodiumItem
               winner={secondPlaceWinner}
               onDropClick={onDropClick}
               position="second"
@@ -37,7 +52,7 @@ export const WaveWinnersPodiumContent: React.FC<
             />
           </div>
           <div>
-            <WavePodiumItem
+            <ModeratedPodiumItem
               winner={firstPlaceWinner}
               onDropClick={onDropClick}
               position="first"
@@ -47,7 +62,7 @@ export const WaveWinnersPodiumContent: React.FC<
             />
           </div>
           <div>
-            <WavePodiumItem
+            <ModeratedPodiumItem
               winner={thirdPlaceWinner}
               onDropClick={onDropClick}
               position="third"

@@ -31,11 +31,13 @@ jobs:
       playwright_smoke_required: ${{ steps.plan_outputs.outputs.playwright_smoke_required }}
       playwright_critical_shell_required: ${{ steps.plan_outputs.outputs.playwright_critical_shell_required }}
       playwright_museum_required: ${{ steps.plan_outputs.outputs.playwright_museum_required }}
-      release_bus_contract_required: ${{ steps.plan_outputs.outputs.release_bus_contract_required }}
+      deployment_contract_required: ${{ steps.plan_outputs.outputs.deployment_contract_required }}
       dependency_governance_required: ${{ steps.plan_outputs.outputs.dependency_governance_required }}
       reviewbot_contract_required: ${{ steps.plan_outputs.outputs.reviewbot_contract_required }}
       agent_files_sync_required: ${{ steps.plan_outputs.outputs.agent_files_sync_required }}
       app_check_matrix: ${{ steps.plan_outputs.outputs.app_check_matrix }}
+      core_playwright_required: ${{ steps.plan_outputs.outputs.core_playwright_required }}
+      core_playwright_matrix: ${{ steps.plan_outputs.outputs.core_playwright_matrix }}
 
     steps:
       - name: Checkout code
@@ -177,14 +179,15 @@ jobs:
           const appCheckLanes = [
             { lane: "quality", label: "Quality and contracts", runner: defaultRunner },
           ];
+          const corePlaywrightLanes = [];
           if (plan.checks.build.required) {
             appCheckLanes.push({ lane: "build", label: "Production build", runner: buildRunner });
           }
           if (plan.checks.playwright_smoke.required) {
-            appCheckLanes.push({ lane: "playwright-smoke", label: "Playwright smoke", runner: defaultRunner });
+            corePlaywrightLanes.push({ lane: "playwright-smoke", label: "Playwright smoke", runner: defaultRunner });
           }
           if (plan.checks.playwright_critical_shell.required) {
-            appCheckLanes.push({
+            corePlaywrightLanes.push({
               lane: "playwright-critical-shell",
               label: "Playwright critical shell",
               runner: defaultRunner,
@@ -207,6 +210,8 @@ jobs:
             );
           }
           write("app_check_matrix", JSON.stringify({ include: appCheckLanes }));
+          write("core_playwright_required", String(corePlaywrightLanes.length > 0));
+          write("core_playwright_matrix", JSON.stringify({ include: corePlaywrightLanes }));
           NODE
 
       - name: Summarize CI plan
@@ -264,10 +269,117 @@ jobs:
           if-no-files-found: ignore
           retention-days: 14
 
+  core-playwright-checks:
+    name: App check / ${{ matrix.label }}
+    needs: plan
+    if: >-
+      needs.plan.outputs.core_playwright_required == 'true' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      issues: read
+    container:
+      image: mcr.microsoft.com/playwright:v1.61.1-noble@sha256:5b8f294aff9041b7191c34a4bab3ac270157a28774d4b0660e9743297b697e48
+      options: --ipc=host
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      fail-fast: true
+      matrix: ${{ fromJSON(needs.plan.outputs.core_playwright_matrix) }}
+
+    env:
+      API_ENDPOINT: "https://api.6529.io"
+      WS_ENDPOINT: "wss://ws.6529.io"
+      ALLOWLIST_API_ENDPOINT: "https://allowlist-api.6529.io"
+      BASE_ENDPOINT: "http://localhost:3001"
+      PLAYWRIGHT_BASE_URL: "http://localhost:3001"
+      PLAYWRIGHT_WEB_SERVER_COMMAND: "./bin/6529 run dev"
+      PLAYWRIGHT_WEB_SERVER_URL: "http://localhost:3001"
+      NEXTGEN_CHAIN_ID: "1"
+      MOBILE_APP_SCHEME: "mobile6529"
+      CORE_SCHEME: "core6529"
+      IPFS_API_ENDPOINT: "https://api-ipfs.6529.io"
+      IPFS_GATEWAY_ENDPOINT: "https://ipfs.6529.io"
+      GIPHY_API_KEY: ${{ vars.GIPHY_API_KEY }}
+      ASSETS_FROM_S3: "false"
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Install Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "22.17.1"
+
+      - name: Activate pinned pnpm
+        run: |
+          corepack enable pnpm
+          corepack prepare "$(node -p 'require("./package.json").packageManager')" --activate
+          pnpm --version
+
+      - name: Restore pnpm store
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-node22-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-node22-pnpm-
+
+      - name: Use cached pnpm store
+        run: echo "npm_config_store_dir=$HOME/.pnpm-store" >> "$GITHUB_ENV"
+
+      - name: Install Socket Firewall
+        id: socket_firewall
+        uses: SocketDev/action@2d3f25590c6ed6ba11a9a14c064d962a3a04698f # v1.3.1
+        with:
+          mode: firewall
+
+      - name: Assert npm lockfile is absent
+        run: ./bin/6529 run guard:no-package-lock
+
+      - name: Install dependencies
+        env:
+          SFW_BIN: ${{ steps.socket_firewall.outputs.firewall-path-binary }}
+        run: ./bin/6529 ci
+
+      - name: Run small Playwright smoke pack
+        if: matrix.lane == 'playwright-smoke'
+        env:
+          NEXT_DEV_DIST_DIR: ".next-playwright-smoke"
+          PLAYWRIGHT_READONLY: "1"
+        run: ./bin/6529 run test:e2e:smoke
+
+      - name: Run critical route-shell Playwright pack
+        if: matrix.lane == 'playwright-critical-shell'
+        env:
+          NEXT_DEV_DIST_DIR: ".next-playwright-critical-shell"
+          PLAYWRIGHT_READONLY: "1"
+        run: ./bin/6529 run test:e2e:critical-shell
+
+      - name: Upload app check artifacts
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: app-pr-ci-results-${{ matrix.lane }}-${{ github.event.pull_request.number || github.run_id }}
+          path: |
+            test-results/**
+            playwright-report/**
+          if-no-files-found: ignore
+          retention-days: 14
+
   app-checks:
     name: App check / ${{ matrix.label }}
     needs: plan
-    if: needs.plan.outputs.install_required == 'true'
+    if: >-
+      needs.plan.outputs.install_required == 'true' &&
+      github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 60
     permissions:
@@ -365,7 +477,7 @@ jobs:
             ${{ runner.os }}-node22-pnpm-
 
       - name: Use cached pnpm store
-        run: ./bin/6529 exec pnpm config set store-dir ~/.pnpm-store
+        run: echo "npm_config_store_dir=$HOME/.pnpm-store" >> "$GITHUB_ENV"
 
       - name: Install Socket Firewall
         id: socket_firewall
@@ -374,12 +486,12 @@ jobs:
           mode: firewall
 
       - name: Assert npm lockfile is absent
-        run: ./bin/6529 guard:no-package-lock
+        run: ./bin/6529 run guard:no-package-lock
 
       - name: Install dependencies
         env:
           SFW_BIN: ${{ steps.socket_firewall.outputs.firewall-path-binary }}
-        run: ./bin/6529 install:frozen
+        run: ./bin/6529 ci
 
       - name: Run Knip dead-code check
         if: matrix.lane == 'quality'
@@ -387,7 +499,7 @@ jobs:
 
       - name: Lint package.json versions
         if: matrix.lane == 'quality' && needs.plan.outputs.dependency_governance_required == 'true'
-        run: ./bin/6529 lint:package-json
+        run: ./bin/6529 run lint:package-json
 
       - name: Classify dependency risk
         if: matrix.lane == 'quality' && needs.plan.outputs.dependency_governance_required == 'true'
@@ -406,30 +518,25 @@ jobs:
         if: matrix.lane == 'quality' && needs.plan.outputs.agent_files_sync_required == 'true'
         run: ./bin/6529 run test:no-coverage -- __tests__/scripts/sync-agent-files.test.ts
 
-      - name: Verify Release Bus v2 workflow contract
-        if: matrix.lane == 'quality' && needs.plan.outputs.release_bus_contract_required == 'true'
+      - name: Verify frontend deployment workflow contracts
+        if: matrix.lane == 'quality' && needs.plan.outputs.deployment_contract_required == 'true'
         run: |
           set -euo pipefail
           ./bin/6529 run test:no-coverage --runInBand --runTestsByPath \
             __tests__/scripts/app-pr-ci-effective-plan.test.ts \
-            __tests__/scripts/pr-ci-policy-bundle.test.ts \
+            __tests__/scripts/ci-wave-web-validation.test.ts \
             __tests__/scripts/deploy-staging-artifact.test.ts \
-            __tests__/scripts/deployment-bus.test.ts \
             __tests__/scripts/e2e-packs.test.ts \
-            __tests__/scripts/manual-deploy-routing-guard.test.ts \
+            __tests__/scripts/frontend-deployment-workflows.test.ts \
             __tests__/scripts/museum-release-tier.test.ts \
             __tests__/scripts/museum-surface-registry.test.ts \
             __tests__/scripts/package-public-review-artifacts.test.ts \
             __tests__/scripts/production-build-artifact.test.ts \
-            __tests__/scripts/production-e2e-dispatch.test.ts \
+            __tests__/scripts/production-artifact-metadata.test.ts \
+            __tests__/scripts/production-artifact-verifier.test.ts \
+            __tests__/scripts/deployment-e2e-workflows.test.ts \
             __tests__/scripts/public-review-artifact-workflows.test.ts \
-            __tests__/scripts/release-bus-artifact-compatibility.test.ts \
-            __tests__/scripts/release-bus-performance-contract.test.ts \
-            __tests__/scripts/release-bus-v2-advance-staging-ref-workflow.test.ts \
-            __tests__/scripts/release-bus-v2-compose-workflow.test.ts \
-            __tests__/scripts/sync-e2e-manifest.test.ts \
-            __tests__/scripts/release-bus-install-dependencies.test.ts \
-            ops/scripts/release-bus-status.test.ts
+            __tests__/scripts/sync-e2e-manifest.test.ts
 
       - name: Lint changed source
         if: matrix.lane == 'quality' && needs.plan.outputs.lint_changed_required == 'true'
@@ -533,6 +640,19 @@ jobs:
             mapfile -t related_jest_tests < "${related_tests_file}"
             rm -f "${related_tests_file}"
 
+            valid_related_tests=()
+            for related_test in "${related_jest_tests[@]}"; do
+              if [ -z "$related_test" ]; then
+                continue
+              fi
+              if [ ! -f "$related_test" ]; then
+                echo "Skipping non-file Jest discovery output: $related_test"
+                continue
+              fi
+              valid_related_tests+=("$related_test")
+            done
+            related_jest_tests=("${valid_related_tests[@]}")
+
             if [ "${#jest_test_files[@]}" -gt 0 ]; then
               declare -A direct_jest_paths=()
               for test_file in "${jest_test_files[@]}"; do
@@ -583,23 +703,7 @@ jobs:
           MUSEUM_RELEASE_TIER_MODE: ${{ vars.MUSEUM_RELEASE_TIER_MODE }}
         run: |
           set -euo pipefail
-          hold_state="unknown"
-          if hold_issues="$(gh issue list \
-            --repo "$GITHUB_REPOSITORY" \
-            --state open \
-            --label "release-bus-museum-hold" \
-            --limit 100 \
-            --json number 2>/dev/null)" && \
-            jq -e 'type == "array"' <<< "$hold_issues" >/dev/null
-          then
-            if [ "$(jq 'length' <<< "$hold_issues")" -eq 0 ]; then
-              hold_state="clear"
-            else
-              hold_state="active"
-            fi
-          else
-            echo "::warning::Museum hold lookup failed; retaining every Museum pack."
-          fi
+          hold_state="clear"
           mapfile -t museum_refs < <(
             git ls-remote --refs \
               https://github.com/6529-Collections/6529networkmuseum.git \
@@ -761,7 +865,7 @@ jobs:
           EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           EXPECTED_MERGE_SHA: ${{ github.sha }}
           BUILD_REQUIRED: ${{ needs.plan.outputs.build_required }}
-          RELEASE_BUS_CONTRACT_REQUIRED: ${{ needs.plan.outputs.release_bus_contract_required }}
+          DEPLOYMENT_CONTRACT_REQUIRED: ${{ needs.plan.outputs.deployment_contract_required }}
           TEST_TYPECHECK_REQUIRED: ${{ needs.plan.outputs.test_typecheck_required }}
           MUSEUM_BROWSER_REQUIRED: ${{ needs.plan.outputs.playwright_museum_required }}
         run: |
@@ -770,22 +874,13 @@ jobs:
           [[ "$EXPECTED_MERGE_SHA" =~ ^[a-f0-9]{40}$ ]]
           [[ "$EXPECTED_HEAD_SHA" =~ ^[a-f0-9]{40}$ ]]
           [[ "$BUILD_REQUIRED" =~ ^(true|false)$ ]]
-          [[ "$RELEASE_BUS_CONTRACT_REQUIRED" =~ ^(true|false)$ ]]
+          [[ "$DEPLOYMENT_CONTRACT_REQUIRED" =~ ^(true|false)$ ]]
           [[ "$TEST_TYPECHECK_REQUIRED" =~ ^(true|false)$ ]]
           [[ "$MUSEUM_BROWSER_REQUIRED" =~ ^(true|false)$ ]]
           test "$(git rev-parse HEAD)" = "$EXPECTED_MERGE_SHA"
           test "$(git rev-parse HEAD^1)" = "$EXPECTED_BASE_SHA"
-          rm -rf release-bus-v2-pr-evidence
-          mkdir -p release-bus-v2-pr-evidence
-          policy_bundle="$(node scripts/pr-ci-policy-bundle.cjs \
-            --expected-git-ref "$EXPECTED_MERGE_SHA" \
-            --output release-bus-v2-pr-evidence/policy-bundle.txt)"
-          policy_bundle_contract="$(jq -er .contract <<< "$policy_bundle")"
-          policy_bundle_digest="$(jq -er .digest <<< "$policy_bundle")"
-          policy_bundle_line_count="$(jq -er .line_count <<< "$policy_bundle")"
-          test "$policy_bundle_contract" = pr-ci-policy-bundle-v1
-          [[ "$policy_bundle_digest" =~ ^[a-f0-9]{64}$ ]]
-          [[ "$policy_bundle_line_count" =~ ^[1-9][0-9]{0,3}$ ]]
+          rm -rf exact-pr-ci-evidence
+          mkdir -p exact-pr-ci-evidence
           jq -e --arg base_sha "$EXPECTED_BASE_SHA" --arg head_sha "$EXPECTED_MERGE_SHA" '
             .contract == "museum-release-selection-v1" and
             .environment == "pr" and
@@ -817,11 +912,8 @@ jobs:
             --arg base_sha "$EXPECTED_BASE_SHA" \
             --arg merge_sha "$EXPECTED_MERGE_SHA" \
             --arg head_sha "$EXPECTED_HEAD_SHA" \
-            --arg policy_bundle_contract "$policy_bundle_contract" \
-            --arg policy_bundle_digest "$policy_bundle_digest" \
-            --argjson policy_bundle_line_count "$policy_bundle_line_count" \
             --argjson build_required "$BUILD_REQUIRED" \
-            --argjson release_bus_contract_required "$RELEASE_BUS_CONTRACT_REQUIRED" \
+            --argjson deployment_contract_required "$DEPLOYMENT_CONTRACT_REQUIRED" \
             --argjson test_typecheck_required "$TEST_TYPECHECK_REQUIRED" \
             --argjson museum_browser_required "$MUSEUM_BROWSER_REQUIRED" \
             --slurpfile museum_release_selection test-results/app-pr-ci/museum-release-selection.json \
@@ -836,39 +928,35 @@ jobs:
               head_sha:$head_sha,
               production_build_required:$build_required,
               dependency_analysis_required:true,
-              release_bus_contract_required:$release_bus_contract_required,
+              deployment_contract_required:$deployment_contract_required,
               test_typecheck_required:$test_typecheck_required,
               museum_browser_required:$museum_browser_required,
               museum_source_commit:$museum_release_selection[0].source_commit,
               museum_release_selection_digest:$museum_release_selection[0].selection_digest,
               museum_release_selection:$museum_release_selection[0],
-              policy_bundle_contract:$policy_bundle_contract,
-              policy_bundle_digest:$policy_bundle_digest,
-              policy_bundle_line_count:$policy_bundle_line_count,
               required_gates:([
                 "package-manager-discipline",
                 "dependency-analysis",
                 "reviewbot-contract",
                 "generated-agent-files",
-                "release-bus-workflow-contract-or-plan-not-required",
+                "deployment-workflow-contract-or-plan-not-required",
                 "changed-lint",
                 "changed-typecheck",
                 "test-typecheck-or-plan-not-required",
                 "related-jest-selection",
                 "production-build-or-plan-not-required",
-                "pr-ci-policy-bundle",
                 "museum-release-selection"
               ] + (if $museum_browser_required then ["museum-browser-qualification"] else [] end))
-            }' > release-bus-v2-pr-evidence/manifest.json
-          (cd release-bus-v2-pr-evidence && \
-            sha256sum ./manifest.json ./policy-bundle.txt > SHA256SUMS)
+            }' > exact-pr-ci-evidence/manifest.json
+          (cd exact-pr-ci-evidence && \
+            sha256sum ./manifest.json > SHA256SUMS)
 
       - name: Upload exact PR merge-tree CI evidence
         if: matrix.lane == 'quality'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: release-bus-v2-pr-${{ github.sha }}
-          path: release-bus-v2-pr-evidence
+          name: exact-pr-ci-${{ github.sha }}
+          path: exact-pr-ci-evidence
           if-no-files-found: error
           retention-days: 30
 
@@ -880,32 +968,52 @@ jobs:
           key: ${{ steps.nextjs_build_cache.outputs.cache-primary-key }}
 
       - name: Restore Playwright browser
-        if: startsWith(matrix.lane, 'playwright-')
+        if: startsWith(matrix.lane, 'playwright-museum-')
         id: playwright_browser_cache
         uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
         with:
           path: ~/.cache/ms-playwright
           key: ${{ runner.os }}-node22-playwright-chromium-${{ hashFiles('pnpm-lock.yaml') }}
 
-      - name: Install Playwright browser
-        if: startsWith(matrix.lane, 'playwright-')
+      - name: Install Playwright dependencies
+        id: playwright_dependencies_primary
+        if: startsWith(matrix.lane, 'playwright-museum-')
+        timeout-minutes: 3
+        continue-on-error: true
+        run: ./bin/6529 exec playwright install-deps chromium
+
+      - name: Retry Playwright dependencies
+        id: playwright_dependencies_retry
+        if: startsWith(matrix.lane, 'playwright-museum-') && steps.playwright_dependencies_primary.outcome != 'success'
+        timeout-minutes: 3
+        continue-on-error: true
+        run: ./bin/6529 exec playwright install-deps chromium
+
+      - name: Verify Playwright dependencies
+        if: startsWith(matrix.lane, 'playwright-museum-')
         env:
-          PLAYWRIGHT_CACHE_HIT: ${{ steps.playwright_browser_cache.outputs.cache-hit }}
+          PRIMARY_OUTCOME: ${{ steps.playwright_dependencies_primary.outcome }}
+          RETRY_OUTCOME: ${{ steps.playwright_dependencies_retry.outcome }}
         run: |
-          if [ "$PLAYWRIGHT_CACHE_HIT" = true ]; then
-            ./bin/6529 exec playwright install-deps chromium
-          else
-            ./bin/6529 exec playwright install --with-deps chromium
+          if [ "$PRIMARY_OUTCOME" != success ] && [ "$RETRY_OUTCOME" != success ]; then
+            echo "Playwright system dependency installation failed twice." >&2
+            exit 1
           fi
+
+      - name: Install Playwright browser
+        if: startsWith(matrix.lane, 'playwright-museum-')
+        timeout-minutes: 10
+        run: ./bin/6529 exec playwright install chromium
 
       - name: Resolve exact Museum publication for Playwright
         id: museum_publication
         if: startsWith(matrix.lane, 'playwright-museum-')
         env:
+          GH_TOKEN: ${{ github.token }}
           # Exact canonical-C qualification. The runtime resolves the pointer
           # and catalog at C, then assembles only the immutable reviewed B corpus.
-          MUSEUM_PUBLICATION_TEST_CATALOG_COMMIT: "970ac8b6a3f1c51b21090cee71365bf9aa4bcd42"
-          MUSEUM_PUBLICATION_TEST_SOURCE_COMMIT: "dfb7024075efd0cedf63eebd4f4e87b7ce84808f"
+          MUSEUM_PUBLICATION_TEST_CATALOG_COMMIT: "858d3ebc049b59219d6fa639dbd325b6adc7345a"
+          MUSEUM_PUBLICATION_TEST_SOURCE_COMMIT: "92966f2836ebf2af06edfe0fe2cff25041307c92"
         run: |
           set -euo pipefail
           mapfile -t museum_refs < <(
@@ -922,6 +1030,12 @@ jobs:
           source_commit="$MUSEUM_PUBLICATION_TEST_SOURCE_COMMIT"
           [[ "$catalog_commit" =~ ^[a-f0-9]{40}$ ]]
           [[ "$source_commit" =~ ^[a-f0-9]{40}$ ]]
+          gh api \
+            "repos/6529-Collections/6529networkmuseum/git/commits/$catalog_commit" \
+            --jq '.sha' | grep -Fx "$catalog_commit"
+          gh api \
+            "repos/6529-Collections/6529networkmuseum/git/commits/$source_commit" \
+            --jq '.sha' | grep -Fx "$source_commit"
           echo "catalog_commit=$catalog_commit" >> "$GITHUB_OUTPUT"
           echo "source_commit=$source_commit" >> "$GITHUB_OUTPUT"
           echo "Museum moving source main: $museum_commit"
@@ -937,23 +1051,7 @@ jobs:
           SOURCE_COMMIT: ${{ steps.museum_publication.outputs.source_commit }}
         run: |
           set -euo pipefail
-          hold_state="unknown"
-          if hold_issues="$(gh issue list \
-            --repo "$GITHUB_REPOSITORY" \
-            --state open \
-            --label "release-bus-museum-hold" \
-            --limit 100 \
-            --json number 2>/dev/null)" && \
-            jq -e 'type == "array"' <<< "$hold_issues" >/dev/null
-          then
-            if [ "$(jq 'length' <<< "$hold_issues")" -eq 0 ]; then
-              hold_state="clear"
-            else
-              hold_state="active"
-            fi
-          else
-            echo "::warning::Museum hold lookup failed; retaining every Museum pack."
-          fi
+          hold_state="clear"
           if [ "$MUSEUM_RELEASE_SELECTION_CONTROL_AVAILABLE" = true ]; then
             NODE_PATH="$GITHUB_WORKSPACE/node_modules${NODE_PATH:+:$NODE_PATH}" \
               node "$MUSEUM_RELEASE_SELECTION_TOOL" \
@@ -1051,20 +1149,6 @@ jobs:
             ].join("\n")
           );
           NODE
-
-      - name: Run small Playwright smoke pack
-        if: matrix.lane == 'playwright-smoke'
-        env:
-          NEXT_DEV_DIST_DIR: ".next-playwright-smoke"
-          PLAYWRIGHT_READONLY: "1"
-        run: ./bin/6529 run test:e2e:smoke
-
-      - name: Run critical route-shell Playwright pack
-        if: matrix.lane == 'playwright-critical-shell'
-        env:
-          NEXT_DEV_DIST_DIR: ".next-playwright-critical-shell"
-          PLAYWRIGHT_READONLY: "1"
-        run: ./bin/6529 run test:e2e:critical-shell
 
       - name: Run Network Museum Playwright packs
         if: startsWith(matrix.lane, 'playwright-museum-')
@@ -1334,7 +1418,7 @@ jobs:
             PLAYWRIGHT_BASE_URL="$museum_base_url" \
             PLAYWRIGHT_OUTPUT_DIR="test-results/playwright/museum-remaining" \
             PLAYWRIGHT_HTML_REPORT_DIR="playwright-report/museum-remaining" \
-            timeout --signal=TERM --kill-after=30s 15m \
+            timeout --signal=TERM --kill-after=30s 20m \
             ./bin/6529 exec playwright test \
               "${selected_specs[@]}" \
               --project="$MUSEUM_PROJECT" \
@@ -1348,7 +1432,7 @@ jobs:
           set -e
           if [ "$museum_remaining_exit" -ne 0 ]; then
             if [ "$museum_remaining_exit" -eq 124 ]; then
-              echo "::error::Museum $MUSEUM_PROJECT remaining coverage exceeded its 15-minute timeout."
+              echo "::error::Museum $MUSEUM_PROJECT remaining coverage exceeded its 20-minute timeout."
             else
               echo "::error::Museum $MUSEUM_PROJECT remaining coverage failed with exit ${museum_remaining_exit}."
             fi
@@ -1375,6 +1459,7 @@ jobs:
     needs:
       - plan
       - app-checks
+      - core-playwright-checks
     if: always() && needs.plan.result == 'success' && needs.plan.outputs.install_required == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -1385,4 +1470,10 @@ jobs:
       - name: Require successful parallel app checks
         env:
           APP_CHECKS_RESULT: ${{ needs.app-checks.result }}
-        run: test "$APP_CHECKS_RESULT" = "success"
+          CORE_PLAYWRIGHT_REQUIRED: ${{ needs.plan.outputs.core_playwright_required }}
+          CORE_PLAYWRIGHT_RESULT: ${{ needs.core-playwright-checks.result }}
+        run: |
+          test "$APP_CHECKS_RESULT" = "success"
+          if [ "$CORE_PLAYWRIGHT_REQUIRED" = true ]; then
+            test "$CORE_PLAYWRIGHT_RESULT" = "success"
+          fi

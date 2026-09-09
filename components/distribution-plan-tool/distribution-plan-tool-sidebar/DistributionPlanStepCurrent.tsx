@@ -1,18 +1,14 @@
-import type {
-    DistributionPlanStepDescription} from "./DistributionPlanToolSidebar";
-import {
-    DISTRIBUTION_PLAN_STEPS
-} from "./DistributionPlanToolSidebar";
+import { DistributionPlanToolStep } from "../DistributionPlanToolContext";
+import type { DistributionPlanStepDescription } from "./DistributionPlanToolSidebar";
 
 export default function DistributionPlanStepCurrent({
   step,
 }: {
   step: DistributionPlanStepDescription;
 }) {
-  const isLastStep =
-    step.order === Object.values(DISTRIBUTION_PLAN_STEPS).at(-1)!.order;
+  const isLastStep = step.key === DistributionPlanToolStep.REVIEW;
   return (
-    <li className="tw-relative tw-pb-10">
+    <li className="tw-relative tw-pb-10 last:tw-pb-0">
       {!isLastStep && (
         <div
           className="tw-absolute tw-left-[13.25px] tw-top-4 -tw-ml-px tw-mt-0.5 tw-h-full tw-w-0.5 tw-bg-iron-600"

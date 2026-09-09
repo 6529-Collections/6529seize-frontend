@@ -4,6 +4,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef } from "react";
 interface UseWaveDropsNotificationReadParams {
   readonly waveId: string;
   readonly enabled?: boolean | undefined;
+  readonly isDirectMessage?: boolean | undefined;
   readonly removeWaveDeliveredNotifications: (
     waveId: string
   ) => Promise<unknown> | void;
@@ -50,6 +51,7 @@ const usesLoadedProxyForSameRole = ({
 export const useWaveDropsNotificationRead = ({
   waveId,
   enabled = true,
+  isDirectMessage = false,
   removeWaveDeliveredNotifications,
 }: UseWaveDropsNotificationReadParams) => {
   const readSyncAttemptRef = useRef<ReadSyncAttempt | null>(null);
@@ -125,6 +127,7 @@ export const useWaveDropsNotificationRead = ({
         try {
           const readResult = await markReadForAttempt(currentState.waveId, {
             shouldSend: () => canSendReadForWave(currentState.waveId),
+            requestDmUnreadState: isDirectMessage,
           });
           return readResult === "sent" ? "success" : "skipped";
         } catch (error) {
@@ -211,7 +214,7 @@ export const useWaveDropsNotificationRead = ({
         promise: runReadSyncAttempt(state),
       });
     },
-    [canSendReadForWave]
+    [canSendReadForWave, isDirectMessage]
   );
 
   useEffect(() => {

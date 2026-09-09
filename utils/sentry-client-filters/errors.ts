@@ -11,7 +11,6 @@ import {
   tenorCategoriesPath,
   twitterCurrentInsetReferenceErrorMessage,
   twitterInjectedWaveDocumentPathPattern,
-  webViewUserAgentTokens,
   routeParameterizationContextKeys,
   routeParameterizationTagKeys,
 } from "./constants";
@@ -54,6 +53,7 @@ import {
   hasLikelyAppOwnedFrame,
   hasNativeJsonStringifyFrame,
   hasSentryRouteParameterizationFrame,
+  isSentryBrowserHelperFrame,
   isSentryRouteParameterizationFrame,
 } from "./app-frame-utils";
 
@@ -229,26 +229,14 @@ export function hasMetaMaskMobileWebViewContext(
     values.some((value) =>
       matchesContextToken(value, metaMaskMobileContextTokens)
     ) &&
-    values.some(
-      (value) =>
-        matchesContextToken(value, mobileSafariWebViewContextTokens) ||
-        matchesContextToken(value, webViewUserAgentTokens)
-    )
-  );
-}
-
-function hasMobileSafariWebViewContext(event: SentryClientEvent): boolean {
-  const contextValues = getRouteParameterizationContextValues(event);
-  const userAgentValues = getRouteParameterizationUserAgentValues(event);
-  return (
-    contextValues.some((value) =>
+    (contextValues.some((value) =>
       matchesContextToken(value, mobileSafariWebViewContextTokens)
     ) ||
-    userAgentValues.some(
-      (value) =>
-        matchesContextToken(value, mobileSafariWebViewContextTokens) ||
-        isIosWebViewUserAgent(value)
-    )
+      userAgentValues.some(
+        (value) =>
+          matchesContextToken(value, mobileSafariWebViewContextTokens) ||
+          isIosWebViewUserAgent(value)
+      ))
   );
 }
 
@@ -642,10 +630,11 @@ export function shouldFilterGifPickerTenorCategoriesError(
 }
 
 export function shouldFilterSentryRouteParameterizationError(
-  event: SentryClientEvent
+  event: SentryClientEvent,
+  hint?: SentryEventHint
 ): boolean {
-  // Sentry SDK route parameterization noise observed in iOS WKWebView;
-  // keep app-owned and generic browser cyclic JSON errors.
+  // Sentry SDK cyclic JSON timer noise observed in MetaMask Mobile on iOS
+  // WKWebView; keep app-owned and generic WebView cyclic JSON errors.
   const value = event.exception?.values?.[0];
   if (
     value?.type !== "TypeError" ||
@@ -663,21 +652,26 @@ export function shouldFilterSentryRouteParameterizationError(
   }
 
   const frames = value.stacktrace?.frames;
-  const framesWithoutSentryRouteParameterization = frames?.filter(
-    (frame) => !isSentryRouteParameterizationFrame(frame)
+  const hasSentryInfrastructureFrame =
+    hasSentryRouteParameterizationFrame(frames) ||
+    (Array.isArray(frames) && frames.some(isSentryBrowserHelperFrame));
+  const framesWithoutSentryInfrastructure = frames?.filter(
+    (frame) =>
+      !isSentryRouteParameterizationFrame(frame) &&
+      !isSentryBrowserHelperFrame(frame)
   );
   if (
-    hasLikelyAppOwnedFrame(framesWithoutSentryRouteParameterization) ||
+    hasAppOwnedSourceEvidence(event, value, hint) ||
+    hasLikelyAppOwnedFrame(framesWithoutSentryInfrastructure) ||
     !hasNativeJsonStringifyFrame(frames)
   ) {
     return false;
   }
 
   return (
-    (hasSentryRouteParameterizationFrame(frames) ||
+    (hasSentryInfrastructureFrame ||
       hasRouteParameterizationRouteEvidence(event)) &&
-    (hasMetaMaskMobileWebViewContext(event) ||
-      hasMobileSafariWebViewContext(event))
+    hasMetaMaskMobileWebViewContext(event)
   );
 }
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { AuthContext } from "@/components/auth/Auth";
+import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import UserSettingsBackground from "@/components/user/settings/UserSettingsBackground";
 import UserSettingsBannerImageInput from "@/components/user/settings/UserSettingsBannerImageInput";
@@ -19,9 +20,8 @@ import {
 import { commonApiPost } from "@/services/api/common-api";
 import { useMutation } from "@tanstack/react-query";
 import { useContext, useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
-import { useClickAway, useKeyPressEvent } from "react-use";
 import { multiPartUpload } from "@/components/waves/create-wave/services/multiPartUpload";
+import { getUserProfileHeaderMessage } from "../user-page-header.messages";
 
 type BannerEditMode = "gradient" | "image";
 const bannerTabs: CommonSelectItem<BannerEditMode>[] = [
@@ -33,14 +33,23 @@ export default function UserPageHeaderEditBanner({
   profile,
   defaultBanner1,
   defaultBanner2,
+  embedded = false,
+  isOpen = true,
+  onAfterLeave,
+  onBack,
+  onBusyChange,
   onClose,
 }: {
   readonly profile: ApiIdentity;
   readonly defaultBanner1: string;
   readonly defaultBanner2: string;
+  readonly embedded?: boolean;
+  readonly isOpen?: boolean;
+  readonly onAfterLeave?: (() => void) | undefined;
+  readonly onBack?: (() => void) | undefined;
+  readonly onBusyChange?: ((isBusy: boolean) => void) | undefined;
   readonly onClose: () => void;
 }) {
-  const modalRef = useRef<HTMLDivElement>(null);
   const isSavingRef = useRef(false);
 
   const handleClose = () => {
@@ -48,9 +57,6 @@ export default function UserPageHeaderEditBanner({
       onClose();
     }
   };
-
-  useClickAway(modalRef, handleClose);
-  useKeyPressEvent("Escape", handleClose);
 
   const { setToast, requestAuth } = useContext(AuthContext);
   const { onProfileEdit } = useContext(ReactQueryWrapperContext);
@@ -72,6 +78,7 @@ export default function UserPageHeaderEditBanner({
       ? getScaledImageUri(initialBannerImageUrl, ImageScale.AUTOx800)
       : null
   );
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (bannerFile) {
@@ -87,8 +94,6 @@ export default function UserPageHeaderEditBanner({
     );
     return undefined;
   }, [bannerFile, initialBannerImageUrl]);
-
-  const [isUploading, setIsUploading] = useState<boolean>(false);
 
   const profileHasImage = Boolean(initialBannerImageUrl);
   const hasGradientChanges =
@@ -112,7 +117,6 @@ export default function UserPageHeaderEditBanner({
         type: "success",
       });
       onProfileEdit({ profile: updatedProfile, previousProfile: null });
-      onClose();
     },
     onError: (error: unknown) => {
       setToast({
@@ -124,15 +128,17 @@ export default function UserPageHeaderEditBanner({
     },
   });
 
-  const isSaving = isUploading || updateUser.isPending;
-  isSavingRef.current = isSaving;
+  const setSavingState = (nextIsSaving: boolean) => {
+    isSavingRef.current = nextIsSaving;
+    setIsSaving(nextIsSaving);
+    onBusyChange?.(nextIsSaving);
+  };
 
   const uploadBannerImage = async (): Promise<string | null> => {
     if (!bannerFile) {
       return initialBannerImageUrl;
     }
     try {
-      setIsUploading(true);
       const uploaded = await multiPartUpload({
         file: bannerFile,
         path: "drop",
@@ -145,8 +151,6 @@ export default function UserPageHeaderEditBanner({
           : "Failed to upload banner image";
       setToast({ message, type: "error" });
       return null;
-    } finally {
-      setIsUploading(false);
     }
   };
 
@@ -165,117 +169,121 @@ export default function UserPageHeaderEditBanner({
       return;
     }
 
-    let banner1Value = bgColor1;
-    let banner2Value: string | undefined = bgColor2;
-
-    if (editMode === "image") {
-      if (!bannerFile && !initialBannerImageUrl) {
-        setToast({
-          message: "Select an image to use as your banner.",
-          type: "error",
-        });
-        return;
-      }
-
-      banner2Value = undefined;
-      const uploadedUrl = await uploadBannerImage();
-      if (!uploadedUrl) {
-        return;
-      }
-      banner1Value = uploadedUrl;
+    if (editMode === "image" && !bannerFile && !initialBannerImageUrl) {
+      setToast({
+        message: getUserProfileHeaderMessage(
+          "user.profileHeader.edit.bannerImageRequired"
+        ),
+        type: "error",
+      });
+      return;
     }
 
-    const body: ApiCreateOrUpdateProfileRequest = {
-      handle: profile.handle,
-      classification: profile.classification,
-      banner_1: banner1Value,
-      banner_2: banner2Value,
-    };
+    setSavingState(true);
+    try {
+      let banner1Value = bgColor1;
+      let banner2Value: string | undefined = bgColor2;
 
-    if (profile.pfp) {
-      body.pfp_url = profile.pfp;
+      if (editMode === "image") {
+        banner2Value = undefined;
+        const uploadedUrl = await uploadBannerImage();
+        if (!uploadedUrl) {
+          return;
+        }
+        banner1Value = uploadedUrl;
+      }
+
+      const body: ApiCreateOrUpdateProfileRequest = {
+        handle: profile.handle,
+        classification: profile.classification,
+        banner_1: banner1Value,
+        banner_2: banner2Value,
+      };
+
+      if (profile.pfp) {
+        body.pfp_url = profile.pfp;
+      }
+
+      await updateUser.mutateAsync(body);
+    } finally {
+      setSavingState(false);
     }
-
-    await updateUser.mutateAsync(body);
+    onClose();
   };
 
-  if (typeof document === "undefined") {
-    return null;
+  const form = (
+    <form
+      onSubmit={onSubmit}
+      className="tw-flex tw-flex-col tw-gap-y-5 tw-px-4 sm:tw-px-6"
+    >
+      <CommonTabs<BannerEditMode>
+        items={bannerTabs}
+        activeItem={editMode}
+        setSelected={setEditMode}
+        filterLabel="Banner editor mode"
+        fill={false}
+      />
+
+      {editMode === "gradient" ? (
+        <UserSettingsBackground
+          bgColor1={bgColor1}
+          bgColor2={bgColor2}
+          setBgColor1={setBgColor1}
+          setBgColor2={setBgColor2}
+        />
+      ) : (
+        <UserSettingsBannerImageInput
+          imageToShow={bannerPreviewUrl}
+          setFile={setBannerFile}
+        />
+      )}
+
+      <div className="tw-gap-x-3 md:tw-flex md:tw-flex-row-reverse">
+        <UserSettingsSave
+          loading={isSaving}
+          disabled={!haveChanges}
+          responsiveWidthClassName="md:tw-w-auto"
+        />
+        <Button
+          variant="secondary"
+          size="lg"
+          disabled={isSaving}
+          onClick={handleClose}
+          fullWidth
+          className="tw-hidden md:tw-inline-flex md:tw-w-auto"
+        >
+          Cancel
+        </Button>
+      </div>
+    </form>
+  );
+
+  if (embedded) {
+    return form;
   }
 
-  const dialogTitleId = "user-page-header-edit-banner-title";
-
-  return createPortal(
-    <dialog
-      open
-      aria-modal="true"
-      aria-labelledby={dialogTitleId}
-      className="tailwind-scope tw-m-0 tw-h-[100dvh] tw-w-screen tw-cursor-default tw-border-0 tw-bg-transparent tw-p-0"
-      style={{ inset: 0, position: "fixed", zIndex: 1100 }}
+  return (
+    <MobileWrapperDialog
+      title={getUserProfileHeaderMessage("user.profileHeader.edit.banner")}
+      isOpen={isOpen}
+      onClose={handleClose}
+      onBack={onBack}
+      onAfterLeave={onAfterLeave}
+      tabletModal
+      showHeaderCloseButton
+      showHeaderDivider
+      showScrollbar
+      maxWidthClass="md:tw-max-w-2xl"
+      headerActions={
+        <p className="tw-m-0 tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-400">
+          {getUserProfileHeaderMessage(
+            "user.profileHeader.edit.bannerDescription"
+          )}
+        </p>
+      }
+      dismissible={!isSaving}
     >
-      <button
-        type="button"
-        aria-label="Close edit banner modal"
-        className="tw-absolute tw-inset-0 tw-cursor-pointer tw-border-none tw-bg-gray-600 tw-bg-opacity-50 tw-p-0"
-        onClick={handleClose}
-      />
-      <div className="tw-relative tw-flex tw-min-h-full tw-w-full tw-items-center tw-justify-center tw-overflow-y-auto tw-p-2 lg:tw-p-4">
-        <div
-          ref={modalRef}
-          className="tw-w-full tw-transform tw-rounded-xl tw-bg-iron-950 tw-p-6 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-max-w-3xl md:tw-max-w-2xl lg:tw-p-8"
-        >
-          <h2 id={dialogTitleId} className="tw-sr-only">
-            Edit Banner
-          </h2>
-          <form onSubmit={onSubmit} className="tw-flex tw-flex-col tw-gap-y-5">
-            <div>
-              <p className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-50 sm:tw-text-xl">
-                Edit profile cover
-              </p>
-              <p className="tw-m-0 tw-mt-2 tw-text-sm tw-text-iron-400">
-                Choose a gradient or upload an image for your profile cover.
-              </p>
-            </div>
-
-            <CommonTabs<BannerEditMode>
-              items={bannerTabs}
-              activeItem={editMode}
-              setSelected={setEditMode}
-              filterLabel="Banner editor mode"
-              fill={false}
-            />
-
-            {editMode === "gradient" ? (
-              <UserSettingsBackground
-                bgColor1={bgColor1}
-                bgColor2={bgColor2}
-                setBgColor1={setBgColor1}
-                setBgColor2={setBgColor2}
-              />
-            ) : (
-              <UserSettingsBannerImageInput
-                imageToShow={bannerPreviewUrl}
-                setFile={setBannerFile}
-              />
-            )}
-
-            <div className="tw-gap-x-3 sm:tw-flex sm:tw-flex-row-reverse">
-              <UserSettingsSave loading={isSaving} disabled={!haveChanges} />
-              <Button
-                variant="secondary"
-                size="lg"
-                disabled={isSaving}
-                onClick={handleClose}
-                fullWidth
-                className="tw-mt-3 sm:tw-mt-0 sm:tw-w-auto"
-              >
-                Cancel
-              </Button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </dialog>,
-    document.body
+      {form}
+    </MobileWrapperDialog>
   );
 }

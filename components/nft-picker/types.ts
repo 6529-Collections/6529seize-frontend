@@ -78,6 +78,7 @@ export type NftPickerProps = {
   readonly overscan?: number | undefined;
   readonly placeholder?: string | undefined;
   readonly className?: string | undefined;
+  readonly hideSelectionSummaryWhenEmpty?: boolean | undefined;
   readonly renderTokenExtra?:
     | ((tokenId: bigint, metadata?: TokenMetadata) => ReactNode)
     | undefined;

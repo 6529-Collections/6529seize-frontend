@@ -33,7 +33,7 @@ export function RateNicButton({
   readonly onRateClick: () => void;
 }) {
   return (
-    <Button variant="success" size="xs" onClick={onRateClick}>
+    <Button variant="success" size="sm" onClick={onRateClick}>
       Rate NIC
     </Button>
   );

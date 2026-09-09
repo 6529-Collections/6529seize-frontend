@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { usePathname } from "next/navigation";
 import { MuseumSourceContribution } from "@/components/museum/MuseumSourceContribution";
 import type {
@@ -57,7 +57,7 @@ describe("MuseumSourceContribution", () => {
     );
 
     expect(
-      screen.getByText(/public record at commit aaaaaaaaaaaa/u)
+      screen.getByText("Published from the Museum's public record.")
     ).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: "Read the source" })
@@ -77,6 +77,8 @@ describe("MuseumSourceContribution", () => {
       "href",
       `https://github.com/6529-Collections/6529networkmuseum/blob/${COMMIT}/CONTRIBUTING.md`
     );
+    const relatedSources = screen.getByText("Related works and context");
+    fireEvent.click(relatedSources);
     const structuredRecord = screen.getByRole("link", {
       name: "Structured record",
     });
@@ -84,12 +86,12 @@ describe("MuseumSourceContribution", () => {
       "href",
       `https://github.com/6529-Collections/6529networkmuseum/blob/${COMMIT}/records/accessions/6529NM.2026.001/objects/6529NM.2026.001.01.json`
     );
-    expect(screen.getByText("Related works and context")).toBeInTheDocument();
+    expect(relatedSources).toBeInTheDocument();
     expect(structuredRecord).not.toHaveAttribute("title");
     expect(structuredRecord).not.toHaveAttribute("aria-label");
   });
 
-  it("keeps the exact stale commit visible", () => {
+  it("keeps the exact stale source links while presenting status in museum language", () => {
     render(
       <MuseumSourceContribution
         identity={identity}
@@ -99,9 +101,15 @@ describe("MuseumSourceContribution", () => {
     );
 
     expect(
-      screen.getByText(/latest verified release available here/u)
+      screen.getByText(/latest verified public record/iu)
     ).toHaveTextContent(
-      "aaaaaaaaaaaa, the latest verified release available here. A source refresh is in progress."
+      "Latest verified public record; a source refresh is in progress."
+    );
+    expect(
+      screen.getByRole("link", { name: "Read the source" })
+    ).toHaveAttribute(
+      "href",
+      `https://github.com/6529-Collections/6529networkmuseum/blob/${COMMIT}/records/accessions/6529NM.2026.001/public/6529NM.2026.001.01.md`
     );
   });
 
@@ -167,8 +175,11 @@ describe("MuseumSourceContribution", () => {
     );
 
     expect(
-      screen.getByText(/Page-level source: unassigned/u)
+      screen.getByText("Published from the Museum's public record.", {
+        exact: true,
+      })
     ).toBeInTheDocument();
+    expect(screen.queryByText(/unassigned/u)).not.toBeInTheDocument();
     expect(
       screen.queryByRole("link", { name: "Read the source" })
     ).not.toBeInTheDocument();

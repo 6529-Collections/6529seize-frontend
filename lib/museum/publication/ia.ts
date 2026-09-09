@@ -11,6 +11,11 @@ import type {
 import { selectMuseumStillMedia } from "./mediaSelection";
 import type { MuseumView } from "@/lib/museum/types";
 import {
+  museumProjectWorks,
+  museumPublicWorkRelation,
+  museumPublicWorkStatus,
+} from "./collectionSemantics";
+import {
   museumAcquisitionHref,
   museumAcquisitionProgramHref,
   museumArtistHref,
@@ -50,6 +55,8 @@ export interface MuseumEntityRefMedia {
   readonly height: number | null;
   readonly alt: string;
   readonly creditLine?: string;
+  readonly srcSet?: string;
+  readonly sizes?: string;
 }
 
 export interface MuseumEntityRef {
@@ -337,11 +344,8 @@ export function buildMuseumArtistRelations(
       id: work.id,
       label: work.title,
       href: museumWorkHref(work.id),
-      relation:
-        work.status === "accessioned_into_permanent_collection"
-          ? "In Collection"
-          : "Connected work",
-      status: work.status,
+      relation: museumPublicWorkRelation(work),
+      status: museumPublicWorkStatus(work),
       ...(media === undefined
         ? {}
         : {
@@ -428,31 +432,30 @@ export function buildMuseumProjectRelations(
   );
   if (project === undefined)
     return { primaryRelations: [], secondaryRelations: [] };
-  const workRefs = (publication.works ?? [])
-    .filter((work) => work.projectId === project.id)
-    .flatMap((work) => {
-      const media = selectMuseumStillMedia(work.media);
-      const relation = ref({
-        kind: "work" as const,
-        id: work.id,
-        label: work.title,
-        href: museumWorkHref(work.id),
-        relation: "Part of",
-        ...(media === undefined
-          ? {}
-          : {
-              media: {
-                kind: "governed" as const,
-                src: media.url,
-                width: media.width,
-                height: media.height,
-                alt: media.altText ?? work.title,
-                creditLine: media.credit.creditLine,
-              },
-            }),
-      });
-      return relation === null ? [] : [relation];
+  const workRefs = museumProjectWorks(publication, project).flatMap((work) => {
+    const media = selectMuseumStillMedia(work.media);
+    const relation = ref({
+      kind: "work" as const,
+      id: work.id,
+      label: work.title,
+      href: museumWorkHref(work.id),
+      relation: "Part of",
+      status: museumPublicWorkStatus(work),
+      ...(media === undefined
+        ? {}
+        : {
+            media: {
+              kind: "governed" as const,
+              src: media.url,
+              width: media.width,
+              height: media.height,
+              alt: media.altText ?? work.title,
+              creditLine: media.credit.creditLine,
+            },
+          }),
     });
+    return relation === null ? [] : [relation];
+  });
   const artistRefs = (project.artistIds ?? [project.artistId]).map((id) =>
     artistRelation(publication, id, "By")
   );

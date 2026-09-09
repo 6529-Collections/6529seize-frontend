@@ -50,7 +50,7 @@ function sourceCopyKey(
 }
 
 const LINK_CLASS =
-  "tw-inline-flex tw-min-h-11 tw-min-w-0 tw-max-w-full tw-items-center tw-break-words tw-text-sm tw-font-semibold tw-text-primary-300 tw-underline tw-underline-offset-4 hover:tw-text-primary-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400";
+  "tw-inline-flex tw-min-h-11 tw-min-w-0 tw-max-w-full tw-items-center tw-break-words tw-text-xs tw-font-semibold tw-text-primary-300 tw-underline tw-underline-offset-4 hover:tw-text-primary-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400";
 
 const RELATED_SOURCE_LABEL_KEYS = {
   accessionRecord:
@@ -121,37 +121,34 @@ export function MuseumSourceContribution({
           const href = buildImmutableMuseumBlobUrl(commit, path);
           return href === null ? [] : [{ href, label, path }];
         });
-  const copyValues = commit === null ? {} : { commit: commit.slice(0, 12) };
-
   return (
     <aside
       className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800"
       aria-labelledby="museum-open-source-title"
     >
-      <div className="tw-mx-auto tw-grid tw-w-full tw-max-w-[1324px] tw-gap-6 tw-px-4 tw-py-8 sm:tw-px-6 lg:tw-grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:tw-items-end lg:tw-gap-10 lg:tw-px-8">
-        <div className="tw-max-w-3xl">
+      <div className="tw-mx-auto tw-flex tw-w-full tw-min-w-0 tw-max-w-[1324px] tw-flex-col tw-gap-2 tw-px-4 tw-py-4 sm:tw-px-6 lg:tw-flex-row lg:tw-items-center lg:tw-justify-between lg:tw-gap-8 lg:tw-px-8">
+        <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-1 sm:tw-flex-row sm:tw-items-baseline sm:tw-gap-3">
           <h2
             id="museum-open-source-title"
-            className="tw-m-0 tw-text-sm tw-font-semibold tw-leading-6 tw-text-iron-100"
+            className="tw-m-0 tw-shrink-0 tw-text-xs tw-font-semibold tw-leading-5 tw-text-iron-200"
           >
             {t(DEFAULT_LOCALE, "museum.network.openMuseum.strip.title")}
           </h2>
-          <p className="tw-m-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-400">
+          <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-500">
             {t(
               DEFAULT_LOCALE,
-              sourceCopyKey(identity, sourceState, pageSource !== null),
-              copyValues
+              sourceCopyKey(identity, sourceState, pageSource !== null)
             )}
           </p>
         </div>
         <nav
-          className="tw-grid tw-min-w-0 tw-gap-3"
+          className="tw-flex tw-min-w-0 tw-flex-col tw-gap-1 lg:tw-items-end"
           aria-label={t(
             DEFAULT_LOCALE,
             "museum.network.openMuseum.strip.actions"
           )}
         >
-          <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-gap-x-5 tw-gap-y-1 lg:tw-justify-end">
+          <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-gap-x-4 tw-gap-y-0 lg:tw-justify-end">
             {exactSourceUrl !== null ? (
               <a
                 href={exactSourceUrl}
@@ -187,14 +184,14 @@ export function MuseumSourceContribution({
             ) : null}
           </div>
           {relatedSources.length > 0 ? (
-            <div className="tw-grid tw-min-w-0 tw-gap-1 lg:tw-justify-items-end">
-              <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-iron-500">
+            <details className="tw-min-w-0 tw-text-xs tw-text-iron-500 lg:tw-text-right">
+              <summary className="tw-min-h-9 tw-cursor-pointer tw-font-medium tw-text-iron-400 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400">
                 {t(
                   DEFAULT_LOCALE,
                   "museum.network.openMuseum.strip.relatedTitle"
                 )}
-              </p>
-              <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-gap-x-5 tw-gap-y-1 lg:tw-justify-end">
+              </summary>
+              <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-gap-x-4 tw-gap-y-0 lg:tw-justify-end">
                 {relatedSources.map(({ href, label, path }) => {
                   const visibleLabel = relatedSourceLabel(label);
                   return (
@@ -210,7 +207,7 @@ export function MuseumSourceContribution({
                   );
                 })}
               </div>
-            </div>
+            </details>
           ) : null}
         </nav>
       </div>

@@ -13,7 +13,36 @@ import {
   normalizeLocale,
 } from "@/i18n/locales";
 import { t, tRich } from "@/i18n/messages";
+import { DE_DE_MESSAGES } from "@/i18n/messages/de-DE";
+import { EN_GB_MESSAGES } from "@/i18n/messages/en-GB";
 import { EN_US_MESSAGES } from "@/i18n/messages/en-US";
+import { ES_ES_MESSAGES } from "@/i18n/messages/es-ES";
+import { FR_FR_MESSAGES } from "@/i18n/messages/fr-FR";
+
+const PROFILE_WAVE_FEED_MESSAGE_KEYS = [
+  "waves.profileFeed.title",
+  "waves.profileFeed.description",
+  "waves.profileFeed.errorTitle",
+  "waves.profileFeed.errorDescription",
+  "waves.profileFeed.emptyTitle",
+  "waves.profileFeed.emptyDescription",
+] as const;
+
+const PROFILE_WAVE_FEED_DICTIONARIES = [
+  EN_US_MESSAGES,
+  EN_GB_MESSAGES,
+  FR_FR_MESSAGES,
+  ES_ES_MESSAGES,
+  DE_DE_MESSAGES,
+] as const;
+
+const WAVE_POSTING_LABELS = [
+  ["en-US", "Posting"],
+  ["en-GB", "Posting"],
+  ["fr-FR", "Publication en cours"],
+  ["es-ES", "Publicando"],
+  ["de-DE", "Beitrag wird veröffentlicht"],
+] as const;
 
 const NEW_VERSION_TOAST_LOCALE_MESSAGES = [
   {
@@ -524,6 +553,13 @@ describe("frontend i18n helpers", () => {
     );
   });
 
+  it.each(WAVE_POSTING_LABELS)(
+    "translates the Wave posting label for %s",
+    (locale, expected) => {
+      expect(t(locale, "waves.header.postLabel.inProgress")).toBe(expected);
+    }
+  );
+
   it("backs curation removal controls with source-locale fallbacks", () => {
     for (const locale of SUPPORTED_LOCALES) {
       expect(t(locale, "waves.myStream.curation.remove")).toBe("Remove");
@@ -538,6 +574,44 @@ describe("frontend i18n helpers", () => {
         "Remove from curation"
       );
     }
+  });
+
+  it("translates the chronological Profile Wave feed framing", () => {
+    for (const messages of PROFILE_WAVE_FEED_DICTIONARIES) {
+      for (const key of PROFILE_WAVE_FEED_MESSAGE_KEYS) {
+        expect(messages[key]).toEqual(expect.any(String));
+        expect(messages[key]).not.toBe("");
+      }
+    }
+
+    expect(t("en-US", "waves.profileFeed.title")).toBe(
+      "Latest From Profile Waves"
+    );
+    expect(t("en-US", "waves.profileFeed.description")).toBe(
+      "See what the community is sharing in Profile Waves."
+    );
+    expect(t("en-US", "waves.profileFeed.errorTitle")).toBe(
+      "Couldn’t load profile posts"
+    );
+    expect(t("en-US", "waves.profileFeed.errorDescription")).toBe(
+      "Refresh this view to try again."
+    );
+    expect(t("en-US", "waves.profileFeed.emptyTitle")).toBe(
+      "No profile posts yet"
+    );
+    expect(t("en-US", "waves.profileFeed.emptyDescription")).toBe(
+      "New posts from members’ Profile Waves will appear here."
+    );
+
+    expect(t("fr-FR", "waves.profileFeed.title")).toBe(
+      "Dernières publications des Profile Waves"
+    );
+    expect(t("es-ES", "waves.profileFeed.title")).toBe(
+      "Últimas publicaciones de Profile Waves"
+    );
+    expect(t("de-DE", "waves.profileFeed.title")).toBe(
+      "Neueste Beiträge aus Profile Waves"
+    );
   });
 
   it("keeps shared search control copy namespaced", () => {

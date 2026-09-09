@@ -305,10 +305,13 @@ export default function RepContributorsDialog({
       tall
       fixedHeight
       tabletModal
-      maxWidthClass="md:tw-max-w-xl md:[&_h2]:tw-mt-2"
+      noPadding
+      maxWidthClass="md:tw-max-w-xl"
       showScrollbar
+      showHeaderCloseButton
+      headerClassName="tw-pb-2 tw-pt-4"
     >
-      <div className="tw-px-4 sm:tw-px-6">
+      <div className="tw-px-4 tw-pb-6 sm:tw-px-6">
         <div className="tw-mb-4 tw-mt-2 tw-flex tw-items-center tw-justify-between tw-gap-3">
           <p className="tw-mb-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
             {formatNumberWithCommas(contributorCount)} {contributorLabel}

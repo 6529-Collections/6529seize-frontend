@@ -16,6 +16,46 @@ type StructuredApiError = Error & {
   };
 };
 
+export const getStructuredApiErrorStatus = (
+  error: unknown
+): number | undefined => {
+  if (typeof error !== "object" || error === null || !("status" in error)) {
+    return undefined;
+  }
+  const status = (error as { readonly status?: unknown }).status;
+  return typeof status === "number" ? status : undefined;
+};
+
+export const getStructuredApiErrorCode = (
+  error: unknown
+): string | undefined => {
+  if (typeof error !== "object" || error === null || !("response" in error)) {
+    return undefined;
+  }
+  const response = (error as { readonly response?: unknown }).response;
+  if (
+    typeof response !== "object" ||
+    response === null ||
+    !("body" in response)
+  ) {
+    return undefined;
+  }
+  const rawBody = (response as { readonly body?: unknown }).body;
+  let body: unknown = rawBody;
+  if (typeof rawBody === "string") {
+    try {
+      body = JSON.parse(rawBody) as unknown;
+    } catch {
+      return undefined;
+    }
+  }
+  if (typeof body !== "object" || body === null || !("code" in body)) {
+    return undefined;
+  }
+  const code = (body as { readonly code?: unknown }).code;
+  return typeof code === "string" && code.trim().length > 0 ? code : undefined;
+};
+
 const getHeaders = (
   headers?: Record<string, string>,
   contentType: boolean = true,
@@ -554,6 +594,7 @@ export const commonApiPostWithoutBodyAndResponse = async (param: {
 export const commonApiDelete = async (param: {
   endpoint: string;
   headers?: Record<string, string> | undefined;
+  signal?: AbortSignal | undefined;
   errorMode?: ApiErrorMode | undefined;
 }): Promise<void> => {
   const url = buildUrl(param.endpoint);
@@ -562,7 +603,25 @@ export const commonApiDelete = async (param: {
     url,
     method: "DELETE",
     headers: getHeaders(param.headers),
+    signal: param.signal,
     parseJson: false,
+    errorMode: param.errorMode ?? "legacy-string",
+  });
+};
+
+export const commonApiDeleteWithResponse = async <T>(param: {
+  endpoint: string;
+  headers?: Record<string, string> | undefined;
+  signal?: AbortSignal | undefined;
+  errorMode?: ApiErrorMode | undefined;
+}): Promise<T> => {
+  const url = buildUrl(param.endpoint);
+
+  return executeApiRequest<T>({
+    url,
+    method: "DELETE",
+    headers: getHeaders(param.headers),
+    signal: param.signal,
     errorMode: param.errorMode ?? "legacy-string",
   });
 };

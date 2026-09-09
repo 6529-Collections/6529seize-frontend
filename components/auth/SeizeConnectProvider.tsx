@@ -23,6 +23,7 @@ import {
 import { logoutSessionV2 } from "@/services/auth/session-v2.utils";
 import { useConnectedAccountsUnreadNotifications } from "@/hooks/useConnectedAccountsUnreadNotifications";
 import { useUnreadNotifications } from "@/hooks/useUnreadNotifications";
+import useCapacitor from "@/hooks/useCapacitor";
 import { useAppKitBootstrap } from "@/components/providers/AppKitBootstrapContext";
 import { SecurityEventType } from "@/types/security";
 import {
@@ -48,7 +49,6 @@ import {
 import { useSeizeConnectProviderEffects } from "./seizeConnectEffects";
 import type { SeizeConnectContextType } from "./seizeConnectTypes";
 import {
-  CONNECT_AFTER_DISCONNECT_DELAY_MS,
   CONNECT_INTENT_HANDOFF_GRACE_MS,
   normalizeAddress,
   useConsolidatedWalletState,
@@ -56,6 +56,13 @@ import {
 import { getSeizeConnectImpersonation } from "./seizeConnectImpersonation";
 import { useAddConnectedAccount } from "./useAddConnectedAccount";
 import { useSignOutAllTransaction } from "./useSignOutAllTransaction";
+import CapacitorConnectFlow from "./CapacitorConnectFlow";
+import type { CapacitorConnectDialogView } from "./CapacitorConnectDialog";
+import {
+  openFreshUserConnection,
+  openUserConnectionSurfaceForRuntime,
+  useDisconnectExternalWalletBeforeSelection,
+} from "./capacitorConnectController";
 
 export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -63,6 +70,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
   const account = useAppKitAccount();
   const wagmiAccount = useAccount();
   const { disconnect } = useDisconnect();
+  const capacitor = useCapacitor();
   const {
     hasTerminalError: hasTerminalBootstrapError,
     isCreated: isAppKitCreated,
@@ -78,6 +86,10 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
   const [isAddingConnectedAccount, setIsAddingConnectedAccount] =
     useState(false);
   const [isConnectIntentWaitingForAppKit, setIsConnectIntentWaitingForAppKit] =
+    useState(false);
+  const [capacitorConnectView, setCapacitorConnectView] =
+    useState<CapacitorConnectDialogView>("closed");
+  const [isCapacitorHandoffPending, setIsCapacitorHandoffPending] =
     useState(false);
 
   // Use consolidated wallet state management
@@ -196,7 +208,10 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     setDisconnected,
     setIsAddingConnectedAccount,
     setIsConnectIntentWaitingForAppKit,
-    stateOpen: appKitModalState.isOpen,
+    stateOpen:
+      appKitModalState.isOpen ||
+      capacitorConnectView !== "closed" ||
+      isCapacitorHandoffPending,
     storedConnectedAccounts,
     walletState,
   });
@@ -217,7 +232,10 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     activeConnectorType === APP_WALLET_CONNECTOR_TYPE;
 
   const openConnectModal = useCallback(
-    async (source: string): Promise<void> => {
+    async (
+      source: string,
+      view: "Connect" | "AllWallets" = "Connect"
+    ): Promise<void> => {
       if (isSigningOutAllRef.current) {
         return;
       }
@@ -245,7 +263,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
           return;
         }
 
-        await openAppKit({ view: "Connect" });
+        await openAppKit({ view });
 
         if (hasSignOutAllGenerationChanged(signOutGeneration)) {
           clearConnectIntentWaitingForAppKit();
@@ -281,6 +299,11 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     ]
   );
 
+  const openExternalWallets = useCallback(
+    () => openConnectModal("capacitorExternalWallets", "AllWallets"),
+    [openConnectModal]
+  );
+
   const seizeConnectOrThrow = useCallback(
     async (source: string): Promise<void> => {
       if (isSigningOutAllRef.current) {
@@ -298,60 +321,48 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     [isSigningOutAllRef, openConnectModal]
   );
 
+  const openUserConnectionSurface = useCallback(
+    (source: string): Promise<void> =>
+      openUserConnectionSurfaceForRuntime({
+        source,
+        isCapacitor: capacitor.isCapacitor,
+        isSigningOutAll: isSigningOutAllRef.current,
+        openWebConnection: seizeConnectOrThrow,
+        setCapacitorView: setCapacitorConnectView,
+      }),
+    [capacitor.isCapacitor, isSigningOutAllRef, seizeConnectOrThrow]
+  );
+
   const seizeConnect = useCallback((): void => {
     seizeConnectOrThrow("seizeConnect").then(undefined, () => undefined);
   }, [seizeConnectOrThrow]);
 
-  const seizeConnectFresh = useCallback(async (): Promise<void> => {
-    if (isSigningOutAllRef.current) {
-      return;
-    }
-    const signOutGeneration = getSignOutAllGeneration();
-
-    const liveConnectedWallet =
-      account.address && account.isConnected && isAddress(account.address)
-        ? getAddress(account.address)
-        : null;
-
-    if (!liveConnectedWallet || isActiveAppWalletConnector) {
-      await seizeConnectOrThrow("seizeConnectFresh");
-      return;
-    }
-
-    try {
-      await disconnect();
-    } catch (error: unknown) {
-      const walletError = createWalletError(
-        WalletDisconnectionError,
-        "disconnect wallet before opening connection modal",
-        error
-      );
-      logError("seizeConnectFresh", walletError);
-      throw walletError;
-    }
-
-    await new Promise<void>((resolve) => {
-      setTimeout(resolve, CONNECT_AFTER_DISCONNECT_DELAY_MS);
-    });
-
-    if (
-      !isMountedRef.current ||
-      hasSignOutAllGenerationChanged(signOutGeneration)
-    ) {
-      return;
-    }
-
-    await seizeConnectOrThrow("seizeConnectFresh");
-  }, [
-    account.address,
-    account.isConnected,
-    disconnect,
-    getSignOutAllGeneration,
-    hasSignOutAllGenerationChanged,
-    isActiveAppWalletConnector,
-    isSigningOutAllRef,
-    seizeConnectOrThrow,
-  ]);
+  const seizeConnectFresh = useCallback(
+    (): Promise<void> =>
+      openFreshUserConnection({
+        address: account.address,
+        isConnected: account.isConnected,
+        isCapacitor: capacitor.isCapacitor,
+        isActiveAppWalletConnector,
+        isSigningOutAll: isSigningOutAllRef.current,
+        disconnect,
+        getSignOutAllGeneration,
+        hasSignOutAllGenerationChanged,
+        isMounted: () => isMountedRef.current,
+        openUserConnectionSurface,
+      }),
+    [
+      account.address,
+      account.isConnected,
+      capacitor.isCapacitor,
+      disconnect,
+      getSignOutAllGeneration,
+      hasSignOutAllGenerationChanged,
+      isActiveAppWalletConnector,
+      isSigningOutAllRef,
+      openUserConnectionSurface,
+    ]
+  );
 
   const seizeDisconnect = useCallback(async (): Promise<void> => {
     if (isSigningOutAllRef.current) {
@@ -532,9 +543,13 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
   const seizeAddConnectedAccount = useAddConnectedAccount({
     account,
     addFlowOriginAddressRef,
-    appKitModalOpen: appKitModalState.isOpen,
+    appKitModalOpen:
+      appKitModalState.isOpen ||
+      capacitorConnectView !== "closed" ||
+      isCapacitorHandoffPending,
     canAddConnectedAccount,
     disconnect,
+    deferDisconnectUntilSelection: capacitor.isCapacitor,
     getSignOutAllGeneration,
     hasSignOutAllGenerationChanged,
     isActiveAppWalletConnector,
@@ -544,9 +559,17 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     isMountedRef,
     isSigningOutAllRef,
     retryConnectTimeoutRef,
-    seizeConnectOrThrow,
+    seizeConnectOrThrow: openUserConnectionSurface,
     setIsAddingConnectedAccount,
   });
+
+  const disconnectExternalWalletBeforeSelection =
+    useDisconnectExternalWalletBeforeSelection({
+      address: account.address,
+      isConnected: account.isConnected,
+      isActiveAppWalletConnector,
+      disconnect,
+    });
 
   const connectedAccounts = useMemo(() => {
     if (isSigningOutAll) {
@@ -670,15 +693,18 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
   const contextValue = useMemo(
     (): SeizeConnectContextType => ({
       address: isSigningOutAll ? undefined : activeAddress,
-      walletName: !isSigningOutAll && isActiveWalletConnected
-        ? appKitModalState.walletName
-        : undefined,
-      walletIcon: !isSigningOutAll && isActiveWalletConnected
-        ? appKitModalState.walletIcon
-        : undefined,
-      isSafeWallet: !isSigningOutAll && isActiveWalletConnected
-        ? appKitModalState.isSafeWallet
-        : false,
+      walletName:
+        !isSigningOutAll && isActiveWalletConnected
+          ? appKitModalState.walletName
+          : undefined,
+      walletIcon:
+        !isSigningOutAll && isActiveWalletConnected
+          ? appKitModalState.walletIcon
+          : undefined,
+      isSafeWallet:
+        !isSigningOutAll && isActiveWalletConnected
+          ? appKitModalState.isSafeWallet
+          : false,
       seizeConnect,
       seizeConnectFresh,
       seizeDisconnect,
@@ -688,7 +714,10 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
       seizeSwitchConnectedAccount,
       seizeAddConnectedAccount,
       seizeConnectOpen:
-        appKitModalState.isOpen || isConnectIntentWaitingForAppKit,
+        appKitModalState.isOpen ||
+        isConnectIntentWaitingForAppKit ||
+        capacitorConnectView !== "closed" ||
+        isCapacitorHandoffPending,
       isConnected: !isSigningOutAll && isActiveWalletConnected,
       canSignActiveWallet: !isSigningOutAll && isActiveWalletConnected,
       hasActiveWalletAddress,
@@ -723,6 +752,8 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
       seizeAddConnectedAccount,
       isConnectIntentWaitingForAppKit,
       appKitModalState.isOpen,
+      capacitorConnectView,
+      isCapacitorHandoffPending,
       account.isConnected,
       walletState,
       hasInitializationError,
@@ -738,6 +769,15 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
         {children}
         {isAppKitCreated && (
           <AppKitModalBridge store={appKitModalBridgeStore} />
+        )}
+        {capacitor.isCapacitor && (
+          <CapacitorConnectFlow
+            view={capacitorConnectView}
+            setView={setCapacitorConnectView}
+            disconnectExternalWallet={disconnectExternalWalletBeforeSelection}
+            openExternalWallets={openExternalWallets}
+            onHandoffStateChange={setIsCapacitorHandoffPending}
+          />
         )}
       </SeizeConnectContext.Provider>
     </WalletErrorBoundary>

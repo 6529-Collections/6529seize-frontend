@@ -169,6 +169,7 @@ beforeEach(() => {
       { index: 2, start: 102, size: 1 },
     ],
     totalHeight: 103,
+    scrollToIndex: jest.fn(() => true),
   });
 });
 
@@ -406,6 +407,43 @@ it("renders announcement, highly rated preview, pinned, and one filterable botto
   expect(ref.current?.sentinelRef.current).toBeInstanceOf(HTMLElement);
 });
 
+it("uses darker section dividers in the app without changing the web tone", () => {
+  const { container, rerender } = render(
+    <UnifiedWavesListWaves
+      waves={baseWaves}
+      onHover={jest.fn()}
+      scrollContainerRef={scrollRef}
+    />
+  );
+  const getSectionDividers = () =>
+    Array.from(container.querySelectorAll("div.tw-border-t"));
+
+  expect(getSectionDividers()).toHaveLength(3);
+  expect(getSectionDividers()[0]).toHaveClass("tw-mb-1", "tw-mt-2");
+  expect(getSectionDividers()[0]).not.toHaveClass("tw-my-3");
+  getSectionDividers().forEach((divider) => {
+    expect(divider).toHaveClass("tw-border-iron-700");
+    expect(divider).not.toHaveClass("tw-border-iron-800");
+  });
+
+  mockDeviceInfo = { isApp: true, hasTouchScreen: true };
+  rerender(
+    <UnifiedWavesListWaves
+      waves={baseWaves}
+      onHover={jest.fn()}
+      scrollContainerRef={scrollRef}
+    />
+  );
+
+  expect(getSectionDividers()).toHaveLength(3);
+  expect(getSectionDividers()[0]).toHaveClass("tw-my-3");
+  expect(getSectionDividers()[0]).not.toHaveClass("tw-mb-1", "tw-mt-2");
+  getSectionDividers().forEach((divider) => {
+    expect(divider).toHaveClass("tw-border-iron-800");
+    expect(divider).not.toHaveClass("tw-border-iron-700");
+  });
+});
+
 it("keeps worth checking out waves in All at their recent-activity position", () => {
   render(
     <UnifiedWavesListWaves
@@ -456,7 +494,9 @@ it("keeps discovery-only worth checking out waves out of Joined", () => {
     />
   );
 
-  expect(screen.getByTestId("preview-avatar-recommendation")).toBeInTheDocument();
+  expect(
+    screen.getByTestId("preview-avatar-recommendation")
+  ).toBeInTheDocument();
   expect(screen.getByLabelText("Following waves list")).toBeInTheDocument();
   expect(screen.queryByTestId("wave-recommendation")).toBeNull();
   expect(screen.getByTestId("wave-joined-wave")).toBeInTheDocument();
@@ -495,11 +535,8 @@ it("keeps the overlaid score inside the wave link and opens details on hover", a
   const waveLink = screen.getByRole("link", {
     name: "Open Scored Discovery, score 93",
   });
-  expect(waveLink).toHaveClass(
-    "tw-relative",
-    "tw-size-8",
-    "tw-cursor-pointer"
-  );
+  expect(waveLink).toHaveClass("tw-relative", "tw-size-8", "tw-cursor-pointer");
+  expect(waveLink.closest(".tw-pt-1")).not.toBeNull();
   const scoreBadgeText = screen.getByText("93", { selector: "text" });
   const scoreBadge = scoreBadgeText.closest("span");
   expect(scoreBadgeText).toBeInTheDocument();
@@ -514,6 +551,14 @@ it("keeps the overlaid score inside the wave link and opens details on hover", a
   );
   expect(scoreBadgeText.closest("svg")).toHaveClass("tw-h-5");
   expect(scoreBadgeText.closest("svg")).toHaveClass("tw-w-6");
+  const scoreBadgePaths = scoreBadgeText
+    .closest("svg")
+    ?.querySelectorAll("path");
+  expect(scoreBadgePaths).toHaveLength(1);
+  expect(scoreBadgePaths?.[0]).toHaveClass(
+    "tw-fill-iron-900",
+    "tw-stroke-white/25"
+  );
   fireEvent.click(scoreBadgeText);
   expect(
     screen.queryByRole("dialog", { name: "Wave score details" })
@@ -1035,6 +1080,100 @@ it("auto-expands the parent for the active subwave", () => {
     })
   ).toHaveAttribute("aria-expanded", "true");
   expect(screen.getByTestId("wave-child")).toBeInTheDocument();
+});
+
+it("keeps the active parent tree ahead of newly paginated roots", async () => {
+  mockUseMyStream.mockReturnValue({
+    activeWave: { id: "child", parentWaveId: "parent", set: jest.fn() },
+    waves: {
+      loadSubwavesForParent,
+      prefetchSubwavesForParent,
+      loadingSubwaveParentIds: [],
+    },
+  });
+  const parent = createMockMinimalWave({
+    id: "parent",
+    hasSubwaves: true,
+    sidebarActivityTimestamp: 10,
+  });
+  const child = createMockMinimalWave({
+    id: "child",
+    parentWaveId: "parent",
+    sidebarActivityTimestamp: 20,
+  });
+  const recent = createMockMinimalWave({
+    id: "recent",
+    sidebarActivityTimestamp: 300,
+  });
+  const newlyPaginated = createMockMinimalWave({
+    id: "newly-paginated",
+    sidebarActivityTimestamp: 200,
+  });
+
+  const { rerender } = render(
+    <UnifiedWavesListWaves
+      waves={[recent, parent, child]}
+      onHover={jest.fn()}
+      scrollContainerRef={scrollRef}
+    />
+  );
+
+  expect(
+    mockUseVirtualizedWaves.mock.calls
+      .at(-1)?.[0]
+      .items.slice(0, 3)
+      .map((row: any) => row.key)
+  ).toEqual(["parent", "parent:subwaves-toggle", "parent:child"]);
+
+  rerender(
+    <UnifiedWavesListWaves
+      waves={[recent, newlyPaginated, parent, child]}
+      onHover={jest.fn()}
+      scrollContainerRef={scrollRef}
+    />
+  );
+  await flushAnimatedSidebarRows();
+
+  expect(
+    mockUseVirtualizedWaves.mock.calls
+      .at(-1)?.[0]
+      .items.slice(0, 3)
+      .map((row: any) => row.key)
+  ).toEqual(["parent", "parent:subwaves-toggle", "parent:child"]);
+});
+
+it("keeps active root waves in normal activity order", () => {
+  mockUseMyStream.mockReturnValue({
+    activeWave: { id: "older", parentWaveId: null, set: jest.fn() },
+    waves: {
+      loadSubwavesForParent,
+      prefetchSubwavesForParent,
+      loadingSubwaveParentIds: [],
+    },
+  });
+
+  render(
+    <UnifiedWavesListWaves
+      waves={[
+        createMockMinimalWave({
+          id: "older",
+          sidebarActivityTimestamp: 10,
+        }),
+        createMockMinimalWave({
+          id: "recent",
+          sidebarActivityTimestamp: 300,
+        }),
+      ]}
+      onHover={jest.fn()}
+      scrollContainerRef={scrollRef}
+    />
+  );
+
+  expect(
+    mockUseVirtualizedWaves.mock.calls
+      .at(-1)?.[0]
+      .items.map((row: any) => row.key)
+  ).toEqual(["recent", "older"]);
 });
 
 it("loads a direct active subwave parent before showing it expanded", async () => {

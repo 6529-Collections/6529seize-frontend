@@ -114,15 +114,12 @@ export function MemesDropSummarySection({
             {manualOutcomes.map((outcome) => (
               <span
                 key={outcome}
-                className="tw-text-base tw-font-medium tw-text-amber-400/80"
+                className="tw-text-sm tw-text-amber-400/70"
               >
                 {outcome}
               </span>
             ))}
-            <MainStageMemeCardLink
-              memeCardId={memeCardId}
-              variant="prominent"
-            />
+            <MainStageMemeCardLink memeCardId={memeCardId} />
           </div>
         )}
       </div>

@@ -2,7 +2,21 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import { PublicReviewMobileNavigationDisclosure } from "@/components/public-review/PublicReviewMobileNavigationDisclosure";
-import { PublicReviewReadingLayout } from "@/components/public-review/PublicReviewReadingLayout";
+import {
+  PublicReviewReadingLayout,
+  usePublicReviewFeedbackPanelCoordination,
+} from "@/components/public-review/PublicReviewReadingLayout";
+
+/** Renders a test link that opens the coordinated feedback panel. */
+function FeedbackLink() {
+  const feedbackPanel = usePublicReviewFeedbackPanelCoordination();
+
+  return (
+    <a href="#public-review-feedback" onClick={() => feedbackPanel.open()}>
+      Share feedback
+    </a>
+  );
+}
 
 describe("PublicReviewReadingLayout", () => {
   const originalMatchMedia = window.matchMedia;
@@ -145,6 +159,35 @@ describe("PublicReviewReadingLayout", () => {
     expect(document.getElementById("public-review-feedback")).toHaveAttribute(
       "hidden"
     );
+  });
+
+  it("reopens feedback when the feedback hash is already current", async () => {
+    const user = userEvent.setup();
+    render(
+      <PublicReviewReadingLayout
+        content={<FeedbackLink />}
+        feedbackAvailable
+        panel={<div>Feedback panel</div>}
+        toolbar={<div>Page 1</div>}
+      />
+    );
+
+    const feedbackLink = screen.getByRole("link", { name: "Share feedback" });
+    await user.click(feedbackLink);
+    await screen.findByRole("dialog", { name: "Page comments" });
+    expect(window.location.hash).toBe("#public-review-feedback");
+
+    await user.keyboard("{Escape}");
+    await waitFor(() =>
+      expect(
+        screen.queryByRole("dialog", { name: "Page comments" })
+      ).not.toBeInTheDocument()
+    );
+
+    await user.click(feedbackLink);
+    expect(
+      await screen.findByRole("dialog", { name: "Page comments" })
+    ).toBeInTheDocument();
   });
 
   it("starts observing the layout when feedback becomes available", async () => {

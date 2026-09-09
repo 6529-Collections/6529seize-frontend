@@ -15,6 +15,7 @@ export function CompactMenu({
   onItemSelect,
   className,
   triggerClassName,
+  triggerAsChild,
   unstyledTrigger,
   menuClassName,
   unstyledMenu,
@@ -41,6 +42,7 @@ export function CompactMenu({
           items={items}
           onItemSelect={onItemSelect}
           triggerClassName={triggerClassName}
+          triggerAsChild={triggerAsChild}
           unstyledTrigger={unstyledTrigger}
           menuClassName={menuClassName}
           unstyledMenu={unstyledMenu}
@@ -82,6 +84,7 @@ function CompactMenuContent({
   items,
   onItemSelect,
   triggerClassName,
+  triggerAsChild = false,
   unstyledTrigger = false,
   menuClassName,
   unstyledMenu = false,
@@ -110,6 +113,7 @@ function CompactMenuContent({
       <CompactMenuTrigger
         trigger={trigger}
         triggerClassName={triggerClassName}
+        triggerAsChild={triggerAsChild}
         unstyledTrigger={unstyledTrigger}
         disabled={disabled}
         ariaLabel={ariaLabel}

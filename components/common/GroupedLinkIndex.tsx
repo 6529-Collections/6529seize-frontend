@@ -2,6 +2,13 @@ import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import Link from "next/link";
 
+import {
+  ABOUT_CARD_SURFACE_CLASS_NAME,
+  ABOUT_DOCUMENTATION_PAGE_TITLE_CLASS_NAME,
+  ABOUT_PAGE_TITLE_CLASS_NAME,
+  ABOUT_SUPPORTING_TEXT_CLASS_NAME,
+} from "@/components/about/AboutLayout";
+
 export type GroupedLinkIndexItem = {
   readonly id: string;
   readonly label: string;
@@ -22,21 +29,32 @@ export default function GroupedLinkIndex({
   headingIdPrefix,
   getCardAriaLabel,
   showArrows = false,
+  variant = "editorial",
 }: {
-  readonly eyebrow: string;
+  readonly eyebrow?: string | undefined;
   readonly title: string;
   readonly groups: readonly GroupedLinkIndexGroup[];
   readonly headingIdPrefix: string;
   readonly getCardAriaLabel: (label: string) => string;
   readonly showArrows?: boolean | undefined;
+  readonly variant?: "documentation" | "editorial" | undefined;
 }) {
   return (
     <section className="tw-w-full tw-pb-10 tw-text-iron-100">
       <header className="tw-mb-8 tw-max-w-3xl">
-        <p className="tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400">
-          {eyebrow}
-        </p>
-        <h1 className="tw-mb-4 tw-text-3xl tw-font-semibold tw-leading-tight tw-text-iron-50 md:tw-text-4xl">
+        {eyebrow && (
+          <p className="tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400">
+            {eyebrow}
+          </p>
+        )}
+        <h1
+          className={clsx(
+            "tw-mb-4",
+            variant === "editorial"
+              ? ABOUT_PAGE_TITLE_CLASS_NAME
+              : ABOUT_DOCUMENTATION_PAGE_TITLE_CLASS_NAME
+          )}
+        >
           {title}
         </h1>
       </header>
@@ -63,7 +81,7 @@ export default function GroupedLinkIndex({
                       href={item.href}
                       aria-label={getCardAriaLabel(item.label)}
                       className={clsx(
-                        "tw-group tw-flex tw-h-full tw-min-h-20 tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/80 tw-p-4 !tw-no-underline tw-transition tw-duration-200 tw-ease-out hover:tw-border-[#24386F] hover:tw-bg-[#050B1E] focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black",
+                        `tw-group tw-flex tw-h-full tw-min-h-20 tw-rounded-xl tw-border tw-border-solid tw-border-white/10 ${ABOUT_CARD_SURFACE_CLASS_NAME} tw-p-4 tw-no-underline tw-transition tw-duration-200 tw-ease-out hover:tw-border-[#24386F] hover:tw-bg-[#17213B] focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-[#0D0D0F]`,
                         showArrows && "tw-gap-4",
                         hasDescription
                           ? "tw-flex-col tw-items-start"
@@ -79,7 +97,9 @@ export default function GroupedLinkIndex({
                         {item.label}
                       </span>
                       {hasDescription && (
-                        <span className="tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-400 group-hover:tw-text-iron-200">
+                        <span
+                          className={`tw-mt-2 ${ABOUT_SUPPORTING_TEXT_CLASS_NAME} group-hover:tw-text-iron-200`}
+                        >
                           {item.description}
                         </span>
                       )}

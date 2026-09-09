@@ -18,6 +18,7 @@ import {
   useWaveLeaderboardVotingModal,
   WaveLeaderboardVotingModal,
 } from "../WaveLeaderboardVotingModal";
+import ContentModerationDropGate from "@/components/content-moderation/ContentModerationDropGate";
 
 interface WaveLeaderboardGalleryProps {
   readonly wave: ApiWave;
@@ -138,17 +139,19 @@ export const WaveLeaderboardGallery: React.FC<WaveLeaderboardGalleryProps> = ({
         isFetchNextPageError={isFetchNextPageError}
         isFetchPreviousPageError={isFetchPreviousPageError}
         renderItem={(drop) => (
-          <WaveLeaderboardGalleryItem
-            drop={drop}
-            onDropClick={onDropClick}
-            onVoteClick={openVotingModal}
-            activeSort={sort}
-            animationKey={animationKey}
-            isVotingClosed={isVotingClosed}
-            isVotingControlsLocked={isVotingControlsLocked}
-            winningThreshold={winningThreshold}
-            winningThresholdMinDurationMs={winningThresholdMinDurationMs}
-          />
+          <ContentModerationDropGate drop={drop} compact>
+            <WaveLeaderboardGalleryItem
+              drop={drop}
+              onDropClick={onDropClick}
+              onVoteClick={openVotingModal}
+              activeSort={sort}
+              animationKey={animationKey}
+              isVotingClosed={isVotingClosed}
+              isVotingControlsLocked={isVotingControlsLocked}
+              winningThreshold={winningThreshold}
+              winningThresholdMinDurationMs={winningThresholdMinDurationMs}
+            />
+          </ContentModerationDropGate>
         )}
       />
       <WaveLeaderboardVotingModal

@@ -15,4 +15,20 @@ describe('UserPageErrorWrapper', () => {
     await user.click(screen.getByLabelText('Close'));
     expect(close).toHaveBeenCalled();
   });
+
+  it('aligns the icon, message, and touch-sized dismiss control', () => {
+    render(
+      <UserPageErrorWrapper closeError={jest.fn()} fullWidth>
+        <h3 className="tw-leading-5">Message title</h3>
+      </UserPageErrorWrapper>
+    );
+
+    const alert = screen.getByRole('alert');
+    const dismiss = screen.getByRole('button', { name: 'Close' });
+
+    expect(alert).toHaveClass('tw-grid', 'tw-items-start');
+    expect(alert).not.toHaveClass('md:tw-w-auto');
+    expect(alert.querySelector('svg')).toHaveClass('tw-size-5');
+    expect(dismiss).toHaveClass('tw-size-11');
+  });
 });

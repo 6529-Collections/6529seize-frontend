@@ -3,6 +3,7 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { ChatRestriction, useDropPrivileges } from "@/hooks/useDropPriviledges";
+import { usePublicProfileModerationStatus } from "@/hooks/content-moderation/usePublicProfileModerationStatus";
 import { useWaveEligibility } from "@/contexts/wave/WaveEligibilityContext";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect } from "react";
@@ -53,6 +54,24 @@ interface PrivilegedDropCreatorProps {
   readonly initialMarkdownKey?: string | null | undefined;
 }
 
+function getProfileModerationPlaceholder({
+  profileId,
+  isLoading,
+  isSuspended,
+}: {
+  readonly profileId: string | null | undefined;
+  readonly isLoading: boolean;
+  readonly isSuspended: boolean;
+}) {
+  if (profileId !== undefined && profileId !== null && isLoading) {
+    return <DropPlaceholder type="profile-check" />;
+  }
+  if (isSuspended) {
+    return <DropPlaceholder type="suspended" />;
+  }
+  return null;
+}
+
 export default function PrivilegedDropCreator({
   activeDrop,
   onCancelReplyQuote,
@@ -82,6 +101,9 @@ export default function PrivilegedDropCreator({
   const { connectedProfile, activeProfileProxy, fetchingProfile } = useAuth();
   const { address, hasValidWalletAuth } = useSeizeConnectContext();
   const { updateEligibility } = useWaveEligibility();
+  const moderationProfileId = connectedProfile?.id;
+  const profileModerationStatus =
+    usePublicProfileModerationStatus(moderationProfileId);
   const refreshWaveAfterSlowModeExpires = useCallback(() => {
     queryClient
       .invalidateQueries({
@@ -133,7 +155,16 @@ export default function PrivilegedDropCreator({
   }, [chatRestriction, updateEligibility, wave.id]);
 
   if (isProfileLoadingForWallet) {
-    return null;
+    return <DropPlaceholder type="profile-check" />;
+  }
+
+  const profileModerationPlaceholder = getProfileModerationPlaceholder({
+    profileId: moderationProfileId,
+    isLoading: profileModerationStatus.isLoading,
+    isSuspended: profileModerationStatus.isSuspended,
+  });
+  if (profileModerationPlaceholder !== null) {
+    return profileModerationPlaceholder;
   }
 
   if (submissionRestriction !== null && blockingChatRestriction !== null) {

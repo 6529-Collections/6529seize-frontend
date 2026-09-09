@@ -4,6 +4,11 @@ import { WaveLeaderboardGallery } from "@/components/waves/leaderboard/gallery/W
 import { AuthContext } from "@/components/auth/Auth";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 
+jest.mock("@/components/content-moderation/ContentModerationDropGate", () => ({
+  __esModule: true,
+  default: ({ children }: any) => children,
+}));
+
 jest.mock("@/hooks/useWaveDropsLeaderboard", () => ({
   useWaveDropsLeaderboard: jest.fn(),
   WaveDropsLeaderboardSort: { RANK: "RANK" },
@@ -30,17 +35,14 @@ jest.mock(
     ),
   })
 );
-jest.mock(
-  "@/components/waves/leaderboard/WaveLeaderboardVotingModal",
-  () => ({
-    useWaveLeaderboardVotingModal: () => ({
-      votingDrop: null,
-      openVotingModal: jest.fn(),
-      closeVotingModal: jest.fn(),
-    }),
-    WaveLeaderboardVotingModal: () => null,
-  })
-);
+jest.mock("@/components/waves/leaderboard/WaveLeaderboardVotingModal", () => ({
+  useWaveLeaderboardVotingModal: () => ({
+    votingDrop: null,
+    openVotingModal: jest.fn(),
+    closeVotingModal: jest.fn(),
+  }),
+  WaveLeaderboardVotingModal: () => null,
+}));
 jest.mock(
   "@/components/waves/leaderboard/gallery/WaveLeaderboardGalleryItem",
   () => ({

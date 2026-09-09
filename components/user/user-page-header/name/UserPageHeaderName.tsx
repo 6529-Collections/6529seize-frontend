@@ -13,6 +13,7 @@ import {
   getUserProfileHeaderDisplayName,
   getUserProfileHeaderMessage,
 } from "../user-page-header.messages";
+import type { ReactNode } from "react";
 
 export default function UserPageHeaderName({
   profile,
@@ -21,6 +22,7 @@ export default function UserPageHeaderName({
   level,
   profileEnabledAt,
   variant = "full",
+  titleAccessory,
 }: {
   readonly profile: ApiIdentity;
   readonly canEdit: boolean;
@@ -28,6 +30,7 @@ export default function UserPageHeaderName({
   readonly level: number;
   readonly profileEnabledAt: string | null;
   readonly variant?: "full" | "title" | "meta";
+  readonly titleAccessory?: ReactNode;
 }) {
   const displayName = getUserProfileHeaderDisplayName(profile, mainAddress);
   const profileEnabledLabel = profileEnabledAt
@@ -67,6 +70,7 @@ export default function UserPageHeaderName({
             <UserCICAndLevel level={level} size={UserCICAndLevelSize.SMALL} />
             <ProfileCurationBadge profile={profile} />
           </div>
+          {titleAccessory}
         </div>
       )}
 
@@ -83,9 +87,12 @@ export default function UserPageHeaderName({
           </UserPageClassificationWrapper>
           {profileEnabledLabel && (
             <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-2">
-              <span className="tw-text-iron-700">&bull;</span>
+              <span
+                aria-hidden="true"
+                className="tw-size-1 tw-flex-none tw-rounded-full tw-bg-iron-400"
+              />
               <p
-                className="tw-m-0 tw-whitespace-nowrap tw-text-[13px] tw-font-normal tw-leading-4 tw-text-white/50"
+                className="tw-m-0 tw-whitespace-nowrap tw-text-[13px] tw-font-normal tw-leading-4 tw-text-iron-400"
                 suppressHydrationWarning
               >
                 {getUserProfileHeaderMessage(

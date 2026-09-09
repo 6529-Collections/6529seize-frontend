@@ -59,20 +59,21 @@ export default function BlockPickerTimeWindowSelect({
 
   return (
     <div ref={listRef} className="tw-w-full">
-      <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-100">
+      <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-300">
         Select window length
       </label>
       <div className="tw-relative tw-mt-1.5">
         <button
           type="button"
-          className="tw-relative tw-flex tw-items-center tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3.5 tw-bg-iron-700/40 tw-text-white tw-font-light tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700/40 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-bg-transparent focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 hover:tw-ring-iron-700 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
+          className="tw-relative tw-flex tw-w-full tw-items-center tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-3.5 tw-py-3 tw-text-base tw-font-light tw-text-iron-50 tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-500 hover:tw-ring-iron-600 focus:tw-bg-iron-900 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 sm:tw-leading-6"
           aria-haspopup="listbox"
           aria-expanded={isOpen}
           aria-labelledby="listbox-label"
           onClick={(e) => {
             e.stopPropagation();
             toggleOpen();
-          }}>
+          }}
+        >
           <span className="tw-block tw-truncate">{title}</span>
           <span className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-items-center tw-pr-3.5">
             <svg
@@ -80,7 +81,8 @@ export default function BlockPickerTimeWindowSelect({
               className="tw-h-5 tw-w-5 tw-text-iron-400"
               viewBox="0 0 24 24"
               fill="none"
-              xmlns="http://www.w3.org/2000/svg">
+              xmlns="http://www.w3.org/2000/svg"
+            >
               <path
                 d="M6 9L12 15L18 9"
                 stroke="currentColor"
@@ -94,12 +96,13 @@ export default function BlockPickerTimeWindowSelect({
         <AllowlistToolAnimationWrapper>
           {isOpen && (
             <motion.div
-              className="tw-origin-top-right tw-absolute tw-right-0 tw-mt-1 tw-w-full tw-rounded-lg tw-shadow-xl tw-bg-iron-800 tw-ring-1 tw-ring-black tw-ring-opacity-5"
+              className="tw-absolute tw-right-0 tw-z-20 tw-mt-1 tw-w-full tw-origin-top-right tw-rounded-lg tw-bg-iron-900 tw-shadow-xl tw-ring-1 tw-ring-iron-700/60"
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.2 }}>
-              <div className="tw-rounded-lg tw-overflow-hidden">
+              transition={{ duration: 0.2 }}
+            >
+              <div className="tw-overflow-hidden tw-rounded-lg">
                 <BlockPickerTimeWindowSelectList
                   setTimeWindow={onTimeWindowSelect}
                   timeWindow={timeWindow}

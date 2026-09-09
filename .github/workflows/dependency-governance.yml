@@ -17,6 +17,9 @@ permissions:
 
 jobs:
   dependency-governance:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
 
     steps:
@@ -52,7 +55,7 @@ jobs:
             ${{ runner.os }}-node22-pnpm-
 
       - name: Use cached pnpm store
-        run: ./bin/6529 exec pnpm config set store-dir ~/.pnpm-store
+        run: echo "npm_config_store_dir=$HOME/.pnpm-store" >> "$GITHUB_ENV"
 
       - name: Classify dependency risk
         id: risk
@@ -71,19 +74,19 @@ jobs:
       - name: Assert npm lockfile is absent
         id: guard_lock
         continue-on-error: true
-        run: ./bin/6529 guard:no-package-lock
+        run: ./bin/6529 run guard:no-package-lock
 
       - name: Install dependencies
         id: install
         continue-on-error: true
         env:
           SFW_BIN: ${{ steps.socket_firewall.outputs.firewall-path-binary }}
-        run: ./bin/6529 install:frozen
+        run: ./bin/6529 ci
 
       - name: Lint package.json versions
         id: lint_package_json
         continue-on-error: true
-        run: ./bin/6529 lint:package-json
+        run: ./bin/6529 run lint:package-json
 
       - name: Dependency governance unit tests
         id: tests

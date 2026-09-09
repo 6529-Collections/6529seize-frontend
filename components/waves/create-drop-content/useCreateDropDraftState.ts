@@ -66,9 +66,7 @@ export const useCreateDropDraftState = ({
   setMetadataOpenState,
   setShowOptionsState,
   resetIdentitySubmissionState,
-  shouldAnimateOptionsRef,
   closeOnNextInputRef,
-  shouldCollapseOptionsAfterMarkdownSyncRef,
 }: {
   readonly metadata: CreateDropMetadataType[];
   readonly initialMetadata: CreateDropMetadataType[];
@@ -111,9 +109,7 @@ export const useCreateDropDraftState = ({
     SetStateAction<ScopedValueState<boolean> | null>
   >;
   readonly resetIdentitySubmissionState: () => void;
-  readonly shouldAnimateOptionsRef: MutableCurrentRef<boolean>;
   readonly closeOnNextInputRef: MutableCurrentRef<boolean>;
-  readonly shouldCollapseOptionsAfterMarkdownSyncRef: MutableCurrentRef<boolean>;
 }) => {
   const [referencedNfts, setReferencedNfts] = useState<ReferencedNft[]>([]);
   const mentionedUsersRef = useRef<Omit<MentionedUser, "current_handle">[]>([]);
@@ -297,7 +293,6 @@ export const useCreateDropDraftState = ({
 
   const updateDropStateAndClearInput = (newDrop: CreateDropConfig) => {
     setDrop(newDrop);
-    shouldCollapseOptionsAfterMarkdownSyncRef.current = false;
     createDropInputRef.current?.clearEditorState();
     setFiles([]);
   };
@@ -347,9 +342,7 @@ export const useCreateDropDraftState = ({
     setMetadataOpenState(null);
     resetIdentitySubmissionState();
     setShowOptionsState(null);
-    shouldAnimateOptionsRef.current = false;
     closeOnNextInputRef.current = false;
-    shouldCollapseOptionsAfterMarkdownSyncRef.current = false;
     setDropEditorRefreshKey((prev) => prev + 1);
   };
 

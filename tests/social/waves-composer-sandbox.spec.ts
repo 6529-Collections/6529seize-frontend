@@ -8,6 +8,7 @@ import {
 } from "../testHelpers";
 import {
   dismissNextDevTools,
+  enableSandboxWaveGuidelines,
   expectNoUnsafeSandboxMutations,
   fetchSandboxRequests,
   getSandboxApiOrigin,
@@ -22,6 +23,9 @@ const PREVIEW_URL = "https://example.com/6529-composer-preview";
 const PREVIEW_TITLE = "Sandbox Preview Title";
 const PREVIEW_DESCRIPTION = "Deterministic local preview served by Playwright.";
 const SANDBOX_CHAT_DROP_CONTENT = "Local-only chat drop from Playwright.";
+const SANDBOX_POLL_QUESTION = "Which sandbox option do you prefer?";
+const SANDBOX_GUIDELINES_FIRST_LINE =
+  "1. Keep discussions constructive and stay on topic in this local sandbox wave.";
 const SANDBOX_FIRST_POLL_OPTION =
   "A longer poll option that stays readable on a phone";
 const SANDBOX_SECOND_POLL_OPTION = "A second poll option";
@@ -307,6 +311,90 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     await expectNoUnsafeSandboxMutations(baseURL);
   });
 
+  test("gates a first chat message with scroll-contained guidelines", async ({
+    baseURL,
+    page,
+  }) => {
+    await enableSandboxWaveGuidelines(baseURL);
+    await gotoSandboxWave(page);
+
+    const composer = page
+      .getByRole("textbox", { name: "Write a chat message" })
+      .last();
+    const postButton = page.getByRole("button", { name: "Post" }).last();
+    await composer.fill(SANDBOX_CHAT_DROP_CONTENT);
+    await postButton.click();
+
+    const dialog = page.getByRole("dialog", { name: "Wave guidelines" });
+    await expect(dialog).toBeVisible({
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
+    await expect(dialog).toContainText(SANDBOX_GUIDELINES_FIRST_LINE);
+    await expect(page.getByRole("button", { name: "Decline" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Agree" })).toBeVisible();
+
+    const dropRequestsBeforeDecision = (
+      await fetchSandboxRequests(baseURL)
+    ).filter(
+      (request) => request.method === "POST" && request.path === "/api/drops"
+    );
+    expect(dropRequestsBeforeDecision).toEqual([]);
+
+    const viewport = page.viewportSize();
+    expect(viewport).not.toBeNull();
+    const panelBounds = await page
+      .getByTestId("wave-guidelines-panel")
+      .boundingBox();
+    expect(panelBounds).not.toBeNull();
+    expect(panelBounds!.x).toBeGreaterThanOrEqual(0);
+    expect(panelBounds!.y).toBeGreaterThanOrEqual(0);
+    expect(panelBounds!.x + panelBounds!.width).toBeLessThanOrEqual(
+      viewport!.width
+    );
+    expect(panelBounds!.y + panelBounds!.height).toBeLessThanOrEqual(
+      viewport!.height
+    );
+
+    const scroller = page.getByTestId("wave-guidelines-scroller");
+    const scrollMetrics = await scroller.evaluate((element) => ({
+      clientHeight: element.clientHeight,
+      scrollHeight: element.scrollHeight,
+    }));
+    expect(scrollMetrics.scrollHeight).toBeGreaterThan(
+      scrollMetrics.clientHeight
+    );
+    await expectNoHorizontalOverflow(page);
+
+    await page.getByRole("button", { name: "Decline" }).click();
+    await expect(dialog).toBeHidden();
+    await expect(composer).toContainText(SANDBOX_CHAT_DROP_CONTENT);
+    expect(
+      (await fetchSandboxRequests(baseURL)).filter(
+        (request) => request.method === "POST" && request.path === "/api/drops"
+      )
+    ).toEqual([]);
+
+    await postButton.click();
+    await expect(dialog).toBeVisible();
+    await page.getByRole("button", { name: "Agree" }).click();
+
+    await expect
+      .poll(
+        async () =>
+          (await fetchSandboxRequests(baseURL)).filter(
+            (request) =>
+              request.method === "POST" && request.path === "/api/drops"
+          ).length,
+        {
+          timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+          message: "Expected Agree to release the pending chat submission.",
+        }
+      )
+      .toBe(1);
+    await expect(dialog).toBeHidden();
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
+
   test("keeps the poll composer usable and submits its exact shape", async ({
     baseURL,
     page,
@@ -367,10 +455,16 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
       name: "Only people who can chat can respond",
     });
     const anonymous = page.getByRole("checkbox", { name: "Anonymous poll" });
-    await responderScope.check();
-    await anonymous.check();
+    await page
+      .getByText("Only people who can chat can respond", { exact: true })
+      .click();
+    await page.getByText("Anonymous poll", { exact: true }).click();
     await expect(responderScope).toBeChecked();
     await expect(anonymous).toBeChecked();
+
+    await page
+      .getByRole("textbox", { name: "Ask a poll question" })
+      .fill(SANDBOX_POLL_QUESTION);
 
     await expectNoHorizontalOverflow(page);
     const postButton = page.getByRole("button", { name: "Post" }).last();
@@ -402,7 +496,7 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
       body: expect.objectContaining({
         wave_id: SANDBOX_WAVE_ID,
         drop_type: "CHAT",
-        content: null,
+        content: SANDBOX_POLL_QUESTION,
         poll: expect.objectContaining({
           options: SANDBOX_POLL_OPTIONS,
           multichoice: true,
@@ -652,21 +746,35 @@ async function installExternalDataFixtures(page: Page) {
 async function showDropActionsIfCollapsed(page: Page) {
   await dismissNextDevTools(page);
 
-  const showActionsButton = page.getByRole("button", {
-    name: "Show drop actions",
-  });
+  const showActionsButtons = page
+    .getByRole("button", { name: "Show composer actions" })
+    .or(page.getByRole("button", { name: "Show drop actions" }));
 
-  if (await showActionsButton.isVisible().catch(() => false)) {
-    await showActionsButton.evaluate((element) => {
-      if (element instanceof HTMLElement) {
-        element.click();
-      }
-    });
+  for (const showActionsButton of await showActionsButtons.all()) {
+    if (await showActionsButton.isVisible()) {
+      await showActionsButton.evaluate((element) => {
+        if (element instanceof HTMLElement) {
+          element.click();
+        }
+      });
+      break;
+    }
   }
 
-  await expect(page.getByRole("button", { name: "Upload a file" })).toBeVisible(
-    { timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS }
-  );
+  await expect
+    .poll(
+      async () =>
+        (await page
+          .getByRole("button", { name: "Upload a file" })
+          .isVisible()
+          .catch(() => false)) ||
+        (await page
+          .getByRole("button", { name: "Upload", exact: true })
+          .isVisible()
+          .catch(() => false)),
+      { timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS }
+    )
+    .toBe(true);
 }
 
 async function installOpenGraphFixture(page: Page) {

@@ -12,6 +12,10 @@ import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { t } from "@/i18n/messages";
+import {
+  useDmUnreadConversation,
+  useDmUnreadSummary,
+} from "@/services/dm-unread/DmUnreadStateProvider";
 import { ChatBubbleLeftRightIcon } from "@heroicons/react/24/outline";
 import {
   Suspense,
@@ -29,7 +33,6 @@ import { QuickDmListPanel } from "./QuickDmListPanel";
 import { QuickDmLoadingRows } from "./QuickDmPanelPieces";
 import {
   CLOSED_STATE,
-  getUnreadCount,
   isQuickDmLauncherCoveringInteractiveElement,
   isQuickDmState,
   LIST_STATE,
@@ -89,6 +92,15 @@ const useIsQuickDmDesktop = (): boolean => {
   return !isApp && !isMobileDevice && isDesktopViewport;
 };
 
+const hasUnreadOutsideChat = (
+  state: QuickDmState,
+  totalUnreadCount: number,
+  currentConversationUnreadCount: number
+): boolean =>
+  state.view === "chat" &&
+  state.waveId !== null &&
+  totalUnreadCount - currentConversationUnreadCount > 0;
+
 const useIsQuickDmLauncherCoveringInteractive = ({
   isEnabled,
   launcherButtonRef,
@@ -147,6 +159,8 @@ export default function QuickDirectMessages() {
   const [state, setState] = useState<QuickDmState>(() => readStoredState());
   const [isCreateDirectMessageOpen, setIsCreateDirectMessageOpen] =
     useState(false);
+  const { totalUnreadMessages } = useDmUnreadSummary();
+  const currentConversationUnread = useDmUnreadConversation(state.waveId ?? "");
   const launcherButtonRef = useRef<HTMLButtonElement | null>(null);
   const panelRef = useRef<HTMLElement | null>(null);
   const restoreFocusElementRef = useRef<HTMLElement | null>(null);
@@ -166,21 +180,14 @@ export default function QuickDirectMessages() {
     state.view === "chat" &&
     state.waveId !== null &&
     (directMessages.isFetching || selectedWave !== null);
-  const totalUnreadCount = useMemo(
-    () => waves.reduce((count, wave) => count + getUnreadCount(wave), 0),
-    [waves]
-  );
+  const totalUnreadCount = totalUnreadMessages;
   const hasUnread = totalUnreadCount > 0;
   const displayUnreadCount =
     totalUnreadCount > 99 ? "99+" : `${totalUnreadCount}`;
-  const hasUnreadOutsideCurrentChat = useMemo(
-    () =>
-      state.view === "chat" &&
-      state.waveId !== null &&
-      waves.some(
-        (wave) => wave.id !== state.waveId && getUnreadCount(wave) > 0
-      ),
-    [state.view, state.waveId, waves]
+  const hasUnreadOutsideCurrentChat = hasUnreadOutsideChat(
+    state,
+    totalUnreadCount,
+    currentConversationUnread?.unread_count ?? 0
   );
 
   useEffect(() => requestDirectMessagesList(), [requestDirectMessagesList]);

@@ -36,11 +36,11 @@ describe('AppWalletImport', () => {
     mockedUseAppWallets.mockReturnValue({ appWalletsSupported: true });
     const user = userEvent.setup();
     render(<AppWalletImport />);
-    expect(screen.getByPlaceholderText('word 1')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('word 1')).toHaveAttribute('type', 'password');
     await user.click(screen.getByRole('button', { name: /private key/i }));
-    expect(screen.getByPlaceholderText(/private key/i)).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/private key/i)).toHaveAttribute('type', 'password');
     await user.click(screen.getByRole('button', { name: /mnemonic/i }));
-    expect(screen.getByPlaceholderText('word 1')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('word 1')).toHaveAttribute('type', 'password');
   });
 
   it('shows error when validating invalid private key', async () => {

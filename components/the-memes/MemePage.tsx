@@ -17,6 +17,7 @@ import { getMemeYearFromMintNumber } from "@/components/the-memes/theMemesFilter
 import { getTheMemesRouteHrefWithLocale } from "@/components/the-memes/theMemesRouteParams";
 import Button from "@/components/utils/button/Button";
 import ButtonLink from "@/components/utils/button/ButtonLink";
+import ProfileCollectedReturnLink from "@/components/user/collected/ProfileCollectedReturnLink";
 import { publicEnv } from "@/config/env";
 import { MEMES_CONTRACT } from "@/constants/constants";
 import { useTitle } from "@/contexts/TitleContext";
@@ -25,6 +26,11 @@ import type { NftRank, NftTDH } from "@/entities/INFT";
 import type { ConsolidatedTDH } from "@/entities/ITDH";
 import type { Transaction } from "@/entities/ITransaction";
 import { areEqualAddresses } from "@/helpers/Helpers";
+import {
+  getProfileCollectedReturnContext,
+  PROFILE_COLLECTED_RETURN_PARAM,
+} from "@/helpers/profile-collected-navigation";
+import useCapacitor from "@/hooks/useCapacitor";
 import { formatInteger } from "@/i18n/format";
 import { normalizeLocale, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -232,7 +238,11 @@ export default function MemePage({
 }) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
+  const { isCapacitor } = useCapacitor();
   const locale = normalizeLocale(searchParams.get("locale"));
+  const returnContext = getProfileCollectedReturnContext(
+    searchParams.get(PROFILE_COLLECTED_RETURN_PARAM)
+  );
   const { setTitle } = useTitle();
   const { connectedProfile } = useContext(AuthContext);
   const connectedWallets = useMemo(
@@ -653,7 +663,17 @@ export default function MemePage({
         <header className="tw-pb-8">
           <div className="tw-flex tw-flex-col tw-gap-4">
             <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-2 md:tw-justify-start">
-              <div className="tw-mb-0 tw-flex tw-items-center">
+              <ProfileCollectedReturnLink
+                locale={locale}
+                returnTo={returnContext?.href}
+              />
+              <div
+                className={`tw-mb-0 tw-items-center ${
+                  returnContext && !isCapacitor
+                    ? "tw-hidden md:tw-flex"
+                    : "tw-flex"
+                }`}
+              >
                 <Link
                   href={getTheMemesRouteHrefWithLocale({
                     href: "/the-memes",
@@ -704,7 +724,7 @@ export default function MemePage({
                 </div>
                 <div className="tw-order-1 tw-min-w-0 tw-flex-1 md:tw-order-2">
                   <h1
-                    className="tw-m-0 tw-flex tw-min-w-0 tw-flex-wrap tw-items-baseline tw-gap-x-2 tw-gap-y-1 md:tw-flex-nowrap md:tw-gap-x-0"
+                    className="tw-m-0 tw-flex tw-min-w-0 tw-flex-wrap tw-items-baseline tw-gap-y-1 md:tw-flex-nowrap"
                     aria-label={t(locale, "theMemes.detail.heading.ariaLabel", {
                       tokenId: formatInteger(locale, nft.id),
                       name: nft.name,
@@ -717,7 +737,7 @@ export default function MemePage({
                     </span>
                     <span
                       aria-hidden="true"
-                      className="tw-mx-3 tw-h-5 tw-w-px tw-self-center tw-bg-white/[0.16] sm:tw-h-6"
+                      className="tw-mx-2.5 tw-h-5 tw-w-px tw-self-center tw-bg-white/[0.16] sm:tw-h-6 md:tw-mx-3"
                     />
                     <span className="tw-mb-0 tw-min-w-0 tw-whitespace-normal tw-break-words tw-text-lg tw-font-semibold tw-leading-tight tw-text-iron-100 sm:tw-text-2xl md:tw-truncate">
                       {nft.name}

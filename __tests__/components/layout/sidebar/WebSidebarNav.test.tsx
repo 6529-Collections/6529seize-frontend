@@ -30,6 +30,9 @@ jest.mock("@/hooks/useDeviceInfo", () => ({
 }));
 
 let mockCanAccessDropForge = false;
+let mockModeratorAccess = {
+  data: { moderator: false, has_open_reports: false },
+};
 jest.mock("@/hooks/useDropForgePermissions", () => ({
   useDropForgePermissions: () => ({
     canAccessLanding: mockCanAccessDropForge,
@@ -38,6 +41,10 @@ jest.mock("@/hooks/useDropForgePermissions", () => ({
 
 jest.mock("@/hooks/useUnreadIndicator", () => ({
   useUnreadIndicator: () => ({ hasUnread: false }),
+}));
+
+jest.mock("@/hooks/content-moderation/useContentModeratorAccess", () => ({
+  useContentModeratorAccess: () => mockModeratorAccess,
 }));
 
 const mockUsePathname = usePathname as jest.Mock;
@@ -64,6 +71,9 @@ describe("WebSidebarNav", () => {
   beforeEach(() => {
     mockUsePathname.mockReturnValue("/waves");
     mockCanAccessDropForge = false;
+    mockModeratorAccess = {
+      data: { moderator: false, has_open_reports: false },
+    };
   });
 
   it("renders Waves as a direct /waves link instead of an expandable trigger", () => {
@@ -146,5 +156,33 @@ describe("WebSidebarNav", () => {
       "aria-current",
       "page"
     );
+  });
+
+  it("shows WatchTower with an accessible open-report indicator", () => {
+    mockModeratorAccess = {
+      data: { moderator: true, has_open_reports: true },
+    };
+
+    render(<WebSidebarNav isCollapsed={false} />);
+
+    expect(
+      screen.getByRole("link", {
+        name: "WatchTower: Open reports need review",
+      })
+    ).toHaveAttribute("href", "/content-moderation");
+  });
+
+  it("places WatchTower after Drop Forge when both are available", () => {
+    mockCanAccessDropForge = true;
+    mockModeratorAccess = {
+      data: { moderator: true, has_open_reports: false },
+    };
+
+    render(<WebSidebarNav isCollapsed={false} />);
+
+    expectDocumentOrder([
+      screen.getByRole("link", { name: "Drop Forge" }),
+      screen.getByRole("link", { name: "WatchTower" }),
+    ]);
   });
 });

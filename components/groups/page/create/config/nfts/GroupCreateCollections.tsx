@@ -1,3 +1,4 @@
+import { GROUP_CREATE_PANEL_STYLES } from "../../GroupCreate.styles";
 import type { ApiCreateGroupDescription } from "@/generated/models/ApiCreateGroupDescription";
 import type { ApiGroupOwnsNft } from "@/generated/models/ApiGroupOwnsNft";
 import { ApiGroupOwnsNftNameEnum } from "@/generated/models/ApiGroupOwnsNft";
@@ -35,7 +36,7 @@ export default function GroupCreateCollections({
   };
 
   return (
-    <div className="tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950 tw-p-3 tw-shadow-inner sm:tw-p-5">
+    <div className={GROUP_CREATE_PANEL_STYLES}>
       <div>
         <p className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50">
           Collection Access

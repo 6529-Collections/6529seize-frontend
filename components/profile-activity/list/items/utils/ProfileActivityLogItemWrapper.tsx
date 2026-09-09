@@ -41,7 +41,7 @@ export default function ProfileActivityLogItemWrapper({
   const pfp = profile?.pfp ?? null;
 
   return (
-    <div className="tw-group tw-p-4 tw-bg-[#0A0A0C]/50 hover:tw-bg-[#0A0A0C] tw-border tw-border-solid tw-border-white/[0.12] hover:tw-border-white/[0.16] tw-rounded-lg tw-transition-all tw-duration-200">
+    <div className="tw-group tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-iron-900/60 tw-p-4 tw-shadow-sm tw-shadow-black/20 tw-transition-colors tw-duration-200 hover:tw-border-white/[0.12] hover:tw-bg-iron-900/80">
       <div className="tw-flex tw-items-start tw-justify-between tw-gap-x-3">
         <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-start tw-gap-x-3">
           {!isArchived &&
@@ -49,10 +49,10 @@ export default function ProfileActivityLogItemWrapper({
               <img
                 src={getScaledImageUri(pfp, ImageScale.W_AUTO_H_50)}
                 alt={handleOrWallet}
-                className="tw-h-6 tw-w-6 tw-flex-shrink-0 tw-rounded-md tw-bg-iron-700 tw-object-cover"
+                className="tw-mt-0.5 tw-h-6 tw-w-6 tw-flex-shrink-0 tw-rounded-md tw-bg-iron-700 tw-object-cover sm:tw-mt-0"
               />
             ) : (
-              <div className="tw-h-6 tw-w-6 tw-flex-shrink-0 tw-rounded-md tw-bg-iron-700" />
+              <div className="tw-mt-0.5 tw-h-6 tw-w-6 tw-flex-shrink-0 tw-rounded-md tw-bg-iron-700 sm:tw-mt-0" />
             ))}
           <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1">
             {!isArchived && (
@@ -60,7 +60,7 @@ export default function ProfileActivityLogItemWrapper({
                 handleOrWallet={handleOrWallet}
                 isCurrentUser={isCurrentUser}
                 tabTarget={tabTarget}
-                textClassName="tw-text-sm lg:tw-text-base tw-font-semibold tw-text-iron-100"
+                textClassName="tw-text-sm sm:tw-text-base tw-font-semibold tw-text-iron-100"
               />
             )}
             {children}

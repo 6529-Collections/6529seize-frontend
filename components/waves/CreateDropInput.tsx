@@ -9,6 +9,7 @@ import {
   useImperativeHandle,
   useCallback,
   useEffect,
+  useId,
   useRef,
 } from "react";
 import type { EditorState, LexicalEditor } from "lexical";
@@ -63,7 +64,10 @@ import CreateDropEmojiPicker from "./CreateDropEmojiPicker";
 import useCapacitor from "@/hooks/useCapacitor";
 import EmojiPlugin from "../drops/create/lexical/plugins/emoji/EmojiPlugin";
 import { EmojiNode } from "../drops/create/lexical/nodes/EmojiNode";
-import { CREATE_DROP_MARKDOWN_TRANSFORMERS } from "@/components/drops/create/lexical/transformers/createDropMarkdownTransformers";
+import {
+  CREATE_DROP_MARKDOWN_SHORTCUT_TRANSFORMERS,
+  CREATE_DROP_MARKDOWN_TRANSFORMERS,
+} from "@/components/drops/create/lexical/transformers/createDropMarkdownTransformers";
 import PlainTextPastePlugin from "@/components/drops/create/lexical/plugins/PlainTextPastePlugin";
 import EditLastDropArrowUpPlugin from "./EditLastDropArrowUpPlugin";
 import RootBlockGuardPlugin from "@/components/drops/create/lexical/plugins/RootBlockGuardPlugin";
@@ -214,6 +218,8 @@ const CreateDropInput = forwardRef<
     readonly stormPartNumber?: number | undefined;
     readonly submitting: boolean;
     readonly isDropMode: boolean;
+    readonly isPollActive?: boolean | undefined;
+    readonly containerClassName?: string | undefined;
     readonly canMentionAll?: boolean | undefined;
     readonly onDrop?: (() => void) | undefined;
     readonly onEditorState: (editorState: EditorState) => void;
@@ -226,6 +232,7 @@ const CreateDropInput = forwardRef<
     readonly onAttachmentFiles?: ((files: File[]) => void) | undefined;
     readonly hasValidationError?: boolean | undefined;
     readonly validationHelperText?: string | null | undefined;
+    readonly validationHelperClassName?: string | undefined;
     readonly canEditLastDropWithArrow?: boolean | undefined;
     readonly onRequestEditLastDrop?: (() => boolean) | undefined;
     readonly initialMarkdown?: string | null | undefined;
@@ -242,6 +249,8 @@ const CreateDropInput = forwardRef<
       isStormMode,
       stormPartNumber = 1,
       isDropMode,
+      isPollActive = false,
+      containerClassName,
       canMentionAll = false,
       submitting,
       onEditorState,
@@ -252,6 +261,7 @@ const CreateDropInput = forwardRef<
       onAttachmentFiles,
       hasValidationError = false,
       validationHelperText = null,
+      validationHelperClassName,
       canEditLastDropWithArrow = false,
       onRequestEditLastDrop,
       initialMarkdown = null,
@@ -262,6 +272,9 @@ const CreateDropInput = forwardRef<
   ) => {
     const { isCapacitor } = useCapacitor();
     const locale = useBrowserLocale();
+    const validationHelperTextId = useId();
+    const showValidationError =
+      hasValidationError && validationHelperText !== null;
     const composerDensity = useDropComposerDensity();
     const isCompact = composerDensity === "compact";
     const editorConfig: InitialConfigType = {
@@ -333,14 +346,32 @@ const CreateDropInput = forwardRef<
           number: stormPartNumber,
         });
       }
+      if (isPollActive) {
+        return t(locale, "waves.poll.composer.questionPlaceholder");
+      }
       if (type === null) {
-        return isDropMode ? "Create a drop" : "Write a chat message";
+        return t(
+          locale,
+          isDropMode
+            ? "waves.composer.placeholder.createDrop"
+            : "waves.composer.placeholder.writeChatMessage"
+        );
       }
       switch (type) {
         case ActiveDropAction.REPLY:
-          return isDropMode ? "Drop a reply" : "Post a reply";
+          return t(
+            locale,
+            isDropMode
+              ? "waves.composer.placeholder.dropReply"
+              : "waves.composer.placeholder.postReply"
+          );
         case ActiveDropAction.QUOTE:
-          return isDropMode ? "Quote a drop" : "Post a quote";
+          return t(
+            locale,
+            isDropMode
+              ? "waves.composer.placeholder.quoteDrop"
+              : "waves.composer.placeholder.postQuote"
+          );
         default:
           assertUnreachable(type);
           return "";
@@ -415,106 +446,119 @@ const CreateDropInput = forwardRef<
     const placeholderText = getPlaceHolderText();
 
     return (
-      <div className="tailwind-scope">
-        <LexicalComposer initialConfig={editorConfig}>
-          <div className="tw-flex tw-items-end tw-gap-x-3">
-            <div className="tw-relative tw-w-full">
-              <RichTextPlugin
-                contentEditable={
-                  <div className="tw-relative">
-                    <ContentEditable
-                      spellCheck={true}
-                      autoCorrect="on"
-                      ariaLabel={placeholderText}
-                      style={{ touchAction: "manipulation" }}
-                      onBlur={onEditorBlur}
-                      className={`editor-input-one-liner tw-form-input tw-block tw-max-h-[40vh] tw-w-full tw-resize-none tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-pl-3 tw-font-normal tw-text-white tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out tw-scrollbar-thin tw-scrollbar-track-iron-900 tw-scrollbar-thumb-iron-600 placeholder:tw-text-iron-500 focus:tw-bg-iron-950 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 ${
+      <>
+        <div className={`tailwind-scope ${containerClassName ?? ""}`}>
+          <LexicalComposer initialConfig={editorConfig}>
+            <div className="tw-flex tw-items-end tw-gap-x-3">
+              <div className="tw-relative tw-w-full">
+                <RichTextPlugin
+                  contentEditable={
+                    <div className="tw-relative">
+                      <ContentEditable
+                        spellCheck={true}
+                        autoCorrect="on"
+                        ariaLabel={placeholderText}
+                        ariaDescribedBy={
+                          showValidationError
+                            ? validationHelperTextId
+                            : undefined
+                        }
+                        ariaRequired={isPollActive}
+                        aria-invalid={hasValidationError || undefined}
+                        style={{ touchAction: "manipulation" }}
+                        onBlur={onEditorBlur}
+                        className={`editor-input-one-liner tw-form-input tw-block tw-max-h-[40vh] tw-w-full tw-resize-none tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-pl-3 tw-font-normal tw-text-white tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out tw-scrollbar-thin tw-scrollbar-track-iron-900 tw-scrollbar-thumb-iron-600 placeholder:tw-text-iron-500 focus:tw-bg-iron-950 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 ${
+                          isCompact
+                            ? "tw-py-3 tw-text-sm tw-leading-5"
+                            : "tw-pb-2 tw-pt-3 tw-text-base tw-leading-6 sm:tw-text-sm"
+                        } ${
+                          submitting ? "tw-cursor-default tw-opacity-50" : ""
+                        } ${isCapacitor ? "tw-pr-[35px]" : "tw-pr-[40px]"}`}
+                      />
+                      <CreateDropEmojiPicker
+                        verticalAlignment={isCompact ? "center" : "top"}
+                      />
+                    </div>
+                  }
+                  placeholder={
+                    <span
+                      className={`editor-placeholder tw-block tw-max-w-[calc(100%-3.5rem)] tw-translate-y-0 tw-truncate sm:tw-translate-y-0.5 ${
                         isCompact
-                          ? "tw-py-3 tw-text-sm tw-leading-5"
-                          : "tw-pb-2 tw-pt-3 tw-text-base tw-leading-6 sm:tw-text-sm"
-                      } ${
-                        submitting ? "tw-cursor-default tw-opacity-50" : ""
-                      } ${isCapacitor ? "tw-pr-[35px]" : "tw-pr-[40px]"}`}
-                    />
-                    <CreateDropEmojiPicker
-                      verticalAlignment={isCompact ? "center" : "top"}
-                    />
-                  </div>
-                }
-                placeholder={
-                  <span
-                    className={`editor-placeholder tw-block tw-max-w-[calc(100%-3.5rem)] tw-overflow-hidden tw-text-ellipsis tw-whitespace-nowrap ${
-                      isCompact
-                        ? "tw-translate-y-0.5 tw-text-sm tw-leading-5"
-                        : "tw-translate-y-0.5 tw-text-base tw-leading-6 sm:tw-text-sm"
-                    } ${submitting ? "tw-opacity-50" : ""}`}
-                  >
-                    {placeholderText}
-                  </span>
-                }
-                ErrorBoundary={LexicalErrorBoundary}
-              />
-              <HistoryPlugin />
-              <OnChangePlugin onChange={onEditorStateChange} />
-              {typeof initialEditorStateJson === "string" && (
-                <NotifyInitialEditorStatePlugin
-                  onEditorState={onEditorStateChange}
+                          ? "tw-text-sm tw-leading-5"
+                          : "tw-text-base tw-leading-6 sm:tw-text-sm"
+                      } ${submitting ? "tw-opacity-50" : ""}`}
+                    >
+                      {placeholderText}
+                    </span>
+                  }
+                  ErrorBoundary={LexicalErrorBoundary}
                 />
-              )}
-              <RootBlockGuardPlugin />
-              <NewMentionsPlugin
-                waveId={waveId}
-                onSelect={onMentionedUserAdded}
-                canMentionAll={canMentionAll}
-                ref={mentionsPluginRef}
-              />
-              <NewWaveMentionsPlugin
-                onSelect={onMentionedWaveAdded}
-                ref={waveMentionsPluginRef}
-              />
-              <NewHashtagsPlugin
-                onSelect={onHashtagAdded}
-                ref={hashtagPluginRef}
-              />
-              <MaxLengthPlugin maxLength={MAX_DROP_PART_UTF16_UNITS} />
-              <DragDropPastePlugin onAttachmentFiles={onAttachmentFiles} />
-              <ListPlugin />
-              <PlainTextPastePlugin />
-              <MarkdownShortcutPlugin
-                transformers={CREATE_DROP_MARKDOWN_TRANSFORMERS}
-              />
-              <TabIndentationPlugin />
-              <LinkPlugin validateUrl={validateUrl} />
-              <ClearEditorPlugin ref={clearEditorRef} />
-              <EditorCommandsPlugin ref={editorCommandsRef} />
-              <DisableEditPlugin disabled={submitting} />
-              <InitialMarkdownPlugin
-                initialMarkdown={initialMarkdown}
-                initialMarkdownKey={initialMarkdownKey}
-              />
-              <EnterKeyPlugin
-                handleSubmit={handleSubmit}
-                canSubmitWithEnter={canSubmitWithEnter}
-                disabled={submitting}
-              />
-              <EditLastDropArrowUpPlugin
-                canEditLastDropWithArrow={canEditLastDropWithArrow}
-                onRequestEditLastDrop={onRequestEditLastDrop}
-                canUseArrowUpShortcut={canUseShortcutKeys}
-              />
-              <EmojiPlugin />
+                <HistoryPlugin />
+                <OnChangePlugin onChange={onEditorStateChange} />
+                {typeof initialEditorStateJson === "string" && (
+                  <NotifyInitialEditorStatePlugin
+                    onEditorState={onEditorStateChange}
+                  />
+                )}
+                <RootBlockGuardPlugin />
+                <NewMentionsPlugin
+                  waveId={waveId}
+                  onSelect={onMentionedUserAdded}
+                  canMentionAll={canMentionAll}
+                  ref={mentionsPluginRef}
+                />
+                <NewWaveMentionsPlugin
+                  onSelect={onMentionedWaveAdded}
+                  ref={waveMentionsPluginRef}
+                />
+                <NewHashtagsPlugin
+                  onSelect={onHashtagAdded}
+                  ref={hashtagPluginRef}
+                />
+                <MaxLengthPlugin maxLength={MAX_DROP_PART_UTF16_UNITS} />
+                <DragDropPastePlugin onAttachmentFiles={onAttachmentFiles} />
+                <ListPlugin />
+                <PlainTextPastePlugin />
+                <MarkdownShortcutPlugin
+                  transformers={CREATE_DROP_MARKDOWN_SHORTCUT_TRANSFORMERS}
+                />
+                <TabIndentationPlugin />
+                <LinkPlugin validateUrl={validateUrl} />
+                <ClearEditorPlugin ref={clearEditorRef} />
+                <EditorCommandsPlugin ref={editorCommandsRef} />
+                <DisableEditPlugin disabled={submitting} />
+                <InitialMarkdownPlugin
+                  initialMarkdown={initialMarkdown}
+                  initialMarkdownKey={initialMarkdownKey}
+                />
+                <EnterKeyPlugin
+                  handleSubmit={handleSubmit}
+                  canSubmitWithEnter={canSubmitWithEnter}
+                  disabled={submitting}
+                />
+                <EditLastDropArrowUpPlugin
+                  canEditLastDropWithArrow={canEditLastDropWithArrow}
+                  onRequestEditLastDrop={onRequestEditLastDrop}
+                  canUseArrowUpShortcut={canUseShortcutKeys}
+                />
+                <EmojiPlugin />
+              </div>
             </div>
-          </div>
-        </LexicalComposer>
-        {hasValidationError && validationHelperText && (
+          </LexicalComposer>
+        </div>
+        {showValidationError && (
           <div
+            id={validationHelperTextId}
             role="alert"
-            className="tw-mt-2 tw-text-xs tw-font-medium tw-text-error"
+            className={
+              validationHelperClassName ??
+              "tw-mt-2 tw-text-[11px] tw-font-medium tw-leading-4 tw-text-amber-200/90"
+            }
           >
             {validationHelperText}
           </div>
         )}
-      </div>
+      </>
     );
   }
 );

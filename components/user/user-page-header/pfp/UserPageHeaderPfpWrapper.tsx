@@ -1,11 +1,10 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import PencilIcon, {
   PencilIconSize,
 } from "@/components/utils/icons/PencilIcon";
-import { createPortal } from "react-dom";
 import UserPageHeaderEditPfp from "./UserPageHeaderEditPfp";
 import { getUserProfileHeaderMessage } from "../user-page-header.messages";
 
@@ -21,25 +20,6 @@ export default function UserPageHeaderPfpWrapper({
   readonly children: React.ReactNode;
 }) {
   const [isEditPfpOpen, setIsEditPfpOpen] = useState<boolean>(false);
-
-  useEffect(() => {
-    if (!isEditPfpOpen || typeof document === "undefined") {
-      return;
-    }
-    const previousOverflow = document.body.style.overflow;
-    const previousPaddingRight = document.body.style.paddingRight;
-    const scrollbarGap =
-      window.innerWidth - document.documentElement.clientWidth;
-    document.body.style.overflow = "hidden";
-    if (scrollbarGap > 0) {
-      document.body.style.paddingRight = `${scrollbarGap}px`;
-    }
-
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      document.body.style.paddingRight = previousPaddingRight;
-    };
-  }, [isEditPfpOpen]);
 
   if (!canEdit) {
     return <div className="tw-inline-flex tw-w-fit">{children}</div>;
@@ -65,15 +45,12 @@ export default function UserPageHeaderPfpWrapper({
           </div>
         </div>
       </button>
-      {isEditPfpOpen &&
-        typeof document !== "undefined" &&
-        createPortal(
-          <UserPageHeaderEditPfp
-            profile={profile}
-            onClose={() => setIsEditPfpOpen(false)}
-          />,
-          document.body
-        )}
+      {isEditPfpOpen && (
+        <UserPageHeaderEditPfp
+          profile={profile}
+          onClose={() => setIsEditPfpOpen(false)}
+        />
+      )}
     </div>
   );
 }

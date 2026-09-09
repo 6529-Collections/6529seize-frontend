@@ -7,9 +7,9 @@ jest.mock("@/hooks/useUnreadNotifications", () => ({
     mockUseUnreadNotifications(handle),
 }));
 
-const mockUseUnreadDmDrops = jest.fn();
-jest.mock("@/hooks/useUnreadDmDrops", () => ({
-  useUnreadDmDrops: (handle: string | null) => mockUseUnreadDmDrops(handle),
+const mockUseDmUnreadSummary = jest.fn();
+jest.mock("@/services/dm-unread/DmUnreadStateProvider", () => ({
+  useDmUnreadSummary: () => mockUseDmUnreadSummary(),
 }));
 
 const mockUseMyStream = jest.fn();
@@ -20,15 +20,15 @@ jest.mock("@/contexts/wave/MyStreamContext", () => ({
 describe("useUnreadIndicator", () => {
   beforeEach(() => {
     mockUseUnreadNotifications.mockReset();
-    mockUseUnreadDmDrops.mockReset();
+    mockUseDmUnreadSummary.mockReset();
     mockUseMyStream.mockReset();
     mockUseMyStream.mockImplementation(() => {
       throw new Error("useUnreadIndicator should not subscribe to MyStream");
     });
-    mockUseUnreadDmDrops.mockReturnValue({
-      haveUnreadDmDrops: false,
-      unreadDmDrops: undefined,
-      unreadDmDropsCount: 0,
+    mockUseDmUnreadSummary.mockReturnValue({
+      hasUnread: false,
+      totalUnreadMessages: 0,
+      unreadConversationCount: 0,
     });
   });
 
@@ -54,10 +54,10 @@ describe("useUnreadIndicator", () => {
   });
 
   it("handles messages type from the unread summary without MyStream", () => {
-    mockUseUnreadDmDrops.mockReturnValue({
-      haveUnreadDmDrops: true,
-      unreadDmDrops: { count: 2 },
-      unreadDmDropsCount: 2,
+    mockUseDmUnreadSummary.mockReturnValue({
+      hasUnread: true,
+      totalUnreadMessages: 2,
+      unreadConversationCount: 1,
     });
     mockUseUnreadNotifications.mockReturnValue({
       haveUnreadNotifications: false,
@@ -69,25 +69,21 @@ describe("useUnreadIndicator", () => {
     expect(mockUseMyStream).not.toHaveBeenCalled();
   });
 
-  it("can merge already-mounted local message unread state when provided", () => {
-    mockUseUnreadDmDrops.mockReturnValue({
-      haveUnreadDmDrops: false,
-      unreadDmDrops: { count: 0 },
-      unreadDmDropsCount: 0,
+  it("does not subscribe to or merge an independent MyStream count", () => {
+    mockUseDmUnreadSummary.mockReturnValue({
+      hasUnread: false,
+      totalUnreadMessages: 0,
+      unreadConversationCount: 0,
     });
     mockUseUnreadNotifications.mockReturnValue({
       haveUnreadNotifications: false,
     });
 
     const { result } = renderHook(() =>
-      useUnreadIndicator({
-        type: "messages",
-        handle: "me",
-        localDirectMessages: [{ unreadDropsCount: 1 }],
-      })
+      useUnreadIndicator({ type: "messages", handle: "me" })
     );
 
-    expect(result.current.hasUnread).toBe(true);
+    expect(result.current.hasUnread).toBe(false);
     expect(mockUseMyStream).not.toHaveBeenCalled();
   });
 });

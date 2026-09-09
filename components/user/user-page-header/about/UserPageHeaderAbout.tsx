@@ -2,6 +2,8 @@
 
 import type { CicStatement } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useState } from "react";
 import PencilIcon, {
   PencilIconSize,
@@ -27,11 +29,22 @@ function UserPageHeaderAboutContent({
   const [view, setView] = useState<AboutStatementView>(
     AboutStatementView.STATEMENT
   );
+  const [draftValue, setDraftValue] = useState(
+    statement?.statement_value ?? ""
+  );
+  const [editorErrorMsg, setEditorErrorMsg] = useState<string | null>(null);
+  const isDesktopAboutEditor = useMediaQuery("(min-width: 768px)");
 
-  const closeEditor = () => setView(AboutStatementView.STATEMENT);
+  const closeEditor = () => {
+    setView(AboutStatementView.STATEMENT);
+    setDraftValue(statement?.statement_value ?? "");
+    setEditorErrorMsg(null);
+  };
 
   const onEditClick = () => {
     if (view === AboutStatementView.STATEMENT) {
+      setDraftValue(statement?.statement_value ?? "");
+      setEditorErrorMsg(null);
       setView(AboutStatementView.EDIT);
     }
   };
@@ -57,9 +70,12 @@ function UserPageHeaderAboutContent({
                 type="button"
                 onClick={onEditClick}
                 aria-label={editActionLabel}
-                className="tw-pointer-events-none tw-hidden tw-shrink-0 tw-border-none tw-bg-transparent tw-p-0 tw-text-iron-400 tw-opacity-0 tw-transition tw-duration-200 focus-visible:tw-rounded-lg focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 sm:tw-block sm:group-focus-within:tw-pointer-events-auto sm:group-focus-within:tw-opacity-100 desktop-hover:group-hover:tw-pointer-events-auto desktop-hover:group-hover:tw-opacity-100 desktop-hover:hover:tw-text-iron-200"
+                className="tw-pointer-events-none tw-hidden tw-shrink-0 tw-border-none tw-bg-transparent tw-p-0 tw-text-iron-400 tw-opacity-0 tw-transition tw-duration-200 focus-visible:tw-rounded-lg focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:group-hover:tw-pointer-events-auto desktop-hover:group-hover:tw-opacity-100 desktop-hover:hover:tw-text-iron-200 touch-only:tw-pointer-events-auto touch-only:tw-size-11 touch-only:tw-opacity-100 sm:tw-block sm:group-focus-within:tw-pointer-events-auto sm:group-focus-within:tw-opacity-100"
               >
-                <span aria-hidden="true">
+                <span
+                  aria-hidden="true"
+                  className="tw-flex tw-size-full tw-items-center tw-justify-center"
+                >
                   <PencilIcon size={PencilIconSize.SMALL} />
                 </span>
               </button>
@@ -81,20 +97,48 @@ function UserPageHeaderAboutContent({
         </div>
       )}
 
-      {view === AboutStatementView.EDIT && (
+      {view === AboutStatementView.EDIT && isDesktopAboutEditor && (
+        <UserPageHeaderAboutEdit
+          profile={profile}
+          statement={statement}
+          onClose={closeEditor}
+          value={draftValue}
+          onValueChange={setDraftValue}
+          errorMsg={editorErrorMsg}
+          onErrorMsgChange={setEditorErrorMsg}
+          autoFocus
+        />
+      )}
+
+      {view === AboutStatementView.EDIT && !isDesktopAboutEditor && (
         <>
           {statement && (
-            <div className="sm:tw-hidden">
+            <div className="tw-max-w-2xl">
               <UserPageHeaderAboutStatement statement={statement} />
             </div>
           )}
-          <div className="tw-hidden sm:tw-block">
-            <UserPageHeaderAboutEdit
-              profile={profile}
-              statement={statement}
-              onClose={closeEditor}
-            />
-          </div>
+          <MobileWrapperDialog
+            title={getUserProfileHeaderMessage(
+              "user.profileHeader.edit.aboutTitle"
+            )}
+            isOpen
+            onClose={closeEditor}
+            tabletModal
+            showHeaderCloseButton
+            showHeaderDivider
+          >
+            <div className="tw-px-4 sm:tw-px-6">
+              <UserPageHeaderAboutEdit
+                profile={profile}
+                statement={statement}
+                onClose={closeEditor}
+                value={draftValue}
+                onValueChange={setDraftValue}
+                errorMsg={editorErrorMsg}
+                onErrorMsgChange={setEditorErrorMsg}
+              />
+            </div>
+          </MobileWrapperDialog>
         </>
       )}
     </>

@@ -4,7 +4,9 @@ import PrimaryButton from "@/components/utils/button/PrimaryButton";
 import SecondaryButton from "@/components/utils/button/SecondaryButton";
 import MemesArtSubmissionFile from "@/components/waves/memes/MemesArtSubmissionFile";
 import MemesArtSubmissionTraits from "@/components/waves/memes/MemesArtSubmissionTraits";
-import React, { useCallback, useMemo } from "react";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
+import React, { useCallback, useMemo, useState } from "react";
 import type {
   InteractiveMediaMimeType,
   InteractiveMediaProvider,
@@ -14,117 +16,6 @@ import type { TraitsData } from "../types/TraitsData";
 import type { SubmissionPhase } from "../ui/SubmissionProgress";
 import SubmissionProgress from "../ui/SubmissionProgress";
 import { useTraitsValidation } from "../validation";
-
-/**
- * Required fields for submission
- * All fields are required for submission
- */
-
-/**
- * Fields that are read-only and should be skipped in validation
- * These are pre-populated by the system
- */
-const READ_ONLY_FIELDS = ["seizeArtistProfile"] as const;
-
-/**
- * Get tooltip text for submit button based on current state
- * Helps users understand why the button might be disabled
- */
-function getSubmitButtonTooltip(
-  isDisabled: boolean,
-  isFormComplete: boolean,
-  artworkUploaded: boolean,
-  traits: TraitsData
-): string {
-  if (!isDisabled) return "";
-
-  if (!artworkUploaded) {
-    return "Please upload artwork";
-  }
-
-  if (!isFormComplete) {
-    // Check each field and return specific message for the first empty one
-    // This helps the user understand what's missing
-    for (const field of Object.keys(traits) as Array<keyof TraitsData>) {
-      // Skip read-only fields
-      if ((READ_ONLY_FIELDS as readonly string[]).includes(field)) continue;
-
-      const value = traits[field];
-      const fieldName = field.replace(/([A-Z])/g, " $1").toLowerCase();
-
-      // String fields (including dropdowns)
-      if (typeof value === "string") {
-        if (!value.trim()) {
-          if (field === "memeName" || field === "palette") {
-            return `Please select a ${fieldName}`;
-          } else {
-            return `Please enter ${fieldName}`;
-          }
-        }
-      }
-      // Number fields
-      else if (typeof value === "number") {
-        if (value === null || value === undefined || isNaN(value)) {
-          return `Please enter ${fieldName}`;
-        }
-      }
-      // Boolean fields need explicit value
-      else if (typeof value === "boolean") {
-        if (value === null || value === undefined) {
-          return `Please set ${fieldName}`;
-        }
-      }
-      // Handle potential null/undefined
-      else if (value === null || value === undefined) {
-        return `Please complete ${fieldName}`;
-      }
-    }
-
-    return "All fields are required";
-  }
-
-  return "Please fix validation errors before submitting";
-}
-
-/**
- * Checks if form meets basic submission requirements
- * ALL fields are required except read-only ones
- */
-function checkFormCompleteness(
-  traits: TraitsData,
-  artworkUploaded: boolean
-): boolean {
-  // Must have artwork
-  if (!artworkUploaded) return false;
-
-  // Check every field in TraitsData
-  for (const field of Object.keys(traits) as Array<keyof TraitsData>) {
-    // Skip read-only fields that are pre-populated
-    if ((READ_ONLY_FIELDS as readonly string[]).includes(field)) continue;
-
-    const value = traits[field];
-
-    // Handle string fields - must not be empty
-    if (typeof value === "string") {
-      if (!value.trim()) return false;
-    }
-    // Handle number fields - must be a defined number and not zero
-    else if (typeof value === "number") {
-      if (value === null || value === undefined || isNaN(value) || value === 0)
-        return false;
-    }
-    // Handle boolean fields - must be explicitly true or false
-    else if (typeof value === "boolean") {
-      if (value === null || value === undefined) return false;
-    }
-    // Handle potential null/undefined values
-    else if (value === null || value === undefined) {
-      return false;
-    }
-  }
-
-  return true;
-}
 
 interface ArtworkStepProps {
   readonly traits: TraitsData;
@@ -211,12 +102,19 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
 }) => {
   // Set up validation with initial empty touched fields to prevent errors on load
   const validation = useTraitsValidation(traits, initialTraits ?? traits);
-
-  // Check form completeness - separate from validation
-  const isFormComplete = useMemo(
-    () => checkFormCompleteness(traits, artworkUploaded),
-    [traits, artworkUploaded]
-  );
+  const locale = useBrowserLocale();
+  const [mediaSubmitAttempted, setMediaSubmitAttempted] = useState(false);
+  const isMediaValidationPending =
+    mediaSource === "url" && externalValidationStatus === "pending";
+  const hasValidMedia =
+    mediaSource === "url" ? isExternalMediaValid : artworkUploaded;
+  let missingMediaError: string | null = null;
+  if (mediaSubmitAttempted && !hasValidMedia && !isMediaValidationPending) {
+    missingMediaError =
+      mediaSource === "upload"
+        ? t(locale, "memes.submission.media.missingUpload")
+        : t(locale, "memes.submission.media.missingInteractive");
+  }
 
   // Create callback handlers for title and description
   const handleTitleChange = useCallback(
@@ -233,6 +131,14 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
     [updateTraitField]
   );
 
+  const handleMediaSourceChange = useCallback(
+    (source: "upload" | "url") => {
+      setMediaSubmitAttempted(false);
+      setMediaSource(source);
+    },
+    [setMediaSource]
+  );
+
   // Handler for field blur to mark fields as touched for validation
   const handleFieldBlur = useCallback(
     (field: keyof TraitsData) => {
@@ -241,43 +147,49 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
     [validation]
   );
 
+  const focusMediaControl = useCallback(() => {
+    const elementId =
+      mediaSource === "upload"
+        ? "memes-art-submission-upload-panel"
+        : "memes-interactive-media-hash";
+    const element = document.getElementById(elementId);
+    if (!(element instanceof HTMLElement)) return;
+
+    element.focus();
+    element.scrollIntoView({
+      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        ? "auto"
+        : "smooth",
+      block: "center",
+      inline: "nearest",
+    });
+  }, [mediaSource]);
+
   // Handle submission with validation
   const handleSubmit = useCallback(() => {
-    // Validate all fields
     const validationResult = validation.validateAll();
+    setMediaSubmitAttempted(true);
 
-    if (validationResult.isValid) {
-      // Proceed with submission if valid
-      onSubmit();
-    } else {
-      // Show validation errors and focus the first invalid field
-      validation.focusFirstInvalidField();
+    if (!hasValidMedia || !validationResult.isValid) {
+      requestAnimationFrame(() => {
+        if (!hasValidMedia) {
+          focusMediaControl();
+          return;
+        }
+
+        validation.focusFirstInvalidField(validationResult.firstInvalidField);
+      });
+      return;
     }
-  }, [validation, onSubmit]);
 
-  // Determine button disabled state - explicit and readable
+    onSubmit();
+  }, [focusMediaControl, hasValidMedia, onSubmit, validation]);
+
   const isSubmitDisabled = useMemo(() => {
-    // Basic completeness check (required fields + artwork)
-    if (!isFormComplete) return true;
-
-    // Submission in progress
     if (isSubmitting) return true;
-
-    // Already successfully submitted
     if (submissionPhase === "success") return true;
-
-    // If user has attempted to submit once, ensure validation passes
-    if (validation.submitAttempted && !validation.isValid) return true;
-
-    // All checks passed, enable button
-    return false;
-  }, [
-    isFormComplete,
-    isSubmitting,
-    submissionPhase,
-    validation.submitAttempted,
-    validation.isValid,
-  ]);
+    return isMediaValidationPending;
+  }, [isMediaValidationPending, isSubmitting, submissionPhase]);
 
   // Get button text based on submission phase
   const getButtonText = (): string => {
@@ -312,11 +224,12 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
       artworkUploaded={artworkUploaded}
       artworkUrl={artworkUrl}
       uploadError={uploadError}
+      missingMediaError={missingMediaError}
       artworkMimeType={artworkMimeType}
       setArtworkUploaded={setArtworkUploaded}
       handleFileSelect={handleFileSelect}
       mediaSource={mediaSource}
-      setMediaSource={setMediaSource}
+      setMediaSource={handleMediaSourceChange}
       externalHash={externalHash}
       externalProvider={externalProvider}
       externalConstructedUrl={externalConstructedUrl}
@@ -365,15 +278,15 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
     <div className="tw-flex tw-h-full tw-flex-col">
       <div
         data-testid="artwork-step-content"
-        className="tw-min-h-0 tw-w-full tw-flex-1 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300"
+        className="tw-min-h-0 tw-w-full tw-flex-1 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300 lg:tw-overflow-hidden"
       >
         <div className="tw-flex tw-min-h-full tw-w-full tw-flex-col lg:tw-h-full lg:tw-min-h-0 lg:tw-flex-row">
-          <div className="tw-flex tw-w-full tw-flex-col tw-px-4 tw-pt-4 md:tw-pl-8 lg:tw-min-h-0 lg:tw-w-1/2 lg:tw-pr-4">
+          <div className="tw-flex tw-w-full tw-flex-col tw-px-4 tw-pb-6 tw-pt-4 md:tw-pl-8 lg:tw-h-full lg:tw-min-h-0 lg:tw-w-1/2 lg:tw-overflow-y-auto lg:tw-pr-4 lg:tw-scrollbar-thin lg:tw-scrollbar-track-iron-800 lg:tw-scrollbar-thumb-iron-500 lg:desktop-hover:hover:tw-scrollbar-thumb-iron-300">
             {renderMediaSubmissionPanel()}
           </div>
 
-          <div className="tw-w-full tw-px-4 tw-pb-6 tw-pt-6 md:tw-pl-6 md:tw-pr-8 lg:tw-min-h-0 lg:tw-w-1/2">
-            <div className="tw-flex tw-flex-col tw-gap-y-6">
+          <div className="tw-w-full tw-px-4 tw-pt-6 md:tw-pl-6 md:tw-pr-8 lg:tw-h-full lg:tw-min-h-0 lg:tw-w-1/2 lg:tw-overflow-y-auto lg:tw-scrollbar-thin lg:tw-scrollbar-track-iron-800 lg:tw-scrollbar-thumb-iron-500 lg:desktop-hover:hover:tw-scrollbar-thumb-iron-300">
+            <div className="tw-flex tw-flex-col tw-gap-y-6 tw-pb-6">
               {renderArtworkDetailsPanel()}
               {renderArtworkTraitsPanel()}
             </div>
@@ -421,12 +334,6 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
                   submissionPhase !== "error"
                 }
                 disabled={isSubmitDisabled}
-                title={getSubmitButtonTooltip(
-                  isSubmitDisabled,
-                  isFormComplete,
-                  artworkUploaded,
-                  traits
-                )}
               >
                 {getButtonText()}
               </PrimaryButton>

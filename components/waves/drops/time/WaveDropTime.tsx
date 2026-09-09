@@ -4,12 +4,14 @@ import React, { useSyncExternalStore } from "react";
 import { Time } from "@/helpers/time";
 import { useCompactMode } from "@/contexts/CompactModeContext";
 
-type WaveDropTimeSize = "xs" | "sm";
+type WaveDropTimeSize = "xs" | "meta" | "sm";
+type WaveDropTimeColor = "default" | "iron-400";
 type WaveDropTimestamp = Date | number | string | null | undefined;
 
 interface WaveDropTimeProps {
   readonly timestamp: WaveDropTimestamp;
   readonly size?: WaveDropTimeSize | undefined;
+  readonly color?: WaveDropTimeColor | undefined;
   readonly variant?: "default" | "compactReveal" | undefined;
 }
 
@@ -19,6 +21,7 @@ interface WaveDropTimeProps {
  */
 const SIZE_CLASSES: Record<WaveDropTimeSize, string> = {
   xs: "tw-text-xs",
+  meta: "tw-text-meta",
   sm: "tw-text-sm",
 };
 
@@ -75,6 +78,7 @@ const getIsMobileServerSnapshot = (): boolean => false;
 const WaveDropTime: React.FC<WaveDropTimeProps> = ({
   timestamp,
   size = "xs",
+  color = "default",
   variant = "default",
 }) => {
   // Hooks must be called at the top level
@@ -132,13 +136,17 @@ const WaveDropTime: React.FC<WaveDropTimeProps> = ({
     return `${dateStr} - ${timeStr}`;
   };
 
-  const textSizeClass = compact
-    ? "tw-text-[11px] tw-leading-4"
-    : SIZE_CLASSES[size];
+  const textSizeClass =
+    compact && size === "xs"
+      ? "tw-text-[11px] tw-leading-4"
+      : SIZE_CLASSES[size];
+  const textColorClass =
+    color === "iron-400" ? "tw-text-iron-400" : "tw-text-white/40";
+  const textWeightClass = color === "iron-400" ? "tw-font-normal" : "";
 
   return (
     <p
-      className={`${textSizeClass} tw-m-0 tw-whitespace-nowrap tw-leading-none tw-text-white/40`}
+      className={`${textSizeClass} ${textColorClass} ${textWeightClass} tw-m-0 tw-whitespace-nowrap tw-leading-none`}
     >
       {formatTime()}
     </p>

@@ -50,6 +50,9 @@ Shared docs cover user-facing behavior reused across multiple product areas.
 - [Cookie Consent and Performance Analytics](feature-cookie-consent-and-performance-analytics.md):
   site-wide consent banner, `/about/cookie-policy`, and performance-tracking
   enable/disable behavior.
+- [Native iOS EULA Consent](feature-ios-eula-consent.md): mandatory versioned
+  agreement checks, device restoration, and fail-closed recovery in the native
+  iOS app.
 
 ### App Delivery
 

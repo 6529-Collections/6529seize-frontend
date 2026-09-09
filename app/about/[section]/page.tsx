@@ -1,9 +1,5 @@
 import About from "@/components/about/About";
-import {
-  getAboutSectionDocumentTitle,
-  isAboutFeatureSection,
-  isAboutLegalSection,
-} from "@/components/about/about.routes";
+import { getAboutSectionDocumentTitle } from "@/components/about/about.routes";
 import {
   AboutCol as Col,
   AboutContainer as Container,
@@ -14,7 +10,6 @@ import { getAppMetadata } from "@/components/providers/metadata";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { AboutSection } from "@/types/enums";
-import clsx from "clsx";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 
@@ -34,16 +29,9 @@ export default async function AboutPage(props: Readonly<Props>) {
 
   const aboutSection = section as AboutSection;
   const isMemes = aboutSection === AboutSection.MEMES;
-  const usesFeatureLayout = isAboutFeatureSection(aboutSection);
-  const usesLegalLayout = isAboutLegalSection(aboutSection);
 
   return (
-    <main
-      className={clsx(
-        "tailwind-scope tw-min-h-screen",
-        (usesFeatureLayout || usesLegalLayout) && ABOUT_PAGE_SURFACE_CLASS_NAME
-      )}
-    >
+    <main className={`tailwind-scope ${ABOUT_PAGE_SURFACE_CLASS_NAME}`}>
       {isMemes ? (
         <About section={AboutSection.MEMES} />
       ) : (

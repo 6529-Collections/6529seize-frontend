@@ -1,4 +1,4 @@
-import { DEFAULT_LOCALE } from "@/i18n/locales";
+import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 
 type UserPageBrainSidebarMessageKey = Extract<
@@ -9,8 +9,9 @@ type UserPageBrainSidebarMessageKey = Extract<
 type MessageParams = Record<string, string | number>;
 
 export function getUserPageBrainSidebarMessage(
+  locale: SupportedLocale,
   key: UserPageBrainSidebarMessageKey,
   params: MessageParams = {}
 ): string {
-  return t(DEFAULT_LOCALE, key, params);
+  return t(locale, key, params);
 }

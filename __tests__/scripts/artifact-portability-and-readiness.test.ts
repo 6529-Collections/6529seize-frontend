@@ -146,11 +146,6 @@ const readiness =
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const portability =
   require("../../ops/scripts/artifact-portability.cjs") as PortabilityModule;
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const policy = require("../../scripts/pr-ci-policy-bundle.cjs") as {
-  FILE_PATHS: readonly string[];
-};
-
 const SOURCE_SHA = "a".repeat(40);
 const EXPECTED_VERSION = "b".repeat(40);
 const CONTENT_ROOTS = [
@@ -979,7 +974,7 @@ describe("artifact-portability.v1", () => {
     fixtures.push(fixture);
     fixture.refreshReportArtifact(fixture.build());
     const runHeadSha = "c".repeat(40);
-    const artifactName = "release-bus-frontend-museum-r1";
+    const artifactName = "staging-frontend-12345";
     const artifactMetadata = {
       artifacts: [
         {
@@ -993,10 +988,10 @@ describe("artifact-portability.v1", () => {
     };
     const run = {
       id: 12345,
-      path: ".github/workflows/release-bus-v2-preflight.yml",
-      event: "workflow_dispatch",
+      path: ".github/workflows/deploy-staging.yml",
+      event: "push",
       conclusion: "success",
-      head_branch: "main",
+      head_branch: "1a-staging",
       head_sha: runHeadSha,
       head_repository: {
         full_name: "6529-Collections/6529seize-frontend",
@@ -1009,7 +1004,7 @@ describe("artifact-portability.v1", () => {
       expectedRunId: "12345",
       expectedRunHeadSha: runHeadSha,
       expectedSourceSha: SOURCE_SHA,
-      expectedWorkflowPath: ".github/workflows/release-bus-v2-preflight.yml",
+      expectedWorkflowPath: ".github/workflows/deploy-staging.yml",
       artifactName,
       run,
       artifactRoot: fixture.reportRoot,
@@ -1039,6 +1034,12 @@ describe("artifact-portability.v1", () => {
         promotion_authorized: false,
       },
     });
+    expect(
+      portability.verifyReportRun({
+        ...options,
+        artifactName: "manual-staging-frontend-12345",
+      })
+    ).toMatchObject({ role: "staging", run: { id: "12345" } });
 
     const reportPackagePath = path.join(
       fixture.reportRoot,
@@ -1183,10 +1184,12 @@ describe("artifact-portability.v1", () => {
 
     const productionWorkflowPath =
       ".github/workflows/production-build-artifact.yml";
-    const productionArtifactName = `production-frontend-${SOURCE_SHA}-frontend-prod-12345`;
+    const productionArtifactName = `production-frontend-${SOURCE_SHA}-12345`;
     const productionRun = {
       ...run,
       path: productionWorkflowPath,
+      event: "workflow_dispatch",
+      head_branch: "main",
     };
     expect(
       portability.verifyReportRun({
@@ -1256,18 +1259,10 @@ describe("artifact-portability.v1", () => {
       "utf8"
     );
     const productionDeploy = fs.readFileSync(
-      path.join(root, ".github/workflows/release-bus-deploy-production.yml"),
-      "utf8"
-    );
-    const stagingDeploy = fs.readFileSync(
-      path.join(root, ".github/workflows/release-bus-deploy-staging.yml"),
-      "utf8"
-    );
-    const fallbackDeploy = fs.readFileSync(
       path.join(root, ".github/workflows/build-upload-deploy-prod.yml"),
       "utf8"
     );
-    const manualStagingDeploy = fs.readFileSync(
+    const stagingDeploy = fs.readFileSync(
       path.join(root, ".github/workflows/deploy-staging.yml"),
       "utf8"
     );
@@ -1280,19 +1275,6 @@ describe("artifact-portability.v1", () => {
     const parsedWorkflow = YAML.parse(reportWorkflow) as {
       jobs: Record<string, { steps: Array<Record<string, unknown>> }>;
     };
-    const parsedProductionDeploy = YAML.parse(productionDeploy) as {
-      jobs: Record<
-        string,
-        {
-          steps: Array<{
-            name?: string;
-            run?: string;
-            with?: Record<string, unknown>;
-          }>;
-        }
-      >;
-    };
-
     const expectPortabilityGuard = (
       workflow: string,
       environment: "staging" | "production",
@@ -1339,53 +1321,19 @@ describe("artifact-portability.v1", () => {
     expect(reportWorkflow).not.toContain("configure-aws-credentials");
     expect(reportWorkflow).not.toContain("update-environment");
     expect(productionDeploy).toContain("elastic-beanstalk-readiness.cjs");
-    expect(fallbackDeploy).toContain("elastic-beanstalk-readiness.cjs");
     expectPortabilityGuard(
       productionDeploy,
-      "production",
-      '"$portability_inventory"'
-    );
-    expectPortabilityGuard(
-      stagingDeploy,
-      "staging",
-      '"$portability_inventory"'
-    );
-    expectPortabilityGuard(
-      fallbackDeploy,
       "production",
       "production-artifact/artifact-portability.json"
     );
     expectPortabilityGuard(
-      manualStagingDeploy,
+      stagingDeploy,
       "staging",
       "staging-artifact/artifact-portability.json"
     );
     expect(productionDeploy).not.toContain("sleep 120");
     expect(productionDeploy).not.toContain("sleep 60");
-    expect(fallbackDeploy).not.toContain("sleep 120");
-    expect(fallbackDeploy).not.toContain("sleep 60");
-    const productionSteps = Object.values(parsedProductionDeploy.jobs).flatMap(
-      (job) => job.steps
-    );
-    const verifierCheckout = productionSteps.find(
-      (step) => step.with?.["path"] === ".release-bus-verifier"
-    );
-    expect(String(verifierCheckout?.with?.["sparse-checkout"] ?? "")).toContain(
-      "ops/scripts/elastic-beanstalk-readiness.cjs"
-    );
-    expect(
-      productionSteps.find(
-        (step) =>
-          step.name ===
-          "Check Elastic Beanstalk health and readiness (adaptive exact-version poll)"
-      )?.run
-    ).toContain(
-      ".release-bus-verifier/ops/scripts/elastic-beanstalk-readiness.cjs"
-    );
     expect(productionDeploy).toMatch(
-      /elastic-beanstalk-readiness\.json[\s\S]*if-no-files-found: error/
-    );
-    expect(fallbackDeploy).toMatch(
       /elastic-beanstalk-readiness\.json[\s\S]*if-no-files-found: error/
     );
     const compareJob = parsedWorkflow.jobs["compare"];
@@ -1396,17 +1344,6 @@ describe("artifact-portability.v1", () => {
       expect.arrayContaining([
         expect.objectContaining({ name: "Download exact staging artifact" }),
         expect.objectContaining({ name: "Download exact production artifact" }),
-      ])
-    );
-    expect(policy.FILE_PATHS).toEqual(
-      expect.arrayContaining([
-        ".github/workflows/artifact-portability-report.yml",
-        "__tests__/scripts/artifact-portability-and-readiness.test.ts",
-        "ops/contracts/artifact-portability-v1.schema.json",
-        "ops/scripts/artifact-portability.cjs",
-        "ops/scripts/artifact-portability-contract.cjs",
-        "ops/scripts/artifact-portability-report-source.cjs",
-        "ops/scripts/elastic-beanstalk-readiness.cjs",
       ])
     );
   });

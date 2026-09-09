@@ -101,7 +101,7 @@ function effectiveActivation({ activationMode, holdState }) {
       effective_mode: "full",
       reason:
         normalisedHold === "active"
-          ? "An auditable Release Bus Museum hold is active."
+          ? "An auditable Museum deployment hold is active."
           : "Museum hold state is unavailable or malformed.",
     };
   }

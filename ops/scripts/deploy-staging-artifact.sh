@@ -3,7 +3,8 @@
 set -euo pipefail
 
 for name in ARTIFACT_URL EXPECTED_DIGEST EXPECTED_SHA \
-  PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64 REPO_DIR RUN_AS; do
+  PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64 REPO_DIR RUN_AS \
+  SSR_CLIENT_ID_B64 SSR_CLIENT_SECRET_B64; do
   if [[ -z "${!name:-}" ]]; then
     echo "Required deployment value $name is missing." >&2
     exit 1
@@ -46,16 +47,22 @@ sudo -H -u "$RUN_AS" pm2 --version >/dev/null 2>&1 || {
   exit 1
 }
 
-release_root="$REPO_DIR/.release-bus"
-release_id="$EXPECTED_SHA-$EXPECTED_DIGEST"
-release_dir="$release_root/releases/$release_id"
-release_app="$release_dir/app"
-current_link="$release_root/current"
-install -d -o "$RUN_AS" -g "$RUN_AS" "$release_root/releases"
-if [[ -e "$current_link" && ! -L "$current_link" ]]; then
-  echo "Refusing to replace a non-symlink staging current path." >&2
+ssr_client_id="$(printf '%s' "$SSR_CLIENT_ID_B64" | base64 -d)"
+ssr_client_secret="$(printf '%s' "$SSR_CLIENT_SECRET_B64" | base64 -d)"
+[[ -n "$ssr_client_id" && -n "$ssr_client_secret" ]] || {
+  echo "Decoded staging SSR credentials must be non-empty." >&2
+  exit 1
+}
+
+release_root="$REPO_DIR/.deploy"
+if [[ -L "$release_root" ]]; then
+  echo "Refusing to use a staging runtime symlink." >&2
+  exit 1
+elif [[ -e "$release_root" && ! -d "$release_root" ]]; then
+  echo "Refusing to replace a non-directory staging runtime path." >&2
   exit 1
 fi
+install -d -o "$RUN_AS" -g "$RUN_AS" "$release_root"
 touch "$release_root/deploy.lock"
 chown "$RUN_AS:$RUN_AS" "$release_root/deploy.lock"
 exec 9>"$release_root/deploy.lock"
@@ -63,8 +70,30 @@ flock -n 9 || {
   echo "Another instance-local staging deployment is active." >&2
   exit 1
 }
+physical_release_root="$(readlink -f "$release_root")"
+release_id="$EXPECTED_SHA-$EXPECTED_DIGEST"
+release_dir="$physical_release_root/releases/$release_id"
+release_app="$release_dir/app"
+current_link="$release_root/current"
+runtime_secrets_file="$release_root/runtime-secrets.json"
+if [[ -e "$current_link" && ! -L "$current_link" ]]; then
+  echo "Refusing to replace a non-symlink staging current path." >&2
+  exit 1
+fi
+install -d -o "$RUN_AS" -g "$RUN_AS" "$physical_release_root/releases"
 
-previous_target="$(readlink -f "$current_link" 2>/dev/null || true)"
+previous_target=""
+if [[ -L "$current_link" ]]; then
+  previous_target="$(readlink -f "$current_link" 2>/dev/null || true)"
+  previous_release_id="${previous_target%/app}"
+  previous_release_id="${previous_release_id##*/}"
+  [[ "$previous_release_id" =~ ^[a-f0-9]{40}(-[a-f0-9]{64})?$ && \
+    "$previous_target" == "$physical_release_root/releases/$previous_release_id/app" && \
+    -f "$previous_target/server.js" ]] || {
+    echo "Refusing to deploy with an unrecognized staging current release." >&2
+    exit 1
+  }
+fi
 pm2_json="$(sudo -H -u "$RUN_AS" pm2 jlist)"
 process_count="$(jq '[.[] | select(.name == "6529seize")] | length' <<<"$pm2_json")"
 process_kind=""
@@ -86,11 +115,15 @@ elif [[ "$process_count" -eq 1 ]]; then
     process_kind="legacy"
   elif [[ -n "$previous_target" ]] && jq -e \
     --arg release_root "$release_root" \
+    --arg physical_release_root "$physical_release_root" \
     --arg previous_target "$previous_target" '
     .exec_mode == "cluster_mode" and
     (.args == null or .args == []) and
-    (.pm_cwd == ($release_root + "/current") or .pm_cwd == $previous_target) and
+    (.pm_cwd == ($release_root + "/current") or
+      .pm_cwd == ($physical_release_root + "/current") or
+      .pm_cwd == $previous_target) and
     (.pm_exec_path == ($release_root + "/current/server.js") or
+      .pm_exec_path == ($physical_release_root + "/current/server.js") or
       .pm_exec_path == ($previous_target + "/server.js"))
   ' <<<"$process_shape" >/dev/null; then
     process_kind="managed"
@@ -168,7 +201,7 @@ prune_release_cache() {
   local current_release=""
   local retained_rollback=0
   local cached_release cached_release_id
-  if [[ "$previous_target" =~ ^${release_root}/releases/[a-f0-9]{40}(-[a-f0-9]{64})?/app$ ]]; then
+  if [[ -n "$previous_target" ]]; then
     current_release="${previous_target%/app}"
   fi
   if [[ "$process_kind" == managed && -z "$current_release" ]]; then
@@ -187,14 +220,14 @@ prune_release_cache() {
     fi
     cached_release_id="${cached_release##*/}"
     if [[ ! "$cached_release_id" =~ ^[a-f0-9]{40}(-[a-f0-9]{64})?$ || \
-      "$cached_release" != "$release_root/releases/$cached_release_id" ]]; then
+      "$cached_release" != "$physical_release_root/releases/$cached_release_id" ]]; then
       echo "Preserving unrecognized staging release cache entry $cached_release_id"
       continue
     fi
     rm -rf -- "$cached_release"
     echo "Pruned rebuildable staging release cache $cached_release_id"
   done < <(
-    find "$release_root/releases" -mindepth 1 -maxdepth 1 \
+    find "$physical_release_root/releases" -mindepth 1 -maxdepth 1 \
       -type d -printf '%T@ %p\n' 2>/dev/null | sort -nr | cut -d' ' -f2-
   )
 }
@@ -239,14 +272,19 @@ artifact_tmp="$(mktemp "$release_dir/package.XXXXXX.zip")"
 staging_app=""
 destinations_file=""
 retain_destinations_file=false
+runtime_secrets_tmp=""
 cleanup() {
-  unset review_destinations PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64
+  unset review_destinations PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64 \
+    ssr_client_id SSR_CLIENT_ID_B64 ssr_client_secret SSR_CLIENT_SECRET_B64
   rm -f "$artifact_tmp"
   if [[ -n "$staging_app" && -d "$staging_app" ]]; then
     rm -rf -- "$staging_app"
   fi
   if [[ "$retain_destinations_file" != true && -n "$destinations_file" ]]; then
     rm -f -- "$destinations_file"
+  fi
+  if [[ -n "$runtime_secrets_tmp" ]]; then
+    rm -f -- "$runtime_secrets_tmp"
   fi
 }
 trap cleanup EXIT HUP INT TERM
@@ -288,12 +326,35 @@ chown "$RUN_AS:$RUN_AS" "$destinations_file"
 unset review_destinations PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64
 retain_destinations_file=true
 
+runtime_secrets_tmp="$(mktemp "$release_root/runtime-secrets.XXXXXX.json")"
+jq -n \
+  --arg ssr_client_id "$ssr_client_id" \
+  --arg ssr_client_secret "$ssr_client_secret" \
+  '{SSR_CLIENT_ID:$ssr_client_id,SSR_CLIENT_SECRET:$ssr_client_secret}' \
+  > "$runtime_secrets_tmp"
+chown "$RUN_AS:$RUN_AS" "$runtime_secrets_tmp"
+chmod 600 "$runtime_secrets_tmp"
+mv -f "$runtime_secrets_tmp" "$runtime_secrets_file"
+runtime_secrets_tmp=""
+unset ssr_client_id SSR_CLIENT_ID_B64 ssr_client_secret SSR_CLIENT_SECRET_B64
+
 ln -sfn "$release_app" "$current_link"
 cat > "$release_root/ecosystem.config.cjs" <<'PM2_CONFIG'
 const fs = require('node:fs');
 const path = require('node:path');
 
 const currentApp = fs.realpathSync(path.join(__dirname, 'current'));
+const runtimeSecretsPath = path.join(__dirname, 'runtime-secrets.json');
+const runtimeEnv = JSON.parse(fs.readFileSync(runtimeSecretsPath, 'utf8'));
+const requireRuntimeEnv = (name) => {
+  const value = runtimeEnv[name];
+  if (typeof value !== 'string' || !value.trim()) {
+    throw new Error(
+      `Required staging runtime value ${name} is missing from ${runtimeSecretsPath}.`
+    );
+  }
+  return value;
+};
 const destinationsPath = path.join(
   path.dirname(currentApp),
   'public-review-discussion-destinations.json'
@@ -321,6 +382,8 @@ module.exports = {
       PORT: '3001',
       HOSTNAME: '0.0.0.0',
       NODE_ENV: 'production',
+      ['SSR_CLIENT_ID']: requireRuntimeEnv('SSR_CLIENT_ID'),
+      ['SSR_CLIENT_SECRET']: requireRuntimeEnv('SSR_CLIENT_SECRET'),
       ...(publicReviewDiscussionDestinations
         ? {
             PUBLIC_REVIEW_DISCUSSION_DESTINATIONS:

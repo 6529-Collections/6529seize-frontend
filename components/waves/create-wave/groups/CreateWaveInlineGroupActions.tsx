@@ -1,68 +1,114 @@
 import {
+  ArrowPathIcon,
+  GlobeAltIcon,
+  PencilIcon,
   ShieldExclamationIcon,
   UserGroupIcon,
-  UserPlusIcon,
+  XMarkIcon,
 } from "@heroicons/react/24/outline";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { ActionButton } from "./CreateWaveInlineGroupButtons";
 
 export default function CreateWaveInlineGroupActions({
   disabled,
-  identityActive,
-  ruleActive,
+  criteriaDisabled = false,
+  criteriaActive,
   searchActive,
-  onAddIdentity,
-  onAddRule,
+  showChooseGroup = true,
+  isWaveAccessEditor = false,
+  showMakeWavePublic = false,
+  onMakeWavePublic,
+  showMatchWaveAccess = false,
+  onMatchWaveAccess,
+  onReplaceCriteria,
   onUseExistingGroup,
 }: {
   readonly disabled: boolean;
-  readonly identityActive: boolean;
-  readonly ruleActive: boolean;
+  readonly criteriaDisabled?: boolean | undefined;
+  readonly criteriaActive: boolean;
   readonly searchActive: boolean;
-  readonly onAddIdentity: () => void;
-  readonly onAddRule: () => void;
+  readonly showChooseGroup?: boolean;
+  readonly isWaveAccessEditor?: boolean;
+  readonly showMakeWavePublic?: boolean;
+  readonly onMakeWavePublic?: (() => void) | undefined;
+  readonly showMatchWaveAccess?: boolean;
+  readonly onMatchWaveAccess?: (() => void) | undefined;
+  readonly onReplaceCriteria: () => void;
   readonly onUseExistingGroup: () => void;
 }) {
+  const locale = useBrowserLocale();
+  const isCancel = isWaveAccessEditor && criteriaActive;
+  let criteriaIcon = (
+    <PencilIcon aria-hidden="true" className="tw-size-3.5 tw-flex-shrink-0" />
+  );
+  let criteriaLabel = t(locale, "waves.create.groups.actions.edit");
+  if (!isWaveAccessEditor) {
+    criteriaIcon = (
+      <ShieldExclamationIcon
+        aria-hidden="true"
+        className="tw-size-3.5 tw-flex-shrink-0"
+      />
+    );
+    criteriaLabel = t(locale, "waves.create.groups.actions.editCriteria");
+  } else if (isCancel) {
+    criteriaIcon = (
+      <XMarkIcon aria-hidden="true" className="tw-size-3.5 tw-flex-shrink-0" />
+    );
+    criteriaLabel = t(locale, "waves.create.actions.cancel");
+  }
+
   return (
-    <div className="tw-flex tw-flex-wrap tw-gap-1.5 md:tw-absolute md:tw-right-0 md:tw-top-0 md:tw-justify-end">
+    <div className="tw-flex tw-flex-wrap tw-gap-1.5 lg:tw-justify-end">
+      {showMakeWavePublic && onMakeWavePublic ? (
+        <ActionButton
+          icon={
+            <GlobeAltIcon
+              aria-hidden="true"
+              className="tw-size-3.5 tw-flex-shrink-0"
+            />
+          }
+          label={t(locale, "waves.create.groups.editAccess.makePublic")}
+          disabled={disabled}
+          onClick={onMakeWavePublic}
+        />
+      ) : null}
+      {showMatchWaveAccess && onMatchWaveAccess ? (
+        <ActionButton
+          icon={
+            <ArrowPathIcon
+              aria-hidden="true"
+              className="tw-size-3.5 tw-flex-shrink-0"
+            />
+          }
+          label={t(locale, "waves.create.groups.actions.matchWaveAccess")}
+          disabled={disabled}
+          onClick={onMatchWaveAccess}
+        />
+      ) : null}
       <ActionButton
-        icon={
-          <UserPlusIcon
-            aria-hidden="true"
-            className="tw-size-3.5 tw-flex-shrink-0"
-          />
-        }
-        label="Add identity"
-        disabled={disabled}
-        active={identityActive}
+        icon={criteriaIcon}
+        label={criteriaLabel}
+        disabled={disabled || criteriaDisabled}
+        active={criteriaActive}
         isToggle={true}
-        onClick={onAddIdentity}
+        onClick={onReplaceCriteria}
       />
-      <ActionButton
-        icon={
-          <ShieldExclamationIcon
-            aria-hidden="true"
-            className="tw-size-3.5 tw-flex-shrink-0"
-          />
-        }
-        label="Add rule"
-        disabled={disabled}
-        active={ruleActive}
-        isToggle={true}
-        onClick={onAddRule}
-      />
-      <ActionButton
-        icon={
-          <UserGroupIcon
-            aria-hidden="true"
-            className="tw-size-3.5 tw-flex-shrink-0"
-          />
-        }
-        label="Choose group"
-        disabled={disabled}
-        active={searchActive}
-        isToggle={true}
-        onClick={onUseExistingGroup}
-      />
+      {showChooseGroup ? (
+        <ActionButton
+          icon={
+            <UserGroupIcon
+              aria-hidden="true"
+              className="tw-size-3.5 tw-flex-shrink-0"
+            />
+          }
+          label={t(locale, "waves.create.groups.actions.chooseGroup")}
+          disabled={disabled}
+          active={searchActive}
+          isToggle={true}
+          onClick={onUseExistingGroup}
+        />
+      ) : null}
     </div>
   );
 }

@@ -305,4 +305,104 @@ describe("useEnhancedWavesListCore", () => {
     expect(result.current.waves[0]?.unreadDropsCount).toBe(3);
     expect(result.current.waves[0]?.firstUnreadDropSerialNo).toBe(10);
   });
+
+  it("uses only the canonical unread owner for direct-message rows", () => {
+    const resetWaveNewDropsCount = jest.fn();
+    mockedUseNewDropCounter.mockReturnValue({
+      newDropsCounts: {
+        "wave-1": {
+          count: 50,
+          latestDropTimestamp: 200,
+          firstUnreadSerialNo: 2,
+        },
+      },
+      resetAllWavesNewDropsCount: jest.fn(),
+      resetWaveNewDropsCount,
+    });
+    const wavesData = createWavesData({
+      mainWavesRefetch: jest.fn(),
+      refetchAllWaves: jest.fn(),
+      waves: [
+        createSidebarWave({
+          unreadDropsCount: 40,
+          firstUnreadDropSerialNo: 3,
+        }),
+      ],
+    });
+
+    const { result } = renderHook(() =>
+      useEnhancedWavesListCore(null, wavesData, {
+        supportsPinning: false,
+        canonicalUnreadByWaveId: {
+          "wave-1": {
+            profile_id: "profile-1",
+            wave_id: "wave-1",
+            unread_count: 2,
+            first_unread_drop_serial_no: 12,
+            latest_drop_serial_no: 13,
+            latest_read_serial_no: 11,
+            version: 4,
+          },
+        },
+      })
+    );
+
+    expect(mockedUseNewDropCounter).toHaveBeenCalledWith(
+      null,
+      wavesData.waves,
+      wavesData.refetchAllWaves,
+      expect.objectContaining({ enabled: false })
+    );
+    expect(result.current.waves[0]).toMatchObject({
+      unreadDropsCount: 2,
+      firstUnreadDropSerialNo: 12,
+      newDropsCount: { count: 0, firstUnreadSerialNo: 12 },
+    });
+
+    result.current.markWaveRead("wave-1");
+    expect(resetWaveNewDropsCount).not.toHaveBeenCalled();
+  });
+
+  it("uses the canonical unread owner before its first snapshot is ready", () => {
+    mockedUseNewDropCounter.mockReturnValue({
+      newDropsCounts: {
+        "wave-1": {
+          count: 2,
+          latestDropTimestamp: 200,
+          firstUnreadSerialNo: 12,
+        },
+      },
+      resetAllWavesNewDropsCount: jest.fn(),
+      resetWaveNewDropsCount: jest.fn(),
+    });
+    const wavesData = createWavesData({
+      mainWavesRefetch: jest.fn(),
+      refetchAllWaves: jest.fn(),
+      waves: [
+        createSidebarWave({
+          unreadDropsCount: 4,
+          firstUnreadDropSerialNo: 10,
+        }),
+      ],
+    });
+
+    const { result } = renderHook(() =>
+      useEnhancedWavesListCore(null, wavesData, {
+        supportsPinning: false,
+        canonicalUnreadByWaveId: {},
+      })
+    );
+
+    expect(mockedUseNewDropCounter).toHaveBeenCalledWith(
+      null,
+      wavesData.waves,
+      wavesData.refetchAllWaves,
+      expect.objectContaining({ enabled: false })
+    );
+    expect(result.current.waves[0]).toMatchObject({
+      unreadDropsCount: 0,
+      firstUnreadDropSerialNo: null,
+      newDropsCount: { count: 0, firstUnreadSerialNo: null },
+    });
+  });
 });

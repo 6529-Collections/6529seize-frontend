@@ -6,6 +6,7 @@ import type {
 import type { SidebarSection } from "@/components/navigation/navTypes";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import { commonApiFetch } from "@/services/api/common-api";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 import { DEFAULT_DROP_FORGE_PERMISSIONS } from "../../helpers/dropForgePermissions";
@@ -99,6 +100,9 @@ jest.mock("@tanstack/react-query", () => ({
     isFetchingNextPage: false,
   }),
   keepPreviousData: (prev: unknown) => prev,
+}));
+jest.mock("@/services/api/common-api", () => ({
+  commonApiFetch: jest.fn(),
 }));
 jest.mock("next/navigation", () => ({
   useRouter: () => useRouter(),
@@ -444,6 +448,11 @@ describe("HeaderSearchModal", () => {
       screen.getByRole("tabpanel", { name: "All results" })
     ).toBeInTheDocument();
     expect(screen.getByRole("status")).not.toHaveAttribute("aria-label");
+    expect(
+      screen.queryByText(
+        "Use arrow keys to move through results and Enter to open."
+      )
+    ).not.toBeInTheDocument();
   });
 
   it("searches waves with the settled modal query", () => {
@@ -510,6 +519,20 @@ describe("HeaderSearchModal", () => {
     waveItemCall?.[0].onWaveSelect(wave);
     expect(activeWaveSet).toHaveBeenCalledWith(wave.id, {
       isDirectMessage: false,
+    });
+  });
+
+  it("requests only non-direct-message waves for site search", () => {
+    setup();
+
+    fireEvent.change(getSearchInput(), { target: { value: "wave" } });
+
+    expect(useWaves).toHaveBeenLastCalledWith({
+      identity: null,
+      waveName: "wave",
+      limit: 20,
+      enabled: true,
+      directMessage: false,
     });
   });
 
@@ -1002,6 +1025,28 @@ describe("HeaderSearchModal", () => {
       "Profiles",
       "Waves",
     ]);
+  });
+
+  it("requests server-ranked profile results", async () => {
+    setup({ selectedCategory: "PROFILES" });
+
+    fireEvent.change(getSearchInput(), { target: { value: "gelato" } });
+
+    const profileQueryOptions = [...useQueryMock.mock.calls]
+      .reverse()
+      .find(
+        ([options]) =>
+          options.queryKey[0] === QueryKey.PROFILE_SEARCH &&
+          options.queryKey[1] === "gelato"
+      )?.[0];
+    expect(profileQueryOptions).toBeDefined();
+
+    await profileQueryOptions?.queryFn();
+
+    expect(commonApiFetch).toHaveBeenCalledWith({
+      endpoint: "community-members",
+      params: { param: "gelato", sort: "level" },
+    });
   });
 
   it("triggers onClose on click away", () => {

@@ -85,6 +85,21 @@ describe("CreateWaveOutcomesCICApprove", () => {
     expect(defaultProps.onOutcome).not.toHaveBeenCalled();
   });
 
+  it("rejects non-finite NIC amounts", async () => {
+    const user = userEvent.setup();
+    render(<CreateWaveOutcomesCICApprove {...defaultProps} />);
+
+    fireEvent.change(screen.getByLabelText("NIC"), {
+      target: { value: "Infinity" },
+    });
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    expect(
+      screen.getByText("NIC must be a positive number")
+    ).toBeInTheDocument();
+    expect(defaultProps.onOutcome).not.toHaveBeenCalled();
+  });
+
   it("clears error when valid input is entered", async () => {
     const user = userEvent.setup();
     render(<CreateWaveOutcomesCICApprove {...defaultProps} />);
@@ -153,26 +168,22 @@ describe("CreateWaveOutcomesCICApprove", () => {
     expect(nicInput).toHaveClass("tw-caret-error");
   });
 
-  it("uses the shared large primary button", () => {
+  it("uses the shared medium primary button", () => {
     render(<CreateWaveOutcomesCICApprove {...defaultProps} />);
 
     const primaryButton = screen.getByRole("button", { name: "Save" });
 
     expect(primaryButton).not.toHaveAttribute("aria-busy");
     expect(primaryButton).not.toBeDisabled();
-    expect(primaryButton).toHaveClass(
-      "tw-min-h-11",
-      "tw-px-5",
-      "tw-py-2.5"
-    );
+    expect(primaryButton).toHaveClass("tw-h-10", "tw-px-3.5", "tw-text-sm");
   });
 
   it("applies normal styling when no error is present", () => {
     render(<CreateWaveOutcomesCICApprove {...defaultProps} />);
 
     const nicInput = screen.getByLabelText("NIC");
-    expect(nicInput).toHaveClass("tw-ring-iron-650");
-    expect(nicInput).toHaveClass("focus:tw-border-blue-500");
+    expect(nicInput).toHaveClass("tw-ring-white/5");
+    expect(nicInput).toHaveClass("focus:tw-border-primary-500/50");
     expect(nicInput).toHaveClass("focus:tw-ring-primary-400");
     expect(nicInput).toHaveClass("tw-caret-primary-400");
   });

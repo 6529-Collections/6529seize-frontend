@@ -412,10 +412,10 @@
       "destinations": ["sentry:owner"],
       "sampling": "eligible function timers in iOS WKWebViews are sampled independently at 1/16; only exact unhandled cyclic-JSON timer errors receive sampled provenance",
       "privacy": "timer arguments are removed from every matching event; sampled extras contain bounded sanitized function names, script basenames, line and column numbers, origin enums, WebView family, and sample rate only",
-      "externalUsage": "v1 is live; Sentry dashboard, saved-search, and alert usage could not be verified because read-only endpoints returned 403",
+      "externalUsage": "v2 is live; Sentry dashboard, saved-search, and alert usage could not be verified because read-only endpoints returned 403",
       "lifecycle": "temporary",
-      "replacement": "By the review date, verify or migrate every v1-keyed Sentry consumer to v2; remove the timer diagnostics after corrected provenance identifies the caller",
-      "reviewBy": "2026-08-17"
+      "replacement": "After the first production release with the narrow MetaMask Mobile suppression has been live for seven days, review retained diagnostic events and remove the timer diagnostics if near-miss coverage remains intact",
+      "reviewBy": "2026-09-01"
     },
     {
       "name": "reaction.*",
@@ -424,7 +424,7 @@
       "owner": "sentry",
       "producer": "utils/monitoring/dropReactionMonitoring.ts",
       "destinations": ["sentry:owner"],
-      "sampling": "breadcrumbs attach to captured Sentry events; error capture has a 60-second dedupe window; the exact privacy-safe handled POST-or-DELETE drop-reaction endpoint warning with a first-party absent-or-zero HTTP status inside one unambiguous current request-sent-to-request-failed breadcrumb window uses the shared deterministic 10% low-value network sample, while stale or ambiguous concurrent reaction failures, transport failures owned by completed concurrent lifecycle windows, and all other reaction warnings and failures remain outside that sampler",
+      "sampling": "breadcrumbs attach to captured Sentry events; error capture has a 60-second dedupe window; the exact privacy-safe handled POST-or-DELETE drop-reaction endpoint warning with an error-level first-party absent-or-zero HTTP status immediately before the latest network request-failed breadcrumb, or inside one unambiguous current request-sent-to-request-failed breadcrumb window, uses the shared deterministic 10% low-value network sample; the exact adjacent terminal pair remains eligible when target-free concurrent lifecycle identities collide, while stale or other ambiguous concurrent reaction failures, transport failures owned by completed concurrent lifecycle windows, and all other reaction warnings and failures remain outside that sampler",
       "privacy": "bounded route and endpoint families, source/action/status/error enums, booleans, mutation sequence, and duration buckets only; raw mutation/drop/wave/profile identifiers, reaction values, paths, endpoints, and error messages were removed 2026-07-17; retained sampled transport warnings also remove request context and the SDK URL tag, preserve validated normalized route families, and recursively filter identifier- or endpoint-bearing breadcrumb messages and nested data values after classification",
       "externalUsage": "unverified",
       "lifecycle": "keep",

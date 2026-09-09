@@ -163,7 +163,7 @@ function EndedParticipationDropInner({
   }, [mobileMenu]);
 
   const getDropLocationBackground = () => {
-    return "tw-bg-iron-950 tw-ring-1 tw-ring-inset tw-ring-iron-800";
+    return "tw-bg-[var(--drop-card-background,theme(colors.iron.950))] tw-ring-1 tw-ring-inset tw-ring-iron-800";
   };
 
   let dropBackgroundClass = getDropLocationBackground();
@@ -217,13 +217,13 @@ function EndedParticipationDropInner({
             )}
 
             {!isStackedTimestamp && (
-              <p className="tw-mb-0 tw-whitespace-nowrap tw-text-xs tw-font-normal tw-leading-none tw-text-iron-500">
+              <p className="tw-m-0 tw-whitespace-nowrap tw-text-xs tw-font-normal tw-leading-none tw-text-iron-500">
                 {getTimeAgoShort(drop.created_at)}
               </p>
             )}
           </div>
           {isStackedTimestamp && (
-            <p className="tw-mb-0 tw-whitespace-nowrap tw-text-xs tw-font-normal tw-leading-none tw-text-iron-500">
+            <p className="tw-m-0 tw-whitespace-nowrap tw-text-xs tw-font-normal tw-leading-none tw-text-iron-500">
               {getTimeAgoShort(drop.created_at)}
             </p>
           )}
@@ -277,8 +277,8 @@ function EndedParticipationDropInner({
 
   return (
     <div
-      className={`${
-        location === DropLocation.WAVE ? "tw-px-4 tw-py-1" : ""
+      className={`${location === DropLocation.WAVE ? "tw-px-4 tw-py-1" : ""} ${
+        location === DropLocation.PROFILE ? "tw-mb-3" : ""
       } tw-w-full`}
     >
       <div className="tw-group tw-relative tw-w-full">

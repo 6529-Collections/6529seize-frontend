@@ -17,6 +17,9 @@ import {
 } from "../services/waveDecisionService";
 import { calculateLastDecisionTime } from "@/helpers/waves/create-wave.helpers";
 import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
+import { CREATE_WAVE_FORM_STYLES } from "../utils/createWaveFormStyles";
 
 interface RollingEndDateProps {
   readonly dates: CreateWaveDatesConfig;
@@ -33,6 +36,8 @@ interface RollingEndDateCollapsedContentProps {
 function RollingEndDateCollapsedContent({
   endDate,
 }: RollingEndDateCollapsedContentProps) {
+  const locale = useBrowserLocale();
+
   return (
     <span className="tw-flex tw-items-center tw-rounded-lg tw-bg-iron-700/40 tw-px-3 tw-py-2 tw-shadow-md tw-transition-transform tw-duration-200 hover:tw-translate-y-[-1px]">
       <FontAwesomeIcon
@@ -41,10 +46,12 @@ function RollingEndDateCollapsedContent({
       />
       <span className="tw-block">
         <span className="tw-block tw-text-xs tw-text-iron-300/70">
-          Wave End Date
+          {t(locale, "waves.create.dates.rank.end.collapsedLabel")}
         </span>
         <span className="tw-block tw-text-sm tw-font-medium tw-text-iron-50">
-          {endDate === null ? "No end date" : formatDate(endDate)}
+          {endDate === null
+            ? t(locale, "waves.create.dates.rank.end.noEndDate")
+            : formatDate(endDate, locale)}
         </span>
       </span>
     </span>
@@ -58,6 +65,7 @@ export default function RollingEndDate({
   isExpanded,
   setIsExpanded,
 }: RollingEndDateProps) {
+  const locale = useBrowserLocale();
   const isRollingMode = dates.isRolling;
   const hasRankFutureDateError = errors.includes(
     CREATE_WAVE_VALIDATION_ERROR.RANK_DECISION_TIME_MUST_BE_IN_FUTURE
@@ -125,7 +133,11 @@ export default function RollingEndDate({
   return (
     <div className="tw-relative">
       <CollapsibleCard
-        title="Optional Wave End Date"
+        title={
+          <span className="tw-text-iron-100">
+            {t(locale, "waves.create.dates.rank.end.optionalTitle")}
+          </span>
+        }
         isExpanded={shouldShowExpandedContent}
         onToggle={() => setIsExpanded(!shouldShowExpandedContent)}
         collapsedContent={collapsedContent}
@@ -135,27 +147,32 @@ export default function RollingEndDate({
           <div className="tw-col-span-2">
             <div className="tw-mb-3 tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-items-start sm:tw-justify-between">
               <div>
-                <p className="tw-mb-1 tw-text-base tw-font-medium tw-text-iron-50">
-                  Set Optional End Date
-                </p>
-                <p className="tw-mb-0 tw-text-xs tw-text-iron-400">
-                  Leave blank for no end date.
+                <h3 className={CREATE_WAVE_FORM_STYLES.sectionTitle}>
+                  {t(locale, "waves.create.dates.rank.end.setTitle")}
+                </h3>
+                <p
+                  className={`tw-mt-1 ${CREATE_WAVE_FORM_STYLES.compactSupportingText}`}
+                >
+                  {t(locale, "waves.create.dates.rank.end.description")}
                 </p>
               </div>
               <div className="tw-rounded-lg tw-bg-iron-700/40 tw-px-3 tw-py-2 tw-shadow-md">
                 <p className="tw-mb-0 tw-text-xs tw-text-iron-300/70">
-                  Wave Ends
+                  {t(locale, "waves.create.dates.rank.end.summaryLabel")}
                 </p>
                 <div className="tw-flex tw-items-center tw-gap-x-2">
                   <p className="tw-mb-0 tw-text-sm tw-font-medium tw-text-iron-50">
                     {selectedEndDate === null
-                      ? "No end date"
-                      : formatDate(selectedEndDate)}
+                      ? t(locale, "waves.create.dates.rank.end.noEndDate")
+                      : formatDate(selectedEndDate, locale)}
                   </p>
                   {hasSelectedEndDate && (
                     <button
                       type="button"
-                      aria-label="Clear end date"
+                      aria-label={t(
+                        locale,
+                        "waves.create.dates.rank.end.clearAriaLabel"
+                      )}
                       onClick={handleClearEndDate}
                       className="tw-flex tw-size-6 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-800 tw-text-iron-300 tw-transition tw-duration-300 hover:tw-border-primary-400 hover:tw-text-primary-300"
                     >
@@ -175,7 +192,9 @@ export default function RollingEndDate({
                   className="tw-size-4 tw-flex-shrink-0"
                   aria-hidden="true"
                 />
-                <span>Wave end date must be in the future.</span>
+                <span>
+                  {t(locale, "waves.create.dates.rank.end.futureError")}
+                </span>
               </div>
             )}
             {hasEndDateBeforeVotingStartError && (
@@ -188,15 +207,17 @@ export default function RollingEndDate({
                   className="tw-size-4 tw-flex-shrink-0"
                   aria-hidden="true"
                 />
-                <span>Wave end date cannot be before voting begins.</span>
+                <span>
+                  {t(locale, "waves.create.dates.rank.end.beforeVotingError")}
+                </span>
               </div>
             )}
 
             <div className="tw-grid tw-grid-cols-1 tw-gap-x-10 tw-gap-y-8 md:tw-grid-cols-2">
               {/* Date selection */}
               <div className="tw-w-full">
-                <p className="tw-mb-2 tw-text-sm tw-font-medium tw-text-iron-300">
-                  Select Official End Date:
+                <p className={`tw-mb-2 ${CREATE_WAVE_FORM_STYLES.fieldLabel}`}>
+                  {t(locale, "waves.create.dates.rank.end.dateLabel")}
                 </p>
                 <CommonCalendar
                   initialMonth={displayedDate.getMonth()}
@@ -205,24 +226,30 @@ export default function RollingEndDate({
                   minTimestamp={minEndDate}
                   maxTimestamp={null}
                   setSelectedTimestamp={handleDateSelection}
+                  variant="flat"
                 />
               </div>
 
               {/* Time selection */}
               <div className="tw-w-full">
-                <p className="tw-mb-2 tw-text-sm tw-font-medium tw-text-iron-300">
-                  Select Time:
+                <p className={`tw-mb-2 ${CREATE_WAVE_FORM_STYLES.fieldLabel}`}>
+                  {t(locale, "waves.create.dates.rank.end.timeLabel")}
                 </p>
                 <TimePicker
                   hours={displayedHours}
                   minutes={displayedMinutes}
                   onTimeChange={handleTimeChange}
                   disabled={!hasSelectedEndDate}
+                  variant="flat"
                 />
                 {!hasSelectedEndDate && (
-                  <p className="tw-mt-2 tw-text-xs tw-text-iron-400">
-                    Pick an end date first. Recurring announcements currently
-                    have no end date.
+                  <p
+                    className={`tw-mt-2 ${CREATE_WAVE_FORM_STYLES.compactSupportingText}`}
+                  >
+                    {t(
+                      locale,
+                      "waves.create.dates.rank.end.disabledTimeGuidance"
+                    )}
                   </p>
                 )}
 
@@ -231,7 +258,10 @@ export default function RollingEndDate({
                   <div className="tw-mt-4 tw-rounded-lg tw-bg-primary-500/10 tw-p-2">
                     <p className="tw-mb-0 tw-text-xs">
                       <span className="tw-text-iron-300">
-                        Last winner announcement will be at:
+                        {t(
+                          locale,
+                          "waves.create.dates.rank.end.lastAnnouncementLabel"
+                        )}
                       </span>
                     </p>
                     <p className="tw-mb-0 tw-text-sm tw-font-medium tw-text-primary-400">
@@ -240,7 +270,8 @@ export default function RollingEndDate({
                           dates.firstDecisionTime,
                           dates.subsequentDecisions,
                           selectedEndDate
-                        )
+                        ),
+                        locale
                       )}
                     </p>
                   </div>
@@ -252,27 +283,33 @@ export default function RollingEndDate({
           {/* Explanatory text - moved below the calendar and time picker */}
           <div className="tw-mt-4 tw-rounded-lg tw-bg-iron-800/30 tw-p-3">
             <p className="tw-mb-1 tw-text-sm tw-font-medium tw-text-iron-200">
-              {isRollingMode
-                ? "About Recurring Winners"
-                : "About Wave End Date"}
+              {t(
+                locale,
+                isRollingMode
+                  ? "waves.create.dates.rank.end.aboutRecurringTitle"
+                  : "waves.create.dates.rank.end.aboutFixedTitle"
+              )}
             </p>
 
             {isRollingMode ? (
               <>
                 <p className="tw-mb-2 tw-text-xs tw-text-iron-400">
-                  In recurring mode, your wave continues announcing winners in
-                  regular intervals until an optional end date.
+                  {t(
+                    locale,
+                    "waves.create.dates.rank.end.recurringDescription"
+                  )}
                 </p>
 
                 <p className="tw-mb-2 tw-text-xs tw-text-iron-400">
-                  Leave the end date blank to keep recurring announcements
-                  open-ended.
+                  {t(
+                    locale,
+                    "waves.create.dates.rank.end.recurringOpenEndedDescription"
+                  )}
                 </p>
               </>
             ) : (
               <p className="tw-mb-2 tw-text-xs tw-text-iron-400">
-                Your wave will end immediately after the final winner
-                announcement.
+                {t(locale, "waves.create.dates.rank.end.fixedDescription")}
               </p>
             )}
 
@@ -281,7 +318,10 @@ export default function RollingEndDate({
               <div className="tw-mt-3 tw-rounded-lg tw-bg-primary-500/10 tw-p-2">
                 <p className="tw-mb-0 tw-flex tw-items-center tw-justify-between tw-text-xs">
                   <span className="tw-text-iron-200">
-                    Total winner announcements:
+                    {t(
+                      locale,
+                      "waves.create.dates.rank.end.totalAnnouncementsLabel"
+                    )}
                   </span>
                   <span className="tw-font-semibold tw-text-primary-400">
                     {calculateTotalDecisions()}

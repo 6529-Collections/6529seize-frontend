@@ -205,9 +205,15 @@ export const useStormPartActions = ({
   }, [refreshState, setEditingPartIndex, setIsStormMode]);
 
   const breakIntoStorm = useCallback(async () => {
-    const updatedDrop = await finalizeCurrentDropPart();
-    if (!updatedDrop) {
+    if (submitting) {
       return;
+    }
+
+    if (canAddPart) {
+      const updatedDrop = await finalizeCurrentDropPart();
+      if (!updatedDrop) {
+        return;
+      }
     }
 
     setIsStormMode(true);
@@ -215,10 +221,12 @@ export const useStormPartActions = ({
       collapseOptions();
     }
   }, [
+    canAddPart,
     collapseOptions,
     finalizeCurrentDropPart,
     keepOptionsVisible,
     setIsStormMode,
+    submitting,
   ]);
 
   return {

@@ -10,6 +10,15 @@ import {
   waitForRouteReady,
 } from "../testHelpers";
 import { gotoDocumentWithTransientRetry } from "../support/routeReadiness";
+import {
+  expectAcquisitionsAcceptance,
+  expectCollectionAcceptance,
+  expectMuseumGeometryAcceptance,
+  expectResearchAcceptance,
+  MUSEUM_RELEASE_ACCEPTANCE_ROUTES,
+  MUSEUM_RELEASE_ACCEPTANCE_VIEWPORTS,
+  openMuseumAcceptanceRoute,
+} from "../support/museumReleaseAcceptance";
 
 const SOURCE_COMMIT =
   process.env["MUSEUM_PUBLICATION_EXPECTED_COMMIT"]?.trim() || null;
@@ -135,15 +144,21 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
 
     await openRoute(page, "/museum/network");
     await expect(
-      page.getByText("Seven works by Casey Reas", { exact: true })
+      page
+        .getByText(
+          "Vera Molnár, in collaboration with Martin Grasser · Themes and Variations",
+          { exact: true }
+        )
+        .first()
     ).toBeVisible();
-    const acquisitionStories = page.getByLabel(
-      "Three ways a work enters the Museum's public record"
+    const acquisitionStories = page.locator(
+      '[aria-labelledby="museum-acquisition-stories-title"]'
     );
     for (const title of [
       "The System in Seven States",
       "Keys and Gates",
       "Conflict at Its Edges",
+      "A Gift of Themes and Variations #210",
     ]) {
       await expect(
         acquisitionStories.getByRole("link", { name: title, exact: true })
@@ -152,12 +167,13 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
     await retainScreenshot(page, testInfo, "museum-network-home");
 
     await openRoute(page, "/museum/network/collection");
-    const collectionWorkHrefs = await page
+    const permanentHoldings = page.getByTestId("museum-permanent-holdings");
+    const collectionWorkHrefs = await permanentHoldings
       .locator('a[href^="/museum/network/works/"]')
       .evaluateAll((links) => [
         ...new Set(links.map((link) => link.getAttribute("href"))),
       ]);
-    expect(collectionWorkHrefs).toHaveLength(7);
+    expect(collectionWorkHrefs).toHaveLength(13);
     expect(
       collectionWorkHrefs.every(
         (href): href is string =>
@@ -165,6 +181,85 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
           /^\/museum\/network\/works\/6529NM-W-\d{4}$/u.test(href)
       )
     ).toBe(true);
+    const inProgressWorkHrefValues = await page
+      .getByTestId("museum-in-progress-works")
+      .locator('a[href^="/museum/network/works/"]')
+      .evaluateAll((links) => links.map((link) => link.getAttribute("href")));
+    const inProgressWorkHrefs = [...new Set(inProgressWorkHrefValues)];
+    expect(inProgressWorkHrefValues).toHaveLength(16);
+    expect(inProgressWorkHrefs).toHaveLength(16);
+    expect(
+      inProgressWorkHrefs.every(
+        (href): href is string =>
+          typeof href === "string" &&
+          /^\/museum\/network\/works\/6529NM-W-\d{4}$/u.test(href) &&
+          !collectionWorkHrefs.includes(href)
+      )
+    ).toBe(true);
+    for (const title of [
+      "Patrolling the border between the Negev Desert and Jordan",
+      "Government soldiers in a church, Suchitoto, El Salvador",
+      "Demonstration, Western Wall, Jerusalem",
+      "Tripoli, Libya",
+      "Palmyra, Syria",
+    ]) {
+      const card = page
+        .locator('[data-testid="museum-landing-media-card"]')
+        .filter({ has: page.getByRole("link", { name: title, exact: true }) });
+      await expect(card.locator("img")).toHaveCount(1);
+      await expect(
+        card.getByText(/does not currently include an image/iu)
+      ).toHaveCount(0);
+    }
+    const firstMagnumCollectionCard = page
+      .locator('[data-testid="museum-landing-media-card"]')
+      .filter({
+        has: page.getByRole("link", {
+          name: "Patrolling the border between the Negev Desert and Jordan",
+          exact: true,
+        }),
+      });
+    await firstMagnumCollectionCard.scrollIntoViewIfNeeded();
+    await expect
+      .poll(
+        () =>
+          firstMagnumCollectionCard
+            .locator("img")
+            .evaluate(
+              (image) =>
+                image instanceof HTMLImageElement &&
+                image.complete &&
+                image.naturalWidth > 0
+            ),
+        { timeout: 20_000 }
+      )
+      .toBe(true);
+    await retainScreenshot(page, testInfo, "museum-network-collection");
+    await expectNoHorizontalOverflow(page);
+
+    await openRoute(page, "/museum/network/projects");
+    const magnumProjectCard = page.locator("article").filter({
+      has: page.getByRole("link", { name: "Magnum Photos 75", exact: true }),
+    });
+    await expect(magnumProjectCard.locator("img")).toHaveCount(1);
+    await expect(magnumProjectCard.getByText("0", { exact: true })).toHaveCount(
+      0
+    );
+    await magnumProjectCard.scrollIntoViewIfNeeded();
+    await expect
+      .poll(() =>
+        magnumProjectCard
+          .locator("img")
+          .evaluate(
+            (image) =>
+              image instanceof HTMLImageElement &&
+              image.complete &&
+              image.naturalWidth > 0
+          )
+      )
+      .toBe(true);
+    await retainScreenshot(page, testInfo, "museum-network-projects");
+    await expectNoHorizontalOverflow(page);
 
     await openRoute(page, "/museum/network/artists");
     const artistHrefs = await page
@@ -172,10 +267,40 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
       .evaluateAll((links) => [
         ...new Set(links.map((link) => link.getAttribute("href"))),
       ]);
-    expect(artistHrefs).toHaveLength(21);
+    expect(artistHrefs).toHaveLength(23);
+    const artistMediaStages = page.getByTestId("museum-directory-media-stage");
+    await expect(artistMediaStages).toHaveCount(23);
+    const artistStageRatios = await artistMediaStages.evaluateAll((stages) =>
+      stages.map((stage) => {
+        const { width, height } = stage.getBoundingClientRect();
+        return width / height;
+      })
+    );
+    for (const ratio of artistStageRatios) {
+      expect(ratio).toBeCloseTo(4 / 3, 2);
+    }
 
     await openRoute(page, "/museum/network/acquisitions");
-    await expect(page.locator("article")).toHaveCount(3);
+    await expect(page.locator("article")).toHaveCount(4);
+    const acquisitionMediaStages = page.getByTestId(
+      "museum-acquisition-media-stage"
+    );
+    await expect(acquisitionMediaStages).toHaveCount(4);
+    const acquisitionStageRatios = await acquisitionMediaStages.evaluateAll(
+      (stages) =>
+        stages.map((stage) => {
+          const { width, height } = stage.getBoundingClientRect();
+          return width / height;
+        })
+    );
+    expect(
+      new Set(acquisitionStageRatios.map((ratio) => ratio.toFixed(3))).size
+    ).toBe(1);
+    for (const ratio of acquisitionStageRatios) {
+      expect(
+        [4 / 5, 4 / 3].some((expected) => Math.abs(ratio - expected) < 0.01)
+      ).toBe(true);
+    }
     await retainScreenshot(page, testInfo, "museum-network-acquisitions");
 
     for (const [path, status] of [
@@ -185,11 +310,15 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
       ],
       [
         "/museum/network/works/6529NM-W-0008",
-        "Selected through an acquisition program; acquisition pending",
+        "Selected through an acquisition program; unminted",
       ],
       [
         "/museum/network/works/6529NM-W-0024",
-        "Selected by Museum Wave; accession processing in progress",
+        "Accessioned into the permanent Collection",
+      ],
+      [
+        "/museum/network/works/6529NM-W-0029",
+        "Accessioned into the permanent Collection",
       ],
     ] as const) {
       await openRoute(page, path);
@@ -198,6 +327,28 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
       await expectNoHorizontalOverflow(page);
       await expectNoDeadLinks(page);
     }
+
+    await openRoute(page, "/museum/network/works/6529NM-W-0029");
+    const veraWorkImage = page.locator(
+      '[aria-labelledby="canonical-work-media-title"] img'
+    );
+    await expect(veraWorkImage).toHaveCount(1);
+    await veraWorkImage.scrollIntoViewIfNeeded();
+    await expect
+      .poll(
+        () =>
+          veraWorkImage.evaluate(
+            (image) =>
+              image instanceof HTMLImageElement &&
+              image.complete &&
+              image.naturalWidth > 0
+          ),
+        { timeout: 20_000 }
+      )
+      .toBe(true);
+    await expect(
+      page.getByText("This image is temporarily unavailable.", { exact: true })
+    ).toHaveCount(0);
 
     await openRoute(page, "/museum/network/works/6529NM-W-0001");
     await expect(page.getByText("By", { exact: true })).toBeVisible();
@@ -234,12 +385,9 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
       })
     ).toHaveCount(0);
     await expect(
-      page.getByText(
-        "Selected by Museum Wave; accession processing in progress",
-        {
-          exact: true,
-        }
-      )
+      page.getByText("Accessioned into the permanent Collection", {
+        exact: true,
+      })
     ).toBeVisible();
     await expect(
       page.getByRole("heading", {
@@ -247,21 +395,12 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
         exact: true,
       })
     ).toHaveCount(1);
-    const palmyraImageControl = page.getByRole("button", {
-      name: "View image · loads 16.9 MB",
-      exact: true,
-    });
-    await expect(palmyraImageControl).toHaveCount(1);
-    await expect(
-      page.locator('[aria-labelledby="canonical-work-media-title"] img')
-    ).toHaveCount(0);
-    await expect(
-      page.locator('[aria-labelledby="canonical-work-presentation-title"] img')
-    ).toHaveCount(0);
-    await palmyraImageControl.click();
     await expect(
       page.locator('[aria-labelledby="canonical-work-presentation-title"] img')
     ).toHaveCount(1);
+    await expect(
+      page.getByRole("button", { name: /loads 16\.9 MB/u })
+    ).toHaveCount(0);
     await expect(page.locator("[download]")).toHaveCount(0);
     await expect(
       page.locator(`a[href="${MAGNUM_WAVE_CONTEXT_HREF}"]`)
@@ -321,14 +460,7 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
       })
     ).toBeVisible();
     await expect(page.locator("#acquisition-works figure")).toHaveCount(5);
-    await expect(page.locator("#acquisition-works figure img")).toHaveCount(4);
-    const acquisitionPalmyraImageControl = page
-      .locator("#acquisition-works")
-      .getByRole("button", {
-        name: "View image · loads 16.9 MB",
-        exact: true,
-      });
-    await expect(acquisitionPalmyraImageControl).toHaveCount(1);
+    await expect(page.locator("#acquisition-works figure img")).toHaveCount(5);
     await expect(
       page.getByRole("heading", { name: "Curatorial reading", exact: true })
     ).toBeVisible();
@@ -410,5 +542,63 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
     });
     expect(focusAndTarget.hasVisibleFocus).toBe(true);
     expect(focusAndTarget.height).toBeGreaterThanOrEqual(44);
+  });
+});
+
+test.describe("Museum deterministic release acceptance @surface @readonly", () => {
+  test.setTimeout(180_000);
+
+  test("accepts Collection media, lifecycle, derivatives, and geometry", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      testInfo.project.name !== "web-desktop-chromium",
+      "The release acceptance matrix owns its explicit 1440/820/390 Chromium viewports."
+    );
+    for (const viewport of MUSEUM_RELEASE_ACCEPTANCE_VIEWPORTS) {
+      await page.setViewportSize(viewport);
+      await openMuseumAcceptanceRoute(
+        page,
+        MUSEUM_RELEASE_ACCEPTANCE_ROUTES.collection
+      );
+      await expectCollectionAcceptance(page);
+      await expectMuseumGeometryAcceptance(page);
+    }
+  });
+
+  test("accepts Acquisitions lifecycle, identifiers, media, and geometry", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      testInfo.project.name !== "web-desktop-chromium",
+      "The release acceptance matrix owns its explicit 1440/820/390 Chromium viewports."
+    );
+    for (const viewport of MUSEUM_RELEASE_ACCEPTANCE_VIEWPORTS) {
+      await page.setViewportSize(viewport);
+      await openMuseumAcceptanceRoute(
+        page,
+        MUSEUM_RELEASE_ACCEPTANCE_ROUTES.acquisitions
+      );
+      await expectAcquisitionsAcceptance(page);
+      await expectMuseumGeometryAcceptance(page);
+    }
+  });
+
+  test("accepts Research coverage, title controls, media, and geometry", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      testInfo.project.name !== "web-desktop-chromium",
+      "The release acceptance matrix owns its explicit 1440/820/390 Chromium viewports."
+    );
+    for (const viewport of MUSEUM_RELEASE_ACCEPTANCE_VIEWPORTS) {
+      await page.setViewportSize(viewport);
+      await openMuseumAcceptanceRoute(
+        page,
+        MUSEUM_RELEASE_ACCEPTANCE_ROUTES.research
+      );
+      await expectResearchAcceptance(page);
+      await expectMuseumGeometryAcceptance(page);
+    }
   });
 });

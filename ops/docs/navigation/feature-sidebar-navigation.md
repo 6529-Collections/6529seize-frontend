@@ -95,7 +95,7 @@ On web layouts, route switching is sidebar-first.
   use the primary `Join 6529` row for the shareable onboarding guide at
   `/join-6529`.
 - Open `About > Network & Reputation` routes:
-  `/network`, `/network/activity`, `/network/groups`, `/network/tdh`,
+  `/network`, `/network/activity`, `/network/tdh`,
   `/network/xtdh` (`xTDH Overview`), `/xtdh` (`xTDH Allocations Dashboard`),
   `/network/wave-score`, `/rep/categories`, `/network/health`,
   `/network/definitions`, `/network/levels`, `/network/health/network-tdh`,

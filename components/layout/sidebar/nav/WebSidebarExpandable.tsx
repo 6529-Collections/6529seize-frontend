@@ -137,16 +137,25 @@ function WebSidebarExpandable({
               <ul className="tw-m-0 tw-list-none tw-p-0">
                 {section.items.map((item) => {
                   const active = isSidebarNavItemActive(item, pathname);
+                  const isAncestorContext = activeSubsection !== null && active;
+                  let itemStateClassName =
+                    "tw-bg-transparent tw-text-iron-400 active:tw-text-white desktop-hover:hover:tw-bg-transparent desktop-hover:hover:tw-text-white";
+                  if (active) {
+                    itemStateClassName =
+                      "tw-bg-iron-900 tw-text-white active:tw-text-white desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white";
+                  }
+                  if (isAncestorContext) {
+                    itemStateClassName =
+                      "tw-bg-iron-900/40 tw-text-iron-200 active:tw-text-white desktop-hover:hover:tw-bg-iron-900/60 desktop-hover:hover:tw-text-white";
+                  }
                   return (
                     <li key={item.href} className="tw-m-0 tw-p-0">
                       <Link
                         href={item.href}
-                        className={`tw-touch-action-manipulation tw-ml-[2.75rem] tw-flex tw-min-h-11 tw-w-[calc(100%-2.75rem)] tw-cursor-pointer tw-items-center tw-justify-start tw-rounded-xl tw-border-none tw-py-2 tw-pl-3 tw-pr-3 tw-text-sm tw-font-medium tw-no-underline tw-transition-colors tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 desktop-hover:tw-min-h-10 motion-reduce:tw-transition-none ${
-                          active
-                            ? "tw-bg-iron-900 tw-text-white active:tw-text-white desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white"
-                            : "tw-bg-transparent tw-text-iron-400 active:tw-text-white desktop-hover:hover:tw-bg-transparent desktop-hover:hover:tw-text-white"
-                        }`}
-                        aria-current={active ? "page" : undefined}
+                        className={`tw-touch-action-manipulation tw-ml-[2.75rem] tw-flex tw-min-h-11 tw-w-[calc(100%-2.75rem)] tw-cursor-pointer tw-items-center tw-justify-start tw-rounded-xl tw-border-none tw-py-2 tw-pl-3 tw-pr-3 tw-text-sm tw-font-medium tw-no-underline tw-transition-colors tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 desktop-hover:tw-min-h-10 motion-reduce:tw-transition-none ${itemStateClassName}`}
+                        aria-current={
+                          active && !isAncestorContext ? "page" : undefined
+                        }
                       >
                         <span className="tw-min-w-0 tw-break-words">
                           {item.name}

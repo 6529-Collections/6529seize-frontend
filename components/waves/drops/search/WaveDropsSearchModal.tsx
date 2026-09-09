@@ -1,16 +1,20 @@
 "use client";
 
 import { useLayoutViewportLock } from "@/components/brain/my-stream/layout/LayoutContext";
+import ProfileAvatar, {
+  ProfileBadgeSize,
+} from "@/components/common/profile/ProfileAvatar";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import { markdownToPlainText } from "@/helpers/waves/waveDescriptionPreview";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useWaveDropsSearch } from "@/hooks/useWaveDropsSearch";
 import { formatDate, formatInteger, formatTime } from "@/i18n/format";
+import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
   ExclamationTriangleIcon,
+  FunnelIcon,
   MagnifyingGlassIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
@@ -19,8 +23,16 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
 import Button from "@/components/utils/button/Button";
+import type { WaveSearchAuthor } from "@/services/api/wave-drops-v2.types";
+import WaveDropSearchResultPreview from "./WaveDropSearchResultPreview";
+import WaveDropsSearchFilters from "./WaveDropsSearchFilters";
+import {
+  isValidWaveSearchDateRange,
+  MIN_WAVE_SEARCH_QUERY_LENGTH,
+  parseLocalDateStart,
+} from "./waveDropsSearch.utils";
 
-const MIN_QUERY_LENGTH = 2;
+const MIN_QUERY_LENGTH = MIN_WAVE_SEARCH_QUERY_LENGTH;
 const DIALOG_TITLE_ID = "wave-drops-search-title";
 const DIALOG_DESCRIPTION_ID = "wave-drops-search-description";
 const SEARCH_INPUT_DESCRIPTION_ID = "wave-drops-search-input-description";
@@ -32,49 +44,25 @@ const SEARCH_RESULTS_STATUS_ID = "wave-drops-search-results-status";
 
 const normalize = (value: string) => value.trim();
 
-const getDropPreviewText = (drop: {
-  readonly title: string | null;
-  readonly parts: readonly {
-    readonly content: string | null;
-  }[];
-}) => {
-  const content = drop.parts
-    .map((part) => markdownToPlainText(part.content ?? ""))
-    .filter(Boolean)
-    .join(" ");
-  return [drop.title?.trim(), content].filter(Boolean).join(" — ");
-};
+const formatOptionalFilterDate = (
+  locale: SupportedLocale,
+  timestamp: number | undefined
+): string =>
+  timestamp === undefined
+    ? ""
+    : formatDate(locale, timestamp, {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      });
 
-function HighlightedSearchText({
-  query,
-  text,
-}: {
-  readonly query: string;
-  readonly text: string;
-}) {
-  if (query.length === 0) return text;
-  const normalizedText = text.toLocaleLowerCase();
-  const normalizedQuery = query.toLocaleLowerCase();
-  const parts: ReactNode[] = [];
-  let cursor = 0;
-  let matchIndex = normalizedText.indexOf(normalizedQuery, cursor);
-  while (matchIndex !== -1) {
-    if (matchIndex > cursor) parts.push(text.slice(cursor, matchIndex));
-    const matchEnd = matchIndex + query.length;
-    parts.push(
-      <mark
-        key={`match-${matchIndex}`}
-        className="tw-rounded-sm tw-bg-primary-400/20 tw-px-0.5 tw-text-inherit"
-      >
-        {text.slice(matchIndex, matchEnd)}
-      </mark>
-    );
-    cursor = matchEnd;
-    matchIndex = normalizedText.indexOf(normalizedQuery, cursor);
-  }
-  if (cursor < text.length) parts.push(text.slice(cursor));
-  return parts;
-}
+const getSearchCriteriaLabel = (
+  locale: SupportedLocale,
+  query: string
+): string => {
+  if (query) return query;
+  return t(locale, "waves.drops.searchModal.results.filtersApplied");
+};
 
 function WaveDropsSearchState({
   description,
@@ -158,14 +146,25 @@ export default function WaveDropsSearchModal({
   useLayoutViewportLock(isOpen);
   const modalRef = useRef<HTMLDivElement>(null);
   const locale = useBrowserLocale();
+  const [filtersOpen, setFiltersOpen] = useState(false);
   useClickAway(modalRef, () => {
-    if (isOpen) onClose();
+    if (!isOpen) return;
+    if (filtersOpen) setFiltersOpen(false);
+    else onClose();
   });
   useKeyPressEvent("Escape", () => {
-    if (isOpen) onClose();
+    if (!isOpen) return;
+    if (filtersOpen) setFiltersOpen(false);
+    else onClose();
   });
 
   const [query, setQuery] = useState("");
+  const [authorFilter, setAuthorFilter] = useState<WaveSearchAuthor | null>(
+    null
+  );
+  const [authorQuery, setAuthorQuery] = useState("");
+  const [afterDate, setAfterDate] = useState("");
+  const [beforeDate, setBeforeDate] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   useDebounce(() => setDebouncedQuery(query), 250, [query]);
 
@@ -175,8 +174,21 @@ export default function WaveDropsSearchModal({
   );
 
   const liveNormalizedQuery = normalize(query);
-  const meetsMinLength = liveNormalizedQuery.length >= MIN_QUERY_LENGTH;
+  const isTextValid =
+    liveNormalizedQuery.length === 0 ||
+    liveNormalizedQuery.length >= MIN_QUERY_LENGTH;
+  const hasFilters =
+    Boolean(authorFilter) || afterDate.length > 0 || beforeDate.length > 0;
+  const hasSearchCriterion = liveNormalizedQuery.length > 0 || hasFilters;
+  const validDateRange = isValidWaveSearchDateRange(afterDate, beforeDate);
+  const canSearch = isTextValid && hasSearchCriterion && validDateRange;
   const isQuerySettled = liveNormalizedQuery === normalizedQuery;
+  const afterTimestamp = afterDate ? parseLocalDateStart(afterDate) : undefined;
+  const beforeTimestamp = beforeDate
+    ? parseLocalDateStart(beforeDate)
+    : undefined;
+  const formattedAfterDate = formatOptionalFilterDate(locale, afterTimestamp);
+  const formattedBeforeDate = formatOptionalFilterDate(locale, beforeTimestamp);
 
   const {
     drops: results,
@@ -190,19 +202,34 @@ export default function WaveDropsSearchModal({
   } = useWaveDropsSearch({
     wave,
     term: normalizedQuery,
-    enabled:
-      isOpen && normalizedQuery.length >= MIN_QUERY_LENGTH && isQuerySettled,
+    authorId: authorFilter?.id,
+    after: afterTimestamp,
+    before: beforeTimestamp,
+    enabled: isOpen && canSearch && isQuerySettled,
     size: 50,
   });
 
   const formattedMinQueryLength = formatInteger(locale, MIN_QUERY_LENGTH);
   const visibleResults = isQuerySettled ? results : [];
-  const isUpdating = meetsMinLength && !isQuerySettled;
+  const isUpdating = canSearch && !isQuerySettled;
   const showLoading =
     isLoading || isUpdating || (isFetching && visibleResults.length === 0);
   const formattedResultCount = formatInteger(locale, visibleResults.length);
+  const searchCriteriaLabel = getSearchCriteriaLabel(
+    locale,
+    liveNormalizedQuery
+  );
+  const activeFilterCount =
+    Number(Boolean(authorFilter)) +
+    Number(Boolean(afterDate)) +
+    Number(Boolean(beforeDate));
 
   const inputRef = useRef<HTMLInputElement>(null);
+  const filtersButtonRef = useRef<HTMLButtonElement>(null);
+  const clearAuthorFilter = () => {
+    setAuthorFilter(null);
+    setAuthorQuery("");
+  };
   useEffect(() => {
     if (!isOpen) return;
     const timer = window.setTimeout(() => inputRef.current?.focus(), 0);
@@ -275,11 +302,7 @@ export default function WaveDropsSearchModal({
                 </div>
 
                 {onSearchAll && (
-                  <Button
-                    onClick={onSearchAll}
-                    variant="tertiary"
-                    size="xs"
-                  >
+                  <Button onClick={onSearchAll} variant="tertiary" size="xs">
                     {t(locale, "waves.drops.searchModal.searchAll")}
                   </Button>
                 )}
@@ -295,51 +318,151 @@ export default function WaveDropsSearchModal({
               </div>
 
               <div className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3 sm:tw-px-5">
-                <div className="tw-relative">
-                  <MagnifyingGlassIcon
-                    className="tw-pointer-events-none tw-absolute tw-left-3.5 tw-top-1/2 tw-size-5 -tw-translate-y-1/2 tw-text-iron-400"
-                    aria-hidden="true"
-                  />
-                  <label
-                    className="tw-sr-only"
-                    htmlFor="wave-drops-search-input"
-                  >
-                    {t(locale, "waves.drops.searchModal.inputLabel", {
-                      waveName: wave.name,
-                    })}
-                  </label>
-                  <input
-                    id="wave-drops-search-input"
-                    ref={inputRef}
-                    type="text"
-                    autoComplete="off"
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    aria-describedby={SEARCH_INPUT_DESCRIPTION_ID}
-                    className="sm:text-sm tw-form-input tw-block tw-h-11 tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-2.5 tw-pl-10 tw-pr-16 tw-text-base tw-font-normal tw-text-iron-50 tw-caret-primary-300 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-150 tw-ease-out placeholder:tw-text-iron-500 hover:tw-bg-iron-900 hover:tw-ring-iron-600 focus:tw-bg-iron-900 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-300/90"
-                    placeholder={t(
-                      locale,
-                      "waves.drops.searchModal.placeholder"
+                <div className="tw-flex tw-gap-2">
+                  <div className="tw-relative tw-min-w-0 tw-flex-1">
+                    <MagnifyingGlassIcon
+                      className="tw-pointer-events-none tw-absolute tw-left-3.5 tw-top-1/2 tw-size-5 -tw-translate-y-1/2 tw-text-iron-400"
+                      aria-hidden="true"
+                    />
+                    <label
+                      className="tw-sr-only"
+                      htmlFor="wave-drops-search-input"
+                    >
+                      {t(locale, "waves.drops.searchModal.inputLabel", {
+                        waveName: wave.name,
+                      })}
+                    </label>
+                    <input
+                      id="wave-drops-search-input"
+                      ref={inputRef}
+                      type="text"
+                      autoComplete="off"
+                      value={query}
+                      onChange={(e) => setQuery(e.target.value)}
+                      aria-describedby={SEARCH_INPUT_DESCRIPTION_ID}
+                      className="sm:text-sm tw-form-input tw-block tw-h-11 tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-2.5 tw-pl-10 tw-pr-16 tw-text-base tw-font-normal tw-text-iron-50 tw-caret-primary-300 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-150 tw-ease-out placeholder:tw-text-iron-500 hover:tw-bg-iron-900 hover:tw-ring-iron-600 focus:tw-bg-iron-900 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-300/90"
+                      placeholder={t(
+                        locale,
+                        "waves.drops.searchModal.placeholder"
+                      )}
+                    />
+                    <p id={SEARCH_INPUT_DESCRIPTION_ID} className="tw-sr-only">
+                      {t(locale, "waves.drops.searchModal.inputDescription", {
+                        minLength: formattedMinQueryLength,
+                        waveName: wave.name,
+                      })}
+                    </p>
+                    {query.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => setQuery("")}
+                        aria-label={t(locale, "waves.drops.searchModal.clear")}
+                        className="tw-absolute tw-right-2.5 tw-top-1/2 tw-flex tw-h-7 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-2.5 tw-text-xs tw-font-medium tw-text-iron-300 tw-transition tw-duration-150 hover:tw-border-iron-600 hover:tw-bg-iron-800 hover:tw-text-iron-100 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70"
+                      >
+                        {t(locale, "waves.drops.searchModal.clearShort")}
+                      </button>
                     )}
-                  />
-                  <p id={SEARCH_INPUT_DESCRIPTION_ID} className="tw-sr-only">
-                    {t(locale, "waves.drops.searchModal.inputDescription", {
-                      minLength: formattedMinQueryLength,
-                      waveName: wave.name,
-                    })}
-                  </p>
-                  {query.length > 0 && (
+                  </div>
+                  <button
+                    ref={filtersButtonRef}
+                    type="button"
+                    onClick={() => setFiltersOpen((open) => !open)}
+                    aria-expanded={filtersOpen}
+                    aria-controls="wave-drops-search-filters-title"
+                    className="tw-flex tw-h-11 tw-flex-shrink-0 tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-text-sm tw-font-medium tw-text-iron-200 tw-transition hover:tw-border-iron-600 hover:tw-bg-iron-800 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70"
+                  >
+                    <FunnelIcon className="tw-size-4" aria-hidden="true" />
+                    <span className="tw-hidden sm:tw-inline">
+                      {t(locale, "waves.drops.searchModal.filters.open")}
+                    </span>
+                    {activeFilterCount > 0 && (
+                      <span className="tw-text-primary-200 tw-flex tw-size-5 tw-items-center tw-justify-center tw-rounded-full tw-bg-primary-400/20 tw-text-xs">
+                        {formatInteger(locale, activeFilterCount)}
+                      </span>
+                    )}
+                  </button>
+                </div>
+                {hasFilters && (
+                  <div className="tw-mt-2 tw-flex tw-flex-wrap tw-items-center tw-gap-1.5">
+                    {authorFilter && (
+                      <button
+                        type="button"
+                        onClick={clearAuthorFilter}
+                        aria-label={t(
+                          locale,
+                          "waves.drops.searchModal.filters.removeAuthor",
+                          { author: authorFilter.handle }
+                        )}
+                        className="tw-flex tw-items-center tw-gap-1 tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-2 tw-py-1 tw-text-xs tw-text-iron-200"
+                      >
+                        {t(locale, "waves.drops.searchModal.filters.from")}:{" "}
+                        {authorFilter.handle}
+                        <XMarkIcon className="tw-size-3.5" aria-hidden="true" />
+                      </button>
+                    )}
+                    {afterDate && (
+                      <button
+                        type="button"
+                        onClick={() => setAfterDate("")}
+                        aria-label={t(
+                          locale,
+                          "waves.drops.searchModal.filters.removeAfter",
+                          { date: formattedAfterDate }
+                        )}
+                        className="tw-flex tw-items-center tw-gap-1 tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-2 tw-py-1 tw-text-xs tw-text-iron-200"
+                      >
+                        {t(locale, "waves.drops.searchModal.filters.after")}:{" "}
+                        {formattedAfterDate}
+                        <XMarkIcon className="tw-size-3.5" aria-hidden="true" />
+                      </button>
+                    )}
+                    {beforeDate && (
+                      <button
+                        type="button"
+                        onClick={() => setBeforeDate("")}
+                        aria-label={t(
+                          locale,
+                          "waves.drops.searchModal.filters.removeBefore",
+                          { date: formattedBeforeDate }
+                        )}
+                        className="tw-flex tw-items-center tw-gap-1 tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-2 tw-py-1 tw-text-xs tw-text-iron-200"
+                      >
+                        {t(locale, "waves.drops.searchModal.filters.before")}:{" "}
+                        {formattedBeforeDate}
+                        <XMarkIcon className="tw-size-3.5" aria-hidden="true" />
+                      </button>
+                    )}
                     <button
                       type="button"
-                      onClick={() => setQuery("")}
-                      aria-label={t(locale, "waves.drops.searchModal.clear")}
-                      className="tw-absolute tw-right-2.5 tw-top-1/2 tw-flex tw-h-7 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-2.5 tw-text-xs tw-font-medium tw-text-iron-300 tw-transition tw-duration-150 hover:tw-border-iron-600 hover:tw-bg-iron-800 hover:tw-text-iron-100 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70"
+                      onClick={() => {
+                        clearAuthorFilter();
+                        setAfterDate("");
+                        setBeforeDate("");
+                      }}
+                      className="tw-border-0 tw-bg-transparent tw-px-2 tw-py-1 tw-text-xs tw-text-iron-400 hover:tw-text-iron-100"
                     >
-                      {t(locale, "waves.drops.searchModal.clearShort")}
+                      {t(locale, "waves.drops.searchModal.filters.clear")}
                     </button>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
+
+              {filtersOpen && (
+                <WaveDropsSearchFilters
+                  waveId={wave.id}
+                  author={authorFilter}
+                  authorQuery={authorQuery}
+                  after={afterDate}
+                  before={beforeDate}
+                  invalidDateRange={!validDateRange}
+                  onAuthorChange={setAuthorFilter}
+                  onAuthorQueryChange={setAuthorQuery}
+                  onAfterChange={setAfterDate}
+                  onBeforeChange={setBeforeDate}
+                  onClose={() => setFiltersOpen(false)}
+                  returnFocusRef={filtersButtonRef}
+                />
+              )}
 
               <div
                 className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-px-4 tw-pb-5 tw-pt-4 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-white/20 desktop-hover:hover:tw-scrollbar-thumb-white/30 sm:tw-px-5"
@@ -385,7 +508,7 @@ export default function WaveDropsSearchModal({
                   </div>
                 )}
 
-                {!showLoading && !isError && !meetsMinLength && (
+                {!showLoading && !isError && !canSearch && (
                   <WaveDropsSearchState
                     id={SEARCH_IDLE_STATUS_ID}
                     variant="idle"
@@ -400,7 +523,7 @@ export default function WaveDropsSearchModal({
 
                 {!showLoading &&
                   !isError &&
-                  meetsMinLength &&
+                  canSearch &&
                   visibleResults.length === 0 && (
                     <WaveDropsSearchState
                       id={SEARCH_EMPTY_STATUS_ID}
@@ -415,7 +538,7 @@ export default function WaveDropsSearchModal({
 
                 {!showLoading &&
                   !isError &&
-                  meetsMinLength &&
+                  canSearch &&
                   visibleResults.length > 0 && (
                     <div className="tw-space-y-2.5">
                       <div
@@ -429,7 +552,7 @@ export default function WaveDropsSearchModal({
                             : "waves.drops.searchModal.results.status.other",
                           {
                             count: formattedResultCount,
-                            query: liveNormalizedQuery,
+                            query: searchCriteriaLabel,
                           }
                         )}
                         className="tw-flex tw-items-center tw-justify-between tw-gap-3 tw-pb-1"
@@ -443,17 +566,26 @@ export default function WaveDropsSearchModal({
                             { count: formattedResultCount }
                           )}
                         </p>
-                        <p className="tw-m-0 tw-min-w-0 tw-truncate tw-text-xs">
-                          <span className="tw-text-iron-600">
+                        {liveNormalizedQuery ? (
+                          <p className="tw-m-0 tw-min-w-0 tw-truncate tw-text-xs">
+                            <span className="tw-text-iron-600">
+                              {t(
+                                locale,
+                                "waves.drops.searchModal.results.queryPrefix"
+                              )}
+                            </span>{" "}
+                            <span className="tw-text-iron-300">
+                              &quot;{liveNormalizedQuery}&quot;
+                            </span>
+                          </p>
+                        ) : (
+                          <p className="tw-m-0 tw-text-xs tw-text-iron-400">
                             {t(
                               locale,
-                              "waves.drops.searchModal.results.queryPrefix"
+                              "waves.drops.searchModal.results.filtersApplied"
                             )}
-                          </span>{" "}
-                          <span className="tw-text-iron-300">
-                            &quot;{liveNormalizedQuery}&quot;
-                          </span>
-                        </p>
+                          </p>
+                        )}
                       </div>
                       <div className="tw-space-y-2">
                         {visibleResults.map((drop) => {
@@ -468,12 +600,6 @@ export default function WaveDropsSearchModal({
                             "waves.drops.searchModal.result.open",
                             { serialNo, author }
                           );
-                          const previewText =
-                            getDropPreviewText(drop) ||
-                            t(
-                              locale,
-                              "waves.drops.searchModal.result.mediaOnly"
-                            );
                           const formattedDate = formatDate(
                             locale,
                             drop.created_at,
@@ -491,12 +617,18 @@ export default function WaveDropsSearchModal({
                               aria-label={resultButtonLabel}
                               className="tw-group tw-flex tw-min-h-20 tw-w-full tw-cursor-pointer tw-items-start tw-gap-3 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900/80 tw-p-3 tw-text-left tw-transition tw-duration-150 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 desktop-hover:hover:tw-border-iron-600 desktop-hover:hover:tw-bg-iron-800/80"
                             >
-                              <span
-                                className="tw-text-primary-200 tw-flex tw-size-9 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-800 tw-text-sm tw-font-semibold tw-ring-1 tw-ring-inset tw-ring-white/5"
-                                aria-hidden="true"
-                              >
-                                {author.slice(0, 1).toLocaleUpperCase(locale)}
-                              </span>
+                              <ProfileAvatar
+                                pfpUrl={drop.author.pfp}
+                                size={ProfileBadgeSize.MEDIUM}
+                                alt=""
+                                fallbackContent={
+                                  <span className="tw-text-primary-200 tw-text-sm tw-font-semibold">
+                                    {([...author][0] ?? "").toLocaleUpperCase(
+                                      locale
+                                    )}
+                                  </span>
+                                }
+                              />
                               <span className="tw-min-w-0 tw-flex-1">
                                 <span className="tw-flex tw-items-center tw-justify-between tw-gap-3">
                                   <span className="tw-min-w-0 tw-truncate tw-text-sm tw-font-semibold tw-text-iron-100">
@@ -512,10 +644,27 @@ export default function WaveDropsSearchModal({
                                     {formattedDate} {formattedTime}
                                   </span>
                                 </span>
-                                <span className="tw-mt-1 tw-line-clamp-2 tw-block tw-text-sm tw-leading-5 tw-text-iron-300">
-                                  <HighlightedSearchText
+                                <span className="tw-mt-1 tw-line-clamp-4 tw-block tw-text-sm tw-leading-5 tw-text-iron-300">
+                                  <WaveDropSearchResultPreview
+                                    title={drop.title}
+                                    parts={drop.parts}
                                     query={liveNormalizedQuery}
-                                    text={previewText}
+                                    fallback={t(
+                                      locale,
+                                      "waves.drops.searchModal.result.mediaOnly"
+                                    )}
+                                    checkedLabel={t(
+                                      locale,
+                                      "waves.drops.searchModal.result.checked"
+                                    )}
+                                    imageFallback={t(
+                                      locale,
+                                      "waves.drops.searchModal.result.imageFallback"
+                                    )}
+                                    uncheckedLabel={t(
+                                      locale,
+                                      "waves.drops.searchModal.result.unchecked"
+                                    )}
                                   />
                                 </span>
                               </span>

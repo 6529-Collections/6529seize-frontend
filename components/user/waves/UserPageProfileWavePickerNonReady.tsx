@@ -1,7 +1,11 @@
 "use client";
 
 import { Spinner } from "@/components/dotLoader/DotLoader";
+import Button from "@/components/utils/button/Button";
 import ButtonLink from "@/components/utils/button/ButtonLink";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
+import type { SupportedLocale } from "@/i18n/locales";
 import { CREATE_WAVE_HREF } from "./userPageProfileWave.helpers";
 import type { resolveWavePickerViewState } from "./userPageProfileWave.helpers";
 import {
@@ -17,15 +21,29 @@ type NonReadyWavePickerState = Exclude<WavePickerState, { kind: "ready" }>;
 const DROPDOWN_VARIANT = "dropdown";
 const MOBILE_SHEET_VARIANT = "mobile-sheet";
 
-function CreateWaveLink() {
+function CreateWaveLink({
+  variant = "secondary",
+}: {
+  readonly variant?: "primary" | "secondary";
+}) {
+  const locale = useBrowserLocale();
   return (
-    <ButtonLink
-      href={CREATE_WAVE_HREF}
-      variant="primary"
-      size="sm"
-    >
-      Create wave
+    <ButtonLink href={CREATE_WAVE_HREF} variant={variant} size="sm">
+      {t(locale, "profileCuration.entry.advancedWave")}
     </ButtonLink>
+  );
+}
+
+function CreateProfileCurationButton({
+  onClick,
+}: {
+  readonly onClick: () => void;
+}) {
+  const locale = useBrowserLocale();
+  return (
+    <Button onClick={onClick} variant="primary" size="sm">
+      {t(locale, "profileCuration.entry.create")}
+    </Button>
   );
 }
 
@@ -66,13 +84,26 @@ function renderProxyMode(variant: WavePickerVariant) {
   return <InfoPanel title="Switch out of proxy mode" message={message} />;
 }
 
-function renderMissingProfileState(variant: WavePickerVariant) {
-  const title = "Create your profile first";
-  const message =
-    "Set up your profile on the Identity tab before choosing a featured curation wave.";
+function renderMissingProfileState(
+  variant: WavePickerVariant,
+  profileHref: string,
+  locale: SupportedLocale
+) {
+  const title = t(locale, "profileCuration.entry.missingProfileTitle");
+  const message = t(locale, "profileCuration.entry.missingProfileMessage");
 
   if (variant === "panel") {
-    return <CurationEmptyPanel title={title} message={message} />;
+    return (
+      <CurationEmptyPanel
+        title={title}
+        message={message}
+        primaryAction={
+          <ButtonLink href={profileHref} variant="primary" size="sm">
+            {t(locale, "profileCuration.entry.goIdentity")}
+          </ButtonLink>
+        }
+      />
+    );
   }
 
   if (variant === DROPDOWN_VARIANT) {
@@ -83,6 +114,9 @@ function renderMissingProfileState(variant: WavePickerVariant) {
             {title}
           </p>
           <p className="tw-mb-0 tw-text-sm tw-text-iron-500">{message}</p>
+          <ButtonLink href={profileHref} variant="primary" size="sm">
+            {t(locale, "profileCuration.entry.goIdentity")}
+          </ButtonLink>
         </div>
       </section>
     );
@@ -94,6 +128,9 @@ function renderMissingProfileState(variant: WavePickerVariant) {
         {title}
       </p>
       <p className="tw-mb-0 tw-text-sm tw-text-iron-500">{message}</p>
+      <ButtonLink href={profileHref} variant="primary" size="sm">
+        {t(locale, "profileCuration.entry.goIdentity")}
+      </ButtonLink>
     </div>
   );
 }
@@ -172,22 +209,32 @@ function renderErrorState({
 
 function renderNoPublicWavesState({
   hasCreatedWaves,
+  onCreateProfileCuration,
+  locale,
   variant,
 }: {
   readonly hasCreatedWaves: boolean;
+  readonly onCreateProfileCuration: () => void;
+  readonly locale: SupportedLocale;
   readonly variant: WavePickerVariant;
 }) {
-  const title = hasCreatedWaves ? "No featured wave yet" : "No waves yet";
+  const title = t(locale, "profileCuration.entry.title");
   const message = hasCreatedWaves
-    ? "Only public waves can be used here. Create one to set it as your featured wave."
-    : "Create your first public wave to set it as your featured wave.";
+    ? t(locale, "profileCuration.entry.noEligibleSome")
+    : t(locale, "profileCuration.entry.noEligibleNone");
+  const actions = (
+    <div className="tw-flex tw-flex-wrap tw-justify-center tw-gap-3">
+      <CreateProfileCurationButton onClick={onCreateProfileCuration} />
+      <CreateWaveLink />
+    </div>
+  );
 
   if (variant === "panel") {
     return (
       <CurationEmptyPanel
         title={title}
         message={message}
-        primaryAction={<CreateWaveLink />}
+        primaryAction={actions}
       />
     );
   }
@@ -200,7 +247,10 @@ function renderNoPublicWavesState({
             {title}
           </p>
           <p className="tw-mb-0 tw-text-sm tw-text-iron-500">{message}</p>
-          <CreateWaveLink />
+          <div className="tw-flex tw-flex-wrap tw-gap-2">
+            <CreateProfileCurationButton onClick={onCreateProfileCuration} />
+            <CreateWaveLink />
+          </div>
         </div>
       </section>
     );
@@ -212,7 +262,10 @@ function renderNoPublicWavesState({
         {title}
       </p>
       <p className="tw-mb-0 tw-text-sm tw-text-iron-500">{message}</p>
-      <CreateWaveLink />
+      <div className="tw-flex tw-flex-wrap tw-gap-2">
+        <CreateProfileCurationButton onClick={onCreateProfileCuration} />
+        <CreateWaveLink />
+      </div>
     </div>
   );
 }
@@ -220,19 +273,24 @@ function renderNoPublicWavesState({
 export default function UserPageProfileWavePickerNonReady({
   state,
   variant,
+  profileHref,
+  onCreateProfileCuration,
   onRetry,
 }: {
   readonly state: NonReadyWavePickerState;
   readonly variant: WavePickerVariant;
+  readonly profileHref: string;
+  readonly onCreateProfileCuration: () => void;
   readonly onRetry: () => void;
 }) {
+  const locale = useBrowserLocale();
   switch (state.kind) {
     case "not_own_profile":
       return renderNotOwnProfileState(variant);
     case "proxy_mode":
       return renderProxyMode(variant);
     case "missing_profile":
-      return renderMissingProfileState(variant);
+      return renderMissingProfileState(variant, profileHref, locale);
     case "loading":
       return renderLoadingState(variant);
     case "error":
@@ -240,6 +298,8 @@ export default function UserPageProfileWavePickerNonReady({
     case "no_public_waves":
       return renderNoPublicWavesState({
         hasCreatedWaves: state.hasCreatedWaves,
+        onCreateProfileCuration,
+        locale,
         variant,
       });
   }

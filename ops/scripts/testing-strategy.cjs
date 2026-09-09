@@ -789,9 +789,11 @@ function createCiPlan(files, options = {}) {
     },
     security: {
       secrets_allowed: false,
-      token_permissions: "contents:read",
-      fork_pr_policy:
-        "No repository secrets, deployment credentials, staging credentials, or artifact-store writes are used by this pull_request workflow.",
+      token_permissions:
+        "contents:read; packages:read only in same-repository frozen-install jobs",
+      fork_pr_policy: options.untrustedPr
+        ? "Package-authenticated install jobs do not execute for fork PRs; the installed-check aggregate fails closed."
+        : "Read-only package authentication is scoped to frozen-install steps in same-repository jobs.",
     },
   };
 }
@@ -841,6 +843,7 @@ function lineNumbersForPattern(text, pattern) {
 }
 
 function findNpmAuthTokenLines(text) {
+  const runtimeTokenPlaceholder = "${NODE_AUTH_TOKEN}";
   const lineNumbers = [];
   text.split(/\r\n|\r|\n/).forEach((line, index) => {
     const trimmed = line.trimStart();
@@ -854,7 +857,10 @@ function findNpmAuthTokenLines(text) {
     if (!afterMarker.startsWith("=")) {
       return;
     }
-    const tokenValue = afterMarker.slice(1).trimStart();
+    const tokenValue = afterMarker.slice(1).trim();
+    if (tokenValue === runtimeTokenPlaceholder) {
+      return;
+    }
     if (tokenValue.length >= 8) {
       lineNumbers.push(index + 1);
     }

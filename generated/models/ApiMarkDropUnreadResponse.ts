@@ -11,11 +11,13 @@
  * Do not edit the class manually.
  */
 
+import { ApiDmUnreadConversationState } from '../models/ApiDmUnreadConversationState';
 import { HttpFile } from '../http/http';
 
 export class ApiMarkDropUnreadResponse {
     'your_unread_drops_count': number;
     'first_unread_drop_serial_no'?: number | null;
+    'dm_unread_state'?: ApiDmUnreadConversationState | null;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -32,6 +34,12 @@ export class ApiMarkDropUnreadResponse {
             "name": "first_unread_drop_serial_no",
             "baseName": "first_unread_drop_serial_no",
             "type": "number",
+            "format": ""
+        },
+        {
+            "name": "dm_unread_state",
+            "baseName": "dm_unread_state",
+            "type": "ApiDmUnreadConversationState",
             "format": ""
         }    ];
 

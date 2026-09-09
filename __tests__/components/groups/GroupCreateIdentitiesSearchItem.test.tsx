@@ -28,3 +28,19 @@ test("exposes its selected state", () => {
   );
   expect(screen.getByRole("button")).toHaveAttribute("aria-pressed", "true");
 });
+
+test("highlights the full interactive row on hover and keyboard focus", () => {
+  render(
+    <GroupCreateIdentitiesSearchItem
+      item={item}
+      selected={false}
+      onProfileSelect={() => {}}
+    />
+  );
+
+  expect(screen.getByRole("button")).toHaveClass(
+    "tw-w-full",
+    "desktop-hover:hover:tw-bg-iron-800",
+    "focus-visible:tw-bg-iron-800"
+  );
+});

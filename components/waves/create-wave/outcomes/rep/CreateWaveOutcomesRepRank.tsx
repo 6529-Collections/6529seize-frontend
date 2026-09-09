@@ -128,7 +128,7 @@ export default function CreateWaveOutcomesRepRank({
   };
 
   return (
-    <div className="tw-flex tw-flex-col tw-gap-y-5">
+    <div className="tw-flex tw-flex-col tw-gap-y-6">
       <div className="tw-flex tw-w-full tw-flex-col tw-gap-5 tw-pt-[0.5px] sm:tw-flex-row">
         <CreateWaveOutcomesRepCategoryField
           category={outcome.category}
@@ -147,18 +147,10 @@ export default function CreateWaveOutcomesRepRank({
         />
       )}
       <div className="tw-flex tw-justify-end tw-gap-x-3">
-        <Button
-          variant="secondary"
-          size="lg"
-          onClick={onCancel}
-        >
+        <Button variant="secondary" size="md" onClick={onCancel}>
           {t(locale, "waves.create.actions.cancel")}
         </Button>
-        <Button
-          variant="primary"
-          size="lg"
-          onClick={onSubmit}
-        >
+        <Button variant="primary" size="md" onClick={onSubmit}>
           {t(locale, "waves.create.actions.save")}
         </Button>
       </div>

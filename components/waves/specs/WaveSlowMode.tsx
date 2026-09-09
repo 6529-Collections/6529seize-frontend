@@ -12,20 +12,35 @@ import { useCallback, useRef, useState } from "react";
 import WaveSettingRow from "./WaveSettingRow";
 import WaveSlowModeEditorForm from "./WaveSlowModeEditorForm";
 import { useWaveSettingUpdater } from "./useWaveSettingUpdater";
+import { waveRightPanelText } from "@/helpers/waves/wave-right-panel.helpers";
 
 interface WaveSlowModeProps {
   readonly wave: ApiWave;
+  readonly display?: "configuration" | "settings" | undefined;
 }
 
-export default function WaveSlowMode({ wave }: WaveSlowModeProps) {
+export default function WaveSlowMode({
+  wave,
+  display = "settings",
+}: WaveSlowModeProps) {
   const { canEdit, mutating, saveChatUpdate, setToast } =
     useWaveSettingUpdater(wave);
   const cooldownMs = wave.chat.slow_mode_cooldown_ms ?? null;
   const isSlowModeEnabled =
     typeof cooldownMs === "number" && cooldownMs >= SLOW_MODE_MIN_MS;
-  const slowModeLabel = isSlowModeEnabled
+  let slowModeLabel = isSlowModeEnabled
     ? `On · ${formatSlowModeInterval(cooldownMs)}`
     : "Off";
+  if (display === "configuration") {
+    slowModeLabel = isSlowModeEnabled
+      ? waveRightPanelText(
+          "waves.sidebar.rightPanel.configuration.chat.slowMode.on",
+          { interval: formatSlowModeInterval(cooldownMs) }
+        )
+      : waveRightPanelText(
+          "waves.sidebar.rightPanel.configuration.chat.slowMode.off"
+        );
+  }
   const initialParts = getSlowModeInputParts(cooldownMs);
   const [value, setValue] = useState(String(initialParts.value));
   const [unit, setUnit] = useState<SlowModeUnit>(initialParts.unit);
@@ -87,8 +102,21 @@ export default function WaveSlowMode({ wave }: WaveSlowModeProps) {
   return (
     <WaveSettingRow
       canEdit={canEdit}
-      editLabel="Edit slow mode"
-      label="Slow mode"
+      editIcon={display === "configuration" ? "gear" : "pencil"}
+      editLabel={
+        display === "configuration"
+          ? waveRightPanelText(
+              "waves.sidebar.rightPanel.configuration.chat.slowMode.edit"
+            )
+          : "Edit slow mode"
+      }
+      label={
+        display === "configuration"
+          ? waveRightPanelText(
+              "waves.sidebar.rightPanel.configuration.chat.slowMode.label"
+            )
+          : "Slow mode"
+      }
       onOpen={resetEditor}
       renderEditor={renderEditor}
       valueLabel={slowModeLabel}

@@ -126,12 +126,13 @@ const ABOUT_CONTENTS_NAV_GROUPS: readonly AboutContentsNavGroup[] = [
     }),
     aboutSectionItem(AboutSection.MEME_LAB, "memeLab"),
     aboutSectionItem(AboutSection.GRADIENTS, "gradient"),
-    aboutSectionItem(AboutSection.MINTING, "minting"),
+    aboutSectionItem(AboutSection.MINTING, "minting", {
+      requiresVisibleSubscriptions: true,
+    }),
   ]),
   aboutGroup("networkReputation", [
     aboutRouteItem("network-identities", "/network", "networkIdentities"),
     aboutRouteItem("network-activity", "/network/activity", "networkActivity"),
-    aboutRouteItem("network-groups", "/network/groups", "networkGroups"),
     aboutRouteItem("network-tdh", "/network/tdh", "tdh"),
     aboutRouteItem("network-xtdh", "/network/xtdh", "xtdhOverview", {
       descriptionId: "xtdh",
@@ -248,12 +249,19 @@ const ABOUT_SECTION_DOCUMENT_TITLE_KEYS = new Map<AboutSection, MessageKey>([
 
 const ABOUT_FEATURE_SECTIONS = new Set<AboutSection>([
   AboutSection.TECH,
+  AboutSection.DATA_DECENTR,
   AboutSection.SUBSCRIPTIONS,
   AboutSection.MEME_LAB,
   AboutSection.GRADIENTS,
   AboutSection.MINTING,
   AboutSection.PRIMARY_ADDRESS,
   AboutSection.GDRC1,
+  AboutSection.ENS,
+  AboutSection.NAKAMOTO_THRESHOLD,
+  AboutSection.FAQ,
+  AboutSection.APPLY,
+  AboutSection.CONTACT_US,
+  AboutSection.NFT_DELEGATION,
 ]);
 
 const ABOUT_LEGAL_SECTIONS = new Set<AboutSection>(
@@ -350,6 +358,10 @@ export function getVisibleAboutNavGroups(
 
   return ABOUT_CONTENTS_NAV_GROUPS.map((group) => ({
     ...group,
+    labelKey:
+      visibilityOptions.hideSubscriptions && group.id === "collectionsMinting"
+        ? ("about.contents.groups.collections" as const)
+        : group.labelKey,
     items: group.items.filter((item) =>
       isAboutNavItemVisible(item, visibilityOptions)
     ),

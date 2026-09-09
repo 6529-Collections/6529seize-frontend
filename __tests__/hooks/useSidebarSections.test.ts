@@ -97,12 +97,12 @@ describe("useSidebarSections", () => {
     );
 
     expect(aboutSection?.items).toEqual([
-      { name: "About", href: "/about", activePathPrefixes: ["/about/"] },
+      { name: "Overview", href: "/about", activePathPrefixes: ["/about/"] },
     ]);
     expect(
       aboutSection?.subsections.map((subsection) => subsection.name)
     ).toEqual([
-      "About 6529",
+      "Overview",
       "Collections & Minting",
       "Network & Reputation",
       "Delegation & Wallets",
@@ -129,7 +129,6 @@ describe("useSidebarSections", () => {
     expect(aboutSection?.subsections[2]?.items).toEqual([
       { name: "Identities", href: "/network" },
       { name: "Activity", href: "/network/activity" },
-      { name: "Groups", href: "/network/groups" },
       { name: "TDH", href: "/network/tdh" },
       { name: "xTDH Overview", href: "/network/xtdh" },
       { name: "xTDH Allocations Dashboard", href: "/xtdh" },

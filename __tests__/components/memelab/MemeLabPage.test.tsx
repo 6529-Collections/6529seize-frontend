@@ -189,7 +189,8 @@ const MEME_LAB_TEST_MINT_DATE_FORMAT = {
 
 function mockSearchParamsWithFocus(
   focus: MEME_FOCUS | null = null,
-  locale?: string
+  locale?: string,
+  returnTo?: string
 ) {
   const values = new Map<string, string>();
   if (focus) {
@@ -197,6 +198,9 @@ function mockSearchParamsWithFocus(
   }
   if (locale) {
     values.set("locale", locale);
+  }
+  if (returnTo) {
+    values.set("returnTo", returnTo);
   }
   const queryString = new URLSearchParams(Array.from(values)).toString();
 
@@ -393,8 +397,9 @@ describe("MemeLabPageComponent", () => {
     expect(
       screen.getByRole("navigation", { name: "Meme Lab page sections" })
     ).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Overview" })).toHaveClass(
-      "tw-border-primary-400"
+    expect(screen.getByRole("button", { name: "Overview" })).toHaveAttribute(
+      "aria-current",
+      "page"
     );
     expect(screen.getByRole("button", { name: "Overview" })).toHaveAttribute(
       "aria-pressed",
@@ -431,6 +436,24 @@ describe("MemeLabPageComponent", () => {
     ).not.toBeInTheDocument();
     expect(screen.queryByText("Market Overview")).not.toBeInTheDocument();
     expect(screen.getAllByTestId("nft-image")).toHaveLength(1);
+  });
+
+  it("returns to the originating profile collected card", async () => {
+    const returnTo =
+      "/Shelby/collected?collection=memelab&page=2#collected-card-memelab-1";
+    mockSearchParamsWithFocus(null, undefined, returnTo);
+    setupMockApiCalls();
+
+    await act(async () => {
+      renderWithQueryClient(<MemeLabPageComponent nftId="1" />);
+    });
+
+    expect(
+      screen.getByRole("link", { name: "Back to Shelby's collected" })
+    ).toHaveAttribute("href", returnTo);
+    expect(
+      screen.getByRole("link", { name: "Back to Meme Lab" }).parentElement
+    ).toHaveClass("tw-hidden", "md:tw-flex");
   });
 
   it("fetches lab extended data on mount", async () => {
@@ -506,9 +529,9 @@ describe("MemeLabPageComponent", () => {
           expect.stringContaining("transactions_memelab?wallet=0xabc"),
           expectAbortSignalOptions
         );
-        expect(screen.getByRole("button", { name: "Overview" })).toHaveClass(
-          "tw-border-primary-400"
-        );
+        expect(
+          screen.getByRole("button", { name: "Overview" })
+        ).toHaveAttribute("aria-current", "page");
         expect(
           screen.queryByRole("button", { name: "Your Cards" })
         ).not.toBeInTheDocument();

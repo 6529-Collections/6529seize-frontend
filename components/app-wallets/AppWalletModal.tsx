@@ -16,10 +16,10 @@ import { useAuth } from "../auth/Auth";
 import { useAppWallets } from "./AppWalletsContext";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import { DELEGATION_FIELD_CLASS_NAME } from "@/components/delegation/delegation-ui";
 
 const LEGACY_UNLOCK_MIN_PASS_LENGTH = 6;
-const APP_WALLET_INPUT_CLASS_NAME =
-  "tw-h-11 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-text-base tw-text-iron-50 tw-shadow-inner tw-shadow-black/20 tw-outline-none tw-transition-colors placeholder:tw-text-iron-600 focus:tw-border-primary-400 focus:tw-ring-2 focus:tw-ring-primary-400/20 disabled:tw-cursor-not-allowed disabled:tw-opacity-60";
+const APP_WALLET_INPUT_CLASS_NAME = DELEGATION_FIELD_CLASS_NAME;
 
 function closeDialog(dialog: HTMLDialogElement) {
   if (typeof dialog.close === "function" && dialog.open) {

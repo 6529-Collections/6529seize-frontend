@@ -4,7 +4,6 @@ import { useContext, useState } from "react";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { AuthContext } from "@/components/auth/Auth";
 import type { DropRateChangeRequest } from "@/entities/IDrop";
-import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
@@ -15,6 +14,7 @@ import {
   WAVE_VOTING_LABELS,
 } from "@/helpers/waves/waves.constants";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import Button from "@/components/utils/button/Button";
 
@@ -62,6 +62,8 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
   const { requestAuth, setToast } = useContext(AuthContext);
   const queryClient = useQueryClient();
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isVoteInputFocused, setIsVoteInputFocused] = useState(false);
+  const [voteLimitMessage, setVoteLimitMessage] = useState<string | null>(null);
   const [optimisticVoteState, setOptimisticVoteState] =
     useState<OptimisticVoteState | null>(null);
   const [voteDraftState, setVoteDraftState] = useState<VoteDraftState | null>(
@@ -81,26 +83,38 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
     optimisticVoteState.dropId === drop.id &&
     optimisticVoteState.baseCurrentVoteValue === currentVoteValue &&
     optimisticVoteState.baseMaxRating === maxRating;
-  const liveCurrentVoteValue = hasMatchingOptimisticState
-    ? optimisticVoteState.nextCurrentVoteValue
-    : currentVoteValue;
-  const liveMaxRating = hasMatchingOptimisticState
-    ? optimisticVoteState.nextMaxRating
-    : maxRating;
+  const {
+    nextCurrentVoteValue: liveCurrentVoteValue,
+    nextMaxRating: liveMaxRating,
+  } = hasMatchingOptimisticState
+    ? optimisticVoteState
+    : { nextCurrentVoteValue: currentVoteValue, nextMaxRating: maxRating };
   const liveCurrentVoteValueString = String(liveCurrentVoteValue);
   const voteSourceKey = `${drop.id}:${liveCurrentVoteValue}:${minRating}:${liveMaxRating}`;
-  const voteValue =
+  const { value: voteValue, limitMessage: activeVoteLimitMessage } =
     voteDraftState?.sourceKey === voteSourceKey
-      ? voteDraftState.value
-      : liveCurrentVoteValueString;
+      ? { value: voteDraftState.value, limitMessage: voteLimitMessage }
+      : { value: liveCurrentVoteValueString, limitMessage: null };
   const parsedVoteValue = Number.parseInt(voteValue, 10);
   const hasValidVoteValue = !Number.isNaN(parsedVoteValue);
+  const isVoteValueOutOfRange =
+    parsedVoteValue < minRating || parsedVoteValue > liveMaxRating;
+  const displayVoteValue =
+    isVoteInputFocused ||
+    voteValue === "" ||
+    voteValue === "-" ||
+    !hasValidVoteValue
+      ? voteValue
+      : formatInteger(locale, parsedVoteValue);
   const isEditing =
     hasValidVoteValue && parsedVoteValue !== liveCurrentVoteValue;
   const voteLabel = WAVE_VOTING_LABELS[drop.wave.voting_credit_type];
   const maxRatingLabel = getWaveVoteScopeMaxLabel(
     drop.wave.voting_credit_scope
   );
+  const voteInputId = `my-vote-input-${drop.id}`;
+  const maxRatingId = `${voteInputId}-max`;
+  const voteLimitMessageId = `${voteInputId}-limit`;
 
   const setVoteDraftValue = (nextValue: string) => {
     setVoteDraftState({
@@ -113,43 +127,78 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
     return Math.min(Math.max(value, minRating), liveMaxRating);
   };
 
+  const getVoteLimitMessage = (value: number) => {
+    if (value > liveMaxRating) {
+      return t(locale, "waves.myVotes.limit.maximum", {
+        label: maxRatingLabel,
+        value: formatInteger(locale, liveMaxRating),
+        credit: voteLabel,
+      });
+    }
+
+    if (value < minRating) {
+      return t(locale, "waves.myVotes.limit.minimum", {
+        value: formatInteger(locale, minRating),
+        credit: voteLabel,
+      });
+    }
+
+    return null;
+  };
+
+  const displayedVoteLimitMessage =
+    getVoteLimitMessage(parsedVoteValue) ?? activeVoteLimitMessage;
+  const voteInputDescription = displayedVoteLimitMessage
+    ? `${maxRatingId} ${voteLimitMessageId}`
+    : maxRatingId;
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (isVotingClosed) {
       return;
     }
 
-    const inputValue = e.target.value;
+    const inputValue = e.target.value.replaceAll(",", "").trim();
     if (inputValue === "") {
+      setVoteLimitMessage(null);
       setVoteDraftValue("");
       return;
     }
 
     if (inputValue === "-") {
+      setVoteLimitMessage(null);
       setVoteDraftValue(inputValue);
       return;
     }
 
+    if (!/^-?\d+$/.test(inputValue)) return;
+
     const value = Number.parseInt(inputValue, 10);
     if (Number.isNaN(value)) return;
+    setVoteLimitMessage(getVoteLimitMessage(value));
     setVoteDraftValue(String(clampVoteValue(value)));
   };
 
   const handleBlur = () => {
+    setIsVoteInputFocused(false);
+
     if (isVotingClosed) {
       return;
     }
 
     if (!hasValidVoteValue || voteValue === "" || voteValue === "-") {
+      setVoteLimitMessage(null);
       setVoteDraftState(null);
       return;
     }
 
     if (parsedVoteValue === liveCurrentVoteValue) {
+      setVoteLimitMessage(null);
       setVoteDraftState(null);
       return;
     }
 
     const clampedValue = clampVoteValue(parsedVoteValue);
+    setVoteLimitMessage(displayedVoteLimitMessage);
     setVoteDraftValue(String(clampedValue));
   };
 
@@ -180,8 +229,9 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
         nextMaxRating,
       });
       setVoteDraftState(null);
+      setVoteLimitMessage(null);
       setToast({
-        message: "Vote updated.",
+        message: t(locale, "waves.myVotes.voteUpdated"),
         type: "success",
       });
       applyWaveDropVoteUpdate(queryClient, response, drop.wave.id);
@@ -189,8 +239,8 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
     onError: (error) => {
       setToast({
         type: "error",
-        title: "Couldn't update your vote.",
-        description: "Please try again.",
+        title: t(locale, "waves.myVotes.voteUpdateError"),
+        description: t(locale, "waves.myVotes.tryAgain"),
         details: getToastErrorDetails(error),
       });
     },
@@ -200,17 +250,25 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
     if (isProcessing || isResetting || isVotingClosed) return;
 
     if (!hasValidVoteValue) {
+      setVoteLimitMessage(null);
       setVoteDraftState(null);
       return;
     }
 
     if (parsedVoteValue === liveCurrentVoteValue) {
+      setVoteLimitMessage(null);
       setVoteDraftState(null);
       return;
     }
 
     const clampedValue = clampVoteValue(parsedVoteValue);
+    const nextVoteLimitMessage = getVoteLimitMessage(parsedVoteValue);
     setVoteDraftValue(String(clampedValue));
+    setVoteLimitMessage(nextVoteLimitMessage);
+
+    if (nextVoteLimitMessage) {
+      return;
+    }
 
     setIsProcessing(true);
 
@@ -218,8 +276,7 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
       const { success } = await requestAuth();
       if (!success) {
         setToast({
-          message:
-            "Couldn't authenticate. Reconnect your wallet and try again.",
+          message: t(locale, "waves.myVotes.authError"),
           type: "error",
         });
         setIsProcessing(false);
@@ -265,87 +322,93 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
   };
 
   return (
-    <div className="tw-flex tw-flex-col tw-gap-y-1.5">
-      <p className="tw-mb-0 tw-text-xs tw-text-iron-500">
-        {maxRatingLabel}{" "}
-        <span className="tw-tabular-nums tw-text-iron-300">
-          {formatNumberWithCommas(liveMaxRating)}
-        </span>
-      </p>
-      <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
-        <div className="tw-relative tw-min-w-[9rem] tw-flex-1 md:tw-w-36 md:tw-flex-none">
+    <div
+      data-vote-controls
+      className="tw-col-span-3 tw-row-start-4 tw-flex tw-w-full tw-min-w-0 tw-cursor-default tw-flex-col sm:@[16rem]/my-vote:tw-row-start-3 sm:@[36rem]/my-vote:tw-col-span-1 sm:@[36rem]/my-vote:tw-col-start-3 sm:@[36rem]/my-vote:tw-max-w-72 @[46rem]/my-vote:tw-contents"
+    >
+      <label htmlFor={voteInputId} className="tw-sr-only">
+        {t(locale, "waves.myVotes.yourVotes")}{" "}
+        {t(locale, "waves.myVotes.inCredit", { credit: voteLabel })}
+      </label>
+      <div
+        className={`tw-flex tw-min-w-0 tw-items-center tw-gap-3 tw-rounded-lg tw-bg-iron-900 tw-pr-1 tw-ring-1 tw-ring-inset tw-transition-colors tw-duration-200 focus-within:tw-ring-2 motion-reduce:tw-transition-none @[46rem]/my-vote:tw-col-start-4 @[46rem]/my-vote:tw-row-start-1 @[46rem]/my-vote:tw-self-end ${
+          isVoteValueOutOfRange
+            ? "tw-ring-rose-400 focus-within:!tw-ring-rose-400"
+            : "tw-ring-iron-700 focus-within:!tw-ring-primary-400"
+        }`}
+      >
+        <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-2">
           <input
+            id={voteInputId}
             onClick={(e) => {
               e.stopPropagation();
             }}
             type="text"
-            value={voteValue}
+            value={displayVoteValue}
             onChange={handleInputChange}
+            onFocus={() => setIsVoteInputFocused(true)}
             onBlur={handleBlur}
             onKeyDown={handleKeyDown}
             disabled={isResetting || isVotingClosed}
-            pattern={minRating < 0 ? "-?[0-9]*" : "[0-9]*"}
+            pattern={minRating < 0 ? "-?[0-9,]*" : "[0-9,]*"}
             inputMode="numeric"
-            className="tw-h-8 tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-3 tw-text-base tw-font-medium tw-text-iron-50 tw-placeholder-iron-400 tw-outline-none tw-ring-1 tw-ring-iron-700 tw-transition-all focus:tw-bg-iron-950/80 focus:tw-ring-primary-400 desktop-hover:hover:tw-bg-iron-950/60 desktop-hover:hover:tw-ring-primary-400"
+            aria-describedby={voteInputDescription}
+            aria-invalid={isVoteValueOutOfRange ? true : undefined}
+            className="tw-h-12 tw-w-full tw-min-w-0 tw-flex-1 tw-rounded-lg tw-border-0 tw-bg-transparent tw-py-0 tw-pl-3 tw-pr-0 tw-text-sm tw-font-semibold tw-tabular-nums tw-text-iron-50 tw-placeholder-iron-400 tw-outline-none focus:tw-ring-0 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 md:tw-h-10"
           />
-          <div className="tw-pointer-events-none tw-absolute tw-right-3 tw-top-1/2 -tw-translate-y-1/2 tw-text-xs tw-text-iron-400">
+          <span className="tw-max-w-[40%] tw-flex-shrink-0 tw-break-words tw-py-1 tw-text-sm tw-leading-4 tw-text-iron-400">
             {voteLabel}
-          </div>
+          </span>
         </div>
 
-        <div className="tw-flex tw-items-center tw-gap-2">
+        <Button
+          onClick={(e) => {
+            e.stopPropagation();
+            void handleSubmit();
+          }}
+          disabled={!isEditing || isProcessing || isResetting || isVotingClosed}
+          variant={isEditing ? "primary" : "tertiary"}
+          size="sm"
+          loading={isProcessing || isResetting}
+          hideChildrenWhenLoading
+          className={`!tw-h-11 tw-min-w-[60px] !tw-border-0 !tw-text-sm !tw-shadow-none md:!tw-h-8 ${
+            isEditing ? "" : "!tw-bg-transparent"
+          }`}
+          aria-label={t(locale, "waves.myVotes.submitVote")}
+        >
+          {t(locale, "waves.myVotes.vote")}
+        </Button>
+      </div>
+      <div className="tw-mt-2 tw-flex tw-min-h-6 tw-min-w-0 tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-3 tw-gap-y-1 tw-text-sm tw-leading-6 @[46rem]/my-vote:tw-col-start-4 @[46rem]/my-vote:tw-row-start-2 @[46rem]/my-vote:tw-mt-0 @[46rem]/my-vote:tw-self-start">
+        <p
+          id={maxRatingId}
+          className="tw-m-0 tw-flex tw-items-center tw-text-xs tw-font-normal tw-text-iron-400 @[46rem]/my-vote:tw-min-h-8"
+        >
+          {maxRatingLabel} {formatInteger(locale, liveMaxRating)}
+        </p>
+        {onExplainVote && (
           <Button
             onClick={(e) => {
               e.stopPropagation();
-              void handleSubmit();
+              handleExplainVote();
             }}
-            disabled={
-              !isEditing || isProcessing || isResetting || isVotingClosed
-            }
+            disabled={!canExplainVote}
             variant="tertiary"
             size="xs"
-            className="tw-relative tw-min-w-[60px]"
-            aria-label="Submit vote"
+            aria-label={t(locale, "waves.voteRationale.explainAriaLabel")}
           >
-            {isProcessing || isResetting ? (
-              <svg
-                aria-hidden="true"
-                role="status"
-                className="tw-absolute tw-inline tw-h-5 tw-w-5 tw-animate-spin tw-text-primary-400"
-                viewBox="0 0 100 101"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  className="tw-text-iron-600"
-                  d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
-                  fill="currentColor"
-                ></path>
-                <path
-                  d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
-                  fill="currentColor"
-                ></path>
-              </svg>
-            ) : (
-              "Vote"
-            )}
+            {t(locale, "waves.voteRationale.explain")}
           </Button>
-          {onExplainVote && (
-            <Button
-              onClick={(e) => {
-                e.stopPropagation();
-                handleExplainVote();
-              }}
-              disabled={!canExplainVote}
-              variant="tertiary"
-              size="xs"
-              aria-label={t(locale, "waves.voteRationale.explainAriaLabel")}
-            >
-              {t(locale, "waves.voteRationale.explain")}
-            </Button>
-          )}
-        </div>
+        )}
       </div>
+      {displayedVoteLimitMessage && (
+        <output
+          id={voteLimitMessageId}
+          className="tw-mb-0 tw-mt-2 tw-min-w-0 tw-text-sm tw-leading-5 tw-text-amber-300 @[46rem]/my-vote:tw-col-start-4 @[46rem]/my-vote:tw-row-start-3 @[46rem]/my-vote:tw-mt-0"
+        >
+          {displayedVoteLimitMessage}
+        </output>
+      )}
     </div>
   );
 };

@@ -66,11 +66,11 @@ function typedBundle(
 }
 
 describe("Museum legacy collection routes", () => {
-  it("sends the plural legacy collections index to the acquisitions hub", () => {
+  it("sends the plural legacy collections index to the permanent Collection", () => {
     MuseumCollectionsLegacyPage();
 
     expect(permanentRedirect).toHaveBeenCalledWith(
-      "/museum/network/acquisitions"
+      "/museum/network/collection"
     );
   });
 

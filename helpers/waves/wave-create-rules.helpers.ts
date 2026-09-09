@@ -104,7 +104,7 @@ const getCreateDropAndVoteRows = ({
       value: getCreateGroupLabel({
         groupId: config.groups.canDrop,
         groupsCache,
-        fallback: "Anyone",
+        fallback: "Public",
       }),
     },
     {
@@ -113,7 +113,7 @@ const getCreateDropAndVoteRows = ({
       value: getCreateGroupLabel({
         groupId: config.groups.canVote,
         groupsCache,
-        fallback: "Anyone",
+        fallback: "Public",
       }),
     },
   ];
@@ -147,18 +147,18 @@ const getCreateAccessSection = (
     rows: [
       {
         id: "can-view",
-        label: "Who can view",
+        label: "Visibility",
         value: getCreateGroupLabel({
           groupId: config.groups.canView,
           groupsCache,
-          fallback: "Anyone",
+          fallback: "Public",
         }),
       },
       ...getCreateDropAndVoteRows(context),
       ...getCreateChatRows(context),
       {
         id: "admin",
-        label: "Who can admin",
+        label: "Admins",
         value: getCreateGroupLabel({
           groupId: config.groups.admin,
           groupsCache,
@@ -174,7 +174,7 @@ const getCreateTimingSection = ({
   endDate,
 }: CreateRulesContext): WaveRuleSection => ({
   id: "timing",
-  title: "Timing",
+  title: "Schedule",
   rows: [
     {
       id: "submission-window",

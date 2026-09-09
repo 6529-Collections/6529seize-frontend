@@ -8,6 +8,7 @@ import { useWebSocket } from "./useWebSocket";
 import { useWebSocketHealth } from "./useWebSocketHealth";
 import { MarketplacePreviewWebSocketSync } from "./MarketplacePreviewWebSocketSync";
 import { NotificationWebSocketSync } from "./NotificationWebSocketSync";
+import { DmUnreadStateProvider } from "@/services/dm-unread/DmUnreadStateProvider";
 
 /**
  * WebSocket connection initializer with coordinated health monitoring
@@ -56,7 +57,7 @@ export function AppWebSocketProvider({
       <WebSocketInitializer />
       <MarketplacePreviewWebSocketSync />
       <NotificationWebSocketSync />
-      {children}
+      <DmUnreadStateProvider>{children}</DmUnreadStateProvider>
     </WebSocketProvider>
   );
 }

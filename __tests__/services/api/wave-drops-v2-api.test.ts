@@ -1,5 +1,6 @@
 import { ApiDropMainType } from "@/generated/models/ApiDropMainType";
 import { ApiDropType } from "@/generated/models/ApiDropType";
+import { ApiDropModerationStatus } from "@/generated/models/ApiDropModerationStatus";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropV2 } from "@/generated/models/ApiDropV2";
 import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
@@ -17,6 +18,7 @@ import {
   fetchGlobalBoostedDropsV2,
   fetchWaveDropsFeedV2,
   fetchWaveCompetitionDropsV2,
+  fetchWaveSearchAuthors,
   mapLeaderboardDropV2,
   voteDropPollV2,
 } from "@/services/api/wave-drops-v2-api";
@@ -33,6 +35,40 @@ const commonApiFetchMock = commonApiFetch as jest.MockedFunction<
 const commonApiPostMock = commonApiPost as jest.MockedFunction<
   typeof commonApiPost
 >;
+
+describe("fetchWaveSearchAuthors", () => {
+  it("sends a bounded author-prefix request for the wave", async () => {
+    const authors = [{ id: "author-1", handle: "alice", pfp: null }];
+    commonApiFetchMock.mockResolvedValueOnce(authors);
+
+    await expect(
+      fetchWaveSearchAuthors({
+        waveId: "wave/1",
+        handle: "  ali ",
+        limit: 8,
+      })
+    ).resolves.toBe(authors);
+    expect(commonApiFetchMock).toHaveBeenCalledWith({
+      endpoint: "v2/waves/wave%2F1/search-authors",
+      params: { handle: "ali", limit: "8" },
+      signal: undefined,
+    });
+  });
+
+  it("clamps author result limits to the server contract", async () => {
+    commonApiFetchMock.mockResolvedValueOnce([]);
+
+    await fetchWaveSearchAuthors({
+      waveId: "wave-1",
+      handle: "",
+      limit: 200,
+    });
+
+    expect(commonApiFetchMock).toHaveBeenCalledWith(
+      expect.objectContaining({ params: { handle: "", limit: "20" } })
+    );
+  });
+});
 
 describe("fetchDropReactionDetailsV2", () => {
   beforeEach(() => {
@@ -503,6 +539,29 @@ describe("fetchWaveDropsFeedV2", () => {
     });
 
     expect(drop.poll).toEqual(poll);
+  });
+
+  it("preserves global and viewer moderation state on mapped drops", () => {
+    const moderation = {
+      status: ApiDropModerationStatus.AiQuarantined,
+      can_view: false,
+    };
+    const viewerContext = {
+      author_blocked: true,
+      drop_hidden: false,
+    };
+
+    const drop = mapLeaderboardDropV2({
+      drop: {
+        ...createDrop(1),
+        moderation,
+        viewer_context: viewerContext,
+      } as unknown as ApiDropV2,
+      wave: waveMin,
+    });
+
+    expect(drop.moderation).toEqual(moderation);
+    expect(drop.viewer_context).toEqual(viewerContext);
   });
 
   it("preserves the over-threshold timestamp on leaderboard drops", () => {

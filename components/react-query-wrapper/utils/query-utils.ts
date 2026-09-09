@@ -141,6 +141,6 @@ export const getDefaultQueryRetry = <TError = Error>(
   };
 };
 
-export const isUnauthorizedQueryError = (error: unknown): boolean => {
+const isUnauthorizedQueryError = (error: unknown): boolean => {
   return getQueryErrorStatus(error) === 401;
 };

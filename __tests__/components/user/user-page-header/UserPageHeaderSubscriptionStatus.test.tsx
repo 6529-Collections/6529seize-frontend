@@ -54,6 +54,12 @@ describe("UserPageHeaderSubscriptionStatus", () => {
     );
     expect(status).toBeInTheDocument();
     expect(status).not.toHaveClass("tw-truncate");
+    expect(screen.getByText("Subscriptions").closest("div")).toHaveClass(
+      "!tw-border-white/10",
+      "!tw-bg-iron-950",
+      "tw-shadow-md",
+      "tw-shadow-black/40"
+    );
     expect(screen.getByRole("link", { name: "Top up" })).toHaveAttribute(
       "href",
       "/sesamenoodles/subscriptions#profile-subscriptions-top-up"
@@ -91,6 +97,60 @@ describe("UserPageHeaderSubscriptionStatus", () => {
     );
     expect(screen.getByRole("link", { name: "Top up" })).not.toHaveClass(
       "tw-bg-primary-500"
+    );
+  });
+
+  it("renders the subtle presentation without card chrome", () => {
+    render(
+      <UserPageHeaderSubscriptionStatus
+        profile={
+          {
+            consolidation_key: "profile-key",
+            normalised_handle: "sesamenoodles",
+          } as ApiIdentity
+        }
+        layout="subtle"
+      />
+    );
+
+    const status = screen.getByText(
+      "Running low · through The Memes #560, Oct 12, 2026"
+    );
+    const statusLink = status.closest("a");
+
+    expect(statusLink).not.toHaveClass(
+      "!tw-border-white/10",
+      "!tw-bg-iron-950",
+      "tw-shadow-md"
+    );
+    expect(screen.getByText("Subscriptions")).toHaveClass("tw-text-iron-500");
+    expect(statusLink).toHaveAttribute(
+      "href",
+      "/sesamenoodles/subscriptions#profile-subscriptions-top-up"
+    );
+  });
+
+  it("renders the wide-row presentation at full width with a divider", () => {
+    render(
+      <UserPageHeaderSubscriptionStatus
+        profile={
+          {
+            consolidation_key: "profile-key",
+            normalised_handle: "sesamenoodles",
+          } as ApiIdentity
+        }
+        layout="wide-row"
+      />
+    );
+
+    const statusLink = screen
+      .getByText("Running low · through The Memes #560, Oct 12, 2026")
+      .closest("a");
+
+    expect(statusLink).toHaveClass("tw-w-full", "tw-border-t");
+    expect(statusLink).toHaveAttribute(
+      "href",
+      "/sesamenoodles/subscriptions#profile-subscriptions-top-up"
     );
   });
 });

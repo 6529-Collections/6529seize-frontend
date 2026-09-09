@@ -422,12 +422,13 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
     await expect(searchInput).toHaveAttribute("placeholder", "Search messages");
     const minimumQueryMessage = page
       .locator("#wave-drops-search-idle-status")
-      .getByText("Type at least 2 characters to search this wave.", {
-        exact: true,
-      });
+      .getByText(
+        "Type at least 3 characters or add a filter to search this wave.",
+        { exact: true }
+      );
     await expect(minimumQueryMessage).toBeVisible();
 
-    await searchInput.fill("x");
+    await searchInput.fill("xx");
     await expect(minimumQueryMessage).toBeVisible();
 
     await searchInput.fill(UNMATCHABLE_WAVE_QUERY);

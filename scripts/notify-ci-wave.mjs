@@ -5,6 +5,7 @@ const {
   CI_PIPELINES_ALERT_URL,
   CI_PIPELINES_ALERT_SECRET,
   CI_PIPELINES_ALERT_API_AUTH,
+  CI_PIPELINES_ALERT_TYPE,
   CI_PIPELINES_TARGET_ENV,
   CI_PIPELINES_STATUS,
   CI_PIPELINES_TITLE,
@@ -13,15 +14,18 @@ const {
   CI_PIPELINES_SERVICE,
   CI_PIPELINES_WORKFLOW,
   CI_RELEASE_NOTES_PROMPT_PATH,
+  CI_RELEASE_NOTE_OPT_OUT,
   CI_RELEASE_GROUP_ID,
   CI_RELEASE_GROUP_SERVICES,
-  CI_RELEASE_TRAIN_ID,
   CI_RELEASE_CONTRIBUTORS,
   CI_PIPELINES_SHA,
+  CI_PIPELINES_PARENT_DEPLOY_RUN_ID,
+  CI_PIPELINES_VALIDATION_PACK,
   GITHUB_REPOSITORY,
   GITHUB_WORKFLOW,
   GITHUB_RUN_ID,
   GITHUB_RUN_NUMBER,
+  GITHUB_RUN_ATTEMPT,
   GITHUB_SERVER_URL = "https://github.com",
   GITHUB_SHA,
   GITHUB_REF_NAME,
@@ -120,6 +124,34 @@ const repository = requireValue("GITHUB_REPOSITORY", GITHUB_REPOSITORY);
 const runId = requireValue("GITHUB_RUN_ID", GITHUB_RUN_ID);
 const status = requireValue("CI_PIPELINES_STATUS", CI_PIPELINES_STATUS);
 const title = requireValue("CI_PIPELINES_TITLE", CI_PIPELINES_TITLE);
+const alertType = CI_PIPELINES_ALERT_TYPE || "workflow";
+if (!["workflow", "deploy", "web_e2e"].includes(alertType)) {
+  console.error("CI_PIPELINES_ALERT_TYPE is invalid");
+  process.exit(1);
+}
+const runAttempt = GITHUB_RUN_ATTEMPT ? Number(GITHUB_RUN_ATTEMPT) : 1;
+if (!Number.isSafeInteger(runAttempt) || runAttempt <= 0) {
+  console.error("GITHUB_RUN_ATTEMPT must be a positive integer");
+  process.exit(1);
+}
+if (
+  CI_PIPELINES_PARENT_DEPLOY_RUN_ID &&
+  !/^[1-9][0-9]{0,19}$/.test(CI_PIPELINES_PARENT_DEPLOY_RUN_ID)
+) {
+  console.error("CI_PIPELINES_PARENT_DEPLOY_RUN_ID is invalid");
+  process.exit(1);
+}
+if (
+  CI_PIPELINES_VALIDATION_PACK &&
+  !/^[A-Za-z0-9._-]{1,100}$/.test(CI_PIPELINES_VALIDATION_PACK)
+) {
+  console.error("CI_PIPELINES_VALIDATION_PACK is invalid");
+  process.exit(1);
+}
+if (alertType === "web_e2e" && !CI_PIPELINES_VALIDATION_PACK) {
+  console.error("CI_PIPELINES_VALIDATION_PACK is required for web_e2e alerts");
+  process.exit(1);
+}
 const triggeredByGithubLogin = GITHUB_TRIGGERING_ACTOR || GITHUB_ACTOR || null;
 let releaseContributors = [];
 try {
@@ -128,22 +160,25 @@ try {
   console.error(releaseContributorMetadataErrorMessage(error));
   process.exit(1);
 }
+if (CI_PIPELINES_SHA && !/^[a-f0-9]{40}$/i.test(CI_PIPELINES_SHA)) {
+  console.error("CI_PIPELINES_SHA must be a 40-character Git SHA");
+  process.exit(1);
+}
+const alertSha = CI_PIPELINES_SHA
+  ? CI_PIPELINES_SHA.toLowerCase()
+  : alertType === "web_e2e"
+    ? null
+    : GITHUB_SHA || null;
+const releaseNoteOptOut = CI_RELEASE_NOTE_OPT_OUT === "true";
 if (
-  CI_RELEASE_TRAIN_ID &&
-  !/^[A-Za-z0-9._-]{1,100}$/.test(CI_RELEASE_TRAIN_ID)
+  CI_RELEASE_NOTE_OPT_OUT &&
+  !["true", "false"].includes(CI_RELEASE_NOTE_OPT_OUT)
 ) {
-  console.error("CI_RELEASE_TRAIN_ID is invalid");
-  process.exit(1);
-}
-if (releaseContributors.length > 0 && !CI_RELEASE_TRAIN_ID) {
-  console.error("CI_RELEASE_TRAIN_ID is required with CI_RELEASE_CONTRIBUTORS");
-  process.exit(1);
-}
-if (CI_PIPELINES_SHA && !/^[a-f0-9]{40}$/.test(CI_PIPELINES_SHA)) {
-  console.error("CI_PIPELINES_SHA must be a 40-character lowercase Git SHA");
+  console.error("CI_RELEASE_NOTE_OPT_OUT must be true or false");
   process.exit(1);
 }
 const isReleaseNotesEligible =
+  !releaseNoteOptOut &&
   status === "success" &&
   targetEnvironment === "prod" &&
   Boolean(CI_RELEASE_NOTES_PROMPT_PATH);
@@ -163,18 +198,19 @@ const releaseNotesFields = isReleaseNotesEligible
       deployed_at: new Date().toISOString(),
     }
   : {};
-// Keep the two new fields atomic. During the ordered rollout, the old
-// dispatcher supplies an empty array and the old receiver rejects unknown
-// fields; the train id has no downstream use unless contributor credits exist.
-const releaseTrainFields =
-  CI_RELEASE_TRAIN_ID && releaseContributors.length > 0
+const contributorFields =
+  releaseContributors.length > 0
+    ? { contributor_github_logins: releaseContributors }
+    : {};
+const webE2EFields =
+  alertType === "web_e2e"
     ? {
-        release_train_id: CI_RELEASE_TRAIN_ID,
-        contributor_github_logins: releaseContributors,
+        parent_deploy_run_id: CI_PIPELINES_PARENT_DEPLOY_RUN_ID || null,
+        validation_pack: CI_PIPELINES_VALIDATION_PACK,
       }
     : {};
-
 const payload = {
+  alert_type: alertType,
   repo: repository.split("/").pop() ?? repository,
   workflow: CI_PIPELINES_WORKFLOW || GITHUB_WORKFLOW || "GitHub Actions",
   status,
@@ -183,12 +219,14 @@ const payload = {
   triggered_by_github_login: triggeredByGithubLogin,
   run_id: runId,
   run_number: GITHUB_RUN_NUMBER || null,
+  run_attempt: runAttempt,
   run_url: `${GITHUB_SERVER_URL}/${repository}/actions/runs/${runId}`,
-  sha: CI_PIPELINES_SHA || GITHUB_SHA || null,
+  sha: alertSha,
   branch: GITHUB_REF_NAME || null,
   environment: targetEnvironment || null,
   service: CI_PIPELINES_SERVICE || null,
-  ...releaseTrainFields,
+  ...webE2EFields,
+  ...contributorFields,
   ...releaseNotesFields,
 };
 

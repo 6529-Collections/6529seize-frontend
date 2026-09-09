@@ -16,6 +16,7 @@ import {
 import { MEME_FOCUS } from "@/components/the-memes/MemeShared";
 import CommonDropdown from "@/components/utils/select/dropdown/CommonDropdown";
 import CommonTabs from "@/components/utils/select/tabs/CommonTabs";
+import ProfileCollectedReturnLink from "@/components/user/collected/ProfileCollectedReturnLink";
 import { publicEnv } from "@/config/env";
 import { MEMELAB_CONTRACT, MEMES_CONTRACT } from "@/constants/constants";
 import { useTitle } from "@/contexts/TitleContext";
@@ -23,6 +24,10 @@ import type { DBResponse } from "@/entities/IDBResponse";
 import type { LabExtendedData, LabNFT, NFT, NFTHistory } from "@/entities/INFT";
 import type { Transaction } from "@/entities/ITransaction";
 import { areEqualAddresses } from "@/helpers/Helpers";
+import {
+  getProfileCollectedReturnContext,
+  PROFILE_COLLECTED_RETURN_PARAM,
+} from "@/helpers/profile-collected-navigation";
 import { TypeFilter } from "@/hooks/useActivityData";
 import useCapacitor from "@/hooks/useCapacitor";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
@@ -35,18 +40,16 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ACTIVITY_PAGE_SIZE,
   getMemeLabBrowserTitle,
-  getMemeLabDetailTabLabel,
   getMemeLabHistoryTabForFocus,
   getMemeLabHistoryTabLabel,
   getMemeLabRouteFocus,
   isAbortError,
   MEME_LAB_HISTORY_TAB,
   MEME_LAB_HISTORY_TABS,
-  MEME_LAB_TABS,
-  MemeLabPageTabButton,
   parseMemeLabFocus,
   runAfterCriticalWork,
 } from "./MemeLabPage.utils";
+import { MemeLabPageTabs } from "./MemeLabPageTabs";
 import {
   MemeLabActivityContent,
   MemeLabCollectors,
@@ -65,6 +68,9 @@ export default function MemeLabPageComponent({
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const returnContext = getProfileCollectedReturnContext(
+    searchParams.get(PROFILE_COLLECTED_RETURN_PARAM)
+  );
   const pathname = usePathname();
   const capacitor = useCapacitor();
 
@@ -116,7 +122,6 @@ export default function MemeLabPageComponent({
     !hasUserTransactions
       ? MEME_LAB_HISTORY_TAB.ACTIVITY
       : requestedHistoryTab;
-  const visibleMemeLabTabs = MEME_LAB_TABS;
   const visibleHistoryTabItems = useMemo(
     () =>
       MEME_LAB_HISTORY_TABS.filter(
@@ -616,7 +621,7 @@ export default function MemeLabPageComponent({
           <div className="tw-mb-4 tw-flex tw-flex-col tw-items-stretch tw-justify-between tw-gap-3 md:tw-flex-row md:tw-items-center">
             <h3
               id="meme-lab-card-activity-heading"
-              className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-200"
+              className="tw-mb-0 tw-text-base tw-font-semibold tw-text-iron-200 sm:tw-text-lg"
             >
               {t(locale, "memeLab.detail.tabs.cardActivity")}
             </h3>
@@ -656,8 +661,18 @@ export default function MemeLabPageComponent({
       <div className="tw-px-4 tw-py-4 md:tw-px-6 md:tw-pb-10 lg:tw-px-8">
         <header className="tw-pb-8">
           <div className="tw-flex tw-flex-col tw-gap-4">
-            <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-2 md:tw-justify-start">
-              <div className="tw-mb-0 tw-flex tw-items-center">
+            <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-2 md:tw-justify-start">
+              <ProfileCollectedReturnLink
+                locale={locale}
+                returnTo={returnContext?.href}
+              />
+              <div
+                className={`tw-mb-0 tw-items-center ${
+                  returnContext && !capacitor.isCapacitor
+                    ? "tw-hidden md:tw-flex"
+                    : "tw-flex"
+                }`}
+              >
                 <Link
                   href={getMemeLabRouteHrefWithLocale({
                     href: "/meme-lab",
@@ -687,7 +702,7 @@ export default function MemeLabPageComponent({
                 </div>
                 <div className="tw-order-1 tw-min-w-0 tw-flex-1 md:tw-order-2">
                   <h1
-                    className="tw-m-0 tw-flex tw-min-w-0 tw-flex-wrap tw-items-baseline tw-gap-x-2 tw-gap-y-1 md:tw-flex-nowrap md:tw-gap-x-0"
+                    className="tw-m-0 tw-flex tw-min-w-0 tw-flex-wrap tw-items-baseline tw-gap-y-1 md:tw-flex-nowrap"
                     aria-label={t(locale, "memeLab.detail.heading.ariaLabel", {
                       tokenId: nft.id,
                       name: nft.name,
@@ -700,7 +715,7 @@ export default function MemeLabPageComponent({
                     </span>
                     <span
                       aria-hidden="true"
-                      className="tw-mx-3 tw-h-5 tw-w-px tw-self-center tw-bg-white/[0.16] sm:tw-h-6"
+                      className="tw-mx-2.5 tw-h-5 tw-w-px tw-self-center tw-bg-white/[0.16] sm:tw-h-6 md:tw-mx-3"
                     />
                     <span className="tw-mb-0 tw-min-w-0 tw-whitespace-normal tw-break-words tw-text-lg tw-font-semibold tw-leading-tight tw-text-iron-100 sm:tw-text-2xl md:tw-truncate">
                       {nft.name}
@@ -739,23 +754,12 @@ export default function MemeLabPageComponent({
               hasOwnershipContext={hasOwnershipContext}
               nftBalance={nftBalance}
             />
-            <nav
-              aria-label={t(locale, "memeLab.detail.sections.tabs")}
-              className="tw-relative tw-mb-8 tw-overflow-hidden tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800"
-            >
-              <div className="tw-w-full tw-overflow-x-auto tw-overflow-y-hidden [-ms-overflow-style:none] [scrollbar-width:none] [touch-action:pan-x] [&::-webkit-scrollbar]:tw-hidden">
-                <div className="-tw-mb-px tw-flex tw-min-w-max tw-gap-x-3 lg:tw-gap-x-4">
-                  {visibleMemeLabTabs.map((tab) => (
-                    <MemeLabPageTabButton
-                      key={`${nft.id}-${nft.contract}-${tab.focus}-tab`}
-                      title={getMemeLabDetailTabLabel(tab.focus, locale)}
-                      isActive={activeTab === tab.focus}
-                      onClick={() => setActiveMemeLabTab(tab.focus)}
-                    />
-                  ))}
-                </div>
-              </div>
-            </nav>
+            <MemeLabPageTabs
+              nft={nft}
+              activeTab={activeTab}
+              locale={locale}
+              onSelectTab={setActiveMemeLabTab}
+            />
             {printHistoryTabs()}
             {printContent()}
           </>

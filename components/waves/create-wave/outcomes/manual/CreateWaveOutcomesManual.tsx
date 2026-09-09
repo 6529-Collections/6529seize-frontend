@@ -8,6 +8,14 @@ import {
 } from "@/types/waves.types";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import Button from "@/components/utils/button/Button";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
+import {
+  CREATE_WAVE_OUTCOME_FLOATING_LABEL_CLASSES,
+  CREATE_WAVE_OUTCOME_LIGHT_INPUT_CLASSES,
+  getCreateWaveOutcomeInputStateClasses,
+  getCreateWaveOutcomeLabelStateClasses,
+} from "../createWaveOutcomeStyles";
 
 export default function CreateWaveOutcomesManual({
   waveType,
@@ -18,6 +26,7 @@ export default function CreateWaveOutcomesManual({
   readonly onOutcome: (outcome: CreateWaveOutcomeConfig) => void;
   readonly onCancel: () => void;
 }) {
+  const locale = useBrowserLocale();
   const [value, setValue] = useState<string>("");
   const [positions, setPositions] = useState<string>("");
   const [positionsError, setPositionsError] = useState<string>("");
@@ -75,6 +84,8 @@ export default function CreateWaveOutcomesManual({
   useEffect(() => setIsInputEmptyError(false), [value]);
 
   const isRankWave = waveType === ApiWaveType.Rank;
+  const manualErrorId = "outcome-manual-error";
+  const positionsErrorId = "outcome-positions-error";
 
   const onSubmit = () => {
     if (!value) {
@@ -125,7 +136,7 @@ export default function CreateWaveOutcomesManual({
 
   return (
     <div className="tw-col-span-full">
-      <div className="tw-flex tw-flex-col tw-gap-y-5 tw-pt-[0.5px]">
+      <div className="tw-flex tw-flex-col tw-gap-y-6 tw-pt-[0.5px]">
         <div className="tw-grid tw-gap-x-5 tw-gap-y-4">
           <div>
             <div className="tw-group tw-relative tw-w-full">
@@ -135,28 +146,29 @@ export default function CreateWaveOutcomesManual({
                 onChange={onValueChange}
                 id="outcome-manual"
                 autoComplete="off"
-                className={`${
-                  isInputEmptyError
-                    ? "tw-caret-error tw-ring-error focus:tw-border-error focus:tw-ring-error"
-                    : "tw-caret-primary-400 tw-ring-iron-650 focus:tw-border-blue-500 focus:tw-ring-primary-400"
-                } ${
-                  value
-                    ? "tw-text-primary-400 focus:tw-text-white"
-                    : "tw-text-white"
-                } tw-peer tw-form-input tw-block tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-border-iron-600 tw-bg-iron-900 tw-px-4 tw-pb-3 tw-pt-4 tw-text-base tw-font-medium tw-shadow-sm tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-500 focus:tw-bg-iron-900 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset sm:tw-text-sm`}
+                aria-invalid={isInputEmptyError}
+                aria-describedby={isInputEmptyError ? manualErrorId : undefined}
+                className={`${getCreateWaveOutcomeInputStateClasses({
+                  hasError: isInputEmptyError,
+                  hasValue: value.length > 0,
+                })} ${CREATE_WAVE_OUTCOME_LIGHT_INPUT_CLASSES}`}
                 placeholder=" "
               />
               <label
                 htmlFor="outcome-manual"
-                className={`${
-                  isInputEmptyError ? "" : "peer-focus:tw-text-primary-400"
-                } tw-absolute tw-start-1 tw-top-2 tw-z-10 tw-origin-[0] -tw-translate-y-4 tw-scale-75 tw-transform tw-cursor-text tw-bg-iron-900 tw-px-2 tw-text-base tw-font-normal tw-text-iron-500 tw-duration-300 peer-placeholder-shown:tw-top-1/2 peer-placeholder-shown:-tw-translate-y-1/2 peer-placeholder-shown:tw-scale-100 peer-focus:tw-top-2 peer-focus:-tw-translate-y-4 peer-focus:tw-scale-75 peer-focus:tw-bg-iron-900 peer-focus:tw-px-2 rtl:peer-focus:tw-left-auto rtl:peer-focus:tw-translate-x-1/4`}
+                className={`${getCreateWaveOutcomeLabelStateClasses(
+                  isInputEmptyError
+                )} ${CREATE_WAVE_OUTCOME_FLOATING_LABEL_CLASSES}`}
               >
                 Manual action
               </label>
             </div>
             {isInputEmptyError && (
-              <div className="tw-flex tw-items-center tw-gap-x-2 tw-pt-1.5">
+              <div
+                id={manualErrorId}
+                role="alert"
+                className="tw-flex tw-items-center tw-gap-x-2 tw-pt-1.5"
+              >
                 <svg
                   className="tw-size-5 tw-flex-shrink-0 tw-text-error"
                   viewBox="0 0 24 24"
@@ -187,28 +199,31 @@ export default function CreateWaveOutcomesManual({
                   onChange={onPositionsChange}
                   id="outcome-positions"
                   autoComplete="off"
-                  className={`${
-                    positionsError
-                      ? "tw-caret-error tw-ring-error focus:tw-border-error focus:tw-ring-error"
-                      : "tw-caret-primary-400 tw-ring-iron-650 focus:tw-border-blue-500 focus:tw-ring-primary-400"
-                  } ${
-                    positions
-                      ? "tw-text-primary-400 focus:tw-text-white"
-                      : "tw-text-white"
-                  } tw-peer tw-form-input tw-block tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-border-iron-600 tw-bg-iron-900 tw-px-4 tw-pb-3 tw-pt-4 tw-text-base tw-font-medium tw-shadow-sm tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-500 focus:tw-bg-iron-900 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset sm:tw-text-sm`}
+                  aria-invalid={Boolean(positionsError)}
+                  aria-describedby={
+                    positionsError ? positionsErrorId : undefined
+                  }
+                  className={`${getCreateWaveOutcomeInputStateClasses({
+                    hasError: Boolean(positionsError),
+                    hasValue: positions.length > 0,
+                  })} ${CREATE_WAVE_OUTCOME_LIGHT_INPUT_CLASSES}`}
                   placeholder=" "
                 />
                 <label
                   htmlFor="outcome-positions"
-                  className={`${
-                    positionsError ? "" : "peer-focus:tw-text-primary-400"
-                  } tw-absolute tw-start-1 tw-top-2 tw-z-10 tw-origin-[0] -tw-translate-y-4 tw-scale-75 tw-transform tw-cursor-text tw-bg-iron-900 tw-px-2 tw-text-base tw-font-normal tw-text-iron-500 tw-duration-300 peer-placeholder-shown:tw-top-1/2 peer-placeholder-shown:-tw-translate-y-1/2 peer-placeholder-shown:tw-scale-100 peer-focus:tw-top-2 peer-focus:-tw-translate-y-4 peer-focus:tw-scale-75 peer-focus:tw-bg-iron-900 peer-focus:tw-px-2 rtl:peer-focus:tw-left-auto rtl:peer-focus:tw-translate-x-1/4`}
+                  className={`${getCreateWaveOutcomeLabelStateClasses(
+                    Boolean(positionsError)
+                  )} ${CREATE_WAVE_OUTCOME_FLOATING_LABEL_CLASSES}`}
                 >
                   Winning Positions (e.g. 1-3, 5, 7-9)
                 </label>
               </div>
               {positionsError && (
-                <div className="tw-flex tw-items-center tw-gap-x-2 tw-pt-1.5">
+                <div
+                  id={positionsErrorId}
+                  role="alert"
+                  className="tw-flex tw-items-center tw-gap-x-2 tw-pt-1.5"
+                >
                   <svg
                     className="tw-size-5 tw-flex-shrink-0 tw-text-error"
                     viewBox="0 0 24 24"
@@ -232,20 +247,12 @@ export default function CreateWaveOutcomesManual({
             </div>
           )}
         </div>
-        <div className="tw-relative tw-z-50 tw-mt-6 tw-flex tw-justify-end tw-gap-x-3">
-          <Button
-            variant="secondary"
-            size="lg"
-            onClick={onCancel}
-          >
-            Cancel
+        <div className="tw-relative tw-z-50 tw-flex tw-justify-end tw-gap-x-3">
+          <Button variant="secondary" size="md" onClick={onCancel}>
+            {t(locale, "waves.create.actions.cancel")}
           </Button>
-          <Button
-            variant="primary"
-            size="lg"
-            onClick={onSubmit}
-          >
-            Save
+          <Button variant="primary" size="md" onClick={onSubmit}>
+            {t(locale, "waves.create.actions.save")}
           </Button>
         </div>
       </div>

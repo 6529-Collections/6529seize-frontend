@@ -11,5 +11,5 @@ export const metadata: Metadata = getAppMetadata({
 });
 
 export default async function MuseumAccessionsPage() {
-  permanentRedirect(`${museumCollectionHref()}#accessions`);
+  permanentRedirect(`${museumCollectionHref()}#collection-acquisitions-title`);
 }

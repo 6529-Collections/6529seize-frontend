@@ -1,8 +1,6 @@
 "use client";
 
-import {
-    AllowlistOperationCode,
-} from "@/components/allowlist-tool/allowlist-tool.types";
+import { AllowlistOperationCode } from "@/components/allowlist-tool/allowlist-tool.types";
 import DistributionPlanAddOperationBtn from "@/components/distribution-plan-tool/common/DistributionPlanAddOperationBtn";
 import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
 import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
@@ -62,31 +60,36 @@ export default function CreatePhasesForm() {
     await addPhase();
   };
   return (
-    <form onSubmit={handleSubmit}>
-      <div className="tw-flex tw-gap-x-4 tw-items-end">
-        <div className="tw-w-80">
-          <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-100">
-            Name
-          </label>
-          <div className="tw-mt-2">
-            <input
-              type="text"
-              name="name"
-              value={formValues.name}
-              onChange={handleChange}
-              required
-              autoComplete="off"
-              placeholder="Name of Phase"
-              className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-iron-700/40 tw-text-white tw-font-light tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700/40 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 hover:tw-ring-iron-700 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
-            />
-          </div>
+    <form
+      onSubmit={handleSubmit}
+      className="tw-grid tw-w-full tw-grid-cols-1 tw-gap-4 sm:tw-grid-cols-[20rem_auto] sm:tw-items-end sm:tw-justify-start"
+    >
+      <div className="tw-min-w-0">
+        <label
+          htmlFor="phase-name"
+          className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-100"
+        >
+          Name
+        </label>
+        <div className="tw-mt-2">
+          <input
+            id="phase-name"
+            type="text"
+            name="name"
+            value={formValues.name}
+            onChange={handleChange}
+            required
+            autoComplete="off"
+            placeholder="Name of Phase"
+            className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-iron-700/40 tw-text-white tw-font-light tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700/40 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 hover:tw-ring-iron-700 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
+          />
         </div>
+      </div>
 
-        <div>
-          <DistributionPlanAddOperationBtn loading={isLoading}>
-            Add phase
-          </DistributionPlanAddOperationBtn>
-        </div>
+      <div className="tw-w-full sm:tw-w-auto">
+        <DistributionPlanAddOperationBtn loading={isLoading}>
+          Add phase
+        </DistributionPlanAddOperationBtn>
       </div>
     </form>
   );

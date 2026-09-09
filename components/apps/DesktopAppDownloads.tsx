@@ -46,7 +46,7 @@ export function DesktopAppDownloads() {
     return (
       <div
         role="alert"
-        className="tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-black/30 tw-p-5"
+        className="tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-[#0D0D0F]/70 tw-p-5"
       >
         <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300">
           {t(APPS_LOCALE, "apps.desktop.error")}
@@ -81,7 +81,7 @@ function DesktopAppDownload({ app }: { readonly app: DesktopAppVersion }) {
         platform: app.displayName,
         version: app.version,
       })}
-      className="tw-group tw-flex tw-min-h-[74px] tw-items-center tw-gap-4 tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-black/40 tw-p-4 !tw-no-underline tw-transition tw-duration-200 tw-ease-out hover:tw-border-primary-400/60 hover:tw-bg-[#050b1e] focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950"
+      className="tw-group tw-flex tw-min-h-[74px] tw-items-center tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.09] tw-bg-[#0D0D0F]/70 tw-p-4 tw-no-underline tw-transition tw-duration-200 tw-ease-out hover:tw-border-primary-400/60 hover:tw-bg-iron-900/80 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-[#0D0D0F]"
     >
       <span className="tw-flex tw-size-11 tw-flex-none tw-items-center tw-justify-center tw-rounded-lg tw-bg-white">
         <Image

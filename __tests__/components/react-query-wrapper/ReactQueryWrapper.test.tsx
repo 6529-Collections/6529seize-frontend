@@ -265,6 +265,7 @@ it("invalidateAll calls queryClient.invalidateQueries with no args", () => {
 
 it("invalidates auth-sensitive queries without clearing unrelated cache", () => {
   const { client, ctx } = createTestSetup();
+  jest.spyOn(client, "removeQueries");
   client.setQueryData([QueryKey.PROFILE, "alice"], { handle: "alice" });
   client.setQueryData([QueryKey.WAVES_V2, { viewer_identity: "0x1" }], []);
   client.setQueryData([QueryKey.WAVES_PUBLIC, { name: "memes" }], []);
@@ -275,6 +276,13 @@ it("invalidates auth-sensitive queries without clearing unrelated cache", () => 
   client.setQueryData([QueryKey.GLOBAL_TDH_STATS], { total: 1 });
 
   act(() => ctx.invalidateAuthSensitiveQueries());
+
+  expect(client.removeQueries).toHaveBeenCalledWith({
+    queryKey: [QueryKey.DROPS],
+  });
+  expect(client.removeQueries).toHaveBeenCalledWith({
+    queryKey: [QueryKey.DROP],
+  });
 
   expect(client.invalidateQueries).toHaveBeenCalledWith({
     predicate: expect.any(Function),

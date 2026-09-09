@@ -33,7 +33,7 @@ Generated from `tests/packs.manifest.cjs` by
 | `test:e2e:delegation-readonly`                      | —                             | readonly | local       | pr-ci, manual             | 15m     | Delegation surfaces read-only coverage.                                             |
 | `test:e2e:network-open-data-readonly`               | —                             | readonly | local       | pr-ci, manual             | 15m     | Network and open-data read-only coverage.                                           |
 | `test:e2e:collections-readonly`                     | —                             | readonly | local       | pr-ci, manual             | 15m     | NextGen and collection read-only coverage.                                          |
-| `test:e2e:public-groups-tools-readonly`             | —                             | readonly | local       | pr-ci, manual             | 15m     | Public groups and tools read-only coverage.                                         |
+| `test:e2e:public-groups-tools-readonly`             | —                             | readonly | local       | pr-ci, manual             | 15m     | Public tools and removed Groups route read-only coverage.                           |
 | `test:e2e:admin-guards-readonly`                    | —                             | readonly | local       | pr-ci, manual             | 15m     | Admin destructive-action fail-closed guards.                                        |
 | `test:e2e:public-content-readonly`                  | —                             | readonly | local       | pr-ci, manual             | 15m     | Public content pages read-only coverage.                                            |
 | `test:e2e:authenticated-shells-readonly`            | —                             | readonly | local       | pr-ci, manual             | 15m     | Authenticated route shells with read-only dev auth.                                 |
@@ -62,7 +62,7 @@ Generated from `tests/packs.manifest.cjs` by
 | `test:e2e:staging`                                  | core                          | readonly | staging     | post-deploy, manual       | 15m     | Staging core surfaces on both web shells.                                           |
 | `test:e2e:staging:social-readonly`                  | social-readonly               | readonly | staging     | post-deploy, manual       | 15m     | Staging waves and profile read-only pack.                                           |
 | `test:e2e:staging:input-detection-readonly`         | input-detection-readonly      | readonly | staging     | post-deploy, manual       | 15m     | Staging Windows touch-input detection contract.                                     |
-| `test:e2e:staging:public-groups-tools-readonly`     | public-groups-tools-readonly  | readonly | staging     | post-deploy, manual       | 15m     | Staging public groups and tools read-only pack.                                     |
+| `test:e2e:staging:public-groups-tools-readonly`     | public-groups-tools-readonly  | readonly | staging     | post-deploy, manual       | 15m     | Staging public tools and removed Groups route read-only pack.                       |
 | `test:e2e:staging:delegation-readonly`              | delegation-readonly           | readonly | staging     | post-deploy, manual       | 15m     | Staging delegation read-only pack.                                                  |
 | `test:e2e:staging:collections-readonly`             | collections-readonly          | readonly | staging     | post-deploy, manual       | 15m     | Staging collection read-only pack.                                                  |
 | `test:e2e:staging:admin-guards-readonly`            | admin-guards-readonly         | readonly | staging     | post-deploy, manual       | 15m     | Staging admin fail-closed guard pack.                                               |
@@ -82,7 +82,7 @@ Generated from `tests/packs.manifest.cjs` by
 | `test:e2e:production:delegation-readonly`           | delegation-readonly           | readonly | production  | cron, manual, post-deploy | 15m     | Production delegation read-only canary.                                             |
 | `test:e2e:production:network-open-data-readonly`    | network-open-data-readonly    | readonly | production  | cron, manual, post-deploy | 15m     | Production network and open-data read-only canary.                                  |
 | `test:e2e:production:collections-readonly`          | collections-readonly          | readonly | production  | cron, manual, post-deploy | 15m     | Production collection read-only canary.                                             |
-| `test:e2e:production:public-groups-tools-readonly`  | public-groups-tools-readonly  | readonly | production  | cron, manual, post-deploy | 15m     | Production public groups and tools read-only canary.                                |
+| `test:e2e:production:public-groups-tools-readonly`  | public-groups-tools-readonly  | readonly | production  | cron, manual, post-deploy | 15m     | Production public tools and removed Groups route read-only canary.                  |
 | `test:e2e:production:admin-guards-readonly`         | admin-guards-readonly         | readonly | production  | cron, manual, post-deploy | 15m     | Production admin fail-closed guard canary.                                          |
 | `test:e2e:production:public-content-readonly`       | public-content-readonly       | readonly | production  | cron, manual, post-deploy | 15m     | Production public-content read-only canary.                                         |
 | `test:e2e:production:profile-deep-links-readonly`   | profile-deep-links-readonly   | readonly | production  | cron, manual, post-deploy | 15m     | Production profile deep-link canary.                                                |
@@ -164,15 +164,12 @@ App PR CI:
   The desktop/mobile route sweep adds browser evidence for Museum-impacting PRs
   and exact staging changes. Unrelated changes exclude it; explicit manual
   Museum selection remains available.
-- Uploaded PR CI artifacts are short-term debugging evidence. Durable
-  deployment-train evidence still belongs on approved 6529-controlled artifact
-  storage, not Git LFS.
-- Deployment workflows use `deployment-bus upload-validation-artifact` to
-  redact, hash, upload, and record GET `/api/version` evidence as
-  `deployment:http-version` when the approved artifact store is writable. A
-  failed upload warns and records no durable pointer. This is durable
-  deployment evidence, but it does not replace the required Playwright pack
-  artifacts for release readiness.
+- Uploaded PR CI artifacts are short-term debugging evidence. Deployment
+  workflows retain their version, health, and validation artifacts in GitHub
+  Actions; use approved artifact storage for longer retention, not Git LFS.
+- Deployment workflows verify GET `/api/version` against the deployed commit
+  and upload their health/E2E evidence. A version check does not replace the
+  required Playwright validation.
 
 WCAG and i18n route evidence:
 
@@ -212,11 +209,11 @@ Surface matrix:
 - `test:e2e:collections-readonly` runs the public NextGen, The Memes, Meme
   Lab, 6529 Gradient, and ReMemes browse/read-only pack on both baseline web
   projects.
-- `test:e2e:public-groups-tools-readonly` runs the public Groups, Subscriptions
-  Report, and Meme Calendar read-only pack on both baseline web projects.
+- `test:e2e:public-groups-tools-readonly` verifies the removed Network Groups
+  route plus Subscriptions Report and Meme Calendar on both baseline web projects.
 - `test:e2e:admin-guards-readonly` runs unauthenticated fail-closed coverage for
-  the NextGen manager boundary, Drop Forge gated route boundaries, and public
-  Groups owner/vote-all control absence on both baseline web projects, with the
+  the NextGen manager boundary and Drop Forge gated route boundaries on both
+  baseline web projects, with the
   mutation guard enabled even locally.
 - `test:e2e:public-content-readonly` runs the public legacy content pack on
   both baseline web projects, with the mutation guard enabled even locally.
@@ -323,11 +320,11 @@ Surface matrix:
   against staging with the remote mutation guard and staging access unlock.
 - `test:e2e:production:collections-readonly` runs the collections read-only
   pack against production desktop web only as a public, read-only smoke.
-- `test:e2e:staging:public-groups-tools-readonly` runs the public Groups,
-  Subscriptions Report, and Meme Calendar read-only pack against staging with
+- `test:e2e:staging:public-groups-tools-readonly` verifies the removed Network
+  Groups route plus Subscriptions Report and Meme Calendar against staging with
   the remote mutation guard and staging access unlock.
-- `test:e2e:production:public-groups-tools-readonly` runs the same public
-  Groups/Tools/Calendar pack against production desktop web only as a public,
+- `test:e2e:production:public-groups-tools-readonly` runs the same removed-route,
+  tools, and calendar pack against production desktop web only as a public,
   read-only smoke.
 - `test:e2e:staging:admin-guards-readonly` runs the admin/destructive guard
   pack against staging with the remote mutation guard and staging access
@@ -354,18 +351,18 @@ Surface matrix:
   smoke.
 - `test:e2e:production:readonly` runs the full production-safe read-only pack
   family in one Playwright invocation so release validation fails fast and
-  returns one aggregate status. Deployment-bus manifests know this as the
-  optional production-only `playwright:production-readonly` pack; record that
-  pack only with redacted durable evidence and desktop Chromium surface
-  metadata. Use the targeted staging or local readonly scripts when a release
-  train needs paired mobile-web evidence for one of the aggregate packs.
+  returns one aggregate status. Retain redacted evidence with desktop Chromium
+  surface metadata. Use the targeted staging or local readonly scripts when
+  a release needs paired mobile-web evidence for one of the aggregate packs.
 - `web-desktop-firefox` and `web-desktop-webkit` are browser-diversity
   projects for train, nightly, or targeted compatibility checks.
 - `capacitor-ios-sim`, `capacitor-android-sim`, and `electron-shell-sim` are
   browser simulations only. They may catch responsive/runtime branching issues,
   but they are not evidence that the real native or desktop shells were tested.
-- The iOS Capacitor simulation seeds the app's existing EULA consent cookie so
-  route-level smoke tests exercise the page shell instead of the legal modal.
+- The iOS Capacitor simulation seeds the app's current versioned EULA consent
+  cookie so route-level smoke tests exercise the page shell instead of the
+  legal modal. Boolean or stale-version values intentionally do not bypass the
+  native gate.
 - Capacitor simulations expose both `CapacitorCustomPlatform` and a minimal
   `globalThis.Capacitor` shim so Playwright can catch hook-based and direct
   runtime-detection drift. This still does not prove native plugin behavior.
@@ -400,7 +397,7 @@ Large-pack ownership:
   NextGen public collection/token routes, The Memes, Meme Lab, 6529 Gradient,
   ReMemes, collection sorting/filter shells, or collection browse cards.
 - `test:e2e:public-groups-tools-readonly` is owned by PR or train owners
-  changing public Groups, profile Groups redirects, Subscriptions Report, Meme
+  changing the removed Network Groups path, profile Groups redirects, Subscriptions Report, Meme
   Calendar, subscription download affordances, calendar locale/timezone controls,
   or read-only mutation guard behavior.
 - `test:e2e:admin-guards-readonly` is owned by PR or train owners changing
@@ -482,8 +479,7 @@ Large-pack ownership:
   exact sandbox reaction endpoint and body.
 - `test:e2e:production:readonly` is owned by the release captain or validation
   agent after a production deploy. It is a production-safe aggregate of the
-  individual public read-only packs on desktop Chromium and is the command
-  behind the optional deployment-bus pack `playwright:production-readonly`. Do
+  individual public read-only packs on desktop Chromium. Do
   not make it a staging requirement unless a real staging aggregate command and
   evidence path exist; use targeted staging/local commands for mobile-web
   follow-up evidence.
@@ -512,9 +508,8 @@ Real-device evidence (AWS Device Farm):
   iOS Safari rendering of the deployed frontend, plus the real Capacitor shell
   APK (launch, WebView boot of `6529.io`, `mobile6529://` deep links, built-in
   fuzz crash detection).
-- Deployment-bus manifests know these as `devicefarm:mobile-web-smoke`,
-  `devicefarm:native-android-smoke`, and `devicefarm:native-android-fuzz`.
-  They are scheduled/dispatch packs, not PR CI packs, and stay read-only
-  against live environments.
+- Mobile-web smoke, native Android smoke, and native Android fuzz are
+  scheduled/dispatch packs, not PR CI packs, and stay read-only against live
+  environments.
 - Regime documentation, provisioning, cost model, and triage:
   `ops/docs/developer/device-farm-qa.md`.

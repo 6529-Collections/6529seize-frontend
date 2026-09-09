@@ -7,6 +7,7 @@ import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import { useLoadActiveSidebarParentSubwaves } from "@/hooks/useLoadActiveSidebarParentSubwaves";
 import { useLoadPersistedExpandedSubwaves } from "@/hooks/useLoadPersistedExpandedSubwaves";
 import { useActiveSubwaveParentHint } from "@/hooks/useActiveSubwaveParentHint";
+import { useRevealActiveSidebarWave } from "@/hooks/useRevealActiveSidebarWave";
 import { usePrefetchWaveData } from "@/hooks/usePrefetchWaveData";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -51,6 +52,7 @@ import { getWaveRoute } from "@/helpers/navigation.helpers";
 import {
   groupSidebarWavesForView,
   isValidSidebarWave,
+  prioritizeActiveWaveContainer,
 } from "../waves/sidebarWaveListUtils";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -180,7 +182,7 @@ function DiscoverWavesLink() {
   return (
     <Link
       href="/discover"
-      className="desktop-hover:hover:tw-text-primary-200 tw-rounded-lg tw-px-2.5 tw-py-2 tw-text-sm tw-font-semibold tw-leading-none tw-text-primary-300 tw-no-underline tw-transition-colors tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black motion-reduce:tw-transition-none"
+      className="active:tw-text-primary-100 desktop-hover:hover:tw-text-primary-200 tw-inline-flex tw-h-7 tw-items-center tw-rounded-md tw-px-1.5 tw-text-[13px] tw-font-medium tw-leading-none tw-text-primary-300 tw-no-underline tw-transition-colors tw-duration-150 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black motion-reduce:tw-transition-none"
       aria-label={label}
     >
       {label}
@@ -216,7 +218,7 @@ function WebWavesListHeader({
       label="Waves"
       paddingClassName={headerPaddingClassName}
       rightContent={
-        <div className="tw-flex tw-items-center tw-gap-x-2">
+        <div className="tw-flex tw-items-center tw-gap-x-1.5">
           <DiscoverWavesLink />
           {showCreateWaveButton && <CreateWaveButton onClick={onCreateWave} />}
         </div>
@@ -320,7 +322,17 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
     () => getRows(pinnedWaves),
     [pinnedWaves, getRows]
   );
-  const allRows = useMemo(() => getRows(allWaves), [allWaves, getRows]);
+  const activeContainerWaveId = isDirectMessage
+    ? null
+    : effectiveActiveParentWaveId;
+  const prioritizedAllWaves = useMemo(
+    () => prioritizeActiveWaveContainer(allWaves, activeContainerWaveId),
+    [activeContainerWaveId, allWaves]
+  );
+  const allRows = useMemo(
+    () => getRows(prioritizedAllWaves),
+    [getRows, prioritizedAllWaves]
+  );
   const rowAnimationOptions = useMemo(
     () => ({ keepExitingRows: !isCollapsed }),
     [isCollapsed]
@@ -468,11 +480,28 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
     rowHeight: getSidebarRowHeight,
     overscan: 5,
   });
+  const revealStaticRows = useMemo(
+    () => [
+      animatedAnnouncementRows,
+      animatedHighlyRatedRows,
+      animatedPinnedRows,
+    ],
+    [animatedAnnouncementRows, animatedHighlyRatedRows, animatedPinnedRows]
+  );
+  useRevealActiveSidebarWave({
+    activeParentWaveId: effectiveActiveParentWaveId,
+    activeWaveId,
+    scrollContainerRef: scrollContainerRef ?? listContainerRef,
+    scrollToVirtualIndex: virtual.scrollToIndex,
+    staticRows: revealStaticRows,
+    virtualRows: virtualizedRows,
+  });
 
   const renderWaveRow = (
     row: AnimatedSidebarWaveTreeRow,
     showPin: boolean,
-    parentsWithVisibleSubwaves: ReadonlySet<string>
+    parentsWithVisibleSubwaves: ReadonlySet<string>,
+    isAnnouncement = false
   ) => {
     const showConnectedSubwaves = parentsWithVisibleSubwaves.has(row.wave.id);
 
@@ -493,6 +522,7 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
 
     return (
       <WebBrainLeftSidebarWave
+        isAnnouncement={isAnnouncement}
         wave={row.wave}
         onHover={onHover}
         showPin={showPin && row.depth === 0}
@@ -544,7 +574,8 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
                 renderWaveRow(
                   row,
                   !hidePin && !isCollapsed && row.wave.isPinned,
-                  announcementParentsWithVisibleSubwaves
+                  announcementParentsWithVisibleSubwaves,
+                  true
                 )
               }
               rows={animatedAnnouncementRows}

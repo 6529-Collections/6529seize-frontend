@@ -1,5 +1,10 @@
 # Network Museum release duration audit
 
+This is a dated performance audit. Its past workflow names, bus lineage, and
+fallback observations describe the measured releases; current deployments use
+[Deployment](../../docs/developer/deployment.md).
+
+
 ## Audit boundary
 
 This is a minute-resolution reconstruction of the 2026-08-04 release that

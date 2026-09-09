@@ -18,8 +18,8 @@ coverage for lists, analytics, tools, unknown routes, and retired networks.
   `codex/etherscan-wave-preview-implementation` starts at that reviewed spec
   head and will be refreshed from the resulting merged `origin/main` before
   publication.
-- Release Bus v2 is in `PRODUCTION` mode with `ALL`, `STAGING`, and
-  `PRODUCTION` running.
+- Deployment follows `ops/docs/developer/deployment.md`; this dated
+  implementation record does not establish current environment state.
 
 ## Constraints
 
@@ -31,8 +31,8 @@ coverage for lists, analytics, tools, unknown routes, and retired networks.
   errors.
 - Use decimal strings for blockchain quantities that may exceed safe integer
   precision.
-- Do not deploy the spec-only PR; register only the implementation candidate
-  for the release train.
+- Deploy the implementation change; the spec-only PR needs no runtime
+  deployment.
 
 ## Open decisions
 
@@ -59,6 +59,6 @@ coverage for lists, analytics, tools, unknown routes, and retired networks.
 2. Publish the implementation PR and drive all review/CI/release gates.
 3. Complete visual E2E against representative entity and route-only cards in
    staging, where the full backend is available.
-4. Register only the exact merged implementation SHA with Release Bus v2,
-   validate staging, mark the exact validated SHA production-ready, and verify
-   production.
+4. Merge the implementation to `1a-staging` and validate its automatic deploy
+   and E2E; with production authorization, merge to `main` and dispatch the
+   production workflow, following its automatic validation.

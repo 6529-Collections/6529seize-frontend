@@ -26,6 +26,7 @@ Use this subarea for in-thread behavior in wave and direct-message threads.
 - Owns unread divider rendering and unread jump controls.
 - Owns typing-indicator behavior.
 - Owns thread composer availability and unavailable-state panel behavior.
+- Owns the profile-scoped chat-history deletion action in Wave Configuration.
 - Composer input formatting and submission details are owned by Wave Composer docs.
 - Drop action menus and link actions are owned by Wave Drop Actions docs.
 
@@ -43,6 +44,8 @@ Use this subarea for in-thread behavior in wave and direct-message threads.
   timeout behavior.
 - [Wave Chat Composer Availability](feature-chat-composer-availability.md): when
   composer renders versus unavailable-state panels.
+- [Delete Your Wave Chat History](feature-delete-own-chat-history.md): the
+  irreversible profile-scoped cleanup action and its preservation rules.
 
 ## Flows
 

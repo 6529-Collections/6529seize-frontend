@@ -91,6 +91,44 @@ Public records, archives, conservation studies, datasets, commissions, and tools
 
 - [The Metropolitan Museum of Art](profiles/met.md)
 
+## Overview
+
+The study compares public museum practice across media and institutions.
+
+## Thematic pathways
+
+The pathways follow artworks, records, and the work of care.
+
+## 1. Work, interface, and access
+
+Access begins with the conditions through which a work can be encountered.
+
+## 2. Preservation, reconstruction, and technical care
+
+Digital preservation includes dependencies, documentation, and reconstruction.
+
+## 3. Records, archives, and public data
+
+Public records connect interpretation to evidence.
+
+## Working lessons
+
+### Describe the encounter before the interpretation
+
+Begin with what a visitor can see, hear, or do.
+
+### Publish loss and missingness
+
+State what cannot be recovered.
+
+### Connect the object to its research paths
+
+Keep the work linked to the evidence used to understand it.
+
+### Keep revisions visible
+
+Corrections remain part of the public history.
+
 The [source register](source-register.md) records the evidence. The [curatorial publication standard](../../docs/curatorial-publication-standard.md) governs Museum scholarship.`;
 }
 
@@ -172,7 +210,55 @@ This standard describes how the Museum studies, describes, and publishes art.
 
 ## The Museum publishes arguments about art
 
-Each text should make a specific work newly intelligible.`;
+Each text should make a specific work newly intelligible.
+
+## 1. The Museum publishes arguments about art
+
+Research begins with a claim that close looking and evidence can test.
+
+## 2. What substantive scholarship must achieve
+
+Scholarship places a work in artistic, technical, and historical context.
+
+## 3. Evidence supports the argument
+
+Sources remain close to the claims they support.
+
+### 3.1 Publish in layers
+
+Readers can move from a concise account to the complete record.
+
+### 3.2 State the condition of knowledge
+
+Each publication states what is known, inferred, and unresolved.
+
+## 6. Close looking for born-digital and tokenized art
+
+Close looking includes code, behavior, interface, and change over time.
+
+## 8. Medium must be described at the level of the artwork
+
+Medium names the actual conditions through which a work exists.
+
+### 12.1 Begin with the subject, not the institution
+
+Open with the artist, work, or question under study.
+
+### 12.3 Prefer verbs that identify action
+
+Verbs should say what a work, artist, or system does.
+
+### 12.8 Finish without a slogan
+
+Conclusions return to the evidence and argument.
+
+### 12.9 Edit for the audible sentence
+
+Read prose aloud and revise its rhythm.
+
+## 15. Acceptance test
+
+Publication requires accurate evidence, clear argument, and finished prose.`;
 }
 
 function withVisitorManuscripts(
@@ -301,11 +387,11 @@ describe("Museum institutional-practice reading room", () => {
       screen.getByText("Scholarship and editorial standard")
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", {
-        level: 2,
-        name: "The Museum publishes arguments about art",
+      screen.getAllByRole("heading", {
+        level: 3,
+        name: "1. The Museum publishes arguments about art",
       })
-    ).toBeInTheDocument();
+    ).toHaveLength(2);
     expectNextLinkWithoutPrefetch("/museum/network/research");
     expectNextLinkWithoutPrefetch(
       "/museum/network/research/institutional-practice"
@@ -317,10 +403,22 @@ describe("Museum institutional-practice reading room", () => {
 
     expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
     expect(
-      screen.getByRole("heading", { level: 1, name: "A field of practice" })
+      screen.getByRole("heading", { level: 1, name: "Museums to learn from" })
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { level: 2, name: "What we looked for" })
+      screen.getAllByRole("heading", { level: 3, name: "Overview" })
+    ).toHaveLength(2);
+    expect(
+      screen.getByRole("heading", {
+        level: 3,
+        name: "Selected thematic pathways",
+      })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", {
+        level: 3,
+        name: "Selected working lessons",
+      })
     ).toBeInTheDocument();
     expect(
       screen.getByText("Institutions the 6529 Network Museum studies")
@@ -337,12 +435,14 @@ describe("Museum institutional-practice reading room", () => {
         `/museum/network/research/institutional-practice/${profile.slug}`
       );
     }
-    expect(
-      screen.getByRole("link", { name: "curatorial publication standard" })
-    ).toHaveAttribute(
-      "href",
-      "/museum/network/research/scholarship-and-writing"
-    );
+    for (const link of screen.getAllByRole("link", {
+      name: "curatorial publication standard",
+    })) {
+      expect(link).toHaveAttribute(
+        "href",
+        "/museum/network/research/scholarship-and-writing"
+      );
+    }
     expectNextLinkWithoutPrefetch("/museum/network/research");
     expectNextLinkWithoutPrefetch(
       "/museum/network/research/institutional-practice/sources"

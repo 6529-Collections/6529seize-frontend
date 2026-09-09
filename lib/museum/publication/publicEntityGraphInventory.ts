@@ -27,9 +27,13 @@ import {
 
 const PUBLIC_ENTITY_IDENTITY_INVENTORY_SCHEMA =
   "https://6529networkmuseum.org/schemas/public-entity-identity-inventory-v1.json";
-const PUBLIC_ENTITY_IDENTITY_INVENTORY_VERSION = "1.5.0" as const;
+const PUBLIC_ENTITY_IDENTITY_INVENTORY_VERSIONS = new Set(["1.6.0", "1.7.0"]);
 const PUBLIC_TYPED_REFERENCE_REGISTRY_ID =
   "PUBLIC_TYPED_REFERENCE_REGISTRY_V1" as const;
+const PUBLIC_TYPED_REFERENCE_AUTHORITY_TYPES = new Set([
+  "PROPOSED_GIFT",
+  "WORK_DESCRIPTION",
+]);
 const INVENTORY_KEYS = [
   "$schema",
   "inventory_version",
@@ -65,7 +69,7 @@ export function parseMuseumIdentityInventory(
 ): MuseumPublicIdentityInventory {
   assertInventoryDocument(document);
   const inventory = parseInventoryJson(document);
-  assertInventoryVersion(inventory);
+  const inventoryVersion = assertInventoryVersion(inventory);
   assertRetiredIdentities(inventory, entities);
   const byId = new Map(entities.map((entity) => [entity.id, entity] as const));
   assertEntityPatterns(inventory, entities);
@@ -81,7 +85,7 @@ export function parseMuseumIdentityInventory(
   validateCanonicalRouteCoverage(entities);
   return {
     sourcePath: MUSEUM_PUBLIC_ENTITY_INVENTORY_PATH,
-    inventoryVersion: PUBLIC_ENTITY_IDENTITY_INVENTORY_VERSION,
+    inventoryVersion,
     curatedAcquisitionIds,
     workAliases: [...workAliases.values()].sort((left, right) =>
       left.sourceObjectId.localeCompare(right.sourceObjectId)
@@ -123,7 +127,9 @@ function parseInventoryJson(
   return requiredRecord(root, "public_entity_graph_inventory_shape");
 }
 
-function assertInventoryVersion(inventory: Record<string, unknown>): void {
+function assertInventoryVersion(
+  inventory: Record<string, unknown>
+): MuseumPublicIdentityInventory["inventoryVersion"] {
   if (
     inventory["$schema"] !== PUBLIC_ENTITY_IDENTITY_INVENTORY_SCHEMA ||
     !sameIdSet(
@@ -138,7 +144,7 @@ function assertInventoryVersion(inventory: Record<string, unknown>): void {
     "inventory_version",
     "public_entity_graph_inventory_version"
   );
-  if (version !== PUBLIC_ENTITY_IDENTITY_INVENTORY_VERSION) {
+  if (!PUBLIC_ENTITY_IDENTITY_INVENTORY_VERSIONS.has(version)) {
     throw new Error("public_entity_graph_inventory_version");
   }
   requiredString(
@@ -146,6 +152,7 @@ function assertInventoryVersion(inventory: Record<string, unknown>): void {
     "identity_policy",
     "public_entity_graph_inventory_policy"
   );
+  return version as MuseumPublicIdentityInventory["inventoryVersion"];
 }
 
 function assertRetiredIdentities(
@@ -337,7 +344,7 @@ function readTypedReferenceRegistry(
     if (
       referenceType !== "manifestation" ||
       targetType !== "ERC721_TOKEN_MANIFESTATION" ||
-      authoritativeRecordType !== "PROPOSED_GIFT" ||
+      !PUBLIC_TYPED_REFERENCE_AUTHORITY_TYPES.has(authoritativeRecordType) ||
       typeof caip19 !== "string" ||
       !/^eip155:[0-9]+\/erc721:0x[0-9a-fA-F]{40}\/[0-9]+$/u.test(caip19) ||
       keys.has(key)

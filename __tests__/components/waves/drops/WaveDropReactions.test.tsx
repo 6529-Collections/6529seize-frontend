@@ -4,9 +4,11 @@ import { QueryKey as AppQueryKey } from "@/components/react-query-wrapper/ReactQ
 import { useEmoji } from "@/contexts/EmojiContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { DropSize } from "@/helpers/waves/drop.helpers";
+import { ChatRestriction } from "@/hooks/useDropPriviledges";
 import * as commonApi from "@/services/api/common-api";
 import { __resetDropReactionMonitoringForTests } from "@/utils/monitoring/dropReactionMonitoring";
 import { __resetDropReactionAuthRecoveryForTests } from "@/hooks/drops/useDropReactionAuthRecovery";
+import { __resetDropReactionRequestQueueForTests } from "@/helpers/reactions/dropReactionRequestQueue";
 import {
   act,
   fireEvent,
@@ -214,6 +216,7 @@ describe("WaveDropReactions", () => {
     jest.clearAllMocks();
     __resetDropReactionMonitoringForTests();
     __resetDropReactionAuthRecoveryForTests();
+    __resetDropReactionRequestQueueForTests();
     requestAuthMock.mockResolvedValue({ success: true });
     mockQueryCacheFindAll.mockReset();
     mockQueryCacheFindAll.mockReturnValue([]);
@@ -390,6 +393,7 @@ describe("WaveDropReactions", () => {
       endpoint: "drops/test-drop/reaction",
       body: { reaction: ":gm:" },
       errorMode: "structured",
+      signal: expect.any(AbortSignal),
     });
 
     // Click button again to decrement
@@ -400,12 +404,14 @@ describe("WaveDropReactions", () => {
     expect(commonApi.commonApiDelete).toHaveBeenCalledWith({
       endpoint: "drops/test-drop/reaction",
       errorMode: "structured",
+      signal: expect.any(AbortSignal),
     });
   });
 
-  it("disables reaction chips when the current wave capability is disabled", () => {
+  it("disables reaction chips when chat and reactions are disabled for the wave", () => {
     mockGetEligibility.mockReturnValue({
       authenticated_user_eligible_to_chat: false,
+      authenticated_user_chat_restriction: ChatRestriction.DISABLED,
     });
     mockUseEmoji.mockReturnValue(
       createEmojiContextValue(
@@ -439,6 +445,49 @@ describe("WaveDropReactions", () => {
     fireEvent.click(button);
     expect(commonApi.commonApiPost).not.toHaveBeenCalled();
     expect(commonApi.commonApiDelete).not.toHaveBeenCalled();
+  });
+
+  it("keeps reaction chips enabled when the viewer lacks chat-group permission", async () => {
+    mockGetEligibility.mockReturnValue({
+      authenticated_user_eligible_to_chat: false,
+      authenticated_user_chat_restriction: ChatRestriction.NO_PERMISSION,
+    });
+    mockUseEmoji.mockReturnValue(
+      createEmojiContextValue(
+        [
+          {
+            category: "people",
+            emojis: [{ id: "gm", skins: [{ src: "/gm.png" }] }],
+          },
+        ],
+        () => null
+      )
+    );
+    (commonApi.commonApiPost as jest.Mock).mockResolvedValue({
+      id: "test-drop",
+    });
+
+    render(
+      <WaveDropReactions
+        drop={
+          createMockDrop({
+            reactions: [
+              {
+                reaction: ":gm:",
+                profiles: [{ handle: "test-handle-1", id: "1" }],
+              },
+            ],
+          }) as any
+        }
+      />
+    );
+
+    const button = screen.getByRole("button");
+    expect(button).toBeEnabled();
+    fireEvent.click(button);
+    await waitFor(() => {
+      expect(commonApi.commonApiPost).toHaveBeenCalledTimes(1);
+    });
   });
 
   it("updates cached notification drops when removing a chip reaction", async () => {
@@ -499,6 +548,7 @@ describe("WaveDropReactions", () => {
       expect(commonApi.commonApiDelete).toHaveBeenCalledWith({
         endpoint: "drops/test-drop/reaction",
         errorMode: "structured",
+        signal: expect.any(AbortSignal),
       });
     });
     expect(mockSetQueryData).toHaveBeenCalledWith(
@@ -569,6 +619,53 @@ describe("WaveDropReactions", () => {
       });
     });
     expect(requestAuthMock).not.toHaveBeenCalled();
+  });
+
+  it("marks chat and reactions disabled after the exact backend 403", async () => {
+    mockUseEmoji.mockReturnValue(
+      createEmojiContextValue(
+        [
+          {
+            category: "people",
+            emojis: [{ id: "gm", skins: [{ src: "/gm.png" }] }],
+          },
+        ],
+        () => null
+      )
+    );
+    (commonApi.commonApiPost as jest.Mock).mockRejectedValueOnce(
+      createStructuredReactionError({
+        body: JSON.stringify({
+          error: "Chatting and reacting is not enabled in this wave",
+        }),
+        message: "Chatting and reacting is not enabled in this wave",
+        status: 403,
+      })
+    );
+
+    render(
+      <WaveDropReactions
+        drop={
+          createMockDrop({
+            reactions: [
+              {
+                reaction: ":gm:",
+                profiles: [{ handle: "test-handle-1", id: "1" }],
+              },
+            ],
+          }) as any
+        }
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button"));
+
+    await waitFor(() => {
+      expect(mockUpdateEligibility).toHaveBeenCalledWith("test-wave", {
+        authenticated_user_eligible_to_chat: false,
+        authenticated_user_chat_restriction: ChatRestriction.DISABLED,
+      });
+    });
   });
 
   it("blocks reaction chips while a rejected session is recovering", async () => {
@@ -749,6 +846,7 @@ describe("WaveDropReactions", () => {
     await waitFor(() => {
       expect(button).toHaveTextContent("1");
     });
+    expect(commonApi.commonApiDelete).not.toHaveBeenCalled();
     expect(firstRollback).not.toHaveBeenCalled();
     expect(secondRollback).not.toHaveBeenCalled();
 
@@ -757,6 +855,9 @@ describe("WaveDropReactions", () => {
       await Promise.resolve();
     });
 
+    await waitFor(() =>
+      expect(commonApi.commonApiDelete).toHaveBeenCalledTimes(1)
+    );
     expect(button).toHaveTextContent("1");
     expect(setToastMock).not.toHaveBeenCalled();
     expect(firstRollback).not.toHaveBeenCalled();
@@ -954,6 +1055,19 @@ describe("WaveDropReactions", () => {
     expect(
       waveReaction.profiles.some((profile: any) => profile.id === "profile-1")
     ).toBe(true);
+
+    expect(commonApi.commonApiPost).toHaveBeenCalledTimes(1);
+    await act(async () => {
+      firstRequest.resolve({});
+      await firstRequest.promise;
+    });
+    await waitFor(() =>
+      expect(commonApi.commonApiPost).toHaveBeenCalledTimes(2)
+    );
+    await act(async () => {
+      secondRequest.resolve({});
+      await secondRequest.promise;
+    });
   });
 
   it("shows the safe status-text message when a chip reaction gets an empty structured response", async () => {

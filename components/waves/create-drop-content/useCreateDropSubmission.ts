@@ -2,7 +2,7 @@
 
 import { containsDisallowedLink } from "@/components/drops/view/part/dropPartMarkdown/linkPreviewDetection";
 import type { AppToastInput } from "@/components/utils/toast/AppToast";
-import type { DropMutationBody } from "@/components/waves/CreateDrop";
+import type { DropMutationBody } from "./drop-submission.types";
 import type { CreateDropInputHandles } from "@/components/waves/CreateDropInput";
 import type { MissingRequirements } from "@/components/waves/utils/getMissingRequirements";
 import { getMissingRequirements } from "@/components/waves/utils/getMissingRequirements";
@@ -199,19 +199,16 @@ const updateFocusAfterAcceptedSubmit = ({
   getMarkdown,
   shouldKeepChatFocused,
   isApp,
-  shouldCollapseOptionsAfterMarkdownSyncRef,
   createDropInputRef,
   shouldRefocusAfterChatSubmitRef,
 }: {
   readonly getMarkdown: string | null;
   readonly shouldKeepChatFocused: boolean;
   readonly isApp: boolean;
-  readonly shouldCollapseOptionsAfterMarkdownSyncRef: MutableCurrentRef<boolean>;
   readonly createDropInputRef: MutableCurrentRef<CreateDropInputHandles | null>;
   readonly shouldRefocusAfterChatSubmitRef: MutableCurrentRef<boolean>;
 }) => {
   if (getMarkdown?.length) {
-    shouldCollapseOptionsAfterMarkdownSyncRef.current = false;
     createDropInputRef.current?.clearEditorState();
   }
 
@@ -264,6 +261,7 @@ export const useCreateDropSubmission = ({
   activeDrop,
   wave,
   isDropMode,
+  isStormMode,
   canExitDropMode,
   isChatBlockedBySlowMode,
   isChatLinksRestrictionActive,
@@ -306,11 +304,11 @@ export const useCreateDropSubmission = ({
   setMetadataOpenState,
   createDropInputRef,
   shouldRefocusAfterChatSubmitRef,
-  shouldCollapseOptionsAfterMarkdownSyncRef,
 }: {
   readonly activeDrop: ActiveDropState | null;
   readonly wave: ApiWave;
   readonly isDropMode: boolean;
+  readonly isStormMode: boolean;
   readonly canExitDropMode: boolean;
   readonly isChatBlockedBySlowMode: boolean;
   readonly isChatLinksRestrictionActive: boolean;
@@ -334,7 +332,9 @@ export const useCreateDropSubmission = ({
   readonly requestAuth: () => Promise<{ success: boolean }>;
   readonly setToast: (toast: AppToastInput) => void;
   readonly signDrop: ReturnType<typeof useDropSignature>["signDrop"];
-  readonly submitDrop: (dropRequest: DropMutationBody) => boolean;
+  readonly submitDrop: (
+    dropRequest: DropMutationBody
+  ) => boolean | Promise<boolean>;
   readonly addOptimisticDrop: (params: {
     readonly drop: ApiDrop;
   }) => Promise<void>;
@@ -361,7 +361,6 @@ export const useCreateDropSubmission = ({
   >;
   readonly createDropInputRef: MutableCurrentRef<CreateDropInputHandles | null>;
   readonly shouldRefocusAfterChatSubmitRef: MutableCurrentRef<boolean>;
-  readonly shouldCollapseOptionsAfterMarkdownSyncRef: MutableCurrentRef<boolean>;
 }) => {
   const {
     locale,
@@ -539,18 +538,16 @@ export const useCreateDropSubmission = ({
     const submittedDraftState = getDraftStateSnapshot();
 
     setSubmitting(true);
-    const { success } = await requestAuth();
-    if (!success) {
-      setSubmitting(false);
-      return;
-    }
-
-    if (!dropRequest.parts.length) {
-      setSubmitting(false);
-      return;
-    }
-
     try {
+      const { success } = await requestAuth();
+      if (!success) {
+        return;
+      }
+
+      if (!dropRequest.parts.length) {
+        return;
+      }
+
       const generatedParts = await generateParts(
         dropRequest.parts,
         setUploadingFiles
@@ -634,7 +631,7 @@ export const useCreateDropSubmission = ({
         handleDuplicateIdentitySubmissionError,
       });
 
-      const submitAccepted = submitDrop({
+      const submitResult = submitDrop({
         drop: updatedDropRequest,
         dropId: optimisticDrop?.id ?? null,
         onSuccess: dropModeSubmitCallbacks.onSuccess,
@@ -645,6 +642,8 @@ export const useCreateDropSubmission = ({
           return dropModeSubmitCallbacks.onError?.(error);
         },
       });
+      const submitAccepted =
+        typeof submitResult === "boolean" ? submitResult : await submitResult;
       if (!submitAccepted) {
         return;
       }
@@ -662,7 +661,6 @@ export const useCreateDropSubmission = ({
         getMarkdown,
         shouldKeepChatFocused,
         isApp,
-        shouldCollapseOptionsAfterMarkdownSyncRef,
         createDropInputRef,
         shouldRefocusAfterChatSubmitRef,
       });
@@ -670,6 +668,7 @@ export const useCreateDropSubmission = ({
       if (isIdentityPickerAllowed) {
         disableIdentityPickerAutoOpen();
       }
+      setIsStormMode(false);
       refreshState();
     } catch (error) {
       setToast({
@@ -740,7 +739,7 @@ export const useCreateDropSubmission = ({
     const hasCurrentContent =
       (submissionMarkdown?.trim().length ?? 0) > 0 || files.length > 0;
 
-    if (hasPartsInDrop && hasCurrentContent) {
+    if ((isStormMode || hasPartsInDrop) && hasCurrentContent) {
       finalizeAndAddDropPart(submissionMarkdown);
       return;
     }

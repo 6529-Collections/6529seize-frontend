@@ -1,6 +1,7 @@
 const http = require("http");
 const path = require("path");
 const { spawn, spawnSync } = require("child_process");
+const composerSandboxConstants = require("./composerSandboxConstants.json");
 
 require("dotenv").config();
 require("dotenv").config({ path: ".env.test" });
@@ -37,6 +38,7 @@ const SANDBOX_NOTIFICATION_ALL_DROPS_DROP_ID =
   "00000000-0000-4000-8000-000000000544";
 const SANDBOX_CREATED_WAVE_ID = "00000000-0000-4000-8000-000000000536";
 const SANDBOX_ADMIN_GROUP_ID = "00000000-0000-4000-8000-000000000537";
+const SANDBOX_RULE_GROUP_ID_PREFIX = "00000000-0000-4000-8000-";
 const SANDBOX_CREATED_WAVE_DROP_ID = "00000000-0000-4000-8000-000000000538";
 const SANDBOX_SUBMITTED_CHAT_DROP_ID = "00000000-0000-4000-8000-000000000539";
 const SANDBOX_SUBMITTED_POLL_ID = "00000000-0000-4000-8000-000000000545";
@@ -54,6 +56,12 @@ const SANDBOX_SCHEDULED_WAVE_DESCRIPTION =
   "Local-only scheduled rank wave description for Playwright.";
 const SANDBOX_SCHEDULED_OUTCOME_TITLE = "Sandbox manual outcome";
 const SANDBOX_CHAT_DROP_CONTENT = "Local-only chat drop from Playwright.";
+const SANDBOX_POLL_QUESTION = "Which sandbox option do you prefer?";
+const SANDBOX_WAVE_GUIDELINES = Array.from(
+  { length: 24 },
+  (_, index) =>
+    `${index + 1}. Keep discussions constructive and stay on topic in this local sandbox wave.`
+).join("\n");
 const SANDBOX_POLL_OPTIONS = [
   "A longer poll option that stays readable on a phone",
   "A second poll option",
@@ -81,8 +89,13 @@ const CREATED_AT = 1713744000000;
 const PREVIEW_URL = "https://example.com/6529-composer-preview";
 const publicScope = { group: null };
 const requests = [];
-// Shared by the single-worker local sandbox runner and reset before each test.
+// Keep created groups for the lifetime of the local sandbox process so saved
+// wave drafts remain resolvable after the request log is reset between tests.
 let sandboxDropReaction = null;
+let sandboxWaveGuidelinesEnabled = false;
+let sandboxRuleGroupSequence = 0;
+const sandboxRuleGroups = new Map();
+const sandboxRuleGroupWallets = new Map();
 const MAX_REQUEST_BODY_BYTES = 16 * 1024;
 
 function encodeJwtPart(value) {
@@ -183,6 +196,64 @@ const sandboxAdminGroup = {
     excluded_identity_addresses: null,
   },
 };
+
+const sandboxPreviewGroup = {
+  id: composerSandboxConstants.previewGroupId,
+  name: "Active collectors",
+  created_at: CREATED_AT,
+  created_by: localIdentityOverview,
+  visible: true,
+  is_private: false,
+  group: {
+    tdh: { min: 100, max: null, inclusion_strategy: "TDH" },
+    rep: {
+      min: null,
+      max: null,
+      direction: "RECEIVED",
+      user_identity: null,
+      category: null,
+    },
+    cic: {
+      min: null,
+      max: null,
+      direction: "RECEIVED",
+      user_identity: null,
+    },
+    level: { min: 1, max: null },
+    owns_nfts: [],
+    identity_group_id: null,
+    identity_group_identities_count: 0,
+    excluded_identity_group_id: null,
+    excluded_identity_group_identities_count: 0,
+    is_beneficiary_of_grant_id: null,
+    is_beneficiary_of_grant_match_mode: "ANY_TOKEN",
+    is_beneficiary_of_grant: null,
+  },
+};
+
+const sandboxGroupMembers = Array.from({ length: 25 }, (_, index) => {
+  const memberNumber = index + 1;
+  const memberSuffix = String(memberNumber).padStart(2, "0");
+  const walletSuffix = memberNumber.toString(16).padStart(40, "0");
+  return {
+    display: `collector-${memberSuffix}`,
+    detail_view_key: `collector-${memberSuffix}`,
+    level: (index % 7) + 1,
+    tdh: 1500 + index * 125,
+    tdh_rate: 0,
+    xtdh: index * 20,
+    xtdh_rate: 0,
+    xtdh_outgoing: 0,
+    xtdh_incoming: index * 20,
+    combined_tdh: 1500 + index * 145,
+    combined_tdh_rate: 0,
+    rep: 50 + index * 4,
+    cic: 10 + index,
+    pfp: null,
+    last_activity: CREATED_AT,
+    wallet: `0x${walletSuffix}`,
+  };
+});
 
 function identityOverview({
   id,
@@ -398,6 +469,10 @@ const localDrop = {
   boosts: 0,
   is_signed: false,
   hide_link_preview: false,
+  moderation: {
+    status: "VISIBLE",
+    can_view: true,
+  },
   context_profile_context: {
     reaction: null,
     boosted: false,
@@ -458,6 +533,10 @@ const submittedChatDrop = {
   is_additional_action_promised: false,
   hide_link_preview: false,
   nft_links: [],
+  moderation: {
+    status: "VISIBLE",
+    can_view: true,
+  },
 };
 
 const submittedPollDrop = {
@@ -889,6 +968,30 @@ function emptyPage() {
   return { data: [], count: 0, page: 1, next: false };
 }
 
+function sandboxGroupMembersPage(searchParams) {
+  const query = (searchParams.get("param") ?? "").trim().toLowerCase();
+  const page = Math.max(1, Number(searchParams.get("page") ?? "1") || 1);
+  const pageSize = Math.max(
+    1,
+    Number(searchParams.get("page_size") ?? "20") || 20
+  );
+  const filteredMembers = query
+    ? sandboxGroupMembers.filter(
+        (member) =>
+          member.display.toLowerCase().includes(query) ||
+          member.wallet.toLowerCase().includes(query)
+      )
+    : sandboxGroupMembers;
+  const pageStart = (page - 1) * pageSize;
+
+  return {
+    data: filteredMembers.slice(pageStart, pageStart + pageSize),
+    count: filteredMembers.length,
+    page,
+    next: pageStart + pageSize < filteredMembers.length,
+  };
+}
+
 function normalizedPath(url) {
   let pathname = url.pathname;
   while (pathname.length > 1 && pathname.endsWith("/")) {
@@ -976,7 +1079,10 @@ function isExpectedChatDropParts(parts, hasPoll) {
   }
 
   if (hasPoll) {
-    return parts.length === 1 && isExpectedChatDropPart(parts[0], null);
+    return (
+      parts.length === 1 &&
+      isExpectedChatDropPart(parts[0], SANDBOX_POLL_QUESTION)
+    );
   }
 
   if (parts.length === 1) {
@@ -1262,11 +1368,329 @@ function isExpectedPublishAdminGroupBody(body) {
   );
 }
 
+function hasOnlyAllowedKeys(value, requiredKeys, optionalKeys = []) {
+  if (!isPlainObject(value)) {
+    return false;
+  }
+
+  const keys = Object.keys(value);
+  const allowedKeys = new Set([...requiredKeys, ...optionalKeys]);
+  return (
+    requiredKeys.every((key) => Object.hasOwn(value, key)) &&
+    keys.every((key) => allowedKeys.has(key))
+  );
+}
+
+function isNullableFiniteNumber(value) {
+  return (
+    value === null || (typeof value === "number" && Number.isFinite(value))
+  );
+}
+
+function isNullableString(value) {
+  return value === null || typeof value === "string";
+}
+
+function isWalletList(value, maximumLength) {
+  return (
+    value === null ||
+    (Array.isArray(value) &&
+      value.length <= maximumLength &&
+      value.every(
+        (address) =>
+          typeof address === "string" && /^0x[0-9a-f]{40}$/i.test(address)
+      ))
+  );
+}
+
+function isExpectedNftOwnership(value) {
+  return (
+    hasOnlyAllowedKeys(value, ["name", "tokens"], ["match_mode"]) &&
+    ["MEMES", "MEMELAB", "NEXTGEN", "GRADIENTS"].includes(value.name) &&
+    Array.isArray(value.tokens) &&
+    value.tokens.length <= 1000 &&
+    value.tokens.every((token) => typeof token === "string") &&
+    (value.match_mode === undefined ||
+      ["ANY_TOKEN", "ALL_TOKENS"].includes(value.match_mode))
+  );
+}
+
+function hasRuleGroupFilter(group) {
+  return (
+    (Array.isArray(group.identity_addresses) &&
+      group.identity_addresses.length > 0) ||
+    (Array.isArray(group.excluded_identity_addresses) &&
+      group.excluded_identity_addresses.length > 0) ||
+    group.level.min !== null ||
+    group.level.max !== null ||
+    group.tdh.min !== null ||
+    group.tdh.max !== null ||
+    group.rep.min !== null ||
+    group.rep.max !== null ||
+    group.rep.user_identity !== null ||
+    group.rep.category !== null ||
+    group.cic.min !== null ||
+    group.cic.max !== null ||
+    group.cic.user_identity !== null ||
+    group.owns_nfts.length > 0 ||
+    (typeof group.is_beneficiary_of_grant_id === "string" &&
+      group.is_beneficiary_of_grant_id.trim().length > 0)
+  );
+}
+
+function isExpectedCreateRuleGroupBody(body) {
+  if (
+    !hasOnlyAllowedKeys(body, ["name", "group"], ["is_private"]) ||
+    typeof body.name !== "string" ||
+    body.name.length === 0 ||
+    body.name.length > 250 ||
+    !/(?:Visibility|Who can access this wave|Who can view|Who can drop|Who can vote|Who can rate|Who can chat|Admin|Admins)$/.test(
+      body.name
+    ) ||
+    (body.is_private !== undefined && body.is_private !== false) ||
+    !hasOnlyAllowedKeys(
+      body.group,
+      [
+        "cic",
+        "excluded_identity_addresses",
+        "identity_addresses",
+        "level",
+        "owns_nfts",
+        "rep",
+        "tdh",
+      ],
+      ["is_beneficiary_of_grant_id", "is_beneficiary_of_grant_match_mode"]
+    )
+  ) {
+    return false;
+  }
+
+  const group = body.group;
+  const validTdh =
+    hasOnlyKeys(group.tdh, ["inclusion_strategy", "max", "min"]) &&
+    isNullableFiniteNumber(group.tdh.min) &&
+    isNullableFiniteNumber(group.tdh.max) &&
+    ["TDH", "XTDH", "BOTH"].includes(group.tdh.inclusion_strategy);
+  const validRep =
+    hasOnlyKeys(group.rep, [
+      "category",
+      "direction",
+      "max",
+      "min",
+      "user_identity",
+    ]) &&
+    isNullableFiniteNumber(group.rep.min) &&
+    isNullableFiniteNumber(group.rep.max) &&
+    ["RECEIVED", "SENT"].includes(group.rep.direction) &&
+    isNullableString(group.rep.user_identity) &&
+    isNullableString(group.rep.category);
+  const validCic =
+    hasOnlyKeys(group.cic, ["direction", "max", "min", "user_identity"]) &&
+    isNullableFiniteNumber(group.cic.min) &&
+    isNullableFiniteNumber(group.cic.max) &&
+    ["RECEIVED", "SENT"].includes(group.cic.direction) &&
+    isNullableString(group.cic.user_identity);
+  const validLevel =
+    hasOnlyKeys(group.level, ["max", "min"]) &&
+    isNullableFiniteNumber(group.level.min) &&
+    isNullableFiniteNumber(group.level.max);
+  const validGrant =
+    (group.is_beneficiary_of_grant_id === undefined ||
+      isNullableString(group.is_beneficiary_of_grant_id)) &&
+    (group.is_beneficiary_of_grant_match_mode === undefined ||
+      ["ANY_TOKEN", "ALL_TOKENS"].includes(
+        group.is_beneficiary_of_grant_match_mode
+      ));
+
+  return (
+    validTdh &&
+    validRep &&
+    validCic &&
+    validLevel &&
+    Array.isArray(group.owns_nfts) &&
+    group.owns_nfts.length <= 100 &&
+    group.owns_nfts.every(isExpectedNftOwnership) &&
+    isWalletList(group.identity_addresses, 200) &&
+    isWalletList(group.excluded_identity_addresses, 200) &&
+    validGrant &&
+    hasRuleGroupFilter(group)
+  );
+}
+
+function createSandboxRuleGroup(body) {
+  sandboxRuleGroupSequence += 1;
+  const id = `${SANDBOX_RULE_GROUP_ID_PREFIX}${String(
+    600 + sandboxRuleGroupSequence
+  ).padStart(12, "0")}`;
+  const identityCount = body.group.identity_addresses?.length ?? 0;
+  const excludedIdentityCount =
+    body.group.excluded_identity_addresses?.length ?? 0;
+  const group = {
+    id,
+    name: body.name,
+    created_at: CREATED_AT,
+    created_by: localIdentityOverview,
+    visible: false,
+    is_private: false,
+    group: {
+      tdh: { ...body.group.tdh },
+      rep: { ...body.group.rep },
+      cic: { ...body.group.cic },
+      level: { ...body.group.level },
+      owns_nfts: body.group.owns_nfts.map((nft) => ({ ...nft })),
+      identity_group_id: identityCount > 0 ? `${id}-included` : null,
+      identity_group_identities_count: identityCount,
+      excluded_identity_group_id:
+        excludedIdentityCount > 0 ? `${id}-excluded` : null,
+      excluded_identity_group_identities_count: excludedIdentityCount,
+      is_beneficiary_of_grant_id: body.group.is_beneficiary_of_grant_id ?? null,
+      is_beneficiary_of_grant_match_mode:
+        body.group.is_beneficiary_of_grant_match_mode ?? "ANY_TOKEN",
+      is_beneficiary_of_grant: null,
+    },
+  };
+
+  sandboxRuleGroups.set(id, group);
+  sandboxRuleGroupWallets.set(id, {
+    included: [...(body.group.identity_addresses ?? [])],
+    excluded: [...(body.group.excluded_identity_addresses ?? [])],
+  });
+  return group;
+}
+
+function isGeneratedSandboxRuleGroupId(value) {
+  if (
+    typeof value !== "string" ||
+    !value.startsWith(SANDBOX_RULE_GROUP_ID_PREFIX)
+  ) {
+    return false;
+  }
+
+  const suffix = value.slice(SANDBOX_RULE_GROUP_ID_PREFIX.length);
+  return /^\d{12}$/.test(suffix) && Number(suffix) >= 601;
+}
+
+function isPersistedPlatformGroupId(value) {
+  return (
+    typeof value === "string" &&
+    value.length <= 128 &&
+    /^[a-z0-9]+(?:-[a-z0-9]+)*-[A-Za-z0-9_-]{16,32}$/.test(value)
+  );
+}
+
+function isRecoverableSandboxRuleGroupId(value) {
+  // Browser drafts can outlive the sandbox process that created their group.
+  // Rebuild a harmless visible placeholder so those local-only drafts remain
+  // testable without granting the recovered group any criteria.
+  return (
+    isGeneratedSandboxRuleGroupId(value) || isPersistedPlatformGroupId(value)
+  );
+}
+
+function recoverSandboxRuleGroup(id) {
+  const recoveredGroup = {
+    id,
+    name: "Recovered sandbox group",
+    created_at: CREATED_AT,
+    created_by: localIdentityOverview,
+    visible: true,
+    is_private: false,
+    group: {
+      tdh: { min: null, max: null, inclusion_strategy: "TDH" },
+      rep: {
+        min: null,
+        max: null,
+        direction: "RECEIVED",
+        user_identity: null,
+        category: null,
+      },
+      cic: {
+        min: null,
+        max: null,
+        direction: "RECEIVED",
+        user_identity: null,
+      },
+      level: { min: null, max: null },
+      owns_nfts: [],
+      identity_group_id: null,
+      identity_group_identities_count: 0,
+      excluded_identity_group_id: null,
+      excluded_identity_group_identities_count: 0,
+      is_beneficiary_of_grant_id: null,
+      is_beneficiary_of_grant_match_mode: "ANY_TOKEN",
+      is_beneficiary_of_grant: null,
+    },
+  };
+
+  sandboxRuleGroups.set(id, recoveredGroup);
+  return recoveredGroup;
+}
+
+function getSandboxRuleGroup(id) {
+  const existingGroup = sandboxRuleGroups.get(id);
+  if (existingGroup) {
+    return existingGroup;
+  }
+
+  return isRecoverableSandboxRuleGroupId(id)
+    ? recoverSandboxRuleGroup(id)
+    : null;
+}
+
+function ruleGroupIdFromVisibilityPath(pathname) {
+  const groupId = pathname.match(/^\/api\/groups\/([^/]+)\/visible$/)?.[1];
+  return groupId && sandboxRuleGroups.has(groupId) ? groupId : null;
+}
+
+function isKnownSandboxGroupId(value) {
+  return (
+    value === null ||
+    value === SANDBOX_ADMIN_GROUP_ID ||
+    value === sandboxPreviewGroup.id ||
+    sandboxRuleGroups.has(value) ||
+    isRecoverableSandboxRuleGroupId(value)
+  );
+}
+
+function isExpectedWaveGroupValidationBody(body) {
+  const optionalGroupKeys = [
+    "admin_group_id",
+    "chat_group_id",
+    "participation_group_id",
+    "voting_group_id",
+  ];
+  if (
+    !hasOnlyAllowedKeys(
+      body,
+      ["visibility_group_id"],
+      [...optionalGroupKeys, "include_authenticated_user_as_admin"]
+    ) ||
+    !isKnownSandboxGroupId(body.visibility_group_id) ||
+    (body.include_authenticated_user_as_admin !== undefined &&
+      typeof body.include_authenticated_user_as_admin !== "boolean")
+  ) {
+    return false;
+  }
+
+  return optionalGroupKeys.every(
+    (key) => !Object.hasOwn(body, key) || isKnownSandboxGroupId(body[key])
+  );
+}
+
 function hasNullGroupScope(value) {
   return (
     hasOnlyKeys(value, ["scope"]) &&
     hasOnlyKeys(value.scope, ["group_id"]) &&
     value.scope.group_id === null
+  );
+}
+
+function hasKnownSandboxGroupScope(value) {
+  return (
+    isPlainObject(value) &&
+    isPlainObject(value.scope) &&
+    hasOnlyKeys(value.scope, ["group_id"]) &&
+    isKnownSandboxGroupId(value.scope.group_id)
   );
 }
 
@@ -1344,8 +1768,7 @@ function isExpectedCreateWaveVotingConfig(
       "scope",
       "signature_required",
     ]) &&
-    hasOnlyKeys(voting.scope, ["group_id"]) &&
-    voting.scope.group_id === null &&
+    hasKnownSandboxGroupScope(voting) &&
     voting.credit_type === "TDH_PLUS_XTDH" &&
     voting.credit_scope === "WAVE" &&
     voting.credit_category === null &&
@@ -1370,8 +1793,7 @@ function isExpectedCreateWaveParticipationConfig(
       "signature_required",
       "terms",
     ]) &&
-    hasOnlyKeys(participation.scope, ["group_id"]) &&
-    participation.scope.group_id === null &&
+    hasKnownSandboxGroupScope(participation) &&
     participation.no_of_applications_allowed_per_participant === null &&
     Array.isArray(participation.required_media) &&
     participation.required_media.length === 0 &&
@@ -1386,8 +1808,7 @@ function isExpectedCreateWaveParticipationConfig(
 function isExpectedCreateWaveChatConfig(chat) {
   return (
     hasOnlyKeys(chat, ["enabled", "links_disabled", "scope"]) &&
-    hasOnlyKeys(chat.scope, ["group_id"]) &&
-    chat.scope.group_id === null &&
+    hasKnownSandboxGroupScope(chat) &&
     chat.enabled === true &&
     chat.links_disabled === false
   );
@@ -1407,7 +1828,8 @@ function isExpectedCreateWaveConfig(wave) {
       "winning_threshold_min_duration_ms",
     ]) &&
     hasOnlyKeys(wave.admin_group, ["group_id"]) &&
-    wave.admin_group.group_id === SANDBOX_ADMIN_GROUP_ID &&
+    typeof wave.admin_group.group_id === "string" &&
+    isKnownSandboxGroupId(wave.admin_group.group_id) &&
     wave.type === "CHAT" &&
     wave.admin_drop_deletion_enabled === true &&
     wave.winning_threshold === null &&
@@ -1416,6 +1838,43 @@ function isExpectedCreateWaveConfig(wave) {
     wave.max_votes_per_identity_to_drop === null &&
     wave.time_lock_ms === null &&
     wave.decisions_strategy === null
+  );
+}
+
+function isExpectedResumedDraftChatWaveBody(body) {
+  if (
+    !hasOnlyKeys(body, [
+      "chat",
+      "description_drop",
+      "outcomes",
+      "participation",
+      "picture",
+      "visibility",
+      "voting",
+      "wave",
+      "name",
+    ]) ||
+    typeof body.name !== "string" ||
+    !body.name.startsWith("Sandbox ") ||
+    body.name.length > 255
+  ) {
+    return false;
+  }
+
+  const descriptionContent = body.description_drop?.parts?.[0]?.content;
+  return (
+    typeof descriptionContent === "string" &&
+    descriptionContent.length <= 100_000 &&
+    body.picture === null &&
+    isExpectedDescriptionDrop(body.description_drop, descriptionContent) &&
+    hasOnlyKeys(body.visibility, ["scope"]) &&
+    hasKnownSandboxGroupScope(body.visibility) &&
+    isExpectedCreateWaveParticipationConfig(body.participation) &&
+    isExpectedCreateWaveVotingConfig(body.voting) &&
+    isExpectedCreateWaveChatConfig(body.chat) &&
+    isExpectedCreateWaveConfig(body.wave) &&
+    Array.isArray(body.outcomes) &&
+    body.outcomes.length === 0
   );
 }
 
@@ -1514,7 +1973,7 @@ function isExpectedCreatePerpetualRankWaveBody(body) {
 
 function isExpectedScheduledRankWaveConfig(wave) {
   // A scheduled rank wave must carry exactly one non-rolling decision point
-  // (the Dates step's default first announcement) and nothing else.
+  // (the Schedule step's default first announcement) and nothing else.
   return (
     hasOnlyKeys(wave, [
       "admin_drop_deletion_enabled",
@@ -1623,6 +2082,26 @@ function notificationWaveIdFromPath(pathname) {
   );
 }
 
+function isExpectedNotificationWaveReadBody(body) {
+  if (isEmptyRequestBody(body)) {
+    return true;
+  }
+  if (!isPlainObject(body) || body.request_dm_unread_state !== true) {
+    return false;
+  }
+
+  const expectedKeys =
+    body.read_through_serial_no === undefined
+      ? ["request_dm_unread_state"]
+      : ["read_through_serial_no", "request_dm_unread_state"];
+  return (
+    hasOnlyKeys(body, expectedKeys) &&
+    (body.read_through_serial_no === undefined ||
+      (Number.isInteger(body.read_through_serial_no) &&
+        body.read_through_serial_no >= 0))
+  );
+}
+
 function isSandboxReactionPath(pathname) {
   return pathname === `/api/drops/${SANDBOX_DROP_ID}/reaction`;
 }
@@ -1717,6 +2196,17 @@ function isKnownSandboxMutation(method, pathname, searchParams, body) {
     return isExpectedSessionRefreshBody(body);
   }
 
+  if (pathname === "/api/auth/session-logout") {
+    return (
+      hasOnlyKeys(body, ["all_sessions", "client_address", "client_type"]) &&
+      body.client_type === "web" &&
+      (body.client_address === null ||
+        (typeof body.client_address === "string" &&
+          /^0x[0-9a-f]{40}$/i.test(body.client_address))) &&
+      typeof body.all_sessions === "boolean"
+    );
+  }
+
   if (pathname === "/api/drops") {
     // The diagnostics reset bounds this synthetic chat submit to one accepted request.
     return (
@@ -1730,29 +2220,41 @@ function isKnownSandboxMutation(method, pathname, searchParams, body) {
   }
 
   if (pathname === "/api/groups") {
-    return isExpectedCreateAdminGroupBody(body);
+    return (
+      isExpectedCreateAdminGroupBody(body) ||
+      isExpectedCreateRuleGroupBody(body)
+    );
   }
 
   if (pathname === `/api/groups/${SANDBOX_ADMIN_GROUP_ID}/visible`) {
     return isExpectedPublishAdminGroupBody(body);
   }
 
+  if (ruleGroupIdFromVisibilityPath(pathname)) {
+    return isExpectedPublishAdminGroupBody(body);
+  }
+
   if (pathname === "/api/waves") {
     return (
       isExpectedCreateWaveBody(body) ||
+      isExpectedResumedDraftChatWaveBody(body) ||
       isExpectedCreatePerpetualRankWaveBody(body) ||
       isExpectedCreateScheduledRankWaveBody(body)
     );
   }
 
   if (pathname === `/api/v2/waves/${SANDBOX_CREATED_WAVE_ID}/metadata`) {
-    // A perpetual rank wave submits its outcomes tab as hidden right after
-    // creation; nothing else is allowed to write wave metadata here.
+    // A perpetual rank wave submits its outcomes tab as hidden and persists
+    // the default proposal-card recipe right after creation. Nothing else is
+    // allowed to write wave metadata here.
     return (
       isPlainObject(body) &&
       hasOnlyKeys(body, ["data_key", "data_value"]) &&
-      body.data_key === "wave_display.outcomes.visible" &&
-      body.data_value === "false"
+      ((body.data_key === "wave_display.outcomes.visible" &&
+        body.data_value === "false") ||
+        (body.data_key === "wave_display.proposals.card_recipe" &&
+          body.data_value ===
+            '{"version":1,"layout":"summary","excerpt_max_characters":360,"show_media_thumbnail":true}'))
     );
   }
 
@@ -1771,7 +2273,7 @@ function isKnownSandboxMutation(method, pathname, searchParams, body) {
   if (notificationWaveId) {
     return (
       sandboxNotificationWaveIds.has(notificationWaveId) &&
-      isEmptyRequestBody(body)
+      isExpectedNotificationWaveReadBody(body)
     );
   }
 
@@ -1779,6 +2281,17 @@ function isKnownSandboxMutation(method, pathname, searchParams, body) {
 }
 
 function classifyRequest(method, pathname, searchParams, body) {
+  if (
+    method === "POST" &&
+    ((pathname === "/api/groups/preview-members" &&
+      isPlainObject(body) &&
+      isPlainObject(body.group)) ||
+      (pathname === "/api/wave-group-validation" &&
+        isExpectedWaveGroupValidationBody(body)))
+  ) {
+    return "api-read";
+  }
+
   // The sandbox allowlist intentionally wins over the broad drop-write guard,
   // but only after exact path, empty-query, and body checks pass.
   if (isKnownSandboxMutation(method, pathname, searchParams, body)) {
@@ -1824,10 +2337,21 @@ function loggedRequestBody(pathname, body) {
     };
   }
 
-  if (pathname === `/api/groups/${SANDBOX_ADMIN_GROUP_ID}/visible`) {
+  if (
+    pathname === `/api/groups/${SANDBOX_ADMIN_GROUP_ID}/visible` ||
+    ruleGroupIdFromVisibilityPath(pathname)
+  ) {
     return {
       visible: body.visible,
       old_version_id: body.old_version_id,
+    };
+  }
+
+  if (pathname === `/api/v2/waves/${SANDBOX_CREATED_WAVE_ID}/metadata`) {
+    return {
+      data_key: typeof body.data_key === "string" ? body.data_key : null,
+      data_value: typeof body.data_value === "string" ? body.data_value : null,
+      keys: sortedKeys(body),
     };
   }
 
@@ -1962,6 +2486,12 @@ function handleDiagnostics(method, pathname, res) {
   if (pathname === "/__composer-sandbox/reset" && method === "POST") {
     requests.length = 0;
     sandboxDropReaction = null;
+    sandboxWaveGuidelinesEnabled = false;
+    writeJson(res, 200, { ok: true });
+    return true;
+  }
+  if (pathname === "/__composer-sandbox/guidelines" && method === "POST") {
+    sandboxWaveGuidelinesEnabled = true;
     writeJson(res, 200, { ok: true });
     return true;
   }
@@ -1979,12 +2509,33 @@ function writeEmptyResponse(res, status) {
 }
 
 const mockApiExactReadRoutes = new Map([
-  ["/api/groups", () => []],
+  [
+    "/api/groups",
+    () => [
+      sandboxPreviewGroup,
+      ...Array.from(sandboxRuleGroups.values()).filter(
+        (group) => group.visible
+      ),
+    ],
+  ],
   [
     "/api/v2/waves",
     () => ({ data: [localWaveOverview], page: 1, next: false }),
   ],
   ["/api/v2/official-waves", () => [localWaveOverview]],
+  [
+    `/api/v2/waves/${SANDBOX_WAVE_ID}/metadata`,
+    () =>
+      sandboxWaveGuidelinesEnabled
+        ? [
+            {
+              id: 1,
+              data_key: "wave_display.rules.custom",
+              data_value: SANDBOX_WAVE_GUIDELINES,
+            },
+          ]
+        : [],
+  ],
   [`/api/waves/${SANDBOX_DM_WAVE_ID}`, () => dmWave],
   [
     `/api/v2/waves/${SANDBOX_DM_WAVE_ID}/drops`,
@@ -2020,6 +2571,7 @@ const mockApiExactReadRoutes = new Map([
   ],
   ["/api/v2/boosted-drops", () => emptyPage()],
   ["/api/v2/drops", () => emptyPage()],
+  ["/api/mention-aliases", () => []],
   ["/api/feed", () => []],
 ]);
 
@@ -2062,6 +2614,61 @@ function handleCommunityMemberRead(pathname, url, res) {
   return writeJsonResponse(res, members);
 }
 
+function handleTopCommunityMembersRead(pathname, url, res) {
+  if (pathname !== "/api/community-members/top") {
+    return false;
+  }
+
+  return writeJsonResponse(res, sandboxGroupMembersPage(url.searchParams));
+}
+
+function handleGroupIdentityWalletsRead(pathname, res) {
+  const match = pathname.match(
+    /^\/api\/groups\/([^/]+)\/identity_groups\/([^/]+)$/
+  );
+  if (!match) {
+    return false;
+  }
+
+  const [, groupId, identityGroupId] = match;
+  const group = getSandboxRuleGroup(groupId);
+  const wallets = sandboxRuleGroupWallets.get(groupId);
+  if (!group || !wallets) {
+    writeJson(res, 404, { error: "Sandbox identity group not found." });
+    return true;
+  }
+
+  if (group.group.identity_group_id === identityGroupId) {
+    return writeJsonResponse(res, wallets.included);
+  }
+  if (group.group.excluded_identity_group_id === identityGroupId) {
+    return writeJsonResponse(res, wallets.excluded);
+  }
+
+  writeJson(res, 404, { error: "Sandbox identity group not found." });
+  return true;
+}
+
+function handleGroupRead(pathname, res) {
+  const groupId = pathname.match(/^\/api\/groups\/([^/]+)$/)?.[1] ?? null;
+  if (!groupId) {
+    return false;
+  }
+
+  let group = getSandboxRuleGroup(groupId);
+  if (groupId === SANDBOX_ADMIN_GROUP_ID) {
+    group = sandboxAdminGroup;
+  } else if (groupId === sandboxPreviewGroup.id) {
+    group = sandboxPreviewGroup;
+  }
+  if (group) {
+    return writeJsonResponse(res, group);
+  }
+
+  writeJson(res, 404, { error: "Sandbox group not found." });
+  return true;
+}
+
 function handleNotificationRead(pathname, url, res) {
   if (pathname !== "/api/v2/notifications") {
     return false;
@@ -2097,6 +2704,9 @@ function handleMockApiRead(method, pathname, url, res) {
 
   return (
     handleCommunityMemberRead(pathname, url, res) ||
+    handleTopCommunityMembersRead(pathname, url, res) ||
+    handleGroupIdentityWalletsRead(pathname, res) ||
+    handleGroupRead(pathname, res) ||
     handleNotificationRead(pathname, url, res) ||
     handleExactMockApiRead(pathname, res) ||
     handlePatternMockApiRead(pathname, res)
@@ -2113,13 +2723,28 @@ function isNotificationMutationPath(pathname) {
 const mockApiKnownPostRoutes = [
   {
     matches: (pathname) => pathname === "/api/groups",
-    respond: (res) =>
-      writeJsonResponse(res, { ...sandboxAdminGroup, visible: false }),
+    respond: (res, body) =>
+      writeJsonResponse(
+        res,
+        isExpectedCreateAdminGroupBody(body)
+          ? { ...sandboxAdminGroup, visible: false }
+          : createSandboxRuleGroup(body)
+      ),
   },
   {
     matches: (pathname) =>
       pathname === `/api/groups/${SANDBOX_ADMIN_GROUP_ID}/visible`,
     respond: (res) => writeJsonResponse(res, sandboxAdminGroup),
+  },
+  {
+    matches: (pathname) => Boolean(ruleGroupIdFromVisibilityPath(pathname)),
+    respond: (res, _body, pathname) => {
+      const groupId = ruleGroupIdFromVisibilityPath(pathname);
+      const group = sandboxRuleGroups.get(groupId);
+      const publishedGroup = { ...group, visible: true };
+      sandboxRuleGroups.set(groupId, publishedGroup);
+      return writeJsonResponse(res, publishedGroup);
+    },
   },
   {
     matches: (pathname) => pathname === "/api/waves",
@@ -2128,19 +2753,26 @@ const mockApiKnownPostRoutes = [
   {
     matches: (pathname) =>
       pathname === `/api/v2/waves/${SANDBOX_CREATED_WAVE_ID}/metadata`,
-    respond: (res) =>
+    respond: (res, body) =>
       writeJsonResponse(res, {
         id: 1,
-        data_key: "wave_display.outcomes.visible",
-        data_value: "false",
+        data_key: body.data_key,
+        data_value: body.data_value,
       }),
   },
   {
     matches: (pathname) => Boolean(notificationWaveIdFromPath(pathname)),
-    respond: (res) => writeEmptyResponse(res, 204),
+    respond: (res, body) =>
+      isEmptyRequestBody(body)
+        ? writeEmptyResponse(res, 204)
+        : writeJsonResponse(res, { dm_unread_state: null }),
   },
   {
     matches: isNotificationMutationPath,
+    respond: (res) => writeEmptyResponse(res, 204),
+  },
+  {
+    matches: (pathname) => pathname === "/api/auth/session-logout",
     respond: (res) => writeEmptyResponse(res, 204),
   },
   {
@@ -2249,12 +2881,39 @@ function handleKnownSandboxPost(method, pathname, url, body, res) {
     return false;
   }
 
-  return route.respond(res);
+  return route.respond(res, body, pathname);
+}
+
+function handleGroupMembersPreview(method, pathname, url, body, res) {
+  if (
+    method !== "POST" ||
+    pathname !== "/api/groups/preview-members" ||
+    !isPlainObject(body) ||
+    !isPlainObject(body.group)
+  ) {
+    return false;
+  }
+
+  return writeJsonResponse(res, sandboxGroupMembersPage(url.searchParams));
+}
+
+function handleWaveGroupValidation(method, pathname, body, res) {
+  if (
+    method !== "POST" ||
+    pathname !== "/api/wave-group-validation" ||
+    !isExpectedWaveGroupValidationBody(body)
+  ) {
+    return false;
+  }
+
+  return writeJsonResponse(res, { valid: true, invalid_roles: [] });
 }
 
 function handleMockApi(method, pathname, url, body, res, requestKind) {
   return (
     handleMockApiRead(method, pathname, url, res) ||
+    handleGroupMembersPreview(method, pathname, url, body, res) ||
+    handleWaveGroupValidation(method, pathname, body, res) ||
     handleAllowedChatDropPost(method, pathname, body, requestKind, res) ||
     handleAllowedChatDropEditPost(method, pathname, requestKind, res) ||
     handleAllowedReactionMutation(method, pathname, url, body, res) ||
@@ -2350,6 +3009,7 @@ async function handleRequest(req, res) {
 }
 
 function buildPublicRuntime() {
+  const useDevAuth = process.env.USE_DEV_AUTH !== "false";
   return {
     ALLOWLIST_API_ENDPOINT: mockApiOrigin,
     API_ENDPOINT: mockApiOrigin,
@@ -2363,9 +3023,13 @@ function buildPublicRuntime() {
     NODE_ENV: "development",
     PORT: String(frontendPort),
     WS_ENDPOINT: mockWsOrigin,
-    USE_DEV_AUTH: "true",
-    DEV_MODE_WALLET_ADDRESS: SANDBOX_WALLET,
-    DEV_MODE_AUTH_JWT: buildSyntheticJwt(),
+    USE_DEV_AUTH: useDevAuth ? "true" : "false",
+    ...(useDevAuth
+      ? {
+          DEV_MODE_WALLET_ADDRESS: SANDBOX_WALLET,
+          DEV_MODE_AUTH_JWT: buildSyntheticJwt(),
+        }
+      : {}),
   };
 }
 

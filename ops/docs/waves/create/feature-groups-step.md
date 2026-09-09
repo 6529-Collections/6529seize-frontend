@@ -1,109 +1,152 @@
-# Wave Creation Group Access and Permissions
+# Wave Creation Access and Permissions
 
 ## Overview
 
-Use `Groups` to review or customize wave access and permissions, including
-viewing, dropping, voting, chatting, and administration where supported. This
-step is user-reachable for `Chat`, `Rank`, and `Approve`.
+Use `Access` to choose who can open a wave and, when needed, give different
+groups permission to chat, submit, vote, or administer it. This step is
+user-reachable for `Chat`, `Rank`, and `Approve` waves.
 
 ## Location in the Site
 
 - Full-page create route: `/waves/create`
 - Desktop modal create route mode: `?create=wave` on `/waves`,
   `/waves/{waveId}`, `/messages`, and `/messages/{waveId}`
-- Step label: `Groups`
+- Step label: `Access`
 
 ## Step Paths
 
-- `Chat`: `Overview` -> `Groups` -> `Rules` -> `Description`
-- `Rank`: `Overview` -> `Groups` -> `Dates` -> `Drops` -> `Rules` ->
-  `Voting` -> `Outcomes` -> `Description`
-- `Approve`: `Overview` -> `Groups` -> `Dates` -> `Drops` -> `Rules` ->
-  `Voting` -> `Outcomes` -> `Description`
+- `Chat`: `Setup` -> `Access` -> `Guidelines` -> `Description` -> `Overview`
+- `Rank`: `Setup` -> `Access` -> `Schedule` -> `Drops` -> `Voting` -> `Outcomes` ->
+  `Guidelines` -> `Description` -> `Overview`
+- `Approve`: `Setup` -> `Access` -> `Schedule` -> `Drops` -> `Voting` -> `Outcomes` ->
+  `Guidelines` -> `Description` -> `Overview`
 
 ## Entry Points
 
-- Continue from `Overview` to `Groups`.
-- Use `Back` from later steps to return to `Groups`.
-- On large screens, reopen `Groups` from the step rail after you move past it.
+- Continue from `Setup` to `Access`.
+- Use `Back` from later steps to return to `Access`.
+- On large screens, reopen `Access` from the step rail after moving past it.
 
-## What You Configure
+## Default Access
 
-- All access and moderation rows are visible when the step opens. Each row
-  groups its permission name, current scope, and related actions so the page can
-  be scanned from `Who can view` through `Admin` without opening a disclosure.
-- Helper copy clarifies that `Who can view` controls who can access the wave,
-  and that followers who can view the wave may get a notification when it is
-  created.
-- `Chat` rows: `Who can view`, `Who can chat`, `Admin`
-- `Rank` and `Approve` rows: `Who can view`, `Who can drop`, `Who can vote`,
-  `Who can chat`, `Admin`
-- `Rank` and `Approve` only:
-  - `Enable chat` toggle controls whether `Who can chat` is editable
-- All wave types:
-  - `Allow admins to delete posts` toggle sets admin delete permission
-- Defaults:
-  - `Anyone` for view/drop/vote/chat
-  - `Only me` for admin when creating a top-level wave
-  - the parent wave's admin group when creating a subwave
-  - `Allow admins to delete posts` is enabled by default
+- The step initially shows only `Who can access this wave`.
+- Helper copy explains that everyone with access can participate by default and
+  only the creator can administer the wave.
+- Selecting an access group also applies it to chat and, for `Rank` and
+  `Approve`, submission and voting.
+- `Customize other permissions` expands the less common controls:
+  - `Chat`: `Who can chat`, `Admins`
+  - `Rank` and `Approve`: `Who can drop`, `Who can vote`, `Who can chat`,
+    `Admins`
+- The expanded section shows `Customized` and reopens automatically after
+  navigating away and back when Admins was changed, a participation group
+  differs from access, chat is disabled, or admin deletion is disabled.
+- `Enable chat` controls whether `Who can chat` is active on `Rank` and
+  `Approve` waves.
+- `Allow admins to delete posts` is enabled by default.
+- Top-level waves default to `Everyone` for access, drop, vote, and chat, and
+  `Only me` for administration.
+- A new subwave starts with the parent wave's exact access group and admin
+  group. Chat and, for `Rank` and `Approve`, submission and voting start with
+  that same access group. A public parent's subwaves start with `Everyone`.
+- Changing the wave type resets access and participation to these defaults.
+- The inherited subwave groups are editable. Subwave access does not have to
+  match the parent's group.
+- Before creating a subwave, the app checks whether its access group includes
+  anyone outside the parent's audience. If it does, a warning explains that
+  those members cannot open the subwave. `Continue anyway` creates it with the
+  chosen group; `Go back` keeps the draft open. A different group whose members
+  can all access the parent needs no warning, nor does a public parent.
+- Members need access to both the subwave and its parent. Making a subwave
+  public does not bypass a restricted parent.
 
-## Group Picker Behavior
+## Editing Criteria
 
-- Focus `Search groups…` to open suggestions.
-- Empty input fetches default suggestions; typed input filters results.
-- Suggestions are capped at `7`.
-- Loading state shows a spinner.
-- No-match state shows `No groups found`.
-- Keyboard controls in the list:
-  - `ArrowDown` / `ArrowUp` move active selection with wrap-around
-  - `Enter` selects the active row
-  - `Escape` closes the list
-- Clicking outside closes the list.
-- Typing in a row that already has a selected group keeps that current group
-  selected until the row is explicitly cleared or a new group is picked.
-- Clear control (`x`) resets the row to its default scope.
-- Helper text under each row shows `Current group: <group-or-scope>`.
-- Inline identity groups use access-group wording and warn when the connected
-  creator is excluded, because excluding yourself from a `Who can view` group
-  can prevent you from opening the created wave.
+- Every wave access row offers one `Edit` action with a pencil icon. Wave access
+  editors do not offer `Choose group`.
+- `Edit` opens the full criteria builder on `Identities`. `Level`, `TDH`, `NIC`,
+  `Rep`, `Required NFTs`, `Collection Access`, and `xTDH Grant` remain directly
+  available as prominent buttons.
+- The currently open criterion has a solid blue button with an underlined
+  label. A dot identifies each criterion that has a value, whether or not it is
+  open. Screen readers receive the configured state in the button name and the
+  open state as pressed.
+- While editing, `Before editing` shows the currently applied audience,
+  including `Everyone`, and `After editing` shows the proposed audience and
+  readable criteria summary.
+- `View members` is available in the before/after summaries when membership can
+  be evaluated. The member browser is searchable, paginated, links identities
+  to their profiles, and explains why identities qualify.
+- `Hide criteria and members` makes criteria and membership visible to group
+  members but hidden from everyone else. It starts off for a new group and
+  preserves the setting copied from an existing assignment.
+- `Save changes` creates a new group and assigns it to the row; the existing
+  group is not mutated. `Next` remains unavailable while an edit is pending.
+- While an edit is open, the header action becomes `Cancel`. Cancel discards
+  the draft and restores the applied audience. There is no separate Close,
+  Discard draft, or Preview matches action.
+- Moving between identity and rule buttons keeps the current draft. Navigating
+  to another wizard step clears an unapplied criteria replacement.
 
-## Warnings and State Changes
+## Identity Criteria
 
-- If both `Who can view` and `Admin` are set to explicit groups, `Warning:
-  Limited Access` appears and clarifies that the view group controls access
-  while the admin group controls management.
-- On `Rank` and `Approve`, turning `Enable chat` off disables editing for
-  `Who can chat`.
-- `Allow admins to delete posts` does not show extra helper text when enabled.
+- Identities can be explicitly included or excluded through profile search, an
+  authenticated EMMA allowlist, or a dragged or selected CSV file.
+- Wallets from profile search, EMMA, and CSV are normalized and deduplicated.
+  If a wallet is later added to the opposite treatment, the latest action wins.
+- The identity editor shows the unique total for the active treatment. Inline
+  groups can include up to 10,000 identities and exclude up to 1,000.
+- Search orders exact, prefix, and substring profile-handle matches before
+  ENS-only matches, then orders each match group by profile level.
+- New inline groups include the connected creator by default, including groups
+  composed only from rules. `Include me` can be switched off.
+- Excluding the creator from the main access group shows a warning because the
+  creator may be unable to reopen the wave.
 
-## Failure and Recovery
+## Permission Shortcuts
 
-- If search shows no matches, clear or change search text and retry.
-- No group selection is required to leave `Groups` and continue.
-- If no explicit admin group is selected, submit tries to create and publish a
-  personal admin group (`Only {handle}` / `Only Me`) for a top-level wave.
-- A subwave reuses its parent wave's admin group instead of creating another
-  personal group when no different group is selected.
-- If a top-level personal admin group cannot be created or made visible, submit
-  stops and identifies the failed stage. Add a primary wallet when requested,
-  choose an existing admin group, or retry later.
+- A restricted `Who can access this wave` row offers `Make wave public`.
+- At the moment it is selected, the access row changes to `Everyone`. Chat,
+  submission, and voting also change to `Everyone` only when each one still
+  matches the access group at that moment. Independently customized rows remain
+  unchanged. Admins is never changed.
+- A customized chat, submission, or voting row offers `Match wave access` when
+  it differs from the access row. Selecting it copies the current access group
+  into that row and resumes default synchronization for later access changes.
+
+## Validation, Failure, and Recovery
+
+- When wave access is restricted, every active Drop, Vote, Chat, and Admins
+  group must contain only people who can also access the wave.
+- The app validates active groups together, exposes and highlights incompatible
+  rows, and keeps `Next` unavailable while validation runs or fails.
+- If current criteria or members cannot load, the editor preserves the draft
+  and offers `Try again`. Older saved assignments whose criteria are unavailable
+  can still show any current members the group endpoint resolves.
+- EMMA load failures offer retry or removal. CSV import accepts `.csv`, ignores
+  malformed entries, and reports when no valid Ethereum addresses are found.
+- If access cannot be checked, `Next` keeps the step open; changing a group
+  starts a fresh check.
+- If no admin group is selected, submission creates and publishes a personal
+  admin group for a top-level wave. A subwave reuses its parent admin group.
+- Submission checks the final group configuration again after authentication
+  and before creating the personal admin group or the wave.
 
 ## Limitations / Notes
 
-- The inline group builder can select an existing group or create an identity,
-  NFT, or combined group without leaving wave creation.
-- `Approve` uses the same group rows as `Rank`.
+- `Approve` uses the same access rows as `Rank`.
+- Group membership is live: profile, reputation, and ownership changes can
+  change who matches criteria over time.
 
 ## Related Pages
 
 - [Wave Creation Index](README.md)
 - [Waves Index](../README.md)
-- [Wave Creation Overview Step](feature-overview-step.md)
-- [Wave Creation Dates and Timeline](feature-dates-step.md)
+- [Wave Creation Setup Step](feature-overview-step.md)
+- [Wave Creation Schedule](feature-dates-step.md)
 - [Wave Creation Drop Settings](feature-drops-step.md)
-- [Wave Creation Rules Step](feature-rules-step.md)
+- [Wave Creation Guidelines Step](feature-rules-step.md)
 - [Wave Creation Description Step](feature-description-step.md)
 - [Wave Right Sidebar Group and Curation Management](../sidebars/feature-right-sidebar-group-management.md)
-- [Groups List Filters](../../groups/feature-groups-list-filters.md)
+- [Network Group Scope Flow](../../network/flow-network-group-scope.md)
 - [Docs Home](../../README.md)

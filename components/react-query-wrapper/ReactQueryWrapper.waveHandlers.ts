@@ -3,6 +3,14 @@ import { QueryKey } from "./query-keys";
 import { toggleWaveFollowing } from "./utils/toggleWaveFollowing";
 
 export const createWaveQueryHandlers = (queryClient: QueryClient) => {
+  const invalidateProfileWaveActivity = () => {
+    queryClient
+      .invalidateQueries({
+        queryKey: [QueryKey.PROFILE_WAVE_ACTIVITY],
+      })
+      .catch(() => undefined);
+  };
+
   const invalidateWavesV2 = () => {
     queryClient
       .invalidateQueries({
@@ -83,7 +91,10 @@ export const createWaveQueryHandlers = (queryClient: QueryClient) => {
     });
   };
 
-  const onWaveCreated = () => invalidateAllWaves();
+  const onWaveCreated = () => {
+    invalidateProfileWaveActivity();
+    invalidateAllWaves();
+  };
 
   const onWaveFollowChange = ({
     waveId,

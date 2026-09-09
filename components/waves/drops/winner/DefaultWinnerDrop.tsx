@@ -138,7 +138,7 @@ const DefaultWinnerDropInner = ({
     metadata: drop.metadata,
   });
   const getBackgroundColorClass = (_loc: DropLocation): string =>
-    "tw-bg-iron-950";
+    "tw-bg-[var(--drop-card-background,theme(colors.iron.950))]";
 
   let bgColorClass = getBackgroundColorClass(location);
   if (contentPresentation === "proposalCard") {
@@ -223,8 +223,8 @@ const DefaultWinnerDropInner = ({
 
   return (
     <div
-      className={`tw-w-full ${
-        location === DropLocation.WAVE ? "tw-px-4 tw-py-1" : ""
+      className={`tw-w-full ${location === DropLocation.WAVE ? "tw-px-4 tw-py-1" : ""} ${
+        location === DropLocation.PROFILE ? "tw-mb-3" : ""
       }`}
     >
       <div className="tw-group tw-relative tw-w-full">

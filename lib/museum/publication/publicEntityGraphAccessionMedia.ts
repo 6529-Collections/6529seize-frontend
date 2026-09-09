@@ -199,10 +199,9 @@ function isExactUtcTimestamp(value: unknown): value is string {
   ) {
     return false;
   }
-  const match =
-    /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})$/u.exec(
-      value.slice(0, 19)
-    );
+  const match = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})$/u.exec(
+    value.slice(0, 19)
+  );
   if (match === null) return false;
 
   const [, yearText, monthText, dayText, hourText, minuteText, secondText] =

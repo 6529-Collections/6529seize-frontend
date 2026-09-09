@@ -31,16 +31,17 @@ const GROUP_MENTION_MARK_PATTERN_FACTORIES: Readonly<
     /(?<![\p{L}\p{N}_@])(@devs6529)(?![\p{L}\p{N}_@])/giu,
 };
 
+export const isAdminOnlyGroupMention = (group: ApiDropGroupMention): boolean =>
+  group === ApiDropGroupMention.All ||
+  group === ApiDropGroupMention.Contributors;
+
 export const getMentionedGroupsFromText = (
   content: string,
-  canMentionAll: boolean
+  canMentionAdminOnlyGroups: boolean
 ): ApiDropGroupMention[] =>
-  // @all keeps its creator/admin permission gate. The other platform-managed
-  // groups are intentionally available to any author who can post; the API
-  // resolves recipients against the wave's visibility and access groups.
   Object.values(ApiDropGroupMention).filter(
     (group) =>
-      (group !== ApiDropGroupMention.All || canMentionAll) &&
+      (!isAdminOnlyGroupMention(group) || canMentionAdminOnlyGroups) &&
       GROUP_MENTION_PATTERNS[group].test(content)
   );
 
@@ -48,13 +49,13 @@ export const getMentionedGroupsFromParts = (
   parts: readonly {
     readonly mentioned_groups?: readonly ApiDropGroupMention[] | null;
   }[],
-  canMentionAll: boolean
+  canMentionAdminOnlyGroups: boolean
 ): ApiDropGroupMention[] =>
   // Part metadata describes global tokens in the current displayed content;
   // it is not a notification-delivery or audience audit record.
   Object.values(ApiDropGroupMention).filter(
     (group) =>
-      (group !== ApiDropGroupMention.All || canMentionAll) &&
+      (!isAdminOnlyGroupMention(group) || canMentionAdminOnlyGroups) &&
       parts.some((part) => part.mentioned_groups?.includes(group))
   );
 

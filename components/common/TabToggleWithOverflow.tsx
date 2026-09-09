@@ -39,8 +39,8 @@ const getTabStateClassName = ({
 }): string => {
   if (isCompactPills) {
     return isActive
-      ? "tw-border-iron-600 tw-bg-iron-800 tw-font-semibold tw-text-iron-50"
-      : "tw-border-transparent tw-bg-transparent tw-font-medium tw-text-iron-400 active:tw-bg-iron-800/60 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-iron-200";
+      ? "tw-bg-white/[0.08] tw-font-semibold tw-text-iron-50"
+      : "tw-bg-transparent tw-font-medium tw-text-iron-500 active:tw-bg-white/[0.06] desktop-hover:hover:tw-bg-white/[0.04] desktop-hover:hover:tw-text-iron-200";
   }
 
   return isActive
@@ -163,7 +163,7 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
     <div
       className={clsx(
         "tailwind-scope tw-flex",
-        isCompactPills ? "tw-gap-x-1.5" : "tw-gap-x-0.5",
+        isCompactPills ? "tw-gap-x-2.5" : "tw-gap-x-0.5",
         fullWidth ? "tw-w-full" : "tw-w-auto"
       )}
     >
@@ -172,7 +172,7 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
         aria-orientation="horizontal"
         className={clsx(
           "tw-flex",
-          isCompactPills ? "tw-gap-x-1.5" : "tw-gap-x-0.5",
+          isCompactPills ? "tw-gap-x-2.5" : "tw-gap-x-0.5",
           fullWidth && "tw-flex-1"
         )}
       >
@@ -191,7 +191,7 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
             className={clsx(
               "tw-whitespace-nowrap tw-border-solid tw-transition-colors tw-duration-150 focus-visible:tw-outline-none focus-visible:tw-ring-inset motion-reduce:tw-transition-none",
               isCompactPills
-                ? "tw-inline-flex tw-h-7 tw-flex-none tw-items-center tw-rounded-full tw-border tw-px-2 tw-text-xs focus-visible:tw-ring-1 focus-visible:tw-ring-iron-400/70"
+                ? "tw-inline-flex tw-h-8 tw-flex-none tw-items-center tw-rounded-full tw-border-0 tw-px-3 tw-text-xs focus-visible:tw-ring-1 focus-visible:tw-ring-iron-400/70"
                 : "-tw-mb-px tw-flex-1 tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-bg-transparent tw-py-3 tw-text-sm focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300",
               fullWidth && "tw-flex tw-justify-center tw-text-center",
               getTabStateClassName({
@@ -214,7 +214,7 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
           triggerClassName={clsx(
             "tw-whitespace-nowrap tw-border-solid tw-transition-colors tw-duration-150 focus-visible:tw-outline-none focus-visible:tw-ring-inset motion-reduce:tw-transition-none",
             isCompactPills
-              ? "tw-inline-flex tw-h-7 tw-flex-none tw-items-center tw-rounded-full tw-border tw-px-2 tw-text-xs focus-visible:tw-ring-1 focus-visible:tw-ring-iron-400/70"
+              ? "tw-inline-flex tw-h-8 tw-flex-none tw-items-center tw-rounded-full tw-border-0 tw-px-3 tw-text-xs focus-visible:tw-ring-1 focus-visible:tw-ring-iron-400/70"
               : "-tw-mb-px tw-flex-1 tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-bg-transparent tw-py-3 tw-text-sm focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300",
             getTabStateClassName({
               isActive: isActiveInOverflow,

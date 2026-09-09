@@ -4,6 +4,7 @@ import {
   type MuseumPublicDocument,
   type MuseumUpstreamMedia,
 } from "./publication/types";
+import { displayCreditWithoutRepeatedLicense } from "./credit";
 
 export const CASEY_ACCESSION_ID = "6529NM.2026.001";
 export const CASEY_ARTIST_SLUG = "casey-reas";
@@ -27,51 +28,6 @@ export interface CaseyArtwork {
   readonly rightsUrl?: string | undefined;
   readonly status: "accessioned";
   readonly mediaRetention: "upstream_not_retained";
-}
-
-function trimTrailingCharacters(
-  value: string,
-  shouldTrim: (character: string) => boolean
-): string {
-  let end = value.length;
-  while (end > 0 && shouldTrim(value[end - 1] ?? "")) {
-    end -= 1;
-  }
-  return value.slice(0, end);
-}
-
-function trimTerminalPeriodsAndWhitespace(value: string): string {
-  return trimTrailingCharacters(
-    value,
-    (character) => character === "." || character.trim().length === 0
-  );
-}
-
-function displayCreditWithoutRepeatedLicense(
-  creditLine: string,
-  rightsLabel: string
-): string {
-  const creditWithoutTerminalPunctuation =
-    trimTerminalPeriodsAndWhitespace(creditLine);
-  const labelWithoutTerminalPunctuation =
-    trimTerminalPeriodsAndWhitespace(rightsLabel);
-  const creditLower = creditWithoutTerminalPunctuation.toLocaleLowerCase();
-  const candidates = [
-    labelWithoutTerminalPunctuation,
-    `Licensed ${labelWithoutTerminalPunctuation}`,
-  ];
-
-  const duplicate = candidates.find((candidate) =>
-    creditLower.endsWith(candidate.toLocaleLowerCase())
-  );
-  if (duplicate === undefined) {
-    return creditLine.trim();
-  }
-
-  return trimTrailingCharacters(
-    creditWithoutTerminalPunctuation.slice(0, -duplicate.length).trim(),
-    (character) => character === ";" || character === ","
-  );
 }
 
 const COMMON_MEDIUM =

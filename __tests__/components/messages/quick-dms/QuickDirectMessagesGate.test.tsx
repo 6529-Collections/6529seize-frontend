@@ -20,11 +20,19 @@ jest.mock("@/components/nft-transfer/TransferState", () => ({
   useIsTransferModeActive: jest.fn(),
 }));
 
+jest.mock("next/navigation", () => ({
+  usePathname: jest.fn(),
+  useSearchParams: jest.fn(),
+}));
+
 const useAuthMock = require("@/components/auth/Auth").useAuth as jest.Mock;
 const useDeviceInfoMock = require("@/hooks/useDeviceInfo").default as jest.Mock;
 const useIsTransferModeActiveMock =
   require("@/components/nft-transfer/TransferState")
     .useIsTransferModeActive as jest.Mock;
+const usePathnameMock = require("next/navigation").usePathname as jest.Mock;
+const useSearchParamsMock = require("next/navigation")
+  .useSearchParams as jest.Mock;
 
 const QuickDirectMessagesGate =
   require("@/components/messages/quick-dms/QuickDirectMessagesGate").default;
@@ -60,6 +68,8 @@ describe("QuickDirectMessagesGate", () => {
       isMobileDevice: false,
     });
     useIsTransferModeActiveMock.mockReturnValue(false);
+    usePathnameMock.mockReturnValue("/waves");
+    useSearchParamsMock.mockReturnValue(new URLSearchParams());
   });
 
   it("mounts Quick Direct Messages only for eligible desktop sessions", () => {
@@ -70,6 +80,22 @@ describe("QuickDirectMessagesGate", () => {
 
   it("does not mount Quick Direct Messages while transfer mode is active", () => {
     useIsTransferModeActiveMock.mockReturnValue(true);
+
+    renderGate();
+
+    expect(screen.queryByTestId("quick-dm-runtime")).not.toBeInTheDocument();
+  });
+
+  it.each([
+    ["the canonical route", "/waves/create", null],
+    ["a trailing-slash route", "/waves/create/", null],
+    ["a locale-prefixed route", "/en/waves/create", null],
+    ["the modal query", "/waves", "wave"],
+  ])("does not mount Quick Direct Messages on %s", (_label, path, create) => {
+    usePathnameMock.mockReturnValue(path);
+    useSearchParamsMock.mockReturnValue(
+      new URLSearchParams(create === null ? "" : `create=${create}`)
+    );
 
     renderGate();
 

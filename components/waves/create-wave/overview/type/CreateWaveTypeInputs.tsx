@@ -30,7 +30,7 @@ export default function CreateWaveTypeInputs({
       {waveTypes.map((waveType) => {
         const isSelected = selected === waveType;
         let titleColorClass = "tw-text-iron-300 group-hover:tw-text-white";
-        const descriptionColorClass = "tw-text-iron-500";
+        const descriptionColorClass = "tw-text-iron-400";
         if (isSelected) {
           titleColorClass = "tw-text-white";
         }
@@ -41,6 +41,8 @@ export default function CreateWaveTypeInputs({
             type={waveType}
             selected={selected ?? NO_SELECTION}
             variant="subtle"
+            name="create-wave-type"
+            ariaLabel={WAVE_LABELS[waveType]}
             onChange={onChange}
           >
             <div className="tw-min-w-0 tw-whitespace-normal">
@@ -50,7 +52,7 @@ export default function CreateWaveTypeInputs({
                 {WAVE_LABELS[waveType]}
               </span>
               <p
-                className={`tw-mb-0 tw-mt-2 tw-text-xs tw-font-normal tw-leading-4 ${descriptionColorClass}`}
+                className={`tw-mb-0 tw-mt-1 tw-text-xs tw-font-normal tw-leading-4 ${descriptionColorClass}`}
               >
                 {waveTypeDescriptions[waveType]}
               </p>

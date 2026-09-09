@@ -4,6 +4,7 @@ import { type FocusEvent, useRef, useState } from "react";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import GroupCreateIdentitiesSearchItems, {
   GROUP_IDENTITY_MIN_SEARCH_LENGTH,
+  type CommunityMemberSearchSort,
   type GroupCreateIdentitiesSearchAppearance,
   type GroupCreateIdentitiesSearchResultsLayout,
 } from "./GroupCreateIdentitiesSearchItems";
@@ -20,6 +21,7 @@ export default function GroupCreateIdentitiesSearch({
   iconClassName = "",
   resultsLayout = "popover",
   appearance = "default",
+  sort,
 }: {
   readonly selectedWallets: string[];
   readonly onIdentitySelect: (identity: CommunityMemberMinimal) => void;
@@ -30,6 +32,7 @@ export default function GroupCreateIdentitiesSearch({
   readonly iconClassName?: string | undefined;
   readonly resultsLayout?: GroupCreateIdentitiesSearchResultsLayout | undefined;
   readonly appearance?: GroupCreateIdentitiesSearchAppearance | undefined;
+  readonly sort?: CommunityMemberSearchSort | undefined;
 }) {
   const isModal = appearance === "modal";
   const [isOpen, setIsOpen] = useState(false);
@@ -38,17 +41,14 @@ export default function GroupCreateIdentitiesSearch({
   const onFocusChange = (newV: boolean) => {
     if (newV) {
       setIsOpen(
-        (searchCriteria?.trim().length ?? 0) >=
-          GROUP_IDENTITY_MIN_SEARCH_LENGTH
+        (searchCriteria?.trim().length ?? 0) >= GROUP_IDENTITY_MIN_SEARCH_LENGTH
       );
     }
   };
 
   const onSearchCriteriaChange = (newV: string | null) => {
     setSearchCriteria(newV);
-    setIsOpen(
-      (newV?.trim().length ?? 0) >= GROUP_IDENTITY_MIN_SEARCH_LENGTH
-    );
+    setIsOpen((newV?.trim().length ?? 0) >= GROUP_IDENTITY_MIN_SEARCH_LENGTH);
   };
 
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -93,9 +93,7 @@ export default function GroupCreateIdentitiesSearch({
           placeholder={placeholder}
         />
         <svg
-          className={`tw-pointer-events-none tw-absolute tw-left-3 tw-size-5 tw-text-iron-400 ${
-            isModal ? "tw-top-1/2 -tw-translate-y-1/2" : "tw-top-3.5"
-          } ${iconClassName}`}
+          className={`tw-pointer-events-none tw-absolute tw-left-3 tw-top-1/2 tw-size-5 -tw-translate-y-1/2 tw-text-iron-400 ${iconClassName}`}
           viewBox="0 0 20 20"
           fill="currentColor"
           aria-hidden="true"
@@ -122,6 +120,7 @@ export default function GroupCreateIdentitiesSearch({
         selectedWallets={selectedWallets}
         resultsLayout={resultsLayout}
         appearance={appearance}
+        sort={sort}
       />
     </div>
   );

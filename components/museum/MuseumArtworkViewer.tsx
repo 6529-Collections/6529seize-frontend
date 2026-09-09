@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { displayCreditWithoutRepeatedLicense } from "@/lib/museum/credit";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import type { CaseyArtwork } from "@/lib/museum/casey";
@@ -181,7 +182,10 @@ export function MuseumArtworkViewer({
         <div className="tw-flex tw-flex-col tw-gap-4 sm:tw-flex-row sm:tw-items-start sm:tw-justify-between">
           <div className="tw-max-w-3xl">
             <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300">
-              {artwork.creditLine}{" "}
+              {displayCreditWithoutRepeatedLicense(
+                artwork.creditLine,
+                artwork.rightsLabel
+              )}{" "}
               <MuseumRightsLink
                 href={artwork.rightsUrl}
                 label={artwork.rightsLabel}

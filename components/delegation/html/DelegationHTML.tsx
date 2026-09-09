@@ -12,6 +12,11 @@ import {
   loadDelegationArticleHtml,
 } from "./delegationContent";
 import { getDelegationArticleNavigation } from "../delegation-page-metadata";
+import {
+  DELEGATION_CARD_CLASS_NAME,
+  DELEGATION_PAGE_DESCRIPTION_CLASS_NAME,
+  DELEGATION_PAGE_TITLE_CLASS_NAME,
+} from "../delegation-ui";
 
 interface Props {
   path?: string | undefined;
@@ -42,8 +47,7 @@ const ARTICLE_CONTENT_CLASS = [
   "[&_ul]:tw-my-5 [&_ul]:tw-list-disc [&_ul]:tw-pl-6",
 ].join(" ");
 
-const ARTICLE_SURFACE_CLASS =
-  "tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950/40 tw-p-4 sm:tw-p-7";
+const ARTICLE_SURFACE_CLASS = `${DELEGATION_CARD_CLASS_NAME} tw-p-4 sm:tw-p-7`;
 
 const WALLET_ARCHITECTURE_CLASS = [
   "tw-max-w-5xl tw-pb-12",
@@ -68,8 +72,8 @@ const FAQ_INDEX_CLASS = [
   "[&_ol]:tw-mb-10 [&_ol]:tw-grid [&_ol]:tw-grid-cols-1 [&_ol]:tw-gap-2.5 [&_ol]:tw-list-none [&_ol]:tw-pl-0",
   "[&_ol>br]:tw-hidden",
   "[&_ol>li]:tw-mb-0 [&_ol>li]:tw-min-w-0",
-  "[&_ol>li>a]:tw-relative [&_ol>li>a]:tw-flex [&_ol>li>a]:tw-h-full [&_ol>li>a]:tw-min-h-14 [&_ol>li>a]:tw-items-center [&_ol>li>a]:tw-overflow-hidden [&_ol>li>a]:tw-rounded-xl [&_ol>li>a]:tw-border [&_ol>li>a]:tw-border-solid [&_ol>li>a]:tw-border-white/[0.04] [&_ol>li>a]:tw-bg-[#111115] [&_ol>li>a]:tw-py-3.5 [&_ol>li>a]:tw-pl-5 [&_ol>li>a]:tw-pr-12 [&_ol>li>a]:tw-text-sm [&_ol>li>a]:tw-font-normal [&_ol>li>a]:tw-leading-6 [&_ol>li>a]:tw-text-iron-300 [&_ol>li>a]:tw-no-underline [&_ol>li>a]:tw-shadow-none [&_ol>li>a]:tw-transition-all [&_ol>li>a]:tw-duration-300 [&_ol>li>a]:tw-ease-out hover:[&_ol>li>a]:-tw-translate-y-0.5 hover:[&_ol>li>a]:tw-border-white/10 hover:[&_ol>li>a]:tw-bg-iron-900/70 hover:[&_ol>li>a]:tw-text-iron-100 hover:[&_ol>li>a]:tw-shadow-lg hover:[&_ol>li>a]:tw-shadow-black/20 hover:[&_ol>li>a]:tw-no-underline focus-visible:[&_ol>li>a]:tw-outline-none focus-visible:[&_ol>li>a]:tw-ring-2 focus-visible:[&_ol>li>a]:tw-ring-[#00f0ff]/50 motion-reduce:[&_ol>li>a]:tw-transform-none motion-reduce:[&_ol>li>a]:tw-transition-none",
-  "[&_ol>li>a::after]:tw-absolute [&_ol>li>a::after]:tw-right-5 [&_ol>li>a::after]:tw-top-1/2 [&_ol>li>a::after]:-tw-translate-y-1/2 [&_ol>li>a::after]:tw-text-base [&_ol>li>a::after]:tw-font-normal [&_ol>li>a::after]:tw-text-iron-600 [&_ol>li>a::after]:tw-content-['→'] [&_ol>li>a::after]:tw-transition-all [&_ol>li>a::after]:tw-duration-300 [&_ol>li>a::after]:tw-ease-out [&_ol>li>a:hover::after]:tw-translate-x-1 [&_ol>li>a:hover::after]:tw-text-[#00f0ff] motion-reduce:[&_ol>li>a::after]:tw-transform-none motion-reduce:[&_ol>li>a::after]:tw-transition-none",
+  "[&_ol>li>a]:tw-relative [&_ol>li>a]:tw-flex [&_ol>li>a]:tw-h-full [&_ol>li>a]:tw-min-h-14 [&_ol>li>a]:tw-items-center [&_ol>li>a]:tw-overflow-hidden [&_ol>li>a]:tw-rounded-xl [&_ol>li>a]:tw-border [&_ol>li>a]:tw-border-solid [&_ol>li>a]:tw-border-white/[0.04] [&_ol>li>a]:tw-bg-iron-900/70 [&_ol>li>a]:tw-py-3.5 [&_ol>li>a]:tw-pl-5 [&_ol>li>a]:tw-pr-12 [&_ol>li>a]:tw-text-sm [&_ol>li>a]:tw-font-normal [&_ol>li>a]:tw-leading-6 [&_ol>li>a]:tw-text-iron-300 [&_ol>li>a]:tw-no-underline [&_ol>li>a]:tw-shadow-none [&_ol>li>a]:tw-transition-all [&_ol>li>a]:tw-duration-300 [&_ol>li>a]:tw-ease-out hover:[&_ol>li>a]:-tw-translate-y-0.5 hover:[&_ol>li>a]:tw-border-white/10 hover:[&_ol>li>a]:tw-bg-iron-900 hover:[&_ol>li>a]:tw-text-iron-100 hover:[&_ol>li>a]:tw-shadow-lg hover:[&_ol>li>a]:tw-shadow-black/20 hover:[&_ol>li>a]:tw-no-underline focus-visible:[&_ol>li>a]:tw-outline-none focus-visible:[&_ol>li>a]:tw-ring-2 focus-visible:[&_ol>li>a]:tw-ring-primary-400 motion-reduce:[&_ol>li>a]:tw-transform-none motion-reduce:[&_ol>li>a]:tw-transition-none",
+  "[&_ol>li>a::after]:tw-absolute [&_ol>li>a::after]:tw-right-5 [&_ol>li>a::after]:tw-top-1/2 [&_ol>li>a::after]:-tw-translate-y-1/2 [&_ol>li>a::after]:tw-text-base [&_ol>li>a::after]:tw-font-normal [&_ol>li>a::after]:tw-text-iron-600 [&_ol>li>a::after]:tw-content-['→'] [&_ol>li>a::after]:tw-transition-all [&_ol>li>a::after]:tw-duration-300 [&_ol>li>a::after]:tw-ease-out [&_ol>li>a:hover::after]:tw-translate-x-1 [&_ol>li>a:hover::after]:tw-text-primary-300 motion-reduce:[&_ol>li>a::after]:tw-transform-none motion-reduce:[&_ol>li>a::after]:tw-transition-none",
 ].join(" ");
 
 const CONSOLIDATION_USE_CASES_CLASS = [
@@ -78,7 +82,7 @@ const CONSOLIDATION_USE_CASES_CLASS = [
   "[&>div>div:first-child]:tw-max-w-5xl [&>div>div:first-child]:tw-border-0 [&>div>div:first-child]:tw-border-b [&>div>div:first-child]:tw-border-solid [&>div>div:first-child]:tw-border-white/[0.05] [&>div>div:first-child]:tw-pb-10 sm:[&>div>div:first-child]:tw-pb-12",
   "[&>div>div:first-child>h2]:tw-mb-5 [&>div>div:first-child>h2]:tw-mt-0 [&>div>div:first-child>h2]:tw-text-xl [&>div>div:first-child>h2]:tw-font-semibold [&>div>div:first-child>h2]:tw-leading-7 [&>div>div:first-child>h2]:tw-text-iron-100",
   "[&>div>div:first-child>p]:tw-mb-5 [&>div>div:first-child>p]:tw-text-base [&>div>div:first-child>p]:tw-font-normal [&>div>div:first-child>p]:tw-leading-7 [&>div>div:first-child>p]:tw-text-iron-300 [&>div>div:first-child>p:last-child]:tw-mb-0",
-  "[&>div>div:not(:first-child)]:tw-rounded-xl [&>div>div:not(:first-child)]:tw-border [&>div>div:not(:first-child)]:tw-border-solid [&>div>div:not(:first-child)]:tw-border-white/[0.04] [&>div>div:not(:first-child)]:tw-bg-[#111115] [&>div>div:not(:first-child)]:tw-p-5 [&>div>div:not(:first-child)]:tw-transition-all [&>div>div:not(:first-child)]:tw-duration-300 [&>div>div:not(:first-child)]:tw-ease-out hover:[&>div>div:not(:first-child)]:tw-border-white/10 hover:[&>div>div:not(:first-child)]:tw-bg-iron-900/60 sm:[&>div>div:not(:first-child)]:tw-p-6 md:[&>div>div:not(:first-child)]:tw-grid md:[&>div>div:not(:first-child)]:tw-grid-cols-2 md:[&>div>div:not(:first-child)]:tw-gap-x-8 motion-reduce:[&>div>div:not(:first-child)]:tw-transition-none",
+  "[&>div>div:not(:first-child)]:tw-rounded-xl [&>div>div:not(:first-child)]:tw-border [&>div>div:not(:first-child)]:tw-border-solid [&>div>div:not(:first-child)]:tw-border-white/[0.04] [&>div>div:not(:first-child)]:tw-bg-iron-900/70 [&>div>div:not(:first-child)]:tw-p-5 [&>div>div:not(:first-child)]:tw-transition-all [&>div>div:not(:first-child)]:tw-duration-300 [&>div>div:not(:first-child)]:tw-ease-out hover:[&>div>div:not(:first-child)]:tw-border-white/10 hover:[&>div>div:not(:first-child)]:tw-bg-iron-900 sm:[&>div>div:not(:first-child)]:tw-p-6 md:[&>div>div:not(:first-child)]:tw-grid md:[&>div>div:not(:first-child)]:tw-grid-cols-2 md:[&>div>div:not(:first-child)]:tw-gap-x-8 motion-reduce:[&>div>div:not(:first-child)]:tw-transition-none",
   "[&>div>div:not(:first-child)>h2]:tw-mb-6 [&>div>div:not(:first-child)>h2]:tw-mt-0 [&>div>div:not(:first-child)>h2]:tw-text-xl [&>div>div:not(:first-child)>h2]:tw-font-semibold [&>div>div:not(:first-child)>h2]:tw-leading-7 [&>div>div:not(:first-child)>h2]:tw-text-iron-100 md:[&>div>div:not(:first-child)>h2]:tw-col-span-2",
   "[&>div>div:not(:first-child)>p]:tw-mb-3 [&>div>div:not(:first-child)>p]:tw-mt-6 [&>div>div:not(:first-child)>p]:tw-text-[11px] [&>div>div:not(:first-child)>p]:tw-font-semibold [&>div>div:not(:first-child)>p]:tw-uppercase [&>div>div:not(:first-child)>p]:tw-leading-4 [&>div>div:not(:first-child)>p]:tw-tracking-widest [&>div>div:not(:first-child)>p]:tw-text-[#8f5cff] [&>div>div:not(:first-child)>p:first-of-type]:tw-mt-0 [&>div>div:not(:first-child)>p:first-of-type]:tw-text-[#00f0ff]",
   "[&>div>div:not(:first-child)>ul]:tw-mb-0 [&>div>div:not(:first-child)>ul]:tw-mt-0 [&>div>div:not(:first-child)>ul]:tw-list-none [&>div>div:not(:first-child)>ul]:tw-space-y-4 [&>div>div:not(:first-child)>ul]:tw-pl-0",
@@ -223,14 +227,11 @@ function DelegationArticleView({
       <div className="tw-w-full">
         {isFaqChildArticle ? (
           <header className="tw-mb-8 tw-border-0 tw-border-b tw-border-solid tw-border-white/[0.07] tw-pb-6">
-            <div className="tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
-              <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-leading-5 tw-tracking-wide tw-text-primary-300">
-                Delegation FAQ
-              </p>
+            <div className="tw-flex tw-flex-col tw-items-start tw-gap-3">
               {article && (
                 <Link
                   href="/delegation/delegation-faq"
-                  className="tw-inline-flex tw-min-h-10 tw-w-full tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-font-medium tw-text-iron-300 tw-no-underline tw-transition-colors hover:tw-text-primary-300 hover:tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 sm:tw-w-auto sm:tw-justify-start"
+                  className="tw-inline-flex tw-min-h-10 tw-items-center tw-justify-start tw-gap-2 tw-rounded-lg tw-font-medium tw-text-iron-300 tw-no-underline tw-transition-colors hover:tw-text-primary-300 hover:tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
                 >
                   <ArrowLeftIcon
                     aria-hidden="true"
@@ -239,6 +240,9 @@ function DelegationArticleView({
                   All FAQ topics
                 </Link>
               )}
+              <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-leading-5 tw-tracking-wide tw-text-primary-300">
+                Delegation FAQ
+              </p>
             </div>
             {pageTitle && (
               <h1 className="tw-mb-3 tw-mt-4 tw-text-2xl tw-font-semibold tw-leading-8 tw-text-iron-50 sm:tw-text-3xl sm:tw-leading-9">
@@ -269,7 +273,7 @@ function DelegationArticleView({
               <h1
                 className={
                   usesCompactReferenceHeader
-                    ? "tw-m-0 tw-text-[22px] tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-[26px]"
+                    ? DELEGATION_PAGE_TITLE_CLASS_NAME
                     : SECTION_TITLE_CLASS
                 }
               >
@@ -278,7 +282,7 @@ function DelegationArticleView({
               </h1>
               {article?.summary && (
                 <p
-                  className={`tw-mb-0 tw-max-w-3xl tw-text-base tw-font-normal tw-leading-7 tw-text-iron-300 ${
+                  className={`${DELEGATION_PAGE_DESCRIPTION_CLASS_NAME} ${
                     usesCompactReferenceHeader ? "tw-mt-2" : "tw-mt-3"
                   }`}
                 >
@@ -321,7 +325,7 @@ function DelegationArticleView({
             {previousArticle ? (
               <Link
                 href={previousArticle.href}
-                className={ARTICLE_PAGER_LINK_CLASS}
+                className={`${ARTICLE_PAGER_LINK_CLASS} tw-w-fit tw-max-w-full tw-justify-self-start`}
               >
                 Previous: {previousArticle.title}
               </Link>
@@ -331,7 +335,7 @@ function DelegationArticleView({
             {nextArticle ? (
               <Link
                 href={nextArticle.href}
-                className={`${ARTICLE_PAGER_LINK_CLASS} sm:tw-justify-end sm:tw-text-right`}
+                className={`${ARTICLE_PAGER_LINK_CLASS} tw-w-fit tw-max-w-full tw-justify-self-end sm:tw-justify-end sm:tw-text-right`}
               >
                 Next: {nextArticle.title}
               </Link>

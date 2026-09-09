@@ -303,7 +303,8 @@ describe("testing strategy CI plan", () => {
     expect(plan.checks["playwright_critical_shell"]!.required).toBe(false);
     expect(plan.security).toMatchObject({
       secrets_allowed: false,
-      token_permissions: "contents:read",
+      token_permissions:
+        "contents:read; packages:read only in same-repository frozen-install jobs",
     });
   });
 
@@ -313,6 +314,9 @@ describe("testing strategy CI plan", () => {
     });
 
     expect(plan.untrusted_pr).toBe(true);
+    expect(plan.security.fork_pr_policy).toContain(
+      "do not execute for fork PRs"
+    );
     expect(plan.risk.computed_floor).toBe(2);
     expect(plan.checks.install.required).toBe(true);
     expect(plan.checks.lint_changed.required).toBe(true);
@@ -338,6 +342,29 @@ describe("testing strategy CI plan", () => {
     expect(plan.checks.dependency_governance.required).toBe(true);
     expect(plan.checks.build.required).toBe(true);
     expect(plan.checks["playwright_critical_shell"]!.required).toBe(true);
+  });
+
+  it("filters non-file related Jest discovery output before resolving paths", () => {
+    const workflow = fs.readFileSync(
+      path.join(process.cwd(), ".github/workflows/app-pr-ci.yml"),
+      "utf8"
+    );
+
+    const guardIndex = workflow.indexOf('if [ -z "$related_test" ]; then');
+    const fileGuardIndex = workflow.indexOf(
+      'if [ ! -f "$related_test" ]; then'
+    );
+    const resolveIndex = workflow.indexOf(
+      'related_path="$(realpath "$related_test")"'
+    );
+
+    expect(guardIndex).toBeGreaterThanOrEqual(0);
+    expect(fileGuardIndex).toBeGreaterThan(guardIndex);
+    expect(resolveIndex).toBeGreaterThan(guardIndex);
+    expect(resolveIndex).toBeGreaterThan(fileGuardIndex);
+    const fileGuardBlock = workflow.slice(fileGuardIndex, resolveIndex);
+    expect(fileGuardBlock).toContain("Skipping non-file Jest discovery output");
+    expect(fileGuardBlock).toContain("continue");
   });
 
   it.each([
@@ -437,6 +464,10 @@ describe("testing strategy CI plan", () => {
       path.join(process.cwd(), ".github/workflows/staging-e2e.yml"),
       "utf8"
     );
+    const productionWorkflow = fs.readFileSync(
+      path.join(process.cwd(), ".github/workflows/production-e2e.yml"),
+      "utf8"
+    );
     const museumReleaseSelector = fs.readFileSync(
       path.join(process.cwd(), "scripts/museum-release-selection.cjs"),
       "utf8"
@@ -457,7 +488,13 @@ describe("testing strategy CI plan", () => {
       "utf8"
     );
 
-    expect(workflow).toContain("playwright install --with-deps chromium");
+    expect(workflow).not.toContain("playwright install --with-deps chromium");
+    expect(stagingWorkflow).not.toContain(
+      "playwright install --with-deps chromium"
+    );
+    expect(productionWorkflow).not.toContain(
+      "playwright install --with-deps chromium"
+    );
     expect(workflow).toContain("test:e2e:smoke");
     expect(workflow).toContain("test:e2e:critical-shell");
     for (const museumBrowserSpec of [
@@ -473,10 +510,11 @@ describe("testing strategy CI plan", () => {
     expect(workflow).toContain("PLAYWRIGHT_WEB_SERVER_COMMAND");
     expect(stagingWorkflow).toContain("--trigger post-deploy");
     expect(stagingWorkflow).toContain("SELECTED_PACK");
-    expect(stagingWorkflow).toContain(
-      'args+=(--exclude-pack "$museum_pack_alias")'
-    );
-    expect(stagingWorkflow).toContain("const isMuseumPack = (pack) =>");
+    expect(stagingWorkflow).toContain("--exclude-pack");
+    expect(stagingWorkflow).not.toContain("const isMuseumPack = (pack) =>");
+    expect(stagingWorkflow).not.toContain("release-bus-museum-hold");
+    expect(productionWorkflow).toContain("--exclude-pack");
+    expect(productionWorkflow).not.toContain("release-bus-museum-hold");
     expect(stagingWorkflow).not.toContain("scripts/museum-e2e-change-set.cjs");
     expect(museumReleaseSelector).toContain("failClosedClassification");
     expect(museumReleaseSelector).toContain("effectiveActivation");
@@ -487,6 +525,7 @@ describe("testing strategy CI plan", () => {
     expect(workflow).toContain(
       "Resolve exact Museum publication for Playwright"
     );
+    expect(workflow).toContain("GH_TOKEN: ${{ github.token }}");
     expect(workflow).toContain(
       "MUSEUM_PUBLICATION_TEST_COMMIT: ${{ steps.museum_publication.outputs.catalog_commit }}"
     );
@@ -494,10 +533,10 @@ describe("testing strategy CI plan", () => {
       "MUSEUM_PUBLICATION_EXPECTED_COMMIT: ${{ steps.museum_publication.outputs.source_commit }}"
     );
     expect(workflow).toContain(
-      'MUSEUM_PUBLICATION_TEST_CATALOG_COMMIT: "970ac8b6a3f1c51b21090cee71365bf9aa4bcd42"'
+      'MUSEUM_PUBLICATION_TEST_CATALOG_COMMIT: "858d3ebc049b59219d6fa639dbd325b6adc7345a"'
     );
     expect(workflow).toContain(
-      'MUSEUM_PUBLICATION_TEST_SOURCE_COMMIT: "dfb7024075efd0cedf63eebd4f4e87b7ce84808f"'
+      'MUSEUM_PUBLICATION_TEST_SOURCE_COMMIT: "92966f2836ebf2af06edfe0fe2cff25041307c92"'
     );
     expect(workflow).toContain('case "$selected_pack"');
     expect(workflow).toContain(
@@ -508,9 +547,8 @@ describe("testing strategy CI plan", () => {
     expect(workflow).toContain("./bin/6529 exec playwright test");
     expect(workflow).not.toContain('./bin/6529 run "$selected_pack"');
     expect(workflow).toContain("--workers=1");
-    expect(stagingWorkflow).toContain(
-      "Unable to prove the deployed parent; retaining every Museum pack."
-    );
+    expect(stagingWorkflow).toContain("DEPLOYMENT_E2E_SOURCE_SHA");
+    expect(stagingWorkflow).toContain("--retry-failed-packs 1");
     expect(museumSpec).not.toContain(
       'test.describe.configure({ mode: "serial" })'
     );
@@ -559,12 +597,22 @@ describe("testing strategy CI plan", () => {
           needs?: string | string[];
           strategy?: { matrix?: string };
           "runs-on"?: string;
-          steps?: Array<{ name?: string; if?: string; run?: string }>;
+          "timeout-minutes"?: number;
+          container?: { image?: string; options?: string };
+          defaults?: { run?: { shell?: string } };
+          steps?: Array<{
+            name?: string;
+            if?: string;
+            id?: string;
+            run?: string;
+            "timeout-minutes"?: number;
+            "continue-on-error"?: boolean;
+          }>;
         }
       >;
     };
     expect(parsed.jobs["app-checks"]).toMatchObject({
-      if: "needs.plan.outputs.install_required == 'true'",
+      if: "needs.plan.outputs.install_required == 'true' && github.event.pull_request.head.repo.full_name == github.repository",
       "runs-on": "${{ matrix.runner }}",
       strategy: {
         matrix: "${{ fromJSON(needs.plan.outputs.app_check_matrix) }}",
@@ -577,6 +625,36 @@ describe("testing strategy CI plan", () => {
           if: "matrix.lane == 'build'",
         }),
         expect.objectContaining({
+          name: "Run Network Museum Playwright packs",
+          if: "startsWith(matrix.lane, 'playwright-museum-')",
+        }),
+      ])
+    );
+    expect(parsed.jobs["app-checks"]?.steps).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: "Run small Playwright smoke pack" }),
+        expect.objectContaining({
+          name: "Run critical route-shell Playwright pack",
+        }),
+      ])
+    );
+    expect(parsed.jobs["core-playwright-checks"]).toMatchObject({
+      if: "needs.plan.outputs.core_playwright_required == 'true' && github.event.pull_request.head.repo.full_name == github.repository",
+      "runs-on": "${{ matrix.runner }}",
+      "timeout-minutes": 20,
+      container: {
+        image:
+          "mcr.microsoft.com/playwright:v1.61.1-noble@sha256:5b8f294aff9041b7191c34a4bab3ac270157a28774d4b0660e9743297b697e48",
+        options: "--ipc=host",
+      },
+      defaults: { run: { shell: "bash" } },
+      strategy: {
+        matrix: "${{ fromJSON(needs.plan.outputs.core_playwright_matrix) }}",
+      },
+    });
+    expect(parsed.jobs["core-playwright-checks"]?.steps).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
           name: "Run small Playwright smoke pack",
           if: "matrix.lane == 'playwright-smoke'",
         }),
@@ -584,10 +662,13 @@ describe("testing strategy CI plan", () => {
           name: "Run critical route-shell Playwright pack",
           if: "matrix.lane == 'playwright-critical-shell'",
         }),
-        expect.objectContaining({
-          name: "Run Network Museum Playwright packs",
-          if: "startsWith(matrix.lane, 'playwright-museum-')",
-        }),
+      ])
+    );
+    expect(parsed.jobs["core-playwright-checks"]?.steps).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: "Restore Playwright browser" }),
+        expect.objectContaining({ name: "Install Playwright dependencies" }),
+        expect.objectContaining({ name: "Install Playwright browser" }),
       ])
     );
     const museumBrowserStep = parsed.jobs["app-checks"]?.steps?.find(
@@ -661,14 +742,14 @@ describe("testing strategy CI plan", () => {
       'echo "Museum server did not become ready for $MUSEUM_PROJECT."'
     );
     expect(museumBrowserRun).toContain(
-      "timeout --signal=TERM --kill-after=30s 15m"
+      "timeout --signal=TERM --kill-after=30s 20m"
     );
     expect(museumBrowserRun).toContain(
       '| sed -u "s/^/[museum $MUSEUM_PROJECT remaining] /"'
     );
     expect(museumBrowserRun).toContain('| tee "$museum_remaining_log"');
     expect(museumBrowserRun).toContain(
-      "Museum $MUSEUM_PROJECT remaining coverage exceeded its 15-minute timeout."
+      "Museum $MUSEUM_PROJECT remaining coverage exceeded its 20-minute timeout."
     );
     expect(museumBrowserRun).toContain(
       "Museum $MUSEUM_PROJECT remaining coverage failed with exit ${museum_remaining_exit}."
@@ -682,15 +763,61 @@ describe("testing strategy CI plan", () => {
     expect(museumBrowserRun).not.toContain("start:standalone");
     expect(parsed.jobs["installed-checks"]).toMatchObject({
       name: "Installed app checks",
-      needs: ["plan", "app-checks"],
+      needs: ["plan", "app-checks", "core-playwright-checks"],
       if: "always() && needs.plan.result == 'success' && needs.plan.outputs.install_required == 'true'",
     });
     expect(workflow).toContain(
       'write("app_check_matrix", JSON.stringify({ include: appCheckLanes }))'
     );
+    expect(workflow).toContain(
+      'write("core_playwright_matrix", JSON.stringify({ include: corePlaywrightLanes }))'
+    );
+    expect(workflow).toContain(
+      'write("core_playwright_required", String(corePlaywrightLanes.length > 0))'
+    );
     expect(workflow).toContain("BUILD_CI_RUNNER");
     expect(workflow).toContain("Restore Playwright browser");
     expect(workflow).toContain("node22-pr-production-nextjs");
+
+    for (const source of [workflow, stagingWorkflow, productionWorkflow]) {
+      const workflowJobs = YAML.parse(source) as {
+        jobs: Record<
+          string,
+          {
+            steps?: Array<{
+              name?: string;
+              run?: string;
+              "timeout-minutes"?: number;
+              "continue-on-error"?: boolean;
+            }>;
+          }
+        >;
+      };
+      const steps = Object.values(workflowJobs.jobs).flatMap(
+        (job) => job.steps ?? []
+      );
+      expect(steps).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            name: "Install Playwright dependencies",
+            run: "./bin/6529 exec playwright install-deps chromium",
+            "timeout-minutes": 3,
+            "continue-on-error": true,
+          }),
+          expect.objectContaining({
+            name: "Retry Playwright dependencies",
+            run: "./bin/6529 exec playwright install-deps chromium",
+            "timeout-minutes": 3,
+            "continue-on-error": true,
+          }),
+          expect.objectContaining({
+            name: "Install Playwright browser",
+            run: "./bin/6529 exec playwright install chromium",
+            "timeout-minutes": 10,
+          }),
+        ])
+      );
+    }
   });
 
   it("keeps full-history CI checkouts blobless", () => {
@@ -832,6 +959,36 @@ describe("testing strategy CI security checks", () => {
       expect.arrayContaining(["npm-auth-token", "private-key-block"])
     );
   });
+
+  it("allows the runtime NODE_AUTH_TOKEN npm placeholder", () => {
+    fs.writeFileSync(
+      path.join(tempDir, ".npmrc"),
+      "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}\n"
+    );
+
+    const result = scanFilesForSecrets([".npmrc"], tempDir);
+
+    expect(result).toMatchObject({ ok: true, findings: [] });
+  });
+
+  it.each(["${NODE_AUTH_TOKEN}extra", '"${NODE_AUTH_TOKEN}"'])(
+    "rejects the near-miss npm auth placeholder %s",
+    (tokenValue) => {
+      fs.writeFileSync(
+        path.join(tempDir, ".npmrc"),
+        `//npm.pkg.github.com/:_authToken=${tokenValue}\n`
+      );
+
+      const result = scanFilesForSecrets([".npmrc"], tempDir);
+
+      expect(result.ok).toBe(false);
+      expect(result.findings).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ pattern: "npm-auth-token" }),
+        ])
+      );
+    }
+  );
 
   it("reports raw JWT-shaped tokens in JSON payload files", () => {
     const fakeJwt = [

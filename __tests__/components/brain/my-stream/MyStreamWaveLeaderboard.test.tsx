@@ -472,9 +472,16 @@ describe("MyStreamWaveLeaderboard", () => {
     expect(headerProps.viewMode).toBe("grid");
     expect(screen.getByTestId("header")).toBeInTheDocument();
     expect(getLeaderboardControlsFrame()).toHaveClass(
+      "tw-w-full",
+      "tw-min-w-0",
       "tw-max-w-full",
-      "!tw-flex-[1_0_15rem]",
-      "lg:!tw-flex-[1_0_27rem]"
+      "!tw-flex-none",
+      "!tw-basis-full",
+      "!tw-pb-2",
+      "!tw-pt-2",
+      "sm:!tw-pt-4",
+      "@[46rem]/leaderboard-toolbar:!tw-w-auto",
+      "@[46rem]/leaderboard-toolbar:!tw-flex-[0_0_27rem]"
     );
     expect(galleryProps.isVotingClosed).toBe(false);
     expect(galleryProps.isVotingControlsLocked).toBe(false);

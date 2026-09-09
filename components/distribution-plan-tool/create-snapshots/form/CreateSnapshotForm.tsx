@@ -8,6 +8,7 @@ import {
   getRandomObjectId,
   isEthereumAddress,
 } from "@/helpers/AllowlistToolHelpers";
+import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import {
   distributionPlanApiFetch,
   distributionPlanApiPost,
@@ -167,16 +168,20 @@ export default function CreateSnapshotForm() {
     <>
       <CreateSnapshotFormSearchCollection setCollection={setCollection} />
       <form
-        className="tw-mt-8 tw-flex tw-flex-wrap tw-gap-y-5"
+        className="tw-mt-8 tw-grid tw-gap-5"
         onSubmit={handleSubmit}
       >
-        <div className="tw-flex tw-w-full tw-gap-x-4">
-          <div className="tw-flex-1">
-            <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-100">
+        <div className="tw-grid tw-w-full tw-grid-cols-1 tw-gap-4 md:tw-grid-cols-3">
+          <div className="tw-min-w-0">
+            <label
+              htmlFor="snapshot-name"
+              className="tw-flex tw-min-h-8 tw-items-center tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-100"
+            >
               Name
             </label>
             <div className="tw-mt-2">
               <input
+                id="snapshot-name"
                 type="text"
                 name="name"
                 value={formValues.name}
@@ -188,12 +193,16 @@ export default function CreateSnapshotForm() {
               />
             </div>
           </div>
-          <div className="tw-flex-1">
-            <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-100">
+          <div className="tw-min-w-0">
+            <label
+              htmlFor="snapshot-contract"
+              className="tw-flex tw-min-h-8 tw-items-center tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-100"
+            >
               Contract number
             </label>
             <div className="tw-mt-2">
               <input
+                id="snapshot-contract"
                 type="text"
                 name="contract"
                 value={formValues.contract}
@@ -205,16 +214,22 @@ export default function CreateSnapshotForm() {
               />
             </div>
           </div>
-          <div className="tw-flex-1">
-            <label className="tw-flex tw-items-center tw-gap-x-2 tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-100">
-              <span>Block number</span>
-              <div onClick={goToEtherScan}>
+          <div className="tw-min-w-0">
+            <div className="tw-flex tw-items-center tw-gap-1 tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-100">
+              <label htmlFor="snapshot-block-number">Block number</label>
+              <button
+                type="button"
+                aria-label="Open Etherscan block explorer in a new tab"
+                onClick={goToEtherScan}
+                data-tooltip-id="block-number-tooltip"
+                className="tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-500 hover:tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+              >
                 <svg
-                  className="tw-h-5 tw-w-5 tw-cursor-pointer tw-text-iron-500"
+                  aria-hidden="true"
+                  className="tw-h-5 tw-w-5"
                   viewBox="0 0 24 24"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
-                  data-tooltip-id="block-number-tooltip"
                 >
                   <path
                     d="M12 16V12M12 8H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
@@ -224,21 +239,18 @@ export default function CreateSnapshotForm() {
                     strokeLinejoin="round"
                   />
                 </svg>
-                <Tooltip
-                  id="block-number-tooltip"
-                  place="top"
-                  style={{
-                    backgroundColor: "#1F2937",
-                    color: "white",
-                    padding: "4px 8px",
-                  }}
-                >
-                  Use etherscan.io to find previous block numbers
-                </Tooltip>
-              </div>
-            </label>
+              </button>
+              <Tooltip
+                id="block-number-tooltip"
+                place="top"
+                style={TOOLTIP_STYLES}
+              >
+                Use etherscan.io to find previous block numbers
+              </Tooltip>
+            </div>
             <div className="tw-mt-2">
               <input
+                id="snapshot-block-number"
                 type="number"
                 name="blockNo"
                 value={formValues.blockNo}
@@ -251,39 +263,43 @@ export default function CreateSnapshotForm() {
             </div>
           </div>
         </div>
-        <div className="tw-flex tw-w-full tw-items-center tw-gap-x-4">
-          <div className="tw-mt-4 tw-flex-1">
-            <label className="tw-flex tw-items-center tw-gap-x-2 tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-100">
-              <span>Token ID(s)</span>
-              <svg
-                className="tw-h-5 tw-w-5 tw-cursor-pointer tw-text-iron-500"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
+        <div className="tw-grid tw-w-full tw-grid-cols-1 tw-gap-4 md:tw-grid-cols-2 md:tw-items-end lg:tw-grid-cols-3">
+          <div className="tw-min-w-0">
+            <div className="tw-flex tw-items-center tw-gap-1 tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-100">
+              <label htmlFor="snapshot-token-ids">Token ID(s)</label>
+              <button
+                type="button"
+                aria-label="Show token ID format example"
                 data-tooltip-id="token-ids-tooltip"
+                className="tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-500 hover:tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
               >
-                <path
-                  d="M12 16V12M12 8H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
+                <svg
+                  aria-hidden="true"
+                  className="tw-h-5 tw-w-5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M12 16V12M12 8H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </button>
               <Tooltip
                 id="token-ids-tooltip"
                 place="top"
-                style={{
-                  backgroundColor: "#1F2937",
-                  color: "white",
-                  padding: "4px 8px",
-                }}
+                style={TOOLTIP_STYLES}
               >
                 Example: 1,3,54-78
               </Tooltip>
-            </label>
+            </div>
             <div className="tw-mt-2">
               <input
+                id="snapshot-token-ids"
                 type="text"
                 name="tokenIds"
                 value={formValues.tokenIds}
@@ -294,32 +310,38 @@ export default function CreateSnapshotForm() {
               />
             </div>
           </div>
-          <div className="tw-flex-1">
-            <div className="tw-flex tw-gap-x-4">
-              <div className="tw-w-full">
-                <div className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-100">
-                  <span className="tw-font-medium tw-text-iron-100">
-                    Consolidation block number
-                  </span>
-                  <div className="tw-mt-0.5 tw-text-xs tw-text-iron-400">
-                    Leave empty if you don&apos;t want to consolidate.
-                  </div>
-                </div>
-                <div className="tw-mt-2">
-                  <input
-                    type="text"
-                    autoComplete="off"
-                    placeholder="Consolidate block number"
-                    className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-700/40 tw-px-3 tw-py-3 tw-text-base tw-font-light tw-text-white tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700/40 tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-500 hover:tw-ring-iron-700 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 sm:tw-leading-6"
-                    value={consolidateBlockNo}
-                    onChange={handleConsolidationBlockNoChange}
-                  />
-                </div>
+          <div className="tw-min-w-0">
+            <div className="tw-w-full">
+              <label
+                htmlFor="snapshot-consolidation-block-number"
+                className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-100"
+              >
+                <span className="tw-font-medium tw-text-iron-100">
+                  Consolidation block number
+                </span>
+                <span
+                  id="snapshot-consolidation-block-help"
+                  className="tw-mt-0.5 tw-block tw-text-xs tw-text-iron-400"
+                >
+                  Leave empty if you don&apos;t want to consolidate.
+                </span>
+              </label>
+              <div className="tw-mt-2">
+                <input
+                  id="snapshot-consolidation-block-number"
+                  aria-describedby="snapshot-consolidation-block-help"
+                  type="text"
+                  autoComplete="off"
+                  placeholder="Consolidate block number"
+                  className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-700/40 tw-px-3 tw-py-3 tw-text-base tw-font-light tw-text-white tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700/40 tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-500 hover:tw-ring-iron-700 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 sm:tw-leading-6"
+                  value={consolidateBlockNo}
+                  onChange={handleConsolidationBlockNoChange}
+                />
               </div>
             </div>
           </div>
-          <div className="tw-flex-1 tw-self-end">
-            <div className="tw-max-w-[8.375rem]">
+          <div className="tw-flex tw-min-w-0 tw-items-end">
+            <div className="tw-w-full sm:tw-max-w-[8.375rem]">
               <DistributionPlanAddOperationBtn loading={isLoading}>
                 Add snapshot
               </DistributionPlanAddOperationBtn>

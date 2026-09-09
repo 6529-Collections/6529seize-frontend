@@ -82,13 +82,13 @@ const PaymentConfig: React.FC<PaymentConfigProps> = ({
       />
 
       <div className="tw-mb-5">
-        <label className="tw-group tw-flex tw-w-max tw-cursor-pointer tw-items-center tw-gap-3">
+        <label className="tw-group tw-flex tw-w-max tw-cursor-pointer tw-items-start tw-gap-3">
           <input
             type="checkbox"
             checked={hasDesignatedPayee}
             onChange={handleDesignatedPayeeToggle}
             aria-label="Designated Payee"
-            className="tw-form-checkbox tw-h-4 tw-w-4 tw-cursor-pointer tw-rounded tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-800 tw-text-primary-400 focus:tw-ring-primary-400 focus:tw-ring-offset-0 desktop-hover:group-hover:tw-border-iron-400"
+            className="tw-form-checkbox tw-mt-0.5 tw-h-4 tw-w-4 tw-flex-shrink-0 tw-cursor-pointer tw-rounded tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-800 tw-text-primary-400 focus:tw-ring-primary-400 focus:tw-ring-offset-0"
           />
           <span className="tw-text-[13px] tw-text-iron-400">
             <span className="tw-font-medium tw-text-iron-200 tw-transition-colors desktop-hover:group-hover:tw-text-white">
@@ -135,6 +135,7 @@ const PaymentConfig: React.FC<PaymentConfigProps> = ({
         className="tw-pb-0"
       >
         <EnsAddressInput
+          variant="dark"
           value={address}
           placeholder="0x... or ENS"
           onAddressChange={handleAddressChange}

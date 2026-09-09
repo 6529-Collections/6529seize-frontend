@@ -166,26 +166,26 @@ export default function CreateWaveDatesRank({
       />
 
       {!isOngoingRanking && (
-        <>
-          <Decisions
-            dates={dates}
-            errors={decisionErrors}
-            setDates={commitDates}
-            onRollingEnabled={handleRollingEnabled}
-            isExpanded={expandedSections.decisions}
-            setIsExpanded={() => toggleSection("decisions")}
-          />
-
-          {dates.subsequentDecisions.length > 0 && isRollingMode && (
-            <RollingEndDate
-              dates={dates}
-              errors={rollingEndDateErrors}
-              setDates={commitDates}
-              isExpanded={expandedSections.rolling}
-              setIsExpanded={() => toggleSection("rolling")}
-            />
-          )}
-        </>
+        <Decisions
+          dates={dates}
+          errors={decisionErrors}
+          setDates={commitDates}
+          onRollingEnabled={handleRollingEnabled}
+          isExpanded={expandedSections.decisions}
+          setIsExpanded={() => toggleSection("decisions")}
+          hasAdvancedError={rollingEndDateErrors.length > 0}
+          advancedContent={
+            dates.subsequentDecisions.length > 0 && isRollingMode ? (
+              <RollingEndDate
+                dates={dates}
+                errors={rollingEndDateErrors}
+                setDates={commitDates}
+                isExpanded={expandedSections.rolling}
+                setIsExpanded={() => toggleSection("rolling")}
+              />
+            ) : null
+          }
+        />
       )}
     </div>
   );

@@ -116,7 +116,7 @@ export default function WaveNotificationPreferenceButtons({
   const triggerId = `${tooltipId}-trigger`;
   const menuId = `${tooltipId}-menu`;
   const triggerActive =
-    settings.allGroupNotificationsEnabled || settings.allDropsEnabled;
+    settings.broadcastMentionsEnabled || settings.allDropsEnabled;
   const triggerSizeClass = compact
     ? "tw-size-9 tw-p-0"
     : "tw-h-10 tw-w-full tw-px-2.5 tw-py-2 lg:tw-h-9";
@@ -170,16 +170,16 @@ export default function WaveNotificationPreferenceButtons({
         <NotificationMenuItem
           icon={AtSymbolIcon}
           label={waveNotificationSettingsMessage(
-            "waves.notificationSettings.allMentions.label"
+            "waves.notificationSettings.broadcastMentions.label"
           )}
           ariaLabel={waveNotificationSettingsMessage(
-            "waves.notificationSettings.allMentions.ariaLabel"
+            "waves.notificationSettings.broadcastMentions.ariaLabel"
           )}
-          active={settings.allGroupNotificationsEnabled}
+          active={settings.broadcastMentionsEnabled}
           buttonDisabled={settings.loading}
-          loading={settings.loadingTarget === "all-group"}
+          loading={settings.loadingTarget === "broadcast-mentions"}
           onSelect={() => {
-            settings.onAllGroupNotificationsClick();
+            settings.onBroadcastMentionsClick();
             setIsOpen(false);
           }}
         />

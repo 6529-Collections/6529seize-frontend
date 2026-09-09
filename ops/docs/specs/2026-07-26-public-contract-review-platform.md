@@ -1076,13 +1076,10 @@ The integrated candidate requires:
 - no new relevant console/runtime errors
 - Help Bot and docs link validation
 
-Before any staging mutation, the operator runs
-`./bin/6529 exec node ops/scripts/release-bus-status.mjs` and follows the
-repository's `deploy-6529` flow for the returned mode and controls. Staging
-deployment uses Simple Release Bus v2 with the exact current candidate SHA; no
-ad hoc workflow dispatch or production action is permitted. `STAGING_DEPLOYED`
-is not accepted as completion; the workstream waits for manifest-bound staging
-validation and performs a final visible smoke review.
+For authorized staging work, follow the repository's `deploy-6529` skill:
+merge into current `1a-staging`, push, and follow the automatic deployment and
+Staging E2E. Perform the final visible smoke review after validation. This
+workstream's staging scope does not authorize a production action.
 
 ## Acceptance Criteria
 

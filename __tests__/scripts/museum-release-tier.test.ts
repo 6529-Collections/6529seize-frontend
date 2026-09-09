@@ -172,6 +172,14 @@ describe("Museum release report-only classifier", () => {
         },
       ]).tier
     ).toBe("P3");
+    expect(
+      classify([
+        {
+          file: "__tests__/scripts/deployment-e2e-workflows.test.ts",
+          status: "M",
+        },
+      ]).tier
+    ).toBe("P3");
   });
 
   it("classifies unrelated paths as NONE", () => {

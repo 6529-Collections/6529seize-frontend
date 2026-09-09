@@ -504,14 +504,13 @@ export default function UserPageRepNewRepSearch({
                   )}
                 </div>
               </div>
-              <div className="tw-mt-4 tw-flex tw-flex-col tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800/60 tw-px-4 tw-pt-4 sm:tw-flex-row-reverse sm:tw-gap-3 sm:tw-px-6">
+              <div className="tw-mt-4 tw-flex tw-flex-col tw-gap-3 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800/60 tw-px-4 tw-pt-4 sm:tw-px-6">
                 <Button
                   disabled={isGrantDisabled}
                   onClick={onGrantRep}
                   loading={mutating}
                   size="lg"
                   fullWidth
-                  className="sm:tw-flex-1"
                 >
                   {t(locale, "rep.categories.grant.actions.grant")}
                 </Button>
@@ -522,7 +521,6 @@ export default function UserPageRepNewRepSearch({
                     variant="secondary"
                     size="lg"
                     fullWidth
-                    className="tw-mt-3 sm:tw-mt-0 sm:tw-flex-1"
                   >
                     {t(locale, "rep.categories.grant.actions.cancel")}
                   </Button>

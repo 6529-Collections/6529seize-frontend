@@ -96,6 +96,8 @@ const mapDecisionDropV2 = ({
     top_raters: [],
     raters_count: voting?.voters_count ?? 0,
     context_profile_context: getContextProfileContext(drop),
+    ...(drop.viewer_context ? { viewer_context: drop.viewer_context } : {}),
+    ...(drop.moderation ? { moderation: drop.moderation } : {}),
     subscribed_actions: [],
     is_signed: drop.is_signed,
     reactions: mapDropReactionCountersV2(drop),

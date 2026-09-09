@@ -4,6 +4,7 @@ import { useAppWallets } from "@/components/app-wallets/AppWalletsContext";
 import { useLayout } from "@/components/brain/my-stream/layout/LayoutContext";
 import { CompactMenu, type CompactMenuItem } from "@/components/compact-menu";
 import { useOptionalCookieConsent } from "@/components/cookies/CookieConsentContext";
+import { useOptionalHeaderContext } from "@/contexts/HeaderContext";
 import { shouldHideSubscriptions } from "@/components/user/layout/userPageVisibility";
 import useCapacitor from "@/hooks/useCapacitor";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
@@ -11,7 +12,11 @@ import { t } from "@/i18n/messages";
 import type { AboutSection } from "@/types/enums";
 import { CheckIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
+import {
+  ABOUT_CONTENT_SURFACE_CLASS_NAME,
+  ABOUT_SECTION_DIVIDER_CLASS_NAME,
+} from "./AboutLayout";
 import {
   getAboutNavItemHref,
   getAboutNavItemId,
@@ -24,24 +29,37 @@ type AboutContentsDropdownProps = {
   readonly currentSection?: AboutSection | undefined;
   readonly currentHref?: string | undefined;
   readonly className?: string | undefined;
+  readonly desktopFlush?: boolean | undefined;
+  readonly flushBottom?: boolean | undefined;
   readonly locale?: SupportedLocale | undefined;
   readonly leadingAction?: ReactNode;
   readonly withDivider?: boolean | undefined;
+};
+
+type AboutContentsDropdownStyle = CSSProperties & {
+  "--about-contents-sticky-top": string;
 };
 
 export function AboutContentsDropdown({
   currentSection,
   currentHref,
   className,
+  desktopFlush = true,
+  flushBottom = false,
   locale = DEFAULT_LOCALE,
   leadingAction,
-  withDivider = false,
+  withDivider = true,
 }: AboutContentsDropdownProps) {
   const capacitor = useCapacitor();
   const hasLeadingAction = Boolean(leadingAction);
   const cookieConsent = useOptionalCookieConsent();
+  const headerContext = useOptionalHeaderContext();
   const { appWalletsSupported } = useAppWallets();
   const { spaces } = useLayout();
+  const stickyTop = headerContext?.refState ? spaces.headerSpace : 0;
+  const stickyStyle: AboutContentsDropdownStyle = {
+    "--about-contents-sticky-top": `${stickyTop}px`,
+  };
   const hideSubscriptions =
     cookieConsent === undefined
       ? false
@@ -110,14 +128,17 @@ export function AboutContentsDropdown({
 
   return (
     <div
-      style={{ top: spaces.headerSpace }}
+      style={stickyStyle}
       className={clsx(
-        "tw-sticky tw-z-30 tw-mb-4 tw-flex tw-flex-col tw-gap-2 tw-bg-black tw-py-2",
+        `tw-sticky tw-top-[var(--about-contents-sticky-top)] tw-z-30 tw-flex tw-flex-col tw-gap-2 ${ABOUT_CONTENT_SURFACE_CLASS_NAME}`,
+        desktopFlush && !capacitor.isCapacitor && "lg:tw-top-0",
+        !flushBottom && "tw-mb-4",
+        !withDivider && "tw-py-2",
         hasLeadingAction
           ? "sm:tw-flex-row sm:tw-items-center sm:tw-justify-between"
           : "tw-items-end sm:tw-flex-row sm:tw-justify-end",
         withDivider &&
-          "tw-h-16 tw-justify-center tw-border-0 tw-border-b tw-border-solid tw-border-white/[0.06] !tw-bg-iron-950 !tw-py-0 sm:tw-items-center",
+          `tw-h-16 tw-justify-center tw-border-0 tw-border-b tw-border-solid ${ABOUT_SECTION_DIVIDER_CLASS_NAME} tw-py-0 sm:tw-items-center`,
         className
       )}
     >

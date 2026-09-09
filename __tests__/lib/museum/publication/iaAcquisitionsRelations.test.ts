@@ -1,4 +1,7 @@
-import { buildMuseumArtistRelations } from "@/lib/museum/publication/ia";
+import {
+  buildMuseumAcquisitionContext,
+  buildMuseumArtistRelations,
+} from "@/lib/museum/publication/ia";
 import { buildMuseumWorkRelations } from "@/lib/museum/publication/iaWorkContext";
 import type { MuseumPublication } from "@/lib/museum/publication/types";
 
@@ -61,7 +64,7 @@ function relationPublication(): MuseumPublication {
     acquisitionMethod: method,
     programId,
     artistIds: [artistId],
-    organizationIds: [],
+    organizationIds: slug === "magnum-acquisition" ? ["6529NM-ORG-0002"] : [],
     projectIds: [],
     workIds: [workId],
     accessionLotIds: [],
@@ -86,6 +89,19 @@ function relationPublication(): MuseumPublication {
       artist("6529NM-AGT-0002", "keys-artist", "6529NM-W-0008"),
       artist("6529NM-AGT-0003", "magnum-artist", "6529NM-W-0024"),
     ],
+    organizations: [
+      {
+        kind: "organization",
+        id: "6529NM-ORG-0002",
+        slug: "magnum-photos",
+        preferredName: "Magnum Photos",
+        projectIds: [],
+        artworkIds: [],
+        acquisitionIds: ["6529NM-CA-2026-003"],
+        documentIds: [],
+        sourcePaths: [source("6529NM-ORG-0002")],
+      },
+    ],
     projects: [],
     gifts: [],
     artworks: [],
@@ -107,7 +123,7 @@ function relationPublication(): MuseumPublication {
       work(
         "6529NM-W-0024",
         "6529NM-AGT-0003",
-        "selected_by_museum_wave_acquisition_review_in_progress",
+        "accessioned_into_permanent_collection",
         "6529NM-CA-2026-003",
         ["6529NM-AP-ENT-0001"]
       ),
@@ -134,11 +150,11 @@ function relationPublication(): MuseumPublication {
       acquisition(
         "6529NM-CA-2026-003",
         "magnum-acquisition",
-        "selected_by_museum_wave_acquisition_review_in_progress",
+        "accessioned_into_permanent_collection",
         "gift",
         "6529NM-W-0024",
         "6529NM-AGT-0003",
-        null
+        "6529NM-AP-ENT-0001"
       ),
     ],
     acquisitionPrograms: [
@@ -175,7 +191,7 @@ function relationPublication(): MuseumPublication {
 }
 
 describe("typed acquisition/work relation presentation", () => {
-  it("keeps Casey, Keys and Gates, and Magnum relations status-specific", () => {
+  it("keeps Casey, Keys and Gates, and Magnum relations semantically distinct", () => {
     const publication = relationPublication();
     const casey = buildMuseumWorkRelations(publication, "6529NM-W-0001", null);
     expect(casey.secondaryRelations).toEqual(
@@ -211,13 +227,30 @@ describe("typed acquisition/work relation presentation", () => {
       expect.arrayContaining([
         expect.objectContaining({
           id: "6529NM-CA-2026-003",
-          relation: "Part of",
+          relation: "Acquired through",
         }),
       ])
     );
     expect(magnum.secondaryRelations).not.toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ id: "6529NM-AP-ENT-0001" }),
+        expect.objectContaining({ relation: "Selected through" }),
+      ])
+    );
+    const magnumAcquisition = buildMuseumAcquisitionContext(
+      publication,
+      "magnum-acquisition",
+      null
+    );
+    expect(magnumAcquisition?.secondaryRelations).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: "6529NM-AP-ENT-0001",
+          relation: "Gift pathway",
+        }),
+        expect.objectContaining({
+          id: "6529NM-ORG-0002",
+          relation: "Project originator",
+        }),
       ])
     );
   });
@@ -258,8 +291,8 @@ describe("typed acquisition/work relation presentation", () => {
       expect.arrayContaining([
         expect.objectContaining({
           id: "6529NM-CA-2026-003",
-          relation: "Included in",
-          status: "selected_by_museum_wave_acquisition_review_in_progress",
+          relation: "Acquired through",
+          status: "accessioned_into_permanent_collection",
           statusAsOf: "2026-01-01",
         }),
       ])

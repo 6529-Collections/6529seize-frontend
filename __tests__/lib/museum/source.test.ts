@@ -67,8 +67,8 @@ describe("Museum source boundary", () => {
     expect(() => buildMuseumRawUrl("records/../private.json")).toThrow(
       "unsafe_repository_path"
     );
-    expect(() => buildMuseumRawUrl("schemas/object-record.schema.json")).toThrow(
-      "unsafe_repository_path"
-    );
+    expect(() =>
+      buildMuseumRawUrl("schemas/object-record.schema.json")
+    ).toThrow("unsafe_repository_path");
   });
 });

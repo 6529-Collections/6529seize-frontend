@@ -14,14 +14,20 @@ import type { ReactNode } from "react";
 
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import type { SupportedLocale } from "@/i18n/locales";
-import { t, type MessageKey } from "@/i18n/messages";
+import { t, tRich, type MessageKey } from "@/i18n/messages";
 
-import { ABOUT_MOBILE_COLUMN_GUTTER_BREAKOUT_CLASS } from "./AboutLayout";
+import {
+  ABOUT_DOCUMENTATION_PAGE_TITLE_CLASS_NAME,
+  ABOUT_FEATURE_CONTENT_GUTTER_CLASS_NAME,
+  ABOUT_FRAMED_ICON_CLASS_NAME,
+  ABOUT_FRAMED_ICON_WRAPPER_CLASS_NAME,
+  ABOUT_MOBILE_COLUMN_GUTTER_BREAKOUT_CLASS,
+} from "./AboutLayout";
 import AboutSubscriptionsProfileButton from "./AboutSubscriptionsProfileButton";
 import AboutSubscriptionsReference from "./AboutSubscriptionsReference";
 import {
   SUBSCRIPTIONS_INTERACTIVE_PANEL_CLASS,
-  SUBSCRIPTIONS_PANEL_CLASS,
+  SUBSCRIPTIONS_NESTED_HEADING_CLASS,
   SUBSCRIPTIONS_SECTION_HEADING_CLASS,
 } from "./aboutSubscriptionsStyles";
 
@@ -41,19 +47,19 @@ const OVERVIEW_BENEFITS: readonly OverviewBenefit[] = [
   {
     icon: faGasPump,
     iconClassName: "tw-text-[#00f0ff]",
-    iconWrapperClassName: "tw-bg-[#00f0ff]/10",
+    iconWrapperClassName: "tw-border-[#00f0ff]/20 tw-bg-[#00f0ff]/10",
     messageKey: "about.subscriptions.overview.gasSavings",
   },
   {
     icon: faEarthAmericas,
     iconClassName: "tw-text-[#8f5cff]",
-    iconWrapperClassName: "tw-bg-[#7000ff]/20",
+    iconWrapperClassName: "tw-border-[#8f5cff]/20 tw-bg-[#8f5cff]/10",
     messageKey: "about.subscriptions.overview.awayFromComputer",
   },
   {
     icon: faSliders,
     iconClassName: "tw-text-iron-300",
-    iconWrapperClassName: "tw-bg-iron-900",
+    iconWrapperClassName: "tw-border-white/10 tw-bg-white/[0.05]",
     messageKey: "about.subscriptions.overview.setAndForget",
   },
 ] as const;
@@ -80,17 +86,19 @@ export default function AboutSubscriptions() {
 
 function SubscriptionHeader({ locale }: { readonly locale: SupportedLocale }) {
   return (
-    <header className="tw-px-1 tw-pb-10 tw-pt-4 sm:tw-px-2 sm:tw-pb-12 sm:tw-pt-8">
+    <header
+      className={`${ABOUT_FEATURE_CONTENT_GUTTER_CLASS_NAME} tw-pb-10 tw-pt-4 sm:tw-pb-12 sm:tw-pt-8`}
+    >
       <div className="tw-max-w-4xl">
         <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
-          <h1 className="tw-m-0 tw-text-[22px] tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-[26px]">
+          <h1 className={ABOUT_DOCUMENTATION_PAGE_TITLE_CLASS_NAME}>
             {m(locale, "about.subscriptions.hero.title")}
           </h1>
           <div className="tw-flex tw-justify-start empty:tw-hidden">
             <AboutSubscriptionsProfileButton variant="white" />
           </div>
         </div>
-        <div className="tw-mt-3">
+        <div className="tw-mt-5">
           <Link
             className="tw-group/report -tw-ml-1 tw-inline-flex tw-max-w-full tw-items-start tw-gap-2 tw-rounded-md tw-px-1 tw-py-1 tw-text-left tw-text-sm tw-leading-6 tw-text-iron-400 tw-no-underline tw-transition-colors hover:tw-text-iron-300 hover:tw-no-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-[#00f0ff]/50 sm:tw-items-center"
             href="/tools/subscriptions-report"
@@ -122,7 +130,7 @@ function Overview({ locale }: { readonly locale: SupportedLocale }) {
   return (
     <section
       aria-labelledby="subscription-overview-heading"
-      className="tw-px-1 tw-pb-8 sm:tw-px-2 sm:tw-pb-12"
+      className={`${ABOUT_FEATURE_CONTENT_GUTTER_CLASS_NAME} tw-pb-8 sm:tw-pb-12`}
     >
       <div className="tw-max-w-3xl">
         <h2
@@ -144,11 +152,11 @@ function Overview({ locale }: { readonly locale: SupportedLocale }) {
               key={benefit.messageKey}
             >
               <span
-                className={`tw-flex tw-size-10 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full md:tw-size-12 ${benefit.iconWrapperClassName}`}
+                className={`${ABOUT_FRAMED_ICON_WRAPPER_CLASS_NAME} ${benefit.iconWrapperClassName}`}
               >
                 <FontAwesomeIcon
                   aria-hidden="true"
-                  className={`tw-text-xl ${benefit.iconClassName}`}
+                  className={`${ABOUT_FRAMED_ICON_CLASS_NAME} ${benefit.iconClassName}`}
                   icon={benefit.icon}
                 />
               </span>
@@ -160,11 +168,14 @@ function Overview({ locale }: { readonly locale: SupportedLocale }) {
         })}
       </ul>
 
-      <div className="tw-mt-4 tw-grid tw-grid-cols-1 tw-gap-4 sm:tw-mt-6 lg:tw-grid-cols-2 lg:tw-gap-6">
+      <div className="tw-mt-8 tw-flex tw-max-w-4xl tw-flex-col tw-gap-10 sm:tw-mt-10 sm:tw-gap-12">
         <OverviewRule
-          title={m(locale, "about.subscriptions.overview.notMintpass.title")}
+          title={subscriptionRuleTitle(
+            locale,
+            "about.subscriptions.overview.notMintpass.title"
+          )}
         >
-          <ul className="tw-m-0 tw-space-y-2 tw-pl-5 tw-text-sm tw-leading-6 tw-text-iron-400 marker:tw-text-iron-600">
+          <ul className="tw-m-0 tw-space-y-3 tw-pl-5 tw-text-base tw-leading-7 tw-text-iron-300 marker:tw-text-[#00f0ff]">
             <li>
               {m(locale, "about.subscriptions.overview.notMintpass.choice")}
             </li>
@@ -184,9 +195,12 @@ function Overview({ locale }: { readonly locale: SupportedLocale }) {
         </OverviewRule>
 
         <OverviewRule
-          title={m(locale, "about.subscriptions.overview.regularMinting.title")}
+          title={subscriptionRuleTitle(
+            locale,
+            "about.subscriptions.overview.regularMinting.title"
+          )}
         >
-          <ul className="tw-m-0 tw-space-y-2 tw-pl-5 tw-text-sm tw-leading-6 tw-text-iron-400 marker:tw-text-iron-600">
+          <ul className="tw-m-0 tw-space-y-3 tw-pl-5 tw-text-base tw-leading-7 tw-text-iron-300 marker:tw-text-[#8f5cff]">
             <li>
               {m(locale, "about.subscriptions.overview.regularMinting.normal")}
             </li>
@@ -208,14 +222,30 @@ function OverviewRule({
   title,
 }: {
   readonly children: ReactNode;
-  readonly title: string;
+  readonly title: ReactNode;
 }) {
   return (
-    <div className={`${SUBSCRIPTIONS_PANEL_CLASS} tw-p-4 sm:tw-p-6`}>
-      <h3 className="tw-m-0 tw-text-base tw-font-medium tw-leading-6 tw-text-iron-100">
-        {title}
-      </h3>
-      <div className="tw-mt-3">{children}</div>
-    </div>
+    <section>
+      <h3 className={SUBSCRIPTIONS_NESTED_HEADING_CLASS}>{title}</h3>
+      <div className="tw-mt-4">{children}</div>
+    </section>
   );
+}
+
+function subscriptionRuleTitle(
+  locale: SupportedLocale,
+  key:
+    | "about.subscriptions.overview.notMintpass.title"
+    | "about.subscriptions.overview.regularMinting.title"
+): ReactNode {
+  return tRich<ReactNode>(locale, key, {
+    not: (
+      <span
+        className="tw-underline tw-decoration-red tw-decoration-[3px] tw-underline-offset-[8px]"
+        key="not"
+      >
+        {m(locale, "about.subscriptions.overview.emphasis.not")}
+      </span>
+    ),
+  });
 }

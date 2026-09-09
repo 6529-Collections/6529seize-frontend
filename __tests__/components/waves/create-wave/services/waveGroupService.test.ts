@@ -1,5 +1,6 @@
 import {
   getAdminGroupId,
+  getOnlyMeGroupDescription,
   WaveAdminGroupError,
 } from "@/components/waves/create-wave/services/waveGroupService";
 import { commonApiPost } from "@/services/api/common-api";
@@ -13,6 +14,16 @@ const mockedCommonApiPost = commonApiPost as jest.Mock;
 describe("waveGroupService", () => {
   beforeEach(() => {
     mockedCommonApiPost.mockReset();
+  });
+
+  it("builds the same creator-only criteria used by preview and submission", () => {
+    expect(getOnlyMeGroupDescription("0xCreator")).toEqual(
+      expect.objectContaining({
+        identity_addresses: ["0xCreator"],
+        excluded_identity_addresses: null,
+        owns_nfts: [],
+      })
+    );
   });
 
   it("returns existing admin group id if provided", async () => {

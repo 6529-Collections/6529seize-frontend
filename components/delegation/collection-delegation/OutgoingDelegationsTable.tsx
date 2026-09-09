@@ -3,6 +3,7 @@
 import Button from "@/components/utils/button/Button";
 import { DELEGATION_ALL_ADDRESS } from "@/constants/constants";
 import { areEqualAddresses } from "@/helpers/Helpers";
+import { buildTooltipId, TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
@@ -53,6 +54,7 @@ export function OutgoingDelegationsTable(
   const { activeConsolidations, revocation, chainsMatch } = props;
   const { getSwitchToMessage, showDelegationToast, onEditDelegation } = props;
   const { bulkRevocations } = revocation;
+  const rowActionTooltipId = buildTooltipId("delegation-row-actions", scope);
 
   function printOutgoingDelegationRow(args: DelegationRowRenderArgs) {
     const { delegationIndex, walletIndex, delegationsCount, del } = args;
@@ -65,7 +67,7 @@ export function OutgoingDelegationsTable(
         key={`outgoing-${del.useCase.use_case}-${delegationIndex}-${walletIndex}-${w.wallet}`}
       >
         <td className="tw-py-1">
-          <div className="tw-flex tw-flex-col tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900 tw-p-4 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
+          <div className="tw-flex tw-flex-col tw-gap-3 tw-rounded-lg tw-bg-white/[0.025] tw-p-4 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
             <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-3">
               {delegationsCount >= 2 && (
                 <input
@@ -107,7 +109,7 @@ export function OutgoingDelegationsTable(
                 isConsolidation={isConsolidation}
               />
             </div>
-            <div className="tw-flex tw-flex-none tw-items-center tw-gap-2 tw-self-end sm:tw-self-auto">
+            <div className="tw-flex tw-flex-none tw-items-center tw-gap-1.5 tw-self-end sm:tw-self-auto">
               <button
                 type="button"
                 aria-label={t(
@@ -115,8 +117,12 @@ export function OutgoingDelegationsTable(
                   "delegation.collection.outgoing.editAriaLabel",
                   { wallet: w.wallet }
                 )}
-                className="tw-inline-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-800 tw-p-0 tw-text-iron-200 tw-transition-colors hover:tw-border-iron-400 hover:tw-bg-iron-700 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
-                data-tooltip-id={`edit-${del.useCase.use_case}-${w.wallet}`}
+                className="tw-inline-flex tw-size-9 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.035] tw-p-0 tw-text-iron-300 tw-shadow-sm tw-shadow-black/20 tw-transition-colors hover:tw-border-white/20 hover:tw-bg-white/[0.07] hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950"
+                data-tooltip-id={rowActionTooltipId}
+                data-tooltip-content={t(
+                  locale,
+                  "delegation.collection.outgoing.edit"
+                )}
                 onClick={() => {
                   onEditDelegation({
                     wallet: w.wallet,
@@ -125,18 +131,12 @@ export function OutgoingDelegationsTable(
                   });
                 }}
               >
-                <FontAwesomeIcon icon={faEdit} className="tw-h-4 tw-w-4" />
+                <FontAwesomeIcon
+                  aria-hidden="true"
+                  icon={faEdit}
+                  className="tw-size-4"
+                />
               </button>
-              <Tooltip
-                id={`edit-${del.useCase.use_case}-${w.wallet}`}
-                style={{
-                  backgroundColor: "#1F2937",
-                  color: "white",
-                  padding: "4px 8px",
-                }}
-              >
-                {t(locale, "delegation.collection.outgoing.edit")}
-              </Tooltip>
               <button
                 type="button"
                 aria-label={t(
@@ -144,8 +144,12 @@ export function OutgoingDelegationsTable(
                   "delegation.collection.outgoing.revokeAriaLabel",
                   { wallet: w.wallet }
                 )}
-                className="tw-inline-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-red tw-bg-red tw-p-0 tw-text-white tw-transition-colors hover:tw-bg-[#e05f57] focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-red"
-                data-tooltip-id={`revoke-${del.useCase.use_case}-${w.wallet}`}
+                className="hover:tw-text-red-100 tw-inline-flex tw-size-9 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-error/25 tw-bg-error/10 tw-p-0 tw-text-error tw-shadow-sm tw-shadow-black/20 tw-transition-colors hover:tw-border-error/40 hover:tw-bg-error/20 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950"
+                data-tooltip-id={rowActionTooltipId}
+                data-tooltip-content={t(
+                  locale,
+                  "delegation.collection.outgoing.revoke"
+                )}
                 onClick={() => {
                   const title = t(
                     locale,
@@ -176,18 +180,12 @@ export function OutgoingDelegationsTable(
                   showDelegationToast(toast);
                 }}
               >
-                <FontAwesomeIcon icon={faXmark} className="tw-h-4 tw-w-4" />
+                <FontAwesomeIcon
+                  aria-hidden="true"
+                  icon={faXmark}
+                  className="tw-size-4"
+                />
               </button>
-              <Tooltip
-                id={`revoke-${del.useCase.use_case}-${w.wallet}`}
-                style={{
-                  backgroundColor: "#1F2937",
-                  color: "white",
-                  padding: "4px 8px",
-                }}
-              >
-                {t(locale, "delegation.collection.outgoing.revoke")}
-              </Tooltip>
             </div>
           </div>
         </td>
@@ -202,7 +200,7 @@ export function OutgoingDelegationsTable(
     return (
       <tr>
         <td colSpan={4} className="tw-pt-3">
-          <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900 tw-p-3">
+          <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3 tw-rounded-lg tw-bg-white/[0.025] tw-p-3">
             <span className="tw-text-sm tw-font-medium tw-text-iron-300">
               {t(locale, "delegation.collection.outgoing.selected", {
                 count:
@@ -267,17 +265,20 @@ export function OutgoingDelegationsTable(
   }
 
   return (
-    <DelegationsTable
-      direction="outgoing"
-      scope={scope}
-      myDelegations={myDelegations}
-      collection={collection}
-      delegationsLoaded={delegationsLoaded}
-      delegationsError={props.delegationsError}
-      onRetry={props.onRetry}
-      activeConsolidations={activeConsolidations}
-      renderRow={printOutgoingDelegationRow}
-      renderFooter={printBatchRevokeFooter}
-    />
+    <>
+      <DelegationsTable
+        direction="outgoing"
+        scope={scope}
+        myDelegations={myDelegations}
+        collection={collection}
+        delegationsLoaded={delegationsLoaded}
+        delegationsError={props.delegationsError}
+        onRetry={props.onRetry}
+        activeConsolidations={activeConsolidations}
+        renderRow={printOutgoingDelegationRow}
+        renderFooter={printBatchRevokeFooter}
+      />
+      <Tooltip id={rowActionTooltipId} place="top" style={TOOLTIP_STYLES} />
+    </>
   );
 }

@@ -12,7 +12,7 @@ import {
   useSyncExternalStore,
 } from "react";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
-import HoverCard from "@/components/utils/tooltip/HoverCard";
+import CustomTooltip from "@/components/utils/tooltip/CustomTooltip";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { Time } from "@/helpers/time";
@@ -484,7 +484,7 @@ export default function WaveApprovalStatusBar({
   retryApprovalStatus = null,
   wave,
 }: WaveApprovalStatusBarProps) {
-  const { hasTouchScreen } = useDeviceInfo();
+  const { hasTouchScreen, isMobileDevice } = useDeviceInfo();
   const isClientHydrated = useSyncExternalStore(
     subscribeToClientRender,
     getClientRenderSnapshot,
@@ -577,7 +577,7 @@ export default function WaveApprovalStatusBar({
       thresholdLabel={thresholdLabel}
     />
   );
-  const useMobileHelp = isClientHydrated && hasTouchScreen;
+  const useMobileHelp = isClientHydrated && hasTouchScreen && isMobileDevice;
   const approvalRulesButton = useMobileHelp ? (
     <ApprovalRulesButton
       aria-controls={isHelpOpen ? approvalRulesHelpId : undefined}
@@ -586,16 +586,15 @@ export default function WaveApprovalStatusBar({
       onClick={() => setIsHelpOpen(true)}
     />
   ) : (
-    <HoverCard
+    <CustomTooltip
       content={approvalRulesHelp}
-      ariaLabel={APPROVAL_RULES_TITLE}
       placement="left"
       delayShow={300}
       delayHide={0}
       offset={8}
     >
-      <ApprovalRulesButton aria-haspopup="dialog" />
-    </HoverCard>
+      <ApprovalRulesButton />
+    </CustomTooltip>
   );
 
   return (

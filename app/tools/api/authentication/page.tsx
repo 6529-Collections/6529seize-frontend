@@ -10,10 +10,10 @@ import {
   AboutCol as Col,
   AboutContainer as Container,
   AboutRow as Row,
+  ABOUT_DOCUMENTATION_PAGE_TITLE_CLASS_NAME,
+  ABOUT_SECTION_HEADING_CLASS_NAME,
   CONTENT_PAGE_CONTAINER_CLASS,
   CONTENT_PAGE_MAIN_CLASS,
-  CONTENT_PAGE_SECTION_HEADING_CLASS,
-  CONTENT_PAGE_TITLE_CLASS,
 } from "@/components/about/AboutLayout";
 
 const API_REFERENCE_URL = "https://api.6529.io/docs/";
@@ -23,7 +23,7 @@ const inlineCodeClass =
 const sectionClass = "tw-w-full tw-text-base tw-leading-7 tw-text-iron-300";
 const exampleSectionClass =
   "tw-w-full tw-text-base tw-leading-7 tw-text-iron-300";
-const sectionHeadingClass = `${CONTENT_PAGE_SECTION_HEADING_CLASS} tw-mb-3`;
+const sectionHeadingClass = `${ABOUT_SECTION_HEADING_CLASS_NAME} tw-mb-3`;
 
 type ApiAuthSectionProps = Readonly<{
   children: ReactNode;
@@ -204,7 +204,7 @@ export default function ApiAuthenticationPage() {
               <p className="tw-mb-2 tw-text-xs tw-font-medium tw-uppercase tw-leading-4 tw-tracking-wider tw-text-iron-500">
                 {apiAuthGuideCopy.eyebrow}
               </p>
-              <h1 className={CONTENT_PAGE_TITLE_CLASS}>
+              <h1 className={ABOUT_DOCUMENTATION_PAGE_TITLE_CLASS_NAME}>
                 {apiAuthGuideCopy.title}
               </h1>
               <p className="tw-mb-0 tw-mt-4 tw-text-base tw-leading-7 tw-text-iron-300">

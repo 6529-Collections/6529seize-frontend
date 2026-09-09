@@ -16,6 +16,7 @@ export type {
   MuseumEntityRelation,
   MuseumExhibition,
   MuseumExternalProposalPresentationMedia,
+  MuseumExternalProposalPresentationVariant,
   MuseumOrganization,
 } from "./entities";
 
@@ -65,6 +66,15 @@ interface MuseumMediaBase {
   readonly altText: string | null;
   readonly credit: MuseumRightsCredit;
   readonly sourcePath: string;
+  readonly variants?: readonly MuseumMediaVariant[];
+}
+
+interface MuseumMediaVariant {
+  readonly url: string;
+  readonly width: number;
+  readonly height: number;
+  readonly byteSize: number;
+  readonly sha256: MuseumSha256;
 }
 
 export interface MuseumRetainedMedia extends MuseumMediaBase {
@@ -466,6 +476,7 @@ export interface MuseumPublicWork {
   readonly title: string;
   readonly medium: string;
   readonly artistId: string;
+  readonly artistIds?: readonly string[];
   readonly projectId: string | null;
   readonly status: MuseumWorkPublicStatus;
   readonly statusAsOf: string;
@@ -617,7 +628,7 @@ export interface MuseumPublicTypedReferenceRegistryEntry {
 
 export interface MuseumPublicIdentityInventory {
   readonly sourcePath: string;
-  readonly inventoryVersion: "1.5.0";
+  readonly inventoryVersion: "1.6.0" | "1.7.0";
   /** Canonical curated acquisitions explicitly declared by the identity inventory. */
   readonly curatedAcquisitionIds: readonly string[];
   readonly workAliases: readonly MuseumWorkAlias[];

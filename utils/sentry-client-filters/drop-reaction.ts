@@ -331,6 +331,21 @@ function getLatestDropReactionNetworkFailure(
   return null;
 }
 
+function hasAdjacentDropReactionTransportFailure(
+  breadcrumbs: SentryBreadcrumb[],
+  failure: DropReactionFailedRequest
+): boolean {
+  const transportBreadcrumb = breadcrumbs[failure.index - 1];
+
+  // Target-free reaction identities can collide across concurrent drops. The
+  // producer-adjacent transport/failure pair is still exact without restoring
+  // a drop identifier to telemetry.
+  return (
+    transportBreadcrumb?.level === "error" &&
+    isDropReactionTransportFailure(transportBreadcrumb, failure.request.method)
+  );
+}
+
 function isDropReactionRequestTerminal(message: string | undefined): boolean {
   return (
     message === reactionRequestFailedBreadcrumbMessage ||
@@ -392,13 +407,9 @@ function getUnambiguousDropReactionRequestStart(
 }
 
 function getCurrentDropReactionRequestWindow(
-  breadcrumbs: SentryBreadcrumb[]
+  breadcrumbs: SentryBreadcrumb[],
+  failure: DropReactionFailedRequest
 ): DropReactionRequestWindow | null {
-  const failure = getLatestDropReactionNetworkFailure(breadcrumbs);
-  if (!failure) {
-    return null;
-  }
-
   const requestStart = getUnambiguousDropReactionRequestStart(
     breadcrumbs,
     failure
@@ -428,7 +439,19 @@ export function hasDropReactionFailure(event: SentryClientEvent): boolean {
   }
 
   const breadcrumbs = getBreadcrumbValues(event);
-  const requestWindow = getCurrentDropReactionRequestWindow(breadcrumbs);
+  const failure = getLatestDropReactionNetworkFailure(breadcrumbs);
+  if (!failure) {
+    return false;
+  }
+
+  if (hasAdjacentDropReactionTransportFailure(breadcrumbs, failure)) {
+    return true;
+  }
+
+  const requestWindow = getCurrentDropReactionRequestWindow(
+    breadcrumbs,
+    failure
+  );
   if (!requestWindow) {
     return false;
   }

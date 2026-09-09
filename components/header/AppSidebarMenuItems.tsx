@@ -18,6 +18,8 @@ type MenuItem = {
   readonly children?: MenuItem[] | undefined;
   readonly section?: boolean | undefined;
   readonly dividerBefore?: boolean | undefined;
+  readonly hasIndicator?: boolean | undefined;
+  readonly indicatorLabel?: string | undefined;
 };
 
 function getItemKey(item: MenuItem): string {
@@ -160,6 +162,26 @@ function SidebarItemIcon({
   return <Icon className={className} />;
 }
 
+function SidebarItemIconWithIndicator({
+  item,
+  className,
+}: {
+  readonly item: MenuItem;
+  readonly className: string;
+}) {
+  return (
+    <span className="tw-relative tw-flex-shrink-0">
+      <SidebarItemIcon icon={item.icon} className={className} />
+      {item.hasIndicator === true && (
+        <span
+          aria-hidden="true"
+          className="tw-absolute tw-right-0 tw-top-0 tw-size-2 tw-rounded-full tw-bg-red"
+        />
+      )}
+    </span>
+  );
+}
+
 function shouldShowChildDivider(items: readonly MenuItem[], index: number) {
   const item = items[index];
 
@@ -232,10 +254,15 @@ function TopLevelMenuItem({
       <Link
         href={item.path === "/profile" ? profilePath : item.path}
         onClick={onNavigate}
+        aria-label={
+          item.hasIndicator === true && item.indicatorLabel
+            ? `${item.label}: ${item.indicatorLabel}`
+            : undefined
+        }
         className="tw-flex tw-items-center tw-space-x-4 tw-rounded-lg tw-px-4 tw-py-3.5 tw-text-base tw-font-semibold tw-text-iron-50 tw-no-underline tw-transition-colors tw-duration-200 active:tw-bg-iron-800"
       >
-        <SidebarItemIcon
-          icon={item.icon}
+        <SidebarItemIconWithIndicator
+          item={item}
           className="tw-h-5 tw-w-5 tw-flex-shrink-0"
         />
         <span>{item.label}</span>

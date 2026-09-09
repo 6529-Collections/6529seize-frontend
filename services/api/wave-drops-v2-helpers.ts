@@ -7,8 +7,23 @@ type DropApprovalTiming = {
   readonly over_threshold_since_ms?: number | null;
 };
 
+export const DEFAULT_WAVE_DROPS_RETRY_OPTIONS = {
+  maxRetries: 2,
+  initialDelayMs: 300,
+  backoffFactor: 1.5,
+  jitter: 0.1,
+} as const;
+
 export const getDropEndpointId = (dropId: string): string =>
   encodeURIComponent(dropId);
+
+export const getNormalizedDropId = (dropId: string): string => {
+  const normalizedDropId = dropId.trim();
+  if (!normalizedDropId) {
+    throw new Error("Cannot fetch drop without a drop id");
+  }
+  return normalizedDropId;
+};
 
 const isAbortFetchError = (error: unknown): boolean => {
   if (error instanceof DOMException && error.name === "AbortError") {

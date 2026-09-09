@@ -1,5 +1,6 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { MuseumAcquisitionRecordPage } from "@/components/museum/MuseumAcquisitionRecordPage";
+import { MuseumAcquisitionRecordContext } from "@/components/museum/acquisition/MuseumAcquisitionRecordHeader";
 import type { MuseumAcquisitionViewModel } from "@/lib/museum/publication/ia";
 import type {
   MuseumArtist,
@@ -314,11 +315,39 @@ function expectEditorialOrder(workTitle: string, artistName: string): void {
 }
 
 describe("MuseumAcquisitionRecordPage exhibition presentation", () => {
+  it("links an art-first acquisition to its immutable source record", () => {
+    const sourceCommit = "d".repeat(40);
+    const sourcePath =
+      "records/accessions/6529NM.2026.003/accession-statement.json";
+    const base = acquisition(
+      "acquisition-vera-molnar",
+      "a-gift-of-themes-and-variations-210",
+      "A Gift of Themes and Variations #210",
+      "accessioned_into_permanent_collection",
+      "6529NM-W-0029"
+    );
+
+    render(
+      <MuseumAcquisitionRecordContext
+        context={{ ...base, sourceCommit, sourcePath }}
+        artFirst={true}
+        curatorialDocumentCount={1}
+        workCount={1}
+      />
+    );
+
+    expect(
+      screen.getByRole("link", { name: "Open source record" })
+    ).toHaveAttribute(
+      "href",
+      `https://github.com/6529-Collections/6529networkmuseum/blob/${sourceCommit}/${sourcePath}`
+    );
+  });
+
   it("joins Keys and Gates Work IDs to selected program media and tiers the record", () => {
     const workTitle = "A Door Opens";
     const artistName = "Anni Artist";
-    const lifecycle =
-      "Selected through an acquisition program; acquisition pending";
+    const lifecycle = "Selected through an acquisition program; unminted";
     const workId = "6529NM-W-0008";
     const media = programMedia(
       "https://museum.test/keys-and-gates/0008.webp",
@@ -496,9 +525,9 @@ describe("MuseumAcquisitionRecordPage exhibition presentation", () => {
     expect(
       screen.getByRole("heading", { name: "Conflict at Its Edges" })
     ).toBeInTheDocument();
-    fireEvent.click(
-      screen.getByRole("button", { name: "View image · loads 16.5 MB" })
-    );
+    expect(
+      screen.queryByRole("button", { name: "View image · loads 16.5 MB" })
+    ).not.toBeInTheDocument();
     expect(
       screen.getByRole("img", { name: presentation.altText })
     ).toHaveAttribute("src", presentation.mediaUrl);
@@ -589,8 +618,12 @@ describe("MuseumAcquisitionRecordPage exhibition presentation", () => {
       screen.getByRole("img", { name: immediatelyViewable.altText })
     ).toHaveAttribute("src", immediatelyViewable.mediaUrl);
     expect(
-      screen.getByRole("button", { name: "View image · loads 16.5 MB" })
-    ).toBeInTheDocument();
+      screen.queryByRole("button", { name: "View image · loads 16.5 MB" })
+    ).not.toBeInTheDocument();
+    expect(screen.getByRole("img", { name: gated.altText })).toHaveAttribute(
+      "src",
+      gated.mediaUrl
+    );
   });
 
   it("fails closed when selected program media has no reviewed derivatives", () => {
@@ -681,7 +714,9 @@ describe("MuseumAcquisitionRecordPage exhibition presentation", () => {
     expect(
       screen.queryByRole("heading", { name: "Curatorial reading" })
     ).not.toBeInTheDocument();
-    expect(document.querySelector("details#acquisition-record")).toBeNull();
+    const record = document.querySelector("details#acquisition-record");
+    expect(record).not.toBeNull();
+    expect(record).not.toHaveAttribute("open");
     expect(
       screen.getAllByText("Accessioned into the permanent Collection", {
         exact: true,

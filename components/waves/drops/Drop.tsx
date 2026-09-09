@@ -1,5 +1,6 @@
 "use client";
 
+import ContentModerationDropGate from "@/components/content-moderation/ContentModerationDropGate";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import type {
@@ -9,6 +10,7 @@ import type {
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import type { ImageScale } from "@/helpers/image.helpers";
+import type { QuickCurationAction } from "@/hooks/drops/useCanShowDropCurationsAction";
 import { useMemo } from "react";
 import DropContext from "./DropContext";
 import { DropLocation } from "./drop.types";
@@ -42,6 +44,11 @@ interface DropProps {
   readonly identityMode?: DropIdentityMode | undefined;
   readonly timestampLayout?: DropTimestampLayout | undefined;
   readonly showInteractions?: boolean | undefined;
+  readonly showStandaloneActionsButton?: boolean | undefined;
+  readonly standaloneQuickRemoveCuration?:
+    | QuickCurationAction
+    | null
+    | undefined;
   readonly inlineAuthorOnDesktop?: boolean | undefined;
   readonly mediaImageScale?: ImageScale | undefined;
   readonly fullWidthMedia?: boolean | undefined;
@@ -56,6 +63,7 @@ interface DropProps {
   readonly quotePath?: readonly string[] | undefined;
   readonly embedDepth?: number | undefined;
   readonly maxEmbedDepth?: number | undefined;
+  readonly moderationPresentation?: "default" | "profile-activity" | undefined;
 }
 
 export default function Drop({
@@ -77,6 +85,8 @@ export default function Drop({
   identityMode,
   timestampLayout,
   showInteractions = true,
+  showStandaloneActionsButton = false,
+  standaloneQuickRemoveCuration,
   inlineAuthorOnDesktop,
   mediaImageScale,
   fullWidthMedia,
@@ -91,16 +101,19 @@ export default function Drop({
   quotePath,
   embedDepth,
   maxEmbedDepth,
+  moderationPresentation = "default",
 }: DropProps) {
   const canOpenDrop =
     drop.drop_type !== ApiDropType.Chat || location !== DropLocation.WAVE;
   const openDropContentClick = canOpenDrop ? onDropContentClick : undefined;
+  const effectiveShowWaveInfo =
+    moderationPresentation === "profile-activity" ? false : showWaveInfo;
 
   const components: Record<ApiDropType, React.ReactNode> = {
     [ApiDropType.Participatory]: (
       <ParticipationDrop
         drop={drop}
-        showWaveInfo={showWaveInfo}
+        showWaveInfo={effectiveShowWaveInfo}
         activeDrop={activeDrop}
         location={location}
         onReply={onReply}
@@ -131,7 +144,7 @@ export default function Drop({
         drop={drop}
         previousDrop={previousDrop}
         nextDrop={nextDrop}
-        showWaveInfo={showWaveInfo}
+        showWaveInfo={effectiveShowWaveInfo}
         activeDrop={activeDrop}
         location={location}
         dropViewDropId={dropViewDropId}
@@ -163,7 +176,7 @@ export default function Drop({
           previousDrop?.type === DropSize.FULL ? previousDrop : null
         }
         nextDrop={nextDrop?.type === DropSize.FULL ? nextDrop : null}
-        showWaveInfo={showWaveInfo}
+        showWaveInfo={effectiveShowWaveInfo}
         activeDrop={activeDrop}
         location={location}
         dropViewDropId={dropViewDropId}
@@ -177,6 +190,8 @@ export default function Drop({
         identityMode={identityMode}
         timestampLayout={timestampLayout}
         showInteractions={showInteractions}
+        showStandaloneActionsButton={showStandaloneActionsButton}
+        standaloneQuickRemoveCuration={standaloneQuickRemoveCuration}
         inlineAuthorOnDesktop={inlineAuthorOnDesktop}
         mediaImageScale={mediaImageScale}
         fullWidthMedia={fullWidthMedia}
@@ -196,7 +211,13 @@ export default function Drop({
 
   return (
     <DropContext.Provider value={memoizedValue}>
-      {components[drop.drop_type]}
+      <ContentModerationDropGate
+        drop={drop}
+        presentation={moderationPresentation}
+        preserveGlobalContext={drop.drop_type === ApiDropType.Chat}
+      >
+        {components[drop.drop_type]}
+      </ContentModerationDropGate>
     </DropContext.Provider>
   );
 }

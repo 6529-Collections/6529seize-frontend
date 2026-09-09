@@ -8,61 +8,66 @@ export default function MyStreamNoItems() {
   const createHref = isApp ? "/waves/create" : "/waves?create=wave";
 
   return (
-    <div className="tw-mx-auto tw-mt-8 tw-px-2 tw-pb-8 sm:tw-px-4 md:tw-mt-16 md:tw-max-w-xl md:tw-px-6 lg:tw-px-0">
-      <div className="tw-relative tw-inline-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-900 tw-p-4">
-        <svg
-          className="tw-h-8 tw-w-8 tw-text-primary-500"
-          viewBox="0 0 48 48"
-          fill="none"
+    <div className="tw-mx-auto tw-flex tw-min-h-full tw-w-full tw-max-w-xl tw-flex-1 tw-flex-col tw-justify-center tw-px-4 tw-pb-24 tw-pt-10 sm:tw-px-6 md:tw-pb-16 md:tw-pt-16 lg:tw-px-0">
+      <div className="tw-relative tw-self-start">
+        <div
           aria-hidden="true"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M7.34119 10.875H11.409V14.625H7.34119V10.875Z"
-            fill="currentColor"
-          />
-          <path
-            d="M22.5001 7.125H48V10.875H22.5001V7.125Z"
-            fill="currentColor"
-          />
-          <path
-            d="M22.5001 14.625H37.1251V18.375H22.5001V14.625Z"
-            fill="currentColor"
-          />
-          <path
-            d="M7.34119 33.375H11.409V37.125H7.34119V33.375Z"
-            fill="currentColor"
-          />
-          <path
-            d="M22.5001 29.625H48V33.375H22.5001V29.625Z"
-            fill="currentColor"
-          />
-          <path
-            d="M22.5001 37.125H37.1251V40.875H22.5001V37.125Z"
-            fill="currentColor"
-          />
-          <path
-            d="M0 20.625C0 21.4534 0.671573 22.125 1.5 22.125H17.25C18.0784 22.125 18.75 21.4534 18.75 20.625V4.875C18.75 4.04657 18.0784 3.375 17.25 3.375H1.5C0.671573 3.375 0 4.04657 0 4.875V20.625ZM3.75 8.625C3.75 7.79657 4.42157 7.125 5.25 7.125H13.5C14.3284 7.125 15 7.79657 15 8.625V16.875C15 17.7034 14.3284 18.375 13.5 18.375H5.25C4.42157 18.375 3.75 17.7034 3.75 16.875V8.625Z"
-            fill="currentColor"
-          />
-          <path
-            d="M0 43.125C0 43.9534 0.671573 44.625 1.5 44.625H17.25C18.0784 44.625 18.75 43.9534 18.75 43.125V27.375C18.75 26.5466 18.0784 25.875 17.25 25.875H1.5C0.671573 25.875 0 26.5466 0 27.375V43.125ZM3.75 31.125C3.75 30.2966 4.42157 29.625 5.25 29.625H13.5C14.3284 29.625 15 30.2966 15 31.125V39.375C15 40.2034 14.3284 40.875 13.5 40.875H5.25C4.42157 40.875 3.75 40.2034 3.75 39.375V31.125Z"
-            fill="currentColor"
-          />
-        </svg>
-        <div className="tw-absolute tw-inset-0 tw-animate-pulse tw-rounded-full tw-bg-primary-400 tw-opacity-10"></div>
+          className="tw-absolute tw-inset-1 tw-rounded-xl tw-bg-primary-500/20 tw-blur-xl"
+        />
+        <div className="tw-relative tw-flex tw-size-16 tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-gradient-to-br tw-from-white/10 tw-to-white/[0.02] tw-shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_12px_28px_rgba(0,0,0,0.28)]">
+          <svg
+            className="tw-size-8 tw-text-primary-400"
+            viewBox="0 0 48 48"
+            fill="none"
+            aria-hidden="true"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M7.34119 10.875H11.409V14.625H7.34119V10.875Z"
+              fill="currentColor"
+            />
+            <path
+              d="M22.5001 7.125H48V10.875H22.5001V7.125Z"
+              fill="currentColor"
+            />
+            <path
+              d="M22.5001 14.625H37.1251V18.375H22.5001V14.625Z"
+              fill="currentColor"
+            />
+            <path
+              d="M7.34119 33.375H11.409V37.125H7.34119V33.375Z"
+              fill="currentColor"
+            />
+            <path
+              d="M22.5001 29.625H48V33.375H22.5001V29.625Z"
+              fill="currentColor"
+            />
+            <path
+              d="M22.5001 37.125H37.1251V40.875H22.5001V37.125Z"
+              fill="currentColor"
+            />
+            <path
+              d="M0 20.625C0 21.4534 0.671573 22.125 1.5 22.125H17.25C18.0784 22.125 18.75 21.4534 18.75 20.625V4.875C18.75 4.04657 18.0784 3.375 17.25 3.375H1.5C0.671573 3.375 0 4.04657 0 4.875V20.625ZM3.75 8.625C3.75 7.79657 4.42157 7.125 5.25 7.125H13.5C14.3284 7.125 15 7.79657 15 8.625V16.875C15 17.7034 14.3284 18.375 13.5 18.375H5.25C4.42157 18.375 3.75 17.7034 3.75 16.875V8.625Z"
+              fill="currentColor"
+            />
+            <path
+              d="M0 43.125C0 43.9534 0.671573 44.625 1.5 44.625H17.25C18.0784 44.625 18.75 43.9534 18.75 43.125V27.375C18.75 26.5466 18.0784 25.875 17.25 25.875H1.5C0.671573 25.875 0 26.5466 0 27.375V43.125ZM3.75 31.125C3.75 30.2966 4.42157 29.625 5.25 29.625H13.5C14.3284 29.625 15 30.2966 15 31.125V39.375C15 40.2034 14.3284 40.875 13.5 40.875H5.25C4.42157 40.875 3.75 40.2034 3.75 39.375V31.125Z"
+              fill="currentColor"
+            />
+          </svg>
+        </div>
       </div>
 
-      <h1 className="tw-mt-8 tw-text-2xl tw-font-bold tw-text-iron-50">
+      <h2 className="tw-mt-7 tw-max-w-xs tw-text-3xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-max-w-none sm:tw-text-4xl">
         No notifications found
-      </h1>
+      </h2>
 
-      <p className="tw-mt-2 tw-max-w-xl tw-text-base tw-font-normal tw-text-iron-400 sm:tw-text-lg">
+      <p className="tw-mt-4 tw-max-w-md tw-text-sm tw-font-medium tw-leading-6 tw-text-iron-400 sm:tw-text-base">
         Engage with the community and get started by{" "}
         <span className="tw-bg-gradient-to-r tw-from-indigo-400 tw-to-indigo-500 tw-bg-clip-text tw-font-semibold tw-text-transparent">
           following or creating a{" "}
           <svg
-            className="tw-ml-1 tw-mr-1 tw-inline tw-h-6 tw-w-6 tw-text-indigo-300"
+            className="tw-mx-1 tw-inline tw-size-5 tw-align-middle tw-text-indigo-300"
             viewBox="0 0 48 48"
             fill="none"
             aria-hidden="true"
@@ -85,12 +90,13 @@ export default function MyStreamNoItems() {
         </span>
       </p>
 
-      <div className="tw-mt-8 tw-flex tw-flex-col tw-gap-4 sm:tw-flex-row sm:tw-items-center">
+      <div className="tw-mt-8 tw-flex tw-w-full tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-items-center">
         <ButtonLink
           href={exploreHref}
           variant="tertiary"
-          size="md"
-          className="tw-group"
+          size="lg"
+          fullWidth
+          className="tw-group sm:tw-w-auto sm:tw-flex-1"
         >
           <span>Explore Waves</span>
           <svg
@@ -116,7 +122,9 @@ export default function MyStreamNoItems() {
         <ButtonLink
           href={createHref}
           variant="action"
-          size="md"
+          size="lg"
+          fullWidth
+          className="sm:tw-w-auto sm:tw-flex-1"
         >
           <svg
             className="tw-h-4 tw-w-4 tw-flex-shrink-0"

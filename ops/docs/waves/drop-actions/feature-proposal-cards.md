@@ -36,7 +36,7 @@ sidebar, and the saved choice then takes precedence.
   cards.
 - Select a quoted proposal or a same-origin proposal preview inside another
   drop.
-- While creating a `Rank` or `Approve` Wave, open `Advanced settings` in
+- While creating a `Rank` or `Approve` Wave, open `Appearance and labels` in
   `Overview`. New Waves default to `Summary card`; choose `Full proposal` to
   keep the previous full-content presentation.
 - For an existing standard `Rank` or `Approve` Wave, open the right sidebar,

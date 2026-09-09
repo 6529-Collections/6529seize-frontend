@@ -63,12 +63,11 @@
 
 1. Resolve PR #3550 review-bot and CI findings in one focused signed follow-up.
 2. Repeat exact-head review bots, CI, and unresolved-thread audit to green.
-3. Re-read Release Bus controls/locks and current refs; use the recorded,
-   owner-approved serialized manual fallback while lanes remain deliberately
-   OFF and drain gates remain clear.
-4. Merge current main into current `1a-staging` without force, freeze the
-   staging composition SHA and embedded production-main SHA, deploy/E2E, then
-   deploy that exact staging-qualified candidate to production and repeat E2E.
+3. Follow `ops/docs/developer/deployment.md` within the authorized release
+   scope, fetching current shared refs and preserving other developers' work.
+4. Merge the development branch into `1a-staging` and follow automatic
+   deployment/E2E. With production authorization, merge into `main`, dispatch
+   `Web Deploy - PROD`, and follow its automatic E2E.
 
 ## Dependencies and open release blockers
 

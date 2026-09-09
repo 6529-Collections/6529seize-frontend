@@ -1,19 +1,20 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { GroupDescriptionType } from "@/entities/IGroup";
 import type { ApiGroupDescription } from "@/generated/models/ApiGroupDescription";
 import { ApiGroupBeneficiaryGrantMatchMode } from "@/generated/models/ApiGroupBeneficiaryGrantMatchMode";
-import { ApiGroupFilterDirection } from "@/generated/models/ApiGroupFilterDirection";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { ApiGroupTdhInclusionStrategy } from "@/generated/models/ApiGroupTdhInclusionStrategy";
 import { ApiXTdhGrantStatus } from "@/generated/models/ApiXTdhGrantStatus";
 import { ApiXTdhGrantTargetTokenMode } from "@/generated/models/ApiXTdhGrantTargetTokenMode";
 import { toShortGrantId } from "@/components/groups/page/create/config/xtdh-grant/utils";
 import { getGroupNftOwnershipCardSummary } from "@/helpers/groups/group-nft-ownership";
+import { useGroupCriteriaIdentityLabels } from "@/hooks/useGroupCriteriaIdentityLabels";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import GroupCardConfig from "./GroupCardConfig";
+import GroupCardConfigsScroller from "./GroupCardConfigsScroller";
+import { getGroupCardIdentityValue } from "./group-card-config-identity";
 
 export interface GroupCardConfigProps {
   readonly key: GroupDescriptionType;
@@ -62,11 +63,7 @@ export default function GroupCardConfigs({
   readonly group?: ApiGroupFull | undefined;
 }) {
   const [nowMs] = useState<number>(() => Date.now());
-
-  const directionLabels: Record<ApiGroupFilterDirection, string> = {
-    [ApiGroupFilterDirection.Received]: "from",
-    [ApiGroupFilterDirection.Sent]: "to",
-  };
+  const identityLabels = useGroupCriteriaIdentityLabels(group?.group);
 
   const getMinMaxValue = ({
     min,
@@ -85,20 +82,6 @@ export default function GroupCardConfigs({
       return `>= ${min}`;
     }
     return `${min} - ${max}`;
-  };
-
-  const getIdentityValue = ({
-    identity,
-    direction,
-  }: {
-    readonly identity: string | null;
-    readonly direction: ApiGroupFilterDirection | null;
-  }): string | null => {
-    if (!identity) {
-      return null;
-    }
-    const directionPrefix = direction ? `${directionLabels[direction]} ` : "";
-    return `${directionPrefix}identity: ${identity}`;
   };
 
   const getTdhConfig = (
@@ -130,9 +113,10 @@ export default function GroupCardConfigs({
       typeof rep.category?.length === "number" && rep.category.length > 0
         ? `category: ${rep.category}`
         : null;
-    const identity = getIdentityValue({
+    const identity = getGroupCardIdentityValue({
       identity: rep.user_identity,
       direction: rep.direction,
+      identityLabels,
     });
     const parts = [value, category, identity].filter(Boolean);
     if (!parts.length) {
@@ -148,9 +132,10 @@ export default function GroupCardConfigs({
     cic: ApiGroupDescription["cic"]
   ): GroupCardConfigProps | null => {
     const value = getMinMaxValue({ min: cic.min, max: cic.max });
-    const identity = getIdentityValue({
+    const identity = getGroupCardIdentityValue({
       identity: cic.user_identity,
       direction: cic.direction,
+      identityLabels,
     });
     const parts = [value, identity].filter(Boolean);
     if (!parts.length) {
@@ -293,120 +278,5 @@ export default function GroupCardConfigs({
   };
 
   const configs = getConfigs();
-
-  const [isLeftHidden, setIsLeftHidden] = useState(false);
-  const [isRightHidden, setIsRightHidden] = useState(true);
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  const checkForHiddenContent = () => {
-    const container = containerRef.current;
-    if (container) {
-      const { scrollLeft, scrollWidth, clientWidth } = container;
-      setIsLeftHidden(scrollLeft > 0);
-      setIsRightHidden(scrollLeft < scrollWidth - clientWidth);
-    }
-  };
-
-  const scrollContainer = (direction: "left" | "right") => {
-    const container = containerRef.current;
-    if (container) {
-      const scrollAmount = direction === "left" ? -200 : 200; // Adjust scroll amount as needed
-      container.scrollBy({ left: scrollAmount, behavior: "smooth" });
-    }
-  };
-
-  useEffect(() => {
-    checkForHiddenContent();
-
-    const container = containerRef.current;
-    const canObserve =
-      typeof ResizeObserver !== "undefined" && !!containerRef.current;
-
-    const observer = canObserve
-      ? new ResizeObserver(() => checkForHiddenContent())
-      : null;
-
-    if (observer && container) {
-      observer.observe(container);
-    } else {
-      // Fallback: still respond to window resizes
-      window.addEventListener("resize", checkForHiddenContent);
-    }
-
-    return () => {
-      if (observer && container) {
-        observer.unobserve(container);
-        observer.disconnect();
-      }
-      window.removeEventListener("resize", checkForHiddenContent);
-    };
-  }, []);
-
-  return (
-    <div className="tw-relative tw-flex tw-items-start tw-text-xs tw-text-iron-200 sm:tw-text-sm">
-      <div className="tw-w-full tw-overflow-x-hidden">
-        {isLeftHidden && (
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              scrollContainer("left");
-            }}
-            aria-label="Scroll left"
-            className="tw-absolute tw-left-0 tw-top-1/2 tw-z-30 tw-inline-flex tw-h-7 tw-w-7 -tw-translate-x-3 tw-translate-y-[-50%] tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/5 tw-bg-iron-800 tw-text-white tw-transition tw-duration-200 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-500 desktop-hover:hover:tw-bg-white/10"
-          >
-            <svg
-              className="tw-h-4 tw-w-4 tw-rotate-90 tw-text-iron-200 tw-transition tw-duration-200 tw-ease-out desktop-hover:hover:tw-text-white"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M6 9L12 15L18 9"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
-        )}
-        <div
-          className="tw-no-scrollbar tw-flex tw-items-center tw-gap-x-4 tw-gap-y-2 tw-overflow-x-auto tw-py-0.5"
-          ref={containerRef}
-          onScroll={checkForHiddenContent}
-        >
-          {configs.map((config) => (
-            <GroupCardConfig config={config} key={config.key} />
-          ))}
-        </div>
-        {isRightHidden && (
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              scrollContainer("right");
-            }}
-            aria-label="Scroll right"
-            className="tw-absolute tw-right-0 tw-top-1/2 tw-z-30 tw-inline-flex tw-h-7 tw-w-7 tw-translate-x-3 tw-translate-y-[-50%] tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/5 tw-bg-iron-800 tw-text-white tw-transition tw-duration-200 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-500 desktop-hover:hover:tw-bg-white/10"
-          >
-            <svg
-              className="tw-h-4 tw-w-4 -tw-rotate-90 tw-text-iron-200 tw-transition tw-duration-200 tw-ease-out desktop-hover:hover:tw-text-white"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M6 9L12 15L18 9"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
-        )}
-      </div>
-    </div>
-  );
+  return <GroupCardConfigsScroller configs={configs} />;
 }

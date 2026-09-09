@@ -48,7 +48,9 @@ jest.mock("@/hooks/useWave", () => ({ useWave: jest.fn() }));
 jest.mock("@/hooks/useWaveViewMode", () => ({ useWaveViewMode: jest.fn() }));
 jest.mock("@/components/navigation/BackButton", () => ({
   __esModule: true,
-  default: () => <div data-testid="back" />,
+  default: ({ returnTo }: { readonly returnTo?: string }) => (
+    <div data-return-to={returnTo ?? ""} data-testid="back" />
+  ),
 }));
 jest.mock("@/components/utils/Spinner", () => ({
   __esModule: true,
@@ -426,6 +428,53 @@ describe("AppHeader", () => {
     ).toBeInTheDocument();
   });
 
+  it("uses the native back button for a collected token origin", () => {
+    const returnTo =
+      "/Shelby/collected?collection=memelab#collected-card-memelab-65";
+    setup({
+      address: "0xabc",
+      asPath: "/meme-lab/65",
+      query: { returnTo },
+      params: { id: "65" },
+      canGoBack: false,
+    });
+
+    expect(screen.getByTestId("back")).toHaveAttribute(
+      "data-return-to",
+      returnTo
+    );
+  });
+
+  it("does not add the native back button to web token headers", () => {
+    useCapacitor.mockReturnValue({ isCapacitor: false });
+    setup({
+      address: "0xabc",
+      asPath: "/meme-lab/65",
+      query: {
+        returnTo:
+          "/Shelby/collected?collection=memelab#collected-card-memelab-65",
+      },
+      params: { id: "65" },
+      canGoBack: false,
+    });
+
+    expect(screen.queryByTestId("back")).not.toBeInTheDocument();
+  });
+
+  it("keeps the native menu action on a direct token visit", () => {
+    setup({
+      address: "0xabc",
+      asPath: "/meme-lab/65",
+      params: { id: "65" },
+      canGoBack: false,
+    });
+
+    expect(screen.queryByTestId("back")).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Open menu" })
+    ).toBeInTheDocument();
+  });
+
   it("shows back button inside wave regardless of canGoBack", () => {
     const wave = {
       id: "w1",
@@ -441,6 +490,32 @@ describe("AppHeader", () => {
     });
     expect(screen.getByTestId("back")).toBeInTheDocument();
     expect(screen.getByText("WaveOne")).toBeInTheDocument();
+  });
+
+  it("shows a linked parent wave for an active subwave", () => {
+    const wave = {
+      id: "child-wave",
+      name: "CI-PRODUCTION",
+      parent_wave: { id: "parent-wave", name: "Follow The Repo" },
+      chat: { scope: { group: { is_direct_message: false } } },
+    };
+    setup({
+      wave,
+      asPath: "/waves/child-wave",
+      waveInfo: { isRankWave: false, isMemesWave: false, isDm: false },
+    });
+
+    expect(
+      screen.getByRole("navigation", { name: "Wave hierarchy" })
+    ).toHaveTextContent(/Subwave of\s*Follow The Repo/);
+    const parentLink = screen.getByRole("link", {
+      name: "Subwave of Follow The Repo",
+    });
+    expect(parentLink).toHaveAttribute(
+      "title",
+      "Open parent wave: Follow The Repo"
+    );
+    expect(parentLink).toHaveAttribute("href", "/waves/parent-wave");
   });
 
   it("shows profile image on waves root page", () => {

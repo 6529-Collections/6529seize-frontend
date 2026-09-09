@@ -3,13 +3,11 @@
 import { useAuth } from "@/components/auth/Auth";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import type { ApiWaveMetadata } from "@/generated/models/ApiWaveMetadata";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { isValidProposalCardExcerptMaxCharacters } from "@/helpers/waves/proposal-card.helpers";
 import {
   getWaveProposalCardConfigFromMetadata,
-  getWaveProposalCardMetadataRequest,
   getWaveProposalCardMetadataUpdate,
 } from "@/helpers/waves/wave-metadata.helpers";
 import { canEditWave } from "@/helpers/waves/waves.helpers";
@@ -18,10 +16,7 @@ import { useWave } from "@/hooks/useWave";
 import { useWaveMetadata } from "@/hooks/waves/useWaveMetadata";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import {
-  createWaveMetadata,
-  deleteWaveMetadata,
-} from "@/services/api/waves-v2-api";
+import { replaceWaveMetadata } from "@/services/api/wave-metadata-replacement";
 import type {
   CreateWaveProposalCardConfig,
   CreateWaveProposalCardMode,
@@ -74,47 +69,6 @@ const getValueLabel = (
       ? "waves.proposalCard.mode.standard.label"
       : "waves.proposalCard.mode.custom.label"
   );
-};
-
-const replaceProposalCardMetadata = async ({
-  waveId,
-  metadata,
-  proposalCards,
-}: {
-  readonly waveId: string;
-  readonly metadata: readonly ApiWaveMetadata[] | null;
-  readonly proposalCards: CreateWaveProposalCardConfig;
-}): Promise<void> => {
-  const update = getWaveProposalCardMetadataUpdate({
-    waveId,
-    metadata,
-    proposalCards,
-  });
-  const rollbackBody = getWaveProposalCardMetadataRequest(
-    getWaveProposalCardConfigFromMetadata(waveId, metadata)
-  );
-  let didDeleteExistingSettings = false;
-
-  try {
-    didDeleteExistingSettings = update.deleteIds.length > 0;
-    await Promise.all(
-      update.deleteIds.map((metadataId) =>
-        deleteWaveMetadata({ waveId, metadataId })
-      )
-    );
-    await Promise.all(
-      update.create.map((body) => createWaveMetadata({ waveId, body }))
-    );
-  } catch (writeError) {
-    if (didDeleteExistingSettings) {
-      try {
-        await createWaveMetadata({ waveId, body: rollbackBody });
-      } catch {
-        // Preserve the original write failure when the best-effort rollback fails.
-      }
-    }
-    throw writeError;
-  }
 };
 
 export function useWaveProposalCardSettings(wave: ApiWave) {
@@ -182,10 +136,15 @@ export function useWaveProposalCardSettings(wave: ApiWave) {
             return;
           }
 
-          await replaceProposalCardMetadata({
+          const update = getWaveProposalCardMetadataUpdate({
             waveId: wave.id,
             metadata,
             proposalCards: draftConfig,
+          });
+          await replaceWaveMetadata({
+            waveId: wave.id,
+            metadata,
+            ...update,
           });
           closeEditor();
         } catch (error) {
@@ -197,10 +156,7 @@ export function useWaveProposalCardSettings(wave: ApiWave) {
           setToast({
             type: "error",
             title: message,
-            description: t(
-              locale,
-              "waves.proposalCard.settings.toastRetry"
-            ),
+            description: t(locale, "waves.proposalCard.settings.toastRetry"),
             details: getToastErrorDetails(error, getErrorMessage(error)),
           });
         } finally {

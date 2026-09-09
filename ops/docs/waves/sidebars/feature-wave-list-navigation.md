@@ -16,8 +16,15 @@ Wave and DM rows in the left list control which thread is open.
   details without creating a competing click target.
 - `Worth Checking Out` is an overlapping discovery view: every recommended
   wave also appears in the `All` list at its recent-activity position. The
-  `Joined` list includes only waves the user has joined, so discovery-only
-  recommendations stay out of that bottom list.
+  `Joined` list normally includes only waves the user has joined, so
+  discovery-only recommendations stay out of that bottom list.
+- A wave opened from a direct link is temporarily added to the sidebar route
+  context when it is outside the loaded list, including in `Joined`. This does
+  not pin or join the wave.
+- When the direct link targets a subwave, its visible root parent is surfaced,
+  its subwaves are loaded, the parent opens, and the active child row is
+  highlighted.
+- The sidebar scrolls the active route row into the nearest visible position.
 - The expanded web Waves panel header includes a secondary `Discover Waves`
   link to `/discover`.
 - Browser back/forward keeps the active row and URL in sync.
@@ -64,6 +71,11 @@ Wave and DM rows in the left list control which thread is open.
 - Native-app edge swipe from `/waves/{waveId}` returns to `/waves`.
 - Inside the `/waves` or `/messages` shell, row changes update URL/history in
   place and keep row highlight aligned.
+- Opening `/waves/{waveId}` directly keeps that wave visible and highlighted
+  even when it is not followed, pinned, or present in the current overview
+  page.
+- Opening a subwave directly shows its root parent while children load, then
+  expands the parent and reveals the selected subwave row.
 - On signed-out desktop web `/waves`, clearing the active row returns to
   `/waves` and leaves the shell visible with a `Select a Wave` placeholder plus
   a connect-wallet CTA in the thread pane.
@@ -92,11 +104,18 @@ Wave and DM rows in the left list control which thread is open.
   their normal touch behavior.
 - Browser-default behavior is kept for modified clicks such as Cmd/Ctrl-click,
   Shift/Alt-click, middle-click, and right-click/context menu.
+- Route-context rows keep their server-returned pin and join state. Their
+  temporary visibility does not change account preferences.
+- A private or inaccessible parent is never synthesized: only parent metadata
+  included in the resolved active-wave response can be surfaced.
 
 ## Failure and Recovery
 
 - If the selected thread no longer resolves, the app returns to section home
   (`/waves` or `/messages`).
+- While direct-linked subwave children are loading, the parent row remains the
+  visible fallback. When the active child arrives, the same sidebar moves the
+  reveal target to that child.
 - Recovery removes stale `wave` query values when present.
 - After recovery, users can select another row immediately.
 

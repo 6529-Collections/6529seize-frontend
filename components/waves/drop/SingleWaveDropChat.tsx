@@ -27,7 +27,9 @@ import type { WsDropDeleteMessage } from "@/helpers/Types";
 import { WsMessageType } from "@/helpers/Types";
 import { t } from "@/i18n/messages";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { isWaveDirectMessage } from "@/helpers/waves/wave.helpers";
 import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
+import { useDmUnreadConversation } from "@/services/dm-unread/DmUnreadStateProvider";
 import { REPLY_TARGET_UNAVAILABLE_TOAST_ID } from "../create-drop-content/reply-target-unavailable";
 
 interface SingleWaveDropChatProps {
@@ -48,6 +50,7 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({
   isVotingControlsLocked = false,
 }) => {
   const { isApp } = useDeviceInfo();
+  const dmUnreadConversation = useDmUnreadConversation(wave.id);
   const nativeKeyboard = useNativeKeyboard();
   const { updateEligibility } = useWaveEligibility();
   const isKeyboardOccupyingViewport =
@@ -196,7 +199,11 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({
                     }
                     activeDrop={activeDrop}
                     initialDrop={null}
-                    unreadCount={wave.metrics.your_unread_drops_count}
+                    unreadCount={
+                      isWaveDirectMessage(wave.id, wave)
+                        ? (dmUnreadConversation?.unread_count ?? 0)
+                        : wave.metrics.your_unread_drops_count
+                    }
                     dropId={drop.id}
                     isMuted={wave.metrics.muted}
                     winningThreshold={winningThreshold}

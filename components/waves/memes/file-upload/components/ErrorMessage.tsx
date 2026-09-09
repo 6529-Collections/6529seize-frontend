@@ -21,7 +21,7 @@ const ErrorMessage: React.FC<ErrorMessageProps> = ({
     id="file-upload-error"
     initial={{ opacity: 0, y: 10 }}
     animate={{ opacity: 1, y: 0 }}
-    className="tw-absolute tw-bottom-14 tw-px-4 tw-py-2 tw-bg-red/10 tw-border tw-border-red/30 tw-rounded-lg tw-text-red tw-text-sm"
+    className="tw-max-w-full tw-rounded-lg tw-border tw-border-red/30 tw-bg-red/10 tw-px-4 tw-py-2 tw-text-center tw-text-xs tw-text-red"
     role="alert"
     aria-live="assertive"
   >

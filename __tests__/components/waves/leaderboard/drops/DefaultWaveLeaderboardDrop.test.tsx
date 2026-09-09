@@ -33,14 +33,18 @@ jest.mock("@/components/voting/VotingModalButton", () => ({
   default: (p: any) => <button data-testid="vote" onClick={p.onClick} />,
 }));
 
-jest.mock("@/components/waves/drops/WaveDropActionsOptions", () => ({
-  __esModule: true,
-  default: () => <div data-testid="options" />,
-}));
-jest.mock("@/components/waves/drops/WaveDropActionsOpen", () => ({
-  __esModule: true,
-  default: () => <div data-testid="open" />,
-}));
+jest.mock("@/components/waves/drops/WaveDropActionsOpen", () => () => (
+  <div data-testid="desktop-open-action" />
+));
+jest.mock("@/components/waves/drops/WaveDropActionsOptions", () => () => (
+  <div data-testid="desktop-delete-action" />
+));
+jest.mock("@/components/content-moderation/ContentModerationDropActions", () =>
+  jest.fn(() => null)
+);
+jest.mock("@/components/content-moderation/ReportDropModal", () =>
+  jest.fn(() => null)
+);
 jest.mock("@/components/waves/drops/WaveDropMobileMenuOpen", () => ({
   __esModule: true,
   default: () => <div data-testid="mobile-open" />,

@@ -6,6 +6,7 @@ import {
   faRightFromBracket,
   faShuffle,
   faShieldHalved,
+  faSliders,
   faUser,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -66,7 +67,6 @@ export default function HeaderUserMenuDropdown({
     sessionUpgradeRequired && requestSessionUpgrade !== undefined;
   const hasConnectionActions =
     hasConnectDeviceAction || hasSessionUpgradeAction;
-
   const { chains, currentChainName, nextChainName, switchToNextChain } =
     useChainSwitcher();
   const upgradeAuthenticationLabel = t(
@@ -397,22 +397,46 @@ export default function HeaderUserMenuDropdown({
                     </li>
                   )}
                   <li className="tw-flex tw-h-full tw-flex-col tw-gap-y-2 tw-px-2 tw-pt-2">
-                    {profilePath && (
+                    <div className="tw-flex tw-w-full tw-items-stretch tw-justify-end tw-gap-2">
+                      {profilePath && (
+                        <Link
+                          href={profilePath}
+                          onClick={onClose}
+                          aria-label={t(
+                            HEADER_USER_MENU_LOCALE,
+                            "headerUserMenu.profile"
+                          )}
+                          className="tw-relative tw-grid tw-h-11 tw-min-w-0 tw-flex-1 tw-cursor-pointer tw-select-none tw-grid-cols-[1.5rem_minmax(0,1fr)] tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-none tw-bg-iron-800 tw-px-3 tw-text-left tw-text-md tw-font-medium tw-text-iron-300 tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
+                        >
+                          <FontAwesomeIcon
+                            icon={faUser}
+                            height={20}
+                            width={20}
+                          />
+                          <span>
+                            {t(
+                              HEADER_USER_MENU_LOCALE,
+                              "headerUserMenu.profile"
+                            )}
+                          </span>
+                        </Link>
+                      )}
                       <Link
-                        href={profilePath}
+                        href="/preferences"
                         onClick={onClose}
                         aria-label={t(
                           HEADER_USER_MENU_LOCALE,
-                          "headerUserMenu.profile"
+                          "profilePreferences.button"
                         )}
-                        className="tw-relative tw-grid tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-grid-cols-[1.5rem_minmax(0,1fr)] tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-3 tw-py-2.5 tw-text-left tw-text-md tw-font-medium tw-text-iron-300 tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
+                        className="tw-relative tw-flex tw-size-11 tw-flex-shrink-0 tw-cursor-pointer tw-select-none tw-items-center tw-justify-center tw-rounded-lg tw-border-none tw-bg-iron-800 tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
                       >
-                        <FontAwesomeIcon icon={faUser} height={20} width={20} />
-                        <span>
-                          {t(HEADER_USER_MENU_LOCALE, "headerUserMenu.profile")}
-                        </span>
+                        <FontAwesomeIcon
+                          icon={faSliders}
+                          height={20}
+                          width={20}
+                        />
                       </Link>
-                    )}
+                    </div>
                     <button
                       onClick={() => {
                         void runMenuAction({

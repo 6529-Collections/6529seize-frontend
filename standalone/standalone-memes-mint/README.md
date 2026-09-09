@@ -2,7 +2,7 @@
 
 This folder builds a **single static mint page** (Next.js `output: "export"`) into `dist/`, suitable for S3 + CloudFront (or any static host).
 
-From the **repository root**, use the `6529` commands below (they run `build:env-schema` first, then `scripts/export-mint-page.cjs`). Deploy is manual: run the export script locally (or in CI you wire up yourself), then use `6529 export-mint-page:*:sync` when you want S3 + CloudFront.
+From the **repository root**, use the `6529 run` commands below (they run `build:env-schema` first, then `scripts/export-mint-page.cjs`). Deploy is manual: run the export script locally (or in CI you wire up yourself), then use `6529 run export-mint-page:*:sync` when you want S3 + CloudFront.
 
 ## Prerequisites
 
@@ -45,17 +45,17 @@ That lets you check the deployed standalone build directly via
 
 | Command | Build target | S3 sync | CloudFront invalidation |
 | ------- | ------------ | ------- | ------------------------ |
-| `6529 export-mint-page` | Prod | No | No |
-| `6529 export-mint-page:sync` | Prod | Yes | Yes: distribution id from `aws cloudfront list-distributions` with `--query` on `Aliases.Items[?@ == 'thememes.6529.io']` (exact alias match to the bucket hostname) |
-| `6529 export-mint-page:test` | Test | No | No |
-| `6529 export-mint-page:test:sync` | Test | Yes | Same exact-alias JMESPath lookup using `Aliases.Items[?@ == 'thememestest.6529.io']` |
+| `6529 run export-mint-page` | Prod | No | No |
+| `6529 run export-mint-page:sync` | Prod | Yes | Yes: distribution id from `aws cloudfront list-distributions` with `--query` on `Aliases.Items[?@ == 'thememes.6529.io']` (exact alias match to the bucket hostname) |
+| `6529 run export-mint-page:test` | Test | No | No |
+| `6529 run export-mint-page:test:sync` | Test | Yes | Same exact-alias JMESPath lookup using `Aliases.Items[?@ == 'thememestest.6529.io']` |
 
 ### Passing flags manually
 
 The `6529` wrapper forwards script arguments after `--`:
 
 ```bash
-6529 export-mint-page -- --test --sync
+6529 run export-mint-page -- --test --sync
 ```
 
 Same flags as the Node script: `--test`, `--sync`, `--help`.

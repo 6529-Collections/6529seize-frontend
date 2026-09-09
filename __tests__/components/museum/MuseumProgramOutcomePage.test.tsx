@@ -89,7 +89,7 @@ describe("MuseumProgramOutcomePage", () => {
       })
     ).toHaveAttribute("href", outcome.media?.sourceUrl);
     expect(screen.getByText("Selected; unminted")).toBeInTheDocument();
-    expect(screen.getByText("A Keys and Gates winner")).toBeInTheDocument();
+    expect(screen.getByText("Selected for Keys and Gates")).toBeInTheDocument();
     expect(
       screen.getByText("A door becomes a question of passage.")
     ).toBeInTheDocument();
@@ -98,6 +98,20 @@ describe("MuseumProgramOutcomePage", () => {
       "href",
       expect.stringContaining(`/blob/${"a".repeat(40)}/`)
     );
+    expect(
+      screen.getByRole("link", { name: "Back to Keys and Gates" })
+    ).toHaveAttribute("href", "/museum/network/acquisitions/keys-and-gates");
+  });
+
+  it("recognizes the canonical Keys and Gates program entity", () => {
+    render(
+      <MuseumProgramOutcomePage
+        outcome={{ ...outcome, programId: "6529NM-AP-ENT-0002" }}
+        sourceCommit={"a".repeat(40)}
+      />
+    );
+
+    expect(screen.getByText("Selected for Keys and Gates")).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: "Back to Keys and Gates" })
     ).toHaveAttribute("href", "/museum/network/acquisitions/keys-and-gates");
@@ -112,7 +126,7 @@ describe("MuseumProgramOutcomePage", () => {
     );
 
     expect(
-      screen.queryByText("A Keys and Gates winner")
+      screen.queryByText("Selected for Keys and Gates")
     ).not.toBeInTheDocument();
     expect(
       screen.queryByRole("link", { name: "Back to program" })

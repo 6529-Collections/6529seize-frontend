@@ -230,7 +230,13 @@ describe('BlockPickerDateSelect', () => {
       );
 
       const mainContainer = container.firstChild;
-      expect(mainContainer).toHaveClass('tw-gap-x-4', 'tw-flex', 'tw-w-full');
+      expect(mainContainer).toHaveClass(
+        'tw-flex',
+        'tw-w-full',
+        'tw-flex-col',
+        'tw-gap-4',
+        'sm:tw-flex-row'
+      );
 
       const dateContainer = screen.getByText('Select date').closest('div.tw-w-full');
       const timeContainer = screen.getByText('Select time').closest('div.tw-w-full');

@@ -28,6 +28,9 @@ const getColumnCount = (
   if (width >= THREE_COLUMN_MIN_WIDTH_PX) {
     return 3;
   }
+  if (layout === "gallery") {
+    return 2;
+  }
   if (width >= TWO_COLUMN_MIN_WIDTH_PX) {
     return 2;
   }

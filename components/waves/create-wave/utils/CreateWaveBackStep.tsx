@@ -6,8 +6,10 @@ import { t } from "@/i18n/messages";
 
 export default function CreateWaveBackStep({
   onPreviousStep,
+  disabled = false,
 }: {
   readonly onPreviousStep: () => void;
+  readonly disabled?: boolean;
 }) {
   const locale = useBrowserLocale();
 
@@ -16,6 +18,7 @@ export default function CreateWaveBackStep({
       variant="secondary"
       size="md"
       onClick={onPreviousStep}
+      disabled={disabled}
     >
       <svg
         className="tw-size-4 tw-flex-shrink-0"

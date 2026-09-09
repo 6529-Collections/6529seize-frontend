@@ -69,17 +69,17 @@ export enum STATEMENT_TYPE {
   THE_LINE = "THE_LINE",
   MANIFOLD = "MANIFOLD",
   TRANSIENT = "TRANSIENT",
+  NINFA = "NINFA",
 }
 
-export const STATEMENT_META: Record<
-  STATEMENT_TYPE,
-  {
-    readonly title: string;
-    readonly inputPlaceholder: string;
-    readonly inputInitialValue: string;
-    readonly canOpenStatement: boolean;
-  }
-> = {
+interface StatementMeta {
+  readonly title: string;
+  readonly inputPlaceholder: string;
+  readonly inputInitialValue: string;
+  readonly canOpenStatement: boolean;
+}
+
+export const STATEMENT_META: Record<STATEMENT_TYPE, StatementMeta> = {
   [STATEMENT_TYPE.X]: {
     title: "X",
     inputPlaceholder: "https://www.x.com/username",
@@ -278,7 +278,17 @@ export const STATEMENT_META: Record<
     inputInitialValue: "https://transient.xyz/",
     canOpenStatement: true,
   },
+  [STATEMENT_TYPE.NINFA]: {
+    title: "Ninfa",
+    inputPlaceholder: "https://ninfa.io/user/@artist",
+    inputInitialValue: "https://ninfa.io/",
+    canOpenStatement: true,
+  },
 };
+
+export const getStatementMeta = (
+  statementType: string
+): StatementMeta | undefined => STATEMENT_META[statementType as STATEMENT_TYPE];
 
 export const SOCIAL_MEDIA_ACCOUNT_STATEMENT_TYPES = [
   STATEMENT_TYPE.X,
@@ -312,6 +322,8 @@ export const NFT_ACCOUNTS_STATEMENT_TYPES = [
   STATEMENT_TYPE.THE_LINE,
   STATEMENT_TYPE.MANIFOLD,
   STATEMENT_TYPE.TRANSIENT,
+  STATEMENT_TYPE.NINFA,
+  STATEMENT_TYPE.LINK,
 ] as const;
 
 export type NFT_ACCOUNTS_STATEMENT_TYPE =
@@ -349,6 +361,7 @@ export enum WsMessageType {
   SYNC_NOTIFICATION_IDENTITIES = "SYNC_NOTIFICATION_IDENTITIES",
   NOTIFICATION_IDENTITIES_SYNCED = "NOTIFICATION_IDENTITIES_SYNCED",
   IDENTITY_NOTIFICATIONS_CHANGED = "IDENTITY_NOTIFICATIONS_CHANGED",
+  DM_UNREAD_STATE_CHANGED = "DM_UNREAD_STATE_CHANGED",
 }
 
 export const WS_DROP_UPDATE_REASON_POLL_RESPONSE = "POLL_RESPONSE" as const;

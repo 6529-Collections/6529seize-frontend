@@ -49,6 +49,7 @@ jest.mock(
             "RANK_FIRST_DECISION_TIME_MUST_BE_AFTER_OR_EQUAL_TO_VOTING_START_DATE"
           )
         )}
+        data-has-advanced-error={String(props.hasAdvancedError)}
       >
         decisions
       </button>
@@ -66,6 +67,7 @@ jest.mock(
       >
         enable rolling
       </button>
+      {props.advancedContent}
     </>
   )
 );
@@ -244,6 +246,10 @@ describe("CreateWaveDatesRank", () => {
       "data-has-rank-error",
       "true"
     );
+    expect(screen.getByTestId("decisions")).toHaveAttribute(
+      "data-has-advanced-error",
+      "true"
+    );
   });
 
   it("routes fixed rank end-before-voting errors to the decisions section", () => {
@@ -290,6 +296,10 @@ describe("CreateWaveDatesRank", () => {
     );
     expect(screen.getByTestId("rolling")).toHaveAttribute(
       "data-has-end-before-voting-error",
+      "true"
+    );
+    expect(screen.getByTestId("decisions")).toHaveAttribute(
+      "data-has-advanced-error",
       "true"
     );
   });

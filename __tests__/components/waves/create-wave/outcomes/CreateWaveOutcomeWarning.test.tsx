@@ -2,15 +2,14 @@ import { render, screen } from "@testing-library/react";
 import CreateWaveOutcomeWarning from "@/components/waves/create-wave/outcomes/CreateWaveOutcomeWarning";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 
-jest.mock(
-  "@/components/waves/create-wave/utils/CreateWaveWarning",
-  () => ({
-    __esModule: true,
-    default: ({ title, description }: any) => (
-      <div data-testid="warning">{title} - {description}</div>
-    ),
-  })
-);
+jest.mock("@/components/waves/create-wave/utils/CreateWaveWarning", () => ({
+  __esModule: true,
+  default: ({ title, description }: any) => (
+    <div data-testid="warning">
+      {title} - {description}
+    </div>
+  ),
+}));
 
 describe("CreateWaveOutcomeWarning", () => {
   it("returns null for non-approve waves", () => {

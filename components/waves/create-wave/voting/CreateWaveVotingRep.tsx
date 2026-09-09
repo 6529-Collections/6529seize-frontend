@@ -22,17 +22,30 @@ export default function CreateWaveVotingRep({
   const isProfileIdError = errors.includes(
     CREATE_WAVE_VALIDATION_ERROR.VOTING_PROFILE_ID_CANNOT_BE_EMPTY
   );
+  const getInputClassName = (hasError: boolean): string =>
+    `!tw-bg-iron-900 !tw-shadow-inner focus:!tw-bg-iron-900 focus:!tw-ring-1 focus:!tw-ring-inset ${
+      hasError
+        ? ""
+        : "!tw-ring-white/5 desktop-hover:hover:!tw-ring-white/10 desktop-hover:hover:focus:!tw-ring-primary-400 focus:!tw-border-primary-500/50 focus:!tw-ring-primary-400"
+    }`;
+  const labelClassName = "!tw-bg-iron-900 peer-focus:!tw-bg-iron-900";
+
   return (
-    <div className="tw-grid md:tw-grid-cols-2 tw-gap-4">
+    <div className="tw-grid tw-gap-4 md:tw-grid-cols-2">
       <RepCategorySearch
         category={category}
         setCategory={setCategory}
         error={isCategoryError}
+        inputClassName={getInputClassName(isCategoryError)}
+        labelClassName={labelClassName}
       />
       <IdentitySearch
         identity={profileId}
         setIdentity={setProfileId}
         error={isProfileIdError}
+        iconPositionClassName="tw-top-1/2 -tw-translate-y-1/2"
+        inputClassName={getInputClassName(isProfileIdError)}
+        labelClassName={labelClassName}
       />
     </div>
   );

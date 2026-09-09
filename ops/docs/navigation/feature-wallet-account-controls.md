@@ -99,6 +99,29 @@ action.
     `Network: {currentChain}` above the switch action
 - `Scan QR Code` appears only in Capacitor runtime with scanner support.
 
+### Native Connect Chooser
+
+- In Capacitor, the top-level `Connect` and add-profile actions open a shared
+  bottom sheet titled `Connect`.
+- The first sheet has no subtitle and offers three destinations:
+  - `App Wallets`
+  - `External Wallets`
+  - `Scan Connection QR`
+- `App Wallets` stays in the same sheet and provides a Back control, a short
+  explanation, `Create App Wallet`, and the app-local wallets available to
+  connect. Selecting a wallet starts its existing unlock/connect flow.
+- `Create App Wallet` closes the sheet while the existing wallet-creation
+  dialog is open, then returns to the App Wallets list when creation is closed.
+- `External Wallets` opens Reown's external-wallet browser. App Wallets are not
+  repeated in that browser. Coinbase Wallet is excluded from new connections
+  in the Capacitor app; web connections and existing native sessions remain
+  unchanged.
+- `Scan Connection QR` opens the native scanner in connection-only mode. This
+  entry accepts only canonical 6529 connection-share deep links and routes a
+  valid result to `/accept-connection-sharing`.
+- The separate `Scan QR Code` action in the app sidebar remains the
+  general-purpose scanner for supported 6529 links.
+
 ## User Journey
 
 1. Open account controls from web sidebar or app sidebar footer.
@@ -107,7 +130,9 @@ action.
    surface. With multiple connected profiles, double-activate within 400 ms to
    switch to the next profile instead.
 4. If another profile slot is available, use `+` on web or in the app footer
-   to reopen wallet connect and authorize another account.
+   to reopen wallet connect and authorize another account. In Capacitor, pick
+   App Wallets, External Wallets, or Scan Connection QR from the shared
+   `Connect` sheet.
 5. Use connected-account controls:
    - select another connected account from the web dropdown, or
    - use app account switch controls in the app sidebar footer; the sidebar
@@ -140,6 +165,10 @@ action.
 - Connect from app footer and continue on the same route.
 - Use `+` to connect another profile, up to the five-profile limit,
   without leaving the current route.
+- In the native app, connect an app-local wallet without mixing those wallets
+  into the Reown external-wallet list.
+- In the native app, scan a connection-share QR from the `Connect` sheet when
+  transferring an authenticated profile session from another device.
 - Use connected-account rows in the web dropdown to switch profiles without
   leaving the menu.
 - Use `Logout` to sign out the active profile.
@@ -182,12 +211,19 @@ action.
   flips to another already-known account.
 - If add-account is canceled and the wallet flow returns to the original active
   wallet, the current session should stay on that original profile.
+- Opening and canceling the native `Connect` chooser does not disconnect the
+  current external wallet; disconnection is deferred until a wallet path is
+  actually selected.
+- The connection-only scanner rejects ordinary web URLs, navigation deep links,
+  malformed connection links, duplicate parameters, and unexpected parameters.
 - After web `Disconnect Wallet`, dropdown actions change to `Connect Wallet`
   and `Logout`; `Connect Wallet` remains grouped with `Connect Device`.
 
 ## Failure and Recovery
 
 - If wallet connect is canceled, stay on the same surface and retry `Connect`.
+- If a QR scanned from the native `Connect` sheet is not a canonical 6529
+  connection-share link, return to the chooser and retry with a connection QR.
 - If `+` closes without storing a new profile, reopen the same control
   and complete the wallet handoff again.
 - If account state looks stale after proxy/account changes, use `Logout` on web
@@ -216,6 +252,8 @@ action.
   the account dropdown.
 - Unread dots/badges are notification-count indicators only; they do not show
   notification category.
+- A connection-share QR restores an authenticated profile session; it does not
+  provide a live signer for actions that require wallet signatures.
 
 ## Related Pages
 

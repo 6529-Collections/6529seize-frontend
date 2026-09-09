@@ -7,6 +7,9 @@ import React from "react";
 const domain = new URL(publicEnv.BASE_ENDPOINT).hostname;
 
 jest.mock("next/dynamic", () => () => () => <div data-testid="dynamic" />);
+jest.mock("@/components/about/AboutContentsDropdown", () => ({
+  AboutContentsDropdown: () => <nav aria-label="Network contents" />,
+}));
 
 // Mock TitleContext
 const mockSetTitle = jest.fn();

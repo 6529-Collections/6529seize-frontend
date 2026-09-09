@@ -1,5 +1,7 @@
 {
   "waves.stormComposer.draftTitle": "Borrador de storm",
+  "waves.stormComposer.emptyDraft": "Las partes de tu storm aparecerán aquí.",
+  "waves.stormComposer.closeDraft": "Cerrar",
   "waves.stormComposer.privateDraftHint": "Solo tú puedes verlo hasta que lo publiques.",
   "waves.stormComposer.partsCountOne": "{count} parte",
   "waves.stormComposer.partsCountOther": "{count} partes",

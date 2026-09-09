@@ -1,5 +1,6 @@
 export * from "./github";
 export * from "./catalog";
+export * from "./collectionSemantics";
 export * from "./dataArchitecture";
 export * from "./institutionalPractice";
 export * from "./legacyCasey";

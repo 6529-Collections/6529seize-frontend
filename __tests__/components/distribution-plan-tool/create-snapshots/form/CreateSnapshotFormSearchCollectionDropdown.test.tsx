@@ -54,7 +54,7 @@ describe('CreateSnapshotFormSearchCollectionDropdown', () => {
   });
 
   it('renders only default collections when collections list is empty', () => {
-    render(
+    const { container } = render(
       <CreateSnapshotFormSearchCollectionDropdown
         collections={[]}
         defaultCollections={[sampleDefault] as any}
@@ -63,6 +63,9 @@ describe('CreateSnapshotFormSearchCollectionDropdown', () => {
     );
     expect(screen.getAllByTestId('table')).toHaveLength(1);
     expect(tableMock).toHaveBeenCalledWith(expect.objectContaining({ collections: [sampleDefault] }));
+    expect(container.querySelector('.tw-overflow-y-auto')).toHaveClass(
+      'tw-max-h-96'
+    );
   });
 
   it('renders no table when both lists are empty', () => {

@@ -74,7 +74,6 @@ metrics.
 - Retry controls are route-specific.
   `/xtdh` has inline retry for top stats; most Network routes recover by refresh
   or reopen.
-- `/network/groups` troubleshooting is owned by Groups docs.
 
 ## Related Pages
 
@@ -85,4 +84,3 @@ metrics.
 - [Network Stats](feature-network-stats.md)
 - [Prenodes Status](feature-prenodes-status.md)
 - [xTDH Network Overview](feature-xtdh-network-overview.md)
-- [Groups Troubleshooting](../groups/troubleshooting-groups-list-and-create-actions.md)

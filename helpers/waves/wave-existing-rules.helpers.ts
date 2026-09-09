@@ -25,7 +25,7 @@ import {
   getDecisionRows,
   getRequiredMediaLabel,
   getRequiredMetadataLabel,
-  getScopeLabel,
+  getScopeRuleValue,
   getSubmissionStrategyRows,
   getTermsLabel,
   getWaveChatAccessRow,
@@ -44,6 +44,22 @@ interface WaveRulesContext {
 
 const getOptionalRulesText = (value: string): string | null =>
   value.length > 0 ? value : null;
+
+const getWaveScopeRow = ({
+  id,
+  label,
+  scope,
+  fallback,
+}: {
+  readonly id: string;
+  readonly label: string;
+  readonly scope: ApiWave["visibility"]["scope"];
+  readonly fallback: string;
+}): WaveRuleRow => ({
+  id,
+  label,
+  ...getScopeRuleValue({ scope, fallback }),
+});
 
 const getWaveCreditLabel = (
   creditType: ApiWaveCreditType | null | undefined
@@ -77,22 +93,18 @@ const getWaveDropAndVoteRows = ({
   }
 
   return [
-    {
+    getWaveScopeRow({
       id: "can-drop",
       label: "Who can drop",
-      value: getScopeLabel({
-        scope: wave.participation.scope,
-        fallback: "Anyone",
-      }),
-    },
-    {
+      scope: wave.participation.scope,
+      fallback: "Public",
+    }),
+    getWaveScopeRow({
       id: "can-vote",
       label: "Who can vote",
-      value: getScopeLabel({
-        scope: wave.voting.scope,
-        fallback: "Anyone",
-      }),
-    },
+      scope: wave.voting.scope,
+      fallback: "Public",
+    }),
   ];
 };
 
@@ -113,30 +125,26 @@ const getWaveAccessSection = (context: WaveRulesContext): WaveRuleSection => ({
   id: "access",
   title: "Access",
   rows: [
-    {
+    getWaveScopeRow({
       id: "can-view",
-      label: "Who can view",
-      value: getScopeLabel({
-        scope: context.wave.visibility.scope,
-        fallback: "Anyone",
-      }),
-    },
+      label: "Visibility",
+      scope: context.wave.visibility.scope,
+      fallback: "Public",
+    }),
     ...getWaveDropAndVoteRows(context),
     ...getWaveChatRows(context),
-    {
+    getWaveScopeRow({
       id: "admin",
-      label: "Who can admin",
-      value: getScopeLabel({
-        scope: context.wave.wave.admin_group,
-        fallback: "Creator/admin group",
-      }),
-    },
+      label: "Admins",
+      scope: context.wave.wave.admin_group,
+      fallback: "Creator/admin group",
+    }),
   ],
 });
 
 const getWaveTimingSection = ({ wave }: WaveRulesContext): WaveRuleSection => ({
   id: "timing",
-  title: "Timing",
+  title: "Schedule",
   rows: [
     {
       id: "submission-window",

@@ -30,6 +30,10 @@ describe("CreateWavesMainSteps", () => {
       }).length
     );
     expect(steps[0]).toHaveAttribute("data-step", CreateWaveStep.OVERVIEW);
+    expect(screen.getByText("Schedule")).toHaveAttribute(
+      "data-step",
+      CreateWaveStep.DATES
+    );
   });
 
   it("does not render approval as a separate approve wave step", () => {
@@ -44,7 +48,7 @@ describe("CreateWavesMainSteps", () => {
     expect(screen.queryByText("Approval")).not.toBeInTheDocument();
   });
 
-  it("renders rules in the chat wave step list", () => {
+  it("renders guidelines in the chat wave step list", () => {
     render(
       <CreateWavesMainSteps
         waveType={ApiWaveType.Chat}
@@ -53,6 +57,6 @@ describe("CreateWavesMainSteps", () => {
       />
     );
 
-    expect(screen.getByText("Rules")).toBeInTheDocument();
+    expect(screen.getByText("Guidelines")).toBeInTheDocument();
   });
 });

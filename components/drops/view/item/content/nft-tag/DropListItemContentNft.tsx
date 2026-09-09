@@ -25,7 +25,7 @@ export default function DropListItemContentNft({
   });
   const nft = nfts[0] ?? null;
 
-  const elementRef = useRef<HTMLDivElement>(null);
+  const elementRef = useRef<HTMLSpanElement>(null);
 
   const getNftHref = () => {
     if (areEqualAddresses(contract, MEMES_CONTRACT)) {
@@ -61,21 +61,24 @@ export default function DropListItemContentNft({
       className="tw-no-underline"
       target={target}
     >
-      <div className="tw-mt-2 tw-flex tw-flex-col tw-gap-y-2" ref={elementRef}>
-        <div className="tw-h-64 tw-w-full">
+      <span
+        className="tw-mt-2 tw-flex tw-flex-col tw-gap-y-2"
+        ref={elementRef}
+      >
+        <span className="tw-h-64 tw-w-full">
           {nft?.imageUrl && (
             <img
               src={nft.imageUrl}
-              alt="NFT token"
+              alt=""
               className="tw-h-full tw-w-full tw-object-contain tw-object-center"
             />
           )}
-        </div>
+        </span>
         <DropListItemContentNftDetails
           referencedNft={{ contract, token, name }}
           nft={nft}
         />
-      </div>
+      </span>
     </Link>
   );
 }

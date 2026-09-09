@@ -7,6 +7,13 @@ import {
 import type { ReactNode } from "react";
 
 import { AboutContentsDropdown } from "@/components/about/AboutContentsDropdown";
+import {
+  ABOUT_CARD_CLASS_NAME,
+  ABOUT_PAGE_BOUNDARY_CLASS_NAME,
+  ABOUT_PAGE_TITLE_CLASS_NAME,
+  ABOUT_SECTION_HEADING_CLASS_NAME,
+  ABOUT_SUPPORTING_TEXT_CLASS_NAME,
+} from "@/components/about/AboutLayout";
 import { useSetTitle } from "@/contexts/TitleContext";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -19,15 +26,22 @@ export default function AppsPage() {
   useSetTitle(t(APPS_LOCALE, "apps.metadata.title"));
 
   return (
-    <main className="tailwind-scope tw-min-h-[100dvh] tw-w-full tw-overflow-x-hidden tw-bg-black tw-text-iron-50">
-      <div className="tw-mx-auto tw-w-full tw-max-w-6xl tw-px-4 tw-pb-16 tw-pt-6 sm:tw-px-6 lg:tw-px-8">
-        <AboutContentsDropdown currentHref="/about/6529-apps" />
+    <main
+      className={`tailwind-scope ${ABOUT_PAGE_BOUNDARY_CLASS_NAME} tw-bg-black tw-text-iron-50`}
+    >
+      <AboutContentsDropdown
+        className="tw-w-full tw-px-4 sm:tw-px-6 lg:tw-px-8"
+        currentHref="/about/6529-apps"
+        flushBottom
+        withDivider
+      />
 
+      <div className="tw-mx-auto tw-w-full tw-max-w-6xl tw-px-4 tw-pb-16 tw-pt-8 sm:tw-px-6 sm:tw-pt-12 lg:tw-px-8">
         <header className="tw-mb-8 tw-max-w-3xl">
-          <p className="tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-wide tw-text-iron-400">
+          <p className="tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-wide tw-text-primary-300">
             {t(APPS_LOCALE, "apps.eyebrow")}
           </p>
-          <h1 className="tw-m-0 tw-text-3xl tw-font-semibold tw-leading-tight tw-text-white md:tw-text-4xl">
+          <h1 className={ABOUT_PAGE_TITLE_CLASS_NAME}>
             {t(APPS_LOCALE, "apps.title")}
           </h1>
         </header>
@@ -38,7 +52,7 @@ export default function AppsPage() {
             icon={DevicePhoneMobileIcon}
             title={t(APPS_LOCALE, "apps.mobile.title")}
             description={t(APPS_LOCALE, "apps.mobile.description")}
-            contentClassName="tw-flex tw-flex-1 tw-items-center tw-justify-center"
+            contentClassName="tw-flex tw-flex-1 tw-items-start tw-justify-center"
           >
             <MobileAppDownloads />
           </AppPanel>
@@ -78,20 +92,17 @@ function AppPanel({
     <section
       id={id}
       aria-labelledby={headingId}
-      className="tw-flex tw-h-full tw-flex-col tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/80 tw-p-5 sm:tw-p-6"
+      className={`tw-flex tw-h-full tw-flex-col ${ABOUT_CARD_CLASS_NAME} tw-p-5 sm:tw-p-8`}
     >
-      <div className="tw-mb-6 tw-flex tw-items-center tw-gap-4">
+      <div className="tw-mb-5 tw-flex tw-items-start tw-gap-3">
         <span className="tw-flex tw-size-11 tw-flex-none tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-text-primary-300">
           <Icon aria-hidden="true" className="tw-size-6" />
         </span>
         <div className="tw-min-w-0">
-          <h2
-            id={headingId}
-            className="tw-m-0 tw-text-xl tw-font-semibold tw-leading-7 tw-text-white"
-          >
+          <h2 id={headingId} className={ABOUT_SECTION_HEADING_CLASS_NAME}>
             {title}
           </h2>
-          <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-leading-6 tw-text-iron-400">
+          <p className={`tw-mb-0 tw-mt-2 ${ABOUT_SUPPORTING_TEXT_CLASS_NAME}`}>
             {description}
           </p>
         </div>

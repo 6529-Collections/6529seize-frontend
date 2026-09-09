@@ -64,11 +64,17 @@ Open a new shell, or activate the wrapper in the current shell:
 source <(./bin/6529 bootstrap --print-export)
 ```
 
-Install dependencies through the secure project path:
+Dependencies, including `@6529-collections/release-request`, come from public
+npm. No package token or private-registry setup is required. Install the exact
+lockfile through the existing secure wrapper:
 
 ```bash
-6529 install
+6529 ci
 ```
+
+See
+[pnpm and Socket Firewall](ops/docs/developer/pnpm-and-socket-firewall.md) for
+the package command boundary and dependency security checks.
 
 Create a local `.env` file from [.env.sample](.env.sample), then start the app:
 
@@ -98,15 +104,19 @@ Important notes:
 This repository intentionally routes project commands through `6529`.
 Do not use plain `pnpm install`, `pnpm dev`, or `npm run ...`; the scripts are
 guarded so dependency installs and package scripts use the expected secure path.
+Unsupported wrapper commands fail closed; use `6529 run <script>` for
+package.json scripts.
 
 Common commands:
 
 ```bash
-6529 install
-6529 install:frozen
+6529 ci
 6529 add <package>
 6529 add -D <package>
-6529 update
+6529 remove <package>
+6529 update [package]
+6529 audit
+6529 audit:fix
 6529 run dev
 6529 run build
 6529 run test
@@ -116,14 +126,12 @@ Common commands:
 6529 run lint:changed
 6529 run typecheck:changed
 6529 run check:changed
-6529 run deployment-bus -- validate-manifest --file deployment-bus-manifest.json
 ```
 
-If pnpm reports ignored install/build scripts, run:
-
-```bash
-6529 approve-builds
-```
+If a new dependency needs an install/build script, add that package to both
+`pnpm-workspace.yaml` and `scripts/public-package-policy.cjs` in the same
+reviewed pull request. Then run `6529 ci`. There is no automatic build-approval
+command.
 
 For deeper package-manager, Socket Firewall, and deployment-wrapper details,
 read [ops/docs/developer/pnpm-and-socket-firewall.md](ops/docs/developer/pnpm-and-socket-firewall.md).
@@ -187,6 +195,8 @@ deployment-sensitive code:
 - Agent and automation instructions: [AGENTS.md](AGENTS.md)
 - Package-manager and deployment-wrapper guidance:
   [ops/docs/developer/pnpm-and-socket-firewall.md](ops/docs/developer/pnpm-and-socket-firewall.md)
+- CI wave deploy and WEB E2E notification contract:
+  [ops/docs/developer/ci-wave-deploy-validation-notifications.md](ops/docs/developer/ci-wave-deploy-validation-notifications.md)
 - Standalone Memes mint page notes:
   [standalone/standalone-memes-mint/README.md](standalone/standalone-memes-mint/README.md)
 
@@ -203,9 +213,12 @@ through [Procfile](Procfile).
 Repository and deployment helper details, including `ghruns`, `ghdeploy`,
 `6529 staging`, and PM2 launch examples, are documented in
 [ops/docs/developer/pnpm-and-socket-firewall.md](ops/docs/developer/pnpm-and-socket-firewall.md).
-The staging and production release process for coordinating shared validation,
-backend dependencies, and production promotion is documented in
-[ops/docs/developer/simple-release-bus-v2.md](ops/docs/developer/simple-release-bus-v2.md).
+The staging and production merge/deployment process, including backend
+dependencies and automatic frontend E2E, is documented in
+[Deployment](ops/docs/developer/deployment.md).
+CI wave message formats, deploy-to-E2E reply correlation, manual reruns, and
+rollout order are documented in
+[ops/docs/developer/ci-wave-deploy-validation-notifications.md](ops/docs/developer/ci-wave-deploy-validation-notifications.md).
 
 ## Contributing
 

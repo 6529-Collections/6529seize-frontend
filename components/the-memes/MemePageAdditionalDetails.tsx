@@ -77,9 +77,9 @@ export function AdditionalDetailsSection({
       <div className="tw-mb-2 tw-flex tw-items-center tw-gap-3">
         <Icon
           aria-hidden="true"
-          className="tw-relative tw-top-px tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-500"
+          className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-500"
         />
-        <h3 className="tw-mb-0 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400">
+        <h3 className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400">
           {title}
         </h3>
         <div className="tw-h-px tw-min-w-10 tw-flex-grow tw-bg-gradient-to-r tw-from-iron-700 tw-to-transparent" />

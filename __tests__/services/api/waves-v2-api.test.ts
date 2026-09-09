@@ -10,6 +10,7 @@ import {
   fetchWaveSubwavesPage,
   searchWavesByName,
 } from "@/services/api/waves-v2-api";
+import { replaceWaveMetadata } from "@/services/api/wave-metadata-replacement";
 import {
   commonApiDelete,
   commonApiFetch,
@@ -341,6 +342,36 @@ describe("waves-v2-api", () => {
 
     expect(commonApiDeleteMock).toHaveBeenCalledWith({
       endpoint: "v2/waves/wave-1/metadata/7",
+      headers: undefined,
+    });
+  });
+
+  it("restores completed metadata deletes when a later delete fails", async () => {
+    const writeError = new Error("delete failed");
+    commonApiDeleteMock
+      .mockResolvedValueOnce(undefined)
+      .mockRejectedValueOnce(writeError);
+    commonApiPostMock.mockResolvedValue({
+      id: 3,
+      data_key: "key",
+      data_value: "first",
+    });
+
+    await expect(
+      replaceWaveMetadata({
+        waveId: "wave-1",
+        metadata: [
+          { id: 1, data_key: "key", data_value: "first" },
+          { id: 2, data_key: "key", data_value: "second" },
+        ],
+        create: [{ data_key: "key", data_value: "replacement" }],
+        deleteIds: [1, 2],
+      })
+    ).rejects.toBe(writeError);
+
+    expect(commonApiPostMock).toHaveBeenCalledWith({
+      endpoint: "v2/waves/wave-1/metadata",
+      body: { data_key: "key", data_value: "first" },
       headers: undefined,
     });
   });

@@ -24,7 +24,7 @@ import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import { ReactQueryWrapperContext } from "../react-query-wrapper/ReactQueryWrapper";
 import { ProcessIncomingDropType } from "@/contexts/wave/hooks/useWaveRealtimeUpdater";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
-import type { DropMutationBody } from "./CreateDrop";
+import type { DropMutationBody } from "./create-drop-content/drop-submission.types";
 import CreateDropReplyingWrapper from "./CreateDropReplyingWrapper";
 import { CreateDropSubmit } from "./CreateDropSubmit";
 import CreateCurationDropUrlInput from "./CreateCurationDropUrlInput";

@@ -171,6 +171,10 @@ describe("NextGenTokenPage", () => {
         "href",
         "/Shelby/collected?collection=nextgen&page=3#collected-card-nextgen-1"
       );
+      expect(screen.getByTestId("back").parentElement).toHaveClass(
+        "tw-hidden",
+        "md:tw-block"
+      );
     });
 
     it("links direct visitors to the current owner's collected view", () => {

@@ -7,6 +7,10 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 cd "$REPO_ROOT"
 
+# Public package installation needs no token. Do not pass obsolete or unrelated
+# package credentials to later build and runtime processes.
+unset NODE_AUTH_TOKEN NPM_TOKEN
+
 public_review_destinations_source="${PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_FILE:-}"
 unset PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_FILE
 
@@ -37,7 +41,7 @@ fi
 
 # Step 2: Reinstall dependencies
 print_message "Reinstalling dependencies..."
-./bin/6529 install:frozen
+./bin/6529 ci
 
 # Step 3: Rebuild the project
 print_message "Rebuilding the project..."

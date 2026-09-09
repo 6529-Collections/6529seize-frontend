@@ -35,6 +35,15 @@ Use this area for wave and direct-message tasks:
 - After initial jump setup, the app removes both `serialNo` and `divider` from
   the URL.
 
+## Latest Profile Posts
+
+- On desktop web, `/waves` with no selected Wave shows the latest posts from
+  members’ effective public Profile Wave curations.
+- Posts appear newest first. Each card identifies the author, posting time, and
+  originating Profile Wave. Curated replies can also appear.
+- On small screens, the default `/waves` view remains a Wave navigator rather
+  than showing the post cards.
+
 ## Access and Availability
 
 - `/discover` is public and can render before wallet connect.

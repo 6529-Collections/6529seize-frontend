@@ -1,5 +1,7 @@
 "use client";
 
+import ContentModerationDropBody from "@/components/content-moderation/ContentModerationDropBody";
+import ContentModerationDropStatusControls from "@/components/content-moderation/ContentModerationDropStatusControls";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
@@ -119,15 +121,21 @@ const RANK_STYLES = {
 
 const getColorClasses = ({
   isActiveDrop,
+  isLocallyFailed,
   rank,
   isDrop,
   location,
 }: {
   isActiveDrop: boolean;
+  isLocallyFailed: boolean;
   rank: number | null;
   isDrop: boolean;
   location: DropLocation;
 }): string => {
+  if (isLocallyFailed) {
+    return "tw-bg-red-500/5";
+  }
+
   if (isActiveDrop) {
     return "tw-bg-[#3CCB7F]/10 tw-ring-1 tw-ring-inset tw-ring-[#3CCB7F]/55";
   }
@@ -140,7 +148,7 @@ const getColorClasses = ({
     const ringClasses = isWaveView
       ? ""
       : "tw-ring-1 tw-ring-inset tw-ring-iron-800";
-    const bgClass = isWaveView ? "" : "tw-bg-iron-950/80";
+    const bgClass = isWaveView ? "" : "tw-bg-iron-950";
 
     return `${bgClass} ${ringClasses} ${hoverClass}`.trim();
   }
@@ -155,7 +163,8 @@ const getDropClasses = (
   groupingClass: string,
   location: DropLocation,
   rank: number | null,
-  isDrop: boolean
+  isDrop: boolean,
+  isLocallyFailed: boolean
 ): string => {
   const baseClasses =
     "touch-select-none tw-cursor-default tw-relative tw-group tw-w-full tw-flex tw-flex-col tw-px-4 tw-transition-colors tw-duration-300 desktop-hover:hover:tw-z-30 focus-within:tw-z-30";
@@ -164,7 +173,13 @@ const getDropClasses = (
 
   const chatDropClasses = isDrop ? "tw-rounded-lg tw-my-0.5" : "";
 
-  const rankClasses = getColorClasses({ isActiveDrop, rank, isDrop, location });
+  const rankClasses = getColorClasses({
+    isActiveDrop,
+    isLocallyFailed,
+    rank,
+    isDrop,
+    location,
+  });
 
   const locationClasses =
     location === DropLocation.MY_STREAM || location === DropLocation.PROFILE
@@ -529,6 +544,8 @@ const getAuthorHeader = ({
   isStorm,
   activePartIndex,
   showActionsButton,
+  showActionsButtonOnMobile,
+  desktopActions,
   handleOpenTouchActions,
   timestampLayout,
 }: {
@@ -539,6 +556,8 @@ const getAuthorHeader = ({
   readonly isStorm: boolean;
   readonly activePartIndex: number;
   readonly showActionsButton: boolean;
+  readonly showActionsButtonOnMobile: boolean;
+  readonly desktopActions?: React.ReactNode | undefined;
   readonly handleOpenTouchActions: (
     e: React.MouseEvent<HTMLButtonElement>
   ) => void;
@@ -557,6 +576,8 @@ const getAuthorHeader = ({
         currentPartIndex={activePartIndex}
         partsCount={drop.parts.length}
         showActionsButton={showActionsButton}
+        showActionsButtonOnMobile={showActionsButtonOnMobile}
+        desktopActions={desktopActions}
         onOpenActions={handleOpenTouchActions}
         timestampLayout={timestampLayout}
       />
@@ -617,6 +638,7 @@ const getContentBlock = ({
   quotePath,
   embedDepth,
   maxEmbedDepth,
+  isLocallyFailed,
 }: {
   readonly shouldShowReplyHeader: boolean;
   readonly onReplyClick: (serialNo: number) => void;
@@ -654,6 +676,7 @@ const getContentBlock = ({
   readonly quotePath?: readonly string[] | undefined;
   readonly embedDepth?: number | undefined;
   readonly maxEmbedDepth?: number | undefined;
+  readonly isLocallyFailed: boolean;
 }): React.ReactNode => (
   <>
     {shouldShowReplyHeader && replyTo && (
@@ -671,7 +694,7 @@ const getContentBlock = ({
     >
       {showAuthorInfo && (
         <div
-          className={`tw-flex tw-w-full tw-items-center tw-gap-x-2 ${
+          className={`tw-flex tw-w-full tw-items-start tw-gap-x-2 ${
             inlineAuthorOnDesktop
               ? ""
               : "md:tw-block md:tw-w-auto md:tw-flex-shrink-0"
@@ -700,34 +723,37 @@ const getContentBlock = ({
           authorHeader,
         })}
         <div
-          className={getDropContentClass({
+          className={`${getDropContentClass({
             showAuthorInfo,
             shouldGroupWithPreviousDrop,
             isProfileView,
-          })}
+          })} ${isLocallyFailed ? "tw-opacity-75" : ""}`.trim()}
         >
-          <WaveDropContent
-            drop={drop}
-            activePartIndex={activePartIndex}
-            setActivePartIndex={setActivePartIndex}
-            onLongPress={handleLongPress}
-            onDropContentClick={onDropContentClick}
-            onQuoteClick={onQuoteClick}
-            setLongPressTriggered={setLongPressTriggered}
-            isEditing={isEditing}
-            isSaving={isSaving}
-            onSave={handleEditSave}
-            onCancel={handleEditCancel}
-            hasTouch={allowLongPress}
-            onLinkCardActionsActiveChange={handleLinkCardActionsActiveChange}
-            mediaImageScale={mediaImageScale}
-            fullWidthMedia={fullWidthMedia}
-            fullWidthLinkPreviews={fullWidthLinkPreviews}
-            embedPath={embedPath}
-            quotePath={quotePath}
-            embedDepth={embedDepth}
-            maxEmbedDepth={maxEmbedDepth}
-          />
+          <ContentModerationDropStatusControls />
+          <ContentModerationDropBody>
+            <WaveDropContent
+              drop={drop}
+              activePartIndex={activePartIndex}
+              setActivePartIndex={setActivePartIndex}
+              onLongPress={handleLongPress}
+              onDropContentClick={onDropContentClick}
+              onQuoteClick={onQuoteClick}
+              setLongPressTriggered={setLongPressTriggered}
+              isEditing={isEditing}
+              isSaving={isSaving}
+              onSave={handleEditSave}
+              onCancel={handleEditCancel}
+              hasTouch={allowLongPress}
+              onLinkCardActionsActiveChange={handleLinkCardActionsActiveChange}
+              mediaImageScale={mediaImageScale}
+              fullWidthMedia={fullWidthMedia}
+              fullWidthLinkPreviews={fullWidthLinkPreviews}
+              embedPath={embedPath}
+              quotePath={quotePath}
+              embedDepth={embedDepth}
+              maxEmbedDepth={maxEmbedDepth}
+            />
+          </ContentModerationDropBody>
         </div>
       </div>
     </div>

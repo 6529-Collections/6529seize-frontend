@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useEffectEvent } from "react";
+import { useEffect, useEffectEvent, useLayoutEffect, useRef } from "react";
 
 type SetUnreadDividerSerialNo = (
   serialNo: number | null | ((current: number | null) => number | null)
@@ -9,10 +9,14 @@ type SetUnreadDividerSerialNo = (
 interface MarkWaveNotificationsReadOptions {
   readonly shouldSend?: () => boolean;
   readonly queueIfBlocked?: boolean;
+  readonly readThroughSerialNo?: number | undefined;
+  readonly requestDmUnreadState?: boolean;
 }
 
 interface UseWaveChatLeaveCleanupParams {
   readonly enabled: boolean;
+  readonly isDirectMessage?: boolean | undefined;
+  readonly readThroughSerialNo?: number | undefined;
   readonly waveId: string;
   readonly setUnreadDividerSerialNo: SetUnreadDividerSerialNo;
   readonly removeWaveDeliveredNotifications: (
@@ -26,12 +30,33 @@ interface UseWaveChatLeaveCleanupParams {
 
 export function useWaveChatLeaveCleanup({
   enabled,
+  isDirectMessage = false,
+  readThroughSerialNo,
   waveId,
   setUnreadDividerSerialNo,
   removeWaveDeliveredNotifications,
   markWaveNotificationsRead,
 }: UseWaveChatLeaveCleanupParams) {
+  const readBoundaryByWaveRef = useRef(
+    new Map<
+      string,
+      {
+        readonly isDirectMessage: boolean;
+        readonly readThroughSerialNo: number | undefined;
+      }
+    >()
+  );
+
+  useLayoutEffect(() => {
+    readBoundaryByWaveRef.current.set(waveId, {
+      isDirectMessage,
+      readThroughSerialNo,
+    });
+  }, [isDirectMessage, readThroughSerialNo, waveId]);
+
   const cleanupLeftWave = useEffectEvent((leftWaveId: string) => {
+    const readBoundary = readBoundaryByWaveRef.current.get(leftWaveId);
+    readBoundaryByWaveRef.current.delete(leftWaveId);
     setUnreadDividerSerialNo(null);
     void (async () => {
       if (document.visibilityState !== "visible") {
@@ -45,8 +70,18 @@ export function useWaveChatLeaveCleanup({
       }
 
       try {
+        const dmReadOptions = readBoundary?.isDirectMessage
+          ? {
+              readThroughSerialNo:
+                readBoundary.readThroughSerialNo === undefined
+                  ? 0
+                  : Math.max(0, Math.floor(readBoundary.readThroughSerialNo)),
+              requestDmUnreadState: true,
+            }
+          : {};
         await markWaveNotificationsRead(leftWaveId, {
           queueIfBlocked: false,
+          ...dmReadOptions,
         });
       } catch (error: unknown) {
         console.error("Failed to mark feed as read:", error);

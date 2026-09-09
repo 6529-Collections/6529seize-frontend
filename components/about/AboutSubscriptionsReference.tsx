@@ -13,7 +13,14 @@ import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 
 import {
+  ABOUT_FEATURE_CONTENT_GUTTER_CLASS_NAME,
+  ABOUT_FRAMED_ICON_CLASS_NAME,
+  ABOUT_FRAMED_ICON_WRAPPER_CLASS_NAME,
+  ABOUT_SECTION_DIVIDER_CLASS_NAME,
+} from "./AboutLayout";
+import {
   SUBSCRIPTIONS_INTERACTIVE_PANEL_CLASS,
+  SUBSCRIPTIONS_NESTED_HEADING_CLASS,
   SUBSCRIPTIONS_PANEL_CLASS,
   SUBSCRIPTIONS_SECTION_HEADING_CLASS,
 } from "./aboutSubscriptionsStyles";
@@ -36,7 +43,7 @@ const NESTED_LIST_CLASS =
 const TIMELINE_ITEM_CLASS =
   "tw-relative tw-grid tw-grid-cols-[2rem_minmax(0,1fr)] tw-gap-3 sm:tw-grid-cols-[2.5rem_minmax(0,1fr)] sm:tw-gap-5";
 const TIMELINE_MARKER_CLASS =
-  "tw-relative tw-z-10 tw-flex tw-size-8 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-bg-black tw-text-sm sm:tw-size-10";
+  "tw-relative tw-z-10 tw-flex tw-size-8 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-bg-[#0D0D0F] tw-text-sm sm:tw-size-10";
 const REMOTE_MESSAGE_KEYS = [
   "about.subscriptions.reference.remote.busy",
   "about.subscriptions.reference.remote.separate",
@@ -61,7 +68,7 @@ function HowItWorks({ locale }: { readonly locale: SupportedLocale }) {
   return (
     <section
       aria-labelledby="subscription-how-it-works-heading"
-      className="tw-px-1 tw-pb-8 sm:tw-px-2 sm:tw-pb-12"
+      className={`${ABOUT_FEATURE_CONTENT_GUTTER_CLASS_NAME} tw-pb-8 sm:tw-pb-12`}
     >
       <div className="tw-mb-4 sm:tw-mb-5">
         <h2
@@ -221,7 +228,7 @@ function Delegation({ locale }: { readonly locale: SupportedLocale }) {
       >
         <summary className="tw-flex tw-min-h-12 tw-list-none tw-items-center tw-justify-between tw-gap-4 tw-bg-iron-900/45 tw-px-4 tw-py-3 tw-text-iron-100 tw-transition-colors hover:tw-text-iron-50 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-[#00f0ff]/50 sm:tw-px-6 [&::-webkit-details-marker]:tw-hidden">
           <h3
-            className="tw-m-0 tw-text-base tw-font-medium sm:tw-text-lg"
+            className={SUBSCRIPTIONS_NESTED_HEADING_CLASS}
             id="subscription-delegation-heading"
           >
             {m(locale, "about.subscriptions.reference.delegation.title")}
@@ -315,11 +322,17 @@ function GasSavings({ locale }: { readonly locale: SupportedLocale }) {
   return (
     <section
       aria-labelledby="subscription-gas-savings-heading"
-      className="tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-px-1 tw-py-6 sm:tw-px-2 sm:tw-py-10"
+      className={`${ABOUT_FEATURE_CONTENT_GUTTER_CLASS_NAME} tw-border-0 tw-border-t tw-border-solid tw-py-6 sm:tw-py-10 ${ABOUT_SECTION_DIVIDER_CLASS_NAME}`}
     >
       <div className="tw-flex tw-items-center tw-gap-3 sm:tw-gap-4">
-        <span className="tw-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-full tw-bg-[#00f0ff]/10 tw-text-lg tw-text-[#00f0ff] sm:tw-size-12 sm:tw-text-xl">
-          <FontAwesomeIcon aria-hidden="true" icon={faGasPump} />
+        <span
+          className={`${ABOUT_FRAMED_ICON_WRAPPER_CLASS_NAME} tw-border-[#00f0ff]/20 tw-bg-[#00f0ff]/10 tw-text-[#00f0ff]`}
+        >
+          <FontAwesomeIcon
+            aria-hidden="true"
+            className={ABOUT_FRAMED_ICON_CLASS_NAME}
+            icon={faGasPump}
+          />
         </span>
         <h2
           className={SUBSCRIPTIONS_SECTION_HEADING_CLASS}
@@ -380,11 +393,17 @@ function RemoteMinting({ locale }: { readonly locale: SupportedLocale }) {
   return (
     <section
       aria-labelledby="subscription-remote-minting-heading"
-      className="tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-px-1 tw-py-6 sm:tw-px-2 sm:tw-py-10"
+      className={`${ABOUT_FEATURE_CONTENT_GUTTER_CLASS_NAME} tw-border-0 tw-border-t tw-border-solid tw-py-6 sm:tw-py-10 ${ABOUT_SECTION_DIVIDER_CLASS_NAME}`}
     >
       <div className="tw-flex tw-items-center tw-gap-3 sm:tw-gap-4">
-        <span className="tw-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-full tw-bg-[#7000ff]/20 tw-text-lg tw-text-[#8f5cff] sm:tw-size-12 sm:tw-text-xl">
-          <FontAwesomeIcon aria-hidden="true" icon={faEarthAmericas} />
+        <span
+          className={`${ABOUT_FRAMED_ICON_WRAPPER_CLASS_NAME} tw-border-[#8f5cff]/20 tw-bg-[#8f5cff]/10 tw-text-[#8f5cff]`}
+        >
+          <FontAwesomeIcon
+            aria-hidden="true"
+            className={ABOUT_FRAMED_ICON_CLASS_NAME}
+            icon={faEarthAmericas}
+          />
         </span>
         <h2
           className={SUBSCRIPTIONS_SECTION_HEADING_CLASS}
@@ -424,9 +443,7 @@ function TimelineStep({
         {number}
       </span>
       <div className="tw-min-w-0">
-        <h3 className="tw-m-0 tw-text-lg tw-font-medium tw-text-iron-100 sm:tw-text-xl">
-          {title}
-        </h3>
+        <h3 className={SUBSCRIPTIONS_NESTED_HEADING_CLASS}>{title}</h3>
         <div className="tw-mt-4 sm:tw-mt-5">{children}</div>
       </div>
     </div>

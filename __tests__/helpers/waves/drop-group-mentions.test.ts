@@ -24,18 +24,15 @@ describe("drop group mentions", () => {
     ).toEqual([ApiDropGroupMention.All]);
   });
 
-  it("detects permission-derived mentions case-insensitively", () => {
+  it("detects global mentions case-insensitively for admins", () => {
     expect(
-      getMentionedGroupsFromText(
-        "Hi @Contributors @ADMINS and @DeVs6529",
-        false
-      )
+      getMentionedGroupsFromText("Hi @Contributors @ADMINS and @DeVs6529", true)
     ).toEqual([
       ApiDropGroupMention.Contributors,
       ApiDropGroupMention.Admins,
       ApiDropGroupMention.Devs6529,
     ]);
-    expect(getMentionedGroupsFromText("again @contributors", false)).toEqual([
+    expect(getMentionedGroupsFromText("again @contributors", true)).toEqual([
       ApiDropGroupMention.Contributors,
     ]);
   });
@@ -46,10 +43,7 @@ describe("drop group mentions", () => {
       "Second paragraph: @ADMINS can review this.",
       "Third paragraph: @contributors can reply.",
     ].join("\n");
-    const expected = [
-      ApiDropGroupMention.Contributors,
-      ApiDropGroupMention.Admins,
-    ];
+    const expected = [ApiDropGroupMention.Admins];
 
     expect(getMentionedGroupsFromText(content, false)).toEqual(expected);
     expect(getMentionedGroupsFromText(content, false)).toEqual(expected);
@@ -86,7 +80,7 @@ describe("drop group mentions", () => {
     expect(markGroupMentionTokens(params)).toBe("**@admins** and **@ADMINS**");
   });
 
-  it("keeps @all restricted while returning other metadata", () => {
+  it("filters admin-only broadcast mentions while returning escalation metadata", () => {
     expect(
       getMentionedGroupsFromParts(
         [
@@ -94,11 +88,12 @@ describe("drop group mentions", () => {
             mentioned_groups: [
               ApiDropGroupMention.All,
               ApiDropGroupMention.Contributors,
+              ApiDropGroupMention.Admins,
             ],
           },
         ],
         false
       )
-    ).toEqual([ApiDropGroupMention.Contributors]);
+    ).toEqual([ApiDropGroupMention.Admins]);
   });
 });

@@ -22,9 +22,9 @@ These rules apply to non-curation thread composer flows in both `Post` and
 
 ## Entry Points
 
-1. Open a wave or DM thread composer and type in the body input.
-2. Select `Break into storm` to save the first part.
-3. Use the primary `Add part` action for later parts and `Post storm` from an
+1. Open a wave or DM thread composer and select the Storm action.
+2. Write the first part and use the primary `Add part` action to save it.
+3. Continue adding later parts, then use `Post storm` from an
    empty current editor to publish the completed storm.
 
 ## Rules in Practice

@@ -28,7 +28,7 @@ export const SingleWaveDropAuthor: React.FC<SingleWaveDropAuthorProps> = ({
     : "Profile picture";
 
   return (
-    <div className="tw-flex tw-items-center tw-gap-x-2.5">
+    <div className="tw-flex tw-items-center tw-gap-x-2">
       <Link
         href={`/${drop.author.handle ?? drop.author.primary_address}`}
         className="tw-flex tw-items-center tw-gap-x-2.5 tw-no-underline"
@@ -46,7 +46,7 @@ export const SingleWaveDropAuthor: React.FC<SingleWaveDropAuthorProps> = ({
         ) : (
           <div className="tw-h-10 tw-w-10 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900" />
         )}
-        <div className="tw-inline-flex tw-items-center tw-gap-x-1">
+        <div className="tw-inline-flex tw-items-center tw-gap-x-2">
           <UserProfileTooltipWrapper user={authorIdentity}>
             <span className="tw-text-md tw-font-semibold tw-text-white desktop-hover:hover:tw-text-opacity-80">
               <ProfileNameWithAiMarker
@@ -66,6 +66,7 @@ export const SingleWaveDropAuthor: React.FC<SingleWaveDropAuthorProps> = ({
         profile={drop.author}
         wave={drop.wave}
         tooltipIdPrefix={`single-drop-author-badges-${drop.id}`}
+        className="tw-inline-flex tw-items-center tw-gap-x-2"
       />
     </div>
   );

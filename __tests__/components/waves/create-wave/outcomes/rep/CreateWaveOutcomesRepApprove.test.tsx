@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import CreateWaveOutcomesRepApprove from "@/components/waves/create-wave/outcomes/rep/CreateWaveOutcomesRepApprove";
 
@@ -79,5 +79,18 @@ describe("CreateWaveOutcomesRepApprove", () => {
     expect(
       screen.getByText("Rep must be a positive number")
     ).toBeInTheDocument();
+  });
+
+  it("rejects non-finite Rep amounts", async () => {
+    const { user, categoryInput, creditInput, saveButton } = await setup();
+
+    await user.type(categoryInput, "cat");
+    fireEvent.change(creditInput, { target: { value: "Infinity" } });
+    await user.click(saveButton);
+
+    expect(
+      screen.getByText("Rep must be a positive number")
+    ).toBeInTheDocument();
+    expect(onOutcome).not.toHaveBeenCalled();
   });
 });

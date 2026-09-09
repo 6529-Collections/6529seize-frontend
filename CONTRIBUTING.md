@@ -42,11 +42,17 @@ Open a new shell, or activate the wrapper in the current shell:
 source <(./bin/6529 bootstrap --print-export)
 ```
 
-Install dependencies:
+Dependencies, including `@6529-collections/release-request`, come from public
+npm. No package token or private-registry setup is required. Install the exact
+lockfile through the existing secure wrapper:
 
 ```bash
-6529 install
+6529 ci
 ```
+
+See
+[pnpm and Socket Firewall](ops/docs/developer/pnpm-and-socket-firewall.md) for
+the package command boundary and dependency security checks.
 
 Create a local `.env` file from [.env.sample](.env.sample), then start the app:
 

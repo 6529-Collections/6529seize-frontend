@@ -4,7 +4,8 @@
 
 On `/`, home has two data-driven sections:
 
-- `Latest Drop` (or `Next Drop` when mint is ended and a next winner exists)
+- `Latest Drop` (or `Next Drop` when the mint-end grace period has elapsed and
+  a next winner exists)
 - `Coming up` (next in queue plus top current leaders)
 
 Use this page for visibility rules, state switches, and route targets.
@@ -47,10 +48,11 @@ Use this page for visibility rules, state switches, and route targets.
 2. The top slot shows a loading placeholder while current mint data, claim
    status, and next-winner data resolve.
 3. The top slot then chooses one mode:
-   - `Latest Drop` when the current mint is not ended, or when no next winner
-     is available.
-   - `Next Drop` when the current mint is ended and a next winner exists.
-4. `Latest Drop` shows artwork, stats, connected-wallet allowlist status,
+   - `Latest Drop` while the current mint is active and for the configured
+     grace period after its scheduled end, or when no next winner is available.
+   - `Next Drop` when the current mint is complete, its grace period has
+     elapsed, and a next winner exists.
+4. `Latest Drop` shows artwork, stats, connected-wallet allowance,
    subscription awareness, edition details, and countdown states: `Upcoming`,
    `Live`, `Mint Complete`, or `Error`. When the card has an explicit Main Stage
    mapping, edition details also includes `Main Stage Submission` → `View`.
@@ -71,7 +73,8 @@ Use this page for visibility rules, state switches, and route targets.
   - Top slot: `Latest Drop`.
   - `Coming up`: up to 3 leaders.
 - Mint ended, next winner available:
-  - Top section switches from `Latest Drop` to `Next Drop`.
+  - Top section keeps `Latest Drop` through the configured grace period, then
+    replaces it with `Next Drop`.
   - The `Next Drop` panel can show subscription awareness or controls for the
     canonical next mint.
   - When the winning drop includes an explicit Meme card mapping, the panel
@@ -99,23 +102,25 @@ Use this page for visibility rules, state switches, and route targets.
   alongside its wave, submission time, and rating details.
 - On iOS outside the US, the countdown `Mint` button is hidden.
 - On iOS outside the US, The Memes subscription row is hidden.
-- Latest Drop and mapped Next Drop cards show a separate `Your allowlist` row.
-  It checks the connected wallet only and lists every Phase 0, Phase 1, or Phase
-  2 entry with a positive manual-allowlist allocation. Subscription airdrops do
-  not count as manual allowlist access.
-- The allowlist row asks disconnected users to connect a wallet, keeps a stable
-  checking state while wallet/API data loads, and distinguishes no matching
-  phase from an unavailable lookup. It reports allowlist membership, not whether
-  an allocation is still unused or mintable now.
+- Latest Drop and mapped Next Drop cards always show `Your allowance`. Before a
+  wallet is connected, the row prompts the user to connect to view it. Once
+  connected, compact wrapping pills list each nonzero Phase 0, Phase 1, Phase 2,
+  or Public allocation, spelling out Airdrop and Allowlist counts; Public can
+  contain Airdrop only.
+- The allowance row distinguishes loading, an unpublished distribution, a
+  published distribution with no matching allocation, and an unavailable
+  lookup. It reports planned allocation, not whether it is still unused or
+  mintable now.
 - Latest Drop subscription awareness is read-only and links to subscription
   info/profile subscriptions without querying the upcoming-meme status endpoint
   for the current or already-dropped card.
 - The current/latest `/the-memes/{id}` detail page uses the same awareness-only
   subscription row beside the mint countdown.
-- When an unresolved `/the-memes/{id}` URL is the explicitly mapped next Meme
-  and home is in `Next Drop` mode, the page reuses the same artwork panel above
-  the calendar. Its Meme pill is static because the user is already on that
-  card route, and subscription awareness stays inside the artwork panel.
+- When an unresolved `/the-memes/{id}` URL is the canonical next Meme and the
+  Main Stage winner is explicitly mapped to that id, the page reuses the same
+  artwork panel above the calendar without waiting for the current mint or the
+  homepage grace period. Its Meme pill is static because the user is already on
+  that card route, and subscription awareness stays inside the artwork panel.
 - Other unresolved upcoming `/the-memes/{id}` pages keep the standalone
   subscription awareness widget followed by the next-mint calendar panel.
 - Awareness-only rows do not embed the profile subscription editor. They show a
@@ -164,6 +169,12 @@ Use this page for visibility rules, state switches, and route targets.
 
 ## Limitations / Notes
 
+- The homepage top-slot grace period is configured by
+  `HOME_LATEST_DROP_GRACE_PERIOD_MINUTES` in
+  `helpers/mint-visibility.helpers.ts` and defaults to 10 minutes. The
+  transition uses the calendar's scheduled mint-end instant as its shared
+  deadline. The exact client render time can vary with the viewer's device
+  clock and browser timer scheduling.
 - `Coming up` uses prediction leaderboard ordering, not chronological ordering.
 - Leader count is capped:
   - With `NEXT MINT` card: up to 2 leader cards

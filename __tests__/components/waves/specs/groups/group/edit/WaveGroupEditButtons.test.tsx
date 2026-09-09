@@ -1,15 +1,21 @@
 import React from "react";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import WaveGroupEditButtons from "@/components/waves/specs/groups/group/edit/WaveGroupEditButtons";
 import { WaveGroupType } from "@/components/waves/specs/groups/group/WaveGroup.types";
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { ApiGroupFilterDirection } from "@/generated/models/ApiGroupFilterDirection";
 import { ApiGroupBeneficiaryGrantMatchMode } from "@/generated/models/ApiGroupBeneficiaryGrantMatchMode";
+import { ApiGroupFilterDirection } from "@/generated/models/ApiGroupFilterDirection";
 import { ApiGroupTdhInclusionStrategy } from "@/generated/models/ApiGroupTdhInclusionStrategy";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import { createDeferredPromise } from "@/__tests__/utils/deferredPromise";
 
 const mockSubmitInlineGroup = jest.fn();
+const mockValidateWaveGroups = jest.fn();
+const mockHideUnattachedClone = jest.fn();
+const mockUseWaveGroupCriteria = jest.fn();
+const mockConvertWaveToUpdateWave = jest.fn();
 let mockInlinePanelProps: any;
 
 jest.mock("@tanstack/react-query", () => {
@@ -27,21 +33,32 @@ jest.mock("focus-trap-react", () => ({
 }));
 
 jest.mock("@/hooks/groups/useGroupMutations", () => ({
-  useGroupMutations: () => ({
-    submit: mockSubmitInlineGroup,
-  }),
+  useGroupMutations: () => ({ submit: mockSubmitInlineGroup }),
 }));
 
+jest.mock("@/services/api/wave-group-validation-api", () => ({
+  validateWaveGroups: (...args: any[]) => mockValidateWaveGroups(...args),
+}));
+
+jest.mock(
+  "@/components/waves/specs/groups/group/edit/hooks/useWaveGroupCriteria",
+  () => ({
+    useWaveGroupCriteria: (groupId: string | null) =>
+      mockUseWaveGroupCriteria(groupId),
+  })
+);
+
+jest.mock(
+  "@/components/waves/specs/groups/group/edit/buttons/utils/waveGroupCloneRecovery",
+  () => ({
+    getCloneReferenceState: jest.fn().mockResolvedValue("unattached"),
+    hideUnattachedClone: (...args: any[]) => mockHideUnattachedClone(...args),
+  })
+);
+
 jest.mock("@/helpers/waves/waves.helpers", () => ({
-  convertWaveToUpdateWave: jest.fn(() => ({
-    name: "Wave 1",
-    picture: null,
-    visibility: { scope: { group_id: "group-1" } },
-    participation: { scope: { group_id: "group-1" } },
-    voting: { scope: { group_id: "group-1" } },
-    chat: { scope: { group_id: "group-1" } },
-    wave: { admin_group: { group_id: "group-1" } },
-  })),
+  convertWaveToUpdateWave: (...args: any[]) =>
+    mockConvertWaveToUpdateWave(...args),
 }));
 
 jest.mock(
@@ -49,21 +66,16 @@ jest.mock(
   () =>
     function MockGroupAssignmentDialog(props: any) {
       mockInlinePanelProps = props;
-      const selectedGroup = {
-        id: "group-2",
-        name: "Selected Group",
-      };
+      const selectedGroup = createFullGroup("selected-group", { level: 10 });
       const payload = {
         name: "Draft Group",
-        group: {},
-        is_private: false,
+        group: props.selectedGroup?.group ?? {},
+        is_private: true,
       };
 
       return (
-        <div
-          data-testid="inline-panel"
-          data-allow-clear={String(props.allowGroupClear)}
-        >
+        <div data-testid="inline-panel" data-start-mode={props.startMode}>
+          {props.beforePanel}
           <span>{props.selectedGroup?.name ?? props.defaultLabel}</span>
           <button
             type="button"
@@ -84,15 +96,7 @@ jest.mock(
               })();
             }}
           >
-            create inline group
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              void props.onChange(null);
-            }}
-          >
-            clear group
+            save edited criteria
           </button>
         </div>
       );
@@ -100,91 +104,25 @@ jest.mock(
 );
 
 jest.mock(
-  "@/components/waves/specs/groups/group/edit/WaveGroupEditButton",
-  () => {
-    const React = require("react");
-
-    function MockWaveGroupEditTrigger({ open, renderTrigger }: any) {
-      if (renderTrigger === null) {
-        return null;
-      }
-
-      if (renderTrigger) {
-        const Trigger = renderTrigger;
-        return <Trigger open={open} />;
-      }
-
-      return <button onClick={open}>edit</button>;
+  "@/components/mobile-wrapper-dialog/MobileWrapperConfirmationDialog",
+  () =>
+    function MockConfirmationDialog(props: any) {
+      return props.isOpen ? (
+        <div role="alertdialog" aria-label={props.title}>
+          <p>{props.message}</p>
+          <button
+            type="button"
+            disabled={props.confirmDisabled || props.isConfirming}
+            onClick={props.onConfirm}
+          >
+            {props.confirmText}
+          </button>
+          <button type="button" onClick={props.onClose}>
+            {props.cancelText}
+          </button>
+        </div>
+      ) : null;
     }
-
-    return {
-      __esModule: true,
-      default: React.forwardRef(({ onWaveUpdate, renderTrigger }: any, ref) => {
-        const handleOpen = () => onWaveUpdate({});
-        React.useImperativeHandle(ref, () => ({ open: handleOpen }), [
-          handleOpen,
-        ]);
-        return (
-          <MockWaveGroupEditTrigger
-            open={handleOpen}
-            renderTrigger={renderTrigger}
-          />
-        );
-      }),
-    };
-  }
-);
-
-jest.mock(
-  "@/components/waves/specs/groups/group/edit/WaveGroupRemoveButton",
-  () => {
-    const React = require("react");
-
-    function MockWaveGroupRemoveTrigger({ open, renderTrigger }: any) {
-      if (renderTrigger === null) {
-        return null;
-      }
-
-      if (renderTrigger) {
-        const Trigger = renderTrigger;
-        return <Trigger open={open} />;
-      }
-
-      return <button onClick={open}>remove</button>;
-    }
-
-    return {
-      __esModule: true,
-      default: React.forwardRef(({ onWaveUpdate, renderTrigger }: any, ref) => {
-        const handleOpen = () => onWaveUpdate({});
-        React.useImperativeHandle(ref, () => ({ open: handleOpen }), [
-          handleOpen,
-        ]);
-        return (
-          <MockWaveGroupRemoveTrigger
-            open={handleOpen}
-            renderTrigger={renderTrigger}
-          />
-        );
-      }),
-    };
-  }
-);
-
-jest.mock(
-  "@/components/waves/specs/groups/group/edit/WaveGroupManageIdentitiesModal",
-  () => ({
-    __esModule: true,
-    WaveGroupManageIdentitiesMode: {
-      INCLUDE: "INCLUDE",
-      EXCLUDE: "EXCLUDE",
-    },
-    default: ({ mode, onClose }: any) => (
-      <div data-testid={`${mode.toLowerCase()}-modal`}>
-        <button onClick={onClose}>close</button>
-      </div>
-    ),
-  })
 );
 
 jest.mock("@/components/distribution-plan-tool/common/CircleLoader", () => ({
@@ -192,323 +130,441 @@ jest.mock("@/components/distribution-plan-tool/common/CircleLoader", () => ({
   default: () => <div data-testid="loader" />,
 }));
 
-const mutateAsync = jest.fn();
-const createQueryClientMock = () => ({
-  setQueryData: jest.fn(),
-  ensureQueryData: jest.fn().mockImplementation(async ({ queryFn }: any) => {
-    return queryFn ? await queryFn({ signal: undefined }) : undefined;
-  }),
-  fetchQuery: jest.fn().mockImplementation(async ({ queryFn }: any) => {
-    return queryFn ? await queryFn({ signal: undefined }) : undefined;
-  }),
-});
+function createFullGroup(
+  id: string,
+  { level = null }: { readonly level?: number | null } = {}
+): ApiGroupFull {
+  return {
+    id,
+    name: id,
+    group: {
+      tdh: {
+        min: null,
+        max: null,
+        inclusion_strategy: ApiGroupTdhInclusionStrategy.Both,
+      },
+      rep: {
+        min: null,
+        max: null,
+        direction: ApiGroupFilterDirection.Received,
+        user_identity: null,
+        category: null,
+      },
+      cic: {
+        min: null,
+        max: null,
+        direction: ApiGroupFilterDirection.Received,
+        user_identity: null,
+      },
+      level: { min: level, max: null },
+      owns_nfts: [],
+      identity_group_id: "included-wallets",
+      identity_group_identities_count: 1,
+      excluded_identity_group_id: "excluded-wallets",
+      excluded_identity_group_identities_count: 1,
+      is_beneficiary_of_grant_id: null,
+      is_beneficiary_of_grant_match_mode:
+        ApiGroupBeneficiaryGrantMatchMode.AnyToken,
+      is_beneficiary_of_grant: null,
+    },
+    created_at: 1,
+    created_by: { id: "profile-1", handle: "alice" } as any,
+    visible: true,
+    is_private: false,
+    is_direct_message: false,
+  };
+}
 
-let queryClientMock = createQueryClientMock();
-
-const auth = {
-  setToast: jest.fn(),
-  requestAuth: jest.fn().mockResolvedValue({ success: true }),
-  connectedProfile: { id: "profile-1", handle: "alice" },
-} as any;
-
-const wrapper = ({ children }: any) => (
-  <AuthContext.Provider value={auth}>
-    <ReactQueryWrapperContext.Provider value={{ onWaveCreated: jest.fn() }}>
-      {children}
-    </ReactQueryWrapperContext.Provider>
-  </AuthContext.Provider>
-);
-
-const baseGroup = {
-  id: "group-1",
-  name: "Group 1",
-  author: { id: "profile-1", handle: "alice" },
-  created_at: Date.now(),
-  is_hidden: false,
-  is_direct_message: false,
+const groupSummaries = {
+  visibility: {
+    id: "visibility-group",
+    name: "Visibility Group",
+    author: { id: "profile-1", handle: "alice" },
+  },
+  drop: {
+    id: "drop-group",
+    name: "Drop Group",
+    author: { id: "profile-1", handle: "alice" },
+  },
+  vote: {
+    id: "vote-group",
+    name: "Vote Group",
+    author: { id: "profile-1", handle: "alice" },
+  },
+  chat: {
+    id: "chat-group",
+    name: "Chat Group",
+    author: { id: "profile-1", handle: "alice" },
+  },
+  admin: {
+    id: "admin-group",
+    name: "Admin Group",
+    author: { id: "profile-1", handle: "alice" },
+  },
 };
 
 const wave: any = {
   id: "w1",
   name: "Wave 1",
-  visibility: { scope: { group: baseGroup } },
+  visibility: { scope: { group: groupSummaries.visibility } },
   participation: {
-    scope: { group: baseGroup },
+    scope: { group: groupSummaries.drop },
     authenticated_user_eligible: true,
   },
   voting: {
-    scope: { group: baseGroup },
+    scope: { group: groupSummaries.vote },
     authenticated_user_eligible: true,
   },
   chat: {
-    scope: { group: baseGroup },
+    scope: { group: groupSummaries.chat },
     authenticated_user_eligible: true,
   },
   wave: {
-    admin_group: { group: baseGroup },
+    admin_group: { group: groupSummaries.admin },
     authenticated_user_eligible_for_admin: true,
     type: "RANK",
   },
 };
 
+const mutateAsync = jest.fn();
+const auth = {
+  setToast: jest.fn(),
+  requestAuth: jest.fn().mockResolvedValue({ success: true }),
+  connectedProfile: {
+    id: "profile-1",
+    handle: "alice",
+    normalised_handle: "alice",
+    primary_wallet: "0xME",
+    display: "Alice",
+    tdh: 1,
+    level: 1,
+    cic: 1,
+    pfp: null,
+  },
+} as any;
+const onWaveCreated = jest.fn();
+const wrapper = ({ children }: { readonly children: React.ReactNode }) => (
+  <AuthContext.Provider value={auth}>
+    <ReactQueryWrapperContext.Provider
+      value={{ onWaveCreated, onGroupCreate: jest.fn() } as any}
+    >
+      {children}
+    </ReactQueryWrapperContext.Provider>
+  </AuthContext.Provider>
+);
+
 describe("WaveGroupEditButtons", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockInlinePanelProps = null;
-    mockSubmitInlineGroup.mockResolvedValue({
-      ok: true,
-      group: {
-        id: "group-created",
-        name: "Created Group",
-      },
-      published: true,
-    });
     auth.requestAuth.mockResolvedValue({ success: true });
-    mutateAsync.mockReset();
     mutateAsync.mockResolvedValue({});
-    queryClientMock = createQueryClientMock();
+    mockConvertWaveToUpdateWave.mockReturnValue({
+      name: "Wave 1",
+      picture: null,
+      visibility: { scope: { group_id: "visibility-group" } },
+      participation: { scope: { group_id: "drop-group" } },
+      voting: { scope: { group_id: "vote-group" } },
+      chat: { scope: { group_id: "chat-group" } },
+      wave: { admin_group: { group_id: "admin-group" } },
+    });
     (useMutation as jest.Mock).mockReturnValue({ mutateAsync });
     (useQuery as jest.Mock).mockReturnValue({ data: undefined });
-    (useQueryClient as jest.Mock).mockReturnValue(queryClientMock);
+    (useQueryClient as jest.Mock).mockReturnValue({
+      ensureQueryData: jest.fn(),
+      fetchQuery: jest.fn(),
+    });
+    mockValidateWaveGroups.mockResolvedValue({
+      valid: true,
+      invalid_roles: [],
+    });
+    mockSubmitInlineGroup.mockResolvedValue({
+      ok: true,
+      group: createFullGroup("created-group", { level: 5 }),
+      published: true,
+    });
+    mockUseWaveGroupCriteria.mockImplementation((groupId: string | null) => ({
+      criteria:
+        groupId === null
+          ? { group: null, includedWallets: [], excludedWallets: [] }
+          : {
+              group: createFullGroup(groupId, {
+                level: groupId === "visibility-group" ? 1 : 2,
+              }),
+              includedWallets: ["0xincluded"],
+              excludedWallets: ["0xexcluded"],
+            },
+      isLoading: false,
+      isError: false,
+      retry: jest.fn(),
+    }));
   });
 
-  it("opens inline group dialog from change group", async () => {
-    render(
-      <WaveGroupEditButtons haveGroup wave={wave} type={WaveGroupType.VIEW} />,
-      { wrapper }
+  it("opens the prefilled editor directly from the gear without a context menu", () => {
+    render(<WaveGroupEditButtons wave={wave} type={WaveGroupType.VIEW} />, {
+      wrapper,
+    });
+
+    expect(screen.queryByText("Change group")).not.toBeInTheDocument();
+    expect(screen.queryByText("Include identity")).not.toBeInTheDocument();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Edit Visibility access" })
     );
-    fireEvent.click(screen.getByRole("button", { name: /Group options/i }));
-    fireEvent.click(screen.getByText("Change group"));
 
     expect(screen.getByTestId("inline-panel")).toHaveAttribute(
-      "data-allow-clear",
-      "false"
+      "data-start-mode",
+      "criteria"
     );
-    expect(screen.getByText("Group 1")).toBeInTheDocument();
     expect(mockInlinePanelProps.selectedGroup).toEqual(
-      expect.objectContaining({
-        id: "group-1",
-        name: "Group 1",
-        group: expect.objectContaining({
-          tdh: {
-            min: null,
-            max: null,
-            inclusion_strategy: ApiGroupTdhInclusionStrategy.Both,
-          },
-          rep: {
-            min: null,
-            max: null,
-            direction: ApiGroupFilterDirection.Received,
-            user_identity: null,
-            category: null,
-          },
-          cic: {
-            min: null,
-            max: null,
-            direction: ApiGroupFilterDirection.Received,
-            user_identity: null,
-          },
-          level: { min: null, max: null },
-          owns_nfts: [],
-          identity_group_id: null,
-          identity_group_identities_count: 0,
-          excluded_identity_group_id: null,
-          excluded_identity_group_identities_count: 0,
-          is_beneficiary_of_grant_id: null,
-          is_beneficiary_of_grant_match_mode:
-            ApiGroupBeneficiaryGrantMatchMode.AnyToken,
-          is_beneficiary_of_grant: null,
-        }),
-      })
+      expect.objectContaining({ id: "visibility-group" })
     );
+    expect(mockInlinePanelProps.selectedGroupIncludedWallets).toEqual([
+      "0xincluded",
+    ]);
+    expect(mockInlinePanelProps.selectedGroupExcludedWallets).toEqual([
+      "0xexcluded",
+    ]);
   });
 
-  it("provides a safe created_by fallback for groups without authors", async () => {
-    const groupWithoutAuthor = {
-      id: "group-without-author",
-      name: "Group Without Author",
-      created_at: 100,
-      is_hidden: false,
-      is_direct_message: false,
-    };
-    const waveWithAuthorlessGroup = {
+  it("defaults to explicitly including the editor for a public access row", () => {
+    const publicVisibilityWave = {
       ...wave,
-      visibility: {
-        scope: { group: groupWithoutAuthor },
-      },
+      visibility: { scope: { group: null } },
     };
-
     render(
       <WaveGroupEditButtons
-        haveGroup
-        wave={waveWithAuthorlessGroup}
+        wave={publicVisibilityWave}
         type={WaveGroupType.VIEW}
       />,
       { wrapper }
     );
-    fireEvent.click(screen.getByRole("button", { name: /Group options/i }));
-    fireEvent.click(screen.getByText("Change group"));
 
-    expect(mockInlinePanelProps.selectedGroup).toEqual(
+    fireEvent.click(
+      screen.getByRole("button", { name: "Edit Visibility access" })
+    );
+
+    expect(mockInlinePanelProps.selectedGroup).toBeNull();
+    expect(mockInlinePanelProps.defaultIncludedIdentity).toEqual(
       expect.objectContaining({
-        id: "group-without-author",
-        name: "Group Without Author",
-        created_by: expect.objectContaining({
-          id: "unknown",
-          handle: null,
-          pfp: null,
-          banner1_color: null,
-          banner2_color: null,
-          cic: 0,
-          rep: 0,
-          tdh: 0,
-          tdh_rate: 0,
-          xtdh: 0,
-          xtdh_rate: 0,
-          level: 0,
-          primary_address: "",
-          subscribed_actions: [],
-          archived: false,
-          active_main_stage_submission_ids: [],
-          winner_main_stage_drop_ids: [],
-          artist_of_prevote_cards: [],
-          profile_wave_id: null,
-          is_wave_creator: false,
-        }),
+        profile_id: "profile-1",
+        wallet: "0xME",
       })
     );
   });
 
-  it("updates the wave when selecting an existing group", async () => {
-    render(
-      <WaveGroupEditButtons haveGroup wave={wave} type={WaveGroupType.VIEW} />,
-      { wrapper }
-    );
-    fireEvent.click(screen.getByRole("button", { name: /Group options/i }));
-    fireEvent.click(screen.getByText("Change group"));
-    fireEvent.click(screen.getByText("select existing group"));
+  it("creates a copy and updates only the edited access row", async () => {
+    render(<WaveGroupEditButtons wave={wave} type={WaveGroupType.CHAT} />, {
+      wrapper,
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Edit Chat access" }));
+    fireEvent.click(screen.getByText("save edited criteria"));
 
-    await waitFor(() => expect(auth.requestAuth).toHaveBeenCalled());
-    expect(mutateAsync).toHaveBeenCalled();
-    expect(mutateAsync.mock.calls[0][0].visibility.scope.group_id).toBe(
-      "group-2"
+    await waitFor(() => expect(mockSubmitInlineGroup).toHaveBeenCalled());
+    expect(mockSubmitInlineGroup.mock.calls[0][0]).toEqual(
+      expect.objectContaining({
+        payload: expect.objectContaining({
+          name: "Draft Group",
+          is_private: true,
+        }),
+      })
+    );
+    expect(mockSubmitInlineGroup.mock.calls[0][0]).not.toHaveProperty(
+      "previousGroup"
+    );
+    await waitFor(() => expect(mutateAsync).toHaveBeenCalled());
+    expect(mutateAsync.mock.calls[0][0]).toEqual(
+      expect.objectContaining({
+        visibility: { scope: { group_id: "visibility-group" } },
+        participation: { scope: { group_id: "drop-group" } },
+        voting: { scope: { group_id: "vote-group" } },
+        chat: { scope: { group_id: "created-group" } },
+        wave: { admin_group: { group_id: "admin-group" } },
+      })
     );
   });
 
-  it("shows error toast when auth fails", async () => {
-    auth.requestAuth.mockResolvedValueOnce({ success: false });
+  it("restricts every public non-admin access row when Visibility changes", async () => {
+    const fullyPublicWave = {
+      ...wave,
+      visibility: { scope: { group: null } },
+      participation: {
+        ...wave.participation,
+        scope: { group: null },
+      },
+      voting: { ...wave.voting, scope: { group: null } },
+      chat: { ...wave.chat, scope: { group: null } },
+    };
+    mockConvertWaveToUpdateWave.mockReturnValue({
+      name: "Wave 1",
+      picture: null,
+      visibility: { scope: { group_id: null } },
+      participation: { scope: { group_id: null } },
+      voting: { scope: { group_id: null } },
+      chat: { enabled: true, scope: { group_id: null } },
+      wave: { type: "RANK", admin_group: { group_id: "admin-group" } },
+    });
+
     render(
-      <WaveGroupEditButtons haveGroup wave={wave} type={WaveGroupType.VIEW} />,
+      <WaveGroupEditButtons wave={fullyPublicWave} type={WaveGroupType.VIEW} />,
       { wrapper }
     );
-    fireEvent.click(screen.getByRole("button", { name: /Group options/i }));
-    fireEvent.click(screen.getByText("Change group"));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Edit Visibility access" })
+    );
+    fireEvent.click(screen.getByText("select existing group"));
+
+    await waitFor(() => expect(mutateAsync).toHaveBeenCalled());
+    expect(mutateAsync.mock.calls[0][0]).toEqual(
+      expect.objectContaining({
+        visibility: { scope: { group_id: "selected-group" } },
+        participation: { scope: { group_id: "selected-group" } },
+        voting: { scope: { group_id: "selected-group" } },
+        chat: {
+          enabled: true,
+          scope: { group_id: "selected-group" },
+        },
+        wave: {
+          type: "RANK",
+          admin_group: { group_id: "admin-group" },
+        },
+      })
+    );
+  });
+
+  it("changes only Visibility when another non-admin row is restricted", async () => {
+    render(<WaveGroupEditButtons wave={wave} type={WaveGroupType.VIEW} />, {
+      wrapper,
+    });
+    fireEvent.click(
+      screen.getByRole("button", { name: "Edit Visibility access" })
+    );
+    fireEvent.click(screen.getByText("select existing group"));
+
+    await waitFor(() => expect(mutateAsync).toHaveBeenCalled());
+    expect(mutateAsync.mock.calls[0][0]).toEqual(
+      expect.objectContaining({
+        visibility: { scope: { group_id: "selected-group" } },
+        participation: { scope: { group_id: "drop-group" } },
+        voting: { scope: { group_id: "vote-group" } },
+        chat: { scope: { group_id: "chat-group" } },
+        wave: { admin_group: { group_id: "admin-group" } },
+      })
+    );
+  });
+
+  it("keeps the editor open and hides its unattached copy when validation fails", async () => {
+    mockValidateWaveGroups.mockResolvedValueOnce({
+      valid: false,
+      invalid_roles: ["CHAT"],
+    });
+    render(<WaveGroupEditButtons wave={wave} type={WaveGroupType.CHAT} />, {
+      wrapper,
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Edit Chat access" }));
+    fireEvent.click(screen.getByText("save edited criteria"));
+
+    await waitFor(() => expect(mockHideUnattachedClone).toHaveBeenCalled());
+    expect(mutateAsync).not.toHaveBeenCalled();
+    expect(screen.getByTestId("inline-panel")).toBeInTheDocument();
+  });
+
+  it("keeps the editor open when authentication fails before selecting a group", async () => {
+    auth.requestAuth.mockResolvedValueOnce({ success: false });
+    render(<WaveGroupEditButtons wave={wave} type={WaveGroupType.CHAT} />, {
+      wrapper,
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Edit Chat access" }));
     fireEvent.click(screen.getByText("select existing group"));
 
     await waitFor(() => expect(auth.setToast).toHaveBeenCalled());
     expect(mutateAsync).not.toHaveBeenCalled();
+    expect(screen.getByTestId("inline-panel")).toBeInTheDocument();
   });
 
-  it("creates an inline group and attaches it without a second auth prompt", async () => {
-    mockSubmitInlineGroup.mockImplementationOnce(async () => {
-      await auth.requestAuth();
-      return {
-        ok: true,
-        group: {
-          id: "group-created",
-          name: "Created Group",
-        },
-        published: true,
-      };
+  it("disables access shortcuts while a wave update is pending", async () => {
+    const pendingMutation = createDeferredPromise<object>();
+    mutateAsync.mockImplementationOnce(() => pendingMutation.promise);
+    render(<WaveGroupEditButtons wave={wave} type={WaveGroupType.VIEW} />, {
+      wrapper,
+    });
+    fireEvent.click(
+      screen.getByRole("button", { name: "Edit Visibility access" })
+    );
+    fireEvent.click(screen.getByText("select existing group"));
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("button", { name: "Make wave public" })
+      ).toBeDisabled();
     });
 
-    render(
-      <WaveGroupEditButtons haveGroup wave={wave} type={WaveGroupType.VIEW} />,
-      { wrapper }
-    );
-    fireEvent.click(screen.getByRole("button", { name: /Group options/i }));
-    fireEvent.click(screen.getByText("Change group"));
-    fireEvent.click(screen.getByText("create inline group"));
-
-    await waitFor(() => expect(mockSubmitInlineGroup).toHaveBeenCalled());
-    const submitArgs = mockSubmitInlineGroup.mock.calls[0][0];
-    expect(submitArgs).toEqual(
-      expect.objectContaining({
-        payload: expect.objectContaining({ name: "Draft Group" }),
-        currentHandle: "alice",
-      })
-    );
-    expect(submitArgs).not.toHaveProperty("previousGroup");
+    pendingMutation.resolve({});
     await waitFor(() => expect(mutateAsync).toHaveBeenCalled());
-    expect(auth.requestAuth).toHaveBeenCalledTimes(1);
-    expect(mutateAsync.mock.calls[0][0].visibility.scope.group_id).toBe(
-      "group-created"
+  });
+
+  it("makes Visibility public only after confirmation", async () => {
+    render(<WaveGroupEditButtons wave={wave} type={WaveGroupType.VIEW} />, {
+      wrapper,
+    });
+    fireEvent.click(
+      screen.getByRole("button", { name: "Edit Visibility access" })
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Make wave public" }));
+
+    expect(mutateAsync).not.toHaveBeenCalled();
+    expect(
+      screen.getByRole("alertdialog", { name: "Make wave public?" })
+    ).toBeInTheDocument();
+    fireEvent.click(
+      screen
+        .getByRole("alertdialog", { name: "Make wave public?" })
+        .querySelector("button")!
+    );
+
+    await waitFor(() => expect(mutateAsync).toHaveBeenCalled());
+    expect(mutateAsync.mock.calls[0][0].visibility.scope.group_id).toBeNull();
+    expect(mutateAsync.mock.calls[0][0].chat.scope.group_id).toBe("chat-group");
+  });
+
+  it("matches a non-admin access row to Visibility only after confirmation", async () => {
+    render(<WaveGroupEditButtons wave={wave} type={WaveGroupType.DROP} />, {
+      wrapper,
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Edit Drop access" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Use visibility criteria" })
+    );
+
+    expect(mutateAsync).not.toHaveBeenCalled();
+    expect(
+      screen.getByRole("alertdialog", { name: "Use visibility criteria?" })
+    ).toBeInTheDocument();
+    fireEvent.click(
+      screen
+        .getByRole("alertdialog", { name: "Use visibility criteria?" })
+        .querySelector("button")!
+    );
+
+    await waitFor(() => expect(mutateAsync).toHaveBeenCalled());
+    expect(mutateAsync.mock.calls[0][0].participation.scope.group_id).toBe(
+      "visibility-group"
+    );
+    expect(mutateAsync.mock.calls[0][0].voting.scope.group_id).toBe(
+      "vote-group"
     );
   });
 
-  it("hides remove option for admin type", async () => {
-    render(
-      <WaveGroupEditButtons haveGroup wave={wave} type={WaveGroupType.ADMIN} />,
-      { wrapper }
-    );
-    fireEvent.click(screen.getByRole("button", { name: /Group options/i }));
-    expect(screen.getByText("Change group")).toBeInTheDocument();
-    expect(screen.queryByText("Remove group")).toBeNull();
+  it("does not offer the Visibility shortcut to Admins", () => {
+    render(<WaveGroupEditButtons wave={wave} type={WaveGroupType.ADMIN} />, {
+      wrapper,
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Edit Admins access" }));
+
+    expect(
+      screen.queryByRole("button", { name: "Use visibility criteria" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Make wave public" })
+    ).not.toBeInTheDocument();
   });
-
-  it("shows add label when no group is linked", async () => {
-    const waveWithoutGroup = {
-      ...wave,
-      visibility: {
-        ...wave.visibility,
-        scope: { group: null },
-      },
-    };
-
-    render(
-      <WaveGroupEditButtons
-        haveGroup={false}
-        wave={waveWithoutGroup}
-        type={WaveGroupType.VIEW}
-      />,
-      { wrapper }
-    );
-
-    fireEvent.click(screen.getByRole("button", { name: /Group options/i }));
-
-    expect(screen.getByText("Add group")).toBeInTheDocument();
-    expect(screen.queryByText("Change group")).toBeNull();
-
-    fireEvent.click(screen.getByText("Add group"));
-    expect(screen.getByTestId("inline-panel")).toHaveAttribute(
-      "data-allow-clear",
-      "false"
-    );
-  });
-});
-jest.mock("@headlessui/react", () => {
-  const close = jest.fn();
-  return {
-    Menu: ({ children, ...props }: any) => (
-      <div {...props}>
-        {typeof children === "function"
-          ? children({ open: false, close })
-          : children}
-      </div>
-    ),
-    MenuButton: React.forwardRef<HTMLButtonElement, any>(
-      ({ children, ...props }, ref) => (
-        <button ref={ref} {...props}>
-          {children}
-        </button>
-      )
-    ),
-    MenuItems: ({ children, anchor: _anchor, ...props }: any) => (
-      <div {...props}>{children}</div>
-    ),
-    MenuItem: ({ children }: any) => children({ close, active: false }),
-    Transition: ({ children }: any) => (
-      <>{typeof children === "function" ? children() : children}</>
-    ),
-  };
 });

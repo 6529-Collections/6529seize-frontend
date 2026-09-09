@@ -69,7 +69,7 @@ export function IncomingDelegationsTable(
         key={`incoming-${del.useCase.use_case}-${delegationIndex}-${walletIndex}-${w.wallet}`}
       >
         <td className="tw-py-1">
-          <div className="tw-flex tw-flex-col tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900 tw-p-4">
+          <div className="tw-flex tw-flex-col tw-gap-2 tw-rounded-lg tw-bg-white/[0.025] tw-p-4">
             <span className="tw-flex tw-min-w-0 tw-items-center tw-gap-3">
               {del.useCase.use_case === SUB_DELEGATION_USE_CASE.use_case ? (
                 <input
@@ -117,7 +117,7 @@ export function IncomingDelegationsTable(
     return (
       <tr>
         <td colSpan={2} className="tw-pt-3">
-          <div className="tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900 tw-p-3">
+          <div className="tw-rounded-lg tw-bg-white/[0.025] tw-p-3">
             <p className="tw-mb-3 tw-text-sm tw-text-iron-300">
               {t(locale, "delegation.collection.incoming.actionsDescription")}
             </p>

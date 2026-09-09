@@ -1,10 +1,6 @@
 "use client";
 
-import {
-  keepPreviousData,
-  useInfiniteQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useMemo } from "react";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { upsertDropIntoMatchingDropsQueries } from "@/components/react-query-wrapper/utils/addDropsToDrops";
@@ -25,6 +21,7 @@ import { fetchWaveDropsFeedV2 } from "@/services/api/wave-drops-v2-api";
 import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
 import { useDebouncedQueryRefetch } from "./useDebouncedQueryRefetch";
 import { useWaveDropUpdateRefetch } from "./useWaveDropUpdateRefetch";
+import { useAuth } from "@/components/auth/Auth";
 
 const DEFAULT_WAVE_DROPS_LIMIT = 20;
 
@@ -79,6 +76,8 @@ export function useWaveDrops({
   limit = DEFAULT_WAVE_DROPS_LIMIT,
   enabled = true,
 }: UseWaveDropsProps) {
+  const { connectedProfile } = useAuth();
+  const viewerProfileId = connectedProfile?.id ?? null;
   const queryKey = useMemo(
     () =>
       [
@@ -90,9 +89,10 @@ export function useWaveDrops({
           containsMedia,
           curationId: curationId ?? null,
           context: "wave-drops",
+          viewerProfileId,
         },
       ] as const,
-    [waveId, limit, dropType, containsMedia, curationId]
+    [waveId, limit, dropType, containsMedia, curationId, viewerProfileId]
   );
   const queryClient = useQueryClient();
 
@@ -154,7 +154,17 @@ export function useWaveDrops({
     enabled: enabled && !!waveId,
     initialPageParam: null,
     getNextPageParam: (lastPage) => lastPage.nextSerialNo,
-    placeholderData: keepPreviousData,
+    placeholderData: (previousData, previousQuery) => {
+      const previousParams = previousQuery?.queryKey[1];
+      if (
+        typeof previousParams !== "object" ||
+        !("viewerProfileId" in previousParams) ||
+        previousParams.viewerProfileId !== viewerProfileId
+      ) {
+        return undefined;
+      }
+      return previousData;
+    },
     staleTime: 60000,
     refetchOnWindowFocus: true,
     refetchOnMount: true,

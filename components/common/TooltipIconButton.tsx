@@ -13,6 +13,8 @@ interface TooltipIconButtonProps extends Omit<
   readonly icon: IconDefinition;
   readonly tooltipText: string;
   readonly iconClassName?: string | undefined;
+  readonly buttonSizeClassName?: string | undefined;
+  readonly buttonShapeClassName?: string | undefined;
   readonly tooltipWidth?: string | undefined;
   readonly tooltipPosition?: "top" | "bottom" | "left" | "right" | undefined;
 }
@@ -21,6 +23,8 @@ export default function TooltipIconButton({
   icon,
   tooltipText,
   iconClassName = "tw-text-iron-400 tw-size-4",
+  buttonSizeClassName = "tw-size-6",
+  buttonShapeClassName = "tw-rounded-full",
   tooltipWidth = "tw-w-72",
   tooltipPosition = "top",
   type = "button",
@@ -42,19 +46,19 @@ export default function TooltipIconButton({
   const ariaDescribedBy = [ariaDescribedByProp, tooltipElementId]
     .filter(Boolean)
     .join(" ");
-  const buttonClassName = `tw-relative tw-inline-flex tw-size-6 tw-shrink-0 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-transparent tw-p-0 tw-leading-none focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 ${className ?? ""}`;
+  const buttonClassName = `tw-relative tw-inline-flex ${buttonSizeClassName} tw-shrink-0 tw-cursor-pointer tw-items-center tw-justify-center ${buttonShapeClassName} tw-border-none tw-bg-transparent tw-p-0 tw-leading-none focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 ${className ?? ""}`;
   const showTooltip = isHovered || isFocused;
 
   const getPositionClasses = () => {
     switch (tooltipPosition) {
       case "top":
-        return "tw-bottom-6 tw-left-1/2 -tw-translate-x-1/2";
+        return "tw-bottom-full tw-left-1/2 tw-mb-2 -tw-translate-x-1/2";
       case "bottom":
-        return "tw-top-6 tw-left-1/2 -tw-translate-x-1/2";
+        return "tw-left-1/2 tw-top-full tw-mt-2 -tw-translate-x-1/2";
       case "left":
-        return "tw-right-6 tw-top-1/2 -tw-translate-y-1/2";
+        return "tw-right-full tw-top-1/2 tw-mr-2 -tw-translate-y-1/2";
       case "right":
-        return "tw-left-6 tw-top-1/2 -tw-translate-y-1/2";
+        return "tw-left-full tw-top-1/2 tw-ml-2 -tw-translate-y-1/2";
     }
   };
 

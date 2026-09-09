@@ -248,6 +248,7 @@ describe("CreateDropContent basic", () => {
     );
     // This legacy editor's only consumer is the create-wave Description step.
     expect(getByText("Describe your wave")).toBeInTheDocument();
+    expect(mockContentEditableProps.ariaLabel).toBe("Describe your wave");
     ref.current.clearEditorState();
     expect(mockClear).toHaveBeenCalled();
     expect(linkProps.validateUrl("https://example.com")).toBe(true);

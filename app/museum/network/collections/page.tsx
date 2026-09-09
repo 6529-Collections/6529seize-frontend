@@ -1,5 +1,5 @@
 import { permanentRedirect } from "next/navigation";
 
 export default function MuseumCollectionsLegacyPage() {
-  permanentRedirect("/museum/network/acquisitions");
+  permanentRedirect("/museum/network/collection");
 }

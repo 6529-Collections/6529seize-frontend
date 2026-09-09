@@ -113,11 +113,11 @@ export default function StepHeader({
           ? "tw-max-w-2xl tw-mx-auto"
           : ""
       } tw-flex tw-flex-col tw-w-full`}>
-      <div className="tw-flex tw-items-center tw-justify-between tw-w-full">
-        <h1 className="tw-text-white">
+      <div className="tw-flex tw-w-full tw-flex-col tw-items-start tw-gap-2 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
+        <h1 className="tw-mb-0 tw-min-w-0 tw-text-white">
           {STEP_META[step].title} {title}
         </h1>
-        <div>
+        <div className="tw-shrink-0">
           {step !== DistributionPlanToolStep.CREATE_PLAN && (
             <button
               type="button"

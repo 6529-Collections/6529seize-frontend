@@ -333,10 +333,19 @@ describe("EditDropLexical", () => {
     expect(screen.getByTestId("emoji-picker")).toBeInTheDocument();
   });
 
-  it("registers global mention tokens for non-admin editors", () => {
+  it("keeps global mentions for import and export but not live typing", () => {
+    editorMock.update.mockImplementationOnce((callback: () => void) =>
+      callback()
+    );
     render(<EditDropLexical {...defaultProps} canMentionAll={false} />);
 
-    expect(markdownShortcutTransformers).toContain(groupMentionTransformerMock);
+    expect(markdownShortcutTransformers).not.toContain(
+      groupMentionTransformerMock
+    );
+    expect(convertFromMarkdownStringMock).toHaveBeenCalledWith(
+      "Initial content here",
+      expect.arrayContaining([groupMentionTransformerMock])
+    );
     expect(exportDropMarkdownMock).toHaveBeenCalledWith(
       expect.anything(),
       expect.arrayContaining([groupMentionTransformerMock])
@@ -646,32 +655,36 @@ describe("EditDropLexical", () => {
     expect(onCancel).not.toHaveBeenCalled();
   });
 
-  it("does not strip existing ALL group metadata for non-admin unchanged content", async () => {
-    const user = userEvent.setup();
-    const onSave = jest.fn();
-    const onCancel = jest.fn();
-    exportDropMarkdownMock.mockReturnValue("@all");
-    getMentionedGroupsFromEditorStateMock.mockReturnValue([
-      ApiDropGroupMention.All,
-    ]);
+  it.each([
+    ["@all", ApiDropGroupMention.All],
+    ["@contributors", ApiDropGroupMention.Contributors],
+  ])(
+    "does not strip existing %s metadata for non-admin unchanged content",
+    async (content, group) => {
+      const user = userEvent.setup();
+      const onSave = jest.fn();
+      const onCancel = jest.fn();
+      exportDropMarkdownMock.mockReturnValue(content);
+      getMentionedGroupsFromEditorStateMock.mockReturnValue([group]);
 
-    render(
-      <EditDropLexical
-        {...defaultProps}
-        initialContent="@all"
-        initialGroupMentions={[ApiDropGroupMention.All]}
-        canMentionAll={false}
-        onSave={onSave}
-        onCancel={onCancel}
-      />
-    );
+      render(
+        <EditDropLexical
+          {...defaultProps}
+          initialContent={content}
+          initialGroupMentions={[group]}
+          canMentionAll={false}
+          onSave={onSave}
+          onCancel={onCancel}
+        />
+      );
 
-    const saveButton = screen.getByRole("button", { name: /save/i });
-    await user.click(saveButton);
+      const saveButton = screen.getByRole("button", { name: /save/i });
+      await user.click(saveButton);
 
-    expect(onCancel).toHaveBeenCalledTimes(1);
-    expect(onSave).not.toHaveBeenCalled();
-  });
+      expect(onCancel).toHaveBeenCalledTimes(1);
+      expect(onSave).not.toHaveBeenCalled();
+    }
+  );
 
   it("calls onCancel when markdown has not changed", async () => {
     const user = userEvent.setup();

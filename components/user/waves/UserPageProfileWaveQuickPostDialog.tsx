@@ -8,14 +8,17 @@ import {
 } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { DropMode } from "@/components/waves/dropComposer.types";
 import { WaveDropCreate } from "@/components/waves/leaderboard/create/WaveDropCreate";
+import Button from "@/components/utils/button/Button";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveCuration } from "@/generated/models/ApiWaveCuration";
 import { addDropToCuration } from "@/hooks/drops/useDropCurationMembershipMutation";
 import { COMMUNITY_CURATIONS_DROPS_QUERY_KEY } from "@/hooks/useCommunityCurationsDrops";
 import { useWave } from "@/hooks/useWave";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { useQueryClient } from "@tanstack/react-query";
-import { useCallback, useContext, useEffect, useRef } from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 
 const PARTIAL_SUCCESS_ERROR =
   "Post created, but it could not be added to this curation.";
@@ -32,11 +35,14 @@ export default function UserPageProfileWaveQuickPostDialog({
   readonly onClose: () => void;
 }) {
   const queryClient = useQueryClient();
+  const locale = useBrowserLocale();
   const { setToast } = useAuth();
   const { invalidateDrops } = useContext(ReactQueryWrapperContext);
   const { isCurationWave } = useWave(wave);
   const hasCurationAddErrorRef = useRef(false);
   const successfulCurationAddsRef = useRef(0);
+  const [failedPostId, setFailedPostId] = useState<string | null>(null);
+  const [isRetryingAdd, setIsRetryingAdd] = useState(false);
 
   useEffect(() => {
     if (!isOpen) {
@@ -77,6 +83,7 @@ export default function UserPageProfileWaveQuickPostDialog({
         });
         successfulCurationAddsRef.current += 1;
       } catch {
+        setFailedPostId(drop.id);
         if (!hasCurationAddErrorRef.current) {
           setToast({
             type: "error",
@@ -110,6 +117,43 @@ export default function UserPageProfileWaveQuickPostDialog({
 
   const handleExitFixedDropMode = useCallback(() => undefined, []);
 
+  const retryAddToCuration = useCallback(async () => {
+    if (!failedPostId || isRetryingAdd) {
+      return;
+    }
+
+    setIsRetryingAdd(true);
+    try {
+      await addDropToCuration({
+        dropId: failedPostId,
+        body: { curation_id: curation.id },
+      });
+      setFailedPostId(null);
+      hasCurationAddErrorRef.current = false;
+      refreshDropCaches();
+      setToast({
+        type: "success",
+        message: t(locale, "profileCuration.quickPost.retrySuccess"),
+      });
+      onClose();
+    } catch {
+      setToast({
+        type: "error",
+        message: t(locale, "profileCuration.quickPost.retryError"),
+      });
+    } finally {
+      setIsRetryingAdd(false);
+    }
+  }, [
+    curation.id,
+    failedPostId,
+    isRetryingAdd,
+    locale,
+    onClose,
+    refreshDropCaches,
+    setToast,
+  ]);
+
   return (
     <MobileWrapperDialog
       title={`Add post to ${curation.name}`}
@@ -119,7 +163,7 @@ export default function UserPageProfileWaveQuickPostDialog({
       tabletModal={true}
       tall={true}
       maxWidthClass="md:tw-max-w-2xl"
-      headerClassName="tw-mb-0 tw-border-b tw-border-solid tw-border-x-0 tw-border-t-0 tw-border-white/[0.06] tw-pb-4 tw-pt-6"
+      headerClassName="tw-mb-0 tw-border-b tw-border-solid tw-border-x-0 tw-border-t-0 tw-border-white/[0.06] tw-py-4"
     >
       <div className="tw-flex tw-min-h-0 tw-flex-1 tw-flex-col">
         <div className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-px-4 tw-py-5 sm:tw-px-6">
@@ -135,6 +179,26 @@ export default function UserPageProfileWaveQuickPostDialog({
             forceStandardDropComposer={isCurationWave}
             fixedDropMode={DropMode.CHAT}
           />
+          {failedPostId && (
+            <div
+              role="alert"
+              className="tw-mt-4 tw-flex tw-flex-col tw-items-start tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-amber-400/25 tw-bg-amber-400/10 tw-p-4 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between"
+            >
+              <p className="tw-mb-0 tw-text-sm tw-leading-6 tw-text-amber-100">
+                {t(locale, "profileCuration.quickPost.partialInline")}
+              </p>
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                loading={isRetryingAdd}
+                onClick={() => void retryAddToCuration()}
+                className="tw-flex-shrink-0"
+              >
+                {t(locale, "profileCuration.quickPost.retry")}
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     </MobileWrapperDialog>

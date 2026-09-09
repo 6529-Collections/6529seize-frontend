@@ -17,6 +17,12 @@ import {
   museumSlug,
   museumSlugMatches,
 } from "@/lib/museum/presentation";
+import {
+  displayGovernanceDecisionClass,
+  displayGovernanceDisposition,
+  displayGovernanceEffect,
+  displayGovernanceWaveStatus,
+} from "../presentation";
 
 interface GovernanceDetailProps {
   readonly params: Promise<{ decisionId: string }>;
@@ -38,8 +44,9 @@ export async function generateMetadata({
     title:
       decision?.title ?? t(DEFAULT_LOCALE, "museum.network.governance.title"),
     description:
-      decision?.governanceEffect ??
-      t(DEFAULT_LOCALE, "museum.network.governance.description"),
+      decision === undefined
+        ? t(DEFAULT_LOCALE, "museum.network.governance.description")
+        : displayGovernanceEffect(decision.governanceEffect),
   });
   return decision === undefined ||
     museumSlug(decision.decisionId) !== decisionId
@@ -71,7 +78,7 @@ export default async function MuseumAboutGovernanceDetailPage({
         <MuseumSectionHeading
           eyebrow={decision.decisionId}
           title={decision.title}
-          description={decision.governanceEffect}
+          description={displayGovernanceEffect(decision.governanceEffect)}
         />
         <div className="tw-flex tw-flex-wrap tw-gap-2">
           <MuseumStatusBadge
@@ -82,42 +89,47 @@ export default async function MuseumAboutGovernanceDetailPage({
             }
             tone={adopted ? "success" : "warning"}
           />
-          <MuseumStatusBadge label={decision.decisionClass} />
+          <MuseumStatusBadge
+            label={displayGovernanceDecisionClass(decision.decisionClass)}
+          />
         </div>
       </div>
       <dl className="tw-mt-8 tw-grid tw-gap-4 sm:tw-grid-cols-2">
-        <div className="tw-border-b tw-border-solid tw-border-iron-800 tw-pb-4">
+        <div className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-pb-4">
           <dt className="tw-text-xs tw-uppercase tw-tracking-[0.12em] tw-text-iron-500">
             {t(DEFAULT_LOCALE, "museum.network.methodology.waveStatus")}
           </dt>
           <dd className="tw-m-0 tw-mt-2 tw-text-sm tw-text-iron-200">
-            {decision.observedWaveStatus}
+            {displayGovernanceWaveStatus(decision.observedWaveStatus)}
           </dd>
         </div>
-        <div className="tw-border-b tw-border-solid tw-border-iron-800 tw-pb-4">
+        <div className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-pb-4">
           <dt className="tw-text-xs tw-uppercase tw-tracking-[0.12em] tw-text-iron-500">
             {t(DEFAULT_LOCALE, "museum.network.methodology.recorded")}
           </dt>
           <dd className="tw-m-0 tw-mt-2 tw-text-sm tw-text-iron-200">
             {decision.createdAt
               ? formatDate(DEFAULT_LOCALE, decision.createdAt)
-              : "—"}
+              : t(DEFAULT_LOCALE, "museum.network.governance.notRecorded")}
           </dd>
         </div>
-        <div className="tw-border-b tw-border-solid tw-border-iron-800 tw-pb-4">
+        <div className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-pb-4">
           <dt className="tw-text-xs tw-uppercase tw-tracking-[0.12em] tw-text-iron-500">
             {t(DEFAULT_LOCALE, "museum.network.methodology.disposition")}
           </dt>
           <dd className="tw-m-0 tw-mt-2 tw-text-sm tw-text-iron-200">
-            {decision.disposition ?? "—"}
+            {decision.disposition === null
+              ? t(DEFAULT_LOCALE, "museum.network.governance.notRecorded")
+              : displayGovernanceDisposition(decision.disposition)}
           </dd>
         </div>
-        <div className="tw-border-b tw-border-solid tw-border-iron-800 tw-pb-4">
+        <div className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-pb-4">
           <dt className="tw-text-xs tw-uppercase tw-tracking-[0.12em] tw-text-iron-500">
             {t(DEFAULT_LOCALE, "museum.network.methodology.rating")}
           </dt>
           <dd className="tw-m-0 tw-mt-2 tw-text-sm tw-text-iron-200">
-            {decision.rating ?? "—"}
+            {decision.rating ??
+              t(DEFAULT_LOCALE, "museum.network.governance.notRecorded")}
             {decision.ratersCount === null
               ? null
               : ` · ${t(DEFAULT_LOCALE, "museum.network.governance.raters", { count: formatInteger(DEFAULT_LOCALE, decision.ratersCount) })}`}

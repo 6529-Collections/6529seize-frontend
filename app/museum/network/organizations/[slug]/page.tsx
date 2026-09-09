@@ -75,7 +75,7 @@ export default async function MuseumOrganizationPage({
       id: project.id,
       label: project.title,
       href: museumProjectHref(project.slug),
-      relation: "Publishes",
+      relation: "Originates",
       ...(project.sourcePaths[0] ? { sourcePath: project.sourcePaths[0] } : {}),
       sourceCommit: publication.identity.commit,
     })),
@@ -129,7 +129,7 @@ export default async function MuseumOrganizationPage({
           {projects.map((project) => (
             <li
               key={project.id}
-              className="tw-border-b tw-border-solid tw-border-iron-800 last:tw-border-b-0"
+              className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 last:tw-border-b-0"
             >
               <Link
                 href={museumProjectHref(project.slug)}

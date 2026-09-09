@@ -5,17 +5,26 @@ import { FAQ_ITEM_SPECS, type JoinLinks } from "./page.content";
 import { cx, m, resolveHref, SECTION_HEADING_CLASS } from "./page.utils";
 
 export function FaqSection({
+  hideNftPurchasing = false,
   links,
   locale,
 }: {
   readonly links: JoinLinks;
+  readonly hideNftPurchasing?: boolean;
   readonly locale: SupportedLocale;
 }) {
-  const items: readonly FaqAccordionItem[] = FAQ_ITEM_SPECS.map((item) => {
+  const items: readonly FaqAccordionItem[] = FAQ_ITEM_SPECS.filter(
+    (item) => !hideNftPurchasing || !item.requiresNftPurchasing
+  ).map((item) => {
     const faqItem = {
       id: item.id,
       question: m(locale, item.questionKey),
-      answer: m(locale, item.answerKey),
+      answer: m(
+        locale,
+        hideNftPurchasing && item.restrictedAnswerKey
+          ? item.restrictedAnswerKey
+          : item.answerKey
+      ),
       learnMoreLabel: m(locale, "join6529.action.learnMore"),
     };
 

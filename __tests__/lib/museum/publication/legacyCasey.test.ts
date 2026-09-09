@@ -28,7 +28,21 @@ describe("legacy Casey publication projection", () => {
       }),
     ]);
     expect(publication.projects).toHaveLength(5);
-    expect(publication.documents).toHaveLength(73);
+    expect(publication.documents).toHaveLength(75);
+    expect(publication.documents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: "generative-system-analysis-standard",
+          sourcePath: "docs/generative-system-analysis.md",
+          title: "generative-system-analysis",
+        }),
+        expect.objectContaining({
+          id: "generative-trait-analysis",
+          sourcePath: "docs/generative-trait-analysis.md",
+          title: "generative-trait-analysis",
+        }),
+      ])
+    );
     expect(publication.rightsHandbook).toEqual(
       expect.objectContaining({
         introduction: expect.objectContaining({
@@ -349,6 +363,8 @@ describe("legacy Casey publication projection", () => {
     ["contributor guide", "CONTRIBUTING.md"],
     ["Open Museum statement", "docs/open-museum.md"],
     ["on-chain transition statement", "docs/onchain-transition.md"],
+    ["generative system analysis standard", "docs/generative-system-analysis.md"],
+    ["generative trait analysis standard", "docs/generative-trait-analysis.md"],
   ])(
     "fails closed when the governed %s is undeclared",
     async (_label, path) => {

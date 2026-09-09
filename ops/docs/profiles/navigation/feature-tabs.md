@@ -21,6 +21,7 @@ Profile tab routes live under `/{user}`.
 ## Supported Tab Routes
 
 - `/{user}`: Identity
+- `/{user}/curations`: Curation
 - `/{user}/brain`: Brain
 - `/{user}/collected`: Collected
 - `/{user}/xtdh`: xTDH (Beta label in the tab UI)
@@ -53,6 +54,8 @@ Profile tab routes live under `/{user}`.
   Waves became available; otherwise the app replaces the URL with `/{user}`.
 - `Subscriptions` is hidden on iOS unless consent country is `US`.
 - `Proxy` is shown only when you are on your own profile (matched by connected handle or connected wallet).
+- `Curation` is visible to owners and public viewers when Waves are available;
+  management controls are limited to the connected owner outside proxy mode.
 - If you open `/{user}/proxy` while your signed-in profile session is still loading, the app keeps the `Proxy` tab selected until it can finish the ownership check.
 - If the current tab route is hidden in the current context, the app replaces the URL with the first visible tab and keeps the current query string.
 
@@ -111,6 +114,7 @@ Profile tab routes live under `/{user}`.
 - [Profile Header Summary](feature-header-summary.md)
 - [Legacy Profile Route Redirects](feature-legacy-profile-route-redirects.md)
 - [Profile Identity Tab](../tabs/feature-identity-tab.md)
+- [Profile Curation Tab](../tabs/feature-curation-tab.md)
 - [Profile Brain Tab](../tabs/feature-brain-tab.md)
 - [Collected Tab, Stats Summary, and Transfer Mode](../tabs/feature-collected-tab.md)
 - [Profile xTDH Tab](../tabs/feature-xtdh-tab.md)

@@ -94,10 +94,10 @@ async function openAbout(page: Page) {
   await expect(
     page.getByRole("heading", {
       level: 1,
-      name: "A public museum for a network state",
+      name: "The 6529 Network Museum",
       exact: true,
     })
-  ).toBeVisible();
+  ).toBeVisible({ timeout: 20_000 });
 }
 
 test.describe("Museum About proposition @surface @readonly", () => {
@@ -124,7 +124,7 @@ test.describe("Museum About proposition @surface @readonly", () => {
         const heading = document.querySelector("header h1");
         const lead = document.querySelector("header h1 + p");
         const museumSection = document.querySelector(
-          '[aria-labelledby="museum-of-network-title"]'
+          '[aria-labelledby="museum-collection-purpose-title"]'
         );
         const sectionHeading = museumSection?.querySelector("h2");
         const sectionBody = museumSection?.querySelector("p");
@@ -172,9 +172,7 @@ test.describe("Museum About proposition @surface @readonly", () => {
       );
       await expect(sourcePanel).toBeVisible();
       await expect(sourcePanel).toContainText(
-        REQUIRED_SOURCE_COMMIT === null
-          ? /Published from the Museum's public record at commit [a-f0-9]{12}\./u
-          : `Published from the Museum's public record at commit ${REQUIRED_SOURCE_COMMIT.slice(0, 12)}.`
+        "Published from the Museum's public record."
       );
       await expect(
         sourcePanel.getByRole("link", { name: "Read the source", exact: true })

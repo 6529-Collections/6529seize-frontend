@@ -2,16 +2,18 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { permanentRedirect } from "next/navigation";
 import {
-  InstitutionalPracticeManuscript,
   InstitutionalPracticePublicationLine,
   institutionalPracticePublicationIsComplete,
   projectInstitutionalPracticeManuscript,
 } from "@/components/museum/InstitutionalPracticeReadingRoom";
 import { MuseumPublicationUnavailable } from "@/components/museum/MuseumPublicationUnavailable";
+import { MuseumResearchEditorialFigure } from "@/components/museum/research/MuseumResearchEditorialFigure";
+import { MuseumResearchReading } from "@/components/museum/research/MuseumResearchReading";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { getMuseumPublicationState } from "@/lib/museum/publication/runtime";
+import { projectMuseumResearchReading } from "@/lib/museum/researchEditorialProjection";
 
 export const metadata: Metadata = getAppMetadata({
   title: t(
@@ -36,6 +38,21 @@ export async function renderMuseumScholarshipAndWritingPage() {
   if (projection?.title !== document.title) {
     return <MuseumPublicationUnavailable />;
   }
+  const selectedReading = projectMuseumResearchReading(projection.body, [
+    "1. The Museum publishes arguments about art",
+    "2. What substantive scholarship must achieve",
+    "3. Evidence supports the argument",
+    "3.1 Publish in layers",
+    "3.2 State the condition of knowledge",
+    "6. Close looking for born-digital and tokenized art",
+    "8. Medium must be described at the level of the artwork",
+    "12.1 Begin with the subject, not the institution",
+    "12.3 Prefer verbs that identify action",
+    "12.8 Finish without a slogan",
+    "12.9 Edit for the audible sentence",
+    "15. Acceptance test",
+  ]);
+  if (selectedReading === null) return <MuseumPublicationUnavailable />;
 
   return (
     <article className="tw-min-w-0">
@@ -60,13 +77,37 @@ export async function renderMuseumScholarshipAndWritingPage() {
         )}
         <InstitutionalPracticePublicationLine projection={projection} />
       </header>
-      <div className="tw-mt-12 tw-max-w-4xl tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-2">
-        <InstitutionalPracticeManuscript
-          projection={projection}
-          sourceCommit={publication.identity.commit}
-          sourcePath={document.sourcePath}
-        />
-      </div>
+      <MuseumResearchEditorialFigure
+        src="/museum/research/editorial/scholarship-and-writing-1600.webp"
+        srcSet="/museum/research/editorial/scholarship-and-writing-800.webp 800w, /museum/research/editorial/scholarship-and-writing-1600.webp 1600w"
+        width={1600}
+        height={1911}
+        alt="Johannes Vermeer's Woman Reading a Letter, circa 1663."
+        credit="Johannes Vermeer, Woman Reading a Letter, c. 1663. Rijksmuseum. Public Domain Mark 1.0."
+        sourceHref="https://www.rijksmuseum.nl/en/collection/object/Woman-Reading-a-Letter--8e9e02c8045362ffb2171b2fb52953ba"
+      />
+      <MuseumResearchReading
+        selectedMarkdown={selectedReading}
+        completeMarkdown={projection.body}
+        sourceCommit={publication.identity.commit}
+        sourcePath={document.sourcePath}
+        selectedTitle={t(
+          DEFAULT_LOCALE,
+          "museum.network.research.publicWritingPrinciples"
+        )}
+        selectedDescription={t(
+          DEFAULT_LOCALE,
+          "museum.network.research.writingPrinciplesDescription"
+        )}
+        completeLabel={t(
+          DEFAULT_LOCALE,
+          "museum.network.research.completeStandard"
+        )}
+        completeDescription={t(
+          DEFAULT_LOCALE,
+          "museum.network.research.completeStandardDescription"
+        )}
+      />
       <div className="tw-mt-10 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-6">
         <Link
           href="/museum/network/research/institutional-practice"

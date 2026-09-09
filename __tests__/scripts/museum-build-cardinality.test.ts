@@ -85,7 +85,7 @@ describe("Museum build cardinality contract", () => {
     expect(report.sourceInventory.reviewedRemovedExports).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          estimatedParams: 19_432,
+          estimatedParams: 24_869,
           path: REVIEWED_HIGH_CARDINALITY_EXPORTS.find(
             ({ path: relativePath }) =>
               relativePath.endsWith("/functions/[declarationKey]/page.tsx") &&
@@ -93,7 +93,7 @@ describe("Museum build cardinality contract", () => {
           )?.path,
         }),
         expect.objectContaining({
-          estimatedParams: 4_858,
+          estimatedParams: 5_437,
           path: REVIEWED_HIGH_CARDINALITY_EXPORTS.find(
             ({ path: relativePath }) =>
               relativePath.endsWith("/functions/[declarationKey]/page.tsx") &&
@@ -105,6 +105,7 @@ describe("Museum build cardinality contract", () => {
     expect(report.cardinality).toMatchObject({
       baselineBuildRoutes: BASELINE_BUILD_ROUTES,
       baselineGenerateStaticParams: BASELINE_GENERATED_PARAMS,
+      snapshotGenerateStaticParamsAdded: 7_839,
       expectedBuildRoutesAfterReviewedReduction:
         EXPECTED_BUILD_ROUTES_AFTER_REVIEWED_REDUCTION,
       expectedRemainingGenerateStaticParams:
@@ -119,7 +120,7 @@ describe("Museum build cardinality contract", () => {
         (total, contributor) => total + contributor.estimatedParams,
         0
       )
-    ).toBe(3_377);
+    ).toBe(4_222);
   });
 
   it("fails closed if a reviewed high-cardinality page exports static params again", () => {

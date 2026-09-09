@@ -1,9 +1,36 @@
+import { formatList } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import type { MuseumPublicAcquisitionStatus } from "@/lib/museum/publication/ia";
 
 export function museumSlug(value: string): string {
   return encodeURIComponent(value.trim());
+}
+
+export function formatMuseumCreatorCredit(
+  creatorNames: readonly string[]
+): string {
+  const names = [...new Set(creatorNames)].filter(
+    (name) => name.trim().length > 0
+  );
+  const [primary, ...collaborators] = names;
+  if (primary === undefined) return "";
+  if (collaborators.length === 0) return primary;
+  return t(DEFAULT_LOCALE, "museum.network.artists.collaborationCredit", {
+    primary,
+    collaborators: formatList(DEFAULT_LOCALE, collaborators),
+  });
+}
+
+export function museumCreatorSeparator(index: number, count: number): string {
+  if (index === 0) return "";
+  if (index === 1) {
+    return `, ${t(DEFAULT_LOCALE, "museum.network.artists.collaborationWith")} `;
+  }
+  if (index === count - 1) {
+    return ` ${t(DEFAULT_LOCALE, "museum.network.artists.collaborationAnd")} `;
+  }
+  return ", ";
 }
 
 export function museumSlugMatches(value: string, candidate: string): boolean {

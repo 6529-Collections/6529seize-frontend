@@ -66,6 +66,11 @@ test.describe("Museum rights education @surface @readonly", () => {
       await expect(
         page.getByRole("link", { name: "Read the guide" })
       ).toHaveCount(2);
+      await page
+        .locator("details")
+        .filter({ hasText: "Browse rights and license terms" })
+        .locator("summary")
+        .click();
       await expect(
         page.getByRole("link", { name: "Read this rights entry" })
       ).toHaveCount(22);
@@ -110,10 +115,17 @@ test.describe("Museum rights education @surface @readonly", () => {
       await expect(page.locator("details pre")).toContainText(
         "Attribution-NonCommercial 4.0 International"
       );
+      const sourceAside = page.locator(
+        'aside[aria-labelledby="museum-open-source-title"]'
+      );
+      await sourceAside
+        .getByText("Related works and context", { exact: true })
+        .click();
       await expect(
-        page
-          .locator('aside[aria-labelledby="museum-open-source-title"]')
-          .getByRole("link", { name: "Exact legal text", exact: true })
+        sourceAside.getByRole("link", {
+          name: "Exact legal text",
+          exact: true,
+        })
       ).toHaveAttribute(
         "href",
         /\/blob\/[a-f0-9]{40}\/docs\/rights\/legal-texts\/cc-by-nc-4\.0\.txt$/u

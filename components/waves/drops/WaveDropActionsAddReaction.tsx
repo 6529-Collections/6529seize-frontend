@@ -8,13 +8,15 @@ import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useDropReaction } from "@/hooks/drops/useDropReaction";
 import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Tooltip } from "react-tooltip";
+import DropActionTooltip from "./DropActionTooltip";
 
 const WaveDropActionsAddReaction: React.FC<{
   readonly drop: ExtendedDrop;
   readonly isMobile?: boolean | undefined;
   readonly onAddReaction?: (() => void) | undefined;
   readonly dialogZIndexClassName?: string | undefined;
+  readonly onMobilePickerOpen?: (() => void) | undefined;
+  readonly mobileButtonRef?: React.Ref<HTMLButtonElement> | undefined;
   readonly size?: "default" | "compact" | undefined;
   readonly updateCurationCache?: boolean | undefined;
 }> = ({
@@ -22,6 +24,8 @@ const WaveDropActionsAddReaction: React.FC<{
   isMobile = false,
   onAddReaction,
   dialogZIndexClassName,
+  onMobilePickerOpen,
+  mobileButtonRef,
   size = "default",
   updateCurationCache = false,
 }) => {
@@ -74,11 +78,17 @@ const WaveDropActionsAddReaction: React.FC<{
 
   const onReact = () => {
     if (!canReact) return;
-    setShowPicker(!showPicker);
+    if (isMobile && onMobilePickerOpen) {
+      onMobilePickerOpen();
+      return;
+    }
+    setShowPicker((isPickerOpen) => !isPickerOpen);
   };
 
   const mobileContent = (
     <button
+      ref={mobileButtonRef}
+      type="button"
       className={`tw-flex tw-items-center tw-gap-x-4 tw-rounded-xl tw-border-0 tw-bg-iron-950 tw-p-4 ${
         canReact ? "active:tw-bg-iron-800" : "tw-cursor-default tw-opacity-50"
       } tw-transition-colors tw-duration-200`}
@@ -107,7 +117,16 @@ const WaveDropActionsAddReaction: React.FC<{
   );
 
   const desktopContent = (
-    <>
+    <DropActionTooltip
+      content={
+        <span className="tw-text-xs">
+          {drop.context_profile_context?.reaction
+            ? "Update Reaction"
+            : "Add Reaction"}
+        </span>
+      }
+      disabled={!canReact || showPicker}
+    >
       <button
         ref={buttonRef}
         className={`picker-button tw-flex tw-h-7 tw-w-7 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-400 tw-transition-colors tw-duration-200 tw-ease-out desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-[#FFCC22] ${
@@ -116,7 +135,6 @@ const WaveDropActionsAddReaction: React.FC<{
         onClick={onReact}
         disabled={!canReact}
         aria-label="Add reaction to drop"
-        {...(canReact ? { "data-tooltip-id": `add-reaction-${drop.id}` } : {})}
       >
         <svg
           className={`${desktopIconSizeClass} tw-flex-shrink-0 tw-transition tw-duration-300 tw-ease-out ${
@@ -133,33 +151,7 @@ const WaveDropActionsAddReaction: React.FC<{
           </g>
         </svg>
       </button>
-      {canReact && (
-        <Tooltip
-          id={`add-reaction-${drop.id}`}
-          place="top"
-          positionStrategy="fixed"
-          offset={8}
-          opacity={1}
-          style={{
-            padding: "4px 8px",
-            background: "#37373E",
-            color: "white",
-            fontSize: "13px",
-            fontWeight: 500,
-            borderRadius: "6px",
-            boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
-            zIndex: 99999,
-            pointerEvents: "none",
-          }}
-        >
-          <span className="tw-text-xs">
-            {drop.context_profile_context?.reaction
-              ? "Update Reaction"
-              : "Add Reaction"}
-          </span>
-        </Tooltip>
-      )}
-    </>
+    </DropActionTooltip>
   );
 
   return (
@@ -181,11 +173,12 @@ const WaveDropActionsAddReaction: React.FC<{
         )}
 
       {/* Mobile Picker */}
-      {isMobile && (
+      {isMobile && !onMobilePickerOpen && (
         <MobileWrapperDialog
           isOpen={showPicker}
           onClose={() => setShowPicker(false)}
           zIndexClassName={dialogZIndexClassName}
+          headerCloseButtonClassName="!tw-size-11"
         >
           <div
             className="tw-flex tw-size-full tw-items-center tw-justify-center"

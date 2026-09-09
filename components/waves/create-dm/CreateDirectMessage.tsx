@@ -12,6 +12,8 @@ import { navigateToDirectMessage } from "@/helpers/navigation.helpers";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { createDirectMessageWave } from "@/helpers/waves/waves.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useRouter } from "next/navigation";
@@ -26,6 +28,7 @@ export default function CreateDirectMessage({
   readonly onSuccess?: (() => void) | undefined;
 }) {
   const [isCreating, setIsCreating] = useState(false);
+  const locale = useBrowserLocale();
   const router = useRouter();
   const { isApp } = useDeviceInfo();
 
@@ -79,11 +82,12 @@ export default function CreateDirectMessage({
       navigateToDirectMessage({ waveId: wave.id, router, isApp });
     } catch (error) {
       console.error(error);
+      const errorMessage = getToastErrorDetails(error);
       setToast({
         type: "error",
         title: "Couldn't create this direct message.",
-        description: "Please try again.",
-        details: getToastErrorDetails(error),
+        description:
+          errorMessage ?? t(locale, "profilePreferences.dm.createRetry"),
       });
       setIsCreating(false);
     }
@@ -99,6 +103,7 @@ export default function CreateDirectMessage({
           onRemove={onRemove}
           appearance="modal"
           resultsLayout="inline"
+          sort="level"
         />
         <div className="tw-mt-3 tw-flex tw-justify-end">
           <Button

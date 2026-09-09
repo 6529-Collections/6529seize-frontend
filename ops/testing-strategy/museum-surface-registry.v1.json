@@ -345,7 +345,15 @@
   ],
   "support_files": [
     {
+      "file": "app/museum/network/about/governance/presentation.ts",
+      "surface_ids": ["museum.governance"]
+    },
+    {
       "file": "app/museum/network/artists/[slug]/TypedArtistProfile.tsx",
+      "surface_ids": ["museum.artist"]
+    },
+    {
+      "file": "app/museum/network/artists/[slug]/MuseumArtistRecordSummary.tsx",
       "surface_ids": ["museum.artist"]
     },
     {
@@ -370,11 +378,107 @@
       "surface_ids": ["museum.shell"]
     },
     {
+      "file": "app/museum/network/research/cards.ts",
+      "surface_ids": ["museum.research"]
+    },
+    {
+      "file": "app/museum/network/research/catalog.ts",
+      "surface_ids": ["museum.research"]
+    },
+    {
+      "file": "app/museum/network/research/media.ts",
+      "surface_ids": ["museum.research"]
+    },
+    {
+      "file": "app/museum/network/acquisitions/loading.tsx",
+      "surface_ids": ["museum.acquisition"]
+    },
+    {
+      "file": "app/museum/network/artists/loading.tsx",
+      "surface_ids": ["museum.artist"]
+    },
+    {
       "file": "app/museum/network/not-found.tsx",
       "surface_ids": ["museum.shell"]
     }
   ],
   "components": [
+    {
+      "file": "components/museum/MuseumNetworkIndexLoading.tsx",
+      "surface_ids": ["museum.shell"]
+    },
+    {
+      "file": "components/museum/acquisition/MuseumAcquisitionCopy.ts",
+      "surface_ids": ["museum.acquisition"]
+    },
+    {
+      "file": "components/museum/acquisition/MuseumAcquisitionLanding.tsx",
+      "surface_ids": ["museum.acquisition"]
+    },
+    {
+      "file": "components/museum/acquisition/MuseumAcquisitionProgramsLanding.tsx",
+      "surface_ids": ["museum.acquisition", "museum.acquisition.program"]
+    },
+    {
+      "file": "components/museum/directory/MuseumDirectoryData.ts",
+      "surface_ids": ["museum.artist", "museum.work"]
+    },
+    {
+      "file": "components/museum/directory/MuseumDirectoryMediaCard.tsx",
+      "surface_ids": ["museum.artist", "museum.work"]
+    },
+    {
+      "file": "components/museum/directory/MuseumDirectoryPages.tsx",
+      "surface_ids": ["museum.artist", "museum.work"]
+    },
+    {
+      "file": "components/museum/landing/MuseumLandingHero.tsx",
+      "surface_ids": ["museum.collection"]
+    },
+    {
+      "file": "components/museum/landing/MuseumLandingMediaCard.tsx",
+      "surface_ids": ["museum.collection"]
+    },
+    {
+      "file": "components/museum/research/MuseumResearchBrowse.tsx",
+      "surface_ids": ["museum.research"]
+    },
+    {
+      "file": "components/museum/research/MuseumResearchDetail.tsx",
+      "surface_ids": ["museum.research"]
+    },
+    {
+      "file": "components/museum/research/MuseumResearchDocumentCard.tsx",
+      "surface_ids": ["museum.research"]
+    },
+    {
+      "file": "components/museum/research/MuseumResearchEditorialFigure.tsx",
+      "surface_ids": ["museum.research"]
+    },
+    {
+      "file": "components/museum/research/MuseumResearchLanding.tsx",
+      "surface_ids": ["museum.research"]
+    },
+    {
+      "file": "components/museum/research/museumResearchMediaAspectRatio.ts",
+      "surface_ids": ["museum.research"]
+    },
+    {
+      "file": "components/museum/research/MuseumResearchProjectCard.tsx",
+      "surface_ids": ["museum.project", "museum.research"]
+    },
+    {
+      "file": "components/museum/research/MuseumResearchProjectsLanding.tsx",
+      "surface_ids": ["museum.project", "museum.research"]
+    },
+    {
+      "file": "components/museum/research/MuseumResearchReading.tsx",
+      "surface_ids": ["museum.research"]
+    },
+    {
+      "file": "components/museum/research/MuseumResearchStoryCard.tsx",
+      "surface_ids": ["museum.project", "museum.research"]
+    },
     {
       "file": "components/museum/DataArchitectureReadingRoom.tsx",
       "surface_ids": ["museum.methodology"]
@@ -429,6 +533,14 @@
     {
       "file": "components/museum/MuseumMediaMetadataPlaceholder.tsx",
       "surface_ids": ["museum.artist", "museum.work", "museum.acquisition"]
+    },
+    {
+      "file": "components/museum/MuseumLiveGeneratorEncounter.tsx",
+      "surface_ids": ["museum.object", "museum.work"]
+    },
+    {
+      "file": "components/museum/MuseumObjectPageModel.ts",
+      "surface_ids": ["museum.object", "museum.work"]
     },
     {
       "file": "components/museum/MuseumAcquisitionRecordPage.tsx",

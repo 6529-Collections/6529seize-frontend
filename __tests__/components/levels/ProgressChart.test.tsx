@@ -1,12 +1,13 @@
 import { render, waitFor, screen } from "@testing-library/react";
 import React from "react";
 
-const lineMock = jest.fn((props: any) => {
-  if (props.options?.onHover) {
-    props.options.onHover({}, [{ index: 1 }]);
-  }
-  return <div data-testid="chart" />;
-});
+const lineMock = jest.fn((props: any) => (
+  <canvas
+    aria-label={props["aria-label"]}
+    data-testid="chart"
+    role={props.role}
+  />
+));
 
 jest.mock("react-chartjs-2", () => ({ Line: (props: any) => lineMock(props) }));
 
@@ -24,16 +25,24 @@ afterAll(() => {
 const ProgressChart = require("@/components/levels/ProgressChart").default;
 
 describe("ProgressChart", () => {
-  it("dispatches level-hover event on hover", () => {
-    const spy = jest.spyOn(window, "dispatchEvent");
+  it("provides an accessible name and localized exact-value tooltip", () => {
     render(<ProgressChart />);
-    expect(screen.getByTestId("chart")).toBeInTheDocument();
-    expect(spy).toHaveBeenCalledWith(
-      expect.objectContaining({ type: "level-hover", detail: { level: 1 } })
-    );
-    const options = lineMock.mock.calls[0][0]?.options;
+    expect(
+      screen.getByRole("img", {
+        name: /TDH \+ Rep thresholds from Level 0 through Level 100/i,
+      })
+    ).toBeInTheDocument();
+
+    const props = lineMock.mock.calls[0][0];
+    const options = props.options;
     expect(options.animation).toBeUndefined();
-    spy.mockRestore();
+    expect(options.onHover).toBeUndefined();
+    expect(
+      options.plugins.tooltip.callbacks.label({
+        label: "2",
+        parsed: { y: 50 },
+      })
+    ).toBe("Level 2: 50 TDH + Rep");
   });
 
   it("disables animation when prefers reduced motion", async () => {

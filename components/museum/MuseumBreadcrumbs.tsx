@@ -27,7 +27,10 @@ export function MuseumBreadcrumbs({
               className="tw-flex tw-min-w-0 tw-items-center tw-gap-x-2"
             >
               {index > 0 ? (
-                <span aria-hidden="true" className="tw-text-iron-600">
+                <span
+                  aria-hidden="true"
+                  className="tw-hidden tw-text-iron-600 sm:tw-inline"
+                >
                   /
                 </span>
               ) : null}

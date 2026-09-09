@@ -20,6 +20,7 @@ import { parseMuseumIdentityInventory } from "./publicEntityGraphInventory";
 import { parseMuseumRelationIdentityInventory } from "./publicEntityGraphRelationInventory";
 import { assertMuseumWorkTypedReferences } from "./publicEntityGraphTypedReferences";
 import { projectMuseumGraph } from "./publicEntityGraphProjection";
+import { assertVeraMolnarActivation } from "./veraMolnarPublication";
 
 export {
   MUSEUM_PUBLIC_ENTITY_INVENTORY_PATH,
@@ -173,6 +174,11 @@ export function applyMuseumPublicEntityGraph(
     catalogMediaAssetPaths
   );
   assertTypedPublicationJoins(projected);
+  assertVeraMolnarActivation({
+    graph,
+    publication: { ...publication, ...projected },
+    sourceDocuments,
+  });
   return {
     ...publication,
     ...projected,

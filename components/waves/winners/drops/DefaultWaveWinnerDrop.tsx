@@ -1,4 +1,6 @@
 import CommonDropdownItemsMobileWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper";
+import ContentModerationDropActions from "@/components/content-moderation/ContentModerationDropActions";
+import ReportDropModal from "@/components/content-moderation/ReportDropModal";
 import { getRankHoverBorderClass } from "@/components/waves/drops/dropRankStyles";
 import WaveDropActionsOpen from "@/components/waves/drops/WaveDropActionsOpen";
 import WaveDropMobileMenuCopyLink from "@/components/waves/drops/WaveDropMobileMenuCopyLink";
@@ -51,6 +53,7 @@ export const DefaultWaveWinnersDrop: React.FC<DefaultWaveWinnersDropProps> = ({
 }) => {
   // Get device info from useDeviceInfo hook
   const { hasTouchScreen } = useDeviceInfo();
+  const [isReportOpen, setIsReportOpen] = React.useState(false);
   const suppressNextClickRef = React.useRef(false);
 
   const handleInteractionStart = React.useCallback(() => {
@@ -246,10 +249,23 @@ export const DefaultWaveWinnersDrop: React.FC<DefaultWaveWinnersDropProps> = ({
                 drop={extendedDrop}
                 onCopy={() => setIsActive(false)}
               />
+              <ContentModerationDropActions
+                drop={extendedDrop}
+                mobile
+                onReport={() => {
+                  handleMobileMenuClose();
+                  setIsReportOpen(true);
+                }}
+              />
             </div>
           </CommonDropdownItemsMobileWrapper>,
           document.body
         )}
+      <ReportDropModal
+        drop={extendedDrop}
+        isOpen={isReportOpen}
+        onClose={() => setIsReportOpen(false)}
+      />
     </div>
   );
 };

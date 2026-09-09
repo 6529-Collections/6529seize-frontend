@@ -1,23 +1,40 @@
+import type { ReactNode } from "react";
 import Button from "@/components/utils/button/Button";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
 export default function CreateWaveInlineGroupDraftSummary({
   draftSummary,
   isValid,
-  canResetDraft,
   canCreateDraft,
   isCreating,
-  onClearAll,
+  forceVisible = false,
+  saveChangesLabel = false,
+  privacyControl,
+  draftMembersPreview,
   onCreateAndUse,
 }: {
   readonly draftSummary: string | null;
   readonly isValid: boolean;
-  readonly canResetDraft: boolean;
   readonly canCreateDraft: boolean;
   readonly isCreating: boolean;
-  readonly onClearAll: () => void;
+  readonly forceVisible?: boolean | undefined;
+  readonly saveChangesLabel?: boolean | undefined;
+  readonly privacyControl?: ReactNode | undefined;
+  readonly draftMembersPreview?: ReactNode | undefined;
   readonly onCreateAndUse: () => void;
 }) {
-  const showDraftActions = draftSummary !== null;
+  const locale = useBrowserLocale();
+  const showDraftActions = forceVisible || draftSummary !== null;
+  const hasDraftMembersPreview =
+    draftMembersPreview !== undefined && draftMembersPreview !== null;
+  let submitLabel = t(locale, "waves.create.groups.draft.createAndUse");
+  if (saveChangesLabel) {
+    submitLabel = t(locale, "waves.create.groups.draft.saveChanges");
+  }
+  if (isCreating) {
+    submitLabel = t(locale, "waves.create.groups.draft.creating");
+  }
 
   if (!showDraftActions) {
     return null;
@@ -28,31 +45,29 @@ export default function CreateWaveInlineGroupDraftSummary({
       {!isValid && (
         <p className="tw-m-0 tw-mb-3 tw-text-xs tw-text-iron-400">
           <span className="tw-font-semibold tw-text-iron-300">
-            Not ready yet.
+            {t(locale, "waves.create.groups.draft.notReadyTitle")}
           </span>{" "}
           <span>
-            Finish the missing group rules before you create this group.
+            {t(locale, "waves.create.groups.draft.notReadyDescription")}
           </span>
         </p>
       )}
-      <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
-        <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-1">
-          <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-300">
-            Create this new group
+      <div className="tw-flex tw-flex-col tw-gap-4">
+        <div className="tw-flex tw-w-fit tw-max-w-full tw-flex-col tw-items-start tw-gap-0.5 tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.04] tw-px-3 tw-py-2 md:tw-max-w-sm">
+          <p className="tw-m-0 tw-flex-shrink-0 tw-text-[0.6875rem] tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
+            {t(locale, "waves.create.groups.draft.afterEditing")}
           </p>
-          <p className="tw-m-0 tw-text-xs tw-font-medium tw-text-iron-500">
-            {draftSummary}
-          </p>
+          {hasDraftMembersPreview ? (
+            <div className="tw-mt-1.5">{draftMembersPreview}</div>
+          ) : (
+            <p className="tw-m-0 tw-max-w-full tw-text-left tw-text-sm tw-font-semibold tw-text-iron-100">
+              {draftSummary ??
+                t(locale, "waves.create.groups.members.noCriteria")}
+            </p>
+          )}
         </div>
-        <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-end tw-gap-2">
-          <Button
-            variant="secondary"
-            size="md"
-            disabled={!canResetDraft}
-            onClick={onClearAll}
-          >
-            Discard draft
-          </Button>
+        {privacyControl}
+        <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-end tw-gap-2 tw-self-start">
           <Button
             variant="action"
             size="md"
@@ -60,7 +75,7 @@ export default function CreateWaveInlineGroupDraftSummary({
             loading={isCreating}
             onClick={onCreateAndUse}
           >
-            {isCreating ? "Creating group..." : "Create and use new group"}
+            {submitLabel}
           </Button>
         </div>
       </div>

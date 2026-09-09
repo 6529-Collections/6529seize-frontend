@@ -1,38 +1,59 @@
 "use client";
 
 /* istanbul ignore file */
-import { useEffect, useRef, type CSSProperties } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react";
 import { usePathname } from "next/navigation";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { getCreateSubwaveTitle } from "@/helpers/waves/create-subwave-title.helpers";
+import type { CreateDropConfig } from "@/entities/IDrop";
+import { useObjectUrl } from "@/hooks/useObjectUrl";
+import CreateWaveDescription from "./description/CreateWaveDescription";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useLayout } from "@/components/brain/my-stream/layout/LayoutContext";
-import type { CreateWaveStep } from "@/types/waves.types";
+import { CreateWaveStep } from "@/types/waves.types";
+import type { CreateWaveGroupConfigType } from "@/types/waves.types";
 import CreateWaveFlow from "./CreateWaveFlow";
 import CreateWaveLayout from "./CreateWaveLayout";
 import CreateWaveStepContent from "./CreateWaveStepContent";
 import type { CreateWaveDescriptionHandles } from "./description/CreateWaveDescription";
 import type { CreateWaveDraft } from "@/helpers/waves/create-wave-draft.helpers";
+import { isCreateWavePathname } from "@/helpers/waves/create-wave-route.helpers";
 import { useCreateWaveDrafts } from "./hooks/useCreateWaveDrafts";
 import { useCreateWaveSubmission } from "./hooks/useCreateWaveSubmission";
 import useKeyboardFocusScroll from "./hooks/useKeyboardFocusScroll";
 import { useSubwaveWaveConfig } from "./hooks/useSubwaveWaveConfig";
 import CreateWaveDraftsSection from "./overview/CreateWaveDraftsSection";
+import SubwaveAccessWarningDialog from "@/components/waves/groups/SubwaveAccessWarningDialog";
 
 export default function CreateWave({
   profile,
   onBack,
   onSuccess,
   parentWaveId,
+  parentWaveName,
   parentAdminGroupId,
+  parentViewGroupId,
 }: {
   readonly profile: ApiIdentity;
   readonly onBack: () => void;
   readonly onSuccess?: (() => void) | undefined;
   readonly parentWaveId?: string | null | undefined;
+  readonly parentWaveName?: string | null | undefined;
   readonly parentAdminGroupId?: string | null | undefined;
+  readonly parentViewGroupId?: string | null | undefined;
 }) {
+  const locale = useBrowserLocale();
+  const isSubwave = !!parentWaveId;
   const waveConfig = useSubwaveWaveConfig({
     parentAdminGroupId,
+    parentViewGroupId,
   });
   const {
     config,
@@ -40,12 +61,25 @@ export default function CreateWave({
     selectedOutcomeType,
     onStep,
     errorFocusRequest,
-    setConfig,
+    replaceConfig,
     endDateConfig,
     setEndDateConfig,
   } = waveConfig;
+  const waveNameSuffix = config.overview.name
+    ? ` "${config.overview.name}"`
+    : "";
+  const imageUrl = useObjectUrl(config.overview.image);
+  const [descriptionVisited, setDescriptionVisited] = useState(false);
+  const [descriptionSnapshot, setDescriptionSnapshot] =
+    useState<CreateDropConfig | null>(null);
   const descriptionRef = useRef<CreateWaveDescriptionHandles | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const [criteriaReplacementByGroup, setCriteriaReplacementByGroup] = useState<
+    Partial<Record<CreateWaveGroupConfigType, boolean>>
+  >({});
+  const [groupResolutionByGroup, setGroupResolutionByGroup] = useState<
+    Partial<Record<CreateWaveGroupConfigType, boolean>>
+  >({});
   useKeyboardFocusScroll(containerRef);
 
   // On the native /waves/create route the create flow has no height-bounding
@@ -67,7 +101,7 @@ export default function CreateWave({
   const pathname = usePathname();
   const { isApp } = useDeviceInfo();
   const { contentContainerStyle } = useLayout();
-  const isNativeRoute = isApp && pathname === "/waves/create";
+  const isNativeRoute = isApp && isCreateWavePathname(pathname);
   const measuredOrFallbackStyle: CSSProperties =
     contentContainerStyle.height !== undefined
       ? contentContainerStyle
@@ -93,7 +127,7 @@ export default function CreateWave({
       return;
     }
     const invalidField = containerRef.current?.querySelector(
-      '[aria-invalid="true"]'
+      '[aria-invalid="true"], [data-wave-group-invalid="true"]'
     );
     if (!(invalidField instanceof HTMLElement)) {
       return;
@@ -104,8 +138,16 @@ export default function CreateWave({
   const { drafts, loadDraft, deleteDraft, clearActiveDraft } =
     useCreateWaveDrafts({ config, endDateConfig, step });
 
+  const resetTransientGroupState = useCallback(() => {
+    setCriteriaReplacementByGroup({});
+    setGroupResolutionByGroup({});
+  }, []);
+
   const onLoadDraft = (draft: CreateWaveDraft) => {
-    setConfig(draft.config);
+    setDescriptionVisited(false);
+    setDescriptionSnapshot(null);
+    resetTransientGroupState();
+    replaceConfig(draft.config);
     setEndDateConfig(draft.endDateConfig);
     loadDraft(draft);
   };
@@ -116,6 +158,8 @@ export default function CreateWave({
     onHaveDropToSubmitChange,
     onInlineGroupCreate,
     onComplete,
+    getDescriptionForReview,
+    subwaveAccessConfirmation,
   } = useCreateWaveSubmission({
     config,
     descriptionRef,
@@ -129,12 +173,58 @@ export default function CreateWave({
     parentAdminGroupId,
   });
 
-  const setStep = (
+  const setStep = async (
     targetStep: CreateWaveStep,
     direction: "forward" | "backward"
-  ) => {
-    onStep({ step: targetStep, direction });
+  ): Promise<void> => {
+    if (step === CreateWaveStep.DESCRIPTION) {
+      setDescriptionVisited(true);
+    }
+    if (targetStep === CreateWaveStep.REVIEW) {
+      const snapshot = getDescriptionForReview();
+      if (!snapshot) {
+        return;
+      }
+      setDescriptionSnapshot(snapshot);
+    }
+    if (targetStep !== CreateWaveStep.GROUPS) {
+      resetTransientGroupState();
+    }
+    return onStep({ step: targetStep, direction });
   };
+
+  const onCriteriaReplacementChange = useCallback(
+    (groupType: CreateWaveGroupConfigType, active: boolean) => {
+      setCriteriaReplacementByGroup((current) => {
+        if (!!current[groupType] === active) {
+          return current;
+        }
+        return { ...current, [groupType]: active };
+      });
+    },
+    []
+  );
+  const onGroupResolutionChange = useCallback(
+    (groupType: CreateWaveGroupConfigType, active: boolean) => {
+      setGroupResolutionByGroup((current) => {
+        if (!!current[groupType] === active) {
+          return current;
+        }
+        return { ...current, [groupType]: active };
+      });
+    },
+    []
+  );
+  const hasPendingCriteriaReplacement = Object.values(
+    criteriaReplacementByGroup
+  ).some(Boolean);
+  const hasUnresolvedSelectedGroup = Object.values(groupResolutionByGroup).some(
+    Boolean
+  );
+
+  const actionInProgress =
+    submitting ||
+    (step === CreateWaveStep.GROUPS && waveConfig.groupValidation.isFetching);
 
   return (
     // The bottom safe-area region is inside the viewport (viewport-fit=cover)
@@ -148,9 +238,11 @@ export default function CreateWave({
       className="create-wave-flow tw-flex tw-min-h-0 tw-flex-1 tw-flex-col"
     >
       <CreateWaveFlow
-        title={`${parentWaveId ? "Create subwave" : "Create Wave"} ${
-          config.overview.name ? `"${config.overview.name}"` : ""
-        }`}
+        title={
+          isSubwave
+            ? getCreateSubwaveTitle(locale, parentWaveName)
+            : `Create Wave${waveNameSuffix}`
+        }
         onBack={onBack}
         nativeBoundedStyle={nativeBoundedStyle}
         scrollResetKey={step}
@@ -159,28 +251,54 @@ export default function CreateWave({
           config={config}
           step={step}
           showActions={selectedOutcomeType === null}
-          submitting={submitting}
+          submitting={actionInProgress}
+          nextDisabled={
+            hasPendingCriteriaReplacement || hasUnresolvedSelectedGroup
+          }
           setStep={setStep}
           onComplete={onComplete}
         >
           <CreateWaveStepContent
             controller={waveConfig}
-            profile={profile}
-            descriptionRef={descriptionRef}
-            submitting={submitting}
-            showDropError={showDropError}
+            isSubwave={isSubwave}
+            parentWaveName={parentWaveName}
+            descriptionSnapshot={descriptionSnapshot}
             overviewLeading={
-              <CreateWaveDraftsSection
-                drafts={drafts}
-                onLoad={onLoadDraft}
-                onDelete={deleteDraft}
-              />
+              !isSubwave && (
+                <CreateWaveDraftsSection
+                  drafts={drafts}
+                  onLoad={onLoadDraft}
+                  onDelete={deleteDraft}
+                />
+              )
             }
-            onHaveDropToSubmitChange={onHaveDropToSubmitChange}
+            onCriteriaReplacementChange={onCriteriaReplacementChange}
+            onGroupResolutionChange={onGroupResolutionChange}
             onInlineGroupCreate={onInlineGroupCreate}
           />
+          {/* Keep the composer mounted after its first visit: hiding it preserves
+              Lexical state, unsaved text, uploads, and its snapshot handle. */}
+          {(descriptionVisited ||
+            step === CreateWaveStep.DESCRIPTION ||
+            step === CreateWaveStep.REVIEW) && (
+            <div hidden={step !== CreateWaveStep.DESCRIPTION}>
+              <CreateWaveDescription
+                ref={descriptionRef}
+                profile={profile}
+                submitting={submitting || step !== CreateWaveStep.DESCRIPTION}
+                showDropError={showDropError}
+                visibilityGroupId={config.groups.canView}
+                wave={{ name: config.overview.name, image: imageUrl, id: null }}
+                onHaveDropToSubmitChange={onHaveDropToSubmitChange}
+              />
+            </div>
+          )}
         </CreateWaveLayout>
       </CreateWaveFlow>
+      <SubwaveAccessWarningDialog
+        isOpen={subwaveAccessConfirmation.isOpen}
+        onDecision={subwaveAccessConfirmation.onDecision}
+      />
     </div>
   );
 }

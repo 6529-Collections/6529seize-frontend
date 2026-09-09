@@ -1,0 +1,80 @@
+{
+  "capturedAt": "2026-08-23T23:49:31.456Z",
+  "route": "/museum/network",
+  "baseUrl": "http://localhost:3141",
+  "failures": [],
+  "results": [
+    {
+      "viewport": {
+        "name": "desktop",
+        "width": 1440,
+        "height": 1000
+      },
+      "screenshot": "ops/workstreams/museum-home-consolidation/evidence/homepage-desktop-1440x1000.png",
+      "sha256": "4692cba94b4bb4e2a04b627be4f4abc6cde6d2526e275bb9d37d0843ee6fd65b",
+      "consoleErrors": [],
+      "title": "6529 Network Museum",
+      "clientWidth": 1440,
+      "scrollWidth": 1410,
+      "scrollHeight": 3877,
+      "acquisitionHeadingCount": 1,
+      "supersededSectionHeadingCount": 0,
+      "expectedAcquisitions": {
+        "The System in Seven States": true,
+        "Keys and Gates": true,
+        "Conflict at Its Edges": true,
+        "A Gift of Themes and Variations #210": true
+      },
+      "decodedImageCount": 9,
+      "brokenImages": []
+    },
+    {
+      "viewport": {
+        "name": "tablet",
+        "width": 820,
+        "height": 1000
+      },
+      "screenshot": "ops/workstreams/museum-home-consolidation/evidence/homepage-tablet-820x1000.png",
+      "sha256": "a74c739158967d90315627e9fc49671d8a349410a46af8a06f4eb7aa24ff19e9",
+      "consoleErrors": [],
+      "title": "6529 Network Museum",
+      "clientWidth": 820,
+      "scrollWidth": 820,
+      "scrollHeight": 5807,
+      "acquisitionHeadingCount": 1,
+      "supersededSectionHeadingCount": 0,
+      "expectedAcquisitions": {
+        "The System in Seven States": true,
+        "Keys and Gates": true,
+        "Conflict at Its Edges": true,
+        "A Gift of Themes and Variations #210": true
+      },
+      "decodedImageCount": 9,
+      "brokenImages": []
+    },
+    {
+      "viewport": {
+        "name": "mobile",
+        "width": 390,
+        "height": 844
+      },
+      "screenshot": "ops/workstreams/museum-home-consolidation/evidence/homepage-mobile-390x844.png",
+      "sha256": "1e695d4f7620e1beec5c24d07eeeb587820e616aea1143de8dedb5b79d23a57b",
+      "consoleErrors": [],
+      "title": "6529 Network Museum",
+      "clientWidth": 390,
+      "scrollWidth": 390,
+      "scrollHeight": 7769,
+      "acquisitionHeadingCount": 1,
+      "supersededSectionHeadingCount": 0,
+      "expectedAcquisitions": {
+        "The System in Seven States": true,
+        "Keys and Gates": true,
+        "Conflict at Its Edges": true,
+        "A Gift of Themes and Variations #210": true
+      },
+      "decodedImageCount": 9,
+      "brokenImages": []
+    }
+  ]
+}

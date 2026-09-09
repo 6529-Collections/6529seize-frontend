@@ -74,3 +74,6 @@ export const useHeaderContext = (): HeaderContextType => {
   }
   return context;
 };
+
+export const useOptionalHeaderContext = (): HeaderContextType | undefined =>
+  useContext(HeaderContext);

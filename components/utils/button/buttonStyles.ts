@@ -6,7 +6,8 @@ export type ButtonVariant =
   | "secondary"
   | "tertiary"
   | "success"
-  | "destructive";
+  | "destructive"
+  | "destructiveOutline";
 
 export type ButtonSize = "xs" | "sm" | "md" | "lg";
 
@@ -23,6 +24,8 @@ const VARIANT_CLASSES: Record<ButtonVariant, string> = {
     "tw-border-emerald-600 tw-bg-emerald-600 tw-text-white desktop-hover:hover:tw-border-emerald-500 desktop-hover:hover:tw-bg-emerald-500 active:tw-border-emerald-700 active:tw-bg-emerald-700",
   destructive:
     "tw-border-red tw-bg-red tw-text-white desktop-hover:hover:tw-border-red/90 desktop-hover:hover:tw-bg-red/90 active:tw-border-red/80 active:tw-bg-red/80",
+  destructiveOutline:
+    "tw-border-red/20 tw-bg-red/5 tw-text-red/70 desktop-hover:hover:tw-border-red/30 desktop-hover:hover:tw-bg-red/10 desktop-hover:hover:tw-text-red active:tw-border-red/30 active:tw-bg-red/10 active:tw-text-red",
 };
 
 const SIZE_CLASSES: Record<ButtonSize, string> = {
@@ -46,8 +49,8 @@ export function getButtonClasses({
   className,
 }: ButtonStyleOptions = {}): string {
   return clsx(
-    "tw-inline-flex tw-flex-shrink-0 tw-items-center tw-justify-center tw-gap-x-1.5 tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-font-semibold tw-shadow-sm tw-shadow-black/20 tw-transition-colors tw-duration-200 tw-ease-out enabled:tw-cursor-pointer focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 disabled:tw-cursor-not-allowed disabled:tw-opacity-50",
-    variant === "destructive"
+    "tw-inline-flex tw-flex-shrink-0 tw-items-center tw-justify-center tw-gap-x-1.5 tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-font-semibold tw-shadow-sm tw-shadow-black/20 tw-transition-colors tw-duration-200 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 enabled:tw-cursor-pointer disabled:tw-cursor-not-allowed disabled:tw-opacity-50",
+    variant === "destructive" || variant === "destructiveOutline"
       ? "focus-visible:tw-outline-red"
       : "focus-visible:tw-outline-primary-400",
     VARIANT_CLASSES[variant],

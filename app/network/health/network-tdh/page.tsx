@@ -8,13 +8,12 @@ import { getAppMetadata } from "@/components/providers/metadata";
 
 export default function CommunityStatsPage() {
   return (
-    <main
-      className={`${NETWORK_REFERENCE_PAGE_CLASSES} tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-900 tw-text-iron-100`}
-    >
+    <main className={NETWORK_REFERENCE_PAGE_CLASSES}>
       <div className="tw-w-full">
         <AboutContentsDropdown
           className={NETWORK_REFERENCE_DROPDOWN_ROW_CLASSES}
           currentHref="/network/health/network-tdh"
+          desktopFlush
           withDivider
         />
 

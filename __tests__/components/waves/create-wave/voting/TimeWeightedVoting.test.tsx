@@ -67,7 +67,7 @@ describe("TimeWeightedVoting", () => {
     expect(input.value).toBe("1440");
   });
 
-  it("renders interval controls in a setting card", () => {
+  it("renders interval controls without a nested setting card", () => {
     renderComponent(baseConfig);
 
     const setting = screen.getByTestId("averaging-interval-setting");
@@ -79,6 +79,8 @@ describe("TimeWeightedVoting", () => {
     expect(setting).toHaveTextContent(
       "The time period over which votes are averaged."
     );
+    expect(setting).toHaveAttribute("data-surface", "plain");
+    expect(setting).not.toHaveClass("tw-rounded-xl", "tw-border");
   });
 
   it("keeps the toggle and updates the interval in default mode", async () => {
@@ -159,9 +161,8 @@ describe("TimeWeightedVoting", () => {
   it("changes unit and converts value", async () => {
     const onChange = jest.fn();
     renderComponent(baseConfig, onChange);
-    await userEvent.selectOptions(screen.getByTestId("time-unit-selector"), [
-      "hours",
-    ]);
+    await userEvent.click(screen.getByTestId("time-unit-selector"));
+    await userEvent.click(screen.getByRole("option", { name: "Hours" }));
     expect(onChange).toHaveBeenCalledWith({
       enabled: true,
       averagingInterval: 1,
@@ -210,7 +211,8 @@ describe("TimeWeightedVoting", () => {
     const setting = screen.getByTestId("averaging-interval-setting");
     const input = screen.getByTestId("averaging-interval-input");
     expect(setting).toHaveTextContent("Must be at least 5 minutes");
-    expect(setting).toHaveClass("tw-border-error");
+    expect(setting).not.toHaveClass("tw-border-error");
+    expect(input).toHaveClass("tw-ring-error");
     expect(input).toHaveAttribute("aria-invalid", "true");
   });
 

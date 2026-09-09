@@ -2,6 +2,11 @@ import DropsList from "@/components/drops/view/DropsList";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import { fireEvent, render, screen } from "@testing-library/react";
 
+jest.mock("@/components/content-moderation/ContentModerationDropGate", () => ({
+  __esModule: true,
+  default: ({ children }: any) => children,
+}));
+
 let dropProps: any[] = [];
 let lightProps: any[] = [];
 let wrapperProps: any[] = [];

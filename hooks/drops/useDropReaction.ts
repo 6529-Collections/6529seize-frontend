@@ -11,6 +11,7 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ChatRestriction } from "@/hooks/useDropPriviledges";
 import type { ApiDropContextProfileContext } from "@/generated/models/ApiDropContextProfileContext";
 import { recordReaction } from "@/helpers/reactions/reactionHistory";
+import { enqueueDropReactionRequest } from "@/helpers/reactions/dropReactionRequestQueue";
 import type { Drop, ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import { COMMUNITY_CURATIONS_DROPS_QUERY_KEY } from "@/hooks/useCommunityCurationsDrops";
@@ -424,11 +425,13 @@ const sendReactionRequest = async ({
   isRemoving,
   mutation,
   reactionCode,
+  signal,
 }: {
   readonly endpoint: string;
   readonly isRemoving: boolean;
   readonly mutation: ReactionMutation;
   readonly reactionCode: string;
+  readonly signal: AbortSignal;
 }): Promise<void> => {
   if (isRemoving) {
     recordReactionRequestSent(mutation, {
@@ -438,6 +441,7 @@ const sendReactionRequest = async ({
     await commonApiDelete({
       endpoint,
       errorMode: "structured",
+      signal,
     });
     return;
   }
@@ -450,6 +454,7 @@ const sendReactionRequest = async ({
     endpoint,
     body: { reaction: reactionCode },
     errorMode: "structured",
+    signal,
   });
 };
 
@@ -490,15 +495,17 @@ export function useDropReaction(
   const isEligibleToChat =
     waveEligibility?.authenticated_user_eligible_to_chat ??
     drop.wave.authenticated_user_eligible_to_chat;
-  const isSlowModeOnlyBlock =
+  const isChatOnlyRestriction =
     isEligibleToChat === false &&
-    waveEligibility?.authenticated_user_chat_restriction ===
-      ChatRestriction.SLOW_MODE;
+    (waveEligibility?.authenticated_user_chat_restriction ===
+      ChatRestriction.SLOW_MODE ||
+      waveEligibility?.authenticated_user_chat_restriction ===
+        ChatRestriction.NO_PERMISSION);
   const canReact =
     !isRecoveryPending &&
     !activeProfileProxy &&
     !drop.id.startsWith("temp-") &&
-    (isEligibleToChat !== false || isSlowModeOnlyBlock);
+    (isEligibleToChat !== false || isChatOnlyRestriction);
   const contextProfileContext = drop.context_profile_context;
   const applyOptimisticReaction = useOptimisticStreamDropReaction({
     applyOptimisticDropUpdate,
@@ -576,11 +583,14 @@ export function useDropReaction(
       let succeeded = false;
 
       try {
-        await sendReactionRequest({
-          endpoint,
-          isRemoving,
-          mutation,
-          reactionCode,
+        await enqueueDropReactionRequest(dropId, async (signal) => {
+          await sendReactionRequest({
+            endpoint,
+            isRemoving,
+            mutation,
+            reactionCode,
+            signal,
+          });
         });
         const result = recordReactionRequestSucceeded(mutation);
         if (result.isLatestMutation) {
@@ -608,6 +618,7 @@ export function useDropReaction(
         ) {
           updateEligibility(waveId, {
             authenticated_user_eligible_to_chat: false,
+            authenticated_user_chat_restriction: ChatRestriction.DISABLED,
           });
         }
 

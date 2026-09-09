@@ -64,7 +64,7 @@ const FilePreview: React.FC<FilePreviewProps> = ({
     <img
       src={url}
       alt="Artwork preview"
-      className="tw-absolute tw-max-h-full tw-max-w-full tw-object-contain tw-shadow-lg"
+      className="tw-h-full tw-w-full tw-object-contain tw-shadow-lg"
     />
   );
 
@@ -137,7 +137,7 @@ const FilePreview: React.FC<FilePreviewProps> = ({
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="tw-relative tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-bg-iron-900"
+      className="tw-absolute tw-inset-0 tw-flex tw-items-center tw-justify-center tw-bg-iron-900"
     >
       {/* Container with checkerboard pattern for transparent media */}
       <div className="tw-absolute tw-inset-0 tw-opacity-5">

@@ -7,7 +7,9 @@ import type { CreateWaveDisplayConfig } from "@/types/waves.types";
 
 describe("CreateWaveDisplaySettings", () => {
   const openAdvancedSettings = () => {
-    fireEvent.click(screen.getByRole("button", { name: /advanced settings/i }));
+    fireEvent.click(
+      screen.getByRole("button", { name: /appearance and labels/i })
+    );
   };
 
   const baseDisplay: CreateWaveDisplayConfig = {
@@ -248,7 +250,7 @@ describe("CreateWaveDisplaySettings", () => {
     );
 
     // The outcomes-visibility toggle lives on the Outcomes step now.
-    expect(screen.queryByText("Show outcomes")).toBeNull();
+    expect(screen.queryByText("Show outcomes menu section")).toBeNull();
     expect(screen.queryByLabelText("Approvals tab label")).toBeNull();
   });
 

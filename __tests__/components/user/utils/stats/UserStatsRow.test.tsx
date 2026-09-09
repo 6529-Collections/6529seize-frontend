@@ -23,7 +23,7 @@ describe("UserStatsRow", () => {
     for (const value of ["1,234", "56", "7", "8", "9"]) {
       expect(screen.getByText(value)).toHaveClass(
         "tw-font-semibold",
-        "tw-text-iron-300"
+        "tw-text-iron-200"
       );
     }
 

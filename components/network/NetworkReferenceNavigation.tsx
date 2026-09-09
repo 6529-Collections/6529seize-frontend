@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
+import { NETWORK_REFERENCE_SECTION_HEADING_CLASSES } from "./networkPageLayoutClasses";
 
 interface ReferenceDestination {
   readonly href: string;
@@ -49,7 +50,7 @@ export default function NetworkReferenceNavigation({
       className="tw-grid tw-grid-cols-1 tw-items-start tw-gap-6 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-py-8 sm:tw-py-12 lg:tw-grid-cols-[minmax(0,1fr)_minmax(0,2.5fr)] lg:tw-gap-12"
     >
       <div className="lg:tw-sticky lg:tw-top-28">
-        <h2 className="tw-m-0 tw-text-lg tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-100 sm:tw-text-xl">
+        <h2 className={NETWORK_REFERENCE_SECTION_HEADING_CLASSES}>
           {t(locale, "network.references.navigation.title")}
         </h2>
       </div>

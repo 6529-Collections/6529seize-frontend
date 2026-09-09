@@ -13,6 +13,9 @@ import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import MyStreamWaveChat from "./MyStreamWaveChat";
 import MyStreamWaveCurationContent from "./curations/MyStreamWaveCurationContent";
 import { useWaveData } from "@/hooks/useWaveData";
+import { useDrop } from "@/hooks/useDrop";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import MyStreamWaveLeaderboard from "./MyStreamWaveLeaderboard";
 import MyStreamWaveSubmissions from "./MyStreamWaveSubmissions";
 import MyStreamWaveOutcome from "./MyStreamWaveOutcome";
@@ -38,6 +41,8 @@ import { MEMES_NOMINEE_REQUIRED_REP } from "@/helpers/waves/memes-nomination";
 import { useWaveViewMode } from "@/hooks/useWaveViewMode";
 import { SubmissionStatus, useWave } from "@/hooks/useWave";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import { ApiDropType } from "@/generated/models/ApiDropType";
+import { areSameProfileIdentity } from "@/helpers/ProfileHelpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { getDropQueryKey } from "@/services/api/drop-api";
 import { markMobileLaunchStep } from "@/utils/monitoring/mobileLaunchTiming";
@@ -205,7 +210,8 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({ waveId }) => {
   const router = useRouter();
   const { isApp } = useDeviceInfo();
   const queryClient = useQueryClient();
-  const { connectedProfile, activeProfileProxy } = useAuth();
+  const locale = useBrowserLocale();
+  const { connectedProfile, activeProfileProxy, setToast } = useAuth();
   const { setWaveDropAction } = useHeaderContext();
   const {
     waves,
@@ -296,7 +302,59 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({ waveId }) => {
   const { activeContentTab } = useContentTab();
   const activeCurationId = searchParams.get("curation");
   const loadedWaveId = wave?.id ?? null;
-  const { editingDropId } = useEditingDrop();
+  const { editingDropId, setEditingDropId } = useEditingDrop();
+  const requestedEditPostId = searchParams.get("editPost") ?? "";
+  const { drop: requestedEditPost } = useDrop({
+    dropId: requestedEditPostId,
+    enabled: requestedEditPostId.length > 0,
+  });
+
+  useEffect(() => {
+    if (!requestedEditPostId || !requestedEditPost) {
+      return;
+    }
+
+    const nextParams = new URLSearchParams(searchParams.toString() || "");
+    nextParams.delete("editPost");
+    const nextQuery = nextParams.toString();
+    const clearEditRequest = () => {
+      router.replace(nextQuery ? `${pathname}?${nextQuery}` : pathname, {
+        scroll: false,
+      });
+    };
+    const canEdit =
+      requestedEditPost.wave.id === waveId &&
+      requestedEditPost.drop_type !== ApiDropType.Participatory &&
+      !activeProfileProxy &&
+      areSameProfileIdentity({
+        left: requestedEditPost.author,
+        right: connectedProfile,
+      });
+
+    if (!canEdit) {
+      clearEditRequest();
+      setToast({
+        type: "warning",
+        message: t(locale, "profileCuration.actions.authorOnly"),
+      });
+      return;
+    }
+
+    setEditingDropId(requestedEditPost.id);
+    clearEditRequest();
+  }, [
+    activeProfileProxy,
+    connectedProfile,
+    locale,
+    pathname,
+    requestedEditPost,
+    requestedEditPostId,
+    router,
+    searchParams,
+    setEditingDropId,
+    setToast,
+    waveId,
+  ]);
 
   // View mode for chat/gallery toggle
   const { viewMode, setViewMode, toggleViewMode } = useWaveViewMode(waveId);

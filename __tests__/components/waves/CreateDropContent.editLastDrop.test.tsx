@@ -55,6 +55,8 @@ jest.mock("framer-motion", () => {
     m: {
       div: MotionDiv,
     },
+    useIsPresent: () => true,
+    useReducedMotion: () => false,
   };
 });
 

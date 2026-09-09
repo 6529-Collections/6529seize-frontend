@@ -142,7 +142,7 @@ test.describe("Museum data architecture @surface @readonly", () => {
       await openArchitectureRoute(page, OVERVIEW, null);
       const profile = await readJsonDisclosure(
         page,
-        "Read the machine application profile"
+        "Read the publication profile"
       );
       expect(profile["profile_id"]).toBe("6529NM_DATA_ARCHITECTURE_V1");
       expect(profile["profile_version"]).toBe("1.0.0");
@@ -176,7 +176,7 @@ test.describe("Museum data architecture @surface @readonly", () => {
     try {
       const exactCommit = await openArchitectureRoute(page, OVERVIEW, null);
       for (const route of STANDARD_ROUTES) {
-        const routeLink = page.locator(`a[href="${route.path}"]`);
+        const routeLink = page.locator(`a[href="${route.path}"]:visible`);
         await expect(routeLink).toHaveCount(1);
         await routeLink.click();
         await expect(page).toHaveURL((url) => url.pathname === route.path);

@@ -2,7 +2,7 @@
 
 import {
   Bars3Icon,
-  EllipsisHorizontalIcon,
+  EllipsisVerticalIcon,
   LockClosedIcon,
   PlusIcon,
 } from "@heroicons/react/24/outline";
@@ -41,10 +41,18 @@ import { useWaveShareCopyAction } from "@/hooks/waves/useWaveShareCopyAction";
 import WaveDescriptionPopover from "@/components/waves/header/WaveDescriptionPopover";
 import WavePicture from "@/components/waves/WavePicture";
 import { getDirectMessageProfileHref } from "@/helpers/waves/direct-message-profile.helpers";
+import {
+  getProfileCollectedTokenReturnContext,
+  PROFILE_COLLECTED_RETURN_PARAM,
+} from "@/helpers/profile-collected-navigation";
 import { getWaveDescriptionPreviewText } from "@/helpers/waves/waveDescriptionPreview";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { getActiveViewFromUrl } from "../navigation/ViewContext";
 import { getActiveWaveIdFromUrl } from "@/helpers/navigation.helpers";
+import {
+  isProfilePreferencesEntry,
+  PREFERENCES_ENTRY_SOURCE_PARAM,
+} from "@/helpers/preferences-navigation";
 import {
   getAppHeaderMoreMenuItems,
   type HeaderMoreMenuItem,
@@ -54,6 +62,7 @@ import {
   useHeaderActiveWave,
 } from "./app-header-wave-preview";
 import WaveHeaderRestrictionButton from "@/components/waves/header/WaveHeaderRestrictionButton";
+import WaveParentNavigation from "@/components/waves/header/WaveParentNavigation";
 import MainStageNominationPopover from "@/components/brain/my-stream/tabs/MainStageNominationPopover";
 import { useProfileDoubleActivate } from "./useProfileDoubleActivate";
 
@@ -251,25 +260,31 @@ const HeaderTitleContent = ({
       ) : (
         <>
           {wavePicture}
-          {activeWave !== null && !isDm && previewText !== null ? (
-            <WaveDescriptionPopover
-              wave={activeWave}
-              align="left"
-              ariaLabel="Show wave description"
-              triggerClassName="tw-flex tw-min-w-0 tw-flex-col tw-items-start tw-border-0 tw-bg-transparent tw-p-0 tw-text-left"
-            >
-              <span className="tw-w-full tw-truncate tw-text-sm tw-font-semibold">
+          <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-items-start">
+            <WaveParentNavigation
+              parentWave={activeWave?.parent_wave}
+              variant="compact-header"
+            />
+            {activeWave !== null && !isDm && previewText !== null ? (
+              <WaveDescriptionPopover
+                wave={activeWave}
+                align="left"
+                ariaLabel="Show wave description"
+                triggerClassName="tw-flex tw-w-full tw-min-w-0 tw-flex-col tw-items-start tw-border-0 tw-bg-transparent tw-p-0 tw-text-left"
+              >
+                <span className="tw-w-full tw-truncate tw-text-sm tw-font-semibold">
+                  {displayWave.name}
+                </span>
+                <span className="tw-hidden tw-w-full tw-truncate tw-text-xs tw-font-normal tw-text-iron-400 sm:tw-block">
+                  {previewText}
+                </span>
+              </WaveDescriptionPopover>
+            ) : (
+              <span className="tw-w-full tw-min-w-0 tw-truncate tw-text-sm tw-font-semibold">
                 {displayWave.name}
               </span>
-              <span className="tw-hidden tw-w-full tw-truncate tw-text-xs tw-font-normal tw-text-iron-400 sm:tw-block">
-                {previewText}
-              </span>
-            </WaveDescriptionPopover>
-          ) : (
-            <span className="tw-min-w-0 tw-truncate tw-text-sm tw-font-semibold">
-              {displayWave.name}
-            </span>
-          )}
+            )}
+          </div>
         </>
       )}
     </div>
@@ -393,7 +408,7 @@ const HeaderMoreMenu = ({
       trigger={
         <>
           <span className="tw-sr-only">More header actions</span>
-          <EllipsisHorizontalIcon className="tw-size-5 tw-flex-shrink-0" />
+          <EllipsisVerticalIcon className="tw-size-5 tw-flex-shrink-0" />
         </>
       }
       items={items}
@@ -537,15 +552,40 @@ export default function AppHeader() {
     activeWaveId: waveParam,
     searchParams,
   });
+  const isProfileWavesFeedView =
+    isCapacitor &&
+    pathname === "/waves" &&
+    !waveParam &&
+    searchParams.get("view") === "profile-feed";
   const showPageShareAction =
     isCapacitor &&
     !isInsideWave &&
     isPageShareSupported({ activeView, pathname, surface: "mobile" });
 
   const isProfilePage = typeof params["user"] === "string";
+  const preferencesProfileReturnTo =
+    isCapacitor &&
+    pathname === "/preferences" &&
+    isProfilePreferencesEntry(
+      searchParams.get(PREFERENCES_ENTRY_SOURCE_PARAM)
+    ) &&
+    connectedProfile?.handle
+      ? `/${encodeURIComponent(connectedProfile.handle)}`
+      : null;
+  const profileCollectedReturnContext = isCapacitor
+    ? getProfileCollectedTokenReturnContext({
+        pathname,
+        returnTo: searchParams.get(PROFILE_COLLECTED_RETURN_PARAM),
+      })
+    : null;
 
   const showBackButton =
-    isInsideWave || isCreateRoute || (isProfilePage && canGoBack);
+    isInsideWave ||
+    isCreateRoute ||
+    isProfileWavesFeedView ||
+    preferencesProfileReturnTo !== null ||
+    profileCollectedReturnContext !== null ||
+    (isProfilePage && canGoBack);
   const pfpImage = (
     <div className="tw-relative tw-h-10 tw-w-10 tw-flex-shrink-0">
       <div
@@ -627,7 +667,14 @@ export default function AppHeader() {
       <div className="tw-flex tw-h-16 tw-items-center tw-justify-between tw-gap-x-2 tw-px-4">
         <div className="tw-flex tw-h-10 tw-w-10 tw-flex-shrink-0 tw-items-center tw-justify-center">
           {showBackButton ? (
-            <BackButton />
+            <BackButton
+              key={`${pathname}?${searchParams.toString()}`}
+              returnTo={
+                preferencesProfileReturnTo ??
+                profileCollectedReturnContext?.href ??
+                (isProfileWavesFeedView ? "/waves" : undefined)
+              }
+            />
           ) : (
             <button
               ref={profileButtonRef}

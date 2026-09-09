@@ -101,7 +101,15 @@ function decodeUtf8(buffer, label) {
   }
 }
 
-function validateContainedPackageSymlink(root, absolutePath) {
+function isPathWithin(root, candidate) {
+  const relative = path.relative(root, candidate);
+  return (
+    relative === "" ||
+    (!relative.startsWith("..") && !path.isAbsolute(relative))
+  );
+}
+
+function validateContainedPackageSymlink(root, realRoot, absolutePath) {
   let linkTargetBytes;
   let realTarget;
   try {
@@ -120,11 +128,15 @@ function validateContainedPackageSymlink(root, absolutePath) {
     !path.isAbsolute(linkTarget),
     `Extracted package contains an absolute symbolic link: ${absolutePath}`
   );
+  let lexicalRoot;
+  if (isPathWithin(root, absolutePath)) {
+    lexicalRoot = root;
+  } else if (isPathWithin(realRoot, absolutePath)) {
+    lexicalRoot = realRoot;
+  }
   const lexicalTarget = path.resolve(path.dirname(absolutePath), linkTarget);
-  const lexicalRelative = path.relative(root, lexicalTarget);
   invariant(
-    lexicalRelative === "" ||
-      (!lexicalRelative.startsWith("..") && !path.isAbsolute(lexicalRelative)),
+    lexicalRoot !== undefined && isPathWithin(lexicalRoot, lexicalTarget),
     `Extracted package symbolic link lexically escapes its root: ${absolutePath}`
   );
   try {
@@ -136,10 +148,8 @@ function validateContainedPackageSymlink(root, absolutePath) {
     );
   }
 
-  const relativeTarget = path.relative(root, realTarget);
   invariant(
-    relativeTarget === "" ||
-      (!relativeTarget.startsWith("..") && !path.isAbsolute(relativeTarget)),
+    isPathWithin(realRoot, realTarget),
     `Extracted package symbolic link escapes its root: ${absolutePath}`
   );
   let targetStats;
@@ -171,7 +181,11 @@ function walkContainedPackageSymlink({
   options,
   ancestorRealDirectories,
 }) {
-  const symlink = validateContainedPackageSymlink(realRoot, absolutePath);
+  const symlink = validateContainedPackageSymlink(
+    root,
+    realRoot,
+    absolutePath
+  );
   const normalizedPath = relativePath.replaceAll(path.sep, "/");
   const symlinkEntry = {
     path: normalizedPath,
@@ -278,10 +292,8 @@ function walkDirectory(root, relativeDirectory = "", options = {}) {
 }
 
 function assertRealPathWithin(root, candidate, label) {
-  const relative = path.relative(root, candidate);
   invariant(
-    relative === "" ||
-      (!relative.startsWith("..") && !path.isAbsolute(relative)),
+    isPathWithin(root, candidate),
     `${label} escapes source root through a symlink`
   );
 }

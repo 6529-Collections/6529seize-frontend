@@ -17,30 +17,43 @@ Global mentions are available in Wave message, reply, and edit composers.
 ## User Journey
 
 1. Open a Wave where you have Chat access.
-2. Type or select `@contributors`, `@admins`, or `@devs6529`.
+2. Type or select `@admins` or `@devs6529`.
 3. Send the message. The global token remains visible in the posted content.
 4. Eligible profiles are resolved when the message is posted.
 
-Wave creators and admins can also use `@all`.
+Wave creators and admins can also use the broadcast mentions `@all` and
+`@contributors`.
 
 ## Common Scenarios
 
-- `@contributors` notifies profiles with Chat access to the current Wave.
-- If Chat access is **Anyone**, there is no finite Chat-access group to expand.
-  In that case, Wave followers are the bounded `@contributors` audience;
-  muted followers and the author are still excluded from notifications.
-- `@admins` notifies the Wave creator and profiles with Admin access.
+- `@contributors` notifies profiles with Chat access that joined the Wave and
+  enabled `Broadcast mentions`.
+- If Chat access is **Public**, there is no finite Chat-access group to expand.
+  In that case, joined Wave followers with `Broadcast mentions` enabled are the
+  bounded `@contributors` audience; muted followers and the author are still
+  excluded from notifications.
+- `@admins` notifies the Wave creator and profiles in the `Admins` scope.
 - `@devs6529` notifies the platform-configured 6529 developer profiles that
   can view the Wave.
-- `@all` keeps its existing follower-broadcast behavior and notification
-  preferences.
+- The `Broadcast mentions` notification preference controls both `@all` and
+  `@contributors`; turning it off opts the profile out of both broadcasts.
+- `All messages` still notifies a joined profile about every message regardless
+  of the broadcast-mention preference.
 
 ## Edge Cases
 
 - Global names work with any capitalization, such as `@Contributors`.
 - Typing a complete token directly has the same effect as choosing it from the
-  suggestion menu; Chat access is the invocation requirement for
-  `@contributors`, `@admins`, and `@devs6529`.
+  suggestion menu. Wave creator or admin access is required for `@all` and
+  `@contributors`; Chat access is the invocation requirement for `@admins` and
+  `@devs6529`.
+- Broadcast suggestions are unavailable to non-admins. If a non-admin types
+  `@all` or `@contributors` directly in a new message, the token is posted
+  as ordinary text without broadcast metadata or notifications.
+- A non-admin can retain `@contributors` while editing an existing message
+  that already contained it. The edit does not rebroadcast the mention, and
+  they cannot add `@contributors` as a broadcast mention to a message that did
+  not already contain it.
 - Global mention text inside links or inline/fenced code remains literal and
   does not notify a Wave audience.
 - A profile included by more than one mention is notified only once.

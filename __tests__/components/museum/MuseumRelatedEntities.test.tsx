@@ -3,7 +3,7 @@ import { MuseumRelatedEntities } from "@/components/museum/MuseumRelatedEntities
 
 describe("MuseumRelatedEntities relation context", () => {
   it("renders human status and date for Casey, Keys and Gates, and Magnum relations", () => {
-    render(
+    const { container } = render(
       <MuseumRelatedEntities
         entities={[
           {
@@ -30,7 +30,7 @@ describe("MuseumRelatedEntities relation context", () => {
             label: "Magnum Photos 75",
             href: "/museum/network/acquisitions/magnum-photos-75",
             relation: "Included in",
-            status: "selected_by_museum_wave_acquisition_review_in_progress",
+            status: "accessioned_into_permanent_collection",
             statusAsOf: "2026-03-01",
           },
         ]}
@@ -42,17 +42,10 @@ describe("MuseumRelatedEntities relation context", () => {
     expect(screen.getByText("Acquired through")).toBeInTheDocument();
     expect(screen.getAllByText("Included in")).toHaveLength(2);
     expect(
-      screen.getByText("Accessioned into the permanent Collection")
-    ).toBeInTheDocument();
+      screen.getAllByText("Accessioned into the permanent Collection")
+    ).toHaveLength(2);
     expect(
-      screen.getByText(
-        "Selected through an acquisition program; acquisition pending"
-      )
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        "Selected by Museum Wave; accession processing in progress"
-      )
+      screen.getByText("Selected through an acquisition program; unminted")
     ).toBeInTheDocument();
     expect(screen.getByText("Jan 1, 2026")).toBeInTheDocument();
     expect(screen.getByText("Feb 1, 2026")).toBeInTheDocument();
@@ -60,5 +53,11 @@ describe("MuseumRelatedEntities relation context", () => {
     expect(
       screen.queryByText(/selected_(?:by|through)/u)
     ).not.toBeInTheDocument();
+    const list = container.querySelector("ul");
+    expect(list).toHaveClass("tw-grid", "tw-gap-y-10");
+    expect(list).not.toHaveClass("tw-border-y", "tw-divide-y");
+    for (const item of screen.getAllByRole("listitem")) {
+      expect(item).toHaveClass("tw-border-b", "tw-pb-5");
+    }
   });
 });

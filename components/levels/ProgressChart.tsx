@@ -10,11 +10,12 @@ import {
   Filler,
   Tooltip,
   LogarithmicScale,
-  type ActiveElement,
-  type ChartEvent,
   type TooltipItem,
 } from "chart.js";
 import levels from "@/constants/levels.json";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { formatInteger } from "@/i18n/format";
+import { t } from "@/i18n/messages";
 import { useEffect, useState } from "react";
 
 ChartJS.register(
@@ -33,6 +34,7 @@ interface LevelData {
 }
 
 export default function ProgressChart() {
+  const locale = useBrowserLocale();
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
   useEffect(() => {
@@ -47,7 +49,7 @@ export default function ProgressChart() {
     labels: (levels as LevelData[]).map((l) => l.level),
     datasets: [
       {
-        label: "TDH + Rep",
+        label: t(locale, "network.levels.table.tdhRep"),
         data: (levels as LevelData[]).map((l) => l.threshold),
         fill: "start" as const,
         tension: 0.15,
@@ -78,26 +80,27 @@ export default function ProgressChart() {
       tooltip: {
         callbacks: {
           label: (ctx: TooltipItem<"line">) =>
-            `Level ${ctx.label}: ${(ctx.parsed.y ?? 0).toLocaleString()} TDH+Rep`,
+            t(locale, "network.levels.chart.tooltip", {
+              level: ctx.label,
+              threshold: formatInteger(locale, ctx.parsed.y ?? 0),
+            }),
         },
       },
     },
     animation: prefersReducedMotion ? (false as const) : undefined,
-    onHover: (_: ChartEvent, activeElements: ActiveElement[]) => {
-      const firstActiveElement = activeElements[0];
-      if (firstActiveElement) {
-        const idx = firstActiveElement.index;
-        const level = (levels as LevelData[])[idx]?.level;
-        window.dispatchEvent(
-          new CustomEvent("level-hover", { detail: { level } })
-        );
-      }
-    },
   };
+
+  const accessibleLabel = t(locale, "network.levels.chart.accessibleLabel");
 
   return (
     <div className="tw-h-[180px] tw-w-full md:tw-h-[280px]">
-      <Line data={data} options={options} />
+      <Line
+        aria-label={accessibleLabel}
+        data={data}
+        fallbackContent={accessibleLabel}
+        options={options}
+        role="img"
+      />
     </div>
   );
 }

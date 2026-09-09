@@ -7,6 +7,7 @@ import { publicEnv } from "@/config/env";
 import { getRenderableWaveDecisionWinners } from "@/helpers/waves/wave-decision.helpers";
 import { CheckCircleIcon } from "@heroicons/react/24/outline";
 import type { DropContentPresentation } from "@/components/waves/drops/dropContentPresentation";
+import ContentModerationDropGate from "@/components/content-moderation/ContentModerationDropGate";
 
 interface WaveWinnersDropsProps {
   readonly wave: ApiWave;
@@ -80,15 +81,20 @@ export const WaveWinnersDrops: React.FC<WaveWinnersDropsProps> = ({
         </p>
       ) : null}
       {renderableWinners.map((winner) => (
-        <WaveWinnersDrop
+        <ContentModerationDropGate
           key={winner.drop.id}
-          winner={winner}
-          wave={wave}
-          onDropClick={onDropClick}
-          isApprovalWave={isApprovalWave}
-          contentPresentation={contentPresentation}
-          outcomesVisible={outcomesVisible}
-        />
+          drop={winner.drop}
+          compact
+        >
+          <WaveWinnersDrop
+            winner={winner}
+            wave={wave}
+            onDropClick={onDropClick}
+            isApprovalWave={isApprovalWave}
+            contentPresentation={contentPresentation}
+            outcomesVisible={outcomesVisible}
+          />
+        </ContentModerationDropGate>
       ))}
     </div>
   );

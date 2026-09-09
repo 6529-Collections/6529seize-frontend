@@ -4,7 +4,6 @@ import { render, screen } from "@testing-library/react";
 
 const mockGetCanonicalNextMintNumber = jest.fn();
 const mockUseNextMintDrop = jest.fn();
-const mockUseNowMintingStatus = jest.fn();
 
 jest.mock("@/components/meme-calendar/meme-calendar.helpers", () => ({
   ...jest.requireActual("@/components/meme-calendar/meme-calendar.helpers"),
@@ -13,10 +12,6 @@ jest.mock("@/components/meme-calendar/meme-calendar.helpers", () => ({
 
 jest.mock("@/hooks/useNextMintDrop", () => ({
   useNextMintDrop: () => mockUseNextMintDrop(),
-}));
-
-jest.mock("@/hooks/useNowMintingStatus", () => ({
-  useNowMintingStatus: () => mockUseNowMintingStatus(),
 }));
 
 jest.mock("@/components/meme-calendar/MemeCalendarOverview", () => ({
@@ -61,11 +56,6 @@ const createDrop = (memeCardId: number): ApiDropV2View =>
 describe("UpcomingMemePage", () => {
   beforeEach(() => {
     mockGetCanonicalNextMintNumber.mockReturnValue(520);
-    mockUseNowMintingStatus.mockReturnValue({
-      isFetching: false,
-      isDropComplete: false,
-      isStatusLoading: false,
-    });
     mockUseNextMintDrop.mockReturnValue({
       nextMint: null,
       waveId: "main-stage-wave",
@@ -92,13 +82,8 @@ describe("UpcomingMemePage", () => {
     ).toEqual(["upcoming-subscription-widget", "upcoming-mint-calendar"]);
   });
 
-  it("shows the revealed drop and calendar for the mapped canonical next meme", () => {
+  it("shows the mapped canonical next meme independently of the active mint", () => {
     mockGetCanonicalNextMintNumber.mockReturnValue(519);
-    mockUseNowMintingStatus.mockReturnValue({
-      isFetching: false,
-      isDropComplete: true,
-      isStatusLoading: false,
-    });
     mockUseNextMintDrop.mockReturnValue({
       nextMint: createDrop(519),
       waveId: "main-stage-wave",
@@ -124,11 +109,6 @@ describe("UpcomingMemePage", () => {
 
   it("keeps the generic view when reveal presentation is disabled", () => {
     mockGetCanonicalNextMintNumber.mockReturnValue(519);
-    mockUseNowMintingStatus.mockReturnValue({
-      isFetching: false,
-      isDropComplete: true,
-      isStatusLoading: false,
-    });
     mockUseNextMintDrop.mockReturnValue({
       nextMint: createDrop(519),
       waveId: "main-stage-wave",
@@ -148,11 +128,6 @@ describe("UpcomingMemePage", () => {
 
   it("keeps the generic view when the revealed drop maps to another meme", () => {
     mockGetCanonicalNextMintNumber.mockReturnValue(519);
-    mockUseNowMintingStatus.mockReturnValue({
-      isFetching: false,
-      isDropComplete: true,
-      isStatusLoading: false,
-    });
     mockUseNextMintDrop.mockReturnValue({
       nextMint: createDrop(520),
       waveId: "main-stage-wave",
@@ -172,10 +147,11 @@ describe("UpcomingMemePage", () => {
 
   it("reserves the artwork panel while the canonical reveal state loads", () => {
     mockGetCanonicalNextMintNumber.mockReturnValue(519);
-    mockUseNowMintingStatus.mockReturnValue({
+    mockUseNextMintDrop.mockReturnValue({
+      nextMint: null,
+      waveId: "main-stage-wave",
       isFetching: true,
-      isDropComplete: false,
-      isStatusLoading: false,
+      isSettingsLoaded: true,
     });
 
     render(<UpcomingMemePage id="519" />);

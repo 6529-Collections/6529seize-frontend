@@ -1,4 +1,3 @@
-import styles from "./AppWallet.module.css";
 import Image from "next/image";
 
 export default function AppWalletAvatar(
@@ -8,7 +7,7 @@ export default function AppWalletAvatar(
   return (
     <Image
       unoptimized
-      className={styles["appWalletAvatar"]}
+      className="tw-shrink-0 tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-black/30 tw-p-0.5"
       fetchPriority="high"
       loading="eager"
       height={size}

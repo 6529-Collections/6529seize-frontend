@@ -550,7 +550,8 @@ export const getAgentLoginActiveAddress = (): string | null => {
   const activeAccount = getActiveAccountFromAccounts(getStoredAccounts());
   if (
     activeAccount?.authSessionVersion !== "v2" ||
-    normalizeAddress(activeAccount.address) !== normalizeAddress(agentLoginAddress)
+    normalizeAddress(activeAccount.address) !==
+      normalizeAddress(agentLoginAddress)
   ) {
     return null;
   }
@@ -653,6 +654,56 @@ export const removeAuthJwt = async (): Promise<void> => {
   if (hasActiveAddressChanged(previousActiveAddress, nextActiveAddress)) {
     emitProfileSwitched();
   }
+};
+
+/**
+ * Clears the credentials for one connected wallet without disconnecting its
+ * profile. This is used when an authenticated action needs a fresh signature:
+ * the account, selected profile and role remain available while the expired or
+ * rejected session is replaced.
+ */
+export const invalidateAuthSessionForAddress = async (
+  address: string
+): Promise<boolean> => {
+  const accounts = getStoredAccounts();
+  const normalizedAddress = normalizeAddress(address);
+  const accountIndex = accounts.findIndex(
+    (account) => normalizeAddress(account.address) === normalizedAddress
+  );
+
+  if (accountIndex < 0) {
+    return false;
+  }
+
+  const account = accounts[accountIndex]!;
+  await removeNativeRefreshToken(account.address);
+
+  const nextAccounts = [...accounts];
+  nextAccounts.splice(accountIndex, 1, {
+    ...account,
+    jwt: null,
+    refreshToken: null,
+    authSessionVersion: null,
+  });
+
+  const activeAddress =
+    getActiveAddressFromStorage() ??
+    getActiveAccountFromAccounts(accounts)?.address ??
+    account.address;
+  persistAccountsWithActive(nextAccounts, activeAddress);
+
+  const agentLoginAddress = safeLocalStorage.getItem(
+    AGENT_LOGIN_ACTIVE_ADDRESS_STORAGE_KEY
+  );
+  if (
+    agentLoginAddress &&
+    normalizeAddress(agentLoginAddress) === normalizedAddress
+  ) {
+    safeLocalStorage.removeItem(AGENT_LOGIN_ACTIVE_ADDRESS_STORAGE_KEY);
+  }
+
+  emitWalletAccountsUpdated();
+  return true;
 };
 
 /**

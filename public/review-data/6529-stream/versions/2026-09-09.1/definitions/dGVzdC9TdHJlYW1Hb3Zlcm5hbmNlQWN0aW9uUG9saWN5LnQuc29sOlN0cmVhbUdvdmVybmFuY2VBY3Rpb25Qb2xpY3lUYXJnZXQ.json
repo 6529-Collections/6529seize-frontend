@@ -1,0 +1,124 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamGovernanceActionPolicy.t.sol:StreamGovernanceActionPolicyTarget#function:0xaa98c64f",
+          "declaringDefinitionId": "test/StreamGovernanceActionPolicy.t.sol:StreamGovernanceActionPolicyTarget",
+          "inherited": false,
+          "inputs": [],
+          "name": "selectedCall",
+          "outputs": [],
+          "selector": "0xaa98c64f",
+          "signature": "selectedCall()",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "selectedCall()",
+          "displaySignature": "selectedCall()",
+          "functionKind": "function",
+          "id": "test/StreamGovernanceActionPolicy.t.sol:StreamGovernanceActionPolicyTarget#function:0xaa98c64f",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlQWN0aW9uUG9saWN5LnQuc29sOlN0cmVhbUdvdmVybmFuY2VBY3Rpb25Qb2xpY3lUYXJnZXQjZnVuY3Rpb246MHhhYTk4YzY0Zg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "selectedCall",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 36,
+            "byteStart": 316,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamGovernanceActionPolicy.t.sol#L9",
+            "lineEnd": 9,
+            "lineStart": 9,
+            "snippetSha256": "sha256:6cf75f936dab658fd87301f0b92c77f571ede0fadbad736d8a1df23a50532afe",
+            "sourceSha256": "sha256:e095cbae77639a3f09a2c691b3e3286757b2b9ded38fe7100106f31ee9ccee97"
+          },
+          "selector": "0xaa98c64f",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamGovernanceActionPolicy.t.sol:StreamGovernanceActionPolicyTarget",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlQWN0aW9uUG9saWN5LnQuc29sOlN0cmVhbUdvdmVybmFuY2VBY3Rpb25Qb2xpY3lUYXJnZXQ",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamGovernanceActionPolicy.t.sol:StreamGovernanceActionPolicyTarget"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamGovernanceActionPolicyTarget",
+    "natspec": "",
+    "range": {
+      "byteLength": 88,
+      "byteStart": 266,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamGovernanceActionPolicy.t.sol#L8-L10",
+      "lineEnd": 10,
+      "lineStart": 8,
+      "snippetSha256": "sha256:829fa86e922ad5e00891765bb21845fa792c8c0d8307a5220efd3a6dbdc1a237",
+      "sourceSha256": "sha256:e095cbae77639a3f09a2c691b3e3286757b2b9ded38fe7100106f31ee9ccee97"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamGovernanceActionPolicy.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-09-09.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 2
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 1
+    },
+    "totalCount": 2
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamGovernanceActionPolicy.t.sol:StreamGovernanceActionPolicyTarget",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGovernanceActionPolicy.t.sol:StreamGovernanceActionPolicyTarget#function:0xaa98c64f",
+      "definitionId": "test/StreamGovernanceActionPolicy.t.sol:StreamGovernanceActionPolicyTarget",
+      "severity": "advisory"
+    }
+  ]
+}

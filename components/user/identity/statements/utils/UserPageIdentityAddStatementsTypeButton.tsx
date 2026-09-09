@@ -1,51 +1,59 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import type { STATEMENT_TYPE } from "@/helpers/Types";
-import { STATEMENT_META } from "@/helpers/Types";
 import SocialStatementIcon from "@/components/user/utils/icons/SocialStatementIcon";
+import { STATEMENT_META, type STATEMENT_TYPE } from "@/helpers/Types";
+import clsx from "clsx";
+import type { TouchEvent } from "react";
+
+export const ADD_STATEMENT_PLATFORM_TOOLTIP_ID =
+  "add-statement-platform-tooltip";
 
 export default function UserPageIdentityAddStatementsTypeButton({
   statementType,
+  label,
   isActive,
   isFirst,
   isLast,
   onClick,
 }: {
   readonly statementType: STATEMENT_TYPE;
+  readonly label?: string | undefined;
   readonly isActive: boolean;
   readonly isFirst: boolean;
   readonly isLast: boolean;
   readonly onClick: () => void;
 }) {
-  const getActivityClass = () =>
-    isActive ? "tw-bg-iron-800" : "tw-bg-transparent";
-
-  const getPositionClass = () => {
-    if (isFirst) {
-      return "tw-rounded-l-md";
-    } else if (isLast) {
-      return "tw-rounded-r-md";
-    }
-    return "";
+  const title = label ?? STATEMENT_META[statementType].title;
+  const onTouchStart = (event: TouchEvent<HTMLButtonElement>) => {
+    // Platform taps must not start the parent sheet's swipe-to-dismiss
+    // gesture. The picker tooltip handles the same tap independently.
+    event.stopPropagation();
   };
-
-  const getDynamicClasses = () => `${getActivityClass()} ${getPositionClass()}`;
-  const [dynamicClasses, setDynamicClasses] = useState(getDynamicClasses());
-
-  useEffect(() => {
-    setDynamicClasses(getDynamicClasses());
-  }, [isActive, isFirst, isLast]);
 
   return (
     <button
       onClick={onClick}
+      onTouchStart={onTouchStart}
       type="button"
-      className={`${dynamicClasses} tw-relative -tw-ml-px tw-flex tw-items-center tw-justify-center tw-flex-1 tw-py-3 tw-text-sm tw-font-semibold tw-text-iron-100 tw-border-none tw-ring-1 tw-ring-inset tw-ring-iron-800 hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out tw-focus:tw-z-10`}>
-      <div className="tw-flex-shrink-0 tw-w-5 tw-h-5">
+      aria-pressed={isActive}
+      data-tooltip-id={ADD_STATEMENT_PLATFORM_TOOLTIP_ID}
+      data-tooltip-content={title}
+      className={clsx(
+        "tw-relative -tw-ml-px tw-flex tw-min-h-11 tw-flex-1 tw-touch-manipulation tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-px-0 tw-py-3 tw-text-iron-100 tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-transition-colors tw-duration-300 tw-ease-out focus:tw-outline-none focus-visible:tw-z-20 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 motion-reduce:tw-transition-none",
+        isFirst && "tw-rounded-l-md",
+        isLast && "tw-rounded-r-md",
+        isActive
+          ? "tw-z-10 tw-bg-iron-800 tw-ring-2 tw-ring-primary-400"
+          : "desktop-hover:hover:tw-bg-iron-800"
+      )}
+    >
+      <span
+        aria-hidden="true"
+        className="tw-flex tw-size-5 tw-flex-shrink-0 tw-items-center tw-justify-center"
+      >
         <SocialStatementIcon statementType={statementType} />
-      </div>
-      <span className="tw-sr-only">{STATEMENT_META[statementType].title}</span>
+      </span>
+      <span className="tw-sr-only">{title}</span>
     </button>
   );
 }

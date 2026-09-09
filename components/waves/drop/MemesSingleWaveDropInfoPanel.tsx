@@ -2,6 +2,7 @@
 
 import { MobileVotingModal, VotingModal } from "@/components/voting";
 import { useVotingModalState } from "@/components/voting/useVotingModalState";
+import type { ApiDropVoteDistribution } from "@/generated/models/ApiDropVoteDistribution";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { getFileInfoFromUrl } from "@/helpers/file.helpers";
 import {
@@ -10,7 +11,7 @@ import {
 } from "@/helpers/waves/drop.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
-import useIsMobileScreen from "@/hooks/isMobileScreen";
+import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 import { useWaveRankReward } from "@/hooks/waves/useWaveRankReward";
 import { useCallback, useMemo } from "react";
 import { MemesDropArtworkHero } from "./MemesDropArtworkHero";
@@ -19,6 +20,7 @@ import { MemesDropSummarySection } from "./MemesDropSummarySection";
 
 interface MemesSingleWaveDropInfoPanelProps {
   readonly drop: ExtendedDrop;
+  readonly voteDistribution?: ApiDropVoteDistribution | undefined;
   readonly wave: ApiWave | null;
   readonly onClose?: (() => void) | undefined;
   readonly isVotingClosed?: boolean | undefined;
@@ -28,13 +30,14 @@ interface MemesSingleWaveDropInfoPanelProps {
 
 export const MemesSingleWaveDropInfoPanel = ({
   drop,
+  voteDistribution,
   wave,
   onClose,
   isVotingClosed = false,
   isVotingControlsLocked = false,
   outcomesVisible = true,
 }: MemesSingleWaveDropInfoPanelProps) => {
-  const isMobileScreen = useIsMobileScreen();
+  const isCompactLayout = useIsMobileLayoutViewport();
   const { isWinner, canDelete, canShowVote, isVotingEnded } =
     useDropInteractionRules(drop);
   const isVotingActionLocked = isVotingClosed || isVotingControlsLocked;
@@ -137,6 +140,7 @@ export const MemesSingleWaveDropInfoPanel = ({
 
         <MemesDropDetailsSection
           drop={drop}
+          voteDistribution={voteDistribution}
           wave={wave}
           artworkMedia={artworkMedia}
           fileInfo={fileInfo}
@@ -148,7 +152,7 @@ export const MemesSingleWaveDropInfoPanel = ({
         />
       </div>
 
-      {isMobileScreen ? (
+      {isCompactLayout ? (
         <MobileVotingModal
           drop={drop}
           isOpen={isVotingOpen}

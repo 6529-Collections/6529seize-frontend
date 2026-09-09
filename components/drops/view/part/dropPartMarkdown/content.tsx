@@ -208,6 +208,74 @@ const isSmartLinkElement = (
   );
 };
 
+const isWhitespaceOnlyReactNode = (node: ReactNode): boolean => {
+  if (typeof node === "string") {
+    return node.trim().length === 0;
+  }
+
+  if (!isValidElement<MarkdownElementProps>(node)) {
+    return false;
+  }
+
+  const children = Children.toArray(node.props.children);
+  return children.length > 0 && children.every(isWhitespaceOnlyReactNode);
+};
+
+const liftNestedMarkdownBlocks = (
+  node: ReactNode,
+  isBlockElement: (candidate: ReactNode) => boolean,
+  path: string
+): ReactNode[] => {
+  if (isBlockElement(node) || !isValidElement<MarkdownElementProps>(node)) {
+    return [node];
+  }
+
+  const children = Children.toArray(node.props.children);
+  if (children.length === 0) {
+    return [node];
+  }
+
+  const liftedChildren = children.flatMap((child, index) =>
+    liftNestedMarkdownBlocks(child, isBlockElement, `${path}.${index}`)
+  );
+  if (!liftedChildren.some(isBlockElement)) {
+    return [node];
+  }
+
+  const result: ReactNode[] = [];
+  let inlineChildren: ReactNode[] = [];
+  let inlineChunkIndex = 0;
+
+  const flushInlineChildren = () => {
+    if (
+      inlineChildren.length > 0 &&
+      !inlineChildren.every(isWhitespaceOnlyReactNode)
+    ) {
+      result.push(
+        cloneElement(
+          node,
+          { key: `markdown-inline:${path}:${inlineChunkIndex}` },
+          inlineChildren
+        )
+      );
+      inlineChunkIndex += 1;
+    }
+    inlineChildren = [];
+  };
+
+  for (const child of liftedChildren) {
+    if (isBlockElement(child)) {
+      flushInlineChildren();
+      result.push(child);
+    } else {
+      inlineChildren.push(child);
+    }
+  }
+  flushInlineChildren();
+
+  return result;
+};
+
 const containsOnlyNativeEmojis = (str: string): boolean => {
   const text = str.trim();
   if (text.length === 0) {
@@ -456,7 +524,11 @@ export const createMarkdownContentRenderers = ({
     };
 
     const { children } = params;
-    const flattened = Children.toArray(children);
+    const isBlockElement = (node: ReactNode): boolean =>
+      isMarkdownImageElement(node) || isSmartLinkElement(node, isSmartLink);
+    const flattened = Children.toArray(children).flatMap((node, index) =>
+      liftNestedMarkdownBlocks(node, isBlockElement, String(index))
+    );
 
     const elements: ReactNode[] = [];
     let currentTextChunk: ReactNode[] = [];

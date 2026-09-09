@@ -1,22 +1,22 @@
 "use client";
 
 import { useCompactMode } from "@/contexts/CompactModeContext";
-import type { ApiCreateDropPart } from "@/generated/models/ApiCreateDropPart";
+import { useEditingDrop } from "@/contexts/EditingDropContext";
 import type { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
 import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
 import { ApiDropType } from "@/generated/models/ApiDropType";
-import type { ApiUpdateDropRequest } from "@/generated/models/ApiUpdateDropRequest";
+import { buildDropUpdateRequest } from "@/helpers/waves/drop-update.helpers";
 import { useDropUpdateMutation } from "@/hooks/drops/useDropUpdateMutation";
 import useDropActionInteractionMode from "@/hooks/useDropActionInteractionMode";
+import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 import useLongPressClickSuppression from "@/hooks/useLongPressClickSuppression";
-import { useEditingDrop } from "@/contexts/EditingDropContext";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
-
 import { DropLocation, hasDropFooter } from "./drop.types";
 import type { BoostAnimationState } from "./DropBoostAnimation";
 import DropBoostAnimation from "./DropBoostAnimation";
 import WaveDropActions from "./WaveDropActions";
+import { getWaveDropActionPresentation } from "./WaveDropActionPresentation";
 import WaveDropMetadata from "./WaveDropMetadata";
 import {
   useWaveDropMobileMenu,
@@ -55,9 +55,10 @@ import {
   shouldOffsetFooterRow,
   shouldShowAuthorInfo,
   shouldShowGroupedDropTimestamp,
-  shouldShowTouchActionsButton,
 } from "./WaveDrop.helpers";
 import type { WaveDropProps } from "./WaveDrop.types";
+import { ModerationRejectedDeliveryStatus } from "./ModerationRejectedDeliveryStatus";
+import { useWaveDropModerationPresentation } from "./useWaveDropModerationPresentation";
 
 const WaveDropInner = ({
   drop,
@@ -77,6 +78,8 @@ const WaveDropInner = ({
   identityMode = "default",
   timestampLayout = "inline",
   showInteractions = true,
+  showStandaloneActionsButton = false,
+  standaloneQuickRemoveCuration = null,
   inlineAuthorOnDesktop = false,
   mediaImageScale,
   fullWidthMedia = false,
@@ -113,6 +116,8 @@ const WaveDropInner = ({
   const isActiveDrop = activeDrop?.drop.id === drop.id;
   const isStorm = drop.parts.length > 1;
   const isDrop = drop.drop_type === ApiDropType.Participatory;
+  const { isModerationRejected, effectiveShowInteractions } =
+    useWaveDropModerationPresentation(drop, showInteractions);
 
   const shouldGroupWithPreviousDrop = shouldGroupCurrentDrop({
     isDrop,
@@ -128,8 +133,9 @@ const WaveDropInner = ({
 
   const { canUseDesktopHoverActions, canUseTouchActionSheet } =
     useDropActionInteractionMode();
+  const isMobileLayoutViewport = useIsMobileLayoutViewport();
   const mobileMenu = useWaveDropMobileMenu();
-  const allowLongPress = showInteractions && canUseTouchActionSheet;
+  const allowLongPress = effectiveShowInteractions && canUseTouchActionSheet;
   // Pointer-driven row hover: some browsers (capability-lying convertibles)
   // never activate CSS :hover although mouse pointer events flow, leaving the
   // group-hover action reveal invisible. Track the cursor with pointer events
@@ -175,10 +181,19 @@ const WaveDropInner = ({
     isProfileView,
     location,
   });
-  const showActionsButton = shouldShowTouchActionsButton({
-    showInteractions,
-    hasTouch: canUseTouchActionSheet,
+  const {
+    canUseMobileActionsSheet,
+    showActionsButton,
+    showActionsButtonOnMobile,
+    desktopActions,
+  } = getWaveDropActionPresentation({
+    drop,
+    showStandaloneActionsButton,
+    standaloneQuickRemoveCuration,
+    showInteractions: effectiveShowInteractions,
     showReplyAndQuote,
+    isMobileLayoutViewport,
+    canUseTouchActionSheet,
     isEditing,
     identityMode,
   });
@@ -465,6 +480,8 @@ const WaveDropInner = ({
     isStorm,
     activePartIndex,
     showActionsButton,
+    showActionsButtonOnMobile,
+    desktopActions,
     handleOpenTouchActions,
     timestampLayout,
   });
@@ -482,48 +499,13 @@ const WaveDropInner = ({
       _mentionedGroups?: ApiDropGroupMention[],
       mentionedWaves?: ApiMentionedWave[]
     ) => {
-      // Clean mentioned users to only include allowed fields for API
-      const cleanedMentions = (mentions ?? drop.mentioned_users).map(
-        (user) => ({
-          mentioned_profile_id: user.mentioned_profile_id,
-          handle_in_content: user.handle_in_content,
-          // Exclude current_handle as it's not allowed in update requests
-        })
-      );
-      const cleanedWaves = (mentionedWaves ?? drop.mentioned_waves).map(
-        (wave) => ({
-          wave_id: wave.wave_id,
-          wave_name_in_content: wave.wave_name_in_content,
-        })
-      );
-      const updatedParts: ApiCreateDropPart[] = drop.parts.map(
-        (part, index) => {
-          const attachments = (part.attachments ?? []).map((attachment) => ({
-            attachment_id: attachment.attachment_id,
-          }));
-          const requestPart: ApiCreateDropPart = {
-            content: index === activePartIndex ? newContent : part.content,
-            quoted_drop: part.quoted_drop ?? null,
-            media: part.media,
-          };
-
-          if (attachments.length) {
-            requestPart.attachments = attachments;
-          }
-
-          return requestPart;
-        }
-      );
-
-      const updateRequest: ApiUpdateDropRequest = {
-        parts: updatedParts,
-        title: drop.title,
-        metadata: drop.metadata,
-        referenced_nfts: drop.referenced_nfts,
-        mentioned_users: cleanedMentions,
-        mentioned_waves: cleanedWaves,
-        signature: null,
-      };
+      const updateRequest = buildDropUpdateRequest({
+        drop,
+        activePartIndex,
+        newContent,
+        mentions,
+        mentionedWaves,
+      });
 
       // Optimistically close the editor
       setEditingDropId(null);
@@ -587,7 +569,7 @@ const WaveDropInner = ({
   }, []);
 
   useEffect(() => {
-    if (canUseTouchActionSheet) {
+    if (canUseMobileActionsSheet) {
       return;
     }
 
@@ -599,7 +581,7 @@ const WaveDropInner = ({
     mobileMenu?.close();
     clearSuppression();
   }, [
-    canUseTouchActionSheet,
+    canUseMobileActionsSheet,
     clearSuppression,
     mobileMenu,
     resetTimestampSwipe,
@@ -614,11 +596,12 @@ const WaveDropInner = ({
   }, [resetTimestampSwipe, showGroupedTimestamp]);
 
   // Derive effective menu state - menu can't be open while editing
-  const effectiveIsSlideUp = isSlideUp && !isEditing && canUseTouchActionSheet;
+  const effectiveIsSlideUp =
+    isSlideUp && !isEditing && canUseMobileActionsSheet;
 
   useWaveDropMobileMenuController({
     drop,
-    enabled: showInteractions,
+    enabled: effectiveShowInteractions,
     isOpen: effectiveIsSlideUp,
     longPressTriggered,
     showReplyAndQuote,
@@ -627,6 +610,8 @@ const WaveDropInner = ({
     onAddReaction: handleOnAddReaction,
     onEdit: handleOnEdit,
     onBoostAnimation: handleMobileBoostAnimation,
+    showOnlyQuickRemove: showStandaloneActionsButton,
+    standaloneQuickRemoveCuration,
   });
 
   const dropClasses = getDropClasses(
@@ -634,7 +619,8 @@ const WaveDropInner = ({
     groupingClass,
     location,
     drop.rank,
-    isDrop
+    isDrop,
+    isModerationRejected
   );
 
   const contentBlock = getContentBlock({
@@ -666,24 +652,29 @@ const WaveDropInner = ({
     quotePath,
     embedDepth,
     maxEmbedDepth,
+    isLocallyFailed: isModerationRejected,
   });
 
   const contentOffsetClass = inlineAuthorOnDesktop
     ? ""
     : getContentOffsetClass(compact);
-  const reactionsRow = (drop.metadata.length > 0 || showInteractions) && (
-    <div
-      className={`tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 md:tw-mx-2 ${contentOffsetClass}`}
-    >
-      {drop.metadata.length > 0 && (
-        <WaveDropMetadata metadata={drop.metadata} />
-      )}
-      {showInteractions && !!drop.raters_count && (
-        <WaveDropRatings drop={drop} />
-      )}
-      {showInteractions && <WaveDropReactions drop={drop} />}
-    </div>
+  const moderationRejectedStatus = isModerationRejected && (
+    <ModerationRejectedDeliveryStatus contentOffsetClass={contentOffsetClass} />
   );
+  const reactionsRow = !isModerationRejected &&
+    (drop.metadata.length > 0 || effectiveShowInteractions) && (
+      <div
+        className={`tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 md:tw-mx-2 ${contentOffsetClass}`}
+      >
+        {drop.metadata.length > 0 && (
+          <WaveDropMetadata metadata={drop.metadata} />
+        )}
+        {effectiveShowInteractions && !!drop.raters_count && (
+          <WaveDropRatings drop={drop} />
+        )}
+        {effectiveShowInteractions && <WaveDropReactions drop={drop} />}
+      </div>
+    );
   const shouldOffsetFooter = shouldOffsetFooterRow({
     inlineAuthorOnDesktop,
     showAuthorInfo,
@@ -691,7 +682,7 @@ const WaveDropInner = ({
     isProfileView,
   });
   const footerOffsetClass = shouldOffsetFooter ? contentOffsetClass : "";
-  const footerRow = hasDropFooter(footer) && (
+  const footerRow = !isModerationRejected && hasDropFooter(footer) && (
     <div className={`tw-mt-2 md:tw-mx-2 ${footerOffsetClass}`}>{footer}</div>
   );
   const outerClass = getWaveDropOuterClass({
@@ -743,9 +734,11 @@ const WaveDropInner = ({
           style={swipeableContentStyle}
         >
           {wrapContentOnly ? wrapContentOnly(contentBlock) : contentBlock}
+          {moderationRejectedStatus}
           {canUseDesktopHoverActions &&
-            showInteractions &&
+            effectiveShowInteractions &&
             showReplyAndQuote &&
+            !showStandaloneActionsButton &&
             !isEditing && (
               <WaveDropActions
                 drop={drop}

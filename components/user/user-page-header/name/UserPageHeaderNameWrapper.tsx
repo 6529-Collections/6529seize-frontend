@@ -1,8 +1,8 @@
 "use client";
 
-import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
-import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
-import PencilIcon from "@/components/utils/icons/PencilIcon";
+import PencilIcon, {
+  PencilIconSize,
+} from "@/components/utils/icons/PencilIcon";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import React, { useState } from "react";
 import UserPageHeaderEditName from "./UserPageHeaderEditName";
@@ -39,27 +39,19 @@ export default function UserPageHeaderNameWrapper({
       >
         <div
           aria-hidden="true"
-          className="tw-absolute tw-inset-0 tw-hidden tw-text-iron-400 group-focus-within:tw-block group-hover:tw-block"
+          className="tw-absolute tw-inset-0 tw-hidden tw-text-iron-400 group-focus-within:tw-block desktop-hover:group-hover:tw-block touch-only:tw-block"
         >
           <div className="tw-absolute -tw-left-5 tw-top-1/2 tw-z-10 tw-flex tw-size-5 -tw-translate-y-1/2 tw-items-center tw-justify-center">
-            <PencilIcon />
+            <PencilIcon size={PencilIconSize.SMALL} />
           </div>
         </div>
       </button>
-      <CommonAnimationWrapper mode="sync" initial={true}>
-        {isEditNameOpen && (
-          <CommonAnimationOpacity
-            key="modal"
-            elementClasses="tw-absolute tw-z-10"
-            onClicked={(e) => e.stopPropagation()}
-          >
-            <UserPageHeaderEditName
-              profile={profile}
-              onClose={() => setIsEditNameOpen(false)}
-            />
-          </CommonAnimationOpacity>
-        )}
-      </CommonAnimationWrapper>
+      {isEditNameOpen && (
+        <UserPageHeaderEditName
+          profile={profile}
+          onClose={() => setIsEditNameOpen(false)}
+        />
+      )}
     </div>
   );
 }

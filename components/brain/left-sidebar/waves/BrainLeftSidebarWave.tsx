@@ -20,6 +20,7 @@ import {
 import useDeviceInfo from "../../../../hooks/useDeviceInfo";
 import BrainLeftSidebarWaveDropTime from "./BrainLeftSidebarWaveDropTime";
 import BrainLeftSidebarWavePin from "./BrainLeftSidebarWavePin";
+import { AnnouncementWaveIcon } from "./SidebarIconTile";
 import {
   SidebarParentSubwaveConnector,
   SidebarSubwaveConnector,
@@ -33,6 +34,7 @@ import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore
 const SUBWAVE_PREFETCH_HOVER_INTENT_MS = 150;
 
 interface BrainLeftSidebarWaveProps {
+  readonly isAnnouncement?: boolean | undefined;
   readonly wave: MinimalWave;
   readonly onHover: (waveId: string) => void;
   readonly showPin?: boolean | undefined;
@@ -96,6 +98,7 @@ const getRowPresentationClasses = (isChildRow: boolean) => {
 };
 
 const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
+  isAnnouncement = false,
   wave,
   onHover,
   showPin = true,
@@ -249,7 +252,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
       className={`tw-group tw-relative tw-flex tw-items-center ${rowHeightClasses} ${rowGapClasses} ${rowPaddingClasses} ${rowVerticalPaddingClasses} tw-transition-colors tw-duration-200 tw-ease-out ${
         isActive
           ? "tw-bg-iron-700/50 desktop-hover:hover:tw-bg-iron-700/70"
-          : "desktop-hover:hover:tw-bg-iron-800/80"
+          : "desktop-hover:hover:tw-bg-iron-900/80"
       }`}
     >
       {!isChildRow && showSubwaveConnector && (
@@ -276,17 +279,25 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
           className="tw-relative tw-flex-shrink-0"
         >
           <div
-            className={`tw-relative ${avatarSizeClasses} tw-rounded-full tw-transition tw-duration-300 desktop-hover:group-hover:tw-brightness-110 ${getAvatarRingClasses()} ${
-              isActive
+            className={`tw-relative ${avatarSizeClasses} ${
+              isAnnouncement ? "tw-rounded-lg" : "tw-rounded-full"
+            } tw-transition tw-duration-300 desktop-hover:group-hover:tw-brightness-110 ${
+              isAnnouncement ? "" : getAvatarRingClasses()
+            } ${
+              isAnnouncement || isActive
                 ? "tw-opacity-100"
                 : "tw-opacity-80 desktop-hover:group-hover:tw-opacity-100"
             }`}
           >
-            <WavePicture
-              name={wave.name}
-              picture={wave.picture}
-              contributors={wave.contributors}
-            />
+            {isAnnouncement ? (
+              <AnnouncementWaveIcon />
+            ) : (
+              <WavePicture
+                name={wave.name}
+                picture={wave.picture}
+                contributors={wave.contributors}
+              />
+            )}
             {isDropWave && (
               <div className={dropBadgeClasses}>
                 <svg
@@ -348,7 +359,11 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
               </div>
               {shouldShowDropTime && (
                 <div
-                  className={`tw-inline-flex tw-min-w-0 tw-items-center tw-whitespace-nowrap ${timestampTextClasses} tw-leading-tight tw-text-iron-500 tw-transition-colors tw-duration-200 desktop-hover:group-hover:tw-text-iron-400`}
+                  className={`tw-inline-flex tw-min-w-0 tw-items-center tw-whitespace-nowrap ${timestampTextClasses} tw-font-normal tw-leading-tight tw-transition-colors tw-duration-200 ${
+                    isActive
+                      ? "tw-text-iron-400 desktop-hover:group-hover:tw-text-iron-400"
+                      : "tw-text-iron-500 desktop-hover:group-hover:tw-text-iron-500"
+                  }`}
                 >
                   <BrainLeftSidebarWaveDropTime time={latestDropTimestamp} />
                 </div>

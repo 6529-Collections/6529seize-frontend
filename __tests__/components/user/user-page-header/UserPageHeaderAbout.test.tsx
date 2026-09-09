@@ -5,6 +5,12 @@ import type { CicStatement } from "@/entities/IProfile";
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
 
+let mockIsDesktopAboutEditor = false;
+
+jest.mock("@/hooks/useMediaQuery", () => ({
+  useMediaQuery: () => mockIsDesktopAboutEditor,
+}));
+
 jest.mock(
   "@/components/user/user-page-header/about/UserPageHeaderAboutStatement",
   () => (props: any) => (
@@ -15,7 +21,23 @@ jest.mock(
 jest.mock(
   "@/components/user/user-page-header/about/UserPageHeaderAboutEdit",
   () => (props: any) => (
-    <button data-testid="edit" type="button" onClick={() => props.onClose()} />
+    <div data-testid="edit">
+      <input
+        aria-label="About draft"
+        value={props.value}
+        onChange={(event) => props.onValueChange(event.target.value)}
+      />
+      <button
+        type="button"
+        onClick={() => props.onErrorMsgChange("Save failed")}
+      >
+        Set error
+      </button>
+      <span>{props.errorMsg}</span>
+      <button type="button" onClick={() => props.onClose()}>
+        Close editor
+      </button>
+    </div>
   )
 );
 
@@ -38,6 +60,10 @@ const statement: CicStatement = {
 };
 
 describe("UserPageHeaderAbout", () => {
+  beforeEach(() => {
+    mockIsDesktopAboutEditor = false;
+  });
+
   it("opens edit view from the empty About add action", async () => {
     render(
       <UserPageHeaderAbout profile={profile} statement={null} canEdit={true} />
@@ -77,7 +103,10 @@ describe("UserPageHeaderAbout", () => {
     expect(editButton).toHaveClass("tw-hidden", "sm:tw-block");
     expect(editButton).toHaveClass(
       "desktop-hover:group-hover:tw-pointer-events-auto",
-      "desktop-hover:group-hover:tw-opacity-100"
+      "desktop-hover:group-hover:tw-opacity-100",
+      "touch-only:tw-pointer-events-auto",
+      "touch-only:tw-size-11",
+      "touch-only:tw-opacity-100"
     );
   });
 
@@ -93,5 +122,36 @@ describe("UserPageHeaderAbout", () => {
       />
     );
     expect(screen.getByTestId("statement")).toBeInTheDocument();
+  });
+
+  it("preserves the About draft and error across breakpoint changes", async () => {
+    const { rerender } = render(
+      <UserPageHeaderAbout
+        profile={profile}
+        statement={statement}
+        canEdit={true}
+      />
+    );
+    await userEvent.click(
+      screen.getByRole("button", { name: "Edit About statement" })
+    );
+    const draft = screen.getByRole("textbox", { name: "About draft" });
+    await userEvent.clear(draft);
+    await userEvent.type(draft, "Unsaved draft");
+    await userEvent.click(screen.getByRole("button", { name: "Set error" }));
+
+    mockIsDesktopAboutEditor = true;
+    rerender(
+      <UserPageHeaderAbout
+        profile={profile}
+        statement={statement}
+        canEdit={true}
+      />
+    );
+
+    expect(screen.getByRole("textbox", { name: "About draft" })).toHaveValue(
+      "Unsaved draft"
+    );
+    expect(screen.getByText("Save failed")).toBeInTheDocument();
   });
 });

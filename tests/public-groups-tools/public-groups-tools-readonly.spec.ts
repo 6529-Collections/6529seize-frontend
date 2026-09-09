@@ -57,7 +57,34 @@ async function expectSubscriptionsSettled(page: Page) {
   });
 }
 
-test.describe("Public groups, tools, and calendar read-only coverage @surface @medium @large @readonly", () => {
+function resolveApiEndpoint(baseURL: string): string {
+  const appUrl = new URL(baseURL);
+  if (process.env["PLAYWRIGHT_COMPOSER_SANDBOX"] === "1") {
+    const sandboxPort =
+      process.env["PLAYWRIGHT_COMPOSER_SANDBOX_API_PORT"] ||
+      String(Number(appUrl.port || "3001") + 1000);
+    return `http://127.0.0.1:${sandboxPort}`;
+  }
+  if (appUrl.hostname === "staging.6529.io") {
+    return "https://api.staging.6529.io";
+  }
+  if (appUrl.hostname === "6529.io" || appUrl.hostname === "www.6529.io") {
+    return "https://api.6529.io";
+  }
+  return process.env["API_ENDPOINT"] || "http://localhost:3000";
+}
+
+async function getStagingApiHeaders(
+  page: Page
+): Promise<Record<string, string>> {
+  const apiAuth = (await page.context().cookies()).find(
+    (cookie) => cookie.name === "x-6529-auth"
+  )?.value;
+
+  return apiAuth ? { "x-6529-auth": apiAuth } : {};
+}
+
+test.describe("Public tools, calendar, and removed Groups route coverage @surface @medium @large @readonly", () => {
   test("renders the Tools index with grouped utility links", async ({
     page,
   }) => {
@@ -86,56 +113,51 @@ test.describe("Public groups, tools, and calendar read-only coverage @surface @m
     await expectNoHorizontalOverflow(page);
   });
 
-  test("renders the public Groups browse surface without write controls", async ({
-    page,
-  }) => {
-    await gotoReady(page, "/network/groups");
+  for (const path of [
+    "/network/groups",
+    "/network/groups?edit=new",
+    "/network/groups?edit=example-group",
+  ]) {
+    test(`keeps the removed Groups route unavailable at ${path}`, async ({
+      page,
+    }) => {
+      await gotoDocumentWithTransientRetry(page, path);
 
-    await expect(page).toHaveURL((url) => url.pathname === "/network/groups");
-    await expect(page).toHaveTitle(/Groups/i);
-    await expect(
-      page.getByRole("heading", { level: 1, name: "Groups" })
-    ).toBeVisible();
-    await expect(page.getByLabel("By Identity")).toBeVisible();
-    await expect(page.getByLabel("By Group Name")).toBeVisible();
-    await expect(page.getByRole("button", { name: "Create New" })).toHaveCount(
-      0
-    );
-    await expect(page.getByRole("button", { name: "My groups" })).toHaveCount(
-      0
-    );
-
-    const groupNameInput = page.getByLabel("By Group Name");
-    await groupNameInput.fill("6529");
-    await expect(page).toHaveURL((url) => {
-      return (
-        url.pathname === "/network/groups" &&
-        url.searchParams.get("group") === "6529"
-      );
+      await expect(page).toHaveURL((url) => url.href.endsWith(path));
+      await expect(page).toHaveTitle(/404/i);
+      await expect(
+        page.getByRole("heading", { name: /404.*PAGE NOT FOUND/i })
+      ).toBeVisible();
+      await expectNoHorizontalOverflow(page);
     });
-    await expectNoHorizontalOverflow(page);
-  });
+  }
 
-  test("activates and clears a network group filter through the active-group state", async ({
+  test("uses a criteria-only network filter and restores deep-linked groups", async ({
+    baseURL,
     page,
   }) => {
     await gotoReady(page, "/network");
 
-    // Resolve a real group id from the app's own unfiltered groups request
-    // (fired when the filter panel opens) so the test stays portable across
-    // local, staging, and production data sets.
-    const groupsResponsePromise = page.waitForResponse(
-      (response) =>
-        response.request().method() === "GET" &&
-        /\/groups(\?|$)/.test(response.url()) &&
-        response.ok(),
-      { timeout: 30000 }
-    );
     await openGroupFilters(page);
-    await expect(page.getByLabel(/^(By )?Group [Nn]ame$/).first()).toBeVisible({
-      timeout: 30000,
-    });
-    const groupsResponse = await groupsResponsePromise;
+    await expect(
+      page
+        .getByRole("button", { name: "Edit criteria" })
+        .filter({ visible: true })
+    ).toBeVisible({ timeout: 30000 });
+    await expect(
+      page
+        .getByRole("button", { name: "Choose group" })
+        .filter({ visible: true })
+    ).toHaveCount(0);
+    await expect(page.getByText("Hide criteria and members")).toHaveCount(0);
+
+    // Resolve a real group id read-only so the deep-link behavior remains
+    // portable across local, staging, and production data sets.
+    const groupsResponse = await page.request.get(
+      `${resolveApiEndpoint(baseURL ?? "http://localhost:3001")}/api/groups`,
+      { headers: await getStagingApiHeaders(page) }
+    );
+    expect(groupsResponse.ok()).toBe(true);
     const groupsPayload = (await groupsResponse.json()) as
       | { readonly id?: string; readonly name?: string }[]
       | { readonly data?: { readonly id?: string; readonly name?: string }[] };
@@ -146,26 +168,32 @@ test.describe("Public groups, tools, and calendar read-only coverage @surface @m
       0
     );
     const groupId = groups[0]?.id;
-    expect(typeof groupId).toBe("string");
+    if (typeof groupId !== "string") {
+      throw new Error("Expected the first public group to have an id");
+    }
 
     // Deep-link the group: the URL param hydrates the active-group state.
     await gotoReady(page, `/network?group=${groupId}`);
     await expect(page).toHaveURL(
       (url) => url.searchParams.get("group") === groupId
     );
-    await openGroupFilters(page);
 
-    // The active-group block is required: "Members:" in the desktop sidebar,
-    // "Active filter" in the mobile sheet.
-    await expect(page.getByText(/Members:|Active filter/).first()).toBeVisible({
-      timeout: 30000,
-    });
+    // The current Network UI exposes the active state in the filter trigger and
+    // the selected-group summary on both desktop and mobile layouts.
+    await expect(
+      page.getByRole("button", { name: "Open group filters (active)" })
+    ).toBeVisible({ timeout: 30000 });
+    await expect(page.getByText("Selected group", { exact: true })).toBeVisible(
+      {
+        timeout: 30000,
+      }
+    );
 
     // Clearing the group exercises the state transition back to null and
     // must drop the URL param.
     const clearButton = page
-      .getByRole("button", { name: /remove|clear group/i })
-      .first();
+      .getByRole("button", { name: "Clear selected group" })
+      .filter({ visible: true });
     await expect(clearButton).toBeVisible({ timeout: 15000 });
     await clearButton.click();
     await expect(page).toHaveURL(

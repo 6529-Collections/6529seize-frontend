@@ -13,6 +13,7 @@ import "@/styles/animations.css";
 import "@/styles/globals.css";
 
 import DynamicHeadTitle from "@/components/dynamic-head/DynamicHeadTitle";
+import { NATIVE_IOS_BOOTSTRAP_SCRIPT } from "@/components/eula/nativeIosBootstrap";
 import AwsRumProvider from "@/components/monitoring/AwsRumProvider";
 import MobileLaunchTimingReporter from "@/components/monitoring/MobileLaunchTimingReporter";
 import LayoutWrapper from "@/components/providers/LayoutWrapper";
@@ -21,7 +22,10 @@ import RuntimeFavicon from "@/components/providers/RuntimeFavicon";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { getProductionAppEnvironment } from "@/config/appEnvironment";
 import { publicEnv } from "@/config/env";
+import { CONSENT_EULA_COOKIE, NATIVE_IOS_COOKIE } from "@/constants/constants";
 import type { Viewport } from "next";
+import { cookies } from "next/headers";
+import Script from "next/script";
 
 export const fetchCache = "force-no-store";
 
@@ -35,16 +39,24 @@ export const viewport: Viewport = {
   maximumScale: 10,
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   readonly children: React.ReactNode;
 }) {
   const isUsingStaticAssets = publicEnv.ASSETS_FROM_S3 === "true";
+  const cookieStore = await cookies();
+  const initialIsIos = cookieStore.get(NATIVE_IOS_COOKIE)?.value === "true";
+  const initialEulaConsentVersion = cookieStore.get(CONSENT_EULA_COOKIE)?.value;
 
   return (
     <html lang="en" data-scroll-behavior="smooth">
       <head>
+        <Script
+          id="native-ios-platform-bootstrap"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{ __html: NATIVE_IOS_BOOTSTRAP_SCRIPT }}
+        />
         <link
           data-runtime-favicon="png"
           rel="icon"
@@ -72,7 +84,10 @@ export default function RootLayout({
         <RuntimeFavicon />
         <MobileLaunchTimingReporter />
         <AwsRumProvider>
-          <Providers>
+          <Providers
+            initialIsIos={initialIsIos}
+            initialEulaConsentVersion={initialEulaConsentVersion}
+          >
             <DynamicHeadTitle />
             <LayoutWrapper>{children}</LayoutWrapper>
           </Providers>

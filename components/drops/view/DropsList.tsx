@@ -15,6 +15,7 @@ import type { RefObject } from "react";
 import { memo, useCallback, useMemo, useState } from "react";
 import BoostedDropCardHome from "@/components/home/boosted/BoostedDropCardHome";
 import BoostedDropCompactChatItem from "@/components/home/boosted/BoostedDropCompactChatItem";
+import ContentModerationDropGate from "@/components/content-moderation/ContentModerationDropGate";
 import HighlightDropWrapper from "./HighlightDropWrapper";
 import UnreadDivider from "./UnreadDivider";
 import {
@@ -60,6 +61,7 @@ interface DropsListProps {
   readonly winningThresholdMinDurationMs?: number | null | undefined;
   readonly isVotingClosed?: boolean | undefined;
   readonly isVotingControlsLocked?: boolean | undefined;
+  readonly moderationPresentation?: "default" | "profile-activity" | undefined;
 }
 
 const MemoizedDrop = memo(Drop);
@@ -90,6 +92,7 @@ const DropsList = memo(
     winningThresholdMinDurationMs,
     isVotingClosed = false,
     isVotingControlsLocked = false,
+    moderationPresentation = "default",
   }: DropsListProps) => {
     const handleReply = useCallback<DropActionHandler>(
       ({ drop, partId }) => onReply({ drop, partId }),
@@ -232,19 +235,21 @@ const DropsList = memo(
                 : "tw-px-3 tw-py-3 sm:tw-px-4"
             }
           >
-            {isCompact ? (
-              <BoostedDropCompactChatItem
-                drop={boostedDrop}
-                onClick={onClick}
-              />
-            ) : (
-              <BoostedDropCardHome
-                drop={boostedDrop}
-                variant="chat"
-                rank={boostedIndex + 1}
-                onClick={onClick}
-              />
-            )}
+            <ContentModerationDropGate drop={boostedDrop} compact>
+              {isCompact ? (
+                <BoostedDropCompactChatItem
+                  drop={boostedDrop}
+                  onClick={onClick}
+                />
+              ) : (
+                <BoostedDropCardHome
+                  drop={boostedDrop}
+                  variant="chat"
+                  rank={boostedIndex + 1}
+                  onClick={onClick}
+                />
+              )}
+            </ContentModerationDropGate>
           </div>
         );
       },
@@ -297,6 +302,7 @@ const DropsList = memo(
               }
               isVotingClosed={getItemData.isVotingClosed}
               isVotingControlsLocked={getItemData.isVotingControlsLocked}
+              moderationPresentation={moderationPresentation}
             />
           ) : (
             <MemoizedLightDrop drop={drop} />
@@ -345,6 +351,7 @@ const DropsList = memo(
       renderUnreadDivider,
       suspendLightDropHydration,
       virtualScrollRootMargin,
+      moderationPresentation,
     ]);
 
     return (

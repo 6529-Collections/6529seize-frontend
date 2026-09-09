@@ -1,8 +1,13 @@
-import { render, screen } from '@testing-library/react';
-import React from 'react';
-import { WaveWinnersPodiumContent } from '@/components/waves/winners/podium/WaveWinnersPodiumContent';
+import { render, screen } from "@testing-library/react";
+import React from "react";
+import { WaveWinnersPodiumContent } from "@/components/waves/winners/podium/WaveWinnersPodiumContent";
 
-jest.mock('@/components/waves/winners/podium/WavePodiumItem', () => ({
+jest.mock("@/components/content-moderation/ContentModerationDropGate", () => ({
+  __esModule: true,
+  default: ({ children }: any) => children,
+}));
+
+jest.mock("@/components/waves/winners/podium/WavePodiumItem", () => ({
   __esModule: true,
   WavePodiumItem: (props: any) => (
     <div
@@ -12,17 +17,22 @@ jest.mock('@/components/waves/winners/podium/WavePodiumItem', () => ({
   ),
 }));
 
-describe('WaveWinnersPodiumContent', () => {
-  it('renders three podium items', () => {
+describe("WaveWinnersPodiumContent", () => {
+  it("renders three podium items", () => {
     render(
-      <WaveWinnersPodiumContent onDropClick={jest.fn()} firstPlaceWinner={{} as any} secondPlaceWinner={{} as any} thirdPlaceWinner={{} as any} />
+      <WaveWinnersPodiumContent
+        onDropClick={jest.fn()}
+        firstPlaceWinner={{} as any}
+        secondPlaceWinner={{} as any}
+        thirdPlaceWinner={{} as any}
+      />
     );
-    expect(screen.getByTestId('item-first')).toBeInTheDocument();
-    expect(screen.getByTestId('item-second')).toBeInTheDocument();
-    expect(screen.getByTestId('item-third')).toBeInTheDocument();
+    expect(screen.getByTestId("item-first")).toBeInTheDocument();
+    expect(screen.getByTestId("item-second")).toBeInTheDocument();
+    expect(screen.getByTestId("item-third")).toBeInTheDocument();
   });
 
-  it('passes default vote details flag to every podium item', () => {
+  it("passes default vote details flag to every podium item", () => {
     render(
       <WaveWinnersPodiumContent
         onDropClick={jest.fn()}

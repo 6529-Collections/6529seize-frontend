@@ -50,6 +50,7 @@ import {
   shouldFilterRabbyChromeUserRejectedRequest,
   shouldFilterRabbyMobileRainbowKitNotFoundError,
   shouldFilterRabbyMobileUserRejectedRequest,
+  shouldFilterSentryRouteParameterizationError,
   shouldFilterTalismanExtensionOnboardingError,
   shouldFilterThirdPartyTelemetryNetworkError,
   shouldFilterThirdPartyTelemetrySpan,
@@ -87,6 +88,9 @@ const APP_WRAPPED_NETWORK_ERROR_PREFIXES = [
   "Network request failed.",
   "Network error:",
 ];
+const NEXT_SERVER_COMPONENT_RENDER_ERROR_MESSAGE =
+  "An error occurred in the Server Components render. The specific message is omitted in production builds to avoid leaking sensitive details. A digest property is included on this error instance which may provide additional details about the nature of the error.";
+const NEXT_SERVER_COMPONENT_DIGEST_PATTERN = /^[A-Za-z0-9_-]{1,64}$/;
 const RAW_BROWSER_NETWORK_ERROR_PATTERNS = [
   /\bfailed to fetch\b/i,
   /\bload failed\b/i,
@@ -238,10 +242,9 @@ function shouldFilterEvent(
     return true;
   }
 
-  // Intentionally do not call shouldFilterSentryRouteParameterizationError.
-  // Keep all cyclic JSON timer failures while origin diagnostics are active.
-  // Generic Sentry/WKWebView frames do not prove third-party ownership, so
-  // retaining only the sampled diagnostic subset would hide genuine app errors.
+  if (shouldFilterSentryRouteParameterizationError(event, hint)) {
+    return true;
+  }
 
   if (shouldFilterAppleWebKitSortedTrackListTypeError(event)) {
     return true;
@@ -269,6 +272,43 @@ function shouldFilterEvent(
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function getNextServerComponentDigest(value: unknown): string | undefined {
+  if (!isRecord(value)) {
+    return undefined;
+  }
+
+  const digest = value["digest"];
+  return typeof digest === "string" &&
+    NEXT_SERVER_COMPONENT_DIGEST_PATTERN.test(digest)
+    ? digest
+    : undefined;
+}
+
+function enrichNextServerComponentRenderError(
+  event: Sentry.Event,
+  hint: Sentry.EventHint | undefined,
+  message: string
+): void {
+  if (message !== NEXT_SERVER_COMPONENT_RENDER_ERROR_MESSAGE) {
+    return;
+  }
+
+  const digest =
+    getNextServerComponentDigest(hint?.originalException) ??
+    getNextServerComponentDigest(hint?.syntheticException);
+  if (!digest) {
+    return;
+  }
+
+  event.tags = {
+    ...event.tags,
+    next_error_digest: digest,
+  };
+  if (!event.fingerprint?.length) {
+    event.fingerprint = ["next-server-component-render", digest];
+  }
 }
 
 function filterNoisyThirdPartyTransactionSpans(
@@ -537,6 +577,8 @@ Sentry.init({
       (typeof value?.value === "string" && value.value) ||
       getFallbackMessage(hint) ||
       (typeof event.message === "string" ? event.message : "");
+
+    enrichNextServerComponentRenderError(event, hint, message);
 
     if (
       (error && isIndexedDBError(error)) ||

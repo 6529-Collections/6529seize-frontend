@@ -63,6 +63,27 @@ requested or is blocked:
 These commands are not read-only shell commands under the user's command policy.
 Ask before running them when required by the active instructions.
 
+## Minting and paid subscription checks
+
+For changes touching first-party minting or Meme subscriptions, follow the
+regional visibility rule in the frontend `AGENTS.md`:
+
+1. Check Capacitor iOS with a non-US country and with country unresolved. Mint
+   and subscription promotions, navigation/search entries, and coverage
+   notification controls must be absent. Mixed pages such as `/join` must close
+   the resulting layout gaps and omit the sections without placeholders.
+2. Open direct routes and native deep links. Profile subscriptions must return
+   to Identity, NextGen mint to the collection, and About Minting/Subscriptions
+   to `/about`. Verify no restricted child mounts or starts its requests or
+   contract hooks, including before hydration and while redirecting.
+3. Check US iOS and web retain their existing purchasing behavior. Use unit or
+   component tests for Android parity; do not claim Android device evidence.
+4. Confirm ordinary user posts/links, collection history, calendar invitations,
+   and open-data reports remain available. Do not implement keyword censorship.
+5. Record the evidence actually collected. Unit tests with mocked platform and
+   country are not native-runtime evidence. These checks do not authorize
+   starting a dev server or making a purchase.
+
 ## iOS Simulator Workflow
 
 Use this for simulator runtime evidence.

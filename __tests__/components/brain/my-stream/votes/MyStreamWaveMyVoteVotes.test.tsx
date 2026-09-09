@@ -16,18 +16,24 @@ describe("MyStreamWaveMyVoteVotes", () => {
 
   it("shows positive rating style", () => {
     render(<MyStreamWaveMyVoteVotes drop={drop} />);
-    expect(screen.getByText("5")).toHaveClass("tw-text-emerald-500");
+    expect(screen.getByText("5")).toHaveClass(
+      "tw-text-emerald-500",
+      "tw-font-semibold"
+    );
     expect(ProgressMock.mock.calls.at(-1)?.[0]).toEqual(
       expect.objectContaining({
         current: 5,
         projected: 6,
+        tooltipLabel: "Projected vote count at decision time",
+        numberFont: "sans",
+        numberWeight: "semibold",
       })
     );
   });
 
   it("shows negative rating style", () => {
     render(<MyStreamWaveMyVoteVotes drop={{ ...drop, rating: -1 }} />);
-    expect(screen.getByText("-1")).toHaveClass("tw-text-rose-500");
+    expect(screen.getByText("-1")).toHaveClass("tw-text-rose-400");
   });
 
   it("uses realtime progress for approve waves", () => {

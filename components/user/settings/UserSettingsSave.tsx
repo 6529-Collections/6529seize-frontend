@@ -6,10 +6,12 @@ export default function UserSettingsSave({
   loading,
   disabled,
   title = "Save",
+  responsiveWidthClassName = "sm:tw-w-auto",
 }: {
   readonly loading: boolean;
   readonly disabled?: boolean | undefined;
   readonly title?: string | undefined;
+  readonly responsiveWidthClassName?: string | undefined;
 }) {
   return (
     <div className="tw-flex tw-justify-end">
@@ -21,7 +23,7 @@ export default function UserSettingsSave({
         disabled={disabled}
         fullWidth
         hideChildrenWhenLoading
-        className="sm:tw-w-auto"
+        className={responsiveWidthClassName}
       >
         {title}
       </Button>

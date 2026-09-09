@@ -68,7 +68,7 @@ const groups: ApiGroupFull[] = [
 const mockCommonApiFetch = commonApiFetch as jest.Mock;
 
 function renderSearchField({
-  defaultLabel = "Anyone",
+  defaultLabel = "Public",
   disabled = false,
   selectedGroup = null,
   allowClear = true,
@@ -108,7 +108,7 @@ function renderSearchField({
 }
 
 function renderStatefulSearchField({
-  defaultLabel = "Anyone",
+  defaultLabel = "Public",
   disabled = false,
   selectedGroup = null,
   allowClear = true,
@@ -163,6 +163,22 @@ describe("CreateWaveGroupSearchField", () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+  });
+
+  it("uses the modal search sizing and vertically centered search icon", () => {
+    renderSearchField();
+
+    const input = screen.getByRole("combobox", { name: "Search groups..." });
+    const searchIcon = input.parentElement?.querySelector("svg");
+    const label = screen.getByText("Search groups...", { selector: "label" });
+
+    expect(input).toHaveClass("tw-text-base", "sm:tw-text-sm");
+    expect(label).toHaveClass("tw-text-base", "sm:tw-text-sm");
+    expect(searchIcon).toHaveClass(
+      "tw-top-1/2",
+      "-tw-translate-y-1/2",
+      "tw-size-5"
+    );
   });
 
   it("opens on focus, renders results, and selects with keyboard", async () => {
@@ -278,7 +294,7 @@ describe("CreateWaveGroupSearchField", () => {
       <QueryClientProvider client={queryClient}>
         <CreateWaveGroupSearchField
           label="Search groups..."
-          defaultLabel="Anyone"
+          defaultLabel="Public"
           disabled={false}
           selectedGroup={selectedGroup}
           onSelect={onSelect}
@@ -308,7 +324,8 @@ describe("CreateWaveGroupSearchField", () => {
     rerender(renderField(null));
 
     await waitFor(() => expect(input).toHaveValue(""));
-    expect(screen.getByText("Current group: Anyone")).toBeInTheDocument();
+    expect(screen.getByText("Public")).toBeInTheDocument();
+    expect(screen.queryByText(/Current group:/)).not.toBeInTheDocument();
     await waitFor(() =>
       expect(mockCommonApiFetch).toHaveBeenCalledWith({
         endpoint: "groups",

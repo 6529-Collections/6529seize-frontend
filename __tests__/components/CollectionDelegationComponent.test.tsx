@@ -90,6 +90,23 @@ describe("CollectionDelegationComponent", () => {
   };
   const setSection = jest.fn();
 
+  function selectLockUseCase(useCase: number) {
+    const dropdown = screen.getByRole("button", {
+      name: /^Lock or unlock use case:/i,
+    });
+    fireEvent.click(dropdown);
+
+    const option = screen
+      .getAllByRole("menuitem")
+      .find((item) => item.textContent?.startsWith(`#${useCase} -`));
+    if (!option) {
+      throw new Error(`Expected lock use-case option #${useCase}`);
+    }
+    fireEvent.click(option);
+
+    return dropdown;
+  }
+
   function mockCollectionLockState(collectionLocked: boolean) {
     mockUseReadContract.mockImplementation((params?: { args?: string[] }) => ({
       data:
@@ -268,7 +285,7 @@ describe("CollectionDelegationComponent", () => {
       }
     );
 
-    const { container, rerender } = render(
+    const { rerender } = render(
       <CollectionDelegationComponent
         collection={collection}
         setSection={setSection}
@@ -288,10 +305,10 @@ describe("CollectionDelegationComponent", () => {
     );
 
     const outgoingDisclosure = screen.getByRole("button", {
-      name: /Outgoing Delegations/i,
+      name: /^Outgoing Delegations$/i,
     });
     const incomingDisclosure = screen.getByRole("button", {
-      name: /Incoming Delegations/i,
+      name: /^Incoming Delegations$/i,
     });
 
     await waitFor(() =>
@@ -300,18 +317,15 @@ describe("CollectionDelegationComponent", () => {
     fireEvent.click(incomingDisclosure);
     expect(incomingDisclosure).toHaveAttribute("aria-expanded", "true");
 
-    const editAction = container.querySelector<SVGElement>(
-      '[data-tooltip-id^="edit-"]'
-    );
-    if (!editAction) {
-      throw new Error("Expected an edit action for the outgoing delegation");
-    }
+    const editAction = screen.getByRole("button", {
+      name: /^Edit delegation for /i,
+    });
     fireEvent.click(editAction);
 
     fireEvent.click(screen.getByRole("button", { name: "Cancel Update" }));
 
     expect(
-      screen.getByRole("button", { name: /Incoming Delegations/i })
+      screen.getByRole("button", { name: /^Incoming Delegations$/i })
     ).toHaveAttribute("aria-expanded", "true");
   });
 
@@ -341,7 +355,7 @@ describe("CollectionDelegationComponent", () => {
       }
     );
 
-    const { container, rerender } = render(
+    const { rerender } = render(
       <CollectionDelegationComponent
         collection={collection}
         setSection={setSection}
@@ -362,15 +376,12 @@ describe("CollectionDelegationComponent", () => {
 
     await waitFor(() =>
       expect(
-        container.querySelector('[data-tooltip-id^="edit-"]')
-      ).not.toBeNull()
+        screen.getByRole("button", { name: /^Edit delegation for /i })
+      ).toBeInTheDocument()
     );
-    const editAction = container.querySelector<SVGElement>(
-      '[data-tooltip-id^="edit-"]'
-    );
-    if (!editAction) {
-      throw new Error("Expected an edit action for the outgoing delegation");
-    }
+    const editAction = screen.getByRole("button", {
+      name: /^Edit delegation for /i,
+    });
     fireEvent.click(editAction);
     expect(
       screen.getByRole("button", { name: "Cancel Update" })
@@ -469,10 +480,7 @@ describe("CollectionDelegationComponent", () => {
         />
       );
 
-      fireEvent.change(
-        screen.getByRole("combobox", { name: "Lock or unlock use case" }),
-        { target: { value: String(useCase) } }
-      );
+      selectLockUseCase(useCase);
       fireEvent.click(screen.getByRole("button", { name: "Unlock Use Case" }));
 
       const expectedTitle = `Unlocking Wallet on Use Case\n#${useCase} ${label}`;
@@ -502,10 +510,7 @@ describe("CollectionDelegationComponent", () => {
       />
     );
 
-    fireEvent.change(
-      screen.getByRole("combobox", { name: "Lock or unlock use case" }),
-      { target: { value: "999" } }
-    );
+    selectLockUseCase(999);
 
     expect(
       screen.queryByRole("button", { name: /^(Lock|Unlock) Use Case$/ })
@@ -536,10 +541,7 @@ describe("CollectionDelegationComponent", () => {
           setSection={setSection}
         />
       );
-      const select = screen.getByRole("combobox", {
-        name: "Lock or unlock use case",
-      });
-      fireEvent.change(select, { target: { value: "3" } });
+      const select = selectLockUseCase(3);
       expect(
         screen.getByRole("button", { name: "Lock Use Case" })
       ).toBeInTheDocument();

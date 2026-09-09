@@ -10,9 +10,10 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiMarkDropUnreadResponse } from "@/generated/models/ApiMarkDropUnreadResponse";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { commonApiPost } from "@/services/api/common-api";
+import { useOptionalDmUnreadActions } from "@/services/dm-unread/DmUnreadStateProvider";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
-import { Tooltip } from "react-tooltip";
+import DropActionTooltip from "./DropActionTooltip";
 
 interface WaveDropActionsMarkUnreadProps {
   readonly drop: ApiDrop;
@@ -31,6 +32,7 @@ export default function WaveDropActionsMarkUnread({
   const { setToast, connectedProfile, activeProfileProxy } = useAuth();
   const [loading, setLoading] = useState(false);
   const unreadDividerContext = useUnreadDividerOptional();
+  const dmUnreadActions = useOptionalDmUnreadActions();
   const { waves, directMessages } = useMyStream();
 
   const isAuthor =
@@ -48,6 +50,10 @@ export default function WaveDropActionsMarkUnread({
         endpoint: `drops/${drop.id}/mark-unread`,
         body: {},
       });
+
+      if (response.dm_unread_state) {
+        dmUnreadActions?.applyServerState(response.dm_unread_state);
+      }
 
       waves.restoreWaveUnreadCount(
         drop.wave.id,
@@ -107,6 +113,7 @@ export default function WaveDropActionsMarkUnread({
     unreadDividerContext,
     waves,
     directMessages,
+    dmUnreadActions,
     onMarkUnread,
   ]);
 
@@ -156,7 +163,11 @@ export default function WaveDropActionsMarkUnread({
   }
 
   return (
-    <>
+    <DropActionTooltip
+      content={<span className="tw-text-xs">Mark as unread</span>}
+      disabled={loading}
+      style={{ backgroundColor: "#1F2937", color: "white", padding: "4px 8px" }}
+    >
       <button
         onClick={(e) => {
           e.stopPropagation();
@@ -165,7 +176,6 @@ export default function WaveDropActionsMarkUnread({
         disabled={loading}
         className="tw-group tw-flex tw-h-full tw-cursor-pointer tw-items-center tw-gap-x-1.5 tw-rounded-full tw-border-0 tw-bg-transparent tw-px-2 tw-text-xs tw-font-medium tw-leading-5 tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-text-iron-50"
         aria-label="Mark as unread"
-        data-tooltip-id={`mark-unread-${drop.id}`}
       >
         {loading ? (
           <Spinner dimension={20} />
@@ -173,17 +183,6 @@ export default function WaveDropActionsMarkUnread({
           <MailUnreadIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-transition tw-duration-300 tw-ease-out" />
         )}
       </button>
-      <Tooltip
-        id={`mark-unread-${drop.id}`}
-        place="top"
-        style={{
-          backgroundColor: "#1F2937",
-          color: "white",
-          padding: "4px 8px",
-        }}
-      >
-        <span className="tw-text-xs">Mark as unread</span>
-      </Tooltip>
-    </>
+    </DropActionTooltip>
   );
 }

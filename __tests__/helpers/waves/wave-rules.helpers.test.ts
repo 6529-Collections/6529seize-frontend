@@ -1,8 +1,14 @@
+import { buildCreateWaveReview } from "@/helpers/waves/create-wave-review.helpers";
+import {
+  CreateWaveOutcomeType,
+  CreateWaveOutcomeConfigWinnersCreditValueType,
+} from "@/types/waves.types";
 import { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { ApiWaveMetadataType } from "@/generated/models/ApiWaveMetadataType";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { buildWaveRules } from "@/helpers/waves/wave-rules.helpers";
+import { getScopeRuleValue } from "@/helpers/waves/wave-rules.shared";
 import type { CreateWaveConfig } from "@/types/waves.types";
 
 const createConfig = (): CreateWaveConfig => ({
@@ -84,15 +90,22 @@ describe("wave-rules.helpers", () => {
       display: "No AI-only submissions.",
       signatureRequired: true,
     });
+    expect(rules.automatic).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ id: "timing", title: "Schedule" }),
+      ])
+    );
     expect(
       rules.automatic
         .flatMap((section) => section.rows)
         .map((row) => [row.label, row.value])
     ).toEqual(
       expect.arrayContaining([
+        ["Visibility", "Public"],
         ["Who can drop", "Artists"],
+        ["Who can vote", "Public"],
         ["Chat status", "Enabled"],
-        ["Chat access", "Anyone when enabled"],
+        ["Chat access", "Public"],
         ["Required metadata", "artist (Text)"],
         ["Negative voting", "Blocked"],
         ["Approval threshold", "25 Rep"],
@@ -134,7 +147,7 @@ describe("wave-rules.helpers", () => {
       "Access",
     ]);
     expect(labels).toEqual(
-      expect.arrayContaining(["Who can view", "Chat access", "Who can admin"])
+      expect.arrayContaining(["Visibility", "Chat access", "Admins"])
     );
     expect(labels).not.toEqual(
       expect.arrayContaining([
@@ -201,8 +214,18 @@ describe("wave-rules.helpers", () => {
     });
 
     expect(rules.custom.display).toBe("Use current-season work.");
-    expect(rules.automatic.flatMap((section) => section.rows)).toEqual(
+    expect(rules.automatic).toEqual(
       expect.arrayContaining([
+        expect.objectContaining({ id: "timing", title: "Schedule" }),
+      ])
+    );
+    const rows = rules.automatic.flatMap((section) => section.rows);
+    expect(rows).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ label: "Visibility", value: "Public" }),
+        expect.objectContaining({ label: "Who can drop", value: "Public" }),
+        expect.objectContaining({ label: "Who can vote", value: "Public" }),
+        expect.objectContaining({ label: "Chat access", value: "Public" }),
         expect.objectContaining({
           label: "Decision cadence",
           value: "Single decision",
@@ -323,7 +346,7 @@ describe("wave-rules.helpers", () => {
         }),
         expect.objectContaining({
           label: "Chat access",
-          value: "Anyone when enabled",
+          value: "Public",
         }),
       ])
     );
@@ -380,7 +403,7 @@ describe("wave-rules.helpers", () => {
         }),
         expect.objectContaining({
           label: "Chat access",
-          value: "Anyone when enabled",
+          value: "Public",
         }),
       ])
     );
@@ -442,7 +465,7 @@ describe("wave-rules.helpers", () => {
       expect.arrayContaining([
         expect.objectContaining({
           label: "Chat access",
-          value: "Anyone when enabled",
+          value: "Public",
         }),
         expect.objectContaining({ label: "Links", value: "Disabled" }),
         expect.objectContaining({ label: "Slow mode", value: "2m" }),
@@ -506,4 +529,203 @@ describe("wave-rules.helpers", () => {
       ])
     );
   });
+
+  it("keeps hidden scope groups private and non-interactive", () => {
+    expect(
+      getScopeRuleValue({
+        scope: { group: { is_hidden: true } },
+        fallback: "Anyone",
+      })
+    ).toEqual({
+      value: "Private group",
+      valueHref: undefined,
+      valueGroupId: undefined,
+      valueLinkLabel: undefined,
+    });
+  });
+
+  it("uses the fallback for an empty scope group", () => {
+    expect(
+      getScopeRuleValue({
+        scope: { group: null },
+        fallback: "Anyone",
+      })
+    ).toEqual({
+      value: "Anyone",
+      valueHref: undefined,
+      valueGroupId: undefined,
+      valueLinkLabel: undefined,
+    });
+  });
+
+  it("keeps direct-message scope groups private and non-interactive", () => {
+    expect(
+      getScopeRuleValue({
+        scope: {
+          group: {
+            id: "dm-1",
+            name: "Private conversation",
+            is_hidden: false,
+            is_direct_message: true,
+          },
+        },
+        fallback: "Anyone",
+      })
+    ).toEqual({
+      value: "Private group",
+      valueHref: undefined,
+      valueGroupId: undefined,
+      valueLinkLabel: undefined,
+    });
+  });
+
+  it("does not expose or link an incomplete visible group", () => {
+    expect(
+      getScopeRuleValue({
+        scope: {
+          group: {
+            id: "stale-group-id",
+            is_hidden: false,
+          },
+        },
+        fallback: "Anyone",
+      })
+    ).toEqual({
+      value: "Group unavailable",
+      valueHref: undefined,
+      valueGroupId: undefined,
+      valueLinkLabel: undefined,
+    });
+  });
+
+  it("links visible scope groups to criteria and members", () => {
+    expect(
+      getScopeRuleValue({
+        scope: {
+          group: {
+            id: "artists & curators",
+            name: "Artists and curators",
+            is_hidden: false,
+          },
+        },
+        fallback: "Anyone",
+      })
+    ).toEqual({
+      value: "Artists and curators",
+      valueHref: "/network?page=1&group=artists%20%26%20curators",
+      valueGroupId: "artists & curators",
+      valueLinkLabel: "Inspect Artists and curators group criteria and members",
+    });
+  });
+});
+
+describe("create-wave final review", () => {
+  it("shows rank rewards and winner percentages alongside voting and author rules", () => {
+    const config = createConfig();
+    const rules = buildCreateWaveReview({
+      config: {
+        ...config,
+        overview: { ...config.overview, type: ApiWaveType.Rank },
+        outcomes: [
+          {
+            type: CreateWaveOutcomeType.REP,
+            title: null,
+            credit: null,
+            category: "Art",
+            winnersConfig: {
+              creditValueType:
+                CreateWaveOutcomeConfigWinnersCreditValueType.PERCENTAGE,
+              totalAmount: 1000,
+              winners: [{ value: 60 }, { value: 40 }],
+            },
+          },
+        ],
+      },
+      groupsCache: {},
+      locale: "en-US",
+      parentWaveName: "Parent",
+    });
+    const rows = rules.automatic.flatMap((section) => section.rows);
+    expect(rows).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ label: "Parent wave", value: "Parent" }),
+        expect.objectContaining({ label: "Total", value: "1,000 REP" }),
+        expect.objectContaining({ label: "Winner 1", value: "60%" }),
+        expect.objectContaining({ label: "Winner 2", value: "40%" }),
+        expect.objectContaining({ id: "max-votes", value: "10" }),
+      ])
+    );
+    expect(rules.custom).toEqual({
+      display: "No AI-only submissions.",
+      binding: "Must be original.",
+      signatureRequired: true,
+    });
+  });
+
+  it("shows approve credit per approved drop and manual reward descriptions", () => {
+    const config = createConfig();
+    const rules = buildCreateWaveReview({
+      config: {
+        ...config,
+        outcomes: [
+          {
+            type: CreateWaveOutcomeType.NIC,
+            title: null,
+            category: null,
+            credit: 25,
+            winnersConfig: null,
+          },
+          {
+            type: CreateWaveOutcomeType.MANUAL,
+            title: "A signed print",
+            category: null,
+            credit: null,
+            winnersConfig: null,
+          },
+        ],
+      },
+      groupsCache: {},
+      locale: "en-US",
+    });
+    expect(rules.automatic.flatMap((section) => section.rows)).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          label: "Per approved drop",
+          value: "25 NIC",
+        }),
+        expect.objectContaining({ label: "Reward", value: "A signed print" }),
+        expect.objectContaining({ id: "approval-threshold" }),
+      ])
+    );
+  });
+
+  it.each([ApiWaveType.Chat, ApiWaveType.Rank])(
+    "omits stale outcome rewards for %s without winners",
+    (type) => {
+      const config = createConfig();
+      const rules = buildCreateWaveReview({
+        config: {
+          ...config,
+          overview: { ...config.overview, type },
+          dates: { ...config.dates, ongoingRanking: true },
+          outcomes: [
+            {
+              type: CreateWaveOutcomeType.MANUAL,
+              title: "Stale reward",
+              category: null,
+              credit: null,
+              winnersConfig: null,
+            },
+          ],
+        },
+        groupsCache: {},
+        locale: "en-US",
+      });
+      expect(
+        rules.automatic
+          .flatMap((section) => section.rows)
+          .some((row) => row.value === "Stale reward")
+      ).toBe(false);
+    }
+  );
 });

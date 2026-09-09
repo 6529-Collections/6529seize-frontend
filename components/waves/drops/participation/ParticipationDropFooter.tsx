@@ -56,7 +56,10 @@ export default function ParticipationDropFooter({
     hasWinningThreshold && shouldShowVoteFooter && shouldShowReactionsFooter;
   const isProposalCard = contentPresentation === "proposalCard";
   const isChatProposal = isProposalCard && !indentContent;
-  const useInlineVotingLayout = isChatProposal || inlineVotingActions;
+  const hasProposalVoteWithoutRatings =
+    isProposalCard && hasVoteAction && !shouldShowRatings;
+  const useInlineVotingLayout =
+    isChatProposal || inlineVotingActions || hasProposalVoteWithoutRatings;
   const hasChatVotingSurface =
     isChatProposal && (shouldShowVoteFooter || shouldShowRatingsOnlyFooter);
   const contentOffsetClass = indentContent

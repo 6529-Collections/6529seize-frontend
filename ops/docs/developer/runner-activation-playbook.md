@@ -3,7 +3,7 @@
 This playbook defines how the Museum release program may measure and, later,
 adopt a faster trusted build runner. The benchmark is an observation tool. It
 does not grant runner capacity, change GitHub billing, set repository variables,
-or alter the release bus.
+or alter the deployment process.
 
 ## Current status
 

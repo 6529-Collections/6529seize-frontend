@@ -17,6 +17,8 @@ export function MuseumPublicMediaFigure({
   sourceLabel,
   eager = false,
   sizes = "(min-width: 1280px) 30vw, (min-width: 640px) 50vw, 100vw",
+  srcSet,
+  aspectRatio,
 }: {
   readonly src: string;
   readonly width: number | null;
@@ -31,9 +33,16 @@ export function MuseumPublicMediaFigure({
   readonly sourceLabel?: string;
   readonly eager?: boolean;
   readonly sizes?: string;
+  readonly srcSet?: string;
+  readonly aspectRatio?: number;
 }) {
+  const mediaFrameStyle =
+    aspectRatio === undefined ? undefined : { aspectRatio };
   const image = (
-    <div className="tw-relative tw-aspect-square tw-w-full tw-overflow-hidden tw-bg-black">
+    <div
+      className="tw-relative tw-aspect-square tw-w-full tw-overflow-hidden tw-bg-black"
+      style={mediaFrameStyle}
+    >
       <MuseumManagedImage
         src={src}
         {...(width === null ? {} : { width })}
@@ -42,6 +51,7 @@ export function MuseumPublicMediaFigure({
         loading={eager ? "eager" : "lazy"}
         fetchPriority={eager ? "high" : "auto"}
         sizes={sizes}
+        {...(srcSet === undefined ? {} : { srcSet })}
         failureMessage={t(DEFAULT_LOCALE, "museum.network.media.unavailable")}
         retryLabel={t(DEFAULT_LOCALE, "museum.network.media.retry")}
         {...(sourceHref === undefined || sourceLabel === undefined

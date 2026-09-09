@@ -7,9 +7,8 @@ Parent: [Network Index](README.md)
 `/network` and `/network/activity` share one active group scope.
 `/network` owns scope controls (`Filter`).
 `/network/activity` can use active scope, but has no scope controls.
-
-`/network/groups` owns group browsing and creation.
-This page owns only the scope handoff into network routes and cross-route scope behavior.
+Criteria-based group creation happens inside the `/network` filter. There is
+no standalone Network Groups page.
 
 ## Location in the Site
 
@@ -18,12 +17,11 @@ This page owns only the scope handoff into network routes and cross-route scope 
   - `/network?page=1&group={groupId}`
   - `/network?group={groupId}`
   - `/network/activity?group={groupId}`
-- Scope controls: `/network` -> `Filter` -> groups list
+- Scope controls: `/network` -> `Filter` -> criteria builder
 
 ## Entry Points
 
-- Open a group card on `/network/groups`.
-- Open `/network` and choose a group in `Filter`.
+- Open `/network` and build criteria in `Filter`.
 - Open a deep link with `group={groupId}`.
 - Open `/network/activity` after scope is already active.
 
@@ -38,18 +36,32 @@ This page owns only the scope handoff into network routes and cross-route scope 
 
 ## User Journey
 
-1. Open `/network/groups`.
-2. Open a group card while it is in idle state.
-3. The app opens `/network?page=1&group={groupId}` (or `/network?group={groupId}` from chat links).
-4. `/network` applies scope and shows scoped leaderboard results.
-5. Open `/network/activity` to view activity under the same scope.
-6. Return to `/network`, open `Filter`, then switch or clear scope.
+1. Open `/network` and select `Filter`.
+2. Build and save criteria. Network's criteria editor does not offer saved-group
+   search or the `Hide criteria and members` setting.
+3. `/network` applies the selected scope and stores its group id in the URL.
+   Group links shared from supported app surfaces can also open
+   `/network?group={groupId}` directly.
+4. Public groups and private groups available to the
+   current authenticated member or creator show the selected group's name and
+   criteria above its scoped member results.
+5. Inspect both how membership is determined and the current member list in the
+   same view. Signed-in users can also open `REP everyone matching criteria` or
+   `NIC everyone matching criteria` from the summary when the group has active
+   criteria.
+6. Use `Clear selected group` to close the group summary and return to the
+   default Network member view.
+7. Open `/network/activity` to view activity under the same scope.
+8. Return to `/network`, open `Filter`, then create another criteria-based
+   group. Use `Clear selected group` outside the filter to clear scope.
 
 ## Common Scenarios
 
-- Jump from a group card to a scoped identities leaderboard.
 - Keep one scope while moving between `/network` and `/network/activity`.
 - Reopen a saved deep link with `group=...` to restore a scoped view on first load.
+- Build a one-off Network audience from the same criteria controls available
+  during Wave group assignment, then save and apply it without leaving the
+  leaderboard.
 
 ## Loading and Consistency
 
@@ -59,16 +71,27 @@ This page owns only the scope handoff into network routes and cross-route scope 
 
 ## Edge Cases
 
-- Group-card open navigation is unavailable while that card is in `Rep all` or `NIC all`.
+- Bulk rating actions are not shown for an empty, loading, unavailable, or
+  signed-out group scope.
 - A stale `group` id deep link can load empty or unexpected results.
 - `/network/activity` has no inline control to clear/switch scope.
+- Signing out or switching profiles while a group is selected reloads the
+  group and member results for the new viewer. Results from the previous viewer
+  are not reused.
+- Reopening the filter with an active group starts from that group's saved
+  criteria. Saving the draft creates a new group rather than changing the
+  original group.
 
 ## Failure and Recovery
 
 - If `/network/activity` looks unexpectedly scoped, open `/network`, clear scope in `Filter`, then reopen `/network/activity`.
 - If a deep link scope is stale, open `/network` and reselect or clear scope.
 - If URL edits do not change scope, apply scope through `/network` `Filter`.
-- If a group card is not openable, exit `Rep all`/`NIC all` first.
+- If the selected group's criteria cannot be loaded, use `Try again` in the
+  filter sheet. Network does not replace the unavailable group with an empty
+  criteria draft.
+- If a bulk rating action fails, use the error toast details, confirm the
+  required amount and REP category, then reopen the action from `/network`.
 - If `/network/activity` looks briefly unscoped, wait for scoped refetch to finish.
 
 ## Limitations / Notes
@@ -76,13 +99,15 @@ This page owns only the scope handoff into network routes and cross-route scope 
 - Scope persists in current app session/tab state, not as URL-only state.
 - `/network/activity` consumes scope but does not manage scope.
 - Membership counts in `/network` filter can refresh asynchronously after scope changes.
+- Private group details are inspectable only when the API makes the full group
+  available to the current authenticated member or creator.
+- If a group is hidden from the current viewer, deleted, malformed, or
+  temporarily unavailable, Network shows a non-identifying unavailable state
+  and does not show cached member results from another group or viewer.
 
 ## Related Pages
 
 - [Network Index](README.md)
 - [Network Activity Feed](feature-network-activity-feed.md)
 - [Network Identities Leaderboard](feature-network-identities-leaderboard.md)
-- [Groups Index](../groups/README.md)
-- [Groups List Filters](../groups/feature-groups-list-filters.md)
-- [Group Card Keyboard Navigation and Actions](../groups/feature-group-card-keyboard-navigation-and-actions.md)
 - [Sidebar Navigation](../navigation/feature-sidebar-navigation.md)

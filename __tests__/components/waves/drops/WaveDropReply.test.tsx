@@ -1,6 +1,7 @@
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import React from "react";
 import WaveDropReply from "@/components/waves/drops/WaveDropReply";
+import { ApiDropModerationStatus } from "@/generated/models/ApiDropModerationStatus";
 
 jest.mock("@/components/waves/drops/DropLoading", () => () => (
   <div data-testid="loading" />
@@ -34,6 +35,10 @@ describe("WaveDropReply", () => {
 
   beforeEach(() => {
     mockContentDisplaySpy.mockClear();
+    baseProps.onReplyClick.mockClear();
+    hookData.drop = null;
+    hookData.content = { segments: [], apiMedia: [] };
+    hookData.isLoading = false;
   });
 
   const expectFixedContainer = () => {
@@ -70,8 +75,13 @@ describe("WaveDropReply", () => {
 
   it("renders content when drop valid", () => {
     hookData.drop = {
+      id: "d",
       author: { handle: "alice", pfp: null },
       serial_no: 1,
+      moderation: {
+        status: ApiDropModerationStatus.Visible,
+        can_view: true,
+      },
     } as any;
     render(<WaveDropReply {...baseProps} />);
     const fixedContainer = expectFixedContainer();
@@ -84,5 +94,98 @@ describe("WaveDropReply", () => {
       ][0];
     expect(lastCallProps.textClassName).not.toContain("tw-block");
     expect(lastCallProps.linkify).toBe(false);
+  });
+
+  it("does not clip a globally moderated tombstone", () => {
+    hookData.drop = {
+      id: "d",
+      author: { id: "author", handle: "alice", pfp: null },
+      serial_no: 1,
+      moderation: {
+        status: ApiDropModerationStatus.ModeratorRemoved,
+        can_view: false,
+      },
+    } as any;
+
+    render(<WaveDropReply {...baseProps} />);
+
+    expect(
+      screen.getByText("Content removed by moderators")
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByTestId("wave-drop-reply-fixed-container")
+    ).not.toBeInTheDocument();
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Content removed by moderators. View original post",
+      })
+    );
+    expect(baseProps.onReplyClick).toHaveBeenCalledWith(1);
+  });
+
+  it("renders a moderated tombstone when a redacted reply has no author", () => {
+    hookData.drop = {
+      id: "d",
+      author: { id: "", handle: null, pfp: null },
+      serial_no: 1,
+      moderation: {
+        status: ApiDropModerationStatus.ModeratorRemoved,
+        can_view: false,
+      },
+    } as any;
+
+    render(<WaveDropReply {...baseProps} />);
+
+    expect(
+      screen.getByText("Content removed by moderators")
+    ).toBeInTheDocument();
+    expect(screen.queryByTestId("not-found")).not.toBeInTheDocument();
+    expect(mockContentDisplaySpy).not.toHaveBeenCalled();
+  });
+
+  it("redacts a stale author-only removed reply for a non-author", () => {
+    hookData.drop = {
+      id: "d",
+      author: { id: "author", handle: "alice", pfp: null },
+      serial_no: 1,
+      moderation: {
+        status: ApiDropModerationStatus.ModeratorRemoved,
+        can_view: true,
+      },
+    } as any;
+
+    render(<WaveDropReply {...baseProps} />);
+
+    expect(
+      screen.getByText("Content removed by moderators")
+    ).toBeInTheDocument();
+    expect(mockContentDisplaySpy).not.toHaveBeenCalled();
+  });
+
+  it("keeps a personally hidden preview faded with a compact unhide action", () => {
+    hookData.drop = {
+      id: "d",
+      author: { id: "author", handle: "alice", pfp: null },
+      serial_no: 1,
+      moderation: {
+        status: ApiDropModerationStatus.Visible,
+        can_view: true,
+      },
+      viewer_context: {
+        author_blocked: false,
+        drop_hidden: true,
+      },
+    } as any;
+
+    render(<WaveDropReply {...baseProps} />);
+
+    expect(screen.getByRole("button", { name: "Unhide" })).toBeVisible();
+    expect(
+      screen.getByTestId("content-moderation-hidden-content")
+    ).toHaveAttribute("inert");
+    expect(
+      screen.getByTestId("wave-drop-reply-fixed-container")
+    ).toBeInTheDocument();
   });
 });

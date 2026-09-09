@@ -40,13 +40,15 @@ the producer's 60-second dedupe window, only the exact privacy-safe
 exception, and a failed `POST` or `DELETE` first-party API breadcrumb for the
 `/api/drops/<id>/reaction` family whose HTTP status is absent or zero enters the
 shared deterministic 10% low-value network sampler. The transport breadcrumb
-must fall between the current `reaction.request_sent` and
-`reaction.request_failed` breadcrumbs; older reaction failures do not qualify,
-ambiguous unresolved concurrent lifecycles using the same HTTP method remain
-outside the sampler, transport failures inside completed concurrent lifecycle
-windows cannot qualify the current request, and later unrelated transport
-failures do not hide a qualifying current failure. Retained samples receive the
-existing
+must either be the error-level breadcrumb immediately before the latest network
+`reaction.request_failed` breadcrumb, or fall inside one unambiguous current
+`reaction.request_sent`-to-`reaction.request_failed` window. The exact adjacent
+terminal pair remains eligible when target-free concurrent lifecycle identities
+collide. Older reaction failures do not qualify, other ambiguous unresolved
+concurrent lifecycles using the same HTTP method remain outside the sampler,
+transport failures inside completed concurrent lifecycle windows cannot qualify
+the current request, and later unrelated transport failures do not hide a
+qualifying current failure. Retained samples receive the existing
 `network_failure_kind=browser_transport` and `network_noise_sampled=true`
 tags. After classification, retained samples remove request context and the
 SDK URL tag and replace identifier- or endpoint-bearing breadcrumb messages

@@ -113,6 +113,10 @@ export default function MemeParticipationDrop({
   const artworkMedia = firstPart?.media.at(0);
 
   const borderClasses = getBorderClasses(drop, isActiveDrop);
+  const backgroundClass =
+    location === DropLocation.WAVE
+      ? "tw-bg-iron-900/80"
+      : "tw-bg-[var(--drop-card-background,theme(colors.iron.950))]";
 
   const handleOnReply = useCallback(() => {
     onReply({ drop, partId: drop.parts[0]?.part_id! });
@@ -153,7 +157,7 @@ export default function MemeParticipationDrop({
         <MemeDropArtistInfo drop={drop} />
         {isContentInteractive ? (
           <button
-            className="tw-mt-2 tw-block tw-w-full tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-text-inherit focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 sm:tw-ml-[3.25rem] sm:tw-mt-1.5 sm:tw-w-auto"
+            className="tw-mt-3 tw-block tw-w-full tw-max-w-screen-sm tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-text-inherit focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 sm:tw-ml-[3.25rem] sm:tw-mt-4 sm:tw-w-auto"
             onClick={handleContentClick}
             type="button"
           >
@@ -161,7 +165,7 @@ export default function MemeParticipationDrop({
             <MemeDropDescription description={description} />
           </button>
         ) : (
-          <div className="tw-mt-2 tw-flex tw-flex-col sm:tw-ml-[3.25rem] sm:tw-mt-1.5">
+          <div className="tw-mt-3 tw-flex tw-max-w-screen-sm tw-flex-col sm:tw-ml-[3.25rem] sm:tw-mt-4">
             {headerContent}
             <MemeDropDescription description={description} />
           </div>
@@ -184,7 +188,7 @@ export default function MemeParticipationDrop({
         </div>
       )}
 
-      <div className="tw-px-4 tw-py-4">
+      <div className="tw-px-4 tw-py-1.5">
         <MemeDropTraits drop={drop} />
       </div>
     </>
@@ -200,11 +204,7 @@ export default function MemeParticipationDrop({
         }`}
       >
         <div
-          className={`${borderClasses} ${
-            location === DropLocation.WAVE
-              ? "tw-bg-iron-900/80"
-              : "tw-bg-iron-950"
-          }`}
+          className={`${borderClasses} ${isActiveDrop ? "" : backgroundClass}`}
         >
           {showInteractions ? (
             <DropMobileMenuHandler
@@ -217,21 +217,25 @@ export default function MemeParticipationDrop({
           ) : (
             content
           )}
-          <div className="tw-flex tw-flex-col tw-justify-between tw-gap-3 tw-pb-4 @[700px]:tw-flex-row @[700px]:tw-items-center @[700px]:tw-gap-y-0 @[700px]:tw-px-4">
-            <div className="tw-px-4 @[700px]:tw-px-0">
+          <div className="tw-flex tw-flex-col tw-justify-between tw-gap-3 tw-pb-3 @[700px]:tw-flex-row @[700px]:tw-items-center @[700px]:tw-gap-y-0 @[700px]:tw-px-4">
+            <div className="tw-w-full tw-px-4 @[700px]:tw-min-w-0 @[700px]:tw-flex-1 @[700px]:tw-px-0">
               <MemeDropVoteStats drop={drop} />
             </div>
 
             {canShowVote && showInteractions && !isVotingActionLocked && (
               <div className="tw-flex tw-w-full tw-justify-center tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-px-6 tw-pt-4 @[700px]:tw-w-auto @[700px]:tw-border-none @[700px]:tw-px-0 @[700px]:tw-pt-0">
                 <div onClick={(e) => e.stopPropagation()}>
-                  <VotingModalButton drop={drop} onClick={openVotingModal} />
+                  <VotingModalButton
+                    drop={drop}
+                    className="!tw-text-meta"
+                    onClick={openVotingModal}
+                  />
                 </div>
               </div>
             )}
           </div>
 
-          {showInteractions && (
+          {showInteractions && drop.reactions.length > 0 && (
             <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-px-4 tw-pb-4">
               <WaveDropReactions drop={drop} />
             </div>

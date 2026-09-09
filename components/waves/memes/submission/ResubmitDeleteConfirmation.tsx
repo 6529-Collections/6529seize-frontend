@@ -35,14 +35,14 @@ export function ResubmitDeleteConfirmation({
   return (
     <div className="tw-flex tw-h-full tw-items-center tw-justify-center tw-px-4 tw-py-8 md:tw-px-8">
       <div className="tw-w-full tw-max-w-xl">
-        <div className="tw-mb-6 tw-flex tw-flex-col tw-gap-y-3">
-          <span className="tw-text-sm tw-font-semibold tw-uppercase tw-tracking-wide tw-text-primary-300">
+        <div className="tw-mb-6 tw-flex tw-flex-col tw-gap-y-2">
+          <span className="tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-wide tw-text-primary-300">
             New version submitted
           </span>
-          <h4 className="tw-mb-0 tw-text-2xl tw-font-semibold tw-text-iron-100">
+          <h4 className="tw-mb-0 tw-mt-0 tw-text-pretty tw-text-2xl tw-font-semibold tw-leading-8 tw-text-iron-100">
             Delete the original submission?
           </h4>
-          <p className="tw-mb-0 tw-text-sm tw-leading-6 tw-text-iron-400">
+          <p className="tw-mb-0 tw-mt-0 tw-text-pretty tw-text-sm tw-leading-6 tw-text-iron-400">
             Your edited submission is live. Delete the original to finish the
             resubmit flow, or keep both submissions for now.
           </p>
@@ -83,7 +83,6 @@ export function ResubmitDeleteConfirmation({
             onClicked={onDeleteOriginal}
             disabled={false}
             loading={isDeleting}
-            size="lg"
           >
             Delete Original
           </PrimaryButton>

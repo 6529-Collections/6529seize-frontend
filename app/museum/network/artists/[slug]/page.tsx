@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MuseumArtworkFigure } from "@/components/museum/MuseumArtworkFigure";
+import { buildMuseumDirectoryModel } from "@/components/museum/directory/MuseumDirectoryData";
 import { MuseumBreadcrumbs } from "@/components/museum/MuseumBreadcrumbs";
-import { MuseumEntityContext } from "@/components/museum/MuseumEntityContext";
 import { MuseumMarkdown } from "@/components/museum/MuseumMarkdown";
 import { MuseumRelatedEntities } from "@/components/museum/MuseumRelatedEntities";
 import { MuseumPublicationUnavailable } from "@/components/museum/MuseumPublicationUnavailable";
@@ -14,15 +14,24 @@ import {
   CASEY_ARTIST_SLUG,
   tryCaseyArtworksFromPublication,
 } from "@/lib/museum/casey";
-import { getMuseumView } from "@/lib/museum/normalize";
-import { getMuseumPublicationState } from "@/lib/museum/publication/runtime";
-import { buildMuseumArtistContext } from "@/lib/museum/publication/ia";
 import {
+  applyMuseumCollectionSemantics,
+  isMuseumPermanentCollectionWork,
+  museumDirectoryPublication,
+  museumPublicWorkStatus,
+} from "@/lib/museum/publication/collectionSemantics";
+import { buildMuseumArtistContext } from "@/lib/museum/publication/ia";
+import { getMuseumPublicationBundle } from "@/lib/museum/publication/runtimeBundle";
+import {
+  MUSEUM_CASEY_ACQUISITION_SLUG,
+  museumAcquisitionHref,
   museumArtistHref,
   museumWorkHrefForSourceId,
   museumWorkHrefIndex,
 } from "@/lib/museum/publication/routes";
+import { buildImmutableMuseumBlobUrl } from "@/lib/museum/publication/security";
 import type { MuseumView } from "@/lib/museum/types";
+import { MuseumArtistRecordSummary } from "./MuseumArtistRecordSummary";
 import { TypedArtistProfile } from "./TypedArtistProfile";
 import { TypedArtistProjects } from "./TypedArtistProjects";
 import { TypedArtistWorks } from "./TypedArtistWorks";
@@ -35,7 +44,7 @@ export async function generateMetadata({
   params,
 }: MuseumArtistPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const publicationState = await getMuseumPublicationState();
+  const { publicationState } = await getMuseumPublicationBundle();
   const artist = publicationState.publication?.artists.find(
     (item) => item.slug === slug
   );
@@ -56,10 +65,14 @@ function TypedArtistPage({
   view,
 }: {
   readonly artist: NonNullable<
-    Awaited<ReturnType<typeof getMuseumPublicationState>>["publication"]
+    Awaited<
+      ReturnType<typeof getMuseumPublicationBundle>
+    >["publicationState"]["publication"]
   >["artists"][number];
   readonly publication: NonNullable<
-    Awaited<ReturnType<typeof getMuseumPublicationState>>["publication"]
+    Awaited<
+      ReturnType<typeof getMuseumPublicationBundle>
+    >["publicationState"]["publication"]
   >;
   readonly view: MuseumView | null;
 }) {
@@ -72,16 +85,14 @@ function TypedArtistPage({
   const projects = publication.projects.filter(
     (project) =>
       project.artistId === artist.id ||
-      project.artistIds?.includes(artist.id) === true
+      project.artistIds?.includes(artist.id) === true ||
+      works.some((work) => work.projectId === project.id)
   );
-  const collectionCount = works.filter(
-    (work) => work.collectionMembership === true
-  ).length;
   const relationshipLabel = (work: (typeof works)[number]): string => {
-    if (work.collectionMembership === true) {
+    if (isMuseumPermanentCollectionWork(work)) {
       return t(DEFAULT_LOCALE, "museum.network.works.collectionStatus");
     }
-    const status = work.status;
+    const status = museumPublicWorkStatus(work);
     switch (status) {
       case "accessioned_into_permanent_collection":
         return t(DEFAULT_LOCALE, "museum.network.works.connectedStatus");
@@ -102,15 +113,11 @@ function TypedArtistPage({
         return t(DEFAULT_LOCALE, "museum.network.acquisitions.withdrawnStatus");
     }
   };
-  const relationshipSummary = `${t(
-    DEFAULT_LOCALE,
-    works.length === 1
-      ? "museum.network.artists.connectedWorks.one"
-      : "museum.network.artists.connectedWorks.other",
-    { count: works.length }
-  )} ${"\u00b7"} ${t(DEFAULT_LOCALE, "museum.network.artists.collectionCount", {
-    count: collectionCount,
-  })}`;
+  const relationshipSummary =
+    buildMuseumDirectoryModel(
+      museumDirectoryPublication(publication)
+    )?.artists.find((record) => record.artist.id === artist.id)?.relationship ??
+    t(DEFAULT_LOCALE, "museum.network.artists.profileUnavailable");
   const context = buildMuseumArtistContext(publication, artist.slug, view, [
     { label: "6529 Network Museum", href: "/museum/network" },
     {
@@ -124,9 +131,24 @@ function TypedArtistPage({
     const document = publication.documents.find(
       (candidate) => candidate.id === documentId
     );
-    return document === undefined ? [] : [document];
+    if (
+      document === undefined ||
+      (document.kind !== "artist_practice" &&
+        document.kind !== "source_record") ||
+      (document.artistIds.length > 0 && !document.artistIds.includes(artist.id))
+    ) {
+      return [];
+    }
+    return [document];
   });
-  const workHrefs = museumWorkHrefIndex(publication);
+  const workHrefs = museumWorkHrefIndex(publication, view);
+  const acquisition = context.secondaryRelations.find(
+    (entity) => entity.kind === "curated_acquisition"
+  );
+  const sourceHref =
+    context.sourcePath === null || context.sourceCommit === null
+      ? null
+      : buildImmutableMuseumBlobUrl(context.sourceCommit, context.sourcePath);
   return (
     <article className="tw-min-w-0">
       <MuseumBreadcrumbs
@@ -154,17 +176,21 @@ function TypedArtistPage({
           {relationshipSummary}
         </p>
       </header>
-      <MuseumEntityContext
-        context={context}
-        labels={{
-          ariaLabel: t(
-            DEFAULT_LOCALE,
-            "museum.network.accessibility.entityContext"
-          ),
-          status: t(DEFAULT_LOCALE, "museum.network.entity.status"),
-          statusAsOf: t(DEFAULT_LOCALE, "museum.network.entity.statusAsOf"),
-          source: t(DEFAULT_LOCALE, "museum.network.entity.sources"),
-        }}
+      <MuseumArtistRecordSummary
+        relationshipSummary={relationshipSummary}
+        workCount={works.length}
+        {...(acquisition === undefined
+          ? {}
+          : {
+              acquisition: {
+                label: acquisition.label,
+                href: acquisition.href,
+              },
+            })}
+        profileHref={
+          profileDocuments.length > 0 ? "#typed-artist-profile-title" : null
+        }
+        sourceHref={sourceHref}
       />
       <TypedArtistWorks
         relationshipLabel={relationshipLabel}
@@ -190,17 +216,18 @@ export default async function MuseumArtistPage({
   params,
 }: MuseumArtistPageProps) {
   const { slug } = await params;
-  const publicationState = await getMuseumPublicationState();
+  const { publicationState, view } = await getMuseumPublicationBundle();
   if (publicationState.publication === null) {
     return <MuseumPublicationUnavailable />;
   }
-  const publication = publicationState.publication;
+  const publication = applyMuseumCollectionSemantics(
+    publicationState.publication
+  );
   const artist = publication.artists.find((item) => item.slug === slug);
   if (artist === undefined) {
     notFound();
   }
   if (publication.works !== undefined) {
-    const view = await getMuseumView();
     return (
       <TypedArtistPage artist={artist} publication={publication} view={view} />
     );
@@ -220,10 +247,17 @@ export default async function MuseumArtistPage({
   const projects = publication.projects.filter(
     (project) => project.artistId === artist.id
   );
-  const workHrefs = museumWorkHrefIndex(publication);
+  const workHrefs = museumWorkHrefIndex(publication, view);
+  const sourceHref =
+    profile === undefined
+      ? null
+      : buildImmutableMuseumBlobUrl(
+          publication.identity.commit,
+          profile.sourcePath
+        );
 
   return (
-    <article>
+    <article className="tw-min-w-0">
       <Link
         href="/museum/network/artists"
         className="tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm tw-font-medium tw-text-iron-400 tw-underline tw-underline-offset-4 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
@@ -241,6 +275,20 @@ export default async function MuseumArtistPage({
           {t(DEFAULT_LOCALE, "museum.network.artists.caseySummary")}
         </p>
       </header>
+
+      <MuseumArtistRecordSummary
+        relationshipSummary={t(
+          DEFAULT_LOCALE,
+          "museum.network.artists.caseyWorks"
+        )}
+        workCount={artworks.length}
+        acquisition={{
+          label: t(DEFAULT_LOCALE, "museum.network.acquisitions.caseyTitle"),
+          href: museumAcquisitionHref(MUSEUM_CASEY_ACQUISITION_SLUG),
+        }}
+        profileHref={profile === undefined ? null : "#artist-profile-title"}
+        sourceHref={sourceHref}
+      />
 
       <section className="tw-mt-12" aria-labelledby="artist-works-title">
         <h2

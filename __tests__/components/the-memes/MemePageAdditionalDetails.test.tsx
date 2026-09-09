@@ -6,17 +6,20 @@ const TestIcon = (props: React.SVGProps<SVGSVGElement>) => (
 );
 
 describe("AdditionalDetailsSection", () => {
-  it("optically aligns the section icon with its heading", () => {
+  it("centers the section icon with its heading", () => {
     render(
       <AdditionalDetailsSection title="Properties" icon={TestIcon}>
         Details
       </AdditionalDetailsSection>
     );
 
-    expect(screen.getByTestId("section-icon")).toHaveClass(
+    const heading = screen.getByRole("heading", { name: "Properties" });
+
+    expect(heading.parentElement).toHaveClass("tw-flex", "tw-items-center");
+    expect(screen.getByTestId("section-icon")).not.toHaveClass(
       "tw-relative",
       "tw-top-px"
     );
-    expect(screen.getByRole("heading", { name: "Properties" })).toBeVisible();
+    expect(heading).toBeVisible();
   });
 });

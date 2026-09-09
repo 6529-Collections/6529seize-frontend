@@ -35,7 +35,7 @@ function WebSidebarExpandableGroup({
     "tw-bg-transparent tw-text-iron-400 active:tw-text-white desktop-hover:hover:tw-bg-transparent desktop-hover:hover:tw-text-white";
   if (hasActiveItem) {
     stateClassName =
-      "tw-bg-iron-900 tw-text-white active:tw-text-white desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white";
+      "tw-bg-iron-900/65 tw-text-iron-100 active:tw-text-white desktop-hover:hover:tw-bg-iron-900/80 desktop-hover:hover:tw-text-white";
   } else if (expanded) {
     stateClassName =
       "tw-bg-iron-900/70 tw-text-white active:tw-text-white desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white";

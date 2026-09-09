@@ -10,6 +10,8 @@ import {
 } from "@/helpers/waves/wave-submission-strategy.helpers";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import type { ReactNode } from "react";
+import { CREATE_WAVE_FORM_STYLES } from "../../utils/createWaveFormStyles";
 
 enum CreateWaveSubmissionMode {
   STANDARD = "STANDARD",
@@ -38,6 +40,7 @@ type SubmissionOptionRowProps<T extends string> = {
   readonly titleId: string;
   readonly descriptionId?: string;
   readonly groupName: string;
+  readonly preview?: ReactNode;
   readonly onChange: (type: T) => void;
 };
 
@@ -59,26 +62,23 @@ function SubmissionOptionRow<T extends string>({
   titleId,
   descriptionId,
   groupName,
+  preview,
   onChange,
 }: SubmissionOptionRowProps<T>) {
   const isSelected = selected === type;
   const wrapperClasses = isSelected
-    ? "tw-border-primary-400 tw-bg-primary-500/5 tw-ring-primary-500/30"
-    : "tw-border-white/5 tw-bg-iron-900 tw-ring-white/5 hover:tw-border-white/10 hover:tw-bg-iron-800 hover:tw-ring-white/10";
+    ? "tw-border-primary-500/60 tw-bg-iron-900 tw-shadow-inner"
+    : "tw-border-white/5 tw-bg-iron-900/60 tw-shadow-none hover:tw-border-white/10 hover:tw-bg-iron-900";
   const labelClasses = isSelected
     ? "tw-text-white"
     : "tw-text-iron-300 group-hover:tw-text-white";
   const descriptionClasses = isSelected
     ? "tw-text-iron-300"
-    : "tw-text-iron-500";
+    : "tw-text-iron-400";
   const hasDescription = description !== undefined;
-
-  return (
-    <label
-      className={`${wrapperClasses} tw-group tw-flex tw-w-full tw-cursor-pointer tw-gap-x-3 tw-rounded-xl tw-border tw-border-solid tw-px-3 tw-py-3 tw-shadow-inner tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out ${
-        hasDescription ? "tw-items-start" : "tw-items-center"
-      }`}
-    >
+  const hasPreview = preview !== undefined && preview !== null;
+  const control = (
+    <>
       <input
         type="radio"
         name={groupName}
@@ -90,7 +90,7 @@ function SubmissionOptionRow<T extends string>({
       />
       <span
         aria-hidden="true"
-        className={`tw-flex tw-h-4 tw-w-4 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-transition tw-duration-300 tw-ease-out peer-focus-visible:tw-ring-2 peer-focus-visible:tw-ring-primary-500 peer-focus-visible:tw-ring-offset-2 peer-focus-visible:tw-ring-offset-iron-950 ${
+        className={`tw-flex tw-h-4 tw-w-4 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-transition tw-duration-300 tw-ease-out ${
           isSelected
             ? "tw-border-primary-400 tw-bg-primary-500/10"
             : "tw-border-iron-600 tw-bg-transparent group-hover:tw-border-iron-500"
@@ -105,20 +105,93 @@ function SubmissionOptionRow<T extends string>({
       <div className="tw-flex tw-min-w-0 tw-flex-col">
         <span
           id={titleId}
-          className={`${labelClasses} tw-min-h-4 tw-text-sm tw-font-semibold`}
+          className={`${labelClasses} tw-min-h-4 tw-font-semibold ${
+            hasPreview ? "tw-text-xs sm:tw-text-sm" : "tw-text-sm"
+          }`}
         >
           {label}
         </span>
         {description && (
           <span
             id={descriptionId}
-            className={`${descriptionClasses} tw-mt-1 tw-text-xs tw-font-medium tw-leading-4`}
+            className={`${descriptionClasses} tw-mt-1 tw-text-xs tw-font-normal tw-leading-4`}
           >
             {description}
           </span>
         )}
       </div>
+    </>
+  );
+
+  if (hasPreview) {
+    return (
+      <label
+        className={`${wrapperClasses} tw-group tw-flex tw-w-full tw-cursor-pointer tw-flex-col tw-gap-y-2 tw-rounded-xl tw-border tw-border-solid tw-p-2 tw-transition tw-duration-300 tw-ease-out focus-within:tw-ring-2 focus-within:tw-ring-inset focus-within:tw-ring-primary-400 sm:tw-gap-y-3 sm:tw-p-3`}
+      >
+        {preview}
+        <div className="tw-flex tw-w-full tw-min-w-0 tw-items-center tw-gap-x-2 sm:tw-gap-x-3">
+          {control}
+        </div>
+      </label>
+    );
+  }
+
+  return (
+    <label
+      className={`${wrapperClasses} tw-group tw-flex tw-w-full tw-cursor-pointer tw-gap-x-3 tw-rounded-xl tw-border tw-border-solid tw-px-3 tw-py-3 tw-transition tw-duration-300 tw-ease-out focus-within:tw-ring-2 focus-within:tw-ring-inset focus-within:tw-ring-primary-400 ${
+        hasDescription ? "tw-items-start" : "tw-items-center"
+      }`}
+    >
+      {control}
     </label>
+  );
+}
+
+function SubmissionModePreview({
+  mode,
+  isSelected,
+}: {
+  readonly mode: CreateWaveSubmissionMode;
+  readonly isSelected: boolean;
+}) {
+  const accentClass = isSelected ? "tw-bg-primary-400/80" : "tw-bg-iron-650";
+
+  return (
+    <div
+      aria-hidden="true"
+      className="tw-h-16 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950/70 tw-p-2 sm:tw-h-20 sm:tw-p-3"
+    >
+      {mode === CreateWaveSubmissionMode.STANDARD ? (
+        <div className="tw-flex tw-h-full tw-flex-col tw-justify-center">
+          <div className="tw-flex tw-items-center tw-gap-1.5 sm:tw-gap-2">
+            <span
+              className={`tw-size-3 tw-flex-shrink-0 tw-rounded-full sm:tw-size-4 ${accentClass}`}
+            />
+            <span className="tw-h-1 tw-w-10 tw-rounded-full tw-bg-iron-650 sm:tw-h-1.5 sm:tw-w-14" />
+          </div>
+          <div className="tw-mt-1.5 tw-flex tw-min-h-0 tw-flex-1 tw-gap-2 sm:tw-mt-2 sm:tw-gap-3">
+            <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-justify-center tw-gap-1 sm:tw-gap-1.5">
+              <span className="tw-h-1 tw-w-full tw-rounded-full tw-bg-iron-800 sm:tw-h-1.5" />
+              <span className="tw-h-1 tw-w-4/5 tw-rounded-full tw-bg-iron-800 sm:tw-h-1.5" />
+              <span className="tw-h-1 tw-w-2/3 tw-rounded-full tw-bg-iron-800 sm:tw-h-1.5" />
+            </div>
+            <span className="tw-aspect-square tw-h-full tw-flex-shrink-0 tw-rounded-sm tw-bg-iron-800 sm:tw-rounded-md" />
+          </div>
+        </div>
+      ) : (
+        <div className="tw-flex tw-h-full tw-items-center tw-justify-center">
+          <div className="tw-flex tw-w-full tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900 tw-p-1.5 sm:tw-w-4/5 sm:tw-gap-3 sm:tw-p-2">
+            <span
+              className={`tw-size-7 tw-flex-shrink-0 tw-rounded-full sm:tw-size-9 ${accentClass}`}
+            />
+            <div className="tw-min-w-0 tw-flex-1">
+              <span className="tw-block tw-h-1 tw-w-2/3 tw-rounded-full tw-bg-iron-650 sm:tw-h-1.5" />
+              <span className="tw-mt-1.5 tw-block tw-h-1 tw-w-full tw-rounded-full tw-bg-iron-800 sm:tw-mt-2 sm:tw-h-1.5" />
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -221,23 +294,33 @@ export default function CreateWaveDropsSubmissionMode({
         <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-100">
           Submission type
         </h3>
-        <p className="tw-m-0 tw-text-sm tw-font-medium tw-leading-relaxed tw-text-iron-400">
+        <p className={CREATE_WAVE_FORM_STYLES.compactSupportingText}>
           Choose whether participants submit drops or nominate identities.
         </p>
       </div>
 
-      <div className="tw-mt-4 tw-grid tw-grid-cols-1 tw-gap-3 md:tw-grid-cols-2">
-        {submissionModeOptions.map((option) => (
-          <SubmissionOptionRow
-            key={option.type}
-            type={option.type}
-            selected={selectedMode}
-            label={option.label}
-            titleId={getOptionTitleId("submission-mode", option.type)}
-            groupName="submission-mode"
-            onChange={onSubmissionModeChange}
-          />
-        ))}
+      <div className="tw-mt-4 tw-grid tw-grid-cols-2 tw-gap-3">
+        {submissionModeOptions.map((option) => {
+          const isSelected = selectedMode === option.type;
+
+          return (
+            <SubmissionOptionRow
+              key={option.type}
+              type={option.type}
+              selected={selectedMode}
+              label={option.label}
+              titleId={getOptionTitleId("submission-mode", option.type)}
+              groupName="submission-mode"
+              preview={
+                <SubmissionModePreview
+                  mode={option.type}
+                  isSelected={isSelected}
+                />
+              }
+              onChange={onSubmissionModeChange}
+            />
+          );
+        })}
       </div>
 
       <CommonAnimationHeight

@@ -15,7 +15,11 @@ jest.mock(
   "@/components/waves/specs/groups/group/WaveGroupScope",
   () =>
     ({ group }: any) =>
-      group ? <div data-testid="scope" /> : <span>Anyone</span>
+      group ? <div data-testid="scope" /> : <span>Public</span>
+);
+jest.mock(
+  "@/components/waves/specs/groups/group/WaveGroupMembersScope",
+  () => () => <div data-testid="members-scope" />
 );
 
 jest.mock("@/helpers/waves/waves.helpers", () => ({ canEditWave: jest.fn() }));
@@ -51,30 +55,39 @@ describe("WaveGroup", () => {
 
   afterEach(() => jest.clearAllMocks());
 
-  it("shows edit buttons when editable", () => {
+  it("shows the gear menu and member summary when the viewer can administer the wave", () => {
     const scope = { group: { is_direct_message: false } } as any;
-    render(<WaveGroup {...baseProps} scope={scope} />, { wrapper });
+    const { container } = render(
+      <WaveGroup {...baseProps} scope={scope} showMembersSummary />,
+      { wrapper }
+    );
+
     expect(screen.getByTestId("edit")).toBeInTheDocument();
+    expect(screen.getByTestId("members-scope")).toBeInTheDocument();
+    expect(container.firstChild).toHaveClass("tw-items-center");
+    expect(screen.getByTestId("members-scope").parentElement).toHaveClass(
+      "tw-items-center"
+    );
   });
 
-  it("hides edit buttons when cannot edit", () => {
+  it("hides the gear menu when the viewer cannot administer the wave", () => {
     canEditWave.mockReturnValue(false);
     const scope = { group: { is_direct_message: false } } as any;
     render(<WaveGroup {...baseProps} scope={scope} />, { wrapper });
     expect(screen.queryByTestId("edit")).toBeNull();
   });
 
-  it('shows "Anyone" when no group provided', () => {
+  it('shows "Public" when no group provided', () => {
     render(<WaveGroup {...baseProps} scope={{} as any} />, { wrapper });
-    expect(screen.getByText("Anyone")).toBeInTheDocument();
+    expect(screen.getByText("Public")).toBeInTheDocument();
   });
 
-  it("clarifies empty chat scope only applies when chat is enabled", () => {
+  it('shows "Public" for an empty chat scope', () => {
     render(
       <WaveGroup {...baseProps} type={WaveGroupType.CHAT} scope={{} as any} />,
       { wrapper }
     );
 
-    expect(screen.getByText("Anyone when enabled")).toBeInTheDocument();
+    expect(screen.getByText("Public")).toBeInTheDocument();
   });
 });

@@ -64,7 +64,7 @@ Then reload the workstream-specific state:
 1. `active-context.md`
 2. `run-log.md`
 3. the merged specification
-4. current PR and release-bus state
+4. current PR, deployment workflow results, and `ops/docs/developer/deployment.md`
 
 ## Escalation Triggers
 
@@ -72,5 +72,6 @@ Then reload the workstream-specific state:
 - Required credentials are unavailable after checking local credential tooling.
 - A destructive or irreversible operation outside the approved staging scope is
   required.
-- The live release bus is unavailable or reports an unsafe/unknown state.
+- The ordinary deployment workflow fails or the required environment is
+  unavailable.
 - A contract source revision cannot be identified or deterministically pinned.

@@ -6,12 +6,15 @@ import type {
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import { getCreateSubwaveTitle } from "@/helpers/waves/create-subwave-title.helpers";
 import CreateWaveDisplaySettings from "./CreateWaveDisplaySettings";
 import CreateWaveImageInput from "./CreateWaveImageInput";
 import CreateWaveNameInput from "./CreateWaveNameInput";
 import CreateWaveType from "./type/CreateWaveType";
 import RankScheduleModeSelector from "./type/RankScheduleModeSelector";
 import { DEFAULT_PROPOSAL_CARD_RECIPE } from "@/helpers/waves/proposal-card.helpers";
+import CreateWaveStepHeader from "../utils/CreateWaveStepHeader";
+import { CREATE_WAVE_FORM_STYLES } from "../utils/createWaveFormStyles";
 
 const DEFAULT_DISPLAY: CreateWaveDisplayConfig = {
   proposalCards: {
@@ -30,6 +33,8 @@ const DEFAULT_DISPLAY: CreateWaveDisplayConfig = {
 
 export default function CreateWaveOverview({
   overview,
+  isSubwave = false,
+  parentWaveName,
   display = DEFAULT_DISPLAY,
   errors,
   ongoingRanking = false,
@@ -38,6 +43,8 @@ export default function CreateWaveOverview({
   onOngoingRankingChange = () => undefined,
 }: {
   readonly overview: WaveOverviewConfig;
+  readonly isSubwave?: boolean;
+  readonly parentWaveName?: string | null | undefined;
   readonly display?: CreateWaveDisplayConfig | undefined;
   readonly errors: CREATE_WAVE_VALIDATION_ERROR[];
   readonly ongoingRanking?: boolean;
@@ -61,16 +68,29 @@ export default function CreateWaveOverview({
     });
 
   return (
-    <div className="tw-flex tw-flex-col tw-gap-y-6">
+    <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-y-6 tw-break-words">
+      <CreateWaveStepHeader
+        title={
+          isSubwave
+            ? getCreateSubwaveTitle(locale, parentWaveName)
+            : t(locale, "waves.create.overview.title")
+        }
+      />
       <CreateWaveNameInput
         onChange={onChange}
         name={overview.name}
+        isSubwave={isSubwave}
         errors={errors}
       />
       <div className="tw-space-y-3">
-        <p className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-100">
-          {t(locale, "waves.create.overview.picture")}
-        </p>
+        <h3 className={CREATE_WAVE_FORM_STYLES.sectionTitle}>
+          {t(
+            locale,
+            isSubwave
+              ? "waves.create.overview.subwavePicture"
+              : "waves.create.overview.picture"
+          )}
+        </h3>
         <CreateWaveImageInput
           imageToShow={overview.image}
           setFile={(file) =>
@@ -82,6 +102,7 @@ export default function CreateWaveOverview({
         />
       </div>
       <CreateWaveType
+        isSubwave={isSubwave}
         selected={overview.typeSelected ? overview.type : null}
         errors={errors}
         onChange={(type) =>

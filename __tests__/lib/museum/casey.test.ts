@@ -3,6 +3,7 @@ import {
   getCaseyDossierAnchor,
   tryCaseyArtworksFromPublication,
 } from "@/lib/museum/casey";
+import { displayCreditWithoutRepeatedLicense } from "@/lib/museum/credit";
 import {
   GitHubMuseumPublicationSource,
   legacyCaseyPublicationAssembler,
@@ -29,6 +30,21 @@ describe("Casey publication overlay", () => {
 
   beforeAll(async () => {
     publication = await buildPublication();
+  });
+
+  it("removes a repeated licensed suffix before the linked rights label", () => {
+    expect(
+      displayCreditWithoutRepeatedLicense(
+        "Casey Reas, Work One; 6529 Network Museum. Licensed CC BY-NC 4.0.",
+        "CC BY-NC 4.0"
+      )
+    ).toBe("Casey Reas, Work One; 6529 Network Museum.");
+    expect(
+      displayCreditWithoutRepeatedLicense(
+        "Vera Molnár, Work. Licensed under CC BY-NC 4.0.",
+        "CC BY-NC 4.0"
+      )
+    ).toBe("Vera Molnár, Work.");
   });
 
   it("uses the governed rights label and derives the canonical CC license URL", () => {

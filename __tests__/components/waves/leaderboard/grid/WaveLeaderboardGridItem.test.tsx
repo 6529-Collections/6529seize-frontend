@@ -103,7 +103,7 @@ jest.mock("@/components/voting/VotingModalButton", () => ({
 
 jest.mock("@/components/waves/drops/WaveDropActionsOpen", () => ({
   __esModule: true,
-  default: () => <button data-testid="open-action">Open</button>,
+  default: () => <button data-testid="desktop-open-action">Open drop</button>,
 }));
 
 jest.mock("@/components/waves/drops/WaveDropMobileMenuOpen", () => ({
@@ -544,9 +544,10 @@ describe("WaveLeaderboardGridItem", () => {
     ).toHaveClass(
       "tw-opacity-0",
       "group-focus-within:tw-opacity-100",
-      "desktop-hover:group-hover:tw-opacity-100"
+      "desktop-hover:group-hover:tw-opacity-100",
+      "touch-only:tw-opacity-100"
     );
-    expect(screen.getByTestId("open-action")).toBeInTheDocument();
+    expect(screen.getByTestId("desktop-open-action")).toBeInTheDocument();
     expect(screen.getByTestId("vote-button")).toBeInTheDocument();
     expect(screen.getByTestId("media")).toBeInTheDocument();
     const mediaWrapper = screen.getByTestId("media")
@@ -856,7 +857,7 @@ describe("WaveLeaderboardGridItem", () => {
       />
     );
 
-    expect(screen.queryByTestId("open-action")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("desktop-open-action")).not.toBeInTheDocument();
     expect(screen.queryByTestId("vote-button")).not.toBeInTheDocument();
     expect(screen.queryByTestId("mobile-copy-action")).not.toBeInTheDocument();
   });
@@ -875,7 +876,7 @@ describe("WaveLeaderboardGridItem", () => {
     expect(
       screen.getByTestId("wave-leaderboard-grid-item-content-only-actions-d1")
     ).toBeInTheDocument();
-    expect(screen.getByTestId("open-action")).toBeInTheDocument();
+    expect(screen.getByTestId("desktop-open-action")).toBeInTheDocument();
     expect(screen.queryByTestId("vote-button")).not.toBeInTheDocument();
   });
 });

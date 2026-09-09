@@ -2,9 +2,9 @@
 
 import TimePicker from "@/components/common/TimePicker";
 import TooltipIconButton from "@/components/common/TooltipIconButton";
+import { CREATE_WAVE_FORM_STYLES } from "../utils/createWaveFormStyles";
 import CommonCalendar from "@/components/utils/calendar/CommonCalendar";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
-import { useCallback, useEffect, useState } from "react";
 
 interface DecisionsFirstProps {
   readonly firstDecisionTime: number;
@@ -17,8 +17,6 @@ export default function DecisionsFirst({
   setFirstDecisionTime,
   minTimestamp,
 }: DecisionsFirstProps) {
-  const [selectedTimestamp, setSelectedTimestamp] = useState(firstDecisionTime);
-
   // The min time-of-day is derived straight from minTimestamp (voting start);
   // no need to mirror it into state. The safe default for firstDecisionTime is
   // owned by the config/date layer (getDefaultFirstDecisionTime), so this step
@@ -31,34 +29,16 @@ export default function DecisionsFirst({
         }
       : null;
 
-  // Update local state if the prop changes
-  useEffect(() => {
-    setSelectedTimestamp(firstDecisionTime);
-  }, [firstDecisionTime]);
-
-  const getHours = useCallback(() => {
-    return new Date(selectedTimestamp).getHours();
-  }, [selectedTimestamp]);
-
-  const getMinutes = useCallback(() => {
-    return new Date(selectedTimestamp).getMinutes();
-  }, [selectedTimestamp]);
-
-  const onTimeChange = useCallback(
-    (hours: number, minutes: number) => {
-      const date = new Date(selectedTimestamp);
-      date.setHours(hours, minutes, 0, 0);
-      const newTimestamp = date.getTime();
-
-      setSelectedTimestamp(newTimestamp);
-      setFirstDecisionTime(newTimestamp);
-    },
-    [selectedTimestamp, setFirstDecisionTime]
-  );
+  const selectedDate = new Date(firstDecisionTime);
+  const onTimeChange = (hours: number, minutes: number) => {
+    const date = new Date(firstDecisionTime);
+    date.setHours(hours, minutes, 0, 0);
+    setFirstDecisionTime(date.getTime());
+  };
 
   const handleDateSelection = (timestamp: number) => {
     // Preserve the time from the current selection
-    const currentDate = new Date(selectedTimestamp);
+    const currentDate = new Date(firstDecisionTime);
     const newDate = new Date(timestamp);
 
     // Get the current hours/minutes
@@ -99,16 +79,15 @@ export default function DecisionsFirst({
     }
 
     const newTimestamp = newDate.getTime();
-    setSelectedTimestamp(newTimestamp);
     setFirstDecisionTime(newTimestamp);
   };
 
   return (
     <div className="tw-col-span-2">
       <div className="tw-mb-3 tw-flex tw-items-center tw-gap-x-2">
-        <p className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-100">
+        <h3 className={CREATE_WAVE_FORM_STYLES.sectionTitle}>
           First Winners Announcement
-        </p>
+        </h3>
         <TooltipIconButton
           icon={faInfoCircle}
           tooltipText="This is when you'll announce the first set of winners for your wave. It must occur after voting begins. This is when creators will find out if they've won and their work will be showcased."
@@ -123,33 +102,35 @@ export default function DecisionsFirst({
       <div className="tw-grid tw-grid-cols-1 tw-gap-x-10 tw-gap-y-8 md:tw-grid-cols-2">
         {/* Date selection */}
         <div className="tw-w-full">
-          <p className="tw-mb-2 tw-text-sm tw-font-medium tw-text-iron-300">
+          <p className={`tw-mb-2 ${CREATE_WAVE_FORM_STYLES.fieldLabel}`}>
             Select Date:
           </p>
           <CommonCalendar
-            initialMonth={new Date(selectedTimestamp).getMonth()}
-            initialYear={new Date(selectedTimestamp).getFullYear()}
-            selectedTimestamp={selectedTimestamp}
+            initialMonth={selectedDate.getMonth()}
+            initialYear={selectedDate.getFullYear()}
+            selectedTimestamp={firstDecisionTime}
             minTimestamp={minTimestamp}
             maxTimestamp={null}
             setSelectedTimestamp={handleDateSelection}
+            variant="flat"
           />
         </div>
 
         {/* Time selection */}
         <div className="tw-w-full">
-          <p className="tw-mb-2 tw-text-sm tw-font-medium tw-text-iron-300">
+          <p className={`tw-mb-2 ${CREATE_WAVE_FORM_STYLES.fieldLabel}`}>
             Select Time:
           </p>
 
           <TimePicker
-            hours={getHours()}
-            minutes={getMinutes()}
+            hours={selectedDate.getHours()}
+            minutes={selectedDate.getMinutes()}
             onTimeChange={onTimeChange}
+            variant="flat"
             minTime={
               // Only apply min time constraint if the selected date is the same as min timestamp date
               minTimestamp &&
-              new Date(selectedTimestamp).toDateString() ===
+              selectedDate.toDateString() ===
                 new Date(minTimestamp).toDateString()
                 ? minTimeObj
                 : null

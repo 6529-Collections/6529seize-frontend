@@ -3,7 +3,10 @@ import { renderHook, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
 
 import { useSingleWaveDropData } from "@/components/waves/drop/useSingleWaveDropData";
+import { ApiDropType } from "@/generated/models/ApiDropType";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { DropSize } from "@/helpers/waves/drop.helpers";
+import { fetchDropVoteSummaryByIdV2 } from "@/services/api/drop-vote-summary-api";
 import {
   fetchDropMetadataByIdV2,
   fetchDropV2ById,
@@ -14,7 +17,15 @@ jest.mock("@/services/api/wave-drops-v2-api", () => ({
   fetchDropV2ById: jest.fn(),
 }));
 
-const useWaveDataMock = jest.fn(() => ({ data: { id: "wave-1" } }));
+jest.mock("@/services/api/drop-vote-summary-api", () => ({
+  fetchDropVoteSummaryByIdV2: jest.fn(),
+}));
+
+jest.mock("@/services/websocket/useWebSocketMessage", () => ({
+  useWebSocketMessage: jest.fn(),
+}));
+
+const useWaveDataMock = jest.fn();
 jest.mock("@/hooks/useWaveData", () => ({
   useWaveData: (props: unknown) => useWaveDataMock(props),
 }));
@@ -22,6 +33,7 @@ jest.mock("@/hooks/useWaveData", () => ({
 const fetchDropV2ByIdMock = fetchDropV2ById as jest.MockedFunction<
   typeof fetchDropV2ById
 >;
+const fetchDropVoteSummaryByIdV2Mock = jest.mocked(fetchDropVoteSummaryByIdV2);
 const fetchDropMetadataByIdV2Mock =
   fetchDropMetadataByIdV2 as jest.MockedFunction<
     typeof fetchDropMetadataByIdV2
@@ -57,11 +69,48 @@ describe("useSingleWaveDropData", () => {
   beforeEach(() => {
     jest.resetAllMocks();
     useWaveDataMock.mockReturnValue({ data: { id: "wave-1" } });
+    fetchDropVoteSummaryByIdV2Mock.mockResolvedValue({});
     fetchDropMetadataByIdV2Mock.mockResolvedValue([
       { data_key: "priority", data_value: "drop-1" },
       { data_key: "title", data_value: "Full Title" },
     ]);
   });
+
+  it.each([
+    [ApiDropType.Participatory, ApiWaveType.Rank, 1],
+    [ApiDropType.Participatory, ApiWaveType.Approve, 0],
+    [ApiDropType.Chat, ApiWaveType.Rank, 0],
+  ])(
+    "%s drop in %s wave makes %i summary request(s)",
+    async (dropType, waveType, expectedRequests) => {
+      useWaveDataMock.mockReturnValue({
+        data: { id: "wave-1", wave: { type: waveType } },
+      });
+      const initialDrop = {
+        ...createInitialDrop("drop-1"),
+        drop_type: dropType,
+      };
+      const { result, rerender } = renderHook(
+        () => useSingleWaveDropData(initialDrop, jest.fn()),
+        { wrapper: createWrapper() }
+      );
+
+      await waitFor(() => {
+        expect(result.current.drop.metadata).toHaveLength(2);
+      });
+      rerender();
+
+      expect(fetchDropVoteSummaryByIdV2Mock).toHaveBeenCalledTimes(
+        expectedRequests
+      );
+      if (expectedRequests > 0) {
+        expect(fetchDropVoteSummaryByIdV2Mock).toHaveBeenCalledWith(
+          "drop-1",
+          expect.any(AbortSignal)
+        );
+      }
+    }
+  );
 
   it("fetches detail metadata without fetching single-drop detail", async () => {
     const initialDrop = createInitialDrop("drop-1");

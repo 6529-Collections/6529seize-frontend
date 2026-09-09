@@ -97,15 +97,16 @@ export default function EULAIntroSections() {
           any reason.
         </p>
         <p>
-          We strive for a positive community, and that means no abusive behavior
-          or posting objectionable user-generated content. Please report any
-          concerns to us at <a href="mailto:support@6529.io">support@6529.io</a>
-          {"."} Our policy is to respond to these reports within 24 hours, which
-          includes removing content or blocking users as warranted.
+          6529 has zero tolerance for objectionable content and abusive users.
+          Content is subject to narrowly defined safety controls before
+          distribution. Profanity, criticism, satire, political opinions, and
+          merely offensive opinions are not automatically prohibited.
         </p>
         <p>
-          Please note: We monitor material posted to the app to filter for
-          objectionable material.
+          You can report content and block abusive users from within Our App.
+          Reports are reviewed, and appropriate action—including content removal
+          and account suspension—is taken within 24 hours. You can also contact
+          us at <a href="mailto:support@6529.io">support@6529.io</a>.
         </p>
       </li>
     </>

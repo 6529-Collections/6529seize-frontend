@@ -130,11 +130,11 @@ const MemesArtSubmissionTraits: React.FC<MemesArtSubmissionTraitsProps> = ({
             );
           }
 
-          // Card Points: all 4 fields in one row
+          // Card Points: two columns on mobile, all four from medium screens
           if (section.title === "Card Points") {
             return (
               <Section key={sectionKey} title={section.title}>
-                <div className="tw-grid tw-grid-cols-2 tw-gap-4 sm:tw-grid-cols-4">
+                <div className="tw-grid tw-grid-cols-2 tw-gap-4 md:tw-grid-cols-4">
                   {section.fields.map((field) => renderField(field))}
                 </div>
               </Section>

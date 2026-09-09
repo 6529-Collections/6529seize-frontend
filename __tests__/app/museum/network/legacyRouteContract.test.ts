@@ -154,7 +154,7 @@ describe("Museum legacy route contract", () => {
   it("redirects the legacy accessions index to Collection accession records", async () => {
     await expectRedirect(
       () => MuseumAccessionsPage(),
-      "/museum/network/collection#accessions"
+      "/museum/network/collection#collection-acquisitions-title"
     );
   });
 

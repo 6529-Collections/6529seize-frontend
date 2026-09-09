@@ -29,6 +29,12 @@ identities.
 - DM-create UI needs an authenticated connected profile.
 - If profile context is missing, create controls are hidden and create content
   does not render.
+- Recipient profile preferences can allow new conversations from everyone,
+  only people the recipient follows, or nobody.
+- A new group direct message must be allowed by every recipient.
+- Existing direct-message conversations are unaffected by later preference
+  changes, including existing groups whose participants would not pass the
+  current creation policy.
 
 ## User Journey
 
@@ -38,11 +44,15 @@ identities.
    opens `/messages/create`.
 4. Type in the `Identity` search input.
 5. Search starts at 3+ typed characters.
-6. While loading, the search list shows `Loading...`; when empty, it shows
+6. Exact handle matches appear first, followed by handles that start with the
+   search text, handles that contain it, and finally ENS or auto-wallet matches.
+   Results within each match group are ordered by profile level from highest to
+   lowest.
+7. While loading, the search list shows `Loading...`; when empty, it shows
    `No results`.
-7. Select one or more recipients; selected recipients appear as removable chips.
-8. Click `Create`; the button switches to `Creating...` while submit runs.
-9. On success, the app opens `/messages/{waveId}`.
+8. Select one or more recipients; selected recipients appear as removable chips.
+9. Click `Create`; the button switches to `Creating...` while submit runs.
+10. On success, the app opens `/messages/{waveId}`.
 
 ## Common Scenarios
 
@@ -71,7 +81,10 @@ identities.
 ## Failure and Recovery
 
 - If search returns no rows, refine the query and keep typing.
-- If DM creation fails, the UI shows `Failed to create Direct Message: ...`;
+- If a recipient does not accept a new direct message from the creator, the UI
+  explains that recipient's policy. Change the participant set or use an
+  existing conversation.
+- For other creation failures, the UI shows the server error when available;
   retry from the same flow.
 - If stale `create=dm` opens unexpectedly, close the flow to clear `create`
   from the URL.
@@ -79,6 +92,9 @@ identities.
 ## Limitations / Notes
 
 - Identity search returns profile-owner results only.
+- Recipient search ranks exact, prefix, and substring handle matches before ENS
+  or auto-wallet matches, then orders each match group from highest to lowest
+  profile level.
 - This page owns direct-message creation form behavior.
 - Route-shell behavior for `/messages/create` (header and back rules) is
   documented in Navigation docs.

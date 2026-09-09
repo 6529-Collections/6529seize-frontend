@@ -1,5 +1,6 @@
 import { getMuseumView } from "@/lib/museum/normalize";
 import { getMuseumPublicationState } from "./runtime";
+import { applyMuseumCollectionSemanticsToLoadState } from "./collectionSemantics";
 import type { MuseumView } from "@/lib/museum/types";
 import type { MuseumPublicationLoadState } from "./types";
 
@@ -27,7 +28,9 @@ export async function getMuseumPublicationBundle(): Promise<{
   readonly publicationState: MuseumPublicationLoadState;
   readonly view: MuseumView | null;
 }> {
-  const publicationState = await getMuseumPublicationState();
+  const publicationState = applyMuseumCollectionSemanticsToLoadState(
+    await getMuseumPublicationState()
+  );
   const publication = publicationState.publication;
 
   // A catalog-activated typed graph is authoritative. Do not also read the

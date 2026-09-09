@@ -49,7 +49,43 @@ async function buildPublication(): Promise<MuseumPublication> {
     fetch: createCaseyFixture().fetch,
   }).load();
   if (state.status !== "current") throw new Error("test_publication_missing");
-  return state.publication;
+  const publication = state.publication;
+  return {
+    ...publication,
+    dataArchitecture: {
+      ...publication.dataArchitecture,
+      introduction: {
+        ...publication.dataArchitecture.introduction,
+        markdown: `# How the Museum knows and cares for art
+
+A public introduction to the Museum data architecture.
+
+## Eleven questions, eleven standards and vocabularies
+
+Each standard answers a particular collections or preservation question.
+
+## One artwork through the architecture
+
+The same work appears through related identity, rights, custody, and source records.
+
+## The Museum's core entities
+
+Artists, works, projects, acquisitions, programs, media, and sources remain distinct and connected.
+
+## Distinctions the Museum keeps
+
+Title, custody, rights, and accession describe different facts.
+
+## Current Casey Reas implementation
+
+The first accession tests the application profile across seven works.
+
+## Education is part of stewardship
+
+The public record should make the Museum's knowledge legible to visitors.`,
+      },
+    },
+  };
 }
 
 describe("Museum data architecture routes", () => {
@@ -79,22 +115,70 @@ describe("Museum data architecture routes", () => {
         level: 1,
         name: "How the Museum knows and cares for art",
       })
-    ).toBeInTheDocument();
+    ).toHaveClass("tw-text-[2rem]", "sm:tw-text-[2.75rem]");
     expect(
       screen.getByText("A public introduction to the Museum data architecture.")
     ).toBeInTheDocument();
     expect(
-      screen.getByText("Read the machine application profile")
+      screen.getByText("Working standard; not adopted policy")
+    ).toBeVisible();
+    expect(
+      screen.getByText("Read the publication profile")
     ).toBeInTheDocument();
     expect(
       screen
-        .getByText("Read the machine application profile")
+        .getByText("Read the publication profile")
         .closest("details")
         ?.querySelector("pre")?.textContent
     ).toBe(publication.dataArchitecture.profileJson);
     expect(
       screen.getByRole("link", { name: "Back to Research" })
     ).toHaveAttribute("data-prefetch", "false");
+  });
+
+  it("opens the complete architecture manuscript when a selected heading drifts", async () => {
+    const driftedPublication: MuseumPublication = {
+      ...publication,
+      dataArchitecture: {
+        ...publication.dataArchitecture,
+        introduction: {
+          ...publication.dataArchitecture.introduction,
+          markdown: publication.dataArchitecture.introduction.markdown.replace(
+            "## Current Casey Reas implementation",
+            "## Current implementation heading retained only in the source"
+          ),
+        },
+      },
+    };
+    mockedPublicationState.mockResolvedValue({
+      status: "current",
+      publication: driftedPublication,
+      errorCode: null,
+      failedAt: null,
+      lastValidAcceptedAt: null,
+    });
+
+    render(await MuseumDataArchitecturePage());
+
+    expect(
+      screen.getByText(
+        "The public record should make the Museum's knowledge legible to visitors."
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", {
+        level: 2,
+        name: "Read the complete guide",
+      })
+    ).toBeInTheDocument();
+    expect(document.getElementById("complete-research-record")).toHaveAttribute(
+      "open"
+    );
+    expect(
+      screen.queryByRole("heading", {
+        name: "The Museum publication is temporarily unavailable",
+      })
+    ).not.toBeInTheDocument();
   });
 
   it("publishes an individual standards profile onsite", async () => {
