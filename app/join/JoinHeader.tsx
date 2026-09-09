@@ -117,7 +117,7 @@ export function JoinHeader({
   readonly locale: SupportedLocale;
   readonly pageState: JoinPageState;
   readonly primaryAction: CurrentPanelAction;
-  readonly secondaryAction: CurrentPanelAction;
+  readonly secondaryAction: CurrentPanelAction | null;
 }) {
   const heroContent = HERO_CONTENT[pageState];
   const { hasHighlightedSubtitle, subtitleKey } = heroContent;
@@ -163,7 +163,9 @@ export function JoinHeader({
         </div>
         <div className="tw-mt-10 tw-flex tw-w-full tw-flex-col tw-items-stretch tw-justify-center tw-gap-4 sm:tw-w-auto sm:tw-flex-row sm:tw-items-center">
           <HeroAction action={primaryAction} variant="primary" />
-          <HeroAction action={secondaryAction} variant="secondary" />
+          {secondaryAction && (
+            <HeroAction action={secondaryAction} variant="secondary" />
+          )}
         </div>
         <HeroPoints locale={locale} />
       </div>

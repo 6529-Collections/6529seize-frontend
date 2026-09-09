@@ -62,6 +62,13 @@ The compact focus area links users to:
 
 ## Notes
 
+On native iOS when the detected country is not `US` (including while it is
+unknown), the Collect step, subscription card, logged-in subscription action,
+and purchasing FAQs are omitted entirely. The wallet FAQ describes browsing,
+profiles, posting, and voting. Progress counts only the four visible steps;
+there is no unavailable banner or empty card. US iOS, web, and Android retain
+the full journey.
+
 The route is available at `/join-6529`; `/join` redirects there for compatibility.
 
 Join 6529 copy is source-complete in `en-US`. Other supported locales currently

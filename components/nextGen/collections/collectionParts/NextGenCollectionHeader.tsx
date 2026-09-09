@@ -19,6 +19,7 @@ import { publicEnv } from "@/config/env";
 import type { NextGenCollection } from "@/entities/INextgen";
 import { numberWithCommas } from "@/helpers/Helpers";
 import useCapacitor from "@/hooks/useCapacitor";
+import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import { fetchUrl } from "@/services/6529api";
 import { faArrowCircleLeft } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -86,6 +87,7 @@ export function NextGenBackToCollectionPageLink(
 }
 
 export function NextGenCountdown(props: Readonly<CountdownProps>) {
+  const { hideNftPurchasing } = useNftPurchasingVisibility();
   const pathname = usePathname() || "";
   const alStatus = getStatusFromDates(
     props.collection.allowlist_start,
@@ -128,7 +130,7 @@ export function NextGenCountdown(props: Readonly<CountdownProps>) {
     return (
       <div className="tw-flex tw-w-full tw-flex-col tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/90 tw-px-5 tw-py-4 tw-text-white tw-shadow-lg">
         <DateCountdown title={`${title} in`} date={new Date(date * 1000)} />
-        {!hideMintBtn && (
+        {!hideMintBtn && !hideNftPurchasing && (
           <ButtonLink
             href={`/nextgen/collection/${formatNameForUrl(
               props.collection.name
