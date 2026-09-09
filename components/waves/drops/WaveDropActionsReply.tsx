@@ -2,7 +2,7 @@
 
 import React, { useContext } from "react";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
-import { Tooltip } from "react-tooltip";
+import DropActionTooltip from "./DropActionTooltip";
 import { AuthContext } from "@/components/auth/Auth";
 import { useWaveEligibility } from "@/contexts/wave/WaveEligibilityContext";
 import { ChatRestriction } from "@/hooks/useDropPriviledges";
@@ -45,7 +45,10 @@ const WaveDropActionsReply: React.FC<WaveDropActionsReplyProps> = ({
   };
 
   return (
-    <>
+    <DropActionTooltip
+      content={<span className="tw-text-xs">Reply</span>}
+      disabled={!canReply}
+    >
       <button
         className={`tw-flex tw-h-7 tw-w-7 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-400 tw-transition-colors tw-duration-200 tw-ease-out desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-200 ${
           !canReply ? "tw-cursor-default tw-opacity-50" : "tw-cursor-pointer"
@@ -53,7 +56,6 @@ const WaveDropActionsReply: React.FC<WaveDropActionsReplyProps> = ({
         onClick={canReply ? handleReplyClick : undefined}
         disabled={!canReply}
         aria-label="Reply to drop"
-        {...(!isTemporaryDrop ? { "data-tooltip-id": `reply-${drop.id}` } : {})}
       >
         <svg
           className={`tw-h-5 tw-w-5 tw-flex-shrink-0 tw-transition tw-duration-300 tw-ease-out ${
@@ -72,28 +74,7 @@ const WaveDropActionsReply: React.FC<WaveDropActionsReplyProps> = ({
           />
         </svg>
       </button>
-      {!isTemporaryDrop && (
-        <Tooltip
-          id={`reply-${drop.id}`}
-          place="top"
-          offset={8}
-          opacity={1}
-          style={{
-            padding: "4px 8px",
-            background: "#37373E",
-            color: "white",
-            fontSize: "13px",
-            fontWeight: 500,
-            borderRadius: "6px",
-            boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
-            zIndex: 99999,
-            pointerEvents: "none",
-          }}
-        >
-          <span className="tw-text-xs">Reply</span>
-        </Tooltip>
-      )}
-    </>
+    </DropActionTooltip>
   );
 };
 
