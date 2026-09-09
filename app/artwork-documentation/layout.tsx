@@ -3,12 +3,12 @@ import type { Metadata } from "next";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { ARTWORK_DOCUMENTATION_MESSAGES } from "@/i18n/messages/artwork-documentation";
 
-export async function generateMetadata(): Promise<Metadata> {
+export function generateMetadata(): Metadata {
   return {
-    ...(await getAppMetadata({
+    ...getAppMetadata({
       title: ARTWORK_DOCUMENTATION_MESSAGES["artworkDocumentation.title"],
       description: ARTWORK_DOCUMENTATION_MESSAGES["artworkDocumentation.intro"],
-    })),
+    }),
     robots: { index: false, follow: false, nocache: true },
     referrer: "no-referrer",
   };

@@ -19,6 +19,7 @@ const mockLink = jest.fn();
 const mockFlush = jest.fn();
 const mockAccess = jest.fn();
 const mockMounted = jest.fn();
+let mockDeferHandle = false;
 jest.mock(
   "@/hooks/artwork-documentation/useArtworkDocumentationAccess",
   () => ({ useArtworkDocumentationAccess: () => mockAccess() })
@@ -33,21 +34,22 @@ jest.mock(
         ArtworkDocumentationInlineHandle,
         ComponentProps<typeof ArtworkDocumentationInline>
       >(function Inline(props, ref) {
+        const [editorReady, setEditorReady] = React.useState(!mockDeferHandle);
         React.useEffect(() => {
           mockMounted();
         }, []);
-        React.useImperativeHandle(ref, () => ({
-          onDropSubmitted: mockLink,
-          flush: mockFlush,
-        }));
+        React.useImperativeHandle(ref, () =>
+          editorReady ? { onDropSubmitted: mockLink, flush: mockFlush } : null
+        );
         return (
           <button
-            onClick={() =>
+            onClick={() => {
               props.onContextCreated?.({
                 id: "context",
                 work_id: "work",
-              } as ApiArtworkDocumentationContext)
-            }
+              } as ApiArtworkDocumentationContext);
+              setEditorReady(true);
+            }}
           >
             Start test documentation
           </button>
@@ -67,6 +69,7 @@ const props = {
 };
 beforeEach(() => {
   jest.clearAllMocks();
+  mockDeferHandle = false;
   mockAccess.mockReturnValue({
     enabled: true,
     selfServiceEnabled: false,
@@ -88,6 +91,7 @@ beforeEach(() => {
 });
 
 it("links a successful drop independently, including when the context finishes creating afterward", async () => {
+  mockDeferHandle = true;
   const ref = createRef<MemesSubmissionDocumentationHandle>();
   render(<MemesSubmissionDocumentation {...props} ref={ref} />);
   act(() => ref.current?.onDropSubmitted("submitted-drop"));
