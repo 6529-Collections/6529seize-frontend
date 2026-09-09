@@ -140,6 +140,17 @@ describe("UserPageTabs", () => {
     expect(tabs).not.toContain(USER_PAGE_TAB_IDS.SUBSCRIPTIONS);
   });
 
+  it("redirects a direct subscription visit to Identity on restricted iOS", () => {
+    const { router } = renderTabs({
+      showWaves: true,
+      isIos: true,
+      country: "CY",
+      pathname: "/testuser/subscriptions",
+    });
+    expect(router.replace).toHaveBeenCalledWith("/testuser");
+    expect(getTabIds()).not.toContain(USER_PAGE_TAB_IDS.SUBSCRIPTIONS);
+  });
+
   it("shows proxy tab when viewing own profile by handle", () => {
     renderTabs({
       showWaves: false,

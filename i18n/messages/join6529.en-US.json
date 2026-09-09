@@ -75,6 +75,7 @@
   "join6529.faq.heading": "Practical questions",
   "join6529.faq.subheading": "The basics before you dive in.",
   "join6529.faq.walletEth.question": "Do I need a wallet or ETH to start?",
+  "join6529.faq.walletEth.restrictedAnswer": "No. You can browse first. Connect a wallet when you want to create a profile, post, or vote. You do not need ETH for these activities.",
   "join6529.faq.walletEth.answer": "No. You can browse first. Connect a wallet when you want to create a profile, post, vote, collect, or use subscription minting. ETH is only needed for minting, buying, gas, or funding subscription minting.",
   "join6529.faq.tdh.question": "What is TDH?",
   "join6529.faq.tdh.answer": "TDH means Total Days Held. Holding eligible Meme Cards over time builds TDH, which can give your votes more weight across 6529.",
