@@ -9,6 +9,7 @@ type FetchHtmlResult = {
 export interface CreateOpenSeaPlanDeps {
   readonly fetchHtml: (url: URL) => Promise<FetchHtmlResult>;
   readonly assertPublicUrl: (url: URL) => Promise<void>;
+  readonly fetchTokenMetadata: (url: URL) => Promise<unknown>;
 }
 
 export type OpenSeaContext = {

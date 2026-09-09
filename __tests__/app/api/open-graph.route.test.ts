@@ -326,6 +326,7 @@ describe("open-graph API route", () => {
       favicons: [],
       image: null,
       images: [],
+      author: undefined,
     };
 
     const fetchResponse = createResponse(200, {
@@ -415,6 +416,35 @@ describe("open-graph API route", () => {
       "text/html",
       "https://cdn.safe.example/page"
     );
+  });
+
+  it.each([
+    { label: "title", data: { title: "x".repeat(128 * 1024) } },
+    {
+      label: "inline image",
+      data: { image: { url: `data:image/svg+xml,${"x".repeat(128 * 1024)}` } },
+    },
+    {
+      label: "image collection",
+      data: { images: Array.from({ length: 1000 }, () => ({ url: "art.png" })) },
+    },
+  ])("returns oversized $label previews without caching them", async ({ data }) => {
+    const execute = jest.fn().mockResolvedValue({ data });
+    opensea.createOpenSeaPlan.mockReturnValue({ cacheKey: "oversized", execute });
+    const request = {
+      nextUrl: new URL(
+        "https://app.local/api/open-graph?url=https://opensea.io/item/ethereum/art/1"
+      ),
+    } as NextRequest;
+
+    const first = await GET(request);
+    const second = await GET(request);
+
+    expect(first.status).toBe(200);
+    expect(await first.json()).toBe(data);
+    expect(second.status).toBe(200);
+    expect(await second.json()).toBe(data);
+    expect(execute).toHaveBeenCalledTimes(2);
   });
 
   it("passes through richer generic article metadata from the parser", async () => {
