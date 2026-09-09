@@ -8,7 +8,7 @@ links and a canonical readiness ledger so artists, community members, technical
 reviewers, and auditors can examine the same candidate before deployment.
 
 The first review covers 6529 Stream, an attempt to build a complete,
-artist-centered contract system for serious one-of-one digital art. Stream is
+artist-centered contract system for digital art, including unique works and editions. Stream is
 in public review, with independent audit and deployment ahead. The overview
 explains the protocol in plain language. **Where Development Stands** preserves
 the evidence state of each immutable review snapshot.
@@ -39,7 +39,10 @@ Publication also requires the environment and lifecycle gates to agree.
 ## Entry Points
 
 - `/reviews/6529-stream`: active review overview
-- `/reviews/6529-stream/{page}`: one of fourteen active editorial pages
+- `/reviews/6529-stream/for-artists`: short guide to artwork plans, consent, payments, and permanence
+- `/reviews/6529-stream/for-collectors`: short guide to buying, refunds, changeable rules, and access
+- `/reviews/6529-stream/review-the-code`: pinned candidate, connected paths, and review priorities
+- `/reviews/6529-stream/{page}`: a detailed topic or community review instructions
 - `/reviews/6529-stream/versions/{version}`: versioned overview
 - `/reviews/6529-stream/versions/{version}/{page}`: versioned editorial page
 - `/reviews/6529-stream/reference`: active generated technical reference
@@ -64,14 +67,22 @@ Every page includes:
   history** destinations on current pages
 - a link to the exact source snapshot; saved snapshot pages also show their
   exact review version and a link back to the current review
-- navigation across the fourteen pages in the current version snapshot
-- an on-page contents list generated from the displayed editorial headings;
-  the simplified current Overview intentionally has no technical subsection list
-- previous and next page controls
+- four prominent starting points and community review instructions; **All topics**
+  expands the detailed chapters and opens automatically on a detailed topic
+- an on-page contents list generated from the displayed editorial headings
+- relevant **Explore next** links on current pages; saved snapshots retain their
+  original fourteen-page sequence and previous/next controls
 - a collapsible page-feedback rail that reads existing comments and includes a
   structured feedback form bound to the immutable displayed review version
 
-The current overview opens with the **Follow one artwork** concept preview. It
+The current overview explains 1/1, 1/1/x, and editions, including editions outside
+The Memes. It distinguishes contract capabilities from unconfirmed launch
+formats and publishing flows. Readers can then choose **For artists**, **For
+collectors**, or **Review the code**. Each is a short guide to the candidate,
+with links to detailed topics and feedback. Current pages do not show a
+"Page 1 of 14" reading requirement.
+
+**Explore an example artwork** opens the existing **Follow one artwork** concept preview. It
 uses five short steps: artwork, release, artist check, collector, and history.
 Each step shows one explanation and one takeaway for the same fictional 1/1.
 The preview clearly says that Stream is not live and that nothing on the page
@@ -79,25 +90,11 @@ can buy, sign, upload, or save. It ends with one feedback question and links to
 the existing page-feedback rail; the normal feedback eligibility rules still
 apply.
 
-The overview then explains five important parts of a Stream artwork, a
-seven-step artwork journey, and focused starting points for artists, collectors
-and minters, and auditors. It ends after those audience paths. The secondary
-**Review history** destination opens the immutable technical Overview for the
-active snapshot. The current **For Artists** page starts with a plain artist
-guide covering six decisions: what artwork to publish; whether it is unique or
-an edition; how collectors can get it; where the money goes; what the artist
-approves; and what can change or become permanent. A six-stage guide
-shows how the artwork moves through Stream and keeps finality separate from
-ending minting, freezing settings, and recording preservation evidence. A
-focused approval checklist separates the details covered by the artist's wallet
-signature from the wider artwork plan. A three-part sales and payments guide
-now follows that checklist before the page explains what can still change. A
-four-part roles summary explains how
-the community, signing wallet, Stream operators, guardian, and outside services
-can affect what happens. It then presents the technical detail in fifteen short
-sections. The sections use reviewed-code, accepted-design, and still-proposed
-labels so readers can tell what is safe to rely on. The generated technical
-reference lets reviewers
+The secondary **Review history** destination opens the immutable technical
+Overview for the active snapshot. **Full artist details** retains the previous
+artist walkthrough and fifteen detailed sections in a closed disclosure below
+the short artist guide. Existing section bookmarks open the disclosure and
+scroll to the requested heading. The generated technical reference lets reviewers
 inspect Solidity files, definitions, functions, events, errors, and other
 declarations within the review. Its all-declarations explorer queries the server
 with the active text, kind, scope, and location filters and loads up to 100
@@ -147,10 +144,13 @@ questions and the authorship disclosure. The launch answer and review questions
 appear only on their current, unversioned routes. Immutable version routes keep
 their exact editorial snapshot and historical authorship disclosure.
 
-The plain Overview guide appears only on the unversioned Overview and replaces
-the versioned technical Overview there. Its on-page section navigation and
-feedback section choices therefore omit the hidden technical headings. A link
-from the current review-wide navigation opens its immutable technical editorial.
+The four short guides appear only on current, unversioned routes. Their source
+claims are tied to the reviewed candidate. The collector and code guides do not
+create new pages inside historical snapshots. Current guide feedback links to
+the current guide while retaining the candidate's review-version identity;
+the version does not identify an immutable copy of the short guide. New guide
+sections and retained artist section IDs are recognized by the feedback ledger.
+A link from the current review-wide navigation opens the immutable editorial.
 Immutable version routes show their exact review version and continue to
 describe their exact review snapshot. The artwork concept preview follows this
 same current-route-only boundary and does not appear in saved snapshots.

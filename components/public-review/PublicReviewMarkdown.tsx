@@ -46,7 +46,8 @@ function resolveReviewRelativeHref(
 }
 
 function createMarkdownComponents(
-  internalLinkBasePath: string | undefined
+  internalLinkBasePath: string | undefined,
+  compactTables: boolean
 ): Components {
   const headingCounts = new Map<string, number>();
 
@@ -161,7 +162,9 @@ function createMarkdownComponents(
         role="region"
         tabIndex={0}
       >
-        <table className="tw-w-full tw-min-w-[38rem] tw-border-collapse tw-text-left tw-text-sm tw-font-normal tw-text-iron-300">
+        <table
+          className={`tw-w-full tw-border-collapse tw-text-left tw-text-sm tw-font-normal tw-text-iron-300 ${compactTables ? "tw-break-words" : "tw-min-w-[38rem]"}`}
+        >
           {children}
         </table>
       </div>
@@ -185,16 +188,21 @@ function createMarkdownComponents(
 export function PublicReviewMarkdown({
   internalLinkBasePath,
   markdown,
+  compactTables = false,
 }: {
   readonly internalLinkBasePath?: string | undefined;
   readonly markdown: string;
+  readonly compactTables?: boolean | undefined;
 }) {
   return (
-    <div className="tw-min-w-0">
+    <div className={`tw-min-w-0 ${compactTables ? "tw-break-words" : ""}`}>
       <Markdown
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[rehypeSanitize]}
-        components={createMarkdownComponents(internalLinkBasePath)}
+        components={createMarkdownComponents(
+          internalLinkBasePath,
+          compactTables
+        )}
       >
         {markdown}
       </Markdown>

@@ -112,6 +112,10 @@ jest.mock("@/components/public-review/StreamReviewOverviewGuide", () => ({
   StreamReviewOverviewGuide: () => <div>Overview guide</div>,
 }));
 
+jest.mock("@/components/public-review/StreamArtworkConceptPreview", () => ({
+  StreamArtworkConceptPreview: () => <div>Artwork concept preview</div>,
+}));
+
 jest.mock("@/components/public-review/StreamReviewRolesGuide", () => ({
   STREAM_REVIEW_ROLES_GUIDE_SECTIONS: [
     { id: "start-with-status", title: "Start with status" },
@@ -326,6 +330,8 @@ jest.mock("@/lib/public-review/streamReviewFeedback.server", () => ({
   ),
   createStreamReviewFeedbackConfig: jest.fn(async () => ({
     pages: [
+      { value: "for-collectors", sectionValues: [] },
+      { value: "review-the-code", sectionValues: [] },
       {
         value: "overview",
         sectionValues: ["old-overview-section"],
@@ -448,36 +454,44 @@ describe("renderStreamReviewRoutePage", () => {
 
     await expect(
       renderStreamReviewRoutePage({
-        params: Promise.resolve({ review: "6529-stream" }),
+        params: Promise.resolve({
+          review: "6529-stream",
+          page: "artwork-lifecycle",
+        }),
       })
     ).rejects.toThrow("NEXT_NOT_FOUND");
 
     expect(notFoundMock).toHaveBeenCalledTimes(1);
   });
 
-  it("ends the current Overview after its plain-language guide", async () => {
+  it("renders the short overview with optional artwork preview", async () => {
     render(
       await renderStreamReviewRoutePage({
         params: Promise.resolve({ review: "6529-stream" }),
       })
     );
 
-    expect(screen.getByText("Overview guide")).toBeInTheDocument();
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "What kinds of art can it support?"
+    );
+    expect(
+      screen.getByText("Artwork concept preview").closest("details")
+    ).not.toHaveAttribute("open");
     expect(screen.queryByText("Launch readiness")).not.toBeInTheDocument();
     expect(screen.queryByText("Reviewer prompts")).not.toBeInTheDocument();
     expect(screen.queryByText("Authorship note")).not.toBeInTheDocument();
     expect(screen.getByTestId("review-shell")).toHaveAttribute(
       "data-editorial-visible",
-      "false"
+      "true"
     );
     expect(screen.getByTestId("review-shell")).toHaveAttribute(
       "data-section-count",
-      "0"
+      "5"
     );
-    expect(screen.getByTestId("feedback-section-count")).toHaveTextContent("0");
+    expect(screen.getByTestId("feedback-section-count")).toHaveTextContent("5");
     expect(
       screen.getByTestId("configured-feedback-section-count")
-    ).toHaveTextContent("0");
+    ).toHaveTextContent("6");
   });
 
   it("puts the current launch answer on Where Development Stands", async () => {
@@ -1206,7 +1220,7 @@ describe("renderStreamReviewRoutePage", () => {
     ).toHaveTextContent("1");
   });
 
-  it("replaces the current For Artists editorial with plain-language details", async () => {
+  it("shows the short artist guide and retains longer details in a closed disclosure", async () => {
     render(
       await renderStreamReviewRoutePage({
         params: Promise.resolve({
@@ -1218,20 +1232,48 @@ describe("renderStreamReviewRoutePage", () => {
 
     expect(screen.getByText("Artist guide")).toBeInTheDocument();
     expect(screen.getByText("Artist details")).toBeInTheDocument();
+    expect(
+      screen.getByText("Artist details").closest("details")
+    ).not.toHaveAttribute("open");
+    expect(screen.getByTestId("editorial-copy")).toHaveTextContent(
+      "Know what your approval covers"
+    );
     expect(screen.queryByText("Authorship note")).not.toBeInTheDocument();
     expect(screen.getByTestId("review-shell")).toHaveAttribute(
       "data-editorial-visible",
-      "false"
+      "true"
     );
     expect(screen.getByTestId("review-shell")).toHaveAttribute(
       "data-section-count",
-      "4"
+      "5"
     );
-    expect(screen.getByTestId("feedback-section-count")).toHaveTextContent("4");
+    expect(screen.getByTestId("feedback-section-count")).toHaveTextContent("5");
     expect(
       screen.getByTestId("configured-feedback-section-count")
-    ).toHaveTextContent("4");
+    ).toHaveTextContent("10");
   });
+
+  it.each(["for-collectors", "review-the-code"])(
+    "renders %s with feedback sections without loading a nonexistent archived page",
+    async (page) => {
+      render(
+        await renderStreamReviewRoutePage({
+          params: Promise.resolve({ review: "6529-stream", page }),
+        })
+      );
+      expect(screen.getByTestId("review-shell")).toHaveAttribute(
+        "data-editorial-visible",
+        "true"
+      );
+      expect(
+        screen.getByTestId("configured-feedback-section-count").textContent
+      ).toBe(screen.getByTestId("feedback-section-count").textContent);
+      expect(loadStreamEditorialContentMock).not.toHaveBeenCalledWith(
+        expect.objectContaining({ id: page }),
+        expect.anything()
+      );
+    }
+  );
 
   it("replaces the current roles editorial with a status-first guide", async () => {
     render(

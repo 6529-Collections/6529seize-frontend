@@ -353,7 +353,7 @@ export const STREAM_REVIEW_DEFINITION: PublicReviewDefinition = {
   contractName: "6529 Stream",
   title: "6529 Stream Contract Review",
   description:
-    "A source-grounded public review of an artist-centered contract system for serious 1/1 digital art.",
+    "A source-grounded public review of an artist-centered contract system for digital art, including unique works and editions.",
   activeVersion: STREAM_REVIEW_VERSION,
   versions: [
     {

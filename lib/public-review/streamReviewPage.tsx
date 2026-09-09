@@ -18,7 +18,7 @@ import {
   STREAM_REVIEW_FOR_ARTISTS_GUIDE_SECTIONS,
   StreamReviewForArtistsGuide,
 } from "@/components/public-review/StreamReviewForArtistsGuide";
-import { StreamReviewOverviewGuide } from "@/components/public-review/StreamReviewOverviewGuide";
+import { StreamArtworkConceptPreview } from "@/components/public-review/StreamArtworkConceptPreview";
 import {
   STREAM_REVIEW_ROLES_GUIDE_SECTIONS,
   StreamReviewRolesGuide,
@@ -62,6 +62,12 @@ import {
   STREAM_REVIEW_DEFINITION,
 } from "@/lib/public-review/streamReviewDefinition";
 import { getStreamSolidityReferenceReader } from "@/lib/public-review/streamSolidityReference";
+import {
+  STREAM_REVIEW_CURRENT_PAGES,
+  STREAM_REVIEW_ENTRY_PAGES,
+  getStreamReviewEntryMarkdown,
+  getStreamReviewRelatedPages,
+} from "./streamReviewEntryGuides";
 
 function getStreamReviewMetadata({
   baseEndpoint,
@@ -104,6 +110,13 @@ async function loadAvailableStreamEditorialContent({
   readonly contentVersion: string;
   readonly route: StreamReviewRouteModel;
 }): Promise<string | undefined> {
+  if (
+    route.version === undefined &&
+    STREAM_REVIEW_ENTRY_PAGES.some((page) => page.id === route.page.id)
+  ) {
+    // These current-only guides have no corresponding immutable editorial file.
+    return "";
+  }
   try {
     return await loadStreamEditorialContent(route.page, contentVersion);
   } catch (error) {
@@ -316,15 +329,6 @@ function getDisplayedSections({
   readonly currentPages: CurrentStreamReviewPages;
   readonly editorialMarkdown: string;
 }): readonly PublicReviewSectionDefinition[] {
-  if (currentPages.overview) {
-    return [];
-  }
-  if (currentPages.forArtists) {
-    return [
-      ...STREAM_REVIEW_FOR_ARTISTS_GUIDE_SECTIONS,
-      ...STREAM_REVIEW_FOR_ARTISTS_DETAIL_SECTIONS,
-    ];
-  }
   if (currentPages.roles) {
     return STREAM_REVIEW_ROLES_GUIDE_SECTIONS;
   }
@@ -335,12 +339,14 @@ function getDisplayedFeedbackConfig({
   feedbackConfig,
   pageId,
   sections,
+  retainSections = false,
 }: {
   readonly feedbackConfig: Awaited<
     ReturnType<typeof createStreamReviewFeedbackConfig>
   >;
   readonly pageId: string;
   readonly sections: readonly PublicReviewSectionDefinition[];
+  readonly retainSections?: boolean;
 }) {
   return {
     ...feedbackConfig,
@@ -348,7 +354,12 @@ function getDisplayedFeedbackConfig({
       configuredPage.value === pageId
         ? {
             ...configuredPage,
-            sectionValues: sections.map((section) => section.id),
+            sectionValues: [
+              ...new Set([
+                ...(retainSections ? (configuredPage.sectionValues ?? []) : []),
+                ...sections.map((section) => section.id),
+              ]),
+            ],
           }
         : configuredPage
     ),
@@ -366,17 +377,8 @@ function StreamReviewIntroNotice({
 }) {
   return (
     <>
-      {currentPages.overview ? (
-        <StreamReviewOverviewGuide pages={pages} />
-      ) : null}
       {currentPages.developmentStatus ? (
         <StreamReviewDevelopmentStatus />
-      ) : null}
-      {currentPages.forArtists ? (
-        <>
-          <StreamReviewForArtistsGuide pages={pages} />
-          <StreamReviewForArtistsDetails />
-        </>
       ) : null}
       {currentPages.roles ? <StreamReviewRolesGuide pages={pages} /> : null}
       {isVersioned || currentPages.communityReview ? (
@@ -406,16 +408,27 @@ async function renderStreamReviewRoute(route: StreamReviewRouteModel) {
   const currentPages = getCurrentStreamReviewPages(route);
   const displayedReviewVersion = {
     ...reviewVersion,
-    pages: reviewVersion.pages.map((page) =>
-      getDisplayedPageTitle(page, route.version !== undefined)
-    ),
+    pages: (route.version === undefined
+      ? STREAM_REVIEW_CURRENT_PAGES
+      : reviewVersion.pages
+    ).map((page) => getDisplayedPageTitle(page, route.version !== undefined)),
   };
-  const displayedEditorialMarkdown = getDisplayedEditorialMarkdown({
-    contentVersion,
-    currentPages,
-    editorialMarkdown,
-    source: manifest.source,
-  });
+  const entryMarkdown =
+    route.version === undefined
+      ? getStreamReviewEntryMarkdown({
+          pageId: route.page.id,
+          version: contentVersion,
+          source: manifest.source,
+        })
+      : undefined;
+  const displayedEditorialMarkdown =
+    entryMarkdown ??
+    getDisplayedEditorialMarkdown({
+      contentVersion,
+      currentPages,
+      editorialMarkdown,
+      source: manifest.source,
+    });
   const displayedPage = getDisplayedPage(
     getDisplayedPageTitle(route.page, route.version !== undefined),
     currentPages
@@ -425,13 +438,30 @@ async function renderStreamReviewRoute(route: StreamReviewRouteModel) {
     editorialMarkdown: displayedEditorialMarkdown,
   });
   const displayedFeedbackConfig = getDisplayedFeedbackConfig({
+    retainSections: entryMarkdown !== undefined,
     feedbackConfig,
     pageId: route.page.id,
-    sections: displayedSections,
+    sections: currentPages.forArtists
+      ? [
+          ...displayedSections,
+          ...STREAM_REVIEW_FOR_ARTISTS_GUIDE_SECTIONS,
+          ...STREAM_REVIEW_FOR_ARTISTS_DETAIL_SECTIONS,
+        ]
+      : displayedSections,
   });
 
   return (
     <PublicReviewShell
+      primaryPageIds={
+        route.version === undefined
+          ? STREAM_REVIEW_ENTRY_PAGES.map((page) => page.id)
+          : undefined
+      }
+      relatedPages={
+        route.version === undefined
+          ? getStreamReviewRelatedPages(route.page.id)
+          : undefined
+      }
       editorialMarkdown={displayedEditorialMarkdown}
       page={displayedPage}
       review={STREAM_REVIEW_DEFINITION}
@@ -449,14 +479,35 @@ async function renderStreamReviewRoute(route: StreamReviewRouteModel) {
       outroNotice={
         currentPages.communityReview ? (
           <StreamReviewReviewerPrompts pages={displayedReviewVersion.pages} />
-        ) : null
+        ) : (
+          <>
+            {currentPages.overview ? (
+              <details className="tw-mt-8">
+                <summary className="tw-min-h-11 tw-cursor-pointer tw-py-3 tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-white">
+                  {t(DEFAULT_LOCALE, "publicReview.navigation.artworkPreview")}
+                </summary>
+                <StreamArtworkConceptPreview />
+              </details>
+            ) : null}
+            {currentPages.forArtists ? (
+              <details className="tw-mt-8">
+                <summary className="tw-min-h-11 tw-cursor-pointer tw-py-3 tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-white">
+                  {t(
+                    DEFAULT_LOCALE,
+                    "publicReview.navigation.fullArtistDetails"
+                  )}
+                </summary>
+                <StreamReviewForArtistsGuide
+                  pages={displayedReviewVersion.pages}
+                />
+                <StreamReviewForArtistsDetails />
+              </details>
+            ) : null}
+          </>
+        )
       }
-      showAudiencePaths={!currentPages.overview}
-      showEditorialContent={
-        !currentPages.overview &&
-        !currentPages.forArtists &&
-        !currentPages.roles
-      }
+      showAudiencePaths={route.version !== undefined}
+      showEditorialContent={!currentPages.roles}
       source={{
         repository: manifest.source.repository,
         commit: manifest.source.commit,
@@ -468,6 +519,7 @@ async function renderStreamReviewRoute(route: StreamReviewRouteModel) {
           page={createStreamEditorialFeedbackPageContext({
             page: route.page,
             version: contentVersion,
+            currentRoute: route.version === undefined,
           })}
           sections={displayedSections}
         />

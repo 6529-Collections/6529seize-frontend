@@ -3,6 +3,11 @@ import { render, screen, waitFor, within } from "@testing-library/react";
 import { PublicReviewShell } from "@/components/public-review/PublicReviewShell";
 import { StreamReviewBotAuthorshipNote } from "@/components/public-review/StreamReviewBotAuthorshipNote";
 import {
+  STREAM_REVIEW_CURRENT_PAGES,
+  STREAM_REVIEW_ENTRY_PAGES,
+  getStreamReviewRelatedPages,
+} from "@/lib/public-review/streamReviewEntryGuides";
+import {
   STREAM_REVIEW_DEFINITION,
   STREAM_REVIEW_SOURCE_COMMIT,
   getStreamReviewVersion,
@@ -14,6 +19,53 @@ if (!ACTIVE_REVIEW_VERSION) {
 }
 
 describe("PublicReviewShell", () => {
+  it("groups current entry pages ahead of optional topics without a universal sequence", () => {
+    const overview = STREAM_REVIEW_ENTRY_PAGES[0];
+    render(
+      <PublicReviewShell
+        editorialMarkdown="## Formats\n\nArtwork formats."
+        page={overview}
+        review={STREAM_REVIEW_DEFINITION}
+        reviewVersion={{
+          ...ACTIVE_REVIEW_VERSION,
+          pages: STREAM_REVIEW_CURRENT_PAGES,
+        }}
+        sections={[{ id: "formats", title: "Formats" }]}
+        displayedVersion={STREAM_REVIEW_DEFINITION.activeVersion}
+        feedbackSlot={<div>Feedback</div>}
+        showAudiencePaths={false}
+        primaryPageIds={STREAM_REVIEW_ENTRY_PAGES.map((page) => page.id)}
+        relatedPages={getStreamReviewRelatedPages(overview.id)}
+        source={ACTIVE_REVIEW_VERSION.source}
+      />
+    );
+    for (const label of [
+      "Start here",
+      "For artists",
+      "For collectors",
+      "Review the code",
+      "Give feedback",
+    ]) {
+      expect(
+        screen.getAllByRole("link", { name: label }).length
+      ).toBeGreaterThan(0);
+    }
+    const topicDisclosures = [...document.querySelectorAll("details")].filter(
+      (details) =>
+        details.querySelector("summary")?.textContent === "All topics"
+    );
+    expect(topicDisclosures).toHaveLength(2);
+    expect(topicDisclosures.every((details) => !details.open)).toBe(true);
+    expect(screen.queryByText(/Page \d+ of \d+/)).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("navigation", {
+        name: "Previous and next contract review pages",
+      })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("navigation", { name: "Explore next" })
+    ).toBeInTheDocument();
+  });
   it("renders a source-pinned, audience-aware fourteen-page review shell", () => {
     const overview = ACTIVE_REVIEW_VERSION.pages[0];
     if (!overview) {

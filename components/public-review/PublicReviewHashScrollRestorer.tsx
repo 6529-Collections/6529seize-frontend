@@ -41,6 +41,13 @@ export function PublicReviewHashScrollRestorer() {
         if (!target) {
           return false;
         }
+        let ancestor = target.parentElement;
+        while (ancestor) {
+          if (ancestor instanceof HTMLDetailsElement) {
+            ancestor.open = true;
+          }
+          ancestor = ancestor.parentElement;
+        }
         target.scrollIntoView({ behavior: "auto", block: "start" });
         return true;
       };
