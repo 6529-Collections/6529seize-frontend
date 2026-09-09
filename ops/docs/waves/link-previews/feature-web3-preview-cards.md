@@ -142,9 +142,10 @@ Only `https://` URLs match. Host must be apex or `www`.
   to non-public destinations are skipped; the existing preview fallback remains
   available. Embedded artwork and missing or unusual JSON content types remain
   supported within that limit.
-- NFT token metadata is read one document at a time per server process. When
-  that reader is busy, the existing preview fallback is used; refreshing later
-  can retry the metadata lookup.
+- NFT token metadata is read one document at a time per server process. Up to
+  32 other lookups can wait for at most 15 seconds before their download starts.
+  If that queue is full or the wait expires, the existing preview fallback is
+  used; refreshing later can retry the metadata lookup.
 - Large previews can still be returned, but previews exceeding the in-memory
   cache budget are fetched again on subsequent requests.
 - Art Blocks cards show project/token context with `View live` and

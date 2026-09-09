@@ -112,25 +112,22 @@ describe("NFT metadata transport", () => {
     expect(cancel).toHaveBeenCalledTimes(1);
   });
 
-  it("bounds simultaneous reads and recovers when the admitted body completes", async () => {
+  it("waits for the active metadata body before fetching the next preview", async () => {
     const stream = new TransformStream<Uint8Array, Uint8Array>();
     const writer = stream.writable.getWriter();
-    mockFetch.mockResolvedValueOnce(new Response(stream.readable));
+    mockFetch
+      .mockResolvedValueOnce(new Response(stream.readable))
+      .mockResolvedValueOnce(new Response('{"name":"Next artwork"}'));
     const admitted = fetchTokenUriJson(url, {});
-    await expect(fetchTokenUriJson(url, {})).rejects.toThrow(
-      "processing is busy"
-    );
-    await expect(fetchTokenUriJson(url, {})).rejects.toThrow(
-      "processing is busy"
-    );
+    const queued = fetchTokenUriJson(url, {});
     await writer.write(new TextEncoder().encode('{"name":"Artwork"}'));
+    expect(mockFetch).toHaveBeenCalledTimes(1);
     await writer.close();
     await expect(admitted).resolves.toEqual({ name: "Artwork" });
-    expect(mockFetch).toHaveBeenCalledTimes(1);
-    mockFetch.mockResolvedValueOnce(new Response('{"name":"Next artwork"}'));
-    await expect(fetchTokenUriJson(url, {})).resolves.toEqual({
+    await expect(queued).resolves.toEqual({
       name: "Next artwork",
     });
+    expect(mockFetch).toHaveBeenCalledTimes(2);
   });
 
   it("releases metadata admission after a failed fetch", async () => {

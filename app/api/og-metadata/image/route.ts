@@ -5,6 +5,10 @@ import {
   type FetchPublicUrlOptions,
 } from "@/lib/security/urlGuard";
 import { OG_IMAGE_PROXY_MAX_BYTES } from "@/app/api/og-metadata/_lib/imageProxyPolicy";
+import {
+  AdmissionQueue,
+  AdmissionQueueError,
+} from "@/lib/fetch/admissionQueue";
 import { NextResponse, type NextRequest } from "next/server";
 import sharp, { type Metadata } from "sharp";
 
@@ -17,8 +21,8 @@ const MAX_HEIGHT = 12000;
 const MAX_INPUT_PIXELS = 512_000_000;
 const MAX_INPUT_DIMENSION = 65_536;
 // Admit before fetching to bound both compressed buffers and native image work.
-// Do not queue requests while the process is already handling a large image.
-let imageRequestActive = false;
+// Ordinary multi-image cards can wait briefly without allocating image buffers.
+const imageAdmission = new AdmissionQueue({ maxPending: 32, waitMs: 15_000 });
 const OVERSIZED_GIF_PREVIEW_MAX_BYTES = 8 * 1024 * 1024;
 const PNG_CONTENT_TYPE = "image/png";
 const GIF_CONTENT_TYPE = "image/gif";
@@ -155,6 +159,15 @@ const cancelResponseBody = async (response: Response): Promise<void> => {
 };
 
 const mapErrorToResponse = (error: unknown): NextResponse => {
+  if (error instanceof AdmissionQueueError) {
+    return NextResponse.json(
+      { error: "Image processing busy" },
+      {
+        status: 503,
+        headers: { "Cache-Control": "no-store", "Retry-After": "1" },
+      }
+    );
+  }
   if (error instanceof UrlGuardError) {
     switch (error.kind) {
       case "missing-url":
@@ -353,21 +366,11 @@ const parseImageUrl = (value: string | null): URL => {
 };
 
 export async function GET(request: NextRequest) {
-  let admitted = false;
+  let releaseAdmission: (() => void) | undefined;
   try {
     const imageUrl = parseImageUrl(request.nextUrl.searchParams.get("url"));
     const width = parseWidth(request.nextUrl.searchParams.get("w"));
-    if (imageRequestActive) {
-      return NextResponse.json(
-        { error: "Image processing busy" },
-        {
-          status: 503,
-          headers: { "Cache-Control": "no-store", "Retry-After": "1" },
-        }
-      );
-    }
-    imageRequestActive = true;
-    admitted = true;
+    releaseAdmission = await imageAdmission.acquire(request.signal);
     const buffer = await fetchImageBuffer(imageUrl);
     const png = await normalizeImageToPng({ buffer, width });
 
@@ -378,11 +381,11 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Unable to normalize OG metadata image.", error);
+    if (!(error instanceof AdmissionQueueError)) {
+      console.error("Unable to normalize OG metadata image.", error);
+    }
     return mapErrorToResponse(error);
   } finally {
-    if (admitted) {
-      imageRequestActive = false;
-    }
+    releaseAdmission?.();
   }
 }

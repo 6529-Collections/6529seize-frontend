@@ -14,7 +14,7 @@ function primitiveBytes(value: unknown): number | null {
   if (value === null) return SLOT_BYTES;
   if (typeof value === "object") return null;
   if (
-    typeof value === "undefined" ||
+    value === undefined ||
     typeof value === "boolean" ||
     typeof value === "number"
   ) {

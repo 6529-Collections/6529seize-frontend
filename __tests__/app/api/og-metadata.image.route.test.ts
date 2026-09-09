@@ -79,8 +79,13 @@ const GIF_2_FRAME = Buffer.from(
   "base64"
 );
 
-const createRequest = (sourceUrl: string, width = "1108"): NextRequest =>
+const createRequest = (
+  sourceUrl: string,
+  width = "1108",
+  signal?: AbortSignal
+): NextRequest =>
   ({
+    signal,
     nextUrl: new URL(
       `http://localhost:3001/api/og-metadata/image?url=${encodeURIComponent(
         sourceUrl
@@ -168,7 +173,12 @@ describe("/api/og-metadata/image", () => {
   });
 
   it("cancels unsuccessful upstream responses", async () => {
-    const cancel = mockImageResponse(0, "text/html", Buffer.from("Missing"), 404);
+    const cancel = mockImageResponse(
+      0,
+      "text/html",
+      Buffer.from("Missing"),
+      404
+    );
 
     const response = await GET(createRequest("https://cdn.test/missing.png"));
 
@@ -376,7 +386,7 @@ describe("/api/og-metadata/image", () => {
     });
   });
 
-  it("fails fast before downloading another image and releases admission after failure", async () => {
+  it("admits a waiting image after the active upstream request fails", async () => {
     let rejectFetch: (error: Error) => void = () => {
       throw new Error("Image fetch has not started.");
     };
@@ -387,32 +397,25 @@ describe("/api/og-metadata/image", () => {
         })
     );
     const pending = GET(createRequest("https://cdn.test/pending.png"));
+    mockImageResponse(PNG_1X1.byteLength);
+    const waiting = GET(createRequest("https://cdn.test/another.png"));
+    await Promise.resolve();
 
     try {
-      const busy = await GET(createRequest("https://cdn.test/another.png"));
-      expect(busy.status).toBe(503);
-      expect(busy.headers.get("cache-control")).toBe("no-store");
-      expect(busy.headers.get("retry-after")).toBe("1");
       expect(mockFetchPublicUrl).toHaveBeenCalledTimes(1);
-      // Rejected requests must not release another request's admission.
-      expect(
-        (await GET(createRequest("https://cdn.test/third.png"))).status
-      ).toBe(503);
-      expect(mockFetchPublicUrl).toHaveBeenCalledTimes(1);
+      expect(mockSharp).not.toHaveBeenCalled();
     } finally {
       rejectFetch(new Error("Upstream failed"));
       expect((await pending).status).toBe(502);
+      expect((await waiting).status).toBe(200);
     }
-
-    mockImageResponse(PNG_1X1.byteLength);
-    expect(
-      (await GET(createRequest("https://cdn.test/retry.png"))).status
-    ).toBe(200);
   });
 
-  it("holds admission until native processing completes", async () => {
+  it("normalizes simultaneous small images sequentially without overlapping downloads or decode", async () => {
     const image = actualSharp(PNG_1X1);
     const bufferOutput: { toBuffer: () => Promise<Buffer> } = image;
+    const originalToBuffer = bufferOutput.toBuffer.bind(image);
+    const workOrder: string[] = [];
     let finishProcessing: () => void = () => {
       throw new Error("Image processing has not started.");
     };
@@ -422,32 +425,123 @@ describe("/api/og-metadata/image", () => {
     const started = new Promise<void>((resolve) => {
       processingStarted = resolve;
     });
-    jest.spyOn(bufferOutput, "toBuffer").mockImplementationOnce(
-      () =>
-        new Promise<Buffer>((resolve) => {
-          finishProcessing = () => resolve(PNG_1X1);
-          processingStarted();
-        })
-    );
+    const continueProcessing = new Promise<void>((resolve) => {
+      finishProcessing = resolve;
+    });
+    jest.spyOn(bufferOutput, "toBuffer").mockImplementationOnce(async () => {
+      workOrder.push("first-decode-start");
+      processingStarted();
+      await continueProcessing;
+      const bytes = await originalToBuffer();
+      workOrder.push("first-decode-complete");
+      return bytes;
+    });
     mockSharp.mockReturnValueOnce(image);
     mockImageResponse(PNG_1X1.byteLength);
     const pending = GET(createRequest("https://cdn.test/processing.png"));
     await started;
+    mockFetchPublicUrl.mockImplementationOnce(async () => {
+      workOrder.push("second-fetch");
+      return {
+        body: createReadableBody(PNG_1X1),
+        headers: createHeaders({ "content-type": "image/png" }),
+        ok: true,
+        status: 200,
+      };
+    });
+    const waiting = GET(createRequest("https://cdn.test/another.png"));
+    await Promise.resolve();
 
     try {
-      expect(
-        (await GET(createRequest("https://cdn.test/another.png"))).status
-      ).toBe(503);
       expect(mockFetchPublicUrl).toHaveBeenCalledTimes(1);
+      expect(mockSharp).toHaveBeenCalledTimes(1);
     } finally {
       finishProcessing();
       expect((await pending).status).toBe(200);
+      const secondResponse = await waiting;
+      expect(secondResponse.status).toBe(200);
+      expect(
+        await actualSharp(
+          Buffer.from(await secondResponse.arrayBuffer())
+        ).metadata()
+      ).toMatchObject({ format: "png", width: 1, height: 1 });
     }
+    expect(workOrder).toEqual([
+      "first-decode-start",
+      "first-decode-complete",
+      "second-fetch",
+    ]);
+  });
 
+  it("bounds pending image requests and removes aborted waiters before any download", async () => {
+    let rejectFetch: (error: Error) => void = () => {
+      throw new Error("Image fetch has not started.");
+    };
+    mockFetchPublicUrl.mockImplementationOnce(
+      () =>
+        new Promise<Response>((_resolve, reject) => {
+          rejectFetch = reject;
+        })
+    );
+    const active = GET(createRequest("https://cdn.test/active.png"));
+    const controllers = Array.from({ length: 32 }, () => new AbortController());
+    const waiting = controllers.map((controller) =>
+      GET(
+        createRequest("https://cdn.test/queued.png", "1108", controller.signal)
+      )
+    );
+    await Promise.resolve();
+
+    try {
+      const full = await GET(createRequest("https://cdn.test/full.png"));
+      expect(full.status).toBe(503);
+      expect(full.headers.get("cache-control")).toBe("no-store");
+      expect(full.headers.get("retry-after")).toBe("1");
+      expect(mockFetchPublicUrl).toHaveBeenCalledTimes(1);
+      expect(mockSharp).not.toHaveBeenCalled();
+    } finally {
+      controllers.forEach((controller) => controller.abort());
+      const responses = await Promise.all(waiting);
+      expect(responses.every((response) => response.status === 503)).toBe(true);
+      rejectFetch(new Error("Upstream failed"));
+      expect((await active).status).toBe(502);
+    }
+    expect(mockFetchPublicUrl).toHaveBeenCalledTimes(1);
     mockImageResponse(PNG_1X1.byteLength);
     expect(
       (await GET(createRequest("https://cdn.test/retry.png"))).status
     ).toBe(200);
+  });
+
+  it("expires a queued image after 15 seconds without fetching it", async () => {
+    jest.useFakeTimers();
+    let rejectFetch: (error: Error) => void = () => {
+      throw new Error("Image fetch has not started.");
+    };
+    mockFetchPublicUrl.mockImplementationOnce(
+      () =>
+        new Promise<Response>((_resolve, reject) => {
+          rejectFetch = reject;
+        })
+    );
+    const active = GET(createRequest("https://cdn.test/active.png"));
+    const waiting = GET(createRequest("https://cdn.test/queued.png"));
+    await Promise.resolve();
+
+    try {
+      jest.advanceTimersByTime(15_000);
+      const response = await waiting;
+      expect(response.status).toBe(503);
+      expect(response.headers.get("cache-control")).toBe("no-store");
+      expect(response.headers.get("retry-after")).toBe("1");
+      expect(mockFetchPublicUrl).toHaveBeenCalledTimes(1);
+      expect(mockSharp).not.toHaveBeenCalled();
+      expect(jest.getTimerCount()).toBe(0);
+    } finally {
+      rejectFetch(new Error("Upstream failed"));
+      await active;
+      jest.useRealTimers();
+    }
   });
 
   it("uses a bounded range request for oversized GIF previews", async () => {
