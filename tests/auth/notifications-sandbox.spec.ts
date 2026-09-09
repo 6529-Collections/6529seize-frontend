@@ -364,6 +364,10 @@ test.describe("Notifications local sandbox @auth @medium @local-only", () => {
   });
 
   test.describe("touch action tooltips", () => {
+    test.skip(
+      ({ browserName }) => browserName !== "chromium",
+      "Long-press touch input uses Chromium CDP."
+    );
     test.use({
       hasTouch: true,
       isMobile: true,
