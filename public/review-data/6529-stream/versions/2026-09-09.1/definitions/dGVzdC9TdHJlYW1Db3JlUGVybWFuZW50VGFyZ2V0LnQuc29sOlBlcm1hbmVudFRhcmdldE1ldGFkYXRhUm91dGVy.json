@@ -1,0 +1,577 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetMetadataRouter#function:0xafdcf2fc",
+          "declaringDefinitionId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetMetadataRouter",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "name": "contractURIForCollection",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "string",
+              "name": "",
+              "type": "string"
+            }
+          ],
+          "selector": "0xafdcf2fc",
+          "signature": "contractURIForCollection(address,uint256)",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetMetadataRouter#function:0x642dd5ae",
+          "declaringDefinitionId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetMetadataRouter",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "name": "contractURIForCore",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "string",
+              "name": "",
+              "type": "string"
+            }
+          ],
+          "selector": "0x642dd5ae",
+          "signature": "contractURIForCore(address)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetMetadataRouter#function:0x21175b4a",
+          "declaringDefinitionId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetMetadataRouter",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "mode",
+              "type": "uint8"
+            }
+          ],
+          "name": "setMode",
+          "outputs": [],
+          "selector": "0x21175b4a",
+          "signature": "setMode(uint8)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetMetadataRouter#function:0x01ffc9a7",
+          "declaringDefinitionId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetMetadataRouter",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "name": "supportsInterface",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x01ffc9a7",
+          "signature": "supportsInterface(bytes4)",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetMetadataRouter#function:0xe9dc6375",
+          "declaringDefinitionId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetMetadataRouter",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "name": "tokenURI",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "string",
+              "name": "",
+              "type": "string"
+            }
+          ],
+          "selector": "0xe9dc6375",
+          "signature": "tokenURI(address,uint256)",
+          "stateMutability": "view"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "supportsInterface(bytes4)",
+          "displaySignature": "supportsInterface(bytes4)",
+          "functionKind": "function",
+          "id": "test/StreamCorePermanentTarget.t.sol:PermanentTargetMetadataRouter#function:0x01ffc9a7",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Db3JlUGVybWFuZW50VGFyZ2V0LnQuc29sOlBlcm1hbmVudFRhcmdldE1ldGFkYXRhUm91dGVyI2Z1bmN0aW9uOjB4MDFmZmM5YTc",
+          "kind": "function",
+          "modifiers": [],
+          "name": "supportsInterface",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 183,
+            "byteStart": 9908,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L306-L308",
+            "lineEnd": 308,
+            "lineStart": 306,
+            "snippetSha256": "sha256:e690d47349ce51f3cb9a21e4db66b459f9faa03e0487d5e49dbad86a995bd3f4",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": "0x01ffc9a7",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "setMode(uint8)",
+          "displaySignature": "setMode(uint8)",
+          "functionKind": "function",
+          "id": "test/StreamCorePermanentTarget.t.sol:PermanentTargetMetadataRouter#function:0x21175b4a",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "mode",
+              "type": "uint8"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Db3JlUGVybWFuZW50VGFyZ2V0LnQuc29sOlBlcm1hbmVudFRhcmdldE1ldGFkYXRhUm91dGVyI2Z1bmN0aW9uOjB4MjExNzViNGE",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setMode",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 67,
+            "byteStart": 10097,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L310-L312",
+            "lineEnd": 312,
+            "lineStart": 310,
+            "snippetSha256": "sha256:126654ce20b96163f2ed3d0434a824a6415cdc18d1db848c7646af0b97c3eb70",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": "0x21175b4a",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "tokenURI(address,uint256)",
+          "displaySignature": "tokenURI(address,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamCorePermanentTarget.t.sol:PermanentTargetMetadataRouter#function:0xe9dc6375",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Db3JlUGVybWFuZW50VGFyZ2V0LnQuc29sOlBlcm1hbmVudFRhcmdldE1ldGFkYXRhUm91dGVyI2Z1bmN0aW9uOjB4ZTlkYzYzNzU",
+          "kind": "function",
+          "modifiers": [],
+          "name": "tokenURI",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "range": {
+            "byteLength": 118,
+            "byteStart": 10170,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L314-L316",
+            "lineEnd": 316,
+            "lineStart": 314,
+            "snippetSha256": "sha256:e9459fe5b4727330a9db4bb9110df8bac488a40d8f4cb54690ab7f4e68a59ee3",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": "0xe9dc6375",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "contractURIForCore(address)",
+          "displaySignature": "contractURIForCore(address)",
+          "functionKind": "function",
+          "id": "test/StreamCorePermanentTarget.t.sol:PermanentTargetMetadataRouter#function:0x642dd5ae",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Db3JlUGVybWFuZW50VGFyZ2V0LnQuc29sOlBlcm1hbmVudFRhcmdldE1ldGFkYXRhUm91dGVyI2Z1bmN0aW9uOjB4NjQyZGQ1YWU",
+          "kind": "function",
+          "modifiers": [],
+          "name": "contractURIForCore",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "range": {
+            "byteLength": 122,
+            "byteStart": 10294,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L318-L320",
+            "lineEnd": 320,
+            "lineStart": 318,
+            "snippetSha256": "sha256:426a64fc546abdd0f4497c8c1735f0fe46f3966cdd664f728e73a712b5800f59",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": "0x642dd5ae",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "contractURIForCollection(address,uint256)",
+          "displaySignature": "contractURIForCollection(address,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamCorePermanentTarget.t.sol:PermanentTargetMetadataRouter#function:0xafdcf2fc",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Db3JlUGVybWFuZW50VGFyZ2V0LnQuc29sOlBlcm1hbmVudFRhcmdldE1ldGFkYXRhUm91dGVyI2Z1bmN0aW9uOjB4YWZkY2YyZmM",
+          "kind": "function",
+          "modifiers": [],
+          "name": "contractURIForCollection",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "range": {
+            "byteLength": 116,
+            "byteStart": 10422,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L322-L324",
+            "lineEnd": 324,
+            "lineStart": 322,
+            "snippetSha256": "sha256:208a154c85e8ab3670ba3002e0b92aa5237ae0eac3f1bc6966b0f52cb5e1967e",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": "0xafdcf2fc",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_result(string)",
+          "functionKind": "function",
+          "id": "test/StreamCorePermanentTarget.t.sol:PermanentTargetMetadataRouter#function:_result(string)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "value",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Db3JlUGVybWFuZW50VGFyZ2V0LnQuc29sOlBlcm1hbmVudFRhcmdldE1ldGFkYXRhUm91dGVyI2Z1bmN0aW9uOl9yZXN1bHQoc3RyaW5nKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_result",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "range": {
+            "byteLength": 621,
+            "byteStart": 10544,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L326-L343",
+            "lineEnd": 343,
+            "lineStart": 326,
+            "snippetSha256": "sha256:a143fc5c763922a1af7b6f9a760751b17616e6ce0c57fe35f48ef27242f1ca9e",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_mode",
+          "natspec": "",
+          "range": {
+            "byteLength": 19,
+            "byteStart": 9744,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L302",
+            "lineEnd": 302,
+            "lineStart": 302,
+            "snippetSha256": "sha256:447ef27384f515bbdd9c21802d9fcdd9cbe59006ec43a057b7377c89e8a52f99",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": null,
+          "type": "uint8",
+          "typeString": "uint8",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_tokenValue",
+          "natspec": "",
+          "range": {
+            "byteLength": 60,
+            "byteStart": 9769,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L303",
+            "lineEnd": 303,
+            "lineStart": 303,
+            "snippetSha256": "sha256:206cdafdb8956655d6b49a61de28ab55541d353fde6200712bb6adc77864bca1",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": null,
+          "type": "string",
+          "typeString": "string",
+          "valueRange": {
+            "byteLength": 31,
+            "byteStart": 9798,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L303",
+            "lineEnd": 303,
+            "lineStart": 303,
+            "snippetSha256": "sha256:9c8c29f14e4807f4b3d49be58db8b9561aa06731d423e427d505d29b289861ca",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "valueSource": "\"ipfs://permanent-target/token\"",
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_contractValue",
+          "natspec": "",
+          "range": {
+            "byteLength": 66,
+            "byteStart": 9835,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L304",
+            "lineEnd": 304,
+            "lineStart": 304,
+            "snippetSha256": "sha256:85e0219bc5637fc64892db1f02cbdcd8bb424f8647f38f05614e08ecda13f71c",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": null,
+          "type": "string",
+          "typeString": "string",
+          "valueRange": {
+            "byteLength": 34,
+            "byteStart": 9867,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L304",
+            "lineEnd": 304,
+            "lineStart": 304,
+            "snippetSha256": "sha256:fc2444c594198d1bcdc154911108af87e364064e47a58e010a747ee4030aa89e",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "valueSource": "\"ipfs://permanent-target/contract\"",
+          "visibility": "private"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamCorePermanentTarget.t.sol:PermanentTargetMetadataRouter",
+    "inheritance": [
+      {
+        "definitionId": "smart-contracts/interfaces/stream/IStreamMetadataRouter.sol:IStreamMetadataRouter",
+        "name": "IStreamMetadataRouter"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1Db3JlUGVybWFuZW50VGFyZ2V0LnQuc29sOlBlcm1hbmVudFRhcmdldE1ldGFkYXRhUm91dGVy",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamCorePermanentTarget.t.sol:PermanentTargetMetadataRouter",
+      "smart-contracts/interfaces/stream/IStreamMetadataRouter.sol:IStreamMetadataRouter",
+      "smart-contracts/vendor/openzeppelin/IERC165.sol:IERC165"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "PermanentTargetMetadataRouter",
+    "natspec": "",
+    "range": {
+      "byteLength": 1493,
+      "byteStart": 9674,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L301-L344",
+      "lineEnd": 344,
+      "lineStart": 301,
+      "snippetSha256": "sha256:127364efb4945a5215b3c7a25ee802167702157de5456cac0accf921c4c19a2f",
+      "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamCorePermanentTarget.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-09-09.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 6
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 5
+    },
+    "totalCount": 6
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetMetadataRouter",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetMetadataRouter#function:0x01ffc9a7",
+      "definitionId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetMetadataRouter",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetMetadataRouter#function:0x21175b4a",
+      "definitionId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetMetadataRouter",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetMetadataRouter#function:0x642dd5ae",
+      "definitionId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetMetadataRouter",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetMetadataRouter#function:0xafdcf2fc",
+      "definitionId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetMetadataRouter",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetMetadataRouter#function:0xe9dc6375",
+      "definitionId": "test/StreamCorePermanentTarget.t.sol:PermanentTargetMetadataRouter",
+      "severity": "advisory"
+    }
+  ]
+}

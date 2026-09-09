@@ -17,7 +17,7 @@ import { resolveStreamReviewRoute } from "@/lib/public-review/streamReviewRoutes
 
 const source = {
   repository: "6529-Collections/6529Stream",
-  commit: "513bd7e079eafe109df6ae1ae21bfbca6fec6786",
+  commit: "92ea123380917032f01aae09691141a2a72df935",
 };
 
 describe("current Stream entry guides", () => {

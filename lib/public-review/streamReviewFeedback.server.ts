@@ -10,6 +10,10 @@ import { t } from "@/i18n/messages";
 import { loadStreamEditorialContent } from "@/lib/public-review/editorialContent";
 import { extractPublicReviewSections } from "@/lib/public-review/editorialSections";
 import {
+  STREAM_REVIEW_LEGACY_ENTRY_FEEDBACK_VERSION,
+  STREAM_REVIEW_LEGACY_ENTRY_SECTIONS,
+} from "./streamReviewLegacyEntryFeedback";
+import {
   STREAM_REVIEW_ENTRY_PAGES,
   STREAM_REVIEW_ENTRY_GUIDE_VERSION,
   getStreamReviewEntryMarkdown,
@@ -186,7 +190,8 @@ async function loadEditorialPageOptions(
             })
           : undefined;
       const retainedArtistSections =
-        entryMarkdown && page.id === "for-artists"
+        version === STREAM_REVIEW_LEGACY_ENTRY_FEEDBACK_VERSION &&
+        page.id === "for-artists"
           ? [
               ...STREAM_REVIEW_FOR_ARTISTS_GUIDE_SECTIONS,
               ...STREAM_REVIEW_FOR_ARTISTS_DETAIL_SECTIONS,
@@ -201,6 +206,11 @@ async function loadEditorialPageOptions(
               ...extractPublicReviewSections(markdown),
               ...extractPublicReviewSections(entryMarkdown ?? ""),
               ...retainedArtistSections,
+              ...(version === STREAM_REVIEW_LEGACY_ENTRY_FEEDBACK_VERSION
+                ? (STREAM_REVIEW_LEGACY_ENTRY_SECTIONS[page.id] ?? []).map(
+                    (id) => ({ id })
+                  )
+                : []),
             ].map((section) => section.id)
           ),
         ],
@@ -281,20 +291,27 @@ export async function createStreamReviewFeedbackConfig({
     severityOptions: STREAM_REVIEW_FEEDBACK_SEVERITIES,
     pages: [
       ...(await loadEditorialPageOptions(manifest.reviewVersion)),
-      ...(manifest.reviewVersion === STREAM_REVIEW_ENTRY_GUIDE_VERSION
+      ...([
+        STREAM_REVIEW_ENTRY_GUIDE_VERSION,
+        STREAM_REVIEW_LEGACY_ENTRY_FEEDBACK_VERSION,
+      ].includes(manifest.reviewVersion)
         ? STREAM_REVIEW_ENTRY_PAGES.filter(
             (page) =>
               !reviewVersion.pages.some((existing) => existing.id === page.id)
           ).map((page) => ({
             value: page.id,
             label: t(DEFAULT_LOCALE, page.titleKey),
-            sectionValues: extractPublicReviewSections(
-              getStreamReviewEntryMarkdown({
-                pageId: page.id,
-                version: manifest.reviewVersion,
-                source: reviewVersion.source,
-              }) ?? ""
-            ).map((section) => section.id),
+            sectionValues:
+              manifest.reviewVersion ===
+              STREAM_REVIEW_LEGACY_ENTRY_FEEDBACK_VERSION
+                ? (STREAM_REVIEW_LEGACY_ENTRY_SECTIONS[page.id] ?? [])
+                : extractPublicReviewSections(
+                    getStreamReviewEntryMarkdown({
+                      pageId: page.id,
+                      version: manifest.reviewVersion,
+                      source: reviewVersion.source,
+                    }) ?? ""
+                  ).map((section) => section.id),
           }))
         : []),
       ...STREAM_REVIEW_TECHNICAL_FEEDBACK_PAGES,

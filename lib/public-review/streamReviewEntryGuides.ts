@@ -6,7 +6,7 @@ import type {
 } from "./publicReviewTypes";
 import { STREAM_REVIEW_PAGES } from "./streamReviewDefinition";
 
-export const STREAM_REVIEW_ENTRY_GUIDE_VERSION = "2026-08-01.1";
+export const STREAM_REVIEW_ENTRY_GUIDE_VERSION = "2026-09-09.1";
 
 function entryPage(id: string, stem: string): PublicReviewPageDefinition {
   return {
@@ -50,7 +50,7 @@ export function getStreamReviewEntryMarkdown({
   if (
     version !== STREAM_REVIEW_ENTRY_GUIDE_VERSION ||
     source.repository !== "6529-Collections/6529Stream" ||
-    source.commit !== "513bd7e079eafe109df6ae1ae21bfbca6fec6786"
+    source.commit !== "92ea123380917032f01aae09691141a2a72df935"
   ) {
     throw new Error(
       "Stream entry guides must be reviewed for this source snapshot."

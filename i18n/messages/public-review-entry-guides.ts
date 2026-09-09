@@ -1,4 +1,32 @@
 export const PUBLIC_REVIEW_ENTRY_GUIDE_MESSAGES = {
+  "publicReview.pages.currentSnapshot.overview.summary":
+    "The artwork formats Stream can represent, what is built, and what remains to finish before launch.",
+  "publicReview.pages.currentSnapshot.artwork-lifecycle.summary":
+    "The intended journey from preparing an artwork to preserving it, with the unfinished steps made clear.",
+  "publicReview.pages.currentSnapshot.for-artists.summary":
+    "Accepted artist rights, proposed publishing tools, and the limits of the current implementation.",
+  "publicReview.pages.currentSnapshot.roles-and-trust.summary":
+    "Who can act in the current contracts, and which artist permissions still need implementation.",
+  "publicReview.pages.currentSnapshot.curation-and-tdh-authorization.summary":
+    "What the older signed-sale permission checks, and what still needs connecting to permanent-Core minting.",
+  "publicReview.pages.currentSnapshot.tokens-collections-and-minting.summary":
+    "How the permanent Core represents collections, controls minting, and closes supply for good.",
+  "publicReview.pages.currentSnapshot.fixed-price-sales-and-auctions.summary":
+    "How the older ETH sale and auction contracts work, and where their connection to the permanent Core remains unfinished.",
+  "publicReview.pages.currentSnapshot.revenue-splits-and-royalties.summary":
+    "Sale credits, split wallets, and royalty information exist; the complete launch payment path still needs work.",
+  "publicReview.pages.currentSnapshot.randomness.summary":
+    "What Core records for random artwork, what the legacy integration demonstrates, and what still needs building.",
+  "publicReview.pages.currentSnapshot.metadata-scripts-and-dependencies.summary":
+    "How artwork records, software dependencies, and metadata refresh controls fit together, including unfinished connections.",
+  "publicReview.pages.currentSnapshot.freezing-preservation-and-artwork-finality.summary":
+    "Closing minting, blocking burns, freezing Core state, and finalizing the wider artwork are separate decisions.",
+  "publicReview.pages.currentSnapshot.governance-pausing-and-successors.summary":
+    "Built governance and pause controls, and the limits of what they prove about a future contract transition.",
+  "publicReview.pages.currentSnapshot.security-testing-and-known-limitations.summary":
+    "The pinned candidate's implementation, retained evidence, and remaining launch requirements.",
+  "publicReview.pages.currentSnapshot.community-review.summary":
+    "Choose a part of Stream to examine and leave feedback tied to the exact candidate.",
   "publicReview.navigation.startHere": "Start here",
   "publicReview.navigation.compactMenu": "Contents",
   "publicReview.navigation.forArtists": "For artists",
@@ -14,13 +42,9 @@ export const PUBLIC_REVIEW_ENTRY_GUIDE_MESSAGES = {
   "publicReview.pages.startHere.title": "Meet Stream",
   "publicReview.pages.startHere.summary":
     "Stream is a system being developed for releasing and collecting digital art. It brings together the artwork's identity, how tokens are created and sold, and records that help people understand and preserve the work over time.",
-  "publicReview.pages.startHere.markdown": `The goal is to keep the artwork and its history clear even as the tools around it change.
-
-**This candidate is under community review. Its published review record says it is not deployed and its independent audit is still ahead.**
+  "publicReview.pages.startHere.markdown": `**Stream is under community review. It is not a live publishing service, and independent audit and launch evidence remain incomplete.**
 
 ## What kinds of art can it support?
-
-The reviewed contract can represent these formats:
 
 | Format | A simple example |
 | --- | --- |
@@ -28,203 +52,153 @@ The reviewed contract can represent these formats:
 | **1/1/x** | A series of distinct works, each with its own token—for example, 100 different outputs from one artwork program. |
 | **Editions** | Multiple copies of an artwork, each represented by its own token—for example, an edition of 50. |
 
-Editions are not restricted to The Memes. Stream's collection system can represent other artwork too. Work may use images, animation, video, audio, code, or a combination.
+Editions are not restricted to The Memes. Work may use images, animation, video, audio, code, or a combination. **The formats and publishing tools offered at launch still need confirmation.**
 
-These examples describe what the contract can represent. **The formats and publishing process offered at launch still need to be confirmed.** Collection creation currently requires an approved account; this review is not an open publishing service.
+All Stream NFTs share one permanent Core contract. Some marketplaces may display different Stream collections together unless they support its collection information.
 
-## How does a release work?
+## How would a release work?
 
-An artwork needs a release plan: the work itself, token supply, sale terms, and who receives the money. Community selection, where used, happens outside the contracts.
+The intended journey is to prepare the artwork and sale terms, obtain the required artist consent, release tokens, reveal any generated output, and preserve the finished work.
 
-In the reviewed sale path, an approved Stream signer authorizes exact mint or auction terms. Someone submits that permission, and the contracts check it before creating the token or starting the auction. Collectors can then hold or transfer their tokens under the applicable rules.
+The permanent Core and its manager mint path are built. Full artist authority and the complete launch sale and payment connections remain unfinished. The older signed-sale rehearsal uses a test-only legacy Core; it does not prove the whole release journey works with the permanent Core.
 
-Artist consent is central to the intended design. The current collection signature records an artist's approval of particular facts, but **it does not itself stop minting when that approval is missing or outdated**. Stronger approval rules remain work to complete.
+## What do the status labels mean?
+
+- **Built in this code:** an implementation exists. Its connections, audit, and deployment still need their own evidence.
+- **Agreed but unfinished:** an accepted requirement still needs implementation or evidence.
+- **Still proposed:** the design awaits acceptance.
+
+This review was updated on September 9, 2026 and describes one pinned code version. [See the exact candidate and review priorities.](/reviews/6529-stream/review-the-code)
 
 ## What lasts?
 
-Stream keeps token identities and history. It also has separate steps for ending minting, locking defined artwork data, and recording preservation evidence.
+Core records token identities and ownership. Closing a collection stops minting permanently; burn blocking, Core freeze, and wider artwork finality are separate steps. A stored file fingerprint helps verify a recovered copy, but cannot keep the file online.
 
-Those steps must be described precisely. A token can exist while its artwork is still waiting for a random result. A frozen record can point to a file stored elsewhere. A record of a file cannot keep that file online by itself.
+## Choose your path
 
-## Choose what you want to understand
+- [**For artists:** choices, consent, collaborators, and payment.](/reviews/6529-stream/for-artists)
+- [**For collectors:** buying, supply, changeable rules, and access.](/reviews/6529-stream/for-collectors)
+- [**Review the code:** implementations, connections, and evidence.](/reviews/6529-stream/review-the-code)
 
-- [**For artists:** your work, choices, approvals, and payments.](/reviews/6529-stream/for-artists)
-- [**For collectors:** what you receive, how buying works, and what can change.](/reviews/6529-stream/for-collectors)
-- [**Review the code:** the exact candidate, its contracts, evidence, and open gaps.](/reviews/6529-stream/review-the-code)
-
-## Help shape it
-
-What would make you comfortable releasing or collecting an artwork through Stream? Which promise is unclear or missing?
-
-[Read how to give feedback.](/reviews/6529-stream/community-review)`,
+[Help shape Stream.](/reviews/6529-stream/community-review)`,
   "publicReview.pages.artistEntry.title": "Stream for artists",
   "publicReview.pages.artistEntry.summary":
     "Stream's goal is to give your artwork a lasting identity and a clear record of how it is released, paid for, and preserved.",
-  "publicReview.pages.artistEntry.markdown": `**This guide describes the candidate under review. It is not a live publishing service.**
+  "publicReview.pages.artistEntry.markdown": `**This is a proposal under community review, not a live publishing service.** The permanent Core can represent unique works, series, and editions outside The Memes. Launch publishing tools and artist selection still need confirmation.
 
-## Decide what you are releasing
+## Review one clear release plan
 
-Your plan should identify the artwork, its files, its license, and its supply. Is it one unique work, a series of distinct works, or an edition? If code generates the art, which code and inputs are needed to recreate it?
-
-The contract can represent these formats, including editions outside The Memes. The launch team still needs to confirm which publishing flows will be offered and how artists are selected.
-
-You should be able to review one readable plan showing:
-
-- The exact artwork and every file or program it needs.
-- How many tokens may exist and who may mint them.
-- The sale method, price or auction terms, and payment recipients.
-- Who can change the work or its settings, and when those powers end.
+You should see the artwork and required files, license, token supply, sale terms, payment recipients, and who may make later changes. All Stream NFTs share one Core address; separate marketplace collection pages depend on marketplace support.
 
 ## Know what your approval covers
 
-The intended design gives artists a say in important release decisions. An approval should show you the actual facts before asking for a signature.
+**Agreed but unfinished:** artist acceptance, consent for minting, approval of relevant payment changes, and final artwork approval must have clear, enforced meanings. A signature screen should show the exact decision you are making.
 
-The reviewed code currently records a signature for one particular collection state. If that state changes, the old signature no longer describes it. However, the minting paths do not require that signature to be current—or present—before minting.
+The full artist-authority system is not implemented yet. The new Core does not have the older collection-signature function. The retained legacy signature covers selected facts and does not itself require minting to wait for artist approval. Do not treat it as approval of the whole release plan.
 
-**Signing the collection state is not the same as approving every sale, payment split, or later change.** Wider artist-permission checks still need to be completed and verified.
-
-For review, ask which actions must require your approval and how the screen will explain each one.
+Artist key rotation, collaborator acceptance, scoped delegation, and estate arrangements are agreed requirements. Their detailed implementation and user experience remain unfinished. ADR 0023 proposes how the artist contracts would divide those responsibilities.
 
 ## Understand who gets paid
 
-The current signed sales use ETH. They record money owed to the named sale poster, protocol, and curator reserve. Recipients collect their balances later. One failed withdrawal does not erase the amount owed.
+The older ETH sale contracts credit a named poster, protocol, and curator reserve. The poster is not automatically the artist or the wallet submitting the transaction. The release plan must explain how your share and collaborators' shares reach the right people.
 
-The sale poster is not automatically the artist. The release plan must explain who that account represents and how your share reaches you.
-
-The code also contains a separate system for fixed recipient lists and payment shares. Current signed sales do not use it. Collaborator payments therefore need a confirmed launch path; the presence of split-wallet code alone is not enough.
-
-For later marketplace sales, Stream reports royalty information. The marketplace decides whether to pay it.
+Separate split wallets and payment contracts exist, but the complete sale connection to the permanent Core remains work to finish. Core now reads royalty information from a resolver. Outside marketplaces decide whether to pay it.
 
 [Explore payments and royalties.](/reviews/6529-stream/revenue-splits-and-royalties)
 
-## Decide what can change—and what should become permanent
+## Decide what becomes permanent
 
-Before the relevant locks, authorized accounts can change some artwork data and settings. Your review should identify those accounts and the limits on their powers.
+Closing a collection in the permanent Core cannot be undone, including when no tokens were minted. Burn blocking, Core freeze, and wider artwork finality are separate steps. Review the exact files, software, dependencies, and permissions covered by each step.
 
-Ending minting, freezing Core data, adding preservation records, and finalizing the wider artwork are separate steps. Finality includes a waiting period and a guardian who can stop the scheduled action. Reviewers still need to prove that every intended artwork-changing route is covered.
-
-Before an irreversible step, the package should contain the files, any required software, and instructions that another person can actually use. A matching file fingerprint proves that a recovered copy is correct; it cannot recover a missing file.
+A matching fingerprint proves a recovered file is correct; it cannot retrieve a missing file. A useful preservation package needs copies and instructions another person can use.
 
 [Explore permanence and preservation.](/reviews/6529-stream/freezing-preservation-and-artwork-finality)
 
 ## What would work for your practice?
 
-- Which decisions must always need your approval?
-- What should collaborators, delegates, or an estate be allowed to do?
-- What would you need to see before making the artwork permanent?
+Which decisions must always require your signature? What should collaborators or an estate be allowed to do? What would you need to inspect before making the work permanent?
 
-Recovery, delegation, and estate arrangements are still open design work. Your real studio workflow is useful evidence for this review.
+Open **Full artist details** below for the accepted requirements, implementation limits, and exact source links.
 
 [Give feedback](/reviews/6529-stream/community-review) · [Back to the introduction](/reviews/6529-stream)`,
   "publicReview.pages.collectorEntry.title": "Stream for collectors",
   "publicReview.pages.collectorEntry.summary":
     "When considering a Stream artwork, you should be able to understand what you receive, how the sale works, and what can still change afterward.",
-  "publicReview.pages.collectorEntry.markdown": `**This guide describes the candidate under review. Its published review record says it is not deployed and its independent audit is still ahead.**
+  "publicReview.pages.collectorEntry.markdown": `**Stream is under community review. This candidate is not deployed, and independent audit and launch evidence remain incomplete.**
 
-## Know the artwork you would receive
+## Know what you would receive
 
-Stream can represent a single work, a series of distinct works, or an edition. Each token has its own identity and a recorded link to its collection. Editions are not limited to The Memes.
+Stream can represent one unique work, a series of distinct works, or an edition. Editions are not limited to The Memes. Each token has its own identity and a recorded collection link.
 
-Before a sale, the artwork page should make these facts easy to find:
+All Stream NFTs share one Core contract. Some marketplaces may group different Stream collections together unless they support the collection information. A collection ID does not guarantee a separate marketplace page.
 
-- The artist, artwork, format, and license.
-- The supply limit, how many tokens have been created, and whether more can be minted.
-- The exact token or kind of output you will receive.
-- Whether the artwork is complete or still waiting for a random result.
-- Where its files live and who can still change relevant data.
+## Check supply and changeable rules
 
-These are requirements for the intended experience, not a claim that every launch screen already exists.
+The permanent Core supports fixed-size, capped-open, and uncapped-open collections. A capped-open maximum can change under governance before closure. A closed collection cannot reopen, even if it has no minted tokens. Burning a token does not erase its identity or undo its minted history.
+
+Ending minting, blocking burns, freezing Core state, and finalizing the wider artwork are different steps. Before buying, you should be able to see which are complete and who still has relevant powers.
+
+[Explore collection and minting rules.](/reviews/6529-stream/tokens-collections-and-minting)
 
 ## Understand the sale
 
-The reviewed signed sale paths use ETH.
+The older contracts demonstrate fixed-price ETH sales and auctions, with withdrawable credits for refunds and proceeds. Their retained rehearsal uses a test-only legacy Core. The complete sale connection to the new permanent Core is still unfinished.
 
-For a fixed-price mint, the approval names the price, the wallet that pays, and the wallet that receives the token. Those wallets may be different—for example, when buying a gift. A valid free claim requires no payment, but still fixes the recipient and artwork details.
+The seller is the poster named in the sale permission, who may differ from the transaction submitter. Sale screens should identify the artwork, total cost, recipient, deadline, refund rules, and reveal status.
 
-For an auction, the auction contract holds the token while people bid. After bidding ends, someone must submit the settlement transaction. That person cannot choose a different winner or price.
+[Explore sales and auctions.](/reviews/6529-stream/fixed-price-sales-and-auctions)
 
-## Know where your bid and refund go
+## Check consent and reveal status
 
-The current highest bid stays in the auction until a higher bid replaces it or the auction settles.
+Minting does not by itself prove that the artist approved the full release. Artist consent is an agreed requirement whose complete implementation still needs work.
 
-If you are outbid, the contract records a refund for you to withdraw. **The refund is not sent automatically.** If your withdrawal fails, the recorded balance remains available.
-
-An auction cannot be cancelled after its first valid bid. Late bids can extend its end time. The reviewed code also allows an administrator to change shared bid-increase and extension settings during an active auction. Whether those rules should instead be fixed at the start is an important review question.
-
-[Explore buying, bidding, and refunds.](/reviews/6529-stream/fixed-price-sales-and-auctions)
-
-## Understand what can change after minting
-
-Token ownership, artwork completion, and permanent artwork locks are different facts.
-
-The current artist signature records approval of particular collection facts. Minting does not itself prove that the artist approved every part of the release plan; stronger consent checks are still work to complete.
-
-Some generative work may be waiting for randomness. Retrying a failed save uses the same accepted result, but unresolved requests can leave the work unfinished. Recovery rules still need review.
-
-Some artwork data remains changeable until the relevant locks are applied. Supply closure and full artwork finality also have unresolved gaps in this candidate. A single “finished” badge would hide these distinctions.
+Some artwork needs a random result after minting. Core records the coordinator selected at mint, but the complete reveal and recovery service needs separate implementation and evidence. A token's existence does not prove that the final artwork is already available.
 
 ## Consider long-term access
 
-A file stored outside Ethereum depends on people or services keeping it available. Even preserved code may need a particular browser, library, or other software to display correctly.
+Look for the required files, usable copies, and instructions for opening or recreating the work. Files outside Ethereum need people or services to keep them available. Even saved code may require particular software. A fingerprint helps check a copy; it cannot keep that copy online.
 
-Look for a clear list of required files, working copies, and instructions for opening or recreating the artwork. A stored fingerprint helps check a copy; it does not keep that copy online.
-
-[Explore artwork storage](/reviews/6529-stream/metadata-scripts-and-dependencies) · [Explore permanent locks](/reviews/6529-stream/freezing-preservation-and-artwork-finality)
-
-## What would you want answered before collecting?
-
-- Which facts must be visible before you buy or bid?
-- Which rules should never change once a sale starts?
-- What would give you confidence that you can still access the artwork years later?
-
-[Give feedback](/reviews/6529-stream/community-review) · [Back to the introduction](/reviews/6529-stream)`,
+[Explore artwork storage](/reviews/6529-stream/metadata-scripts-and-dependencies) · [Give feedback](/reviews/6529-stream/community-review)`,
   "publicReview.pages.codeEntry.title": "Review the Stream code",
   "publicReview.pages.codeEntry.summary":
     "Start with the exact candidate, the paths it actually connects, and the claims those paths are meant to support.",
-  "publicReview.pages.codeEntry.markdown": `This review covers **2026-08-01.1**, pinned to source **513bd7e079eafe109df6ae1ae21bfbca6fec6786**. Its publication record marks the candidate as not deployed and pre-audit. Later repository changes are outside this snapshot.
+  "publicReview.pages.codeEntry.markdown": `This review covers **2026-09-09.1**, pinned to **92ea123380917032f01aae09691141a2a72df935** and checked on September 9, 2026. The candidate remains not deployed and pre-audit. Later changes are outside this snapshot.
 
-[Open the pinned source](https://github.com/6529-Collections/6529Stream/tree/513bd7e079eafe109df6ae1ae21bfbca6fec6786) · [Open the generated technical reference](/reviews/6529-stream/reference)
+[Open the pinned source](https://github.com/6529-Collections/6529Stream/tree/92ea123380917032f01aae09691141a2a72df935) · [Open the technical reference](/reviews/6529-stream/reference)
 
 ## Start with the actual connections
 
-The Core is the shared ERC-721 contract that keeps collection and token identities, ownership, supply, and defined freeze rules.
-
-The reviewed setup has important parallel paths:
-
-| Area | Current connection |
+| Area | Built code and its boundary |
 | --- | --- |
-| Signed sales | \`StreamDrops\` checks the authorization. Fixed-price mints and current auctions use \`StreamMinter\`. |
-| Manager minting | \`StreamMintManager\` and \`StreamMintLedger\` provide a separate phase, gate, counter, and batch path connected to Core. Signed sales do not use it. |
-| Payments | Drops and Auctions keep local credits. Separate resolver, settlement, and split-wallet contracts exist but do not settle those current sales. |
-| Artwork and authority | Randomness, metadata, preservation, finality, and governance have separate contracts and permissions. Code presence does not establish complete launch wiring. |
+| Permanent Core | ERC-721 ownership, collection identity, terminal closure, burn blocking, manager-only minting, and governed module references. |
+| Manager and ledger | Direct and prepared mint execution, batch roots, token operation IDs, counters, and one-use claims. ADR 0018 is accepted and implemented. |
+| Older signed sales | Drops and Auctions retain local ETH credits and use the old minter. The rehearsal imports a test-only legacy Core. This does not prove a permanent-Core sale integration. |
+| Royalties and metadata | Core has resolver-backed royalty reads, router hooks, fallback metadata, and restricted refresh helpers. Complete serving and payment integrations need separate evidence. |
+| Artist authority | An evidence archive and contract directory exist. Full artist consent is unfinished; ADR 0023's architecture remains proposed. |
 
-Trace each supported route end to end. Do not attribute one route's checks to another.
+The source has moved into domain folders. Follow this version's generated declarations and pinned links rather than old flat-file line numbers.
 
-## Check the most consequential claims first
+## Check the consequential claims first
 
-**Artist consent:** the current collection-state signature is evidence, not a condition enforced by the minting paths. Compare intended consent rules with every caller that can mint or change protected facts.
+**Artist consent:** accepted requirements cover attribution, mint consent, payment changes, collaborators, and succession. Trace each required check through concrete callers; the old snapshot signature is not a whole-plan approval.
 
-**Supply and replay:** test both minting paths together, failed batches, reused permissions, burns, and replacement managers. An empty collection's supply can be reopened after \`setFinalSupply\` while it remains unfrozen.
+**Supply and replay:** test terminal closure, including zero minted tokens, cap changes, failed batches, burns, used nullifiers, and manager replacement. The old empty-collection reopening caveat belongs to the legacy Core.
 
-**Money and auctions:** trace credits, refunds, reserves, and withdrawals. Examine active-auction setting changes and the missing payment-token binding in the separate settlement replay key.
+**Paid minting:** join sale, settlement, ledger, and token operation records. Separate the working mint path from unfinished typed payment and sale connections. ADR 0019 remains proposed.
 
-**Randomness and permanence:** test provider changes while results are unfinished, same-seed recovery, missing artwork files, and alternate writers or modules that could bypass the claimed finality boundary.
-
-[Read the detailed development status and known limitations.](/reviews/6529-stream/security-testing-and-known-limitations)
+**Finality and replacement:** check the exact authority, component set, waiting period, veto, writer coverage, and preserved obligations. ADR 0020 recovery remains proposed.
 
 ## Follow claims to evidence
 
-The technical reference contains the source inventory, callable declarations, retained evidence, risk register, governed parameters, and documentation gaps. Use the topic chapters for reasoning and their pinned links for verification.
+Use three labels: **built in this code**, **agreed but unfinished**, and **still proposed**. Code existence, integration, deployment, marketplace behavior, and independent audit need different evidence.
 
-Keep three things distinct: behavior implemented in this code, accepted design still awaiting completion, and proposals that remain open. Connection, deployment, live-service testing, and independent audit require their own evidence.
+The committed Core size proof reports 18,997 runtime bytes and 5,579 bytes of headroom. This is retained build evidence. Public beta and production remain blocked by missing audit and deployment evidence and incomplete launch bindings.
 
-Local tests do not establish the real launch roles, provider funding, marketplace behavior, or long-term artwork access.
+[Read development status and the exact evidence.](/reviews/6529-stream/security-testing-and-known-limitations)
 
 ## Leave a finding someone can act on
 
-Identify the claimed rule, exact code, required conditions, and call sequence. Explain the result and who it affects. Include a reproducer or test when possible, and separate demonstrated behavior from assumptions.
+Name the claimed rule, exact source, conditions, and call sequence. Explain who is affected. Distinguish a demonstrated result from an assumption, and an older rehearsal from the permanent-Core path.
 
-Use the review's current reporting instructions for sensitive findings. Report an unclear product promise too: it can lead users to trust protection the code does not provide.
-
-[How to report a finding](/reviews/6529-stream/community-review) · [Public feedback](/reviews/6529-stream/feedback) · [Back to the introduction](/reviews/6529-stream)`,
+[How to report a finding](/reviews/6529-stream/community-review) · [Public feedback](/reviews/6529-stream/feedback)`,
 } as const;

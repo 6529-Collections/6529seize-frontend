@@ -35,12 +35,12 @@ const EXPECTED_PAGE_TITLES = [
 
 describe("6529 Stream public review definition", () => {
   it("pins the active review version and exact source commit", () => {
-    expect(STREAM_REVIEW_VERSION).toBe("2026-08-01.1");
+    expect(STREAM_REVIEW_VERSION).toBe("2026-09-09.1");
     expect(STREAM_REVIEW_PREVIOUS_VERSION).toBe("2026-07-30.1");
     expect(STREAM_REVIEW_OLDER_VERSION).toBe("2026-07-27.1");
     expect(STREAM_REVIEW_LEGACY_VERSION).toBe("2026-07-26.1");
     expect(STREAM_REVIEW_SOURCE_COMMIT).toBe(
-      "513bd7e079eafe109df6ae1ae21bfbca6fec6786"
+      "92ea123380917032f01aae09691141a2a72df935"
     );
     expect(STREAM_REVIEW_DEFINITION.versions[0]?.source.commit).toBe(
       STREAM_REVIEW_SOURCE_COMMIT
@@ -73,7 +73,7 @@ describe("6529 Stream public review definition", () => {
       deploymentStatus: "NOT_DEPLOYED",
       auditStatus: "PRE_AUDIT",
       source: {
-        commit: STREAM_REVIEW_SOURCE_COMMIT,
+        commit: "513bd7e079eafe109df6ae1ae21bfbca6fec6786",
       },
     });
     expect(previous?.pages).toHaveLength(14);

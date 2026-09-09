@@ -5,19 +5,12 @@ import { notFound } from "next/navigation";
 
 import { PublicReviewEditorialFeedback } from "@/components/public-review/PublicReviewEditorialFeedback";
 import { PublicReviewShell } from "@/components/public-review/PublicReviewShell";
+import { PublicReviewMarkdown } from "@/components/public-review/PublicReviewMarkdown";
 import { StreamReviewBotAuthorshipNote } from "@/components/public-review/StreamReviewBotAuthorshipNote";
 import {
   StreamReviewDevelopmentStatus,
   StreamReviewReviewerPrompts,
 } from "@/components/public-review/StreamReviewDevelopmentStatus";
-import {
-  STREAM_REVIEW_FOR_ARTISTS_DETAIL_SECTIONS,
-  StreamReviewForArtistsDetails,
-} from "@/components/public-review/StreamReviewForArtistsDetails";
-import {
-  STREAM_REVIEW_FOR_ARTISTS_GUIDE_SECTIONS,
-  StreamReviewForArtistsGuide,
-} from "@/components/public-review/StreamReviewForArtistsGuide";
 import { StreamArtworkConceptPreview } from "@/components/public-review/StreamArtworkConceptPreview";
 import {
   STREAM_REVIEW_ROLES_GUIDE_SECTIONS,
@@ -65,6 +58,7 @@ import { getStreamSolidityReferenceReader } from "@/lib/public-review/streamSoli
 import {
   STREAM_REVIEW_CURRENT_PAGES,
   STREAM_REVIEW_ENTRY_PAGES,
+  STREAM_REVIEW_ENTRY_GUIDE_VERSION,
   getStreamReviewEntryMarkdown,
   getStreamReviewRelatedPages,
 } from "./streamReviewEntryGuides";
@@ -112,13 +106,21 @@ async function loadAvailableStreamEditorialContent({
 }): Promise<string | undefined> {
   if (
     route.version === undefined &&
+    route.page.id !== "for-artists" &&
     STREAM_REVIEW_ENTRY_PAGES.some((page) => page.id === route.page.id)
   ) {
     // These current-only guides have no corresponding immutable editorial file.
     return "";
   }
   try {
-    return await loadStreamEditorialContent(route.page, contentVersion);
+    // A short guide can have a different title from its retained detail page.
+    const editorialPage = getStreamReviewVersion(contentVersion)?.pages.find(
+      (page) => page.id === route.page.id
+    );
+    if (!editorialPage) {
+      return undefined;
+    }
+    return await loadStreamEditorialContent(editorialPage, contentVersion);
   } catch (error) {
     if (error instanceof PublicReviewEditorialContentError) {
       return undefined;
@@ -170,7 +172,11 @@ function getCurrentStreamReviewPages(
     overview: isCurrent && pageId === "overview",
     revenueSplits: isCurrent && pageId === "revenue-splits-and-royalties",
     randomness: isCurrent && pageId === "randomness",
-    roles: isCurrent && pageId === "roles-and-trust",
+    roles:
+      isCurrent &&
+      pageId === "roles-and-trust" &&
+      STREAM_REVIEW_DEFINITION.activeVersion !==
+        STREAM_REVIEW_ENTRY_GUIDE_VERSION,
     tokensAndMinting: isCurrent && pageId === "tokens-collections-and-minting",
     salesAndAuctions: isCurrent && pageId === "fixed-price-sales-and-auctions",
   };
@@ -187,6 +193,9 @@ function getDisplayedEditorialMarkdown({
   readonly editorialMarkdown: string;
   readonly source: StreamReviewSource;
 }): string {
+  if (contentVersion === STREAM_REVIEW_ENTRY_GUIDE_VERSION) {
+    return editorialMarkdown;
+  }
   if (currentPages.artworkLifecycle) {
     return getCurrentArtworkLifecycleEditorialMarkdown({
       editorialMarkdown,
@@ -260,6 +269,9 @@ function getDisplayedPage(
   page: PublicReviewPageDefinition,
   currentPages: CurrentStreamReviewPages
 ): PublicReviewPageDefinition {
+  if (page.summaryKey.startsWith("publicReview.pages.currentSnapshot.")) {
+    return page;
+  }
   if (currentPages.artworkLifecycle) {
     return {
       ...page,
@@ -444,8 +456,7 @@ async function renderStreamReviewRoute(route: StreamReviewRouteModel) {
     sections: currentPages.forArtists
       ? [
           ...displayedSections,
-          ...STREAM_REVIEW_FOR_ARTISTS_GUIDE_SECTIONS,
-          ...STREAM_REVIEW_FOR_ARTISTS_DETAIL_SECTIONS,
+          ...extractPublicReviewSections(editorialMarkdown),
         ]
       : displayedSections,
   });
@@ -497,10 +508,10 @@ async function renderStreamReviewRoute(route: StreamReviewRouteModel) {
                     "publicReview.navigation.fullArtistDetails"
                   )}
                 </summary>
-                <StreamReviewForArtistsGuide
-                  pages={displayedReviewVersion.pages}
+                <PublicReviewMarkdown
+                  markdown={editorialMarkdown}
+                  internalLinkBasePath="/reviews/6529-stream"
                 />
-                <StreamReviewForArtistsDetails />
               </details>
             ) : null}
           </>

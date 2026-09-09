@@ -180,6 +180,34 @@ describe("Stream review feedback manifest binding", () => {
     ).rejects.toThrow("absent");
   });
 
+  it("retains August guide feedback targets after closing that review", async () => {
+    const manifest = { ...makeManifest(), reviewVersion: "2026-08-01.1" };
+    const config = await createStreamReviewFeedbackConfig({ manifest });
+    expect(config.submissionsOpen).toBe(false);
+    expect(config.pages).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          value: "for-collectors",
+          sectionValues: expect.arrayContaining([
+            "know-where-your-bid-and-refund-go",
+          ]),
+        }),
+        expect.objectContaining({
+          value: "review-the-code",
+          sectionValues: expect.arrayContaining([
+            "start-with-the-actual-connections",
+          ]),
+        }),
+        expect.objectContaining({
+          value: "for-artists",
+          sectionValues: expect.arrayContaining([
+            "know-what-your-approval-covers",
+          ]),
+        }),
+      ])
+    );
+  });
+
   it("creates immutable editorial and technical feedback paths", () => {
     const editorialPage = STREAM_REVIEW_PAGES[0];
     if (!editorialPage) {

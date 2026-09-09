@@ -1224,7 +1224,7 @@ function createStatusRecords({
         "what remains before launch",
       ],
       exactKeys: ["status:latest-development", latest.source.commit],
-      canonicalPath: `/reviews/${reviewId}#development-update`,
+      canonicalPath: `/reviews/${reviewId}/security-testing-and-known-limitations#stream-launch-readiness`,
       summary: developmentFacts.join(" "),
       structured: latest,
       provenance: {

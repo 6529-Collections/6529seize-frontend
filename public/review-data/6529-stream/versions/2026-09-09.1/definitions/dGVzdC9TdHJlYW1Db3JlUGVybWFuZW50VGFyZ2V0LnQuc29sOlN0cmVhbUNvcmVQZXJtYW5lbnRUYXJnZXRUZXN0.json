@@ -1,0 +1,1701 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest#function:0x0a9254e4",
+          "declaringDefinitionId": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "setUp",
+          "outputs": [],
+          "selector": "0x0a9254e4",
+          "signature": "setUp()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest#function:0x1474e2b7",
+          "declaringDefinitionId": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testActualCoreCallBoundaryCoversBelowAtAndAboveWithFullStipend",
+          "outputs": [],
+          "selector": "0x1474e2b7",
+          "signature": "testActualCoreCallBoundaryCoversBelowAtAndAboveWithFullStipend()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest#function:0xd964d96d",
+          "declaringDefinitionId": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testActualCoreContractUriBoundaryRejectsBelowAndRoutesAtAndAbove",
+          "outputs": [],
+          "selector": "0xd964d96d",
+          "signature": "testActualCoreContractUriBoundaryRejectsBelowAndRoutesAtAndAbove()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest#function:0x3c189eac",
+          "declaringDefinitionId": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testActualCoreTokenUriBoundaryRejectsBelowAndRoutesAtAndAbove",
+          "outputs": [],
+          "selector": "0x3c189eac",
+          "signature": "testActualCoreTokenUriBoundaryRejectsBelowAndRoutesAtAndAbove()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest#function:0x5f4c3cc8",
+          "declaringDefinitionId": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testEntropyFailureRollsBackAllCoreState",
+          "outputs": [],
+          "selector": "0x5f4c3cc8",
+          "signature": "testEntropyFailureRollsBackAllCoreState()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest#function:0xc2046204",
+          "declaringDefinitionId": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testEntropyReturnDataFailsClosedAndRollsBack",
+          "outputs": [],
+          "selector": "0xc2046204",
+          "signature": "testEntropyReturnDataFailsClosedAndRollsBack()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest#function:0xf7b84dc0",
+          "declaringDefinitionId": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testGasRaiseRequiresExactBoundActionAndAtMostDouble",
+          "outputs": [],
+          "selector": "0xf7b84dc0",
+          "signature": "testGasRaiseRequiresExactBoundActionAndAtMostDouble()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest#function:0x584aed5d",
+          "declaringDefinitionId": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testGenesisPinsAllFourGasRowsAndTargetAbi",
+          "outputs": [],
+          "selector": "0x584aed5d",
+          "signature": "testGenesisPinsAllFourGasRowsAndTargetAbi()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest#function:0x8c20c2dc",
+          "declaringDefinitionId": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testMetadataRouterMaximumBoundedReturnCompletes",
+          "outputs": [],
+          "selector": "0x8c20c2dc",
+          "signature": "testMetadataRouterMaximumBoundedReturnCompletes()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest#function:0x65a29053",
+          "declaringDefinitionId": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testMetadataRouterSuccessAndEveryFailureFallsBack",
+          "outputs": [],
+          "selector": "0x65a29053",
+          "signature": "testMetadataRouterSuccessAndEveryFailureFallsBack()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest#function:0xa19b71b0",
+          "declaringDefinitionId": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testMintRegistersEntropyBeforePublishingToken",
+          "outputs": [],
+          "selector": "0xa19b71b0",
+          "signature": "testMintRegistersEntropyBeforePublishingToken()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest#function:0x221ea166",
+          "declaringDefinitionId": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testPointerAuthenticationRejectsRegistryStatusAndCodehashDrift",
+          "outputs": [],
+          "selector": "0x221ea166",
+          "signature": "testPointerAuthenticationRejectsRegistryStatusAndCodehashDrift()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest#function:0x73827a24",
+          "declaringDefinitionId": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testPreparedMintAbortByReplacementManagerRestoresDenseAllocation",
+          "outputs": [],
+          "selector": "0x73827a24",
+          "signature": "testPreparedMintAbortByReplacementManagerRestoresDenseAllocation()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest#function:0xa5080e47",
+          "declaringDefinitionId": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testUnresolvedArtistAndRoyaltyInterfacesCannotBeInstalled",
+          "outputs": [],
+          "selector": "0xa5080e47",
+          "signature": "testUnresolvedArtistAndRoyaltyInterfacesCannotBeInstalled()",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "setUp()",
+          "displaySignature": "setUp()",
+          "functionKind": "function",
+          "id": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest#function:0x0a9254e4",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Db3JlUGVybWFuZW50VGFyZ2V0LnQuc29sOlN0cmVhbUNvcmVQZXJtYW5lbnRUYXJnZXRUZXN0I2Z1bmN0aW9uOjB4MGE5MjU0ZTQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setUp",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2517,
+            "byteStart": 13634,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L387-L451",
+            "lineEnd": 451,
+            "lineStart": 387,
+            "snippetSha256": "sha256:ef57a5be7b35051f79406ce28e290b40c28bc8931db00b4b7438b3f22318adf5",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": "0x0a9254e4",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testGenesisPinsAllFourGasRowsAndTargetAbi()",
+          "displaySignature": "testGenesisPinsAllFourGasRowsAndTargetAbi()",
+          "functionKind": "function",
+          "id": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest#function:0x584aed5d",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Db3JlUGVybWFuZW50VGFyZ2V0LnQuc29sOlN0cmVhbUNvcmVQZXJtYW5lbnRUYXJnZXRUZXN0I2Z1bmN0aW9uOjB4NTg0YWVkNWQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testGenesisPinsAllFourGasRowsAndTargetAbi",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 705,
+            "byteStart": 16157,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L453-L462",
+            "lineEnd": 462,
+            "lineStart": 453,
+            "snippetSha256": "sha256:fa089c7918913c03b1c0719c0abbb07763b9e7514fe1a6bb3fb20bc49ffdba53",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": "0x584aed5d",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testMintRegistersEntropyBeforePublishingToken()",
+          "displaySignature": "testMintRegistersEntropyBeforePublishingToken()",
+          "functionKind": "function",
+          "id": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest#function:0xa19b71b0",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Db3JlUGVybWFuZW50VGFyZ2V0LnQuc29sOlN0cmVhbUNvcmVQZXJtYW5lbnRUYXJnZXRUZXN0I2Z1bmN0aW9uOjB4YTE5YjcxYjA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testMintRegistersEntropyBeforePublishingToken",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1055,
+            "byteStart": 16868,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L464-L483",
+            "lineEnd": 483,
+            "lineStart": 464,
+            "snippetSha256": "sha256:fb602fe923aa33b313777ddd7caa82ab2397ba3bfd154e8193be44087b767eeb",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": "0xa19b71b0",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testEntropyFailureRollsBackAllCoreState()",
+          "displaySignature": "testEntropyFailureRollsBackAllCoreState()",
+          "functionKind": "function",
+          "id": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest#function:0x5f4c3cc8",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Db3JlUGVybWFuZW50VGFyZ2V0LnQuc29sOlN0cmVhbUNvcmVQZXJtYW5lbnRUYXJnZXRUZXN0I2Z1bmN0aW9uOjB4NWY0YzNjYzg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testEntropyFailureRollsBackAllCoreState",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 645,
+            "byteStart": 17929,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L485-L495",
+            "lineEnd": 495,
+            "lineStart": 485,
+            "snippetSha256": "sha256:70df17912ae2f2eb073ad90049969a88fb4da02c81702c8e4a7b03dfceb533cb",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": "0x5f4c3cc8",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testEntropyReturnDataFailsClosedAndRollsBack()",
+          "displaySignature": "testEntropyReturnDataFailsClosedAndRollsBack()",
+          "functionKind": "function",
+          "id": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest#function:0xc2046204",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Db3JlUGVybWFuZW50VGFyZ2V0LnQuc29sOlN0cmVhbUNvcmVQZXJtYW5lbnRUYXJnZXRUZXN0I2Z1bmN0aW9uOjB4YzIwNDYyMDQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testEntropyReturnDataFailsClosedAndRollsBack",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 509,
+            "byteStart": 18580,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L497-L504",
+            "lineEnd": 504,
+            "lineStart": 497,
+            "snippetSha256": "sha256:96bb2ff67d544886e08ba2c1e23fb680ccab00e2d6524490cdd66ead68a77a75",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": "0xc2046204",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testActualCoreCallBoundaryCoversBelowAtAndAboveWithFullStipend()",
+          "displaySignature": "testActualCoreCallBoundaryCoversBelowAtAndAboveWithFullStipend()",
+          "functionKind": "function",
+          "id": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest#function:0x1474e2b7",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Db3JlUGVybWFuZW50VGFyZ2V0LnQuc29sOlN0cmVhbUNvcmVQZXJtYW5lbnRUYXJnZXRUZXN0I2Z1bmN0aW9uOjB4MTQ3NGUyYjc",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testActualCoreCallBoundaryCoversBelowAtAndAboveWithFullStipend",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2065,
+            "byteStart": 19095,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L506-L551",
+            "lineEnd": 551,
+            "lineStart": 506,
+            "snippetSha256": "sha256:f1b630570155c365739f5a229b3c0f8253032d6efa94b9c04e60551d85d89685",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": "0x1474e2b7",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testPreparedMintAbortByReplacementManagerRestoresDenseAllocation()",
+          "displaySignature": "testPreparedMintAbortByReplacementManagerRestoresDenseAllocation()",
+          "functionKind": "function",
+          "id": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest#function:0x73827a24",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Db3JlUGVybWFuZW50VGFyZ2V0LnQuc29sOlN0cmVhbUNvcmVQZXJtYW5lbnRUYXJnZXRUZXN0I2Z1bmN0aW9uOjB4NzM4MjdhMjQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testPreparedMintAbortByReplacementManagerRestoresDenseAllocation",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1181,
+            "byteStart": 21166,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L553-L576",
+            "lineEnd": 576,
+            "lineStart": 553,
+            "snippetSha256": "sha256:ac459667e6a585b56a985b55fe0a192f3d46f8ed5ad674656c4ee64036120af0",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": "0x73827a24",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testMetadataRouterSuccessAndEveryFailureFallsBack()",
+          "displaySignature": "testMetadataRouterSuccessAndEveryFailureFallsBack()",
+          "functionKind": "function",
+          "id": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest#function:0x65a29053",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Db3JlUGVybWFuZW50VGFyZ2V0LnQuc29sOlN0cmVhbUNvcmVQZXJtYW5lbnRUYXJnZXRUZXN0I2Z1bmN0aW9uOjB4NjVhMjkwNTM",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testMetadataRouterSuccessAndEveryFailureFallsBack",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1383,
+            "byteStart": 22353,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L578-L608",
+            "lineEnd": 608,
+            "lineStart": 578,
+            "snippetSha256": "sha256:212d6703ec8953a7089340735ab23a5bc0e71890b616812b6e3a2fab665c00f4",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": "0x65a29053",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testMetadataRouterMaximumBoundedReturnCompletes()",
+          "displaySignature": "testMetadataRouterMaximumBoundedReturnCompletes()",
+          "functionKind": "function",
+          "id": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest#function:0x8c20c2dc",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Db3JlUGVybWFuZW50VGFyZ2V0LnQuc29sOlN0cmVhbUNvcmVQZXJtYW5lbnRUYXJnZXRUZXN0I2Z1bmN0aW9uOjB4OGMyMGMyZGM",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testMetadataRouterMaximumBoundedReturnCompletes",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 599,
+            "byteStart": 23742,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L610-L624",
+            "lineEnd": 624,
+            "lineStart": 610,
+            "snippetSha256": "sha256:bc7543c6e23e306ff3c16122a8b575422a05ea9435be30459270eb006f33be4e",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": "0x8c20c2dc",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testActualCoreTokenUriBoundaryRejectsBelowAndRoutesAtAndAbove()",
+          "displaySignature": "testActualCoreTokenUriBoundaryRejectsBelowAndRoutesAtAndAbove()",
+          "functionKind": "function",
+          "id": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest#function:0x3c189eac",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Db3JlUGVybWFuZW50VGFyZ2V0LnQuc29sOlN0cmVhbUNvcmVQZXJtYW5lbnRUYXJnZXRUZXN0I2Z1bmN0aW9uOjB4M2MxODllYWM",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testActualCoreTokenUriBoundaryRejectsBelowAndRoutesAtAndAbove",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 758,
+            "byteStart": 24347,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L626-L641",
+            "lineEnd": 641,
+            "lineStart": 626,
+            "snippetSha256": "sha256:e0b8863abdb70756aec1668966894cb6a1bd75f21dce0a0f2d67d7ba6fc02fc3",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": "0x3c189eac",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testActualCoreContractUriBoundaryRejectsBelowAndRoutesAtAndAbove()",
+          "displaySignature": "testActualCoreContractUriBoundaryRejectsBelowAndRoutesAtAndAbove()",
+          "functionKind": "function",
+          "id": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest#function:0xd964d96d",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Db3JlUGVybWFuZW50VGFyZ2V0LnQuc29sOlN0cmVhbUNvcmVQZXJtYW5lbnRUYXJnZXRUZXN0I2Z1bmN0aW9uOjB4ZDk2NGQ5NmQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testActualCoreContractUriBoundaryRejectsBelowAndRoutesAtAndAbove",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 640,
+            "byteStart": 25111,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L643-L655",
+            "lineEnd": 655,
+            "lineStart": 643,
+            "snippetSha256": "sha256:9a1a5355af5617a7c977cfe404c8fee58122edbeb20297d5b3240b70c7a76b72",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": "0xd964d96d",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testPointerAuthenticationRejectsRegistryStatusAndCodehashDrift()",
+          "displaySignature": "testPointerAuthenticationRejectsRegistryStatusAndCodehashDrift()",
+          "functionKind": "function",
+          "id": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest#function:0x221ea166",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Db3JlUGVybWFuZW50VGFyZ2V0LnQuc29sOlN0cmVhbUNvcmVQZXJtYW5lbnRUYXJnZXRUZXN0I2Z1bmN0aW9uOjB4MjIxZWExNjY",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testPointerAuthenticationRejectsRegistryStatusAndCodehashDrift",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 815,
+            "byteStart": 25757,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L657-L672",
+            "lineEnd": 672,
+            "lineStart": 657,
+            "snippetSha256": "sha256:9a70d29d3b22a68cdae3504d00158c1faa21b742bd7f6591417d80c6109ad50d",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": "0x221ea166",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testUnresolvedArtistAndRoyaltyInterfacesCannotBeInstalled()",
+          "displaySignature": "testUnresolvedArtistAndRoyaltyInterfacesCannotBeInstalled()",
+          "functionKind": "function",
+          "id": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest#function:0xa5080e47",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Db3JlUGVybWFuZW50VGFyZ2V0LnQuc29sOlN0cmVhbUNvcmVQZXJtYW5lbnRUYXJnZXRUZXN0I2Z1bmN0aW9uOjB4YTUwODBlNDc",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testUnresolvedArtistAndRoyaltyInterfacesCannotBeInstalled",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 943,
+            "byteStart": 26578,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L674-L699",
+            "lineEnd": 699,
+            "lineStart": 674,
+            "snippetSha256": "sha256:81649970b532bda59410d5732bfae7cda493f4c0b938d11681fe12636b536748",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": "0xa5080e47",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testGasRaiseRequiresExactBoundActionAndAtMostDouble()",
+          "displaySignature": "testGasRaiseRequiresExactBoundActionAndAtMostDouble()",
+          "functionKind": "function",
+          "id": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest#function:0xf7b84dc0",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Db3JlUGVybWFuZW50VGFyZ2V0LnQuc29sOlN0cmVhbUNvcmVQZXJtYW5lbnRUYXJnZXRUZXN0I2Z1bmN0aW9uOjB4ZjdiODRkYzA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testGasRaiseRequiresExactBoundActionAndAtMostDouble",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1504,
+            "byteStart": 27527,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L701-L730",
+            "lineEnd": 730,
+            "lineStart": 701,
+            "snippetSha256": "sha256:a066be03a4e0fcbd6ba72ca1a5c3648dcfa5fc7a1846d648f3223a6ee095d39d",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": "0xf7b84dc0",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_installPointer(bytes32,address,bytes32,bytes4)",
+          "functionKind": "function",
+          "id": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest#function:_installPointer(bytes32,address,bytes32,bytes4)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "pointerType",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "moduleType",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Db3JlUGVybWFuZW50VGFyZ2V0LnQuc29sOlN0cmVhbUNvcmVQZXJtYW5lbnRUYXJnZXRUZXN0I2Z1bmN0aW9uOl9pbnN0YWxsUG9pbnRlcihieXRlczMyLGFkZHJlc3MsYnl0ZXMzMixieXRlczQp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_installPointer",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 315,
+            "byteStart": 29037,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L732-L740",
+            "lineEnd": 740,
+            "lineStart": 732,
+            "snippetSha256": "sha256:2b7a145d63f9252f3c898f3dac2b9ebc2a9179a4e7401a01ba8db0c29ed41863",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_updatePointerWithCandidate(bytes32,address)",
+          "functionKind": "function",
+          "id": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest#function:_updatePointerWithCandidate(bytes32,address)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "pointerType",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "target",
+              "type": "address"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Db3JlUGVybWFuZW50VGFyZ2V0LnQuc29sOlN0cmVhbUNvcmVQZXJtYW5lbnRUYXJnZXRUZXN0I2Z1bmN0aW9uOl91cGRhdGVQb2ludGVyV2l0aENhbmRpZGF0ZShieXRlczMyLGFkZHJlc3Mp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_updatePointerWithCandidate",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1128,
+            "byteStart": 29358,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L742-L763",
+            "lineEnd": 763,
+            "lineStart": 742,
+            "snippetSha256": "sha256:fe9e2724d54a7ece940bb604b1e86e38e501653aba8c0e24e8abb2dad023bcd0",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_expectInvalidPointerUpdate(bytes32,address)",
+          "functionKind": "function",
+          "id": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest#function:_expectInvalidPointerUpdate(bytes32,address)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "pointerType",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "target",
+              "type": "address"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Db3JlUGVybWFuZW50VGFyZ2V0LnQuc29sOlN0cmVhbUNvcmVQZXJtYW5lbnRUYXJnZXRUZXN0I2Z1bmN0aW9uOl9leHBlY3RJbnZhbGlkUG9pbnRlclVwZGF0ZShieXRlczMyLGFkZHJlc3Mp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_expectInvalidPointerUpdate",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1265,
+            "byteStart": 30492,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L765-L789",
+            "lineEnd": 789,
+            "lineStart": 765,
+            "snippetSha256": "sha256:ee16e652c990a667378d0e53ba778e2c6fb383793b72c6bfcd5e5338280e0388",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_pointerState(bytes32)",
+          "functionKind": "function",
+          "id": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest#function:_pointerState(bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "pointerType",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Db3JlUGVybWFuZW50VGFyZ2V0LnQuc29sOlN0cmVhbUNvcmVQZXJtYW5lbnRUYXJnZXRUZXN0I2Z1bmN0aW9uOl9wb2ludGVyU3RhdGUoYnl0ZXMzMik",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_pointerState",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "pointer",
+              "storageLocation": "memory",
+              "type": "StreamCorePointerState"
+            }
+          ],
+          "range": {
+            "byteLength": 188,
+            "byteStart": 31763,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L791-L797",
+            "lineEnd": 797,
+            "lineStart": 791,
+            "snippetSha256": "sha256:7ee1d226252c1a9ccb724e24256cb141ce32a8d7e73e950fc9c0b01c379f3646",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_minimumMetadataReadGas(bool)",
+          "functionKind": "function",
+          "id": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest#function:_minimumMetadataReadGas(bool)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "contractRead",
+              "type": "bool"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Db3JlUGVybWFuZW50VGFyZ2V0LnQuc29sOlN0cmVhbUNvcmVQZXJtYW5lbnRUYXJnZXRUZXN0I2Z1bmN0aW9uOl9taW5pbXVtTWV0YWRhdGFSZWFkR2FzKGJvb2wp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_minimumMetadataReadGas",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "threshold",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 538,
+            "byteStart": 31957,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L799-L812",
+            "lineEnd": 812,
+            "lineStart": 799,
+            "snippetSha256": "sha256:562275dd834067120ac37239d08fe00d52f60dfaca3c34091492dbc42fcbc0ff",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_metadataRouteAtGas(bool,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest#function:_metadataRouteAtGas(bool,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "contractRead",
+              "type": "bool"
+            },
+            {
+              "index": 1,
+              "name": "coreGas",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Db3JlUGVybWFuZW50VGFyZ2V0LnQuc29sOlN0cmVhbUNvcmVQZXJtYW5lbnRUYXJnZXRUZXN0I2Z1bmN0aW9uOl9tZXRhZGF0YVJvdXRlQXRHYXMoYm9vbCx1aW50MjU2KQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_metadataRouteAtGas",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "routed",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 635,
+            "byteStart": 32501,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L814-L827",
+            "lineEnd": 827,
+            "lineStart": 814,
+            "snippetSha256": "sha256:851a5a18d3d80f470f397a3dfb7cc34cd179e5f9fa244350fa897dd8450f0ae0",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_createCollection(uint8,bool,uint256,uint8)",
+          "functionKind": "function",
+          "id": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest#function:_createCollection(uint8,bool,uint256,uint8)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "supplyMode",
+              "type": "uint8"
+            },
+            {
+              "index": 1,
+              "name": "hasMaxSupply",
+              "type": "bool"
+            },
+            {
+              "index": 2,
+              "name": "maxSupply",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "initialStatus",
+              "type": "uint8"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Db3JlUGVybWFuZW50VGFyZ2V0LnQuc29sOlN0cmVhbUNvcmVQZXJtYW5lbnRUYXJnZXRUZXN0I2Z1bmN0aW9uOl9jcmVhdGVDb2xsZWN0aW9uKHVpbnQ4LGJvb2wsdWludDI1Nix1aW50OCk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_createCollection",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1168,
+            "byteStart": 33142,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L829-L864",
+            "lineEnd": 864,
+            "lineStart": 829,
+            "snippetSha256": "sha256:32491cbf37d4ab075950842780f5838a2e0ebc3f6f81994744720f49f3fd3112",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertGasRow(bytes32,uint256,uint256,uint8)",
+          "functionKind": "function",
+          "id": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest#function:_assertGasRow(bytes32,uint256,uint256,uint8)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "parameterId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "expectedValue",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "expectedFloor",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "expectedFailureClass",
+              "type": "uint8"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Db3JlUGVybWFuZW50VGFyZ2V0LnQuc29sOlN0cmVhbUNvcmVQZXJtYW5lbnRUYXJnZXRUZXN0I2Z1bmN0aW9uOl9hc3NlcnRHYXNSb3coYnl0ZXMzMix1aW50MjU2LHVpbnQyNTYsdWludDgp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertGasRow",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 531,
+            "byteStart": 34316,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L866-L878",
+            "lineEnd": 878,
+            "lineStart": 866,
+            "snippetSha256": "sha256:2cba9031bf8346108092028e9b462bff70f4f29744d92a71f6ff5afb5b5c042a",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_POINTER_MINT_MANAGER",
+          "natspec": "",
+          "range": {
+            "byteLength": 123,
+            "byteStart": 11242,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L347-L348",
+            "lineEnd": 348,
+            "lineStart": 347,
+            "snippetSha256": "sha256:8bf1b0177c9affc79d933f8fc40b1c8a3b73ff8617cda08adaf0dcdd5aa84573",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 66,
+            "byteStart": 11299,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L348",
+            "lineEnd": 348,
+            "lineStart": 348,
+            "snippetSha256": "sha256:432679ff763cb9d9578f97757002818a84d2f38fcef9100040fdcdd48ef4cb15",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "valueSource": "0x136326f089f522351128a5fb79275bd12b2d84fe5bb50d5e46c9f5508d6df7e2",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_POINTER_METADATA_ROUTER",
+          "natspec": "",
+          "range": {
+            "byteLength": 126,
+            "byteStart": 11371,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L349-L350",
+            "lineEnd": 350,
+            "lineStart": 349,
+            "snippetSha256": "sha256:f4df57fa31fee57c9655fbbb013fa01a23ca4e627ab3cb9d1e82f9d3c0c34b00",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 66,
+            "byteStart": 11431,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L350",
+            "lineEnd": 350,
+            "lineStart": 350,
+            "snippetSha256": "sha256:022739529e927299b1394a4d9e1e02361fa484630caf695dd03eca610f6b6344",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "valueSource": "0x7024d3e2544fc48a261933c43d901dca0ee3fc26ea2b857748ab0c295a16f20a",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_POINTER_ENTROPY_COORDINATOR",
+          "natspec": "",
+          "range": {
+            "byteLength": 130,
+            "byteStart": 11503,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L351-L352",
+            "lineEnd": 352,
+            "lineStart": 351,
+            "snippetSha256": "sha256:a675a4aa80378dea604de904827a145e7688718204df3095ffd2e0f632cdb0d3",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 66,
+            "byteStart": 11567,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L352",
+            "lineEnd": 352,
+            "lineStart": 352,
+            "snippetSha256": "sha256:4dfab833d875e961f50cfade55b416d49ea38fd48b121eef846042ad623d7c04",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "valueSource": "0xb3b3ef20764c647bdeda70b21ab009ff2783106d6995be14389ec6f42ea6dfbb",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_POINTER_ARTIST_REGISTRY",
+          "natspec": "",
+          "range": {
+            "byteLength": 126,
+            "byteStart": 11639,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L353-L354",
+            "lineEnd": 354,
+            "lineStart": 353,
+            "snippetSha256": "sha256:1219790e4332d2bf008ff27bed55502e1e3b47f42803eae91902cec3973d916f",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 66,
+            "byteStart": 11699,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L354",
+            "lineEnd": 354,
+            "lineStart": 354,
+            "snippetSha256": "sha256:749b51efe00a5231facb5895d5b5d352353e2de059dfde3cdd8ec523897087ff",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "valueSource": "0xaef5244b535c06d7f8e259ec85024ebdfc2d95b38d64f6570dc627a2684749f4",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_POINTER_MODULE_REGISTRY",
+          "natspec": "",
+          "range": {
+            "byteLength": 126,
+            "byteStart": 11771,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L355-L356",
+            "lineEnd": 356,
+            "lineStart": 355,
+            "snippetSha256": "sha256:284815fdb5d8fa8e99db965a7621b35b4363223a73c25b2820fc9a936680b35b",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 66,
+            "byteStart": 11831,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L356",
+            "lineEnd": 356,
+            "lineStart": 356,
+            "snippetSha256": "sha256:0649204a172288fb5f0d96ea3ff80ed6dfe7518b9952cd7d4256dad65d08811d",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "valueSource": "0xde86dd5f33a5b2bd22cfbe7752609f5086a946f705768f7e2e6cb501157a41c4",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_POINTER_ROYALTY_RESOLVER",
+          "natspec": "",
+          "range": {
+            "byteLength": 127,
+            "byteStart": 11903,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L357-L358",
+            "lineEnd": 358,
+            "lineStart": 357,
+            "snippetSha256": "sha256:4f2221561e2218e99325bddaac06ce46a88783627386c9fc703f22e32e06c106",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 66,
+            "byteStart": 11964,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L358",
+            "lineEnd": 358,
+            "lineStart": 358,
+            "snippetSha256": "sha256:781fc196bc38a3492a678ce6a0a7d0591375e9cdb894694f6532ff8ad54a429c",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "valueSource": "0xafcd60ac064e6f5b3428ca05e721b02c16a658af3989d079e29e38df5fab9c91",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_GGP_ROYALTY_RESOLVER_GAS_LIMIT",
+          "natspec": "",
+          "range": {
+            "byteLength": 133,
+            "byteStart": 12037,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L360-L361",
+            "lineEnd": 361,
+            "lineStart": 360,
+            "snippetSha256": "sha256:6a6620238333d2d69d7758a3c18a5ec7e72dc94cf1bf41a8e44802e7d13e8709",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 66,
+            "byteStart": 12104,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L361",
+            "lineEnd": 361,
+            "lineStart": 361,
+            "snippetSha256": "sha256:3221008d69974b6f93f8a669bbb6d7774af36fa8709d0a10317105498383d0f2",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "valueSource": "0x9bae92ab1dd0c5535c65125ea4ee7cff3d55fc31fc2555096c2b5eabceb5bcda",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_GGP_ROYALTY_RETURN_GAS_BUFFER",
+          "natspec": "",
+          "range": {
+            "byteLength": 132,
+            "byteStart": 12176,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L362-L363",
+            "lineEnd": 363,
+            "lineStart": 362,
+            "snippetSha256": "sha256:83e3c7ab71afe90b4e8482b24ce19d7e3b7d2a1d3b0e4295098ff869a153114f",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 66,
+            "byteStart": 12242,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L363",
+            "lineEnd": 363,
+            "lineStart": 363,
+            "snippetSha256": "sha256:8435914da5fe7eaba968c5c565b5ba493b8759a5e8d2c79bcc5521c83a639e08",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "valueSource": "0x0af6f5a1a5059e398191fa0af185be12fee6d609933826603244c7f247793be7",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_GGP_METADATA_ROUTER_GAS_LIMIT",
+          "natspec": "",
+          "range": {
+            "byteLength": 132,
+            "byteStart": 12314,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L364-L365",
+            "lineEnd": 365,
+            "lineStart": 364,
+            "snippetSha256": "sha256:f3beb33b8f8143ea0d71f54401c6267b70e8ef6719ed8db38498569fa84a540c",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 66,
+            "byteStart": 12380,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L365",
+            "lineEnd": 365,
+            "lineStart": 365,
+            "snippetSha256": "sha256:a038e708fdef79ba788b3cb4decd47028c7a2c380c41d71496bbd0f360991e40",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "valueSource": "0x02ad62929eaa837b9d1704745193125454925fd11a6bf273d7bb1faa23272e93",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_GGP_ENTROPY_REGISTRATION_GAS_LIMIT",
+          "natspec": "",
+          "range": {
+            "byteLength": 137,
+            "byteStart": 12452,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L366-L367",
+            "lineEnd": 367,
+            "lineStart": 366,
+            "snippetSha256": "sha256:460312c81b983219b7452fac34db81492eb48fb875dc85de757e5ed81c752eef",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 66,
+            "byteStart": 12523,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L367",
+            "lineEnd": 367,
+            "lineStart": 367,
+            "snippetSha256": "sha256:8a3c125f850a646add865993481448c64f8a17408a38c34f2396bb2be6257a12",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "valueSource": "0x51125071e3dfb233a2711689d4cc377bbda429f1356ebc09a58d763548541e17",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_COLLECTION_SCOPE_DOMAIN",
+          "natspec": "",
+          "range": {
+            "byteLength": 126,
+            "byteStart": 12596,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L369-L370",
+            "lineEnd": 370,
+            "lineStart": 369,
+            "snippetSha256": "sha256:6eb2cd5c1b15d272f5ce5d796b5655156b87a0e5a1141aa18aff8d60610b217f",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 66,
+            "byteStart": 12656,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L370",
+            "lineEnd": 370,
+            "lineStart": 370,
+            "snippetSha256": "sha256:f684d4a6a2d6b710ac95b0963bf82a2698064421e508ea9a71d0ef8b3dbb6f98",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "valueSource": "0x3a882a22dad9915c9193738f63216234155080ed4c4fc9bfae446e90f1df6e16",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_COLLECTION_STATE_DOMAIN",
+          "natspec": "",
+          "range": {
+            "byteLength": 126,
+            "byteStart": 12728,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L371-L372",
+            "lineEnd": 372,
+            "lineStart": 371,
+            "snippetSha256": "sha256:88afcc9b3016fd4eb5f533d1b44cb72d8514405de250a42fcae352ecc23bd2ed",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 66,
+            "byteStart": 12788,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L372",
+            "lineEnd": 372,
+            "lineStart": 372,
+            "snippetSha256": "sha256:8b203dfe3b7c5ef9e91cf8564e69f1123dacb2ffb570b822026b0908ec87f477",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "valueSource": "0x854c83f82b7677e58c61a2482a7a430a8318d765d99a95d3fbce5c84be6cc2b5",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_REGISTRY_MANIFEST",
+          "natspec": "",
+          "range": {
+            "byteLength": 83,
+            "byteStart": 12861,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L374",
+            "lineEnd": 374,
+            "lineStart": 374,
+            "snippetSha256": "sha256:5349bc7fb53451f8c7fd1870e36ab0c84e21b9664a9a1a76192717d766f8e09a",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 37,
+            "byteStart": 12907,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L374",
+            "lineEnd": 374,
+            "lineStart": 374,
+            "snippetSha256": "sha256:d67b168615dac8a98f8c3fa50314be09568f4ece8aafcb1e08d1ffc7a3c54c71",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "valueSource": "keccak256(\"target.registry.manifest\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_DEPLOYMENT_MANIFEST",
+          "natspec": "",
+          "range": {
+            "byteLength": 87,
+            "byteStart": 12950,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L375",
+            "lineEnd": 375,
+            "lineStart": 375,
+            "snippetSha256": "sha256:66adc321069cc302b5d0518ec2fefaa68cdee5f48467ae5d77e2855484e49563",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 39,
+            "byteStart": 12998,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L375",
+            "lineEnd": 375,
+            "lineStart": 375,
+            "snippetSha256": "sha256:6446333f93a099b79a889f5b0e4f14879e0c16276db3dc4bb0257ddb87fed39e",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "valueSource": "keccak256(\"target.deployment.manifest\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_MODULE_MANIFEST",
+          "natspec": "",
+          "range": {
+            "byteLength": 79,
+            "byteStart": 13043,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L376",
+            "lineEnd": 376,
+            "lineStart": 376,
+            "snippetSha256": "sha256:7009a1acebf8dd0524dda167d1517b239c03db279972451e7da1df292136ac16",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 35,
+            "byteStart": 13087,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L376",
+            "lineEnd": 376,
+            "lineStart": 376,
+            "snippetSha256": "sha256:b3c31b737cec422b975a149931c9604640fc3776661aeb7864bf6fcd76e43249",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "valueSource": "keccak256(\"target.module.manifest\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_TOKEN_ROUTE_HASH",
+          "natspec": "",
+          "range": {
+            "byteLength": 87,
+            "byteStart": 13128,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L377",
+            "lineEnd": 377,
+            "lineStart": 377,
+            "snippetSha256": "sha256:aa395248d332067f96bbccbea9c9261e8bf702e5103028f5f1582981f1f6f194",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 42,
+            "byteStart": 13173,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L377",
+            "lineEnd": 377,
+            "lineStart": 377,
+            "snippetSha256": "sha256:6c67c96032955492dad2cd2f92b0f1e710a4bd4e4ea8257937af6e838acbe9da",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "valueSource": "keccak256(\"ipfs://permanent-target/token\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_CONTRACT_ROUTE_HASH",
+          "natspec": "",
+          "range": {
+            "byteLength": 93,
+            "byteStart": 13221,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L378",
+            "lineEnd": 378,
+            "lineStart": 378,
+            "snippetSha256": "sha256:247bcdbfe5bf966e0999a6c0fef453f85c17296292cf17516937a382bb203c1f",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 45,
+            "byteStart": 13269,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L378",
+            "lineEnd": 378,
+            "lineStart": 378,
+            "snippetSha256": "sha256:3cc5891d262f87e08940080ab07a5cfa619577e0250d14f33a6d88bd9041b18c",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "valueSource": "keccak256(\"ipfs://permanent-target/contract\")",
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_executor",
+          "natspec": "",
+          "range": {
+            "byteLength": 51,
+            "byteStart": 13321,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L380",
+            "lineEnd": 380,
+            "lineStart": 380,
+            "snippetSha256": "sha256:055b9256f082cd2f18fc9dd080c5eb5a44e9fe70f9219dc7526effacf48ebf56",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": null,
+          "type": "PermanentTargetGovernanceExecutor",
+          "typeString": "contract PermanentTargetGovernanceExecutor",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_registry",
+          "natspec": "",
+          "range": {
+            "byteLength": 47,
+            "byteStart": 13378,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L381",
+            "lineEnd": 381,
+            "lineStart": 381,
+            "snippetSha256": "sha256:9f7793b342cc3ae0ba141da9a83c349649d5c2b838e545831ca37b060e94cb5e",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": null,
+          "type": "PermanentTargetModuleRegistry",
+          "typeString": "contract PermanentTargetModuleRegistry",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_core",
+          "natspec": "",
+          "range": {
+            "byteLength": 40,
+            "byteStart": 13431,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L382",
+            "lineEnd": 382,
+            "lineStart": 382,
+            "snippetSha256": "sha256:c306d70ac700822a9b0253f12ad8096f5e4a768f0e1c7fb835b9a2506507b8b3",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": null,
+          "type": "PermanentTargetCoreHarness",
+          "typeString": "contract PermanentTargetCoreHarness",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_manager",
+          "natspec": "",
+          "range": {
+            "byteLength": 43,
+            "byteStart": 13477,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L383",
+            "lineEnd": 383,
+            "lineStart": 383,
+            "snippetSha256": "sha256:54399e5f245c3f5a64eee9ac2f565e5a57a317fd8353ba33e7892b4fe8f6c213",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": null,
+          "type": "PermanentTargetMintManager",
+          "typeString": "contract PermanentTargetMintManager",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_entropy",
+          "natspec": "",
+          "range": {
+            "byteLength": 50,
+            "byteStart": 13526,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L384",
+            "lineEnd": 384,
+            "lineStart": 384,
+            "snippetSha256": "sha256:ad4b62394b63958111b46bd2bc2db1d7f236676643964c544132cbe4d38777dc",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": null,
+          "type": "PermanentTargetEntropyCoordinator",
+          "typeString": "contract PermanentTargetEntropyCoordinator",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_router",
+          "natspec": "",
+          "range": {
+            "byteLength": 45,
+            "byteStart": 13582,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L385",
+            "lineEnd": 385,
+            "lineStart": 385,
+            "snippetSha256": "sha256:5ceb0f60becd940f2507ada18497f70a894f298635e9776d0af9b76b230cf62d",
+            "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+          },
+          "selector": null,
+          "type": "PermanentTargetMetadataRouter",
+          "typeString": "contract PermanentTargetMetadataRouter",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest",
+    "inheritance": [
+      {
+        "definitionId": "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase",
+        "name": "CharacterizationTestBase"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1Db3JlUGVybWFuZW50VGFyZ2V0LnQuc29sOlN0cmVhbUNvcmVQZXJtYW5lbnRUYXJnZXRUZXN0",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest",
+      "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamCorePermanentTargetTest",
+    "natspec": "",
+    "range": {
+      "byteLength": 23680,
+      "byteStart": 11169,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamCorePermanentTarget.t.sol#L346-L879",
+      "lineEnd": 879,
+      "lineStart": 346,
+      "snippetSha256": "sha256:68a4ddd1284f99d72d540fb4f04184dca36c1aeb337602d0b0f78e7a5c393ff3",
+      "sourceSha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamCorePermanentTarget.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-09-09.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 15
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 14
+    },
+    "totalCount": 15
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest#function:0x0a9254e4",
+      "definitionId": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest#function:0x1474e2b7",
+      "definitionId": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest#function:0x221ea166",
+      "definitionId": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest#function:0x3c189eac",
+      "definitionId": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest#function:0x584aed5d",
+      "definitionId": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest#function:0x5f4c3cc8",
+      "definitionId": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest#function:0x65a29053",
+      "definitionId": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest#function:0x73827a24",
+      "definitionId": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest#function:0x8c20c2dc",
+      "definitionId": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest#function:0xa19b71b0",
+      "definitionId": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest#function:0xa5080e47",
+      "definitionId": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest#function:0xc2046204",
+      "definitionId": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest#function:0xd964d96d",
+      "definitionId": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest#function:0xf7b84dc0",
+      "definitionId": "test/StreamCorePermanentTarget.t.sol:StreamCorePermanentTargetTest",
+      "severity": "advisory"
+    }
+  ]
+}

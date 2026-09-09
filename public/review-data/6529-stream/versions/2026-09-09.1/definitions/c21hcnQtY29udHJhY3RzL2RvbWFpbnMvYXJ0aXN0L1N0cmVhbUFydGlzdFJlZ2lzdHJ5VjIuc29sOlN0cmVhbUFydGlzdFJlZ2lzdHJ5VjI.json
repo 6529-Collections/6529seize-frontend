@@ -1,0 +1,1559 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol:IStreamArtistRegistryV2#error:0xf8958cff",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol:IStreamArtistRegistryV2",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "enum IStreamArtistRegistryV2.ArtistExternalProviderV2",
+              "name": "provider",
+              "type": "uint8"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "expectedBindingHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "internalType": "bytes32",
+              "name": "suppliedBindingHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "ArtistRegistryExternalProviderBindingMismatch",
+          "selector": "0xf8958cff",
+          "signature": "ArtistRegistryExternalProviderBindingMismatch(uint8,bytes32,bytes32)"
+        },
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol:IStreamArtistRegistryV2#error:0x96e28507",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol:IStreamArtistRegistryV2",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "pinClass",
+              "type": "uint8"
+            },
+            {
+              "index": 1,
+              "internalType": "uint8",
+              "name": "pinIndex",
+              "type": "uint8"
+            }
+          ],
+          "name": "ArtistRegistryInvalidPin",
+          "selector": "0x96e28507",
+          "signature": "ArtistRegistryInvalidPin(uint8,uint8)"
+        },
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol:IStreamArtistRegistryV2#error:0x209009a3",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol:IStreamArtistRegistryV2",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "recipeSetHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "ArtistRegistryInvalidRecipeSetHash",
+          "selector": "0x209009a3",
+          "signature": "ArtistRegistryInvalidRecipeSetHash(bytes32)"
+        },
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol:IStreamArtistRegistryV2#error:0x0ea7e59b",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol:IStreamArtistRegistryV2",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "expectedAddress",
+              "type": "address"
+            }
+          ],
+          "name": "ArtistRegistryPinAddressAlias",
+          "selector": "0x0ea7e59b",
+          "signature": "ArtistRegistryPinAddressAlias(address)"
+        }
+      ],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol:StreamArtistRegistryV2#function:0x7309443f",
+          "declaringDefinitionId": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol:StreamArtistRegistryV2",
+          "inherited": false,
+          "inputs": [],
+          "name": "artistArchivePinV2",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "struct IStreamArtistRegistryV2.ArtistDirectoryPinV2",
+              "name": "",
+              "type": "(address,bytes32,bytes4,bytes32,bytes32,bytes32)"
+            }
+          ],
+          "selector": "0x7309443f",
+          "signature": "artistArchivePinV2()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol:StreamArtistRegistryV2#function:0xa8e9a0c4",
+          "declaringDefinitionId": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol:StreamArtistRegistryV2",
+          "inherited": false,
+          "inputs": [],
+          "name": "artistCoordinatorPinV2",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "struct IStreamArtistRegistryV2.ArtistDirectoryPinV2",
+              "name": "",
+              "type": "(address,bytes32,bytes4,bytes32,bytes32,bytes32)"
+            }
+          ],
+          "selector": "0xa8e9a0c4",
+          "signature": "artistCoordinatorPinV2()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol:StreamArtistRegistryV2#function:0xb3ee9a4f",
+          "declaringDefinitionId": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol:StreamArtistRegistryV2",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "enum IStreamArtistRegistryV2.ArtistExternalProviderV2",
+              "name": "provider",
+              "type": "uint8"
+            }
+          ],
+          "name": "artistExternalProviderPinV2",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "struct IStreamArtistRegistryV2.ArtistDirectoryPinV2",
+              "name": "",
+              "type": "(address,bytes32,bytes4,bytes32,bytes32,bytes32)"
+            }
+          ],
+          "selector": "0xb3ee9a4f",
+          "signature": "artistExternalProviderPinV2(uint8)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol:StreamArtistRegistryV2#function:0x624085e5",
+          "declaringDefinitionId": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol:StreamArtistRegistryV2",
+          "inherited": false,
+          "inputs": [],
+          "name": "artistRecipeSetHashV2",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x624085e5",
+          "signature": "artistRecipeSetHashV2()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol:StreamArtistRegistryV2#function:0x0b9a2e95",
+          "declaringDefinitionId": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol:StreamArtistRegistryV2",
+          "inherited": false,
+          "inputs": [],
+          "name": "artistRegistryBindingHashV2",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x0b9a2e95",
+          "signature": "artistRegistryBindingHashV2()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol:StreamArtistRegistryV2#function:0xef830742",
+          "declaringDefinitionId": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol:StreamArtistRegistryV2",
+          "inherited": false,
+          "inputs": [],
+          "name": "artistRegistryMarkerV2",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0xef830742",
+          "signature": "artistRegistryMarkerV2()",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol:StreamArtistRegistryV2#function:0x7f86b1a4",
+          "declaringDefinitionId": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol:StreamArtistRegistryV2",
+          "inherited": false,
+          "inputs": [],
+          "name": "artistRegistrySchemaHashV2",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x7f86b1a4",
+          "signature": "artistRegistrySchemaHashV2()",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol:StreamArtistRegistryV2#function:0xbc02750a",
+          "declaringDefinitionId": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol:StreamArtistRegistryV2",
+          "inherited": false,
+          "inputs": [],
+          "name": "artistRegistrySchemaV2",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint16",
+              "name": "",
+              "type": "uint16"
+            }
+          ],
+          "selector": "0xbc02750a",
+          "signature": "artistRegistrySchemaV2()",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol:StreamArtistRegistryV2#function:0x7b12b1da",
+          "declaringDefinitionId": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol:StreamArtistRegistryV2",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "enum IStreamArtistRegistryV2.ArtistSemanticDomainV2",
+              "name": "domain",
+              "type": "uint8"
+            }
+          ],
+          "name": "artistSemanticOwnerPinV2",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "struct IStreamArtistRegistryV2.ArtistDirectoryPinV2",
+              "name": "",
+              "type": "(address,bytes32,bytes4,bytes32,bytes32,bytes32)"
+            }
+          ],
+          "selector": "0x7b12b1da",
+          "signature": "artistSemanticOwnerPinV2(uint8)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol:StreamArtistRegistryV2#function:0x01ffc9a7",
+          "declaringDefinitionId": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol:StreamArtistRegistryV2",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "name": "supportsInterface",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x01ffc9a7",
+          "signature": "supportsInterface(bytes4)",
+          "stateMutability": "pure"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "production_release_contract",
+    "classificationReason": "Listed in release-artifacts/contracts.json production_contracts.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": null,
+          "displaySignature": "constructor(ArtistRegistryConfigurationV2)",
+          "functionKind": "constructor",
+          "id": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol:StreamArtistRegistryV2#function:constructor(ArtistRegistryConfigurationV2)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "configuration",
+              "storageLocation": "memory",
+              "type": "ArtistRegistryConfigurationV2"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2RvbWFpbnMvYXJ0aXN0L1N0cmVhbUFydGlzdFJlZ2lzdHJ5VjIuc29sOlN0cmVhbUFydGlzdFJlZ2lzdHJ5VjIjZnVuY3Rpb246Y29uc3RydWN0b3IoQXJ0aXN0UmVnaXN0cnlDb25maWd1cmF0aW9uVjIp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "constructor",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2904,
+            "byteStart": 1937,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/artist/StreamArtistRegistryV2.sol#L35-L93",
+            "lineEnd": 93,
+            "lineStart": 35,
+            "snippetSha256": "sha256:c031f81f694864e6b91d0c8ee5feba5efb9db02a9fbb86d4b4350c3a8f335c4b",
+            "sourceSha256": "sha256:038560c0a8811b7ed4a816d011813d9c529e16091bd646f153c63390578a2430"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "supportsInterface(bytes4)",
+          "displaySignature": "supportsInterface(bytes4)",
+          "functionKind": "function",
+          "id": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol:StreamArtistRegistryV2#function:0x01ffc9a7",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2RvbWFpbnMvYXJ0aXN0L1N0cmVhbUFydGlzdFJlZ2lzdHJ5VjIuc29sOlN0cmVhbUFydGlzdFJlZ2lzdHJ5VjIjZnVuY3Rpb246MHgwMWZmYzlhNw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "supportsInterface",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 212,
+            "byteStart": 4847,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/artist/StreamArtistRegistryV2.sol#L95-L98",
+            "lineEnd": 98,
+            "lineStart": 95,
+            "snippetSha256": "sha256:7564f47d216df760198ca6dfdace3248346e2ef5221466f30d93790c37206032",
+            "sourceSha256": "sha256:038560c0a8811b7ed4a816d011813d9c529e16091bd646f153c63390578a2430"
+          },
+          "selector": "0x01ffc9a7",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "artistRegistryMarkerV2()",
+          "displaySignature": "artistRegistryMarkerV2()",
+          "functionKind": "function",
+          "id": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol:StreamArtistRegistryV2#function:0xef830742",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL2RvbWFpbnMvYXJ0aXN0L1N0cmVhbUFydGlzdFJlZ2lzdHJ5VjIuc29sOlN0cmVhbUFydGlzdFJlZ2lzdHJ5VjIjZnVuY3Rpb246MHhlZjgzMDc0Mg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "artistRegistryMarkerV2",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 97,
+            "byteStart": 5065,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/artist/StreamArtistRegistryV2.sol#L100-L102",
+            "lineEnd": 102,
+            "lineStart": 100,
+            "snippetSha256": "sha256:c7656b1a2120178d6381173931da39000626c234cb470052fb6162beea7a96f6",
+            "sourceSha256": "sha256:038560c0a8811b7ed4a816d011813d9c529e16091bd646f153c63390578a2430"
+          },
+          "selector": "0xef830742",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "artistRegistrySchemaV2()",
+          "displaySignature": "artistRegistrySchemaV2()",
+          "functionKind": "function",
+          "id": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol:StreamArtistRegistryV2#function:0xbc02750a",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL2RvbWFpbnMvYXJ0aXN0L1N0cmVhbUFydGlzdFJlZ2lzdHJ5VjIuc29sOlN0cmVhbUFydGlzdFJlZ2lzdHJ5VjIjZnVuY3Rpb246MHhiYzAyNzUwYQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "artistRegistrySchemaV2",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint16"
+            }
+          ],
+          "range": {
+            "byteLength": 104,
+            "byteStart": 5168,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/artist/StreamArtistRegistryV2.sol#L104-L106",
+            "lineEnd": 106,
+            "lineStart": 104,
+            "snippetSha256": "sha256:b9764c3a32efe4a5db37ada8d9ebcd4c9de0adc6d4328c7ebcbeb02f2f3585d1",
+            "sourceSha256": "sha256:038560c0a8811b7ed4a816d011813d9c529e16091bd646f153c63390578a2430"
+          },
+          "selector": "0xbc02750a",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "artistRegistrySchemaHashV2()",
+          "displaySignature": "artistRegistrySchemaHashV2()",
+          "functionKind": "function",
+          "id": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol:StreamArtistRegistryV2#function:0x7f86b1a4",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL2RvbWFpbnMvYXJ0aXN0L1N0cmVhbUFydGlzdFJlZ2lzdHJ5VjIuc29sOlN0cmVhbUFydGlzdFJlZ2lzdHJ5VjIjZnVuY3Rpb246MHg3Zjg2YjFhNA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "artistRegistrySchemaHashV2",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 106,
+            "byteStart": 5278,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/artist/StreamArtistRegistryV2.sol#L108-L110",
+            "lineEnd": 110,
+            "lineStart": 108,
+            "snippetSha256": "sha256:e19a7ff4b1642774b542bb8f27347491b1fd96ef52ddbed98b7804bb2c76342b",
+            "sourceSha256": "sha256:038560c0a8811b7ed4a816d011813d9c529e16091bd646f153c63390578a2430"
+          },
+          "selector": "0x7f86b1a4",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "artistRecipeSetHashV2()",
+          "displaySignature": "artistRecipeSetHashV2()",
+          "functionKind": "function",
+          "id": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol:StreamArtistRegistryV2#function:0x624085e5",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL2RvbWFpbnMvYXJ0aXN0L1N0cmVhbUFydGlzdFJlZ2lzdHJ5VjIuc29sOlN0cmVhbUFydGlzdFJlZ2lzdHJ5VjIjZnVuY3Rpb246MHg2MjQwODVlNQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "artistRecipeSetHashV2",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 103,
+            "byteStart": 5390,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/artist/StreamArtistRegistryV2.sol#L112-L114",
+            "lineEnd": 114,
+            "lineStart": 112,
+            "snippetSha256": "sha256:ebe0d273d3e2cf96074920e9d7073a4f84bb412e2886b256a729f576c8176975",
+            "sourceSha256": "sha256:038560c0a8811b7ed4a816d011813d9c529e16091bd646f153c63390578a2430"
+          },
+          "selector": "0x624085e5",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "artistRegistryBindingHashV2()",
+          "displaySignature": "artistRegistryBindingHashV2()",
+          "functionKind": "function",
+          "id": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol:StreamArtistRegistryV2#function:0x0b9a2e95",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL2RvbWFpbnMvYXJ0aXN0L1N0cmVhbUFydGlzdFJlZ2lzdHJ5VjIuc29sOlN0cmVhbUFydGlzdFJlZ2lzdHJ5VjIjZnVuY3Rpb246MHgwYjlhMmU5NQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "artistRegistryBindingHashV2",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 115,
+            "byteStart": 5499,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/artist/StreamArtistRegistryV2.sol#L116-L118",
+            "lineEnd": 118,
+            "lineStart": 116,
+            "snippetSha256": "sha256:bebf635ecb268ac8f1fcfdc3d33ddef2fccf366172a4590d2c28fc64faf1fe4d",
+            "sourceSha256": "sha256:038560c0a8811b7ed4a816d011813d9c529e16091bd646f153c63390578a2430"
+          },
+          "selector": "0x0b9a2e95",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "artistCoordinatorPinV2()",
+          "displaySignature": "artistCoordinatorPinV2()",
+          "functionKind": "function",
+          "id": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol:StreamArtistRegistryV2#function:0xa8e9a0c4",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL2RvbWFpbnMvYXJ0aXN0L1N0cmVhbUFydGlzdFJlZ2lzdHJ5VjIuc29sOlN0cmVhbUFydGlzdFJlZ2lzdHJ5VjIjZnVuY3Rpb246MHhhOGU5YTBjNA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "artistCoordinatorPinV2",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "ArtistDirectoryPinV2"
+            }
+          ],
+          "range": {
+            "byteLength": 131,
+            "byteStart": 5620,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/artist/StreamArtistRegistryV2.sol#L120-L122",
+            "lineEnd": 122,
+            "lineStart": 120,
+            "snippetSha256": "sha256:a9ef36af04c47f94259facd1243b47e8019834d73ad5b617118e1cd28b5f56c6",
+            "sourceSha256": "sha256:038560c0a8811b7ed4a816d011813d9c529e16091bd646f153c63390578a2430"
+          },
+          "selector": "0xa8e9a0c4",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "artistArchivePinV2()",
+          "displaySignature": "artistArchivePinV2()",
+          "functionKind": "function",
+          "id": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol:StreamArtistRegistryV2#function:0x7309443f",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL2RvbWFpbnMvYXJ0aXN0L1N0cmVhbUFydGlzdFJlZ2lzdHJ5VjIuc29sOlN0cmVhbUFydGlzdFJlZ2lzdHJ5VjIjZnVuY3Rpb246MHg3MzA5NDQzZg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "artistArchivePinV2",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "ArtistDirectoryPinV2"
+            }
+          ],
+          "range": {
+            "byteLength": 114,
+            "byteStart": 5757,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/artist/StreamArtistRegistryV2.sol#L124-L126",
+            "lineEnd": 126,
+            "lineStart": 124,
+            "snippetSha256": "sha256:57576fab074fce01e2b894d2cfbeabe68fbd49f7cafaa6d3d66e4204221bf66e",
+            "sourceSha256": "sha256:038560c0a8811b7ed4a816d011813d9c529e16091bd646f153c63390578a2430"
+          },
+          "selector": "0x7309443f",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "artistSemanticOwnerPinV2(uint8)",
+          "displaySignature": "artistSemanticOwnerPinV2(ArtistSemanticDomainV2)",
+          "functionKind": "function",
+          "id": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol:StreamArtistRegistryV2#function:0x7b12b1da",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "domain",
+              "type": "ArtistSemanticDomainV2"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2RvbWFpbnMvYXJ0aXN0L1N0cmVhbUFydGlzdFJlZ2lzdHJ5VjIuc29sOlN0cmVhbUFydGlzdFJlZ2lzdHJ5VjIjZnVuY3Rpb246MHg3YjEyYjFkYQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "artistSemanticOwnerPinV2",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "ArtistDirectoryPinV2"
+            }
+          ],
+          "range": {
+            "byteLength": 199,
+            "byteStart": 5877,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/artist/StreamArtistRegistryV2.sol#L128-L134",
+            "lineEnd": 134,
+            "lineStart": 128,
+            "snippetSha256": "sha256:e18e6b93ba2c2e4bbe693526f6406d132cc554d3c225f6b58d82fa00f2e69556",
+            "sourceSha256": "sha256:038560c0a8811b7ed4a816d011813d9c529e16091bd646f153c63390578a2430"
+          },
+          "selector": "0x7b12b1da",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "artistExternalProviderPinV2(uint8)",
+          "displaySignature": "artistExternalProviderPinV2(ArtistExternalProviderV2)",
+          "functionKind": "function",
+          "id": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol:StreamArtistRegistryV2#function:0xb3ee9a4f",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "provider",
+              "type": "ArtistExternalProviderV2"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2RvbWFpbnMvYXJ0aXN0L1N0cmVhbUFydGlzdFJlZ2lzdHJ5VjIuc29sOlN0cmVhbUFydGlzdFJlZ2lzdHJ5VjIjZnVuY3Rpb246MHhiM2VlOWE0Zg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "artistExternalProviderPinV2",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "ArtistDirectoryPinV2"
+            }
+          ],
+          "range": {
+            "byteLength": 211,
+            "byteStart": 6082,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/artist/StreamArtistRegistryV2.sol#L136-L142",
+            "lineEnd": 142,
+            "lineStart": 136,
+            "snippetSha256": "sha256:7e5fc0aaa8241884cd7c1651ae18e335f20d8f67c58a2b279c09cfdf74175abc",
+            "sourceSha256": "sha256:038560c0a8811b7ed4a816d011813d9c529e16091bd646f153c63390578a2430"
+          },
+          "selector": "0xb3ee9a4f",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_validatePin(ArtistDirectoryPinV2,uint8,uint8)",
+          "functionKind": "function",
+          "id": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol:StreamArtistRegistryV2#function:_validatePin(ArtistDirectoryPinV2,uint8,uint8)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "pin",
+              "storageLocation": "memory",
+              "type": "ArtistDirectoryPinV2"
+            },
+            {
+              "index": 1,
+              "name": "pinClass",
+              "type": "uint8"
+            },
+            {
+              "index": 2,
+              "name": "pinIndex",
+              "type": "uint8"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2RvbWFpbnMvYXJ0aXN0L1N0cmVhbUFydGlzdFJlZ2lzdHJ5VjIuc29sOlN0cmVhbUFydGlzdFJlZ2lzdHJ5VjIjZnVuY3Rpb246X3ZhbGlkYXRlUGluKEFydGlzdERpcmVjdG9yeVBpblYyLHVpbnQ4LHVpbnQ4KQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_validatePin",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 659,
+            "byteStart": 6299,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/artist/StreamArtistRegistryV2.sol#L144-L158",
+            "lineEnd": 158,
+            "lineStart": 144,
+            "snippetSha256": "sha256:c4e9fca8d41f1678ba54d144c0346749076b4444c32f4cd5d26aaf9efba52b2a",
+            "sourceSha256": "sha256:038560c0a8811b7ed4a816d011813d9c529e16091bd646f153c63390578a2430"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_requireUniqueAddress(address[],uint256,address)",
+          "functionKind": "function",
+          "id": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol:StreamArtistRegistryV2#function:_requireUniqueAddress(address[],uint256,address)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "seenAddresses",
+              "storageLocation": "memory",
+              "type": "address[]"
+            },
+            {
+              "index": 1,
+              "name": "seenCount",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "expectedAddress",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2RvbWFpbnMvYXJ0aXN0L1N0cmVhbUFydGlzdFJlZ2lzdHJ5VjIuc29sOlN0cmVhbUFydGlzdFJlZ2lzdHJ5VjIjZnVuY3Rpb246X3JlcXVpcmVVbmlxdWVBZGRyZXNzKGFkZHJlc3NbXSx1aW50MjU2LGFkZHJlc3Mp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_requireUniqueAddress",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 582,
+            "byteStart": 6964,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/artist/StreamArtistRegistryV2.sol#L160-L175",
+            "lineEnd": 175,
+            "lineStart": 160,
+            "snippetSha256": "sha256:a46c0b508ea02686e4da5400e2a124d2ec189a4f5fb71b840b34a68658d57a1b",
+            "sourceSha256": "sha256:038560c0a8811b7ed4a816d011813d9c529e16091bd646f153c63390578a2430"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_externalProviderBindingHash(ArtistExternalProviderV2,ArtistDirectoryPinV2)",
+          "functionKind": "function",
+          "id": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol:StreamArtistRegistryV2#function:_externalProviderBindingHash(ArtistExternalProviderV2,ArtistDirectoryPinV2)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "provider",
+              "type": "ArtistExternalProviderV2"
+            },
+            {
+              "index": 1,
+              "name": "pin",
+              "storageLocation": "memory",
+              "type": "ArtistDirectoryPinV2"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2RvbWFpbnMvYXJ0aXN0L1N0cmVhbUFydGlzdFJlZ2lzdHJ5VjIuc29sOlN0cmVhbUFydGlzdFJlZ2lzdHJ5VjIjZnVuY3Rpb246X2V4dGVybmFsUHJvdmlkZXJCaW5kaW5nSGFzaChBcnRpc3RFeHRlcm5hbFByb3ZpZGVyVjIsQXJ0aXN0RGlyZWN0b3J5UGluVjIp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_externalProviderBindingHash",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 564,
+            "byteStart": 7552,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/artist/StreamArtistRegistryV2.sol#L177-L193",
+            "lineEnd": 193,
+            "lineStart": 177,
+            "snippetSha256": "sha256:cd3a8ab6268831bd8b6c3202f6bd6eec96961e94bf4fb3566cea9af0273cf1fb",
+            "sourceSha256": "sha256:038560c0a8811b7ed4a816d011813d9c529e16091bd646f153c63390578a2430"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_providerId(ArtistExternalProviderV2)",
+          "functionKind": "function",
+          "id": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol:StreamArtistRegistryV2#function:_providerId(ArtistExternalProviderV2)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "provider",
+              "type": "ArtistExternalProviderV2"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2RvbWFpbnMvYXJ0aXN0L1N0cmVhbUFydGlzdFJlZ2lzdHJ5VjIuc29sOlN0cmVhbUFydGlzdFJlZ2lzdHJ5VjIjZnVuY3Rpb246X3Byb3ZpZGVySWQoQXJ0aXN0RXh0ZXJuYWxQcm92aWRlclYyKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_providerId",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 665,
+            "byteStart": 8122,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/artist/StreamArtistRegistryV2.sol#L195-L209",
+            "lineEnd": 209,
+            "lineStart": 195,
+            "snippetSha256": "sha256:991b9da4bda0eea055dea6e7bddfe8565002524157842744cf797a5cf72d2ff1",
+            "sourceSha256": "sha256:038560c0a8811b7ed4a816d011813d9c529e16091bd646f153c63390578a2430"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_pinHash(ArtistDirectoryPinV2)",
+          "functionKind": "function",
+          "id": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol:StreamArtistRegistryV2#function:_pinHash(ArtistDirectoryPinV2)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "pin",
+              "storageLocation": "memory",
+              "type": "ArtistDirectoryPinV2"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2RvbWFpbnMvYXJ0aXN0L1N0cmVhbUFydGlzdFJlZ2lzdHJ5VjIuc29sOlN0cmVhbUFydGlzdFJlZ2lzdHJ5VjIjZnVuY3Rpb246X3Bpbkhhc2goQXJ0aXN0RGlyZWN0b3J5UGluVjIp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_pinHash",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 407,
+            "byteStart": 8793,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/artist/StreamArtistRegistryV2.sol#L211-L222",
+            "lineEnd": 222,
+            "lineStart": 211,
+            "snippetSha256": "sha256:37ac6da30eb62f0cdd8091b6d297981d62acbd13bcd76f8a5012f03a0e68e72f",
+            "sourceSha256": "sha256:038560c0a8811b7ed4a816d011813d9c529e16091bd646f153c63390578a2430"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_storePin(ArtistDirectoryPinV2,ArtistDirectoryPinV2)",
+          "functionKind": "function",
+          "id": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol:StreamArtistRegistryV2#function:_storePin(ArtistDirectoryPinV2,ArtistDirectoryPinV2)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "target",
+              "storageLocation": "storage",
+              "type": "ArtistDirectoryPinV2"
+            },
+            {
+              "index": 1,
+              "name": "source",
+              "storageLocation": "memory",
+              "type": "ArtistDirectoryPinV2"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2RvbWFpbnMvYXJ0aXN0L1N0cmVhbUFydGlzdFJlZ2lzdHJ5VjIuc29sOlN0cmVhbUFydGlzdFJlZ2lzdHJ5VjIjZnVuY3Rpb246X3N0b3JlUGluKEFydGlzdERpcmVjdG9yeVBpblYyLEFydGlzdERpcmVjdG9yeVBpblYyKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_storePin",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 505,
+            "byteStart": 9206,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/artist/StreamArtistRegistryV2.sol#L224-L233",
+            "lineEnd": 233,
+            "lineStart": 224,
+            "snippetSha256": "sha256:5d1820f2b3627a9f4794038d65f58fe59d966c8932fd35e471f7858639a945f1",
+            "sourceSha256": "sha256:038560c0a8811b7ed4a816d011813d9c529e16091bd646f153c63390578a2430"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_MARKER",
+          "natspec": "",
+          "range": {
+            "byteLength": 77,
+            "byteStart": 566,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/artist/StreamArtistRegistryV2.sol#L11",
+            "lineEnd": 11,
+            "lineStart": 11,
+            "snippetSha256": "sha256:dbac87678139f7e4b9ef37cf6812f6b57bbadf1e785e8089cce70f67954311a2",
+            "sourceSha256": "sha256:038560c0a8811b7ed4a816d011813d9c529e16091bd646f153c63390578a2430"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 42,
+            "byteStart": 601,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/artist/StreamArtistRegistryV2.sol#L11",
+            "lineEnd": 11,
+            "lineStart": 11,
+            "snippetSha256": "sha256:ed830f3a0f6d086f9ba25d02496814321396d21c60d01e1322c8734a6ea851e7",
+            "sourceSha256": "sha256:038560c0a8811b7ed4a816d011813d9c529e16091bd646f153c63390578a2430"
+          },
+          "valueSource": "keccak256(\"6529STREAM_ARTIST_REGISTRY_V2\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_BINDING_DOMAIN",
+          "natspec": "",
+          "range": {
+            "byteLength": 93,
+            "byteStart": 649,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/artist/StreamArtistRegistryV2.sol#L12",
+            "lineEnd": 12,
+            "lineStart": 12,
+            "snippetSha256": "sha256:95b1404b583043dc9913c15f49e3b4540b93fa21acad15e22d0a0c7b50e93188",
+            "sourceSha256": "sha256:038560c0a8811b7ed4a816d011813d9c529e16091bd646f153c63390578a2430"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 50,
+            "byteStart": 692,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/artist/StreamArtistRegistryV2.sol#L12",
+            "lineEnd": 12,
+            "lineStart": 12,
+            "snippetSha256": "sha256:facdd51171f22aa1a5bb8407212d1a0be543f722588048fcc53a0e78be837fba",
+            "sourceSha256": "sha256:038560c0a8811b7ed4a816d011813d9c529e16091bd646f153c63390578a2430"
+          },
+          "valueSource": "keccak256(\"6529STREAM_ARTIST_REGISTRY_BINDING_V2\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_EXTERNAL_PROVIDER_BINDING_DOMAIN",
+          "natspec": "",
+          "range": {
+            "byteLength": 128,
+            "byteStart": 748,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/artist/StreamArtistRegistryV2.sol#L13-L14",
+            "lineEnd": 14,
+            "lineStart": 13,
+            "snippetSha256": "sha256:80cf5b1da3cb4cedd34c37462fe1a5cd321e885f44288b408a5336b65e3bd5ff",
+            "sourceSha256": "sha256:038560c0a8811b7ed4a816d011813d9c529e16091bd646f153c63390578a2430"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 59,
+            "byteStart": 817,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/artist/StreamArtistRegistryV2.sol#L14",
+            "lineEnd": 14,
+            "lineStart": 14,
+            "snippetSha256": "sha256:aaedb2c7c5b14b71f9f09ccd30b604773169a755fe4d132d27ec321a8239c2a8",
+            "sourceSha256": "sha256:038560c0a8811b7ed4a816d011813d9c529e16091bd646f153c63390578a2430"
+          },
+          "valueSource": "keccak256(\"6529STREAM_ARTIST_EXTERNAL_PROVIDER_BINDING_V2\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_SCHEMA_HASH",
+          "natspec": "",
+          "range": {
+            "byteLength": 92,
+            "byteStart": 882,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/artist/StreamArtistRegistryV2.sol#L15",
+            "lineEnd": 15,
+            "lineStart": 15,
+            "snippetSha256": "sha256:0b2ce0dbb5f886a17fd54fc8d5d6150a3b456854cb336784c8114d364e3406e4",
+            "sourceSha256": "sha256:038560c0a8811b7ed4a816d011813d9c529e16091bd646f153c63390578a2430"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 52,
+            "byteStart": 922,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/artist/StreamArtistRegistryV2.sol#L15",
+            "lineEnd": 15,
+            "lineStart": 15,
+            "snippetSha256": "sha256:f71fac54287ae5ea7dd7187b8f5f3312ad367663b8cd05933a8fb30d06b6f45a",
+            "sourceSha256": "sha256:038560c0a8811b7ed4a816d011813d9c529e16091bd646f153c63390578a2430"
+          },
+          "valueSource": "keccak256(\"6529stream.artist-registry-directory.v2\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_EMPTY_CODE_HASH",
+          "natspec": "",
+          "range": {
+            "byteLength": 57,
+            "byteStart": 980,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/artist/StreamArtistRegistryV2.sol#L16",
+            "lineEnd": 16,
+            "lineStart": 16,
+            "snippetSha256": "sha256:6268c93a9242a6210ab2ae13350fa58b4a0f295906fecc8adcf58d77c18979b5",
+            "sourceSha256": "sha256:038560c0a8811b7ed4a816d011813d9c529e16091bd646f153c63390578a2430"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 13,
+            "byteStart": 1024,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/artist/StreamArtistRegistryV2.sol#L16",
+            "lineEnd": 16,
+            "lineStart": 16,
+            "snippetSha256": "sha256:028b740eb001c589ecf8b13a1d5c860d5dd5c68c9940ea6ee14fbe5b64c6fdd9",
+            "sourceSha256": "sha256:038560c0a8811b7ed4a816d011813d9c529e16091bd646f153c63390578a2430"
+          },
+          "valueSource": "keccak256(\"\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_SCHEMA_VERSION",
+          "natspec": "",
+          "range": {
+            "byteLength": 43,
+            "byteStart": 1043,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/artist/StreamArtistRegistryV2.sol#L17",
+            "lineEnd": 17,
+            "lineStart": 17,
+            "snippetSha256": "sha256:2407a79c806b566be848ce48e8b49a28bcffdfcfb814479abf1d87f97f65e03b",
+            "sourceSha256": "sha256:038560c0a8811b7ed4a816d011813d9c529e16091bd646f153c63390578a2430"
+          },
+          "selector": null,
+          "type": "uint16",
+          "typeString": "uint16",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 1085,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/artist/StreamArtistRegistryV2.sol#L17",
+            "lineEnd": 17,
+            "lineStart": 17,
+            "snippetSha256": "sha256:d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+            "sourceSha256": "sha256:038560c0a8811b7ed4a816d011813d9c529e16091bd646f153c63390578a2430"
+          },
+          "valueSource": "2",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_COORDINATOR_PIN_CLASS",
+          "natspec": "",
+          "range": {
+            "byteLength": 49,
+            "byteStart": 1092,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/artist/StreamArtistRegistryV2.sol#L18",
+            "lineEnd": 18,
+            "lineStart": 18,
+            "snippetSha256": "sha256:f7ddad8f972020038dbb21b31ae918f768214f27a58e2d0fd3c0260b1bdf1e27",
+            "sourceSha256": "sha256:038560c0a8811b7ed4a816d011813d9c529e16091bd646f153c63390578a2430"
+          },
+          "selector": null,
+          "type": "uint8",
+          "typeString": "uint8",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 1140,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/artist/StreamArtistRegistryV2.sol#L18",
+            "lineEnd": 18,
+            "lineStart": 18,
+            "snippetSha256": "sha256:5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+            "sourceSha256": "sha256:038560c0a8811b7ed4a816d011813d9c529e16091bd646f153c63390578a2430"
+          },
+          "valueSource": "0",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_ARCHIVE_PIN_CLASS",
+          "natspec": "",
+          "range": {
+            "byteLength": 45,
+            "byteStart": 1147,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/artist/StreamArtistRegistryV2.sol#L19",
+            "lineEnd": 19,
+            "lineStart": 19,
+            "snippetSha256": "sha256:268d4b6c45f060037248059fdc7342eb5670abdc09fdc32bdb5af016a39fd524",
+            "sourceSha256": "sha256:038560c0a8811b7ed4a816d011813d9c529e16091bd646f153c63390578a2430"
+          },
+          "selector": null,
+          "type": "uint8",
+          "typeString": "uint8",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 1191,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/artist/StreamArtistRegistryV2.sol#L19",
+            "lineEnd": 19,
+            "lineStart": 19,
+            "snippetSha256": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+            "sourceSha256": "sha256:038560c0a8811b7ed4a816d011813d9c529e16091bd646f153c63390578a2430"
+          },
+          "valueSource": "1",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_OWNER_PIN_CLASS",
+          "natspec": "",
+          "range": {
+            "byteLength": 43,
+            "byteStart": 1198,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/artist/StreamArtistRegistryV2.sol#L20",
+            "lineEnd": 20,
+            "lineStart": 20,
+            "snippetSha256": "sha256:ff28d6e45d82a8787f187cb8332bde132b3a16ee3e08816ad2cc4f8c0acef786",
+            "sourceSha256": "sha256:038560c0a8811b7ed4a816d011813d9c529e16091bd646f153c63390578a2430"
+          },
+          "selector": null,
+          "type": "uint8",
+          "typeString": "uint8",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 1240,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/artist/StreamArtistRegistryV2.sol#L20",
+            "lineEnd": 20,
+            "lineStart": 20,
+            "snippetSha256": "sha256:d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+            "sourceSha256": "sha256:038560c0a8811b7ed4a816d011813d9c529e16091bd646f153c63390578a2430"
+          },
+          "valueSource": "2",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_PROVIDER_PIN_CLASS",
+          "natspec": "",
+          "range": {
+            "byteLength": 46,
+            "byteStart": 1247,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/artist/StreamArtistRegistryV2.sol#L21",
+            "lineEnd": 21,
+            "lineStart": 21,
+            "snippetSha256": "sha256:de3ff45bcb0e57a83c6f40320b05b1366498941821aed30249d785284928baa9",
+            "sourceSha256": "sha256:038560c0a8811b7ed4a816d011813d9c529e16091bd646f153c63390578a2430"
+          },
+          "selector": null,
+          "type": "uint8",
+          "typeString": "uint8",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 1292,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/artist/StreamArtistRegistryV2.sol#L21",
+            "lineEnd": 21,
+            "lineStart": 21,
+            "snippetSha256": "sha256:4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce",
+            "sourceSha256": "sha256:038560c0a8811b7ed4a816d011813d9c529e16091bd646f153c63390578a2430"
+          },
+          "valueSource": "3",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_COMPONENT_COUNT",
+          "natspec": "",
+          "range": {
+            "byteLength": 46,
+            "byteStart": 1299,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/artist/StreamArtistRegistryV2.sol#L22",
+            "lineEnd": 22,
+            "lineStart": 22,
+            "snippetSha256": "sha256:4de499db7e7b3de6772a6d73da7d62dd4b9fcb18b9ffa0241769d123c930cabc",
+            "sourceSha256": "sha256:038560c0a8811b7ed4a816d011813d9c529e16091bd646f153c63390578a2430"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 2,
+            "byteStart": 1343,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/artist/StreamArtistRegistryV2.sol#L22",
+            "lineEnd": 22,
+            "lineStart": 22,
+            "snippetSha256": "sha256:8527a891e224136950ff32ca212b45bc93f69fbb801c3b1ebedac52775f99e61",
+            "sourceSha256": "sha256:038560c0a8811b7ed4a816d011813d9c529e16091bd646f153c63390578a2430"
+          },
+          "valueSource": "14",
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_operationCoordinator",
+          "natspec": "",
+          "range": {
+            "byteLength": 50,
+            "byteStart": 1352,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/artist/StreamArtistRegistryV2.sol#L24",
+            "lineEnd": 24,
+            "lineStart": 24,
+            "snippetSha256": "sha256:62e94f88885249cc030eb0ab250ec343ae7d92907f35c0f6b50d76e8d10715d6",
+            "sourceSha256": "sha256:038560c0a8811b7ed4a816d011813d9c529e16091bd646f153c63390578a2430"
+          },
+          "selector": null,
+          "type": "ArtistDirectoryPinV2",
+          "typeString": "struct IStreamArtistRegistryV2.ArtistDirectoryPinV2",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_archive",
+          "natspec": "",
+          "range": {
+            "byteLength": 37,
+            "byteStart": 1408,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/artist/StreamArtistRegistryV2.sol#L25",
+            "lineEnd": 25,
+            "lineStart": 25,
+            "snippetSha256": "sha256:1a20c87e9eec1816a78cd8ecac79475f1cfb15d6e5437146e1161a0ad050f59b",
+            "sourceSha256": "sha256:038560c0a8811b7ed4a816d011813d9c529e16091bd646f153c63390578a2430"
+          },
+          "selector": null,
+          "type": "ArtistDirectoryPinV2",
+          "typeString": "struct IStreamArtistRegistryV2.ArtistDirectoryPinV2",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_semanticOwners",
+          "natspec": "",
+          "range": {
+            "byteLength": 47,
+            "byteStart": 1451,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/artist/StreamArtistRegistryV2.sol#L26",
+            "lineEnd": 26,
+            "lineStart": 26,
+            "snippetSha256": "sha256:873346914d98a1f51bdf1f4ee71b6001946b60f2cbe8dfb673edb057abfabca9",
+            "sourceSha256": "sha256:038560c0a8811b7ed4a816d011813d9c529e16091bd646f153c63390578a2430"
+          },
+          "selector": null,
+          "type": "ArtistDirectoryPinV2[7]",
+          "typeString": "struct IStreamArtistRegistryV2.ArtistDirectoryPinV2[7]",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_externalProviders",
+          "natspec": "",
+          "range": {
+            "byteLength": 50,
+            "byteStart": 1504,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/artist/StreamArtistRegistryV2.sol#L27",
+            "lineEnd": 27,
+            "lineStart": 27,
+            "snippetSha256": "sha256:a5c829b56a033c985061bac1b5c87718f9a4aa23eb616ac5774b3b38585f1b73",
+            "sourceSha256": "sha256:038560c0a8811b7ed4a816d011813d9c529e16091bd646f153c63390578a2430"
+          },
+          "selector": null,
+          "type": "ArtistDirectoryPinV2[5]",
+          "typeString": "struct IStreamArtistRegistryV2.ArtistDirectoryPinV2[5]",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_recipeSetHash",
+          "natspec": "",
+          "range": {
+            "byteLength": 30,
+            "byteStart": 1709,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/artist/StreamArtistRegistryV2.sol#L30",
+            "lineEnd": 30,
+            "lineStart": 30,
+            "snippetSha256": "sha256:efeb96ed8a40a78874e10dae217cb270eac7e886f2320624858b2bd73c45c0f4",
+            "sourceSha256": "sha256:038560c0a8811b7ed4a816d011813d9c529e16091bd646f153c63390578a2430"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_registryBindingHash",
+          "natspec": "",
+          "range": {
+            "byteLength": 36,
+            "byteStart": 1894,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/artist/StreamArtistRegistryV2.sol#L33",
+            "lineEnd": 33,
+            "lineStart": 33,
+            "snippetSha256": "sha256:83c1bc1b5f4358408b80a37156e7ab273fa0a90e319a29ccbf7d62bf0077ba04",
+            "sourceSha256": "sha256:038560c0a8811b7ed4a816d011813d9c529e16091bd646f153c63390578a2430"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol:StreamArtistRegistryV2",
+    "inheritance": [
+      {
+        "definitionId": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol:IStreamArtistRegistryV2",
+        "name": "IStreamArtistRegistryV2"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "c21hcnQtY29udHJhY3RzL2RvbWFpbnMvYXJ0aXN0L1N0cmVhbUFydGlzdFJlZ2lzdHJ5VjIuc29sOlN0cmVhbUFydGlzdFJlZ2lzdHJ5VjI",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "smart-contracts/domains/artist/StreamArtistRegistryV2.sol:StreamArtistRegistryV2",
+      "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol:IStreamArtistRegistryV2",
+      "smart-contracts/vendor/openzeppelin/IERC165.sol:IERC165"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": "production_contract"
+    },
+    "name": "StreamArtistRegistryV2",
+    "natspec": "@notice Constructor-fixed typed directory for the proposed artist-authority successor.\n @dev This contract performs no dependency calls and has no runtime storage-write path. Its\n      private storage is configuration only, not artist semantic state. It does not authorize,\n      route, coordinate, consume replay, own records, or answer current/latest artist state.",
+    "range": {
+      "byteLength": 9212,
+      "byteStart": 501,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/artist/StreamArtistRegistryV2.sol#L10-L234",
+      "lineEnd": 234,
+      "lineStart": 10,
+      "snippetSha256": "sha256:7c594ea4de202cbd9a7dc652a77b00744c5c2be9571d6e8ad2e8682ce62d8745",
+      "sourceSha256": "sha256:038560c0a8811b7ed4a816d011813d9c529e16091bd646f153c63390578a2430"
+    },
+    "release": {
+      "abiSha256": "sha256:71b4c0a4d63ccb53a79a687080b2b04664dad4915ed4c4c411ca7e40f8967a5d",
+      "bytecodeSha256": "sha256:db313a01f921bd3a280a52e777c74d4ef0c299dd9bf7118095dba1b89a3e70bb",
+      "deployedBytecodeSha256": "sha256:bb3787b10a23a88d0c82a280b60dac886f903ab49369cd9eac1991d344349840",
+      "deployedBytecodeSizeBytes": 1072,
+      "summary": {
+        "custom_error_count": 4,
+        "event_count": 0,
+        "function_count": 10,
+        "payable_function_count": 0,
+        "read_function_count": 10,
+        "write_function_count": 0
+      },
+      "tracked": true
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-09-09.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 11
+    },
+    "byCode": {
+      "MISSING_FUNCTION_NATSPEC": 11
+    },
+    "totalCount": 11
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol:StreamArtistRegistryV2#function:0x01ffc9a7",
+      "definitionId": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol:StreamArtistRegistryV2",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol:StreamArtistRegistryV2#function:0x0b9a2e95",
+      "definitionId": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol:StreamArtistRegistryV2",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol:StreamArtistRegistryV2#function:0x624085e5",
+      "definitionId": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol:StreamArtistRegistryV2",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol:StreamArtistRegistryV2#function:0x7309443f",
+      "definitionId": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol:StreamArtistRegistryV2",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol:StreamArtistRegistryV2#function:0x7b12b1da",
+      "definitionId": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol:StreamArtistRegistryV2",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol:StreamArtistRegistryV2#function:0x7f86b1a4",
+      "definitionId": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol:StreamArtistRegistryV2",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol:StreamArtistRegistryV2#function:0xa8e9a0c4",
+      "definitionId": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol:StreamArtistRegistryV2",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol:StreamArtistRegistryV2#function:0xb3ee9a4f",
+      "definitionId": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol:StreamArtistRegistryV2",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol:StreamArtistRegistryV2#function:0xbc02750a",
+      "definitionId": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol:StreamArtistRegistryV2",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol:StreamArtistRegistryV2#function:0xef830742",
+      "definitionId": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol:StreamArtistRegistryV2",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol:StreamArtistRegistryV2#function:constructor(ArtistRegistryConfigurationV2)",
+      "definitionId": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol:StreamArtistRegistryV2",
+      "severity": "advisory"
+    }
+  ]
+}

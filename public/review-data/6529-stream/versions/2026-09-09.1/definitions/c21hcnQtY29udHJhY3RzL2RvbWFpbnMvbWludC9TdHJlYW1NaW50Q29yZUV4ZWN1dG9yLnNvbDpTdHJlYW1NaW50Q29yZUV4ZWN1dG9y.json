@@ -1,0 +1,915 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/domains/mint/StreamMintCoreExecutor.sol:StreamMintCoreExecutor#event:MintTokenExecuted(uint16,bytes32,uint256,bytes32,uint256,bytes32,uint256,address,address,bytes32,bytes32)",
+          "declaringDefinitionId": "smart-contracts/domains/mint/StreamMintCoreExecutor.sol:StreamMintCoreExecutor",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "operationId",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "operationRoot",
+              "type": "bytes32"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "phaseId",
+              "type": "bytes32"
+            },
+            {
+              "index": 6,
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "tokenIndex",
+              "type": "uint256"
+            },
+            {
+              "index": 7,
+              "indexed": false,
+              "internalType": "address",
+              "name": "initialRecipient",
+              "type": "address"
+            },
+            {
+              "index": 8,
+              "indexed": false,
+              "internalType": "address",
+              "name": "beneficiary",
+              "type": "address"
+            },
+            {
+              "index": 9,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "tokenDataHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 10,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "mintCommitment",
+              "type": "bytes32"
+            }
+          ],
+          "name": "MintTokenExecuted",
+          "signature": "MintTokenExecuted(uint16,bytes32,uint256,bytes32,uint256,bytes32,uint256,address,address,bytes32,bytes32)",
+          "topic0": "0x9a7828375f9c6ee3bf4a1308318e0f533ec7219823ec6b8e475529a60ebcdb8f"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/domains/mint/StreamMintCoreExecutor.sol:StreamMintCoreExecutor#event:PreparedMintCompleted(uint16,bytes32,uint256,uint256,bytes32,address)",
+          "declaringDefinitionId": "smart-contracts/domains/mint/StreamMintCoreExecutor.sol:StreamMintCoreExecutor",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "operationId",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "operationRoot",
+              "type": "bytes32"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "internalType": "address",
+              "name": "initialRecipient",
+              "type": "address"
+            }
+          ],
+          "name": "PreparedMintCompleted",
+          "signature": "PreparedMintCompleted(uint16,bytes32,uint256,uint256,bytes32,address)",
+          "topic0": "0x5e1526e787b4d79b30b4a423d4b531694eb879c8814cf7aadc233fe251aa80dc"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/domains/mint/StreamMintCoreExecutor.sol:StreamMintCoreExecutor#event:PreparedMintStarted(uint16,bytes32,uint256,uint256,bytes32,uint256,address,bytes32,bytes32)",
+          "declaringDefinitionId": "smart-contracts/domains/mint/StreamMintCoreExecutor.sol:StreamMintCoreExecutor",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "operationId",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "operationRoot",
+              "type": "bytes32"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "collectionSerial",
+              "type": "uint256"
+            },
+            {
+              "index": 6,
+              "indexed": false,
+              "internalType": "address",
+              "name": "beneficiary",
+              "type": "address"
+            },
+            {
+              "index": 7,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "tokenDataHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 8,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "mintCommitment",
+              "type": "bytes32"
+            }
+          ],
+          "name": "PreparedMintStarted",
+          "signature": "PreparedMintStarted(uint16,bytes32,uint256,uint256,bytes32,uint256,address,bytes32,bytes32)",
+          "topic0": "0x1e2d8a1f460486b578f1af40819ce76be1d843363ec34b385fe331604f6817ac"
+        }
+      ],
+      "functions": []
+    },
+    "abstract": false,
+    "classification": "production_support_library",
+    "classificationReason": "First-party protocol library outside the production contract catalog.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [
+        {
+          "anonymous": false,
+          "astId": 52837,
+          "canonicalSignature": "MintTokenExecuted(uint16,bytes32,uint256,bytes32,uint256,bytes32,uint256,address,address,bytes32,bytes32)",
+          "displaySignature": "MintTokenExecuted(uint16,bytes32,uint256,bytes32,uint256,bytes32,uint256,address,address,bytes32,bytes32)",
+          "id": "smart-contracts/domains/mint/StreamMintCoreExecutor.sol:StreamMintCoreExecutor#event:MintTokenExecuted(uint16,bytes32,uint256,bytes32,uint256,bytes32,uint256,address,address,bytes32,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "operationId",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "indexed": true,
+              "name": "operationRoot",
+              "type": "bytes32"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "name": "phaseId",
+              "type": "bytes32"
+            },
+            {
+              "index": 6,
+              "indexed": false,
+              "name": "tokenIndex",
+              "type": "uint256"
+            },
+            {
+              "index": 7,
+              "indexed": false,
+              "name": "initialRecipient",
+              "type": "address"
+            },
+            {
+              "index": 8,
+              "indexed": false,
+              "name": "beneficiary",
+              "type": "address"
+            },
+            {
+              "index": 9,
+              "indexed": false,
+              "name": "tokenDataHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 10,
+              "indexed": false,
+              "name": "mintCommitment",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2RvbWFpbnMvbWludC9TdHJlYW1NaW50Q29yZUV4ZWN1dG9yLnNvbDpTdHJlYW1NaW50Q29yZUV4ZWN1dG9yI2V2ZW50Ok1pbnRUb2tlbkV4ZWN1dGVkKHVpbnQxNixieXRlczMyLHVpbnQyNTYsYnl0ZXMzMix1aW50MjU2LGJ5dGVzMzIsdWludDI1NixhZGRyZXNzLGFkZHJlc3MsYnl0ZXMzMixieXRlczMyKQ",
+          "kind": "event",
+          "name": "MintTokenExecuted",
+          "natspec": "",
+          "range": {
+            "byteLength": 378,
+            "byteStart": 385,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintCoreExecutor.sol#L10-L22",
+            "lineEnd": 22,
+            "lineStart": 10,
+            "snippetSha256": "sha256:1a901b231a46943b2f4f9bf6b4f3e8374ffd16ef9d6de64913a8931d7be94417",
+            "sourceSha256": "sha256:5c434a0c3ac2a8d03038ed467381493491b7258d5caf3aa17470c6ab5708792d"
+          },
+          "topic0": "0x9a7828375f9c6ee3bf4a1308318e0f533ec7219823ec6b8e475529a60ebcdb8f"
+        },
+        {
+          "anonymous": false,
+          "astId": 52857,
+          "canonicalSignature": "PreparedMintStarted(uint16,bytes32,uint256,uint256,bytes32,uint256,address,bytes32,bytes32)",
+          "displaySignature": "PreparedMintStarted(uint16,bytes32,uint256,uint256,bytes32,uint256,address,bytes32,bytes32)",
+          "id": "smart-contracts/domains/mint/StreamMintCoreExecutor.sol:StreamMintCoreExecutor#event:PreparedMintStarted(uint16,bytes32,uint256,uint256,bytes32,uint256,address,bytes32,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "operationId",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "indexed": true,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "name": "operationRoot",
+              "type": "bytes32"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "name": "collectionSerial",
+              "type": "uint256"
+            },
+            {
+              "index": 6,
+              "indexed": false,
+              "name": "beneficiary",
+              "type": "address"
+            },
+            {
+              "index": 7,
+              "indexed": false,
+              "name": "tokenDataHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 8,
+              "indexed": false,
+              "name": "mintCommitment",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2RvbWFpbnMvbWludC9TdHJlYW1NaW50Q29yZUV4ZWN1dG9yLnNvbDpTdHJlYW1NaW50Q29yZUV4ZWN1dG9yI2V2ZW50OlByZXBhcmVkTWludFN0YXJ0ZWQodWludDE2LGJ5dGVzMzIsdWludDI1Nix1aW50MjU2LGJ5dGVzMzIsdWludDI1NixhZGRyZXNzLGJ5dGVzMzIsYnl0ZXMzMik",
+          "kind": "event",
+          "name": "PreparedMintStarted",
+          "natspec": "",
+          "range": {
+            "byteLength": 327,
+            "byteStart": 768,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintCoreExecutor.sol#L23-L33",
+            "lineEnd": 33,
+            "lineStart": 23,
+            "snippetSha256": "sha256:6ae70a60e6e148edc2c706d6cafe162a1981a20bc98217ca74e38ec03d8fc1b7",
+            "sourceSha256": "sha256:5c434a0c3ac2a8d03038ed467381493491b7258d5caf3aa17470c6ab5708792d"
+          },
+          "topic0": "0x1e2d8a1f460486b578f1af40819ce76be1d843363ec34b385fe331604f6817ac"
+        },
+        {
+          "anonymous": false,
+          "astId": 52871,
+          "canonicalSignature": "PreparedMintCompleted(uint16,bytes32,uint256,uint256,bytes32,address)",
+          "displaySignature": "PreparedMintCompleted(uint16,bytes32,uint256,uint256,bytes32,address)",
+          "id": "smart-contracts/domains/mint/StreamMintCoreExecutor.sol:StreamMintCoreExecutor#event:PreparedMintCompleted(uint16,bytes32,uint256,uint256,bytes32,address)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "operationId",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "indexed": true,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "name": "operationRoot",
+              "type": "bytes32"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "name": "initialRecipient",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2RvbWFpbnMvbWludC9TdHJlYW1NaW50Q29yZUV4ZWN1dG9yLnNvbDpTdHJlYW1NaW50Q29yZUV4ZWN1dG9yI2V2ZW50OlByZXBhcmVkTWludENvbXBsZXRlZCh1aW50MTYsYnl0ZXMzMix1aW50MjU2LHVpbnQyNTYsYnl0ZXMzMixhZGRyZXNzKQ",
+          "kind": "event",
+          "name": "PreparedMintCompleted",
+          "natspec": "",
+          "range": {
+            "byteLength": 237,
+            "byteStart": 1100,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintCoreExecutor.sol#L34-L41",
+            "lineEnd": 41,
+            "lineStart": 34,
+            "snippetSha256": "sha256:0883f5ab1d9281e23c27d418b1a4779e8cc66f78df4f531c57949d7d58d70d88",
+            "sourceSha256": "sha256:5c434a0c3ac2a8d03038ed467381493491b7258d5caf3aa17470c6ab5708792d"
+          },
+          "topic0": "0x5e1526e787b4d79b30b4a423d4b531694eb879c8814cf7aadc233fe251aa80dc"
+        }
+      ],
+      "functions": [
+        {
+          "canonicalSignature": null,
+          "displaySignature": "executeSingleStep(IStreamCore,IStreamMintManager.MintBatch,uint256,bytes32,bytes32,uint16)",
+          "functionKind": "function",
+          "id": "smart-contracts/domains/mint/StreamMintCoreExecutor.sol:StreamMintCoreExecutor#function:0x353d9da0",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "core",
+              "type": "IStreamCore"
+            },
+            {
+              "index": 1,
+              "name": "batch",
+              "storageLocation": "calldata",
+              "type": "IStreamMintManager.MintBatch"
+            },
+            {
+              "index": 2,
+              "name": "tokenIndex",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "operationRoot",
+              "type": "bytes32"
+            },
+            {
+              "index": 4,
+              "name": "operationId",
+              "type": "bytes32"
+            },
+            {
+              "index": 5,
+              "name": "schemaVersion",
+              "type": "uint16"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2RvbWFpbnMvbWludC9TdHJlYW1NaW50Q29yZUV4ZWN1dG9yLnNvbDpTdHJlYW1NaW50Q29yZUV4ZWN1dG9yI2Z1bmN0aW9uOjB4MzUzZDlkYTA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "executeSingleStep",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 1255,
+            "byteStart": 1710,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintCoreExecutor.sol#L57-L91",
+            "lineEnd": 91,
+            "lineStart": 57,
+            "snippetSha256": "sha256:bb3af96a736e407b961bc33adec5ecdf7f2b011ec930cb558326917c1ca384bd",
+            "sourceSha256": "sha256:5c434a0c3ac2a8d03038ed467381493491b7258d5caf3aa17470c6ab5708792d"
+          },
+          "selector": "0x353d9da0",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "executePrepared(IStreamCore,IStreamMintManager.MintBatch,uint256,bytes32,bytes32,uint16)",
+          "functionKind": "function",
+          "id": "smart-contracts/domains/mint/StreamMintCoreExecutor.sol:StreamMintCoreExecutor#function:0x999a7bff",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "core",
+              "type": "IStreamCore"
+            },
+            {
+              "index": 1,
+              "name": "batch",
+              "storageLocation": "calldata",
+              "type": "IStreamMintManager.MintBatch"
+            },
+            {
+              "index": 2,
+              "name": "tokenIndex",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "operationRoot",
+              "type": "bytes32"
+            },
+            {
+              "index": 4,
+              "name": "operationId",
+              "type": "bytes32"
+            },
+            {
+              "index": 5,
+              "name": "schemaVersion",
+              "type": "uint16"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2RvbWFpbnMvbWludC9TdHJlYW1NaW50Q29yZUV4ZWN1dG9yLnNvbDpTdHJlYW1NaW50Q29yZUV4ZWN1dG9yI2Z1bmN0aW9uOjB4OTk5YTdiZmY",
+          "kind": "function",
+          "modifiers": [],
+          "name": "executePrepared",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 1428,
+            "byteStart": 2971,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintCoreExecutor.sol#L93-L132",
+            "lineEnd": 132,
+            "lineStart": 93,
+            "snippetSha256": "sha256:5917264dc76797b27bb110cf780b9d18b11e67c75e15aa5fa162052eeb19d9b9",
+            "sourceSha256": "sha256:5c434a0c3ac2a8d03038ed467381493491b7258d5caf3aa17470c6ab5708792d"
+          },
+          "selector": "0x999a7bff",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_tokenExecutionFact(IStreamMintManager.MintBatch,uint256,bytes32,bytes32,uint256,bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/domains/mint/StreamMintCoreExecutor.sol:StreamMintCoreExecutor#function:_tokenExecutionFact(IStreamMintManager.MintBatch,uint256,bytes32,bytes32,uint256,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "batch",
+              "storageLocation": "calldata",
+              "type": "IStreamMintManager.MintBatch"
+            },
+            {
+              "index": 1,
+              "name": "tokenIndex",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "operationRoot",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "name": "operationId",
+              "type": "bytes32"
+            },
+            {
+              "index": 4,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 5,
+              "name": "tokenDataHash",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2RvbWFpbnMvbWludC9TdHJlYW1NaW50Q29yZUV4ZWN1dG9yLnNvbDpTdHJlYW1NaW50Q29yZUV4ZWN1dG9yI2Z1bmN0aW9uOl90b2tlbkV4ZWN1dGlvbkZhY3QoSVN0cmVhbU1pbnRNYW5hZ2VyLk1pbnRCYXRjaCx1aW50MjU2LGJ5dGVzMzIsYnl0ZXMzMix1aW50MjU2LGJ5dGVzMzIp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_tokenExecutionFact",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "fact",
+              "storageLocation": "memory",
+              "type": "TokenExecutionFact"
+            }
+          ],
+          "range": {
+            "byteLength": 771,
+            "byteStart": 4405,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintCoreExecutor.sol#L134-L152",
+            "lineEnd": 152,
+            "lineStart": 134,
+            "snippetSha256": "sha256:df9a9a16bc633130dfd3c3f0312cf1751e52aa9846c08e93b090bf1a4d431263",
+            "sourceSha256": "sha256:5c434a0c3ac2a8d03038ed467381493491b7258d5caf3aa17470c6ab5708792d"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [
+        {
+          "members": [
+            {
+              "index": 0,
+              "name": "operationId",
+              "natspec": "",
+              "range": {
+                "byteLength": 19,
+                "byteStart": 1379,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintCoreExecutor.sol#L44",
+                "lineEnd": 44,
+                "lineStart": 44,
+                "snippetSha256": "sha256:8138db78a947581066a750633643addc89e7fda5e7323d97f5d32a11c945836e",
+                "sourceSha256": "sha256:5c434a0c3ac2a8d03038ed467381493491b7258d5caf3aa17470c6ab5708792d"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "tokenId",
+              "natspec": "",
+              "range": {
+                "byteLength": 15,
+                "byteStart": 1408,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintCoreExecutor.sol#L45",
+                "lineEnd": 45,
+                "lineStart": 45,
+                "snippetSha256": "sha256:66875c39eec6445ab2b3787f7fe7517ed1914f5ebb02d7f9ee07cc370b8b605f",
+                "sourceSha256": "sha256:5c434a0c3ac2a8d03038ed467381493491b7258d5caf3aa17470c6ab5708792d"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "operationRoot",
+              "natspec": "",
+              "range": {
+                "byteLength": 21,
+                "byteStart": 1433,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintCoreExecutor.sol#L46",
+                "lineEnd": 46,
+                "lineStart": 46,
+                "snippetSha256": "sha256:c5b59b2df981656b220268dfdf648bc22dee3c42faa4014472f458d0a6ec3944",
+                "sourceSha256": "sha256:5c434a0c3ac2a8d03038ed467381493491b7258d5caf3aa17470c6ab5708792d"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 3,
+              "name": "collectionId",
+              "natspec": "",
+              "range": {
+                "byteLength": 20,
+                "byteStart": 1464,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintCoreExecutor.sol#L47",
+                "lineEnd": 47,
+                "lineStart": 47,
+                "snippetSha256": "sha256:59d930bd0f2dfed41bacd10f1ff469fcacef2b565f94ee3556e462d42461f316",
+                "sourceSha256": "sha256:5c434a0c3ac2a8d03038ed467381493491b7258d5caf3aa17470c6ab5708792d"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 4,
+              "name": "phaseId",
+              "natspec": "",
+              "range": {
+                "byteLength": 15,
+                "byteStart": 1494,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintCoreExecutor.sol#L48",
+                "lineEnd": 48,
+                "lineStart": 48,
+                "snippetSha256": "sha256:3978b5acb6899597c4a6f59b9f64917317d63766942cfcb68a340a1ce6c0586d",
+                "sourceSha256": "sha256:5c434a0c3ac2a8d03038ed467381493491b7258d5caf3aa17470c6ab5708792d"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 5,
+              "name": "tokenIndex",
+              "natspec": "",
+              "range": {
+                "byteLength": 18,
+                "byteStart": 1519,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintCoreExecutor.sol#L49",
+                "lineEnd": 49,
+                "lineStart": 49,
+                "snippetSha256": "sha256:1f301d550265d8c46646ef152ac294a1498b743fb7db7083093d1cfaa09cd806",
+                "sourceSha256": "sha256:5c434a0c3ac2a8d03038ed467381493491b7258d5caf3aa17470c6ab5708792d"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 6,
+              "name": "initialRecipient",
+              "natspec": "",
+              "range": {
+                "byteLength": 24,
+                "byteStart": 1547,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintCoreExecutor.sol#L50",
+                "lineEnd": 50,
+                "lineStart": 50,
+                "snippetSha256": "sha256:c04b2fa6966bdf13499eb1348675589e7750c0d017e5916b008d2bdc0797b793",
+                "sourceSha256": "sha256:5c434a0c3ac2a8d03038ed467381493491b7258d5caf3aa17470c6ab5708792d"
+              },
+              "type": "address",
+              "typeString": "address"
+            },
+            {
+              "index": 7,
+              "name": "beneficiary",
+              "natspec": "",
+              "range": {
+                "byteLength": 19,
+                "byteStart": 1581,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintCoreExecutor.sol#L51",
+                "lineEnd": 51,
+                "lineStart": 51,
+                "snippetSha256": "sha256:047b48832b2ab3626b610dd7af2abecdf79edd9aeab974238b59c3314f563a3d",
+                "sourceSha256": "sha256:5c434a0c3ac2a8d03038ed467381493491b7258d5caf3aa17470c6ab5708792d"
+              },
+              "type": "address",
+              "typeString": "address"
+            },
+            {
+              "index": 8,
+              "name": "tokenDataHash",
+              "natspec": "",
+              "range": {
+                "byteLength": 21,
+                "byteStart": 1610,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintCoreExecutor.sol#L52",
+                "lineEnd": 52,
+                "lineStart": 52,
+                "snippetSha256": "sha256:c659c96b080f85ee4f363b57a4f063978316e6f1801688cf55a7edaf8753bd56",
+                "sourceSha256": "sha256:5c434a0c3ac2a8d03038ed467381493491b7258d5caf3aa17470c6ab5708792d"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 9,
+              "name": "mintCommitment",
+              "natspec": "",
+              "range": {
+                "byteLength": 22,
+                "byteStart": 1641,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintCoreExecutor.sol#L53",
+                "lineEnd": 53,
+                "lineStart": 53,
+                "snippetSha256": "sha256:6f623e8a1594b556f5514ce243d9cec8a0e6b19b1f36454f263b929bc69e7ed6",
+                "sourceSha256": "sha256:5c434a0c3ac2a8d03038ed467381493491b7258d5caf3aa17470c6ab5708792d"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 10,
+              "name": "collectionSerial",
+              "natspec": "",
+              "range": {
+                "byteLength": 24,
+                "byteStart": 1673,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintCoreExecutor.sol#L54",
+                "lineEnd": 54,
+                "lineStart": 54,
+                "snippetSha256": "sha256:19d95555d9cb48db30e0e406a48acf4e1e75320f0d0b8b0289f0f5a04df80f6a",
+                "sourceSha256": "sha256:5c434a0c3ac2a8d03038ed467381493491b7258d5caf3aa17470c6ab5708792d"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            }
+          ],
+          "name": "TokenExecutionFact",
+          "natspec": "",
+          "range": {
+            "byteLength": 361,
+            "byteStart": 1343,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintCoreExecutor.sol#L43-L55",
+            "lineEnd": 55,
+            "lineStart": 43,
+            "snippetSha256": "sha256:a6e97745beebde069a90a044a898104fca5164bc1bb8d6e9a90529fbbf620ac1",
+            "sourceSha256": "sha256:5c434a0c3ac2a8d03038ed467381493491b7258d5caf3aa17470c6ab5708792d"
+          }
+        }
+      ],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/domains/mint/StreamMintCoreExecutor.sol:StreamMintCoreExecutor",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "c21hcnQtY29udHJhY3RzL2RvbWFpbnMvbWludC9TdHJlYW1NaW50Q29yZUV4ZWN1dG9yLnNvbDpTdHJlYW1NaW50Q29yZUV4ZWN1dG9y",
+    "kind": "library",
+    "linearizedDefinitionIds": [
+      "smart-contracts/domains/mint/StreamMintCoreExecutor.sol:StreamMintCoreExecutor"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamMintCoreExecutor",
+    "natspec": "@notice Core token execution and token-level event emission for StreamMintManager.\n @dev Library calls execute by delegatecall, so events retain the manager as their emitter.",
+    "range": {
+      "byteLength": 4830,
+      "byteStart": 348,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintCoreExecutor.sol#L9-L153",
+      "lineEnd": 153,
+      "lineStart": 9,
+      "snippetSha256": "sha256:121a3a68a5952d13b78502c865eda01850ca79a30dba6d65038d66bbfff1ce04",
+      "sourceSha256": "sha256:5c434a0c3ac2a8d03038ed467381493491b7258d5caf3aa17470c6ab5708792d"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/domains/mint/StreamMintCoreExecutor.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-09-09.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 2
+    },
+    "byCode": {
+      "MISSING_FUNCTION_NATSPEC": 2
+    },
+    "totalCount": 2
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/domains/mint/StreamMintCoreExecutor.sol:StreamMintCoreExecutor#function:0x353d9da0",
+      "definitionId": "smart-contracts/domains/mint/StreamMintCoreExecutor.sol:StreamMintCoreExecutor",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/domains/mint/StreamMintCoreExecutor.sol:StreamMintCoreExecutor#function:0x999a7bff",
+      "definitionId": "smart-contracts/domains/mint/StreamMintCoreExecutor.sol:StreamMintCoreExecutor",
+      "severity": "advisory"
+    }
+  ]
+}

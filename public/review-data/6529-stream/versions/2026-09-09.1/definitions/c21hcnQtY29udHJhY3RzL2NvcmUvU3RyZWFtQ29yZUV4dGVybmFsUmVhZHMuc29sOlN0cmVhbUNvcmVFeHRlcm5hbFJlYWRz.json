@@ -1,0 +1,3391 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads#function:0x5d572948",
+          "declaringDefinitionId": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes",
+              "name": "callData",
+              "type": "bytes"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "gasLimit",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "internalType": "uint256",
+              "name": "completionBuffer",
+              "type": "uint256"
+            }
+          ],
+          "name": "boundedRouterString",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "status",
+              "type": "uint8"
+            },
+            {
+              "index": 1,
+              "internalType": "string",
+              "name": "value",
+              "type": "string"
+            }
+          ],
+          "selector": "0x5d572948",
+          "signature": "boundedRouterString(address,bytes,uint256,uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads#function:0xc2596011",
+          "declaringDefinitionId": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "codeHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "codeIsLive",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0xc2596011",
+          "signature": "codeIsLive(address,bytes32)",
+          "stateMutability": "view"
+        },
+        {
+          "canonicalAbiSelector": "0x61d7cfc0",
+          "declarationId": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads#function:0x0eb4cdba",
+          "declaringDefinitionId": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "struct StreamCorePointerState",
+              "name": "registryPointer",
+              "type": "(address,bytes32,bool,bytes32,bytes4,address,uint8,bytes32,bytes32,uint64)"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "internalType": "bytes32",
+              "name": "expectedModuleType",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "internalType": "bytes4",
+              "name": "expectedInterfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "name": "eligiblePointer",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "enum StreamCoreValidationStatus",
+              "name": "status",
+              "type": "StreamCoreValidationStatus"
+            },
+            {
+              "index": 1,
+              "internalType": "struct StreamCorePointerState",
+              "name": "candidate",
+              "type": "(address,bytes32,bool,bytes32,bytes4,address,uint8,bytes32,bytes32,uint64)"
+            }
+          ],
+          "selector": "0x0eb4cdba",
+          "selectorSource": "compiler_ast_library",
+          "signature": "eligiblePointer((address,bytes32,bool,bytes32,bytes4,address,uint8,bytes32,bytes32,uint64),address,bytes32,bytes4)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads#function:0xb4ca922d",
+          "declaringDefinitionId": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "parameterId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "gasParameterScopeHash",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0xb4ca922d",
+          "signature": "gasParameterScopeHash(bytes32)",
+          "stateMutability": "view"
+        },
+        {
+          "canonicalAbiSelector": "0x41059b9d",
+          "declarationId": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads#function:0x3c1fe8b2",
+          "declaringDefinitionId": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "scopeHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "struct StreamCoreGasParameterState",
+              "name": "parameter",
+              "type": "(uint256,uint256,uint8,uint64)"
+            }
+          ],
+          "name": "gasParameterStateHash",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x3c1fe8b2",
+          "selectorSource": "compiler_ast_library",
+          "signature": "gasParameterStateHash(bytes32,(uint256,uint256,uint8,uint64))",
+          "stateMutability": "pure"
+        },
+        {
+          "canonicalAbiSelector": "0x7606195c",
+          "declarationId": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads#function:0x3e34db2f",
+          "declaringDefinitionId": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "parameterId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "struct StreamCoreGasParameterState",
+              "name": "previous",
+              "type": "(uint256,uint256,uint8,uint64)"
+            },
+            {
+              "index": 2,
+              "internalType": "struct StreamCoreGasParameterState",
+              "name": "candidate",
+              "type": "(uint256,uint256,uint8,uint64)"
+            }
+          ],
+          "name": "gasParameterTransitionHashes",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "scopeHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "oldValueHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "internalType": "bytes32",
+              "name": "newValueHash",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x3e34db2f",
+          "selectorSource": "compiler_ast_library",
+          "signature": "gasParameterTransitionHashes(bytes32,(uint256,uint256,uint8,uint64),(uint256,uint256,uint8,uint64))",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads#function:0x4849f996",
+          "declaringDefinitionId": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "registry",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "runtimeCodeHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "internalType": "bytes32",
+              "name": "moduleManifestHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "internalType": "bytes32",
+              "name": "deploymentManifestHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "genesisModuleRegistry",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "valid",
+              "type": "bool"
+            },
+            {
+              "index": 1,
+              "internalType": "struct StreamCorePointerState",
+              "name": "pointer",
+              "type": "(address,bytes32,bool,bytes32,bytes4,address,uint8,bytes32,bytes32,uint64)"
+            }
+          ],
+          "selector": "0x4849f996",
+          "signature": "genesisModuleRegistry(address,bytes32,bytes32,bytes32)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads#function:0xb77b2ad8",
+          "declaringDefinitionId": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "executor",
+              "type": "address"
+            }
+          ],
+          "name": "isGovernanceExecutor",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0xb77b2ad8",
+          "signature": "isGovernanceExecutor(address)",
+          "stateMutability": "view"
+        },
+        {
+          "canonicalAbiSelector": "0x018b07e4",
+          "declarationId": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads#function:0x5618b7ec",
+          "declaringDefinitionId": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "struct StreamCorePointerState",
+              "name": "pointer",
+              "type": "(address,bytes32,bool,bytes32,bytes4,address,uint8,bytes32,bytes32,uint64)"
+            }
+          ],
+          "name": "isLiveModuleRegistry",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x5618b7ec",
+          "selectorSource": "compiler_ast_library",
+          "signature": "isLiveModuleRegistry((address,bytes32,bool,bytes32,bytes4,address,uint8,bytes32,bytes32,uint64))",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads#function:0x9caddc56",
+          "declaringDefinitionId": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "pointerType",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "internalType": "address",
+              "name": "governanceExecutor",
+              "type": "address"
+            }
+          ],
+          "name": "pointerConfiguration",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "known",
+              "type": "bool"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "moduleType",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "selector": "0x9caddc56",
+          "signature": "pointerConfiguration(bytes32,address,address)",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads#function:0x21422496",
+          "declaringDefinitionId": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "pointerType",
+              "type": "bytes32"
+            }
+          ],
+          "name": "pointerScopeHash",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x21422496",
+          "signature": "pointerScopeHash(bytes32)",
+          "stateMutability": "view"
+        },
+        {
+          "canonicalAbiSelector": "0xbe54c368",
+          "declarationId": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads#function:0x67f36d73",
+          "declaringDefinitionId": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "scopeHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "struct StreamCorePointerState",
+              "name": "pointer",
+              "type": "(address,bytes32,bool,bytes32,bytes4,address,uint8,bytes32,bytes32,uint64)"
+            },
+            {
+              "index": 2,
+              "internalType": "uint64",
+              "name": "revision",
+              "type": "uint64"
+            }
+          ],
+          "name": "pointerStateHash",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x67f36d73",
+          "selectorSource": "compiler_ast_library",
+          "signature": "pointerStateHash(bytes32,(address,bytes32,bool,bytes32,bytes4,address,uint8,bytes32,bytes32,uint64),uint64)",
+          "stateMutability": "pure"
+        },
+        {
+          "canonicalAbiSelector": "0xf88a712b",
+          "declarationId": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads#function:0xaff1f44b",
+          "declaringDefinitionId": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "pointerType",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "struct StreamCorePointerState",
+              "name": "previous",
+              "type": "(address,bytes32,bool,bytes32,bytes4,address,uint8,bytes32,bytes32,uint64)"
+            },
+            {
+              "index": 2,
+              "internalType": "struct StreamCorePointerState",
+              "name": "candidate",
+              "type": "(address,bytes32,bool,bytes32,bytes4,address,uint8,bytes32,bytes32,uint64)"
+            }
+          ],
+          "name": "pointerTransitionHashes",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "scopeHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "oldValueHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "internalType": "bytes32",
+              "name": "newValueHash",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0xaff1f44b",
+          "selectorSource": "compiler_ast_library",
+          "signature": "pointerTransitionHashes(bytes32,(address,bytes32,bool,bytes32,bytes4,address,uint8,bytes32,bytes32,uint64),(address,bytes32,bool,bytes32,bytes4,address,uint8,bytes32,bytes32,uint64))",
+          "stateMutability": "view"
+        },
+        {
+          "canonicalAbiSelector": "0xab98a9cf",
+          "declarationId": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads#function:0x24d2e718",
+          "declaringDefinitionId": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "struct StreamCorePointerState",
+              "name": "registryPointer",
+              "type": "(address,bytes32,bool,bytes32,bytes4,address,uint8,bytes32,bytes32,uint64)"
+            },
+            {
+              "index": 1,
+              "internalType": "struct StreamCorePointerState",
+              "name": "current",
+              "type": "(address,bytes32,bool,bytes32,bytes4,address,uint8,bytes32,bytes32,uint64)"
+            },
+            {
+              "index": 2,
+              "internalType": "bytes32",
+              "name": "pointerType",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "internalType": "address",
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "index": 4,
+              "internalType": "address",
+              "name": "governanceExecutor",
+              "type": "address"
+            },
+            {
+              "index": 5,
+              "internalType": "uint64",
+              "name": "nextRevision",
+              "type": "uint64"
+            }
+          ],
+          "name": "preparePointerUpdate",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "enum StreamCoreValidationStatus",
+              "name": "status",
+              "type": "StreamCoreValidationStatus"
+            },
+            {
+              "index": 1,
+              "internalType": "struct StreamCorePointerTransitionPlan",
+              "name": "plan",
+              "type": "((address,bytes32,bool,bytes32,bytes4,address,uint8,bytes32,bytes32,uint64),bytes32,bytes32,bytes32,bytes32)"
+            }
+          ],
+          "selector": "0x24d2e718",
+          "selectorSource": "compiler_ast_library",
+          "signature": "preparePointerUpdate((address,bytes32,bool,bytes32,bytes4,address,uint8,bytes32,bytes32,uint64),(address,bytes32,bool,bytes32,bytes4,address,uint8,bytes32,bytes32,uint64),bytes32,address,address,uint64)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads#function:0x5af2b486",
+          "declaringDefinitionId": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "executor",
+              "type": "address"
+            }
+          ],
+          "name": "readCurrentAction",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "valid",
+              "type": "bool"
+            },
+            {
+              "index": 1,
+              "internalType": "struct StreamCoreExternalReads.CurrentAction",
+              "name": "action",
+              "type": "(bool,bytes32,uint8,bytes32,bytes32,bytes32)"
+            }
+          ],
+          "selector": "0x5af2b486",
+          "signature": "readCurrentAction(address)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads#function:0x52f762cc",
+          "declaringDefinitionId": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "registry",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "module",
+              "type": "address"
+            }
+          ],
+          "name": "readModuleRecord",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "valid",
+              "type": "bool"
+            },
+            {
+              "index": 1,
+              "internalType": "struct StreamCoreExternalReads.ModuleRecordFacts",
+              "name": "facts",
+              "type": "(uint8,bytes32,bytes32,bytes4,bytes32,bytes32,bytes32,uint64)"
+            }
+          ],
+          "selector": "0x52f762cc",
+          "signature": "readModuleRecord(address,address)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads#function:0xbfa9b93f",
+          "declaringDefinitionId": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "gasLimit",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "completionBuffer",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "internalType": "bytes",
+              "name": "callData",
+              "type": "bytes"
+            },
+            {
+              "index": 4,
+              "internalType": "uint256",
+              "name": "salePrice",
+              "type": "uint256"
+            }
+          ],
+          "name": "resolveRoyalty",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "receiver",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "royaltyAmount",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0xbfa9b93f",
+          "signature": "resolveRoyalty(address,uint256,uint256,bytes,uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads#function:0x397e8c16",
+          "declaringDefinitionId": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "name": "supportsInterfaceStrict",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x397e8c16",
+          "signature": "supportsInterfaceStrict(address,bytes4)",
+          "stateMutability": "view"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "production_support_library",
+    "classificationReason": "First-party protocol library outside the production contract catalog.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "pointerConfiguration(bytes32,address,address)",
+          "displaySignature": "pointerConfiguration(bytes32,address,address)",
+          "functionKind": "function",
+          "id": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads#function:0x9caddc56",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "pointerType",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "governanceExecutor",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2NvcmUvU3RyZWFtQ29yZUV4dGVybmFsUmVhZHMuc29sOlN0cmVhbUNvcmVFeHRlcm5hbFJlYWRzI2Z1bmN0aW9uOjB4OWNhZGRjNTY",
+          "kind": "function",
+          "modifiers": [],
+          "name": "pointerConfiguration",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "known",
+              "type": "bool"
+            },
+            {
+              "index": 1,
+              "name": "moduleType",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "range": {
+            "byteLength": 2074,
+            "byteStart": 5480,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L130-L172",
+            "lineEnd": 172,
+            "lineStart": 130,
+            "snippetSha256": "sha256:d814086c49fd18b667e4e7d97eb51d6105c8c3fdfc007e8024902786c8db6955",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "selector": "0x9caddc56",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "genesisModuleRegistry(address,bytes32,bytes32,bytes32)",
+          "displaySignature": "genesisModuleRegistry(address,bytes32,bytes32,bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads#function:0x4849f996",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "registry",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "runtimeCodeHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "moduleManifestHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "name": "deploymentManifestHash",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2NvcmUvU3RyZWFtQ29yZUV4dGVybmFsUmVhZHMuc29sOlN0cmVhbUNvcmVFeHRlcm5hbFJlYWRzI2Z1bmN0aW9uOjB4NDg0OWY5OTY",
+          "kind": "function",
+          "modifiers": [],
+          "name": "genesisModuleRegistry",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "valid",
+              "type": "bool"
+            },
+            {
+              "index": 1,
+              "name": "pointer",
+              "storageLocation": "memory",
+              "type": "StreamCorePointerState"
+            }
+          ],
+          "range": {
+            "byteLength": 1157,
+            "byteStart": 7560,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L174-L201",
+            "lineEnd": 201,
+            "lineStart": 174,
+            "snippetSha256": "sha256:066952e3ae11893801ec2e6ca4d25809d2723bec3adfdfbcfac822eba4e3d799",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "selector": "0x4849f996",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "eligiblePointer((address,bytes32,bool,bytes32,bytes4,address,uint8,bytes32,bytes32,uint64),address,bytes32,bytes4)",
+          "displaySignature": "eligiblePointer(StreamCorePointerState,address,bytes32,bytes4)",
+          "functionKind": "function",
+          "id": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads#function:0x0eb4cdba",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "registryPointer",
+              "storageLocation": "memory",
+              "type": "StreamCorePointerState"
+            },
+            {
+              "index": 1,
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "expectedModuleType",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "name": "expectedInterfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2NvcmUvU3RyZWFtQ29yZUV4dGVybmFsUmVhZHMuc29sOlN0cmVhbUNvcmVFeHRlcm5hbFJlYWRzI2Z1bmN0aW9uOjB4MGViNGNkYmE",
+          "kind": "function",
+          "modifiers": [],
+          "name": "eligiblePointer",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "status",
+              "type": "StreamCoreValidationStatus"
+            },
+            {
+              "index": 1,
+              "name": "candidate",
+              "storageLocation": "memory",
+              "type": "StreamCorePointerState"
+            }
+          ],
+          "range": {
+            "byteLength": 1635,
+            "byteStart": 8723,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L203-L243",
+            "lineEnd": 243,
+            "lineStart": 203,
+            "snippetSha256": "sha256:5f01c4ef4fefcd02104133448cbf31fb348654aef1c018c28c9d4f1f0eb08ca1",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "selector": "0x0eb4cdba",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "preparePointerUpdate((address,bytes32,bool,bytes32,bytes4,address,uint8,bytes32,bytes32,uint64),(address,bytes32,bool,bytes32,bytes4,address,uint8,bytes32,bytes32,uint64),bytes32,address,address,uint64)",
+          "displaySignature": "preparePointerUpdate(StreamCorePointerState,StreamCorePointerState,bytes32,address,address,uint64)",
+          "functionKind": "function",
+          "id": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads#function:0x24d2e718",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "registryPointer",
+              "storageLocation": "memory",
+              "type": "StreamCorePointerState"
+            },
+            {
+              "index": 1,
+              "name": "current",
+              "storageLocation": "memory",
+              "type": "StreamCorePointerState"
+            },
+            {
+              "index": 2,
+              "name": "pointerType",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "index": 4,
+              "name": "governanceExecutor",
+              "type": "address"
+            },
+            {
+              "index": 5,
+              "name": "nextRevision",
+              "type": "uint64"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2NvcmUvU3RyZWFtQ29yZUV4dGVybmFsUmVhZHMuc29sOlN0cmVhbUNvcmVFeHRlcm5hbFJlYWRzI2Z1bmN0aW9uOjB4MjRkMmU3MTg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "preparePointerUpdate",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "status",
+              "type": "StreamCoreValidationStatus"
+            },
+            {
+              "index": 1,
+              "name": "plan",
+              "storageLocation": "memory",
+              "type": "StreamCorePointerTransitionPlan"
+            }
+          ],
+          "range": {
+            "byteLength": 1349,
+            "byteStart": 10364,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L245-L275",
+            "lineEnd": 275,
+            "lineStart": 245,
+            "snippetSha256": "sha256:124e81d54731877ce1bd3320b1ebe8abd02ed3bcfafea9bf03d9b5480591be1c",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "selector": "0x24d2e718",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "isLiveModuleRegistry((address,bytes32,bool,bytes32,bytes4,address,uint8,bytes32,bytes32,uint64))",
+          "displaySignature": "isLiveModuleRegistry(StreamCorePointerState)",
+          "functionKind": "function",
+          "id": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads#function:0x5618b7ec",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "pointer",
+              "storageLocation": "memory",
+              "type": "StreamCorePointerState"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2NvcmUvU3RyZWFtQ29yZUV4dGVybmFsUmVhZHMuc29sOlN0cmVhbUNvcmVFeHRlcm5hbFJlYWRzI2Z1bmN0aW9uOjB4NTYxOGI3ZWM",
+          "kind": "function",
+          "modifiers": [],
+          "name": "isLiveModuleRegistry",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 178,
+            "byteStart": 11719,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L277-L283",
+            "lineEnd": 283,
+            "lineStart": 277,
+            "snippetSha256": "sha256:d1ed76b60f0516e82b67f6516a995acfe9cb6f215a7b78e3ff90cb3719e6643a",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "selector": "0x5618b7ec",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "pointerScopeHash(bytes32)",
+          "displaySignature": "pointerScopeHash(bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads#function:0x21422496",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "pointerType",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2NvcmUvU3RyZWFtQ29yZUV4dGVybmFsUmVhZHMuc29sOlN0cmVhbUNvcmVFeHRlcm5hbFJlYWRzI2Z1bmN0aW9uOjB4MjE0MjI0OTY",
+          "kind": "function",
+          "modifiers": [],
+          "name": "pointerScopeHash",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 315,
+            "byteStart": 11903,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L285-L294",
+            "lineEnd": 294,
+            "lineStart": 285,
+            "snippetSha256": "sha256:5852c3fae6f7f7968adcacc869e16bb03fcd384b14de8d76d209e88b248ee1d8",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "selector": "0x21422496",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "pointerStateHash(bytes32,(address,bytes32,bool,bytes32,bytes4,address,uint8,bytes32,bytes32,uint64),uint64)",
+          "displaySignature": "pointerStateHash(bytes32,StreamCorePointerState,uint64)",
+          "functionKind": "function",
+          "id": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads#function:0x67f36d73",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "scopeHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "pointer",
+              "storageLocation": "memory",
+              "type": "StreamCorePointerState"
+            },
+            {
+              "index": 2,
+              "name": "revision",
+              "type": "uint64"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2NvcmUvU3RyZWFtQ29yZUV4dGVybmFsUmVhZHMuc29sOlN0cmVhbUNvcmVFeHRlcm5hbFJlYWRzI2Z1bmN0aW9uOjB4NjdmMzZkNzM",
+          "kind": "function",
+          "modifiers": [],
+          "name": "pointerStateHash",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 689,
+            "byteStart": 12224,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L296-L317",
+            "lineEnd": 317,
+            "lineStart": 296,
+            "snippetSha256": "sha256:bdff75f60b86707b1e7f03aa38aeb1a79f65769c63405d1352c849584b28bb5d",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "selector": "0x67f36d73",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "pointerTransitionHashes(bytes32,(address,bytes32,bool,bytes32,bytes4,address,uint8,bytes32,bytes32,uint64),(address,bytes32,bool,bytes32,bytes4,address,uint8,bytes32,bytes32,uint64))",
+          "displaySignature": "pointerTransitionHashes(bytes32,StreamCorePointerState,StreamCorePointerState)",
+          "functionKind": "function",
+          "id": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads#function:0xaff1f44b",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "pointerType",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "previous",
+              "storageLocation": "memory",
+              "type": "StreamCorePointerState"
+            },
+            {
+              "index": 2,
+              "name": "candidate",
+              "storageLocation": "memory",
+              "type": "StreamCorePointerState"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2NvcmUvU3RyZWFtQ29yZUV4dGVybmFsUmVhZHMuc29sOlN0cmVhbUNvcmVFeHRlcm5hbFJlYWRzI2Z1bmN0aW9uOjB4YWZmMWY0NGI",
+          "kind": "function",
+          "modifiers": [],
+          "name": "pointerTransitionHashes",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "scopeHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "oldValueHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "newValueHash",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 471,
+            "byteStart": 12919,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L319-L327",
+            "lineEnd": 327,
+            "lineStart": 319,
+            "snippetSha256": "sha256:735a42e7d2cb5d7ef583eb4080190c09f3a45ef01eeb6b4ba05b55286ce9c710",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "selector": "0xaff1f44b",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "gasParameterScopeHash(bytes32)",
+          "displaySignature": "gasParameterScopeHash(bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads#function:0xb4ca922d",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "parameterId",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2NvcmUvU3RyZWFtQ29yZUV4dGVybmFsUmVhZHMuc29sOlN0cmVhbUNvcmVFeHRlcm5hbFJlYWRzI2Z1bmN0aW9uOjB4YjRjYTkyMmQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "gasParameterScopeHash",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 263,
+            "byteStart": 13396,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L329-L335",
+            "lineEnd": 335,
+            "lineStart": 329,
+            "snippetSha256": "sha256:d3667f833dd1fe8ce53b939bd4ff978129751e3ae60373e72a159e5f51bef414",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "selector": "0xb4ca922d",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "gasParameterStateHash(bytes32,(uint256,uint256,uint8,uint64))",
+          "displaySignature": "gasParameterStateHash(bytes32,StreamCoreGasParameterState)",
+          "functionKind": "function",
+          "id": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads#function:0x3c1fe8b2",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "scopeHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "parameter",
+              "storageLocation": "memory",
+              "type": "StreamCoreGasParameterState"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2NvcmUvU3RyZWFtQ29yZUV4dGVybmFsUmVhZHMuc29sOlN0cmVhbUNvcmVFeHRlcm5hbFJlYWRzI2Z1bmN0aW9uOjB4M2MxZmU4YjI",
+          "kind": "function",
+          "modifiers": [],
+          "name": "gasParameterStateHash",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 452,
+            "byteStart": 13665,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L337-L352",
+            "lineEnd": 352,
+            "lineStart": 337,
+            "snippetSha256": "sha256:b072daa2d5edd80b299cde36ed76e196730525ac35dc3de94dbb529ef0b197dd",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "selector": "0x3c1fe8b2",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "gasParameterTransitionHashes(bytes32,(uint256,uint256,uint8,uint64),(uint256,uint256,uint8,uint64))",
+          "displaySignature": "gasParameterTransitionHashes(bytes32,StreamCoreGasParameterState,StreamCoreGasParameterState)",
+          "functionKind": "function",
+          "id": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads#function:0x3e34db2f",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "parameterId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "previous",
+              "storageLocation": "memory",
+              "type": "StreamCoreGasParameterState"
+            },
+            {
+              "index": 2,
+              "name": "candidate",
+              "storageLocation": "memory",
+              "type": "StreamCoreGasParameterState"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2NvcmUvU3RyZWFtQ29yZUV4dGVybmFsUmVhZHMuc29sOlN0cmVhbUNvcmVFeHRlcm5hbFJlYWRzI2Z1bmN0aW9uOjB4M2UzNGRiMmY",
+          "kind": "function",
+          "modifiers": [],
+          "name": "gasParameterTransitionHashes",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "scopeHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "oldValueHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "newValueHash",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 462,
+            "byteStart": 14123,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L354-L362",
+            "lineEnd": 362,
+            "lineStart": 354,
+            "snippetSha256": "sha256:b8a24f387e74f0d589efa334a03240ecefaf633dd8cbe954377ae2406f140889",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "selector": "0x3e34db2f",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "isGovernanceExecutor(address)",
+          "displaySignature": "isGovernanceExecutor(address)",
+          "functionKind": "function",
+          "id": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads#function:0xb77b2ad8",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "executor",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2NvcmUvU3RyZWFtQ29yZUV4dGVybmFsUmVhZHMuc29sOlN0cmVhbUNvcmVFeHRlcm5hbFJlYWRzI2Z1bmN0aW9uOjB4Yjc3YjJhZDg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "isGovernanceExecutor",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 212,
+            "byteStart": 14591,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L364-L368",
+            "lineEnd": 368,
+            "lineStart": 364,
+            "snippetSha256": "sha256:006062cf7996e866866e1a21da32b14780faeadbc5be22cfff6f4c02a8a53fb7",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "selector": "0xb77b2ad8",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "codeIsLive(address,bytes32)",
+          "displaySignature": "codeIsLive(address,bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads#function:0xc2596011",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "codeHash",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2NvcmUvU3RyZWFtQ29yZUV4dGVybmFsUmVhZHMuc29sOlN0cmVhbUNvcmVFeHRlcm5hbFJlYWRzI2Z1bmN0aW9uOjB4YzI1OTYwMTE",
+          "kind": "function",
+          "modifiers": [],
+          "name": "codeIsLive",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 134,
+            "byteStart": 14809,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L370-L372",
+            "lineEnd": 372,
+            "lineStart": 370,
+            "snippetSha256": "sha256:346e1c878bfcafc40f22a121fbe50b73e3dc5d226f15e20608e899b957bcee19",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "selector": "0xc2596011",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "readCurrentAction(address)",
+          "displaySignature": "readCurrentAction(address)",
+          "functionKind": "function",
+          "id": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads#function:0x5af2b486",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "executor",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2NvcmUvU3RyZWFtQ29yZUV4dGVybmFsUmVhZHMuc29sOlN0cmVhbUNvcmVFeHRlcm5hbFJlYWRzI2Z1bmN0aW9uOjB4NWFmMmI0ODY",
+          "kind": "function",
+          "modifiers": [],
+          "name": "readCurrentAction",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "valid",
+              "type": "bool"
+            },
+            {
+              "index": 1,
+              "name": "action",
+              "storageLocation": "memory",
+              "type": "CurrentAction"
+            }
+          ],
+          "range": {
+            "byteLength": 709,
+            "byteStart": 14949,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L374-L393",
+            "lineEnd": 393,
+            "lineStart": 374,
+            "snippetSha256": "sha256:5e46f5dd5b3906717e791061dcdbc0aa5ed80ac8adbf1536bf0d69a8c1bb966e",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "selector": "0x5af2b486",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "readModuleRecord(address,address)",
+          "displaySignature": "readModuleRecord(address,address)",
+          "functionKind": "function",
+          "id": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads#function:0x52f762cc",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "registry",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "module",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2NvcmUvU3RyZWFtQ29yZUV4dGVybmFsUmVhZHMuc29sOlN0cmVhbUNvcmVFeHRlcm5hbFJlYWRzI2Z1bmN0aW9uOjB4NTJmNzYyY2M",
+          "kind": "function",
+          "modifiers": [],
+          "name": "readModuleRecord",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "valid",
+              "type": "bool"
+            },
+            {
+              "index": 1,
+              "name": "facts",
+              "storageLocation": "memory",
+              "type": "ModuleRecordFacts"
+            }
+          ],
+          "range": {
+            "byteLength": 1303,
+            "byteStart": 15664,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L395-L426",
+            "lineEnd": 426,
+            "lineStart": 395,
+            "snippetSha256": "sha256:c9957f2d6f6437078a7b103968ad0a4ddeb99449d2ef03697d0623b2206368fa",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "selector": "0x52f762cc",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "boundedRouterString(address,bytes,uint256,uint256)",
+          "displaySignature": "boundedRouterString(address,bytes,uint256,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads#function:0x5d572948",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "callData",
+              "storageLocation": "memory",
+              "type": "bytes"
+            },
+            {
+              "index": 2,
+              "name": "gasLimit",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "completionBuffer",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2NvcmUvU3RyZWFtQ29yZUV4dGVybmFsUmVhZHMuc29sOlN0cmVhbUNvcmVFeHRlcm5hbFJlYWRzI2Z1bmN0aW9uOjB4NWQ1NzI5NDg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "boundedRouterString",
+          "natspec": "@notice Calls a metadata router with governed gas and bounded returndata.\n @dev The embedding Core supplies authenticated live GGP values. Malformed,\n      failed, and oversized responses return a status instead of reverting.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "status",
+              "type": "uint8"
+            },
+            {
+              "index": 1,
+              "name": "value",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "range": {
+            "byteLength": 750,
+            "byteStart": 17221,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L431-L445",
+            "lineEnd": 445,
+            "lineStart": 431,
+            "snippetSha256": "sha256:78280162d2f6762fe7418e30636d717690e7848124ab36175c8364bad06c6818",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "selector": "0x5d572948",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "resolveRoyalty(address,uint256,uint256,bytes,uint256)",
+          "displaySignature": "resolveRoyalty(address,uint256,uint256,bytes,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads#function:0xbfa9b93f",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "gasLimit",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "completionBuffer",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "callData",
+              "storageLocation": "memory",
+              "type": "bytes"
+            },
+            {
+              "index": 4,
+              "name": "salePrice",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2NvcmUvU3RyZWFtQ29yZUV4dGVybmFsUmVhZHMuc29sOlN0cmVhbUNvcmVFeHRlcm5hbFJlYWRzI2Z1bmN0aW9uOjB4YmZhOWI5M2Y",
+          "kind": "function",
+          "modifiers": [],
+          "name": "resolveRoyalty",
+          "natspec": "@notice Resolves a royalty through a governed, buffered, exact-shape static read.\n @dev Invalid responses fail soft to the ERC-2981 zero-royalty tuple.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "receiver",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "royaltyAmount",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 1445,
+            "byteStart": 18144,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L449-L487",
+            "lineEnd": 487,
+            "lineStart": 449,
+            "snippetSha256": "sha256:fef5fef0e63419706f5219fa9cb8f657c9cfa5291b812d8362d316c1ba87a460",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "selector": "0xbfa9b93f",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "supportsInterfaceStrict(address,bytes4)",
+          "displaySignature": "supportsInterfaceStrict(address,bytes4)",
+          "functionKind": "function",
+          "id": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads#function:0x397e8c16",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2NvcmUvU3RyZWFtQ29yZUV4dGVybmFsUmVhZHMuc29sOlN0cmVhbUNvcmVFeHRlcm5hbFJlYWRzI2Z1bmN0aW9uOjB4Mzk3ZThjMTY",
+          "kind": "function",
+          "modifiers": [],
+          "name": "supportsInterfaceStrict",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 757,
+            "byteStart": 19595,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L489-L506",
+            "lineEnd": 506,
+            "lineStart": 489,
+            "snippetSha256": "sha256:b5ea0c6aa89f2361c23af0a23a028582bfe191f404e712ffeaeb73276191f90b",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "selector": "0x397e8c16",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_isEligibleModule(ModuleRecordFacts,address,bytes32,bytes32,bytes4)",
+          "functionKind": "function",
+          "id": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads#function:_isEligibleModule(ModuleRecordFacts,address,bytes32,bytes32,bytes4)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "record",
+              "storageLocation": "memory",
+              "type": "ModuleRecordFacts"
+            },
+            {
+              "index": 1,
+              "name": "module",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "runtimeCodeHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "name": "expectedModuleType",
+              "type": "bytes32"
+            },
+            {
+              "index": 4,
+              "name": "expectedInterfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2NvcmUvU3RyZWFtQ29yZUV4dGVybmFsUmVhZHMuc29sOlN0cmVhbUNvcmVFeHRlcm5hbFJlYWRzI2Z1bmN0aW9uOl9pc0VsaWdpYmxlTW9kdWxlKE1vZHVsZVJlY29yZEZhY3RzLGFkZHJlc3MsYnl0ZXMzMixieXRlczMyLGJ5dGVzNCk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_isEligibleModule",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 682,
+            "byteStart": 20358,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L508-L520",
+            "lineEnd": 520,
+            "lineStart": 508,
+            "snippetSha256": "sha256:86b2474eb0d3076c943a8d2d6e973f6869c656c3e1040b97412a2d183a1d312e",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_isLiveModuleRegistry(StreamCorePointerState)",
+          "functionKind": "function",
+          "id": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads#function:_isLiveModuleRegistry(StreamCorePointerState)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "pointer",
+              "storageLocation": "memory",
+              "type": "StreamCorePointerState"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2NvcmUvU3RyZWFtQ29yZUV4dGVybmFsUmVhZHMuc29sOlN0cmVhbUNvcmVFeHRlcm5hbFJlYWRzI2Z1bmN0aW9uOl9pc0xpdmVNb2R1bGVSZWdpc3RyeShTdHJlYW1Db3JlUG9pbnRlclN0YXRlKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_isLiveModuleRegistry",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 669,
+            "byteStart": 21046,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L522-L534",
+            "lineEnd": 534,
+            "lineStart": 522,
+            "snippetSha256": "sha256:4b59b1ae34cb8c309d6ea900e6403f132e995a0e00c66d4700f0ab42dc25596b",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_isValidContract(address)",
+          "functionKind": "function",
+          "id": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads#function:_isValidContract(address)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "target",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2NvcmUvU3RyZWFtQ29yZUV4dGVybmFsUmVhZHMuc29sOlN0cmVhbUNvcmVFeHRlcm5hbFJlYWRzI2Z1bmN0aW9uOl9pc1ZhbGlkQ29udHJhY3QoYWRkcmVzcyk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_isValidContract",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 169,
+            "byteStart": 21721,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L536-L538",
+            "lineEnd": 538,
+            "lineStart": 536,
+            "snippetSha256": "sha256:190e31b5170f211a516b1323a9a82619b6010f26addb85087e9bc3ef5b3378f2",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_codeIsLive(address,bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads#function:_codeIsLive(address,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "codeHash",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2NvcmUvU3RyZWFtQ29yZUV4dGVybmFsUmVhZHMuc29sOlN0cmVhbUNvcmVFeHRlcm5hbFJlYWRzI2Z1bmN0aW9uOl9jb2RlSXNMaXZlKGFkZHJlc3MsYnl0ZXMzMik",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_codeIsLive",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 162,
+            "byteStart": 21896,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L540-L542",
+            "lineEnd": 542,
+            "lineStart": 540,
+            "snippetSha256": "sha256:c101f0b3cc1e24f9a58581c9b0d85c6711dc6f7abd1c07f9f6b48ec7c48ac7c0",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_isDelegatedEOA(address)",
+          "functionKind": "function",
+          "id": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads#function:_isDelegatedEOA(address)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2NvcmUvU3RyZWFtQ29yZUV4dGVybmFsUmVhZHMuc29sOlN0cmVhbUNvcmVFeHRlcm5hbFJlYWRzI2Z1bmN0aW9uOl9pc0RlbGVnYXRlZEVPQShhZGRyZXNzKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_isDelegatedEOA",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "delegated",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 316,
+            "byteStart": 22064,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L544-L552",
+            "lineEnd": 552,
+            "lineStart": 544,
+            "snippetSha256": "sha256:9f3a3f1b731c6c11de07471187163a5c21ac75fa0f521ef599d2ed685e531a47",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_boundedStaticRead(address,bytes,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads#function:_boundedStaticRead(address,bytes,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "callData",
+              "storageLocation": "memory",
+              "type": "bytes"
+            },
+            {
+              "index": 2,
+              "name": "maxReturnBytes",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2NvcmUvU3RyZWFtQ29yZUV4dGVybmFsUmVhZHMuc29sOlN0cmVhbUNvcmVFeHRlcm5hbFJlYWRzI2Z1bmN0aW9uOl9ib3VuZGVkU3RhdGljUmVhZChhZGRyZXNzLGJ5dGVzLHVpbnQyNTYp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_boundedStaticRead",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "success",
+              "type": "bool"
+            },
+            {
+              "index": 1,
+              "name": "returnData",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "range": {
+            "byteLength": 1008,
+            "byteStart": 22386,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L554-L578",
+            "lineEnd": 578,
+            "lineStart": 554,
+            "snippetSha256": "sha256:336ec60d195a50352c5178127325979d37fc61ca596bd6a02e1a9bd4abd03991",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_boundedStaticReadDetailed(address,bytes,uint256,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads#function:_boundedStaticReadDetailed(address,bytes,uint256,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "callData",
+              "storageLocation": "memory",
+              "type": "bytes"
+            },
+            {
+              "index": 2,
+              "name": "maxReturnBytes",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "gasLimit",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2NvcmUvU3RyZWFtQ29yZUV4dGVybmFsUmVhZHMuc29sOlN0cmVhbUNvcmVFeHRlcm5hbFJlYWRzI2Z1bmN0aW9uOl9ib3VuZGVkU3RhdGljUmVhZERldGFpbGVkKGFkZHJlc3MsYnl0ZXMsdWludDI1Nix1aW50MjU2KQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_boundedStaticReadDetailed",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "success",
+              "type": "bool"
+            },
+            {
+              "index": 1,
+              "name": "oversized",
+              "type": "bool"
+            },
+            {
+              "index": 2,
+              "name": "returnData",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "range": {
+            "byteLength": 1109,
+            "byteStart": 23400,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L580-L610",
+            "lineEnd": 610,
+            "lineStart": 580,
+            "snippetSha256": "sha256:7a8ec6f62c1f3b7adf7c64c326a4250809034cbf28d7018fd7c9a5ac13d10edc",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_isCanonicalCurrentAction(bytes)",
+          "functionKind": "function",
+          "id": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads#function:_isCanonicalCurrentAction(bytes)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "data",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2NvcmUvU3RyZWFtQ29yZUV4dGVybmFsUmVhZHMuc29sOlN0cmVhbUNvcmVFeHRlcm5hbFJlYWRzI2Z1bmN0aW9uOl9pc0Nhbm9uaWNhbEN1cnJlbnRBY3Rpb24oYnl0ZXMp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_isCanonicalCurrentAction",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "valid",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 290,
+            "byteStart": 24515,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L612-L619",
+            "lineEnd": 619,
+            "lineStart": 612,
+            "snippetSha256": "sha256:3ea101f58ec2c8269e5e5a6e250a172edfedb75207ce967963a46ee743e97182",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_isCanonicalModuleRecordEncoding(bytes)",
+          "functionKind": "function",
+          "id": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads#function:_isCanonicalModuleRecordEncoding(bytes)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "data",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2NvcmUvU3RyZWFtQ29yZUV4dGVybmFsUmVhZHMuc29sOlN0cmVhbUNvcmVFeHRlcm5hbFJlYWRzI2Z1bmN0aW9uOl9pc0Nhbm9uaWNhbE1vZHVsZVJlY29yZEVuY29kaW5nKGJ5dGVzKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_isCanonicalModuleRecordEncoding",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "valid",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 1106,
+            "byteStart": 24811,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L621-L640",
+            "lineEnd": 640,
+            "lineStart": 621,
+            "snippetSha256": "sha256:96ff7c39584eb8411057bd2b3a0dc0ad0a891e6a705fb0f268abe8982ff329cd",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_MODULE_STATUS_ACTIVE",
+          "natspec": "",
+          "range": {
+            "byteLength": 48,
+            "byteStart": 1654,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L56",
+            "lineEnd": 56,
+            "lineStart": 56,
+            "snippetSha256": "sha256:a37565f7946616cc5b01a51a87552bfae8501dbe7f582035fe07b3fa2c5ff292",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "selector": null,
+          "type": "uint8",
+          "typeString": "uint8",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 1701,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L56",
+            "lineEnd": 56,
+            "lineStart": 56,
+            "snippetSha256": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "valueSource": "1",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_STREAM_CORE_SATELLITE_POINTER_SCOPE_V1",
+          "natspec": "",
+          "range": {
+            "byteLength": 141,
+            "byteStart": 1708,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L57-L58",
+            "lineEnd": 58,
+            "lineStart": 57,
+            "snippetSha256": "sha256:87b61bdd284e21c386f7d59cbce5d0dc19e6b7a7433ca33b63812c2d77a18e8c",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 66,
+            "byteStart": 1783,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L58",
+            "lineEnd": 58,
+            "lineStart": 58,
+            "snippetSha256": "sha256:5e2a2e8e4c8b4f21149e364f38198353153284539c413294f60003ef0ff8ca60",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "valueSource": "0xf4a381d3d4c51db07c19830799ea01c544326118ea1db1fb59d54af5f637bdbb",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_STREAM_CORE_SATELLITE_POINTER_STATE_V1",
+          "natspec": "",
+          "range": {
+            "byteLength": 141,
+            "byteStart": 1855,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L59-L60",
+            "lineEnd": 60,
+            "lineStart": 59,
+            "snippetSha256": "sha256:2b6cf03346b357d0679a5ddb9f490b6a2d8c51dd39f0a409f127a44f00993573",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 66,
+            "byteStart": 1930,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L60",
+            "lineEnd": 60,
+            "lineStart": 60,
+            "snippetSha256": "sha256:7fb0231a9e587bc792ebb1c0eaa36d43d7b1354257b4b13c5f87a21abbd13344",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "valueSource": "0x1fdde0a7122d0fc7c237e721e372e43082581dcc6bd2babca4e09bb1e6b3d043",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_STREAM_GAS_PARAMETER_SCOPE_V2",
+          "natspec": "",
+          "range": {
+            "byteLength": 132,
+            "byteStart": 2002,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L61-L62",
+            "lineEnd": 62,
+            "lineStart": 61,
+            "snippetSha256": "sha256:b956baba3116887b684000e9314db6ef13bdc6d30dc9fb029228077b191d63e3",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 66,
+            "byteStart": 2068,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L62",
+            "lineEnd": 62,
+            "lineStart": 62,
+            "snippetSha256": "sha256:54dbcffdf0605b50d194000cb97fa20055db2ec9138cfb86c6fddd9436604c39",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "valueSource": "0x9533611d402c2b44cf950a4a8900d25f6829bfac541dc4d5353094f966bb1a71",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_STREAM_GAS_PARAMETER_STATE_V2",
+          "natspec": "",
+          "range": {
+            "byteLength": 132,
+            "byteStart": 2140,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L63-L64",
+            "lineEnd": 64,
+            "lineStart": 63,
+            "snippetSha256": "sha256:59d4e34c2ef0c76a0974ea2f27e8a674453f49333d3aee85b28bedecaff0bcc7",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 66,
+            "byteStart": 2206,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L64",
+            "lineEnd": 64,
+            "lineStart": 64,
+            "snippetSha256": "sha256:992665ffee98da588ba4fad23f5bfc2d9d4546486e47720e0dc0292e1dc8347d",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "valueSource": "0x5059a253d3f7dd63b5d9fd1f0568caf72967f501a3db678b31cefe911334159c",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_POINTER_SYSTEM_MANIFEST",
+          "natspec": "",
+          "range": {
+            "byteLength": 126,
+            "byteStart": 2279,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L66-L67",
+            "lineEnd": 67,
+            "lineStart": 66,
+            "snippetSha256": "sha256:769f4cbc9f4cb0ed4c0aa870127560ded618defff9f03f81442926dd783ec822",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 66,
+            "byteStart": 2339,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L67",
+            "lineEnd": 67,
+            "lineStart": 67,
+            "snippetSha256": "sha256:101cf3d9e3f9833c60f5f77ddb70fde97d600d2c3a538e079498ec1194eef82f",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "valueSource": "0x03f4d9e115b9c4c43ab58684ef44935e7cf92d54b8db1d97a707c8526faa3c1b",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_POINTER_STATE_EXPORT_PUBLISHER",
+          "natspec": "",
+          "range": {
+            "byteLength": 133,
+            "byteStart": 2411,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L68-L69",
+            "lineEnd": 69,
+            "lineStart": 68,
+            "snippetSha256": "sha256:f6d6b902f3d7bfcd193eb44fa789d685d6dbcd0387a4d4e91c20676a093823f4",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 66,
+            "byteStart": 2478,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L69",
+            "lineEnd": 69,
+            "lineStart": 69,
+            "snippetSha256": "sha256:6bc858b01ef62d68dead3199c680471b699795319e4382b03b424f9c4c2d5542",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "valueSource": "0x03f5dfc0687afbbc9c86bda58667bf3bb235a2d1cbe7273bbbe4d5301fb0b6d2",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_POINTER_MINT_MANAGER",
+          "natspec": "",
+          "range": {
+            "byteLength": 123,
+            "byteStart": 2550,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L70-L71",
+            "lineEnd": 71,
+            "lineStart": 70,
+            "snippetSha256": "sha256:8bf1b0177c9affc79d933f8fc40b1c8a3b73ff8617cda08adaf0dcdd5aa84573",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 66,
+            "byteStart": 2607,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L71",
+            "lineEnd": 71,
+            "lineStart": 71,
+            "snippetSha256": "sha256:432679ff763cb9d9578f97757002818a84d2f38fcef9100040fdcdd48ef4cb15",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "valueSource": "0x136326f089f522351128a5fb79275bd12b2d84fe5bb50d5e46c9f5508d6df7e2",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_POINTER_METADATA_ROUTER",
+          "natspec": "",
+          "range": {
+            "byteLength": 126,
+            "byteStart": 2679,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L72-L73",
+            "lineEnd": 73,
+            "lineStart": 72,
+            "snippetSha256": "sha256:f4df57fa31fee57c9655fbbb013fa01a23ca4e627ab3cb9d1e82f9d3c0c34b00",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 66,
+            "byteStart": 2739,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L73",
+            "lineEnd": 73,
+            "lineStart": 73,
+            "snippetSha256": "sha256:022739529e927299b1394a4d9e1e02361fa484630caf695dd03eca610f6b6344",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "valueSource": "0x7024d3e2544fc48a261933c43d901dca0ee3fc26ea2b857748ab0c295a16f20a",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_POINTER_ARTIST_REGISTRY",
+          "natspec": "",
+          "range": {
+            "byteLength": 126,
+            "byteStart": 2811,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L74-L75",
+            "lineEnd": 75,
+            "lineStart": 74,
+            "snippetSha256": "sha256:1219790e4332d2bf008ff27bed55502e1e3b47f42803eae91902cec3973d916f",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 66,
+            "byteStart": 2871,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L75",
+            "lineEnd": 75,
+            "lineStart": 75,
+            "snippetSha256": "sha256:749b51efe00a5231facb5895d5b5d352353e2de059dfde3cdd8ec523897087ff",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "valueSource": "0xaef5244b535c06d7f8e259ec85024ebdfc2d95b38d64f6570dc627a2684749f4",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_POINTER_ARTWORK_FINALITY_RECOVERY",
+          "natspec": "",
+          "range": {
+            "byteLength": 136,
+            "byteStart": 2943,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L76-L77",
+            "lineEnd": 77,
+            "lineStart": 76,
+            "snippetSha256": "sha256:0470289e2bf463b3dd74237710117422624209c0db347db48e4eca8a28c3bdc2",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 66,
+            "byteStart": 3013,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L77",
+            "lineEnd": 77,
+            "lineStart": 77,
+            "snippetSha256": "sha256:81ec575d497fb1a22fc907b2f59fdce41f4395d5dd11e33e6d9430aab197ce81",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "valueSource": "0xead6d91d79d13e47343aa9d24c2198c5e4fcd612fdd9531d8b2549bab7651474",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_POINTER_ROYALTY_RESOLVER",
+          "natspec": "",
+          "range": {
+            "byteLength": 127,
+            "byteStart": 3085,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L78-L79",
+            "lineEnd": 79,
+            "lineStart": 78,
+            "snippetSha256": "sha256:4f2221561e2218e99325bddaac06ce46a88783627386c9fc703f22e32e06c106",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 66,
+            "byteStart": 3146,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L79",
+            "lineEnd": 79,
+            "lineStart": 79,
+            "snippetSha256": "sha256:781fc196bc38a3492a678ce6a0a7d0591375e9cdb894694f6532ff8ad54a429c",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "valueSource": "0xafcd60ac064e6f5b3428ca05e721b02c16a658af3989d079e29e38df5fab9c91",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_POINTER_ENTROPY_COORDINATOR",
+          "natspec": "",
+          "range": {
+            "byteLength": 130,
+            "byteStart": 3218,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L80-L81",
+            "lineEnd": 81,
+            "lineStart": 80,
+            "snippetSha256": "sha256:a675a4aa80378dea604de904827a145e7688718204df3095ffd2e0f632cdb0d3",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 66,
+            "byteStart": 3282,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L81",
+            "lineEnd": 81,
+            "lineStart": 81,
+            "snippetSha256": "sha256:4dfab833d875e961f50cfade55b416d49ea38fd48b121eef846042ad623d7c04",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "valueSource": "0xb3b3ef20764c647bdeda70b21ab009ff2783106d6995be14389ec6f42ea6dfbb",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_POINTER_ARTWORK_FINALITY_REGISTRY",
+          "natspec": "",
+          "range": {
+            "byteLength": 136,
+            "byteStart": 3354,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L82-L83",
+            "lineEnd": 83,
+            "lineStart": 82,
+            "snippetSha256": "sha256:a20d7ebf8e661c74e7083ab016b1014151429f826093fe45b452c219cbb829e9",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 66,
+            "byteStart": 3424,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L83",
+            "lineEnd": 83,
+            "lineStart": 83,
+            "snippetSha256": "sha256:07ddd6dd1ed4ad1c575e5f15cf1b37cf0a08552f468dd6e7c3375a57900d6e09",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "valueSource": "0xd43cf73a122b502fe5e16c9100883f4371b93df4467921d97b4e220819fb8ebe",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_POINTER_COLLECTION_METADATA",
+          "natspec": "",
+          "range": {
+            "byteLength": 130,
+            "byteStart": 3496,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L84-L85",
+            "lineEnd": 85,
+            "lineStart": 84,
+            "snippetSha256": "sha256:03a0e7328598c8cd435d719837a76325e74c3c4679593ea303813ccc9cce1d68",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 66,
+            "byteStart": 3560,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L85",
+            "lineEnd": 85,
+            "lineStart": 85,
+            "snippetSha256": "sha256:99ec03b21f48c00429113ca69489b1b8335424bee151f125ce20bab918738068",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "valueSource": "0xd90b9e0160ba8e56a77078d6022d52bf0cd862ba5a5adfb6f792287e31399f90",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_POINTER_MODULE_REGISTRY",
+          "natspec": "",
+          "range": {
+            "byteLength": 126,
+            "byteStart": 3632,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L86-L87",
+            "lineEnd": 87,
+            "lineStart": 86,
+            "snippetSha256": "sha256:284815fdb5d8fa8e99db965a7621b35b4363223a73c25b2820fc9a936680b35b",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 66,
+            "byteStart": 3692,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L87",
+            "lineEnd": 87,
+            "lineStart": 87,
+            "snippetSha256": "sha256:0649204a172288fb5f0d96ea3ff80ed6dfe7518b9952cd7d4256dad65d08811d",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "valueSource": "0xde86dd5f33a5b2bd22cfbe7752609f5086a946f705768f7e2e6cb501157a41c4",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_POINTER_MINT_LEDGER",
+          "natspec": "",
+          "range": {
+            "byteLength": 122,
+            "byteStart": 3764,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L88-L89",
+            "lineEnd": 89,
+            "lineStart": 88,
+            "snippetSha256": "sha256:ee739e4a082f9a4eca3585a99bdcfa05d21ae47e62141824f82be612c599dbf0",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 66,
+            "byteStart": 3820,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L89",
+            "lineEnd": 89,
+            "lineStart": 89,
+            "snippetSha256": "sha256:4bc943f0b0930173e05d5fc65e19816fd123a33e94f684d0c8de0df8bedfa985",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "valueSource": "0xe5dd56591e517e4085238d3b93e69c570fcfba756eed59ca2c4e234606e661cd",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_MODULE_STREAM_SYSTEM_MANIFEST",
+          "natspec": "",
+          "range": {
+            "byteLength": 132,
+            "byteStart": 3893,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L91-L92",
+            "lineEnd": 92,
+            "lineStart": 91,
+            "snippetSha256": "sha256:854a3d3e13e929af1f9c9a566be27441cc48a01023826e166370f624d1ed7480",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 66,
+            "byteStart": 3959,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L92",
+            "lineEnd": 92,
+            "lineStart": 92,
+            "snippetSha256": "sha256:3e11950b5528ebe7898bb3bf2b4bb782c57ee02d8da1133c024ca0ede29bbb74",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "valueSource": "0x47fd79d5a6e9b1d75dcedf141a46e2e8f6d95d5a5be2b88f197fa98a1436fec6",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_MODULE_GOVERNANCE_LAYER",
+          "natspec": "",
+          "range": {
+            "byteLength": 126,
+            "byteStart": 4031,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L93-L94",
+            "lineEnd": 94,
+            "lineStart": 93,
+            "snippetSha256": "sha256:d99606b0e3873cbe56409ebd8deedd3fcf355ed8218ed57c6842842ab2f9a2ce",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 66,
+            "byteStart": 4091,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L94",
+            "lineEnd": 94,
+            "lineStart": 94,
+            "snippetSha256": "sha256:13ec6bfc41c8d335ee8da459338bc4362ef3253cb8c8a3f0b966be45094e24a1",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "valueSource": "0xa79066eedc862e1122885d62af037de32376da824a17eceb77f7332aef89ce4e",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_MODULE_REVENUE_RESOLVER",
+          "natspec": "",
+          "range": {
+            "byteLength": 126,
+            "byteStart": 4163,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L95-L96",
+            "lineEnd": 96,
+            "lineStart": 95,
+            "snippetSha256": "sha256:e004c90926ebababaf24f82ea389c06b3fdbbede1e8c7cabd9966e618309d2f4",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 66,
+            "byteStart": 4223,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L96",
+            "lineEnd": 96,
+            "lineStart": 96,
+            "snippetSha256": "sha256:09af86d74888d87209a86090314e9542d11ea63d68bd9861db796dc9bee7f846",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "valueSource": "0x217d16181cfb7c9bb7e1687d0b13ef4b864e9154dc37b60f75a88bec454b5467",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_MODULE_ARTWORK_FINALITY_RECOVERY",
+          "natspec": "",
+          "range": {
+            "byteLength": 135,
+            "byteStart": 4295,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L97-L98",
+            "lineEnd": 98,
+            "lineStart": 97,
+            "snippetSha256": "sha256:e4093732946e9def2fb3d7d6945c65498228e8368d0090098de09185658ddbcc",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 66,
+            "byteStart": 4364,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L98",
+            "lineEnd": 98,
+            "lineStart": 98,
+            "snippetSha256": "sha256:3910acccc613a41d153c16cf762c75765595585d10bd9da0978ecfd04b1aad08",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "valueSource": "0x50e132608386d4b0bf237635eb7bfd9473f667085fa7d7b18f81c5045c289050",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_INTERFACE_STATE_EXPORT_PUBLISHER",
+          "natspec": "",
+          "range": {
+            "byteLength": 70,
+            "byteStart": 4436,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L99",
+            "lineEnd": 99,
+            "lineStart": 99,
+            "snippetSha256": "sha256:c19a7407db3b0b2dd545572ecd05f24d9bc96498d3e148ea2223232ce10a124c",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "selector": null,
+          "type": "bytes4",
+          "typeString": "bytes4",
+          "valueRange": {
+            "byteLength": 10,
+            "byteStart": 4496,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L99",
+            "lineEnd": 99,
+            "lineStart": 99,
+            "snippetSha256": "sha256:b35e519bb03a4a607a6a2b33f5651dc9f4e9e6c9a66efe761792e9987874a884",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "valueSource": "0x77faad4f",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_INTERFACE_ARTWORK_FINALITY_RECOVERY",
+          "natspec": "",
+          "range": {
+            "byteLength": 73,
+            "byteStart": 4512,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L100",
+            "lineEnd": 100,
+            "lineStart": 100,
+            "snippetSha256": "sha256:dfdd1b1d54e5dbb33ed017e7698354429e0ad84b3d57ca67d2c3c5319322112b",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "selector": null,
+          "type": "bytes4",
+          "typeString": "bytes4",
+          "valueRange": {
+            "byteLength": 10,
+            "byteStart": 4575,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L100",
+            "lineEnd": 100,
+            "lineStart": 100,
+            "snippetSha256": "sha256:c6066d9f87df6f31e5d9fe7febafcc2407395513ed4f82c20ec8ae6645091ed1",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "valueSource": "0x83685f5c",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_MAX_MODULE_RECORD_RETURNDATA",
+          "natspec": "",
+          "range": {
+            "byteLength": 62,
+            "byteStart": 4592,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L102",
+            "lineEnd": 102,
+            "lineStart": 102,
+            "snippetSha256": "sha256:1a665d1b547641ae2410597728b0f2ec237c19d2f30976ec9230b90c936523e5",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 5,
+            "byteStart": 4649,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L102",
+            "lineEnd": 102,
+            "lineStart": 102,
+            "snippetSha256": "sha256:d3fe5377f5c075aa8be283208b027ee6244d796ead2ed44842d3e40d8ca587fa",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "valueSource": "2_496",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_MAX_MODULE_MANIFEST_URI_BYTES",
+          "natspec": "",
+          "range": {
+            "byteLength": 63,
+            "byteStart": 4660,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L103",
+            "lineEnd": 103,
+            "lineStart": 103,
+            "snippetSha256": "sha256:f760f40c610cd65d4c5144a5b7bac804615d0ee6ab5b418d0cfa042a1fb2e630",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 5,
+            "byteStart": 4718,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L103",
+            "lineEnd": 103,
+            "lineStart": 103,
+            "snippetSha256": "sha256:f127cada2c166851ea3481aeeca4f1981763135072c4dddcdaf555fc513b4eae",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "valueSource": "2_048",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_MAX_ROUTER_RETURNDATA",
+          "natspec": "",
+          "range": {
+            "byteLength": 56,
+            "byteStart": 4729,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L104",
+            "lineEnd": 104,
+            "lineStart": 104,
+            "snippetSha256": "sha256:19f27a212827269a9b63fdd7af82f2e77b451c341c319a47053bc6415c8beb9b",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 6,
+            "byteStart": 4779,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L104",
+            "lineEnd": 104,
+            "lineStart": 104,
+            "snippetSha256": "sha256:f114034b3e59d4f05c808a3ccd7ffd7fc3cc1d25f714c35df1ccb6067a127663",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "valueSource": "65_536",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_MAX_ROYALTY_BPS",
+          "natspec": "",
+          "range": {
+            "byteLength": 49,
+            "byteStart": 4791,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L105",
+            "lineEnd": 105,
+            "lineStart": 105,
+            "snippetSha256": "sha256:e1f4e2dea6225b8f077a8b8f37d698bea7087ecf17ae3efc95f475ee0cc0b046",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 5,
+            "byteStart": 4835,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L105",
+            "lineEnd": 105,
+            "lineStart": 105,
+            "snippetSha256": "sha256:5033ad0f2453310077c2a7969dea21a06947c6c4f06e6cba5cdaa754213affb2",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "valueSource": "1_000",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_ROYALTY_DENOMINATOR",
+          "natspec": "",
+          "range": {
+            "byteLength": 54,
+            "byteStart": 4846,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L106",
+            "lineEnd": 106,
+            "lineStart": 106,
+            "snippetSha256": "sha256:49d18d64ee1e060e5885afa0812c11a54611ccf94cf0f1a1fd3ef3549bcf97f1",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 6,
+            "byteStart": 4894,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L106",
+            "lineEnd": 106,
+            "lineStart": 106,
+            "snippetSha256": "sha256:391585291af5d1b10159ddc594f1247f88ac1302d06fc210b03f4792669eeeb2",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "valueSource": "10_000",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_CURRENT_ACTION_SELECTOR",
+          "natspec": "",
+          "range": {
+            "byteLength": 87,
+            "byteStart": 4907,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L108",
+            "lineEnd": 108,
+            "lineStart": 108,
+            "snippetSha256": "sha256:9394b4ea10bc789f27c27287fd0f4b68c4bfe5ca67e58c4d1328621ba9af292a",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "selector": null,
+          "type": "bytes4",
+          "typeString": "bytes4",
+          "valueRange": {
+            "byteLength": 36,
+            "byteStart": 4958,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L108",
+            "lineEnd": 108,
+            "lineStart": 108,
+            "snippetSha256": "sha256:2441ba42b2732c53a453bba4fd39a83ad491f16082f6620c367dce704b380623",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          },
+          "valueSource": "bytes4(keccak256(\"currentAction()\"))",
+          "visibility": "private"
+        }
+      ],
+      "structs": [
+        {
+          "members": [
+            {
+              "index": 0,
+              "name": "executing",
+              "natspec": "",
+              "range": {
+                "byteLength": 14,
+                "byteStart": 5032,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L111",
+                "lineEnd": 111,
+                "lineStart": 111,
+                "snippetSha256": "sha256:3787950b8d1aed1283b96c1c70b9cb7274c6848219f526895d199dd15f0357c4",
+                "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+              },
+              "type": "bool",
+              "typeString": "bool"
+            },
+            {
+              "index": 1,
+              "name": "actionId",
+              "natspec": "",
+              "range": {
+                "byteLength": 16,
+                "byteStart": 5056,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L112",
+                "lineEnd": 112,
+                "lineStart": 112,
+                "snippetSha256": "sha256:b14ef6c66b17428049b5e086372bf9ca0e30fe710d865446f9cb6538fbd8d4fd",
+                "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "actionClass",
+              "natspec": "",
+              "range": {
+                "byteLength": 17,
+                "byteStart": 5082,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L113",
+                "lineEnd": 113,
+                "lineStart": 113,
+                "snippetSha256": "sha256:f352f23378a3d5170462559ca88857e49b37668ac14ba09962c637eaf24fb717",
+                "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+              },
+              "type": "uint8",
+              "typeString": "uint8"
+            },
+            {
+              "index": 3,
+              "name": "scopeHash",
+              "natspec": "",
+              "range": {
+                "byteLength": 17,
+                "byteStart": 5109,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L114",
+                "lineEnd": 114,
+                "lineStart": 114,
+                "snippetSha256": "sha256:d30111263932e6fd147aee0549154a5f88f758af1a22932f25002f3aad2a5bcf",
+                "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 4,
+              "name": "oldValueHash",
+              "natspec": "",
+              "range": {
+                "byteLength": 20,
+                "byteStart": 5136,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L115",
+                "lineEnd": 115,
+                "lineStart": 115,
+                "snippetSha256": "sha256:67fdd1d7829aee31992557755c65b4cdb9c9032b53c8b6e383f742aef6a9e1fb",
+                "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 5,
+              "name": "newValueHash",
+              "natspec": "",
+              "range": {
+                "byteLength": 20,
+                "byteStart": 5166,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L116",
+                "lineEnd": 116,
+                "lineStart": 116,
+                "snippetSha256": "sha256:d2f141fa2f6045d2595c71336027afdbd5750819377be07ac81a9982f76f0475",
+                "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            }
+          ],
+          "name": "CurrentAction",
+          "natspec": "",
+          "range": {
+            "byteLength": 192,
+            "byteStart": 5001,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L110-L117",
+            "lineEnd": 117,
+            "lineStart": 110,
+            "snippetSha256": "sha256:b227a877f588e463a8fd5f4f13d6340c53714dcb6ae6dbe0acd7c583ab6f56da",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          }
+        },
+        {
+          "members": [
+            {
+              "index": 0,
+              "name": "status",
+              "natspec": "",
+              "range": {
+                "byteLength": 12,
+                "byteStart": 5234,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L120",
+                "lineEnd": 120,
+                "lineStart": 120,
+                "snippetSha256": "sha256:98aa7a738a837479eca085a4a2733441d13d99136ce5f191dabdafce27ed4ab6",
+                "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+              },
+              "type": "uint8",
+              "typeString": "uint8"
+            },
+            {
+              "index": 1,
+              "name": "moduleType",
+              "natspec": "",
+              "range": {
+                "byteLength": 18,
+                "byteStart": 5256,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L121",
+                "lineEnd": 121,
+                "lineStart": 121,
+                "snippetSha256": "sha256:78601881f7e581d9d5a205a3a3c8fdd8db7b2f23ccd66045d46e2e40addb7529",
+                "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "moduleVersion",
+              "natspec": "",
+              "range": {
+                "byteLength": 21,
+                "byteStart": 5284,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L122",
+                "lineEnd": 122,
+                "lineStart": 122,
+                "snippetSha256": "sha256:e2903bbee7a7677f991f5f90c0a9a36c0af22a2803ce0a42cb9434acf19dc66f",
+                "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 3,
+              "name": "interfaceId",
+              "natspec": "",
+              "range": {
+                "byteLength": 18,
+                "byteStart": 5315,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L123",
+                "lineEnd": 123,
+                "lineStart": 123,
+                "snippetSha256": "sha256:621b54c8fd416779dec8673ca8e536a648d5e5a5a034909137720bc8c90d118e",
+                "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+              },
+              "type": "bytes4",
+              "typeString": "bytes4"
+            },
+            {
+              "index": 4,
+              "name": "runtimeCodeHash",
+              "natspec": "",
+              "range": {
+                "byteLength": 23,
+                "byteStart": 5343,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L124",
+                "lineEnd": 124,
+                "lineStart": 124,
+                "snippetSha256": "sha256:f9be5c7f327a310391371a11c201638820028acaea021e5b61fd05105a7dfcc8",
+                "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 5,
+              "name": "deploymentManifestHash",
+              "natspec": "",
+              "range": {
+                "byteLength": 30,
+                "byteStart": 5376,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L125",
+                "lineEnd": 125,
+                "lineStart": 125,
+                "snippetSha256": "sha256:e525a26b7829bc58441af8a1e64b716977d39a0796249a82c08f996128f70ac5",
+                "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 6,
+              "name": "moduleManifestHash",
+              "natspec": "",
+              "range": {
+                "byteLength": 26,
+                "byteStart": 5416,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L126",
+                "lineEnd": 126,
+                "lineStart": 126,
+                "snippetSha256": "sha256:46d1209b89fd1ed2a01c78f367b0d5356d2c9e7c6c183db22a4e9b6f79606bc7",
+                "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 7,
+              "name": "revision",
+              "natspec": "",
+              "range": {
+                "byteLength": 15,
+                "byteStart": 5452,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L127",
+                "lineEnd": 127,
+                "lineStart": 127,
+                "snippetSha256": "sha256:07b4a1587c2ed4fd064eb7c3608572e27aded7a3fc956985ec46c91667eb9cfa",
+                "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+              },
+              "type": "uint64",
+              "typeString": "uint64"
+            }
+          ],
+          "name": "ModuleRecordFacts",
+          "natspec": "",
+          "range": {
+            "byteLength": 275,
+            "byteStart": 5199,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L119-L128",
+            "lineEnd": 128,
+            "lineStart": 119,
+            "snippetSha256": "sha256:2107081e066ae24d4287e5a390abf0889b72dd4c4595fe3184ddbc723c2a0846",
+            "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+          }
+        }
+      ],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "c21hcnQtY29udHJhY3RzL2NvcmUvU3RyZWFtQ29yZUV4dGVybmFsUmVhZHMuc29sOlN0cmVhbUNvcmVFeHRlcm5hbFJlYWRz",
+    "kind": "library",
+    "linearizedDefinitionIds": [
+      "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamCoreExternalReads",
+    "natspec": "@notice Bounded, fail-closed external reads used by StreamCore.\n @dev The linked library owns no storage and makes no authorization or state-transition\n      decisions. It validates exact returndata shapes before returning compact facts to Core.",
+    "range": {
+      "byteLength": 24303,
+      "byteStart": 1616,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/core/StreamCoreExternalReads.sol#L55-L641",
+      "lineEnd": 641,
+      "lineStart": 55,
+      "snippetSha256": "sha256:5b0e3c73acc940a58f3bcbe7b6b70816dd332abf5309dc4a9226253ebacb7f7f",
+      "sourceSha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/core/StreamCoreExternalReads.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-09-09.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 16
+    },
+    "byCode": {
+      "MISSING_FUNCTION_NATSPEC": 16
+    },
+    "totalCount": 16
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads#function:0x0eb4cdba",
+      "definitionId": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads#function:0x21422496",
+      "definitionId": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads#function:0x24d2e718",
+      "definitionId": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads#function:0x397e8c16",
+      "definitionId": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads#function:0x3c1fe8b2",
+      "definitionId": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads#function:0x3e34db2f",
+      "definitionId": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads#function:0x4849f996",
+      "definitionId": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads#function:0x52f762cc",
+      "definitionId": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads#function:0x5618b7ec",
+      "definitionId": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads#function:0x5af2b486",
+      "definitionId": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads#function:0x67f36d73",
+      "definitionId": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads#function:0x9caddc56",
+      "definitionId": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads#function:0xaff1f44b",
+      "definitionId": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads#function:0xb4ca922d",
+      "definitionId": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads#function:0xb77b2ad8",
+      "definitionId": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads#function:0xc2596011",
+      "definitionId": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads",
+      "severity": "advisory"
+    }
+  ]
+}

@@ -45,7 +45,7 @@ describe("StreamArtworkConceptPreview", () => {
       name: "The artist checks the exact plan",
     });
     expect(approvalView).toHaveTextContent(
-      "If an important detail changes, she must approve again."
+      "The required artist approval checks still need to be completed. This example does not demonstrate an enforced signature over the whole plan."
     );
 
     await user.click(

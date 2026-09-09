@@ -1,0 +1,391 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "smart-contracts/vendor/openzeppelin/IERC165.sol:IERC165#function:0x01ffc9a7",
+          "declaringDefinitionId": "smart-contracts/vendor/openzeppelin/IERC165.sol:IERC165",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "name": "supportsInterface",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x01ffc9a7",
+          "signature": "supportsInterface(bytes4)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamMintGate.sol:IStreamMintGate#function:0xa4285bba",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamMintGate.sol:IStreamMintGate",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "manager",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "executor",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "internalType": "bytes32",
+              "name": "phaseId",
+              "type": "bytes32"
+            },
+            {
+              "index": 4,
+              "internalType": "address",
+              "name": "payer",
+              "type": "address"
+            },
+            {
+              "index": 5,
+              "internalType": "address",
+              "name": "authorizer",
+              "type": "address"
+            },
+            {
+              "index": 6,
+              "internalType": "address[]",
+              "name": "initialRecipients",
+              "type": "address[]"
+            },
+            {
+              "index": 7,
+              "internalType": "address[]",
+              "name": "beneficiaries",
+              "type": "address[]"
+            },
+            {
+              "index": 8,
+              "internalType": "bytes32",
+              "name": "contextHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 9,
+              "internalType": "bytes32",
+              "name": "expectedPolicyHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 10,
+              "internalType": "bytes",
+              "name": "gateData",
+              "type": "bytes"
+            }
+          ],
+          "name": "validateMint",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "struct IStreamMintGate.GateResult",
+              "name": "",
+              "type": "(bytes32,bytes32[],address,uint8,uint64,bytes32)"
+            }
+          ],
+          "selector": "0xa4285bba",
+          "signature": "validateMint(address,address,uint256,bytes32,address,address,address[],address[],bytes32,bytes32,bytes)",
+          "stateMutability": "view"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "published_interface",
+    "classificationReason": "Listed in release-artifacts/contracts.json interfaces.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "validateMint(address,address,uint256,bytes32,address,address,address[],address[],bytes32,bytes32,bytes)",
+          "displaySignature": "validateMint(address,address,uint256,bytes32,address,address,address[],address[],bytes32,bytes32,bytes)",
+          "functionKind": "function",
+          "id": "smart-contracts/interfaces/stream/IStreamMintGate.sol:IStreamMintGate#function:0xa4285bba",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "manager",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "executor",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "phaseId",
+              "type": "bytes32"
+            },
+            {
+              "index": 4,
+              "name": "payer",
+              "type": "address"
+            },
+            {
+              "index": 5,
+              "name": "authorizer",
+              "type": "address"
+            },
+            {
+              "index": 6,
+              "name": "initialRecipients",
+              "storageLocation": "calldata",
+              "type": "address[]"
+            },
+            {
+              "index": 7,
+              "name": "beneficiaries",
+              "storageLocation": "calldata",
+              "type": "address[]"
+            },
+            {
+              "index": 8,
+              "name": "contextHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 9,
+              "name": "expectedPolicyHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 10,
+              "name": "gateData",
+              "storageLocation": "calldata",
+              "type": "bytes"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVyZmFjZXMvc3RyZWFtL0lTdHJlYW1NaW50R2F0ZS5zb2w6SVN0cmVhbU1pbnRHYXRlI2Z1bmN0aW9uOjB4YTQyODViYmE",
+          "kind": "function",
+          "modifiers": [],
+          "name": "validateMint",
+          "natspec": "@notice Validates one mint request against gate-specific evidence.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "GateResult"
+            }
+          ],
+          "range": {
+            "byteLength": 413,
+            "byteStart": 502,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamMintGate.sol#L18-L30",
+            "lineEnd": 30,
+            "lineStart": 18,
+            "snippetSha256": "sha256:827e2ca51295eda776cb5fbebd1d6c53e54c81d52c1c9419d5d96b66a2698e0e",
+            "sourceSha256": "sha256:2d9811516b23d6f98c787e9851a61c891a6d9247cbe907027a4b933d7410bb41"
+          },
+          "selector": "0xa4285bba",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [
+        {
+          "members": [
+            {
+              "index": 0,
+              "name": "authorizationId",
+              "natspec": "",
+              "range": {
+                "byteLength": 23,
+                "byteStart": 249,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamMintGate.sol#L9",
+                "lineEnd": 9,
+                "lineStart": 9,
+                "snippetSha256": "sha256:2724af7d714a42ce733b5be373a7289bb68c79953ec32980d2671c3a4cf10b6f",
+                "sourceSha256": "sha256:2d9811516b23d6f98c787e9851a61c891a6d9247cbe907027a4b933d7410bb41"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "nullifiers",
+              "natspec": "",
+              "range": {
+                "byteLength": 20,
+                "byteStart": 282,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamMintGate.sol#L10",
+                "lineEnd": 10,
+                "lineStart": 10,
+                "snippetSha256": "sha256:053ff02232487523f254b18b0647b2ddd0208cf5fb86242758e128f9b33cdc05",
+                "sourceSha256": "sha256:2d9811516b23d6f98c787e9851a61c891a6d9247cbe907027a4b933d7410bb41"
+              },
+              "type": "bytes32[]",
+              "typeString": "bytes32[]"
+            },
+            {
+              "index": 2,
+              "name": "authorizer",
+              "natspec": "",
+              "range": {
+                "byteLength": 18,
+                "byteStart": 312,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamMintGate.sol#L11",
+                "lineEnd": 11,
+                "lineStart": 11,
+                "snippetSha256": "sha256:2fcb69f90b0960b3247543f1382dfcc7e6395c130aaa2841dbd0d0c4ebf7e65b",
+                "sourceSha256": "sha256:2d9811516b23d6f98c787e9851a61c891a6d9247cbe907027a4b933d7410bb41"
+              },
+              "type": "address",
+              "typeString": "address"
+            },
+            {
+              "index": 3,
+              "name": "authorizerKind",
+              "natspec": "",
+              "range": {
+                "byteLength": 20,
+                "byteStart": 340,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamMintGate.sol#L12",
+                "lineEnd": 12,
+                "lineStart": 12,
+                "snippetSha256": "sha256:84bd574beecb4c6f1014c3cdc2f64bd0e7ae8350ee87ccbbf896fe598cb81f3b",
+                "sourceSha256": "sha256:2d9811516b23d6f98c787e9851a61c891a6d9247cbe907027a4b933d7410bb41"
+              },
+              "type": "uint8",
+              "typeString": "uint8"
+            },
+            {
+              "index": 4,
+              "name": "maxQuantity",
+              "natspec": "",
+              "range": {
+                "byteLength": 18,
+                "byteStart": 370,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamMintGate.sol#L13",
+                "lineEnd": 13,
+                "lineStart": 13,
+                "snippetSha256": "sha256:37939f67656c234fd0e73005035c831b76ae3ae9fca4ad2575928e651f8a2a07",
+                "sourceSha256": "sha256:2d9811516b23d6f98c787e9851a61c891a6d9247cbe907027a4b933d7410bb41"
+              },
+              "type": "uint64",
+              "typeString": "uint64"
+            },
+            {
+              "index": 5,
+              "name": "gateHash",
+              "natspec": "",
+              "range": {
+                "byteLength": 16,
+                "byteStart": 398,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamMintGate.sol#L14",
+                "lineEnd": 14,
+                "lineStart": 14,
+                "snippetSha256": "sha256:275ae52b7a8c55bfb99708753963ee62410ef9b27803e312022ce806fa8ee440",
+                "sourceSha256": "sha256:2d9811516b23d6f98c787e9851a61c891a6d9247cbe907027a4b933d7410bb41"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            }
+          ],
+          "name": "GateResult",
+          "natspec": "",
+          "range": {
+            "byteLength": 200,
+            "byteStart": 221,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamMintGate.sol#L8-L15",
+            "lineEnd": 15,
+            "lineStart": 8,
+            "snippetSha256": "sha256:471eddd9373b2611f67b730a24288759fa9c6f44facf15ab024d2fff457c0a43",
+            "sourceSha256": "sha256:2d9811516b23d6f98c787e9851a61c891a6d9247cbe907027a4b933d7410bb41"
+          }
+        }
+      ],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/interfaces/stream/IStreamMintGate.sol:IStreamMintGate",
+    "inheritance": [
+      {
+        "definitionId": "smart-contracts/vendor/openzeppelin/IERC165.sol:IERC165",
+        "name": "IERC165"
+      }
+    ],
+    "interface": {
+      "abiSha256": "sha256:ff831b25a82ff55f070fbf318dfe306b1d5cf2d28c7c187310aad98aa5d7c64e",
+      "interfaceId": "0xa5d7921d",
+      "interfaceIdSource": "selector_xor",
+      "published": true
+    },
+    "key": "c21hcnQtY29udHJhY3RzL2ludGVyZmFjZXMvc3RyZWFtL0lTdHJlYW1NaW50R2F0ZS5zb2w6SVN0cmVhbU1pbnRHYXRl",
+    "kind": "interface",
+    "linearizedDefinitionIds": [
+      "smart-contracts/interfaces/stream/IStreamMintGate.sol:IStreamMintGate",
+      "smart-contracts/vendor/openzeppelin/IERC165.sol:IERC165"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": "published_interface"
+    },
+    "name": "IStreamMintGate",
+    "natspec": "@notice View-only eligibility module for StreamMintManager phases.",
+    "range": {
+      "byteLength": 739,
+      "byteStart": 178,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamMintGate.sol#L7-L31",
+      "lineEnd": 31,
+      "lineStart": 7,
+      "snippetSha256": "sha256:377838733c8b5c79e3eec43ee7756e1ecf0b20d34f9412556b6703c1b74c944c",
+      "sourceSha256": "sha256:2d9811516b23d6f98c787e9851a61c891a6d9247cbe907027a4b933d7410bb41"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/interfaces/stream/IStreamMintGate.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-09-09.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {},
+    "byCode": {},
+    "totalCount": 0
+  },
+  "warnings": []
+}
