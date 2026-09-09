@@ -143,6 +143,7 @@ export function NftPickerSearch({
       <output
         id={statusId}
         htmlFor={collectionInputId}
+        aria-live="polite"
         className="tw-m-0 tw-text-xs tw-text-iron-300"
       >
         {t(locale, statusKey)}

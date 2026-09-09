@@ -75,6 +75,11 @@ Use browser request blocking only in your testing session; remove the rules afte
   fixed-contract flow using 6529 card search, not collection discovery.
 - [ ] Test keyboard focus, screen-reader announcements for loading/error/input
   guidance, and retry-button access.
+- [ ] With a screen reader active, keep focus in the contract input while a
+  lookup transitions from loading to failure (use the blocking steps above).
+  Confirm the loading and final error messages are announced without moving
+  focus. Record the screen reader and browser used; DOM tests alone do not
+  verify spoken announcements.
 - [ ] Check narrow mobile width, desktop, and 200% zoom for clipping/overlap.
 - [ ] Test English and a non-English browser locale. New lookup messages
   currently fall back to English; no missing-message error should occur.

@@ -355,22 +355,39 @@ describe("NftPicker contract search", () => {
     expect(onContractChange).not.toHaveBeenCalled();
   });
 
-  it("announces errors and lets the user retry lookup", async () => {
+  it("keeps a polite status region from loading to error and lets the user retry", async () => {
     const user = userEvent.setup();
     const retry = jest.fn();
+    let isFetching = true;
     mockedUseContractOverviewQuery.mockImplementation(
       ({ address }: { address?: string }) => ({
         data: null,
-        isFetching: false,
-        isError: Boolean(address),
+        isFetching: Boolean(address) && isFetching,
+        isError: Boolean(address) && !isFetching,
         refetch: retry,
       })
     );
-    render(<NftPicker onChange={jest.fn()} debounceMs={0} />);
-    await user.type(
-      screen.getByLabelText("Select collection"),
-      searchContract.address
+    const onChange = jest.fn();
+    const { rerender } = render(
+      <NftPicker onChange={onChange} debounceMs={0} />
     );
+    const input = screen.getByLabelText("Select collection");
+    const status = screen.getByRole("status");
+    expect(status).toHaveAttribute("aria-live", "polite");
+    expect(input).toHaveAttribute("aria-describedby", status.id);
+    await user.type(input, searchContract.address);
+    expect(await screen.findByText("Looking up collection…")).toBe(status);
+    expect(input).toHaveAttribute("aria-invalid", "false");
+    expect(input).toHaveAttribute("aria-busy", "true");
+
+    isFetching = false;
+    rerender(<NftPicker onChange={onChange} debounceMs={0} />);
+    expect(screen.getByRole("status")).toBe(status);
+    expect(status).toHaveAttribute("aria-live", "polite");
+    expect(status).toHaveTextContent(
+      "Could not load this collection. Try again."
+    );
+    expect(input).toHaveAttribute("aria-busy", "false");
     await user.click(await screen.findByRole("button", { name: "Try again" }));
     expect(retry).toHaveBeenCalledTimes(1);
     expect(screen.getByRole("combobox")).toHaveFocus();
