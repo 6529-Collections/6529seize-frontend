@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import type { MouseEvent, PointerEvent } from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTitle } from "@/contexts/TitleContext";
 import { useUnreadIndicator } from "@/hooks/useUnreadIndicator";
 import { useUnreadNotifications } from "@/hooks/useUnreadNotifications";
@@ -39,7 +39,7 @@ const getIconSlotClass = ({
     ? "tw-h-8 tw-scale-[0.82] sm:tw-h-9 sm:tw-scale-[0.88]"
     : "tw-h-8 tw-scale-[0.9]";
 
-  return `tw-relative tw-z-10 tw-flex tw-translate-y-[var(--mobile-nav-icon-offset,0px)] tw-items-center tw-justify-center tw-transition-transform tw-duration-300 tw-ease-[cubic-bezier(0.22,1,0.36,1)] group-active:tw-opacity-50 group-data-[pressed=true]:tw-opacity-50 motion-reduce:tw-transition-none ${compactClassName}`;
+  return `tw-relative tw-z-10 tw-flex tw-items-center tw-justify-center tw-transition-transform tw-duration-300 tw-ease-[cubic-bezier(0.22,1,0.36,1)] group-active:tw-opacity-50 group-data-[pressed=true]:tw-opacity-50 motion-reduce:tw-transition-none ${compactClassName}`;
 };
 
 const FixedActiveNavIndicator = () => (
@@ -173,6 +173,13 @@ const NavItemContent = ({
   fullPrefetch = false,
 }: Props) => {
   const [pressed, setPressed] = useState(false);
+  const pointerStartRef = useRef<{
+    readonly pointerId: number;
+    readonly x: number;
+    readonly y: number;
+  } | null>(null);
+  const clickSeenRef = useRef(false);
+  const recoveryTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pathname = usePathname();
   // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense
   const searchParams = useSearchParams();
@@ -235,6 +242,15 @@ const NavItemContent = ({
     setTitle,
   ]);
 
+  useEffect(
+    () => () => {
+      if (recoveryTimeoutRef.current !== null) {
+        clearTimeout(recoveryTimeoutRef.current);
+      }
+    },
+    []
+  );
+
   if (item.disabled) {
     return (
       <button
@@ -278,6 +294,7 @@ const NavItemContent = ({
   const href = getNavHref(resolvedItem);
 
   const handleClick = (event: MouseEvent<HTMLAnchorElement>) => {
+    clickSeenRef.current = true;
     if (item.kind === "route" && item.name === "Profile" && !address) {
       event.preventDefault();
       seizeConnect();
@@ -307,8 +324,51 @@ const NavItemContent = ({
 
   const handlePointerDown = (event: PointerEvent<HTMLAnchorElement>) => {
     if (variant === "floating" && event.isPrimary && event.button === 0) {
+      clickSeenRef.current = false;
+      pointerStartRef.current = {
+        pointerId: event.pointerId,
+        x: event.clientX,
+        y: event.clientY,
+      };
+      event.currentTarget.setPointerCapture(event.pointerId);
       setPressed(true);
     }
+  };
+  const handlePointerUp = (event: PointerEvent<HTMLAnchorElement>) => {
+    const pointerStart = pointerStartRef.current;
+    pointerStartRef.current = null;
+    setPressed(false);
+
+    if (pointerStart?.pointerId !== event.pointerId) return;
+    const link = event.currentTarget;
+    const bounds = link.getBoundingClientRect();
+    const releasedOutside =
+      event.clientX < bounds.left ||
+      event.clientX > bounds.right ||
+      event.clientY < bounds.top ||
+      event.clientY > bounds.bottom;
+    const movedByUser = Math.hypot(
+      event.clientX - pointerStart.x,
+      event.clientY - pointerStart.y
+    );
+    if (!releasedOutside || movedByUser > 8) return;
+
+    if (recoveryTimeoutRef.current !== null) {
+      clearTimeout(recoveryTimeoutRef.current);
+    }
+    // A dock transition can move the link away between pointerdown and
+    // pointerup. Give the browser's native click a chance, then recover the
+    // stationary tap only if it did not dispatch one.
+    recoveryTimeoutRef.current = setTimeout(() => {
+      recoveryTimeoutRef.current = null;
+      if (!clickSeenRef.current && link.isConnected) {
+        link.click();
+      }
+    }, 0);
+  };
+  const handlePointerCancel = () => {
+    pointerStartRef.current = null;
+    setPressed(false);
   };
   const clearPressed = () => setPressed(false);
 
@@ -320,9 +380,8 @@ const NavItemContent = ({
       data-pressed={pressed ? "true" : undefined}
       onClick={handleClick}
       onPointerDown={handlePointerDown}
-      onPointerUp={clearPressed}
-      onPointerCancel={clearPressed}
-      onPointerLeave={clearPressed}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerCancel}
       onLostPointerCapture={clearPressed}
       onBlur={clearPressed}
       {...(fullPrefetch ? { prefetch: true } : {})}

@@ -358,34 +358,12 @@ const getDockStyle = ({
       }
     : undefined;
 
-// Keep phone links in the compact row's fixed positions while the capsule animates.
-const phoneNavWidthClassName =
-  "tw-left-1/2 -tw-translate-x-1/2 tw-w-[min(calc(100vw-4.75rem),25.75rem)] sm:tw-w-[min(calc(100vw-6rem),31.75rem)] md:tw-w-[min(calc(100vw-9.25rem),35.75rem)]";
+const floatingNavHitRowClassName = "tw-relative tw-h-full";
 
-const getFloatingNavHitRowClassName = (
-  compact: boolean,
-  isTabletViewport: boolean
-) => {
-  if (isTabletViewport) {
-    return "tw-relative tw-h-full";
-  }
-  const iconOffset = compact
-    ? "[--mobile-nav-icon-offset:2px]"
-    : "[--mobile-nav-icon-offset:-3px] sm:[--mobile-nav-icon-offset:-2px]";
-  // Both icon positions retain a centered 48px square. The extra 4px above
-  // the compact capsule stays within the existing gap to floating controls.
-  return `tw-absolute tw-bottom-0 tw-h-[58px] sm:tw-h-[62px] ${phoneNavWidthClassName} ${iconOffset}`;
-};
-
-const getFloatingNavListClassName = (
-  compact: boolean,
-  isTabletViewport: boolean
-) => {
-  const phoneSpacing = "tw-gap-0 tw-px-0";
-  const tabletSpacing = compact ? "tw-gap-0 tw-px-2.5" : "tw-gap-0.5 tw-px-4";
-
-  return `tw-m-0 tw-flex tw-h-full tw-list-none tw-items-center ${isTabletViewport ? tabletSpacing : phoneSpacing}`;
-};
+const getFloatingNavListClassName = (compact: boolean) =>
+  `tw-m-0 tw-flex tw-h-full tw-list-none tw-items-center ${
+    compact ? "tw-gap-0 tw-px-2.5" : "tw-gap-0.5 tw-px-4"
+  }`;
 
 const getFloatingActivePillClassName = ({
   compact,
@@ -413,29 +391,38 @@ const getFloatingActivePillStyle = ({
   readonly itemCount: number;
   readonly isTabletViewport: boolean;
 }): React.CSSProperties => {
-  if (!isTabletViewport) {
-    // End buttons reserve 48px; the five middle buttons share the remainder.
-    const edgeWidth = `max(3rem, 100% / ${itemCount})`;
-    const edgeMaxWidth = `calc(${edgeWidth} + 0.25rem)`;
-    if (activeItemIndex === 0) {
-      return { left: `calc(${edgeWidth} / 2)`, maxWidth: edgeMaxWidth };
-    }
-    if (activeItemIndex === itemCount - 1) {
-      return {
-        left: `calc(100% - ${edgeWidth} / 2)`,
-        maxWidth: edgeMaxWidth,
-      };
-    }
-    const middleWidth = `(100% - (${edgeWidth} * 2)) / ${itemCount - 2}`;
-    return {
-      left: `calc(${edgeWidth} + (${middleWidth}) * ${activeItemIndex - 0.5})`,
-      maxWidth: `calc(${middleWidth} + 0.25rem)`,
-    };
-  }
-
   const paddingX = compact ? "0.625rem" : "1rem";
   const gap = compact ? "0rem" : "0.125rem";
   const gapCount = Math.max(0, itemCount - 1);
+
+  if (!isTabletViewport) {
+    // End buttons reserve 48px inside the dock's existing visual padding;
+    // the middle buttons share the remaining content width.
+    const innerWidth = `(100% - (${paddingX} * 2) - (${gap} * ${gapCount}))`;
+    const edgeWidth = `max(3rem, (${innerWidth}) / ${itemCount})`;
+    const edgeMaxWidth = `calc(${edgeWidth} + 0.25rem)`;
+    if (activeItemIndex === 0) {
+      return {
+        left: `calc(${paddingX} + (${edgeWidth} / 2))`,
+        maxWidth: edgeMaxWidth,
+      };
+    }
+    if (activeItemIndex === itemCount - 1) {
+      return {
+        left: `calc(100% - ${paddingX} - (${edgeWidth} / 2))`,
+        maxWidth: edgeMaxWidth,
+      };
+    }
+    const middleWidth = `((${innerWidth}) - (${edgeWidth} * 2)) / ${
+      itemCount - 2
+    }`;
+    return {
+      left: `calc(${paddingX} + ${edgeWidth} + (${middleWidth}) * ${
+        activeItemIndex - 0.5
+      } + (${gap} * ${activeItemIndex}))`,
+      maxWidth: `calc(${middleWidth} + 0.25rem)`,
+    };
+  }
 
   return {
     left: `calc(${paddingX} + ((100% - (${paddingX} * 2) - (${gap} * ${gapCount})) / ${itemCount} * ${
@@ -457,10 +444,8 @@ const BottomNavigationFallback: React.FC<BottomNavigationProps> = ({
         className={getDockClassName(false)}
         style={getDockStyle({ compact: false, isTabletViewport })}
       >
-        <div className={getFloatingNavHitRowClassName(false, isTabletViewport)}>
-          <ul
-            className={getFloatingNavListClassName(false, isTabletViewport)}
-          />
+        <div className={floatingNavHitRowClassName}>
+          <ul className={getFloatingNavListClassName(false)} />
         </div>
       </div>
     </nav>
@@ -570,30 +555,22 @@ const BottomNavigationResolvedContent: React.FC<
       >
         <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-overflow-hidden tw-rounded-[inherit]">
           <div
-            className={`tw-relative tw-h-full ${isTabletViewport ? "" : phoneNavWidthClassName}`}
-          >
-            <div
-              aria-hidden="true"
-              data-testid="mobile-dock-active-pill"
-              className={getFloatingActivePillClassName({
-                compact,
-                visible: hasActiveItem,
-              })}
-              style={getFloatingActivePillStyle({
-                activeItemIndex: hasActiveItem ? activeItemIndex : 0,
-                compact,
-                itemCount: navItems.length,
-                isTabletViewport,
-              })}
-            />
-          </div>
+            aria-hidden="true"
+            data-testid="mobile-dock-active-pill"
+            className={getFloatingActivePillClassName({
+              compact,
+              visible: hasActiveItem,
+            })}
+            style={getFloatingActivePillStyle({
+              activeItemIndex: hasActiveItem ? activeItemIndex : 0,
+              compact,
+              itemCount: navItems.length,
+              isTabletViewport,
+            })}
+          />
         </div>
-        <div
-          className={getFloatingNavHitRowClassName(compact, isTabletViewport)}
-        >
-          <ul
-            className={getFloatingNavListClassName(compact, isTabletViewport)}
-          >
+        <div className={floatingNavHitRowClassName}>
+          <ul className={getFloatingNavListClassName(compact)}>
             {navItems.map((item) => (
               <li
                 key={item.name}

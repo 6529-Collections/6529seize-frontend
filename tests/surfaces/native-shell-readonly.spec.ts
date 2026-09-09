@@ -117,6 +117,13 @@ async function expectUsableNotificationTarget(dock: Locator) {
       throw new Error("Expected a visible notification bell icon.");
     }
     const iconBox = icon.getBoundingClientRect();
+    const dockElement = link.closest(
+      '[data-mobile-bottom-nav-dock="true"]'
+    );
+    if (!dockElement) {
+      throw new Error("Expected the notification link inside the mobile dock.");
+    }
+    const dockBox = dockElement.getBoundingClientRect();
     const center = {
       x: iconBox.x + iconBox.width / 2,
       y: iconBox.y + iconBox.height / 2,
@@ -136,6 +143,7 @@ async function expectUsableNotificationTarget(dock: Locator) {
 
     return {
       center,
+      dockRightClearance: dockBox.right - center.x,
       width: box.width,
       height: box.height,
       horizontalOffset: Math.abs(center.x - (box.x + box.width / 2)),
@@ -149,6 +157,7 @@ async function expectUsableNotificationTarget(dock: Locator) {
   expect(target.horizontalOffset).toBeLessThanOrEqual(0.5);
   expect(target.topClearance).toBeGreaterThanOrEqual(24 - 0.01);
   expect(target.bottomClearance).toBeGreaterThanOrEqual(24 - 0.01);
+  expect(target.dockRightClearance).toBeGreaterThanOrEqual(24 - 0.01);
   expect(target.missedPoints).toEqual([]);
 
   const overlappingLinks = await dock.getByRole("link").evaluateAll((links) => {
@@ -326,9 +335,6 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
         exact: true,
       });
       await expect(bell).toBeVisible();
-      const expandedBounds = await bell.boundingBox();
-      expect(expandedBounds).not.toBeNull();
-
       for (const compact of [false, true]) {
         await test.step(`${width}px ${compact ? "compact" : "expanded"}`, async () => {
           if (compact) {
@@ -341,9 +347,6 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
             .toBe(compact ? 54 : 64);
 
           const center = await expectUsableNotificationTarget(dock);
-          if (compact) {
-            expect(await bell.boundingBox()).toEqual(expandedBounds);
-          }
           // Use trusted touchscreen input at the outer corner, where the
           // original capsule-shaped link silently dropped the first tap.
           const point = { x: center.x + 23, y: center.y + 23 };
@@ -388,6 +391,24 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
           await expect(
             dock.getByRole("link", { name: "Notifications", exact: true })
           ).toHaveAttribute("aria-current", "page");
+          const activePill = dock.getByTestId("mobile-dock-active-pill");
+          await expect(activePill).toHaveCSS("opacity", "1");
+          const activePillOffset = await activePill.evaluate((pill) => {
+            const pillBox = pill.getBoundingClientRect();
+            const activeIcon = pill
+              .closest('[data-mobile-bottom-nav-dock="true"]')
+              ?.querySelector('a[aria-current="page"] svg');
+            if (!activeIcon) {
+              throw new Error("Expected an active mobile navigation icon.");
+            }
+            const iconBox = activeIcon.getBoundingClientRect();
+            return Math.abs(
+              pillBox.x +
+                pillBox.width / 2 -
+                (iconBox.x + iconBox.width / 2)
+            );
+          });
+          expect(activePillOffset).toBeLessThanOrEqual(0.5);
           if (width === 360 && !compact) {
             await expect(bell).not.toHaveAttribute("data-pressed");
             await page.keyboard.press("Tab");
