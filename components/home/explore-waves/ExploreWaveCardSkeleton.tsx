@@ -10,7 +10,7 @@ export function ExploreWaveCardSkeleton({
   if (variant === "discover") {
     return (
       <div className="tw-relative tw-flex tw-h-full tw-min-h-[22rem] tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950">
-        <div className="tw-absolute tw-inset-0 tw-bg-gradient-to-b tw-from-iron-800/60 tw-to-iron-950 tw-to-60%" />
+        <div className="tw-absolute tw-inset-0 tw-bg-gradient-to-b tw-from-iron-800/60 tw-to-black tw-to-60%" />
         <div className="tw-relative tw-flex tw-flex-1 tw-flex-col tw-px-5 tw-pb-5 tw-pt-40">
           <div className="tw-h-6 tw-w-3/4 tw-animate-pulse tw-rounded-md tw-bg-iron-800 motion-reduce:tw-animate-none" />
           <div className="tw-mt-3 tw-min-h-10 tw-space-y-2">
