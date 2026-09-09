@@ -56,10 +56,17 @@ Use browser request blocking only in your testing session; remove the rules afte
 - [ ] Block both contract routes. Wait for request retries to finish: the
   picker shows a lookup error and Try again, not a false not-found result.
   Remove blocking and click Try again; the lookup recovers.
+- [ ] Activate Try again with the keyboard. Focus returns to the contract
+  input while the retry control is hidden during loading; it must not fall
+  back to the page body.
 - [ ] Check Network: the updated picker never calls either `/collections`
   search route. Token-metadata and owner-NFT requests are expected.
 - [ ] Open the site's `/api/alchemy/collections?query=memes` directly:
   expect HTTP 410, the address-only error, and `Cache-Control: no-store`.
+- [ ] After paired BE PR #1974 is deployed, request
+  `<API_ENDPOINT>/alchemy-proxy/collections?query=memes` directly. Expect
+  HTTP 410, the address-only error, and `Cache-Control: no-store`. This is a
+  separate BE deployment check; the FE release alone does not guarantee it.
 
 ## Shared picker regression and accessibility
 

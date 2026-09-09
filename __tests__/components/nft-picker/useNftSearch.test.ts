@@ -103,3 +103,44 @@ it("distinguishes not-found results from request errors and exposes retry", () =
   });
   expect(refetch).toHaveBeenCalledTimes(1);
 });
+
+it.each([0, 250])(
+  "hides the old contract during a valid-to-valid edit with %i ms debounce",
+  (debounceMs) => {
+    const nextAddress = "0x000000000000000000000000000000000000beef";
+    // Even if the query layer retains old data while disabled, it must be hidden.
+    lookup.mockImplementation(
+      ({ address: input }) =>
+        ({
+          data: {
+            address: input ?? address,
+            name: "Collection",
+            tokenType: "ERC721",
+          },
+          isFetching: false,
+          isSuccess: true,
+          isError: false,
+          refetch,
+        }) as unknown as ReturnType<typeof useContractOverviewQuery>
+    );
+    const { result } = renderHook(() =>
+      useNftSearch({ chain: "ethereum", debounceMs })
+    );
+    act(() => result.current.setQuery(address));
+    act(() => jest.advanceTimersByTime(debounceMs));
+    expect(result.current.suggestionList[0]?.address).toBe(address);
+
+    act(() => result.current.setQuery(nextAddress));
+    expect(result.current.suggestionList).toEqual([]);
+    expect(result.current.isLoading).toBe(true);
+    expect(lookup).toHaveBeenLastCalledWith({
+      address: undefined,
+      chain: "ethereum",
+      enabled: false,
+    });
+
+    act(() => jest.advanceTimersByTime(debounceMs));
+    expect(result.current.suggestionList[0]?.address).toBe(nextAddress);
+    expect(result.current.isLoading).toBe(false);
+  }
+);

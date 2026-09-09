@@ -54,11 +54,13 @@ current localization debt; translating the full picker is separate work.
   and still needs an owner audit before the Alchemy deadline.
 - Core implementation is deferred. An installed older desktop renderer can
   still call its local Alchemy search until it is synced and released.
-- Ship the FE address-only UI and BE retirement together. The address endpoint
-  already exists on both old and new BE versions, so FE can be released first
-  to minimize disruption to old web clients. BE retirement ends the search
-  fallback for old web/desktop clients; neither release preserves their keyword
-  discovery. Coordinate that compatibility loss with the later Core release.
+- Treat this as one coordinated migration: deploy the FE address-only UI first.
+  The address endpoint already exists on both old and new BE versions. Gate BE
+  retirement on older web/desktop clients being updated, or on explicit release
+  owner acceptance of the compatibility loss for remaining older clients.
+  Record that decision and the Core release plan before deploying BE. Its 410
+  response ends their search fallback; neither release preserves keyword
+  discovery. The provider deadline still applies to clients that are not updated.
 - Do not roll back to the deprecated search implementation after September 30,
   2026. A corrective release must keep address-only behavior or use another
   supported provider.

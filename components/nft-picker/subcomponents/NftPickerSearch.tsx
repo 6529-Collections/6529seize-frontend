@@ -140,17 +140,21 @@ export function NftPickerSearch({
           />
         )}
       </div>
-      <p
+      <output
         id={statusId}
-        role="status"
+        htmlFor={collectionInputId}
         className="tw-m-0 tw-text-xs tw-text-iron-300"
       >
         {t(locale, statusKey)}
-      </p>
+      </output>
       {isError && !loading && (
         <button
           type="button"
-          onClick={onRetry}
+          onClick={() => {
+            // Retry disappears while fetching; keep keyboard focus in the lookup.
+            inputRef.current?.focus();
+            onRetry();
+          }}
           className="tw-self-start tw-rounded-md tw-px-2 tw-py-2 tw-text-sm tw-text-primary-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
         >
           {t(locale, "nftPicker.address.retry")}

@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ReactNode } from "react";
 
@@ -102,6 +102,49 @@ beforeEach(() => {
     isFetching: false,
   });
 });
+
+it.each([0, 250])(
+  "prevents mouse and Enter selection of the old address during a %i ms debounce",
+  (debounceMs) => {
+    jest.useFakeTimers();
+    try {
+      const onContractChange = jest.fn();
+      mockedUseContractOverviewQuery.mockImplementation(
+        ({ address }: { address?: string }) => ({
+          data:
+            address === fixedContract.address ? fixedContract : searchContract,
+          isFetching: false,
+          isSuccess: true,
+        })
+      );
+      render(
+        <NftPicker
+          onChange={jest.fn()}
+          onContractChange={onContractChange}
+          debounceMs={debounceMs}
+        />
+      );
+      const input = screen.getByRole("combobox");
+      fireEvent.change(input, { target: { value: searchContract.address } });
+      act(() => jest.advanceTimersByTime(debounceMs));
+      expect(screen.getByText("Search Memes")).toBeInTheDocument();
+
+      fireEvent.change(input, { target: { value: fixedContract.address } });
+      expect(screen.queryByText("Search Memes")).not.toBeInTheDocument();
+      expect(screen.queryByRole("option")).not.toBeInTheDocument();
+      fireEvent.keyDown(input, { key: "Enter" });
+      expect(onContractChange).not.toHaveBeenCalled();
+
+      act(() => jest.advanceTimersByTime(debounceMs));
+      fireEvent.keyDown(input, { key: "Enter" });
+      expect(onContractChange).toHaveBeenCalledWith(
+        expect.objectContaining({ address: fixedContract.address })
+      );
+    } finally {
+      jest.useRealTimers();
+    }
+  }
+);
 
 describe("NftPicker fixedContract", () => {
   it("renders the fixed contract without collection search or clear-contract action", () => {
@@ -330,6 +373,7 @@ describe("NftPicker contract search", () => {
     );
     await user.click(await screen.findByRole("button", { name: "Try again" }));
     expect(retry).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole("combobox")).toHaveFocus();
   });
 
   it("emits onContractChange only after a user selects a searched contract", async () => {
