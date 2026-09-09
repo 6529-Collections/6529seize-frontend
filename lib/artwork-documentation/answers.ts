@@ -1,11 +1,12 @@
 import type { ApiArtworkDocumentationAnswer } from "@/generated/models/ApiArtworkDocumentationAnswer";
 import type { ApiArtworkDocumentationContext } from "@/generated/models/ApiArtworkDocumentationContext";
+import { ApiArtworkDocumentationOperationOpEnum } from "@/generated/models/ApiArtworkDocumentationOperation";
 import type { PendingEdit } from "./draft-controller";
 import { recordValue, type FieldValue, type ModuleId } from "./registry";
 
 export function isRedacted(value: unknown): boolean {
   return (
-    !!value &&
+    value !== null &&
     typeof value === "object" &&
     "redacted" in value &&
     value.redacted === true
@@ -21,13 +22,11 @@ export function readAnswer(
     (edit) => edit.moduleId === moduleId && edit.operation.field === field
   );
   if (pending)
-    return pending.operation.op === "set"
+    return pending.operation.op === ApiArtworkDocumentationOperationOpEnum.Set
       ? pending.operation.answer
       : undefined;
   const answer = context.modules[moduleId]?.answers[field];
-  return !answer || isRedacted(answer)
-    ? undefined
-    : (answer as ApiArtworkDocumentationAnswer);
+  return !answer || isRedacted(answer) ? undefined : answer;
 }
 export function answerValue(
   context: ApiArtworkDocumentationContext,
@@ -61,7 +60,8 @@ export function requiredPaths(
   if (Array.isArray(techniques) && techniques.includes("miniature"))
     result.add("process.construction_note");
   const people = answerValue(context, "rights", "people_depicted", edits);
-  if (people && people !== "none") result.add("rights.consent_status");
+  if (typeof people === "string" && people !== "" && people !== "none")
+    result.add("rights.consent_status");
   if (people === "includes_minors" || people === "uncertain")
     result.add("rights.identifiability_note");
   if (

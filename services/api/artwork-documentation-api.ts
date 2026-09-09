@@ -349,7 +349,7 @@ export const pinDocumentationArtistRecord = (
     errorMode: "structured",
   });
 export function documentationErrorStatus(error: unknown): number | undefined {
-  return error &&
+  return error !== null &&
     typeof error === "object" &&
     "status" in error &&
     typeof error.status === "number"

@@ -383,7 +383,7 @@ export function parseSection(
 }
 
 export function recordValue(value: unknown): Record<string, FieldValue> {
-  return value && typeof value === "object" && !Array.isArray(value)
+  return value !== null && typeof value === "object" && !Array.isArray(value)
     ? (value as Record<string, FieldValue>)
     : {};
 }
@@ -405,7 +405,7 @@ export function initialValue(editor: ValueEditor): FieldValue {
     case "object":
       return Object.fromEntries(
         Object.entries(editor.fields)
-          .filter(([, field]) => field.kind === "boolean")
+          .filter(([, nestedEditor]) => nestedEditor.kind === "boolean")
           .map(([key]) => [key, false])
       );
     case "localized":
@@ -428,7 +428,8 @@ export function initialValue(editor: ValueEditor): FieldValue {
       return 0;
     case "asset":
       return editor.multiple ? [] : "";
-    default:
+    case "text":
+    case "choice":
       return "";
   }
 }

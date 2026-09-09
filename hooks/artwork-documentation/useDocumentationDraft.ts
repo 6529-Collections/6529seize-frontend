@@ -38,6 +38,8 @@ export function useDocumentationDraft(initial: ApiArtworkDocumentationContext) {
     const beforeUnload = (event: BeforeUnloadEvent) => {
       if (controller.snapshot().dirty) {
         event.preventDefault();
+        // Legacy WebViews need returnValue as well as preventDefault to protect unsaved edits.
+        // eslint-disable-next-line @typescript-eslint/no-deprecated -- Retain the documented beforeunload compatibility mechanism.
         event.returnValue = "";
       }
     };

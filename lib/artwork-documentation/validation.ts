@@ -1,6 +1,10 @@
 import type { ApiArtworkDocumentationValueSchema } from "@/generated/models/ApiArtworkDocumentationValueSchema";
 import type { ApiArtworkDocumentationContext } from "@/generated/models/ApiArtworkDocumentationContext";
-import type { ApiArtworkDocumentationOperation } from "@/generated/models/ApiArtworkDocumentationOperation";
+import {
+  ApiArtworkDocumentationOperationOpEnum,
+  type ApiArtworkDocumentationOperation,
+} from "@/generated/models/ApiArtworkDocumentationOperation";
+import { ApiArtworkDocumentationAnswerStatusEnum } from "@/generated/models/ApiArtworkDocumentationAnswer";
 
 /** Client guidance uses the server's registered schema; server validation remains authoritative. */
 function matchesDocumentationSchema(
@@ -48,7 +52,7 @@ function matchesDocumentationSchema(
           ))
       );
     case "object": {
-      if (!value || typeof value !== "object" || Array.isArray(value))
+      if (value === null || typeof value !== "object" || Array.isArray(value))
         return false;
       const record = value as Record<string, unknown>;
       const properties = schema.properties ?? {};
@@ -67,6 +71,7 @@ function matchesDocumentationSchema(
         )
       );
     }
+    case undefined:
     default:
       return true;
   }
@@ -87,7 +92,8 @@ export function validDocumentationOperation(
   moduleId: string,
   operation: ApiArtworkDocumentationOperation
 ): boolean {
-  if (operation.op === "unset") return true;
+  if (operation.op === ApiArtworkDocumentationOperationOpEnum.Unset)
+    return true;
   if (
     moduleId === "artwork" &&
     operation.field === "canonical_asset_id" &&
@@ -104,11 +110,11 @@ export function validDocumentationOperation(
       return false;
   }
   const definition = context.profile.modules
-    .find((module) => module.id === moduleId)
+    .find((module) => String(module.id) === moduleId)
     ?.fields.find((field) => field.id === operation.field);
   const answer = operation.answer;
   if (!definition || !answer) return false;
-  if (answer.status !== "provided")
+  if (answer.status !== ApiArtworkDocumentationAnswerStatusEnum.Provided)
     return !answer.explanation || Array.from(answer.explanation).length <= 1000;
   return matchesDocumentationSchema(answer.value, definition.value_schema);
 }

@@ -158,42 +158,14 @@ export class DocumentationDraftController {
     generation: number,
     signal: AbortSignal
   ): Promise<boolean> {
-    while (
-      this.edits.size ||
-      this.pendingBatch ||
-      this.queuedContent.size ||
-      this.pendingContent
-    ) {
+    while (this.hasQueuedEdits()) {
       if (!this.edits.size && !this.pendingBatch) {
         if (!(await this.saveQueuedContent(generation, signal))) return false;
         continue;
       }
-      const first = this.edits.values().next().value as PendingEdit | undefined;
-      if (!this.pendingBatch && first)
-        this.pendingBatch = {
-          context: this.context,
-          moduleId: first.moduleId,
-          edits: [...this.edits.values()].filter(
-            (edit) => edit.moduleId === first.moduleId
-          ),
-          key: crypto.randomUUID(),
-        };
-      const batch = this.pendingBatch;
+      const batch = this.nextBatch();
       if (!batch) break;
-      if (
-        !batch.edits.every((edit) =>
-          validDocumentationOperation(
-            batch.context,
-            batch.moduleId,
-            edit.operation
-          )
-        )
-      ) {
-        this.pendingBatch = null;
-        this.state = "invalid";
-        this.emit();
-        return false;
-      }
+      if (!this.validateBatch(batch)) return false;
       this.state = "saving";
       this.emit();
       try {
@@ -204,30 +176,79 @@ export class DocumentationDraftController {
           batch.key,
           signal
         );
-        if (signal.aborted || generation !== this.generation) return false;
-        this.context = result;
-        for (const edit of batch.edits) {
-          const key = `${edit.moduleId}.${edit.operation.field}`;
-          if (this.edits.get(key)?.sequence === edit.sequence)
-            this.edits.delete(key);
-        }
-        this.pendingBatch = null;
+        if (!this.isCurrentSave(generation, signal)) return false;
+        this.acknowledgeBatch(batch, result);
       } catch (error) {
-        if (generation === this.generation) await this.handleFailure(error);
-        return false;
+        return this.failSave(error, generation);
       }
     }
     this.state = "clean";
     this.emit();
     return true;
   }
+  private hasQueuedEdits(): boolean {
+    return (
+      this.edits.size > 0 ||
+      this.pendingBatch !== null ||
+      this.queuedContent.size > 0 ||
+      this.pendingContent !== null
+    );
+  }
+  private nextBatch(): Batch | null {
+    if (this.pendingBatch) return this.pendingBatch;
+    const first = this.edits.values().next().value;
+    if (!first) return null;
+    this.pendingBatch = {
+      context: this.context,
+      moduleId: first.moduleId,
+      edits: [...this.edits.values()].filter(
+        (edit) => edit.moduleId === first.moduleId
+      ),
+      key: crypto.randomUUID(),
+    };
+    return this.pendingBatch;
+  }
+  private validateBatch(batch: Batch): boolean {
+    if (
+      !batch.edits.every((edit) =>
+        validDocumentationOperation(
+          batch.context,
+          batch.moduleId,
+          edit.operation
+        )
+      )
+    ) {
+      this.pendingBatch = null;
+      this.state = "invalid";
+      this.emit();
+      return false;
+    }
+    return true;
+  }
+  private isCurrentSave(generation: number, signal: AbortSignal): boolean {
+    return !signal.aborted && generation === this.generation;
+  }
+  private acknowledgeBatch(
+    batch: Batch,
+    result: ApiArtworkDocumentationContext
+  ): void {
+    this.context = result;
+    for (const edit of batch.edits) {
+      const key = `${edit.moduleId}.${edit.operation.field}`;
+      if (this.edits.get(key)?.sequence === edit.sequence)
+        this.edits.delete(key);
+    }
+    this.pendingBatch = null;
+  }
+  private async failSave(error: unknown, generation: number): Promise<false> {
+    if (generation === this.generation) await this.handleFailure(error);
+    return false;
+  }
   private async saveQueuedContent(
     generation: number,
     signal: AbortSignal
   ): Promise<boolean> {
-    const edit = this.queuedContent.values().next().value as
-      | QueuedContent
-      | undefined;
+    const edit = this.queuedContent.values().next().value;
     if (!this.pendingContent && edit)
       this.pendingContent = {
         edit,

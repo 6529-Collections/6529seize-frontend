@@ -18,6 +18,10 @@ export async function sha256Base64(blob: Blob): Promise<string> {
   return btoa(String.fromCharCode(...digest));
 }
 
+function ensureNotAborted(signal: AbortSignal): void {
+  if (signal.aborted) throw new DOMException("Aborted", "AbortError");
+}
+
 export async function transferDocumentationFile({
   contextId,
   session,
@@ -40,7 +44,7 @@ export async function transferDocumentationFile({
   const completed = new Map<number, ApiArtworkDocumentationCompletePart>();
   let sent = 0;
   for (const received of session.received_parts) {
-    if (signal.aborted) throw new DOMException("Aborted", "AbortError");
+    ensureNotAborted(signal);
     const start = (received.part_number - 1) * partSize;
     const bytes = file.slice(start, Math.min(start + partSize, file.size));
     if ((await sha256Base64(bytes)) !== received.checksum_sha256)
@@ -62,25 +66,24 @@ export async function transferDocumentationFile({
   signal.addEventListener("abort", cancelWorkers, { once: true });
   if (signal.aborted) workersAbort.abort();
   const workerSignal = workersAbort.signal;
-  let failure: unknown;
-  let failed = false;
+  const outcome: { failure?: { error: unknown } } = {};
   let cursor = 0;
   const transfer = async () => {
     while (cursor < remaining.length) {
       const partNumber = remaining[cursor++];
       if (partNumber === undefined) return;
-      if (workerSignal.aborted) throw new DOMException("Aborted", "AbortError");
+      ensureNotAborted(workerSignal);
       const start = (partNumber - 1) * partSize;
       const bytes = file.slice(start, Math.min(start + partSize, file.size));
       const checksum = await sha256Base64(bytes);
-      if (workerSignal.aborted) throw new DOMException("Aborted", "AbortError");
+      ensureNotAborted(workerSignal);
       const signed = await signDocumentationParts(
         contextId,
         session.upload_id,
         [{ part_number: partNumber, checksum_sha256: checksum }],
         workerSignal
       );
-      if (workerSignal.aborted) throw new DOMException("Aborted", "AbortError");
+      ensureNotAborted(workerSignal);
       const part = signed.parts[0];
       if (!part) throw new Error("MISSING_SIGNED_PART");
       const response = await fetch(part.url, {
@@ -89,7 +92,7 @@ export async function transferDocumentationFile({
         headers: part.headers,
         signal: workerSignal,
       });
-      if (workerSignal.aborted) throw new DOMException("Aborted", "AbortError");
+      ensureNotAborted(workerSignal);
       const etag = response.headers.get("etag");
       if (!response.ok || !etag) throw new Error("PART_UPLOAD_FAILED");
       completed.set(partNumber, {
@@ -107,9 +110,8 @@ export async function transferDocumentationFile({
         try {
           await transfer();
         } catch (error) {
-          if (!failed) {
-            failed = true;
-            failure = error;
+          if (!outcome.failure) {
+            outcome.failure = { error };
             workersAbort.abort();
           }
         }
@@ -118,7 +120,7 @@ export async function transferDocumentationFile({
   } finally {
     signal.removeEventListener("abort", cancelWorkers);
   }
-  if (failed) throw failure;
+  if (outcome.failure) throw outcome.failure.error;
   return completeDocumentationUpload(
     contextId,
     session.upload_id,
