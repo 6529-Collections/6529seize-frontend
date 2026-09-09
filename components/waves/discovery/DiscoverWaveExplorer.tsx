@@ -237,10 +237,10 @@ function DiscoverWaveControls({
   const scoreFiltersEnabled = isScoreSort(activeSort);
 
   return (
-    <fieldset className="tw-m-0 tw-flex tw-w-full tw-min-w-0 tw-flex-col tw-gap-2 tw-rounded-lg tw-border-0 tw-bg-black/20 tw-p-1.5 tw-ring-1 tw-ring-inset tw-ring-white/5 xl:tw-flex-row xl:tw-items-center">
+    <fieldset className="tw-m-0 tw-w-full tw-min-w-0 tw-rounded-lg tw-border-0 tw-bg-black/20 tw-p-1.5 tw-ring-1 tw-ring-inset tw-ring-white/5">
       <legend className="tw-sr-only">Discovery controls</legend>
-      <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-y-3 xl:tw-flex-row xl:tw-items-center xl:tw-gap-x-4">
-        <div className="tw-min-w-0">
+      <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-3">
+        <div className="tw-w-max tw-min-w-0 tw-max-w-full">
           <CommonTabs<DiscoverSort>
             items={SORT_ITEMS}
             activeItem={activeSort}
@@ -250,11 +250,7 @@ function DiscoverWaveControls({
             fill={false}
           />
         </div>
-        <div
-          className="tw-hidden tw-h-6 tw-w-px tw-flex-shrink-0 tw-bg-white/10 xl:tw-block"
-          aria-hidden="true"
-        />
-        <div className="tw-no-scrollbar tw-flex tw-min-w-0 tw-items-center tw-gap-4 tw-overflow-x-auto tw-scroll-smooth tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/60">
+        <div className="tw-no-scrollbar tw-flex tw-w-max tw-min-w-0 tw-max-w-full tw-items-center tw-gap-4 tw-overflow-x-auto tw-scroll-smooth tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/60">
           <div
             role="radiogroup"
             className={`tw-flex tw-flex-shrink-0 tw-flex-nowrap tw-gap-1.5 tw-transition-opacity ${

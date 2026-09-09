@@ -50,6 +50,8 @@ from home discovery.
   when it is absent, with drop count and relative activity time aligned below.
 - Artwork is subtly desaturated at rest and returns to full color on hover or
   keyboard focus. Touch cards retain full color.
+- Sort and score-filter groups share a row when space allows and wrap when
+  needed. On narrow screens, each group keeps its horizontal scrolling.
 - Use `/discover` as the larger browse surface when home six-card discovery is
   not enough.
 
