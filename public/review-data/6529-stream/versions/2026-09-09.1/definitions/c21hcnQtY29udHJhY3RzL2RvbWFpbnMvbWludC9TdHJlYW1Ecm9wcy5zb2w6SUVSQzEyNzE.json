@@ -1,0 +1,162 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "smart-contracts/domains/mint/StreamDrops.sol:IERC1271#function:0x1626ba7e",
+          "declaringDefinitionId": "smart-contracts/domains/mint/StreamDrops.sol:IERC1271",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "_hash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes",
+              "name": "_signature",
+              "type": "bytes"
+            }
+          ],
+          "name": "isValidSignature",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes4",
+              "name": "",
+              "type": "bytes4"
+            }
+          ],
+          "selector": "0x1626ba7e",
+          "signature": "isValidSignature(bytes32,bytes)",
+          "stateMutability": "view"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "first_party_candidate",
+    "classificationReason": "First-party protocol definition outside the release and published-interface catalogs.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "isValidSignature(bytes32,bytes)",
+          "displaySignature": "isValidSignature(bytes32,bytes)",
+          "functionKind": "function",
+          "id": "smart-contracts/domains/mint/StreamDrops.sol:IERC1271#function:0x1626ba7e",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_hash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "_signature",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2RvbWFpbnMvbWludC9TdHJlYW1Ecm9wcy5zb2w6SUVSQzEyNzEjZnVuY3Rpb246MHgxNjI2YmE3ZQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "isValidSignature",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes4"
+            }
+          ],
+          "range": {
+            "byteLength": 97,
+            "byteStart": 520,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamDrops.sol#L21",
+            "lineEnd": 21,
+            "lineStart": 21,
+            "snippetSha256": "sha256:7864f96adf0b00aa815826222db8e099cafe552fc03fa69cb575982c3563055a",
+            "sourceSha256": "sha256:2fed6886b797c7ea002a90c8a613d3d678c7ef9dc7b8182b255117c2a390b175"
+          },
+          "selector": "0x1626ba7e",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/domains/mint/StreamDrops.sol:IERC1271",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "c21hcnQtY29udHJhY3RzL2RvbWFpbnMvbWludC9TdHJlYW1Ecm9wcy5zb2w6SUVSQzEyNzE",
+    "kind": "interface",
+    "linearizedDefinitionIds": [
+      "smart-contracts/domains/mint/StreamDrops.sol:IERC1271"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "IERC1271",
+    "natspec": "",
+    "range": {
+      "byteLength": 124,
+      "byteStart": 495,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamDrops.sol#L20-L22",
+      "lineEnd": 22,
+      "lineStart": 20,
+      "snippetSha256": "sha256:bd9094e2355036914cd6f145ff82d760a1174043d7a2ede516563929b9561ccc",
+      "sourceSha256": "sha256:2fed6886b797c7ea002a90c8a613d3d678c7ef9dc7b8182b255117c2a390b175"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/domains/mint/StreamDrops.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-09-09.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 2
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 1
+    },
+    "totalCount": 2
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "smart-contracts/domains/mint/StreamDrops.sol:IERC1271",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/domains/mint/StreamDrops.sol:IERC1271#function:0x1626ba7e",
+      "definitionId": "smart-contracts/domains/mint/StreamDrops.sol:IERC1271",
+      "severity": "advisory"
+    }
+  ]
+}

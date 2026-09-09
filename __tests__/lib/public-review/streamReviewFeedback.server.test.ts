@@ -16,6 +16,7 @@ import {
   STREAM_REVIEW_SLUG,
   STREAM_REVIEW_VERSION,
 } from "@/lib/public-review/streamReviewDefinition";
+import { STREAM_REVIEW_ENTRY_PAGES } from "@/lib/public-review/streamReviewEntryGuides";
 
 jest.mock("@/lib/public-review/editorialContent", () => ({
   loadStreamEditorialContent: jest.fn(
@@ -90,7 +91,10 @@ describe("Stream review feedback manifest binding", () => {
       expect.arrayContaining([
         expect.objectContaining({
           value: "overview",
-          sectionValues: ["exact-section"],
+          sectionValues: expect.arrayContaining([
+            "exact-section",
+            "what-lasts",
+          ]),
         }),
         expect.objectContaining({ value: "reference-function" }),
       ])
@@ -132,6 +136,41 @@ describe("Stream review feedback manifest binding", () => {
     ).toThrow("Feedback page does not belong to this review version.");
   });
 
+  it("keeps new guide feedback in the ledger and links to real current pages", async () => {
+    const config = await createStreamReviewFeedbackConfig({
+      manifest: makeManifest(),
+    });
+    for (const page of STREAM_REVIEW_ENTRY_PAGES) {
+      expect(
+        config.pages.find((option) => option.value === page.id)?.sectionValues
+          ?.length
+      ).toBeGreaterThan(0);
+      const context = createStreamEditorialFeedbackPageContext({
+        page,
+        version: STREAM_REVIEW_VERSION,
+        currentRoute: true,
+      });
+      expect(context.canonicalPath).not.toContain("/versions/");
+      expect(context.pageId).toBe(page.id);
+    }
+    const collectors = STREAM_REVIEW_ENTRY_PAGES.find(
+      (page) => page.id === "for-collectors"
+    )!;
+    expect(() =>
+      createStreamEditorialFeedbackPageContext({
+        page: collectors,
+        version: STREAM_REVIEW_VERSION,
+      })
+    ).toThrow("does not belong");
+    expect(() =>
+      createStreamEditorialFeedbackPageContext({
+        page: collectors,
+        version: "2026-07-30.1",
+        currentRoute: true,
+      })
+    ).toThrow("does not belong");
+  });
+
   it("rejects a file that is absent from the exact manifest", async () => {
     await expect(
       createStreamReviewFeedbackConfig({
@@ -139,6 +178,39 @@ describe("Stream review feedback manifest binding", () => {
         sourcePaths: ["src/NotInThisVersion.sol"],
       })
     ).rejects.toThrow("absent");
+  });
+
+  it("retains August guide feedback targets after closing that review", async () => {
+    const manifest = { ...makeManifest(), reviewVersion: "2026-08-01.1" };
+    const config = await createStreamReviewFeedbackConfig({ manifest });
+    expect(config.submissionsOpen).toBe(false);
+    expect(config.pages).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          value: "for-collectors",
+          sectionValues: expect.arrayContaining([
+            "know-where-your-bid-and-refund-go",
+          ]),
+        }),
+        expect.objectContaining({
+          value: "review-the-code",
+          sectionValues: expect.arrayContaining([
+            "start-with-the-actual-connections",
+          ]),
+        }),
+        expect.objectContaining({
+          value: "for-artists",
+          sectionValues: expect.arrayContaining([
+            "know-what-your-approval-covers",
+            "stream-artist-artwork-heading",
+            "stream-artist-evidence-heading",
+            "stream-artist-details-heading",
+            "approving-a-specific-collection-state",
+            "questions-for-artists",
+          ]),
+        }),
+      ])
+    );
   });
 
   it("creates immutable editorial and technical feedback paths", () => {

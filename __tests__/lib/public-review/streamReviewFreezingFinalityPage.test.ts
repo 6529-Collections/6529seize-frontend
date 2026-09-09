@@ -5,15 +5,14 @@ import { loadStreamEditorialContent } from "@/lib/public-review/editorialContent
 import { getCurrentFreezingFinalityEditorialMarkdown } from "@/lib/public-review/streamReviewFreezingFinalityPage";
 import {
   getStreamReviewVersion,
-  STREAM_REVIEW_DEFINITION,
+  STREAM_REVIEW_AUGUST_VERSION,
 } from "@/lib/public-review/streamReviewDefinition";
 
 async function loadFreezingFinalityEditorial() {
-  const reviewVersion = getStreamReviewVersion(
-    STREAM_REVIEW_DEFINITION.activeVersion
-  );
+  // These legacy transformers are bound to the August editorial snapshot.
+  const reviewVersion = getStreamReviewVersion(STREAM_REVIEW_AUGUST_VERSION);
   if (reviewVersion === undefined) {
-    throw new Error("The active Stream review version is unavailable.");
+    throw new Error("The August Stream review fixture is unavailable.");
   }
   const page = reviewVersion.pages.find(
     (candidate) => candidate.id === "freezing-preservation-and-artwork-finality"

@@ -1,0 +1,253 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/helpers/StreamPostEntropyCompletionGasHarness.sol:StreamGasBurningERC721Receiver#function:0x150b7a02",
+          "declaringDefinitionId": "test/helpers/StreamPostEntropyCompletionGasHarness.sol:StreamGasBurningERC721Receiver",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "internalType": "bytes",
+              "name": "",
+              "type": "bytes"
+            }
+          ],
+          "name": "onERC721Received",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes4",
+              "name": "",
+              "type": "bytes4"
+            }
+          ],
+          "selector": "0x150b7a02",
+          "signature": "onERC721Received(address,address,uint256,bytes)",
+          "stateMutability": "view"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": null,
+          "displaySignature": "constructor(uint256)",
+          "functionKind": "constructor",
+          "id": "test/helpers/StreamPostEntropyCompletionGasHarness.sol:StreamGasBurningERC721Receiver#function:constructor(uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "gasToBurn",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL1N0cmVhbVBvc3RFbnRyb3B5Q29tcGxldGlvbkdhc0hhcm5lc3Muc29sOlN0cmVhbUdhc0J1cm5pbmdFUkM3MjFSZWNlaXZlciNmdW5jdGlvbjpjb25zdHJ1Y3Rvcih1aW50MjU2KQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "constructor",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 70,
+            "byteStart": 8573,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/helpers/StreamPostEntropyCompletionGasHarness.sol#L229-L231",
+            "lineEnd": 231,
+            "lineStart": 229,
+            "snippetSha256": "sha256:171a1791e36b979e5ce6dbd1a1004d6685d299de3abf2ed76ba66d99ea3ff22e",
+            "sourceSha256": "sha256:84fe1db03e74d3e662bfea1695cc8d725a1fd51a7f031f0b0b9c6fcb1a382251"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "onERC721Received(address,address,uint256,bytes)",
+          "displaySignature": "onERC721Received(address,address,uint256,bytes)",
+          "functionKind": "function",
+          "id": "test/helpers/StreamPostEntropyCompletionGasHarness.sol:StreamGasBurningERC721Receiver#function:0x150b7a02",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "",
+              "storageLocation": "calldata",
+              "type": "bytes"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL1N0cmVhbVBvc3RFbnRyb3B5Q29tcGxldGlvbkdhc0hhcm5lc3Muc29sOlN0cmVhbUdhc0J1cm5pbmdFUkM3MjFSZWNlaXZlciNmdW5jdGlvbjoweDE1MGI3YTAy",
+          "kind": "function",
+          "modifiers": [],
+          "name": "onERC721Received",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes4"
+            }
+          ],
+          "range": {
+            "byteLength": 285,
+            "byteStart": 8649,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/helpers/StreamPostEntropyCompletionGasHarness.sol#L233-L241",
+            "lineEnd": 241,
+            "lineStart": 233,
+            "snippetSha256": "sha256:cd5f7617c994c5ef810c37f074651c86913ffbdbd056255ecb4f45dd94738f56",
+            "sourceSha256": "sha256:84fe1db03e74d3e662bfea1695cc8d725a1fd51a7f031f0b0b9c6fcb1a382251"
+          },
+          "selector": "0x150b7a02",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": true,
+          "name": "_gasToBurn",
+          "natspec": "",
+          "range": {
+            "byteLength": 36,
+            "byteStart": 8530,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/helpers/StreamPostEntropyCompletionGasHarness.sol#L227",
+            "lineEnd": 227,
+            "lineStart": 227,
+            "snippetSha256": "sha256:7301c66a250090b43dd35fdfe910c1d9dcaf1035f1b1929f863e63b09cad4135",
+            "sourceSha256": "sha256:84fe1db03e74d3e662bfea1695cc8d725a1fd51a7f031f0b0b9c6fcb1a382251"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/helpers/StreamPostEntropyCompletionGasHarness.sol:StreamGasBurningERC721Receiver",
+    "inheritance": [
+      {
+        "definitionId": "smart-contracts/vendor/openzeppelin/IERC721Receiver.sol:IERC721Receiver",
+        "name": "IERC721Receiver"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9oZWxwZXJzL1N0cmVhbVBvc3RFbnRyb3B5Q29tcGxldGlvbkdhc0hhcm5lc3Muc29sOlN0cmVhbUdhc0J1cm5pbmdFUkM3MjFSZWNlaXZlcg",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/helpers/StreamPostEntropyCompletionGasHarness.sol:StreamGasBurningERC721Receiver",
+      "smart-contracts/vendor/openzeppelin/IERC721Receiver.sol:IERC721Receiver"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamGasBurningERC721Receiver",
+    "natspec": "",
+    "range": {
+      "byteLength": 471,
+      "byteStart": 8465,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/helpers/StreamPostEntropyCompletionGasHarness.sol#L226-L242",
+      "lineEnd": 242,
+      "lineStart": 226,
+      "snippetSha256": "sha256:833f1c38322dc4560e2b41f259ac82e597a05a8894969654d640ba64e3fb94b7",
+      "sourceSha256": "sha256:84fe1db03e74d3e662bfea1695cc8d725a1fd51a7f031f0b0b9c6fcb1a382251"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/helpers/StreamPostEntropyCompletionGasHarness.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-09-09.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 3
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 2
+    },
+    "totalCount": 3
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/helpers/StreamPostEntropyCompletionGasHarness.sol:StreamGasBurningERC721Receiver",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/helpers/StreamPostEntropyCompletionGasHarness.sol:StreamGasBurningERC721Receiver#function:0x150b7a02",
+      "definitionId": "test/helpers/StreamPostEntropyCompletionGasHarness.sol:StreamGasBurningERC721Receiver",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/helpers/StreamPostEntropyCompletionGasHarness.sol:StreamGasBurningERC721Receiver#function:constructor(uint256)",
+      "definitionId": "test/helpers/StreamPostEntropyCompletionGasHarness.sol:StreamGasBurningERC721Receiver",
+      "severity": "advisory"
+    }
+  ]
+}

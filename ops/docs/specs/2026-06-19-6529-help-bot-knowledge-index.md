@@ -26,6 +26,10 @@ backend-owned frontend product records. The source lives at
 `ops/help/help-index.json`, the sync step writes `public/help-index.json`, and
 the backend consumes the deployed `/help-index.json` with a short cache.
 
+The Stream review record includes its four current entry guides and the
+**All topics** navigation. Its collector and code-review guide links refer to
+current pages; those guides are not invented as historical snapshot routes.
+
 ## Goals
 
 - Define frontend-owned source material for 6529 Help Bot answers.

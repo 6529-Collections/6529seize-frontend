@@ -2,12 +2,11 @@
   "counts": {
     "byCategory": {
       "editorial": 245,
-      "status": 38,
+      "status": 37,
       "technical": 8264
     },
     "byKind": {
       "contract": 334,
-      "development_status": 1,
       "editorial_section": 245,
       "enum": 15,
       "error": 492,
@@ -30,16 +29,7 @@
       "script": 141,
       "test": 4487
     },
-    "total": 8547
-  },
-  "developmentStatus": {
-    "checkedAt": "2026-08-01T00:00:00.000Z",
-    "configPath": "config/public-reviews/6529-stream.development-status.json",
-    "configSha256": "sha256:80410b77cca6e91c3f26b98c1bf4ab7f9d25f37a5ecd0c7bfb10a0ce565fa1c0",
-    "source": {
-      "commit": "5021c8060950c3fef995271e674ed4b2007fee6d",
-      "repository": "6529-Collections/6529Stream"
-    }
+    "total": 8546
   },
   "editorial": {
     "corpusSha256": "sha256:4fc40f9a9a4a1ede85085cbd0d2ad0038ee6ffe54d4cc35aa7e623f7f114e7e8",
@@ -53,11 +43,11 @@
     "sourceSha256": "sha256:f37e6fc4d9095086676c36ca270959eb4d2170dd43c95fb53906e92373d3aded",
     "version": "1"
   },
-  "knowledgeSha256": "sha256:70a68d5bf4ce784ab80c0cbd6817fa5255dc2cc1e0c344fecdeeecbb18c247b8",
+  "knowledgeSha256": "sha256:65a26b628a3fcf8ba580510adb09ba11b9eb90229b4552169ad0f8e53e6a5243",
   "publication": {
     "auditStatus": "PRE_AUDIT",
     "deploymentStatus": "NOT_DEPLOYED",
-    "lifecycleState": "PUBLIC_REVIEW"
+    "lifecycleState": "REVIEW_CLOSED"
   },
   "recordShards": [
     {
@@ -327,8 +317,8 @@
     },
     {
       "path": "/review-data/6529-stream/versions/2026-08-01.1/knowledge/records/053.json",
-      "recordCount": 67,
-      "sha256": "sha256:3a7002927f014f4ce7b0cf6711fd4c509a2ee962d302daa415317f07d0933f3a"
+      "recordCount": 66,
+      "sha256": "sha256:920604ed2058beaa9875be280f26fba3e4d6c7d016a59923e37f653514c0ac4d"
     }
   ],
   "reference": {
@@ -341,8 +331,8 @@
   "schemaVersion": "public-review.knowledge-manifest.v1",
   "searchIndex": {
     "path": "/review-data/6529-stream/versions/2026-08-01.1/knowledge/search-index.json",
-    "recordCount": 8547,
-    "sha256": "sha256:667849d6a13dbcb38b45d6804ade7af5366bee51bab870c2c490a1af26cfd807"
+    "recordCount": 8546,
+    "sha256": "sha256:f0d0ac9b7075d8b29768829b3597a66fb5414a4cd518da22dfcd1bfd11bfe50c"
   },
   "source": {
     "commit": "513bd7e079eafe109df6ae1ae21bfbca6fec6786",

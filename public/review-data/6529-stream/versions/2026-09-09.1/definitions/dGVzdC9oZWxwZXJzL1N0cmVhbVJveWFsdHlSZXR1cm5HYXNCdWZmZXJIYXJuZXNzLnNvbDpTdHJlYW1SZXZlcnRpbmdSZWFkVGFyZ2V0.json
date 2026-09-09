@@ -1,0 +1,112 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": []
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": null,
+          "displaySignature": "fallback()",
+          "functionKind": "fallback",
+          "id": "test/helpers/StreamRoyaltyReturnGasBufferHarness.sol:StreamRevertingReadTarget#function:fallback()",
+          "inputs": [],
+          "key": "dGVzdC9oZWxwZXJzL1N0cmVhbVJveWFsdHlSZXR1cm5HYXNCdWZmZXJIYXJuZXNzLnNvbDpTdHJlYW1SZXZlcnRpbmdSZWFkVGFyZ2V0I2Z1bmN0aW9uOmZhbGxiYWNrKCk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "fallback",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 45,
+            "byteStart": 11265,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/helpers/StreamRoyaltyReturnGasBufferHarness.sol#L296-L298",
+            "lineEnd": 298,
+            "lineStart": 296,
+            "snippetSha256": "sha256:6b2ddeef750b4f9bc65b419db385a7d78b10e7fafc29a24111f88438cf3e9233",
+            "sourceSha256": "sha256:9db942d3a0bd25fa67c1e004798079420949ed3a4fd060490154306f2647bd92"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/helpers/StreamRoyaltyReturnGasBufferHarness.sol:StreamRevertingReadTarget",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9oZWxwZXJzL1N0cmVhbVJveWFsdHlSZXR1cm5HYXNCdWZmZXJIYXJuZXNzLnNvbDpTdHJlYW1SZXZlcnRpbmdSZWFkVGFyZ2V0",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/helpers/StreamRoyaltyReturnGasBufferHarness.sol:StreamRevertingReadTarget"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamRevertingReadTarget",
+    "natspec": "",
+    "range": {
+      "byteLength": 88,
+      "byteStart": 11224,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/helpers/StreamRoyaltyReturnGasBufferHarness.sol#L295-L299",
+      "lineEnd": 299,
+      "lineStart": 295,
+      "snippetSha256": "sha256:67f46bbfd6a12c99ae5b5c259ebfa46d276de0e79574ee10e44ddccdc7ba5919",
+      "sourceSha256": "sha256:9db942d3a0bd25fa67c1e004798079420949ed3a4fd060490154306f2647bd92"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/helpers/StreamRoyaltyReturnGasBufferHarness.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-09-09.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 2
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 1
+    },
+    "totalCount": 2
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/helpers/StreamRoyaltyReturnGasBufferHarness.sol:StreamRevertingReadTarget",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/helpers/StreamRoyaltyReturnGasBufferHarness.sol:StreamRevertingReadTarget#function:fallback()",
+      "definitionId": "test/helpers/StreamRoyaltyReturnGasBufferHarness.sol:StreamRevertingReadTarget",
+      "severity": "advisory"
+    }
+  ]
+}
