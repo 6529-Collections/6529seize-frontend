@@ -3,23 +3,57 @@
 The implementation in [FE PR #3897](https://github.com/6529-Collections/6529seize-frontend/pull/3897)
 uses a pasted Ethereum contract address to select a collection. It is paired
 with [BE PR #1974](https://github.com/6529-Collections/6529seize-backend/pull/1974).
-These are implementation changes awaiting deployment, not a claim about the live site.
+This is a source-code comparison, not a claim that main matches every deployed
+environment. Baselines checked on September 9, 2026: FE `main` at
+`447a3235bec4a3f751058c4a3cdf0a0f904c9657` and BE `main` at
+`41dfb41a33b9c1c01b7f4cb6a082838febf4594e`. The revised column describes
+FE #3897 and BE #1974; endpoint changes take effect in each environment only
+after the corresponding deployment.
 
-## Behavior that is not an exact match
+## What to test: main versus revised
 
-| Capability | Before | After |
+Use profile xTDH → Granted → Create New Grant for collection-picker checks.
+Do not submit a real grant unless that is part of the intended test.
+See [What to test](WHAT_TO_TEST.md) for inputs and manual procedures.
+
+| Check | Main at the baseline above | Revised feature / expected test result |
 | --- | --- | --- |
-| Collection-name or partial-name discovery | Non-address text used Alchemy collection search. | Removed. The input explains that a complete contract address is required. No replacement search provider or index is added. |
-| Multiple collection suggestions and search pagination | Search could return a list; the server helper supported a page key (the picker did not expose paging). | One contract result, or no result. Search response types, normalizer, cache, and helper are removed. |
-| Spam filtering in search | Keyword results were filtered by default, with a control to reveal hidden entries. Pasted-address results bypassed that filtering. | The keyword filter and toggle are removed. Address selection retains its previous behavior: it is not a spam or authenticity check. |
-| Search fallback | FE fell back to BE search, but the BE array / FE envelope mismatch could hide successful results. | Search failover is removed, eliminating that mismatch. Address lookup still falls back to BE contract metadata. |
-| Existing clients calling the search route | Could request collection-name search while Alchemy supported it. | Both retired search routes return HTTP 410 and a clear error, without an Alchemy request. Older clients might show no suggestions rather than the error text. |
-| Unsupported NFT standards | Mouse selection disabled non-ERC-721 results, but Enter could bypass it. | Keyboard and mouse both enforce the existing ERC-721 restriction. |
+| Collection name or keyword | More than one non-address character enables debounced Alchemy collection search and can return matching collections. | Names show complete-address guidance and cause no collection lookup request. |
+| Complete contract address | Already supported through contract metadata; a valid address starts lookup directly. | Same retained metadata endpoint, now with debouncing and lowercase normalization. Mixed case, lowercase, and surrounding spaces resolve the same collection. |
+| ENS name, marketplace URL, incomplete or malformed address | Can be submitted as keyword text. This is not actual ENS resolution or URL parsing. | Invalid-address guidance, no lookup request, and no endless spinner. |
+| Edit while results are visible or a lookup is pending | Keyword results can remain from the previous debounced query while typing. | Previous results disappear immediately on an address edit; mouse and Enter cannot select the old collection. |
+| Mouse and keyboard selection | Both exist, but Enter can bypass the visible control's non-ERC-721 restriction. ArrowDown on an empty list can leave a negative active index. | Both enforce ERC-721. ArrowDown on an empty list followed by a valid result still permits Enter selection; ERC-1155 remains unselectable. |
+| Loading, missing metadata, and failure | Loading spinner exists, without this picker's dedicated lookup-error message or retry button. | Distinct invalid/loading/not-found/unsupported/error messages. Try again retries; focus returns to the input before the button disappears. |
+| Backend fallback | Name search tries FE `/api/alchemy/collections`, then BE `/alchemy-proxy/collections`; BE's array versus FE's expected envelope can already hide successful search results. Address lookup separately uses `/contract` failover. | Search failover and its response-shape mismatch are removed. Block the FE contract request and verify the retained BE `/alchemy-proxy/contract` fallback supplies metadata. |
+| Retired search endpoints | Both call Alchemy search; empty queries return 400 with `query is required`. BE uses a one-minute request cache. | Both return 410 with `Collection name search is no longer available. Use a contract address.` for empty and nonempty queries, with `Cache-Control: no-store` and no Alchemy search request. Test each endpoint after its own deployment. |
+| Token selection and saved state | Individual IDs, ranges, Select All, limits, clearing, and saved selections exist. | Unchanged. Exercise each control and ensure changing collections does not carry over old token selections. |
+| Meme card-name search | Separate fixed-Memes-contract flow using 6529 `nfts_search`. | Unchanged: card IDs/ranges and card-name search remain available. |
+| Owner NFTs and token metadata | Existing owner-NFT filtering/pagination and token-metadata endpoints. | Unchanged. Smoke-test a known wallet/contract and token. |
+| Accessibility and layout | Existing combobox/keyboard controls, without the new associated lookup-status region. | Associated guidance, polite announcements, invalid/busy states, and retry focus. Verify actual screen-reader speech, keyboard operation, mobile layout, and 200% zoom. |
+
+## Features removed: main versus revised
+
+| Feature | Main at the baseline above | Revised feature |
+| --- | --- | --- |
+| Collection discovery by name or keyword | Find a collection without already knowing its address. | Removed from this picker; users obtain the complete contract address elsewhere. |
+| Multiple matching collection suggestions | Browse Alchemy's matches in its returned order. | Only metadata for the supplied address, not a discovery/ranking list. |
+| Spam-filtered keyword results | Suspected spam is hidden by default. When the results footer is visible, it can show a filtered count and **Show anyway**. | The keyword filter, count, and reveal control are removed. Pasted-address lookup already bypassed that filter and remains no safety verdict. |
+| Collection-search API access and fallback | FE and older clients can request keyword results from the search routes. | Those routes return 410; older clients lose this fallback and may show no suggestions. |
+
+The old control is specifically **Show anyway**, not a permanently available
+Hide/Show toggle. Search helpers carried pagination metadata, but the picker
+had no next-page or load-more control; no visible pagination feature is removed.
+Other app searches are not blanket-disabled. Distribution Plan's separately
+operated allowlist search remains outside this implementation.
+
+## Address lookup is not a safety check
 
 V3 `getContractMetadata` does not document `isSpam` or
 `spamClassifications`. No `isSpamContract` request is added in this change.
 Do not interpret the existing normalizer's default non-spam value, collection
 name, image, or verification metadata as an affirmative safety verdict.
+No replacement search provider or index is added; the obsolete search response
+types, normalizer, cache, and helper are removed.
 
 ## Retained features
 
