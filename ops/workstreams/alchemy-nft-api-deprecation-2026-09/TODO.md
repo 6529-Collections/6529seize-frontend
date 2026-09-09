@@ -62,7 +62,7 @@ The affected call path is:
 - [x] Remove the keyword spam filter and Show anyway control; document that pasted-address lookup remains unfiltered.
 - [x] Enforce the existing ERC-721 restriction for keyboard and mouse selection.
 - [x] Update focused tests, product guidance, and the help corpus.
-- [x] Update the network/open-data E2E pack for the retired search route's 410/message/no-store contract, preserving other routes' 400 validation checks.
+- [x] Keep the network/open-data E2E empty-query check compatible with both the old 400 (`query is required`) and retired 410 (address-only error), requiring the matching response body and no-store header. Other routes retain their 400 validation checks. The route unit test and post-migration manual checks still require 410; the shared E2E check alone does not prove retirement.
 - [x] Add [Actual changes](ACTUAL_CHANGES.md) and [What to test](WHAT_TO_TEST.md).
 - [ ] Complete manual acceptance on the deployed environment.
 - [ ] Coordinate FE/BE rollout and the explicit loss of old-client keyword fallback.
