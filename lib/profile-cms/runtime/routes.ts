@@ -129,9 +129,11 @@ function resolveCmsRouteInternal(
   }
   seenPaths.add(path);
 
-  const route = cmsPackage.payload.routes.find(
+  const matchingRoutes = cmsPackage.payload.routes.filter(
     (candidate) => normalizeCmsHandleSegment(candidate.path) === path
   );
+  // Never let manifest ordering choose between conflicting canonical routes.
+  const route = matchingRoutes.length === 1 ? matchingRoutes[0] : undefined;
   if (!route) {
     return { kind: "not_found", reason: "route_missing" };
   }

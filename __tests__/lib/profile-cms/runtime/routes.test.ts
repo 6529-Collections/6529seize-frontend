@@ -46,6 +46,25 @@ describe("profile CMS runtime routes", () => {
     }
   );
 
+  it.each([false, true])(
+    "rejects canonical route collisions regardless of order (reversed: %s)",
+    (reversed) => {
+      const routes: CmsPackageV1["payload"]["routes"] = [
+        { path: "/Punk6529/index.html", kind: "page", page_id: "page-home" },
+        {
+          path: "/punk6529/index.html",
+          kind: "redirect",
+          target: "/punk6529/Other/index.html",
+        },
+      ];
+      const cmsPackage = withRoutes(reversed ? routes.toReversed() : routes);
+      expect(resolveCmsRoute(cmsPackage, "/punk6529/index.html")).toEqual({
+        kind: "not_found",
+        reason: "route_missing",
+      });
+    }
+  );
+
   it("normalizes path aliases and detects cycles across handle casing", () => {
     const cmsPackage = withRoutes([
       {
