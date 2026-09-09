@@ -34,6 +34,7 @@ import {
 } from "./value-utils";
 
 const reactDomInsertBeforeRawFrameCount = 50;
+const reactDomRemoveChildRawFrameCount = 50;
 // These pre-symbolication minified names are intentionally separate from
 // REACT_DOM_INSERT_BEFORE_RUNTIME_FUNCTIONS, which contains source-mapped
 // semantic React DOM function names.
@@ -46,6 +47,7 @@ const reactDomInsertBeforeRawRuntimeFunctions = new Set([
 ]);
 const reactDomInsertBeforeRawRequiredFunctions = ["lo", "li", "lr"];
 const reactDomInsertBeforeRawTerminalFunctions = new Set(["sN", "sR"]);
+const reactDomRemoveChildRawFunctionSequence = ["s9", "s7"] as const;
 
 function isReactDomRuntimeFrame(frame: SentryStackFrame): boolean {
   const paths = getFramePaths(frame);
@@ -153,6 +155,29 @@ function hasRawReactDomInsertBeforeFrameSignature(
   );
 }
 
+function hasRawReactDomRemoveChildFrameSignature(
+  frames: SentryStackFrame[] | undefined
+): boolean {
+  // beforeSend sees this minified stack before Sentry applies source maps.
+  // Keep the cohort-backed alternating sequence exact so minifier drift fails open.
+  if (
+    !Array.isArray(frames) ||
+    frames.length !== reactDomRemoveChildRawFrameCount
+  ) {
+    return false;
+  }
+
+  const hasObservedFunctionSequence = frames.every((frame, index) => {
+    const expectedFunction =
+      reactDomRemoveChildRawFunctionSequence[
+        index % reactDomRemoveChildRawFunctionSequence.length
+      ];
+    return frame.function?.trim() === expectedFunction;
+  });
+
+  return hasObservedFunctionSequence && hasOnlyOneNextStaticChunk(frames);
+}
+
 function getReactDomNotFoundErrorValue(
   event: SentryClientEvent,
   message: string
@@ -195,6 +220,18 @@ export function hasReactDomInsertBeforeRawNotFoundErrorSignature(
     value?.mechanism?.type === "generic" &&
     value.mechanism.handled === true &&
     hasRawReactDomInsertBeforeFrameSignature(value.stacktrace?.frames)
+  );
+}
+
+export function hasReactDomRemoveChildRawNotFoundErrorSignature(
+  event: SentryClientEvent,
+  message: string
+): boolean {
+  const value = getReactDomNotFoundErrorValue(event, message);
+  return (
+    value?.mechanism?.type === "generic" &&
+    value.mechanism.handled === true &&
+    hasRawReactDomRemoveChildFrameSignature(value.stacktrace?.frames)
   );
 }
 

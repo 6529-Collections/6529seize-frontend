@@ -11,6 +11,7 @@ import {
 import {
   hasReactDomInsertBeforeRawNotFoundErrorSignature,
   hasReactDomNotFoundErrorSignature,
+  hasReactDomRemoveChildRawNotFoundErrorSignature,
 } from "./app-frame-utils";
 
 export function shouldFilterReactDomInsertBeforeNotFoundError(
@@ -41,6 +42,16 @@ export function shouldFilterReactDomInsertBeforeNotFoundError(
 export function shouldFilterReactDomRemoveChildNotFoundError(
   event: SentryClientEvent
 ): boolean {
+  if (
+    hasWavesRoute(event) &&
+    hasReactDomRemoveChildRawNotFoundErrorSignature(
+      event,
+      REACT_DOM_REMOVE_CHILD_NOT_FOUND_ERROR_MESSAGE
+    )
+  ) {
+    return true;
+  }
+
   if (!hasReactDomRemoveChildRoute(event)) {
     return false;
   }
