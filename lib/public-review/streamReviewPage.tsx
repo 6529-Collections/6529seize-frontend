@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 
 import { PublicReviewEditorialFeedback } from "@/components/public-review/PublicReviewEditorialFeedback";
 import { PublicReviewShell } from "@/components/public-review/PublicReviewShell";
+import { getStreamReviewDiagramPresentation } from "@/lib/public-review/streamReviewDiagrams";
 import { PublicReviewMarkdown } from "@/components/public-review/PublicReviewMarkdown";
 import { StreamReviewBotAuthorshipNote } from "@/components/public-review/StreamReviewBotAuthorshipNote";
 import {
@@ -441,6 +442,13 @@ async function renderStreamReviewRoute(route: StreamReviewRouteModel) {
       editorialMarkdown,
       source: manifest.source,
     });
+  const diagramPresentation = getStreamReviewDiagramPresentation({
+    pageId: route.page.id,
+    markdown: displayedEditorialMarkdown,
+    version: contentVersion,
+    routeVersion: route.version,
+    source: manifest.source,
+  });
   const displayedPage = getDisplayedPage(
     getDisplayedPageTitle(route.page, route.version !== undefined),
     currentPages
@@ -473,7 +481,8 @@ async function renderStreamReviewRoute(route: StreamReviewRouteModel) {
           ? getStreamReviewRelatedPages(route.page.id)
           : undefined
       }
-      editorialMarkdown={displayedEditorialMarkdown}
+      editorialMarkdown={diagramPresentation.markdown}
+      sectionIntros={diagramPresentation.sectionIntros}
       page={displayedPage}
       review={STREAM_REVIEW_DEFINITION}
       reviewVersion={displayedReviewVersion}

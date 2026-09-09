@@ -82,6 +82,16 @@ collectors**, or **Review the code**. Each is a short guide to the candidate,
 with links to detailed topics and feedback. Current pages do not show a
 "Page 1 of 14" reading requirement.
 
+Six current pages include small, static diagrams: artwork formats on the overview,
+separate approvals in **For artists**, role permissions in **Who Can Do What**,
+the two mint paths in **Review the code**, sale credits and withdrawals in
+**Revenue, Splits, and Royalties**, and Core freeze order in **Freezing,
+Preservation, and Artwork Finality**. Diagrams replace the corresponding introductory
+paragraph or table and stack vertically when space is narrow. Built behavior,
+unfinished connections, and proposed designs are labeled in words. The full role
+table and code component notes remain available in expandable sections. Saved
+version pages retain their original text and tables.
+
 **Explore an example artwork** opens a fictional, five-step release flow. It labels the
 whole-plan approval screen as an intended experience whose enforcement is still
 unfinished. Nothing in the example buys, signs, uploads, or saves.

@@ -47,23 +47,30 @@ function resolveReviewRelativeHref(
 
 function createMarkdownComponents(
   internalLinkBasePath: string | undefined,
-  compactTables: boolean
+  compactTables: boolean,
+  sectionIntros: Readonly<Record<string, ReactNode>> | undefined
 ): Components {
   const headingCounts = new Map<string, number>();
 
   return {
     h1: () => null,
-    h2: ({ children }) => (
-      <h2
-        id={getUniquePublicReviewHeadingId(
-          getHeadingText(children),
-          headingCounts
-        )}
-        className="tw-mb-0 tw-mt-14 tw-scroll-mt-24 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-pt-8 tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-100 sm:tw-text-2xl"
-      >
-        {children}
-      </h2>
-    ),
+    h2: ({ children }) => {
+      const id = getUniquePublicReviewHeadingId(
+        getHeadingText(children),
+        headingCounts
+      );
+      return (
+        <>
+          <h2
+            id={id}
+            className="tw-mb-0 tw-mt-14 tw-scroll-mt-24 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-pt-8 tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-100 sm:tw-text-2xl"
+          >
+            {children}
+          </h2>
+          {sectionIntros?.[id]}
+        </>
+      );
+    },
     h3: ({ children }) => {
       const headingText = getHeadingText(children);
       const evidenceStates = extractPublicReviewEvidenceStates(
@@ -189,10 +196,12 @@ export function PublicReviewMarkdown({
   internalLinkBasePath,
   markdown,
   compactTables = false,
+  sectionIntros,
 }: {
   readonly internalLinkBasePath?: string | undefined;
   readonly markdown: string;
   readonly compactTables?: boolean | undefined;
+  readonly sectionIntros?: Readonly<Record<string, ReactNode>> | undefined;
 }) {
   return (
     <div className={`tw-min-w-0 ${compactTables ? "tw-break-words" : ""}`}>
@@ -201,7 +210,8 @@ export function PublicReviewMarkdown({
         rehypePlugins={[rehypeSanitize]}
         components={createMarkdownComponents(
           internalLinkBasePath,
-          compactTables
+          compactTables,
+          sectionIntros
         )}
       >
         {markdown}

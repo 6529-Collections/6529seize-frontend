@@ -96,6 +96,7 @@ function PublicReviewPageStepper({
 
 export function PublicReviewShell({
   editorialMarkdown,
+  sectionIntros,
   page,
   review,
   reviewVersion,
@@ -112,6 +113,7 @@ export function PublicReviewShell({
   relatedPages,
 }: {
   readonly editorialMarkdown: string;
+  readonly sectionIntros?: Readonly<Record<string, ReactNode>> | undefined;
   readonly page: PublicReviewPageDefinition;
   readonly review: PublicReviewDefinition;
   readonly reviewVersion: PublicReviewVersionDefinition;
@@ -258,6 +260,7 @@ export function PublicReviewShell({
                             routeVersion
                           )}
                           markdown={editorialMarkdown}
+                          sectionIntros={sectionIntros}
                         />
                       </article>
 

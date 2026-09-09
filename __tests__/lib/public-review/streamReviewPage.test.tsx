@@ -16,6 +16,7 @@ jest.mock("@/components/providers/metadata", () => ({
 jest.mock("@/components/public-review/PublicReviewShell", () => ({
   PublicReviewShell: (props: {
     editorialMarkdown: string;
+    sectionIntros?: Readonly<Record<string, React.ReactNode>>;
     introNotice?: React.ReactNode;
     outroNotice?: React.ReactNode;
     feedbackSlot: React.ReactNode;
@@ -28,6 +29,7 @@ jest.mock("@/components/public-review/PublicReviewShell", () => ({
       data-source={props.source.commit}
     >
       {props.introNotice}
+      {Object.values(props.sectionIntros ?? {})}
       {props.showEditorialContent && (
         <div data-testid="editorial">{props.editorialMarkdown}</div>
       )}
@@ -160,7 +162,14 @@ describe("Stream versioned page rendering", () => {
       expect(
         screen.getByTestId("editorial").textContent!.length
       ).toBeGreaterThan(100);
-      if (!STREAM_REVIEW_ENTRY_PAGES.some((entry) => entry.id === page.id)) {
+      if (
+        !STREAM_REVIEW_ENTRY_PAGES.some((entry) => entry.id === page.id) &&
+        ![
+          "roles-and-trust",
+          "revenue-splits-and-royalties",
+          "freezing-preservation-and-artwork-finality",
+        ].includes(page.id)
+      ) {
         expect(screen.getByTestId("editorial").textContent).toBe(
           readEditorial(STREAM_REVIEW_VERSION, page.id)
         );
@@ -184,6 +193,7 @@ describe("Stream versioned page rendering", () => {
         screen.queryByText("Artwork concept preview")
       ).not.toBeInTheDocument();
       expect(screen.queryByTestId("artist-details")).not.toBeInTheDocument();
+      expect(screen.queryByRole("figure")).not.toBeInTheDocument();
     }
   );
 
