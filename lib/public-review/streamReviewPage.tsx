@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 import { PublicReviewEditorialFeedback } from "@/components/public-review/PublicReviewEditorialFeedback";
 import { PublicReviewShell } from "@/components/public-review/PublicReviewShell";
 import { getStreamReviewDiagramPresentation } from "@/lib/public-review/streamReviewDiagrams";
+import { getStreamReviewLegacyCommentSections } from "@/lib/public-review/streamReviewLegacyEntryFeedback";
 import { PublicReviewMarkdown } from "@/components/public-review/PublicReviewMarkdown";
 import { StreamReviewBotAuthorshipNote } from "@/components/public-review/StreamReviewBotAuthorshipNote";
 import {
@@ -556,7 +557,13 @@ async function renderStreamReviewRoute(route: StreamReviewRouteModel) {
             currentRoute: route.version === undefined,
           })}
           sections={feedbackSections}
-          commentSections={commentSections}
+          commentSections={[
+            ...commentSections,
+            ...getStreamReviewLegacyCommentSections({
+              page: route.page,
+              version: contentVersion,
+            }),
+          ]}
         />
       }
     />

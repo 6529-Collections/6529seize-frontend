@@ -1,4 +1,20 @@
 export const PUBLIC_REVIEW_ENTRY_GUIDE_MESSAGES = {
+  "publicReview.legacyEntryFeedback.artworkFormats":
+    "What kinds of art can it support?",
+  "publicReview.legacyEntryFeedback.release": "How does a release work?",
+  "publicReview.legacyEntryFeedback.permanence": "What lasts?",
+  "publicReview.legacyEntryFeedback.paths":
+    "Choose what you want to understand",
+  "publicReview.legacyEntryFeedback.feedback": "Help shape it",
+  "publicReview.legacyEntryFeedback.artistRelease":
+    "Decide what you are releasing",
+  "publicReview.legacyEntryFeedback.artistApproval":
+    "Know what your approval covers",
+  "publicReview.legacyEntryFeedback.artistPayments": "Understand who gets paid",
+  "publicReview.legacyEntryFeedback.artistPermanence":
+    "Decide what can change—and what should become permanent",
+  "publicReview.legacyEntryFeedback.artistPractice":
+    "What would work for your practice?",
   "publicReview.pages.currentSnapshot.overview.summary":
     "The artwork formats Stream can represent, what is built, and what remains to finish before launch.",
   "publicReview.pages.currentSnapshot.artwork-lifecycle.summary":

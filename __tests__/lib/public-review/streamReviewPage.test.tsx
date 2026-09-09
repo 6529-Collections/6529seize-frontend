@@ -68,7 +68,11 @@ jest.mock("@/components/public-review/PublicReviewEditorialFeedback", () => ({
       </div>
       <div data-testid="comment-sections">
         {commentSections?.map((section) => (
-          <a key={section.id} href={section.href}>
+          <a
+            key={section.id}
+            href={section.href}
+            data-testid={`comment-section-${section.id}`}
+          >
             {section.title}
           </a>
         ))}
@@ -120,6 +124,10 @@ import {
   STREAM_REVIEW_ENTRY_PAGES,
 } from "@/lib/public-review/streamReviewEntryGuides";
 import { extractPublicReviewSections } from "@/lib/public-review/editorialSections";
+import {
+  STREAM_REVIEW_LEGACY_ENTRY_FEEDBACK_VERSION,
+  STREAM_REVIEW_LEGACY_ENTRY_SECTIONS,
+} from "@/lib/public-review/streamReviewLegacyEntryFeedback";
 import {
   renderStreamReviewRoutePage,
   generateStreamReviewRouteMetadata,
@@ -270,6 +278,36 @@ describe("Stream versioned page rendering", () => {
       "18,997 runtime bytes"
     );
   });
+
+  it.each(["overview", "for-artists"])(
+    "preserves every legacy comment label and a valid topic target on the saved %s page",
+    async (pageId) => {
+      const version = STREAM_REVIEW_LEGACY_ENTRY_FEEDBACK_VERSION;
+      await show(pageId, version);
+      const editorialIds = new Set(
+        extractPublicReviewSections(readEditorial(version, pageId)).map(
+          (section) => section.id
+        )
+      );
+      const basePath = `/reviews/6529-stream/versions/${version}${pageId === "overview" ? "" : `/${pageId}`}`;
+      for (const id of STREAM_REVIEW_LEGACY_ENTRY_SECTIONS[pageId] ?? []) {
+        const label = screen.getByTestId(`comment-section-${id}`);
+        expect(label.textContent).toBeTruthy();
+        expect(label.textContent).not.toBe(id);
+        expect(label.textContent).not.toMatch(/^publicReview\./);
+        if (editorialIds.has(id)) {
+          expect(label).not.toHaveAttribute("href");
+        } else {
+          const href = label.getAttribute("href");
+          expect(href).toContain(`${basePath}#`);
+          expect(editorialIds.has(href?.split("#")[1] ?? "")).toBe(true);
+          expect(
+            screen.getByTestId("feedback-panel-sections")
+          ).not.toHaveTextContent(`${id}:`);
+        }
+      }
+    }
+  );
 
   it("rejects source drift before displaying a current entry guide", async () => {
     mockLoadManifest.mockResolvedValueOnce({
