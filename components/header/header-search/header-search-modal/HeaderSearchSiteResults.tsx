@@ -19,7 +19,6 @@ import { USER_PAGE_TAB_IDS } from "@/components/user/layout/userTabs.config";
 import Button from "@/components/utils/button/Button";
 import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
 import type { CommunityMemberMinimal } from "@/entities/IProfile";
-import type { ApiWave } from "@/generated/models/ApiWave";
 import { getProfileTargetRoute } from "@/helpers/Helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -31,6 +30,7 @@ import HeaderSearchModalItem, {
   getNftCollectionMap,
   isHeaderSearchWaveDirectMessage,
   type HeaderSearchModalItemType,
+  type HeaderSearchWave,
   type NFTSearchResult,
   type PageSearchResult,
 } from "../HeaderSearchModalItem";
@@ -72,8 +72,10 @@ const isProfileResult = (
   item: HeaderSearchModalItemType
 ): item is CommunityMemberMinimal => Object.hasOwn(item, "wallet");
 
-const isWaveResult = (item: HeaderSearchModalItemType): item is ApiWave =>
-  Object.hasOwn(item, "serial_no");
+const isWaveResult = (
+  item: HeaderSearchModalItemType
+): item is HeaderSearchWave =>
+  Object.hasOwn(item, "serial_no") || Object.hasOwn(item, "isDirectMessage");
 
 const getHeaderSearchItemKey = (item: HeaderSearchModalItemType): string => {
   if (isPageResult(item)) return `page:${item.href}`;
@@ -254,7 +256,7 @@ export function HeaderSearchSiteResults({
   );
 
   const goToWave = useCallback(
-    (wave: ApiWave) => {
+    (wave: HeaderSearchWave) => {
       rememberCurrentSearch();
       onClose();
       const isDirectMessage = isHeaderSearchWaveDirectMessage(wave);
