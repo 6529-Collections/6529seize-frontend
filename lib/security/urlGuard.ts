@@ -5,6 +5,11 @@ import { isIP } from "node:net";
 import { toASCII } from "node:punycode";
 import { Agent, fetch as undiciFetch } from "undici";
 import type { RequestInit as UndiciRequestInit } from "undici";
+import {
+  bindResponseDeadline,
+  createFetchDeadline,
+  discardResponse,
+} from "@/lib/fetch/fetchDeadline";
 
 type UrlGuardErrorKind =
   | "missing-url"
@@ -581,45 +586,24 @@ export async function fetchPublicUrl(
 
   let currentUrl = initialUrl;
   let redirectCount = 0;
+  const deadline = createFetchDeadline(
+    init.signal,
+    options.timeoutMs,
+    () => new UrlGuardError("Request timed out.", "timeout", 504)
+  );
+  let response: Response | undefined;
 
-  while (true) {
-    const validatedUrl = await validatePublicUrl(currentUrl, options);
+  try {
+    for (;;) {
+      const validatedUrl = await deadline.run(() =>
+        validatePublicUrl(currentUrl, options)
+      );
 
-    const headers = new Headers(init.headers);
-    if (options.userAgent && !headers.has("user-agent")) {
-      headers.set("user-agent", options.userAgent);
-    }
-
-    let timeoutId: NodeJS.Timeout | undefined;
-    let abortedByTimeout = false;
-    const controller = new AbortController();
-    const signals: AbortSignal[] = [];
-    if (init.signal) {
-      signals.push(init.signal);
-    }
-
-    const abortHandler = (event: Event) => {
-      const target = event.target as AbortSignal;
-      controller.abort(target.reason);
-    };
-
-    for (const signal of signals) {
-      if (signal.aborted) {
-        controller.abort(signal.reason);
-      } else {
-        signal.addEventListener("abort", abortHandler, { once: true });
+      const headers = new Headers(init.headers);
+      if (options.userAgent && !headers.has("user-agent")) {
+        headers.set("user-agent", options.userAgent);
       }
-    }
 
-    if (options.timeoutMs !== undefined) {
-      timeoutId = setTimeout(() => {
-        abortedByTimeout = true;
-        controller.abort();
-      }, options.timeoutMs);
-    }
-
-    let response: Response;
-    try {
       const baseRequestInit: RequestInit = {
         ...init,
         headers,
@@ -630,91 +614,69 @@ export async function fetchPublicUrl(
             baseRequestInit
           )
         : baseRequestInit;
-      response = await fetchWithValidatedAddresses(
-        currentUrl,
-        {
-          ...requestInit,
-          redirect: "manual",
-          signal: controller.signal,
-        },
-        validatedUrl
+      response = await deadline.run(() =>
+        fetchWithValidatedAddresses(
+          currentUrl,
+          {
+            ...requestInit,
+            redirect: "manual",
+            signal: deadline.signal,
+          },
+          validatedUrl
+        )
       );
-    } catch (error) {
-      if (abortedByTimeout) {
-        throw new UrlGuardError("Request timed out.", "timeout", 504, {
-          cause: error,
-        });
-      }
 
-      if (error instanceof UrlGuardError) {
-        throw error;
-      }
-
-      throw new UrlGuardError("Failed to fetch URL.", "fetch-failed", 502, {
-        cause: error,
-      });
-    } finally {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-      for (const signal of signals) {
-        signal.removeEventListener("abort", abortHandler);
-      }
-    }
-
-    if (redirectStatusCodes.has(response.status)) {
-      if (redirectCount >= maxRedirects) {
-        throw new UrlGuardError(
-          "Too many redirects.",
-          "too-many-redirects",
-          502
-        );
-      }
-
-      const location = response.headers.get("location");
-      if (!location) {
-        throw new UrlGuardError(
-          "Redirect response missing location header.",
-          "redirect-location-missing",
-          502
-        );
-      }
-
-      let nextUrl: URL;
-      try {
-        nextUrl = new URL(location, currentUrl);
-      } catch (error) {
-        throw new UrlGuardError(
-          "Redirect response has invalid location.",
-          "redirect-location-invalid",
-          502,
-          { cause: error }
-        );
-      }
-
-      currentUrl = nextUrl;
-      redirectCount += 1;
-      continue;
-    }
-
-    if (options.revalidateFinalUrl !== false && response.url) {
-      try {
-        const finalUrl = new URL(response.url);
-        await assertPublicUrl(finalUrl, options);
-      } catch (error) {
-        if (error instanceof UrlGuardError) {
-          throw error;
+      if (redirectStatusCodes.has(response.status)) {
+        discardResponse(response);
+        if (redirectCount >= maxRedirects) {
+          throw new UrlGuardError(
+            "Too many redirects.",
+            "too-many-redirects",
+            502
+          );
         }
-        throw new UrlGuardError(
-          "Failed to validate final URL.",
-          "fetch-failed",
-          502,
-          { cause: error }
-        );
-      }
-    }
 
-    return response;
+        const location = response.headers.get("location");
+        if (!location) {
+          throw new UrlGuardError(
+            "Redirect response missing location header.",
+            "redirect-location-missing",
+            502
+          );
+        }
+
+        let nextUrl: URL;
+        try {
+          nextUrl = new URL(location, currentUrl);
+        } catch (error) {
+          throw new UrlGuardError(
+            "Redirect response has invalid location.",
+            "redirect-location-invalid",
+            502,
+            { cause: error }
+          );
+        }
+
+        currentUrl = nextUrl;
+        redirectCount += 1;
+        continue;
+      }
+
+      if (options.revalidateFinalUrl !== false && response.url) {
+        const finalUrl = new URL(response.url);
+        await deadline.run(() => assertPublicUrl(finalUrl, options));
+      }
+
+      return bindResponseDeadline(response, deadline);
+    }
+  } catch (error) {
+    deadline.dispose();
+    if (response) discardResponse(response);
+    if (deadline.signal.aborted) throw deadline.signal.reason;
+    if (error instanceof UrlGuardError) throw error;
+    throw new UrlGuardError("Failed to fetch URL.", "fetch-failed", 502, {
+      cause: error,
+    });
   }
 }
 
@@ -726,6 +688,7 @@ export async function fetchPublicJson<T>(
   const response = await fetchPublicUrl(input, init, options);
 
   if (!response.ok) {
+    discardResponse(response);
     throw new UrlGuardError(
       `Request failed with status ${response.status}`,
       "fetch-failed",

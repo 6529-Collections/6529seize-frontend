@@ -73,6 +73,9 @@ loading.
   only to backend-uploaded attachments that pass the 6529 attachment pipeline.
 - GitHub file and directory links use the GitHub preview handler, not the generic
   external-card path. GitHub binary, PDF, and large files are also metadata-only.
+- GitHub previews show public metadata only. Private repositories and draft
+  releases do not provide preview metadata. A previously public preview can
+  remain cached for up to two minutes after its visibility changes.
 
 ## Failure and Recovery
 

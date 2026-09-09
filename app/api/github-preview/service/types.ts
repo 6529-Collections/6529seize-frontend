@@ -240,6 +240,8 @@ export interface GithubDiscussionGraphqlNode {
 
 export interface GithubDiscussionGraphqlData {
   readonly repository?: {
+    readonly visibility?: string | null;
+    readonly isPrivate?: boolean | null;
     readonly discussion?: GithubDiscussionGraphqlNode | null;
     readonly discussions?: {
       readonly totalCount?: number | null;
