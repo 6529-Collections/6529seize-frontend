@@ -11,6 +11,7 @@
  * Do not edit the class manually.
  */
 
+import { ApiArtworkDocumentationInterviewInstrument } from '../models/ApiArtworkDocumentationInterviewInstrument';
 import { ApiArtworkDocumentationProfileModule } from '../models/ApiArtworkDocumentationProfileModule';
 import { HttpFile } from '../http/http';
 
@@ -25,6 +26,7 @@ export class ApiArtworkDocumentationProfile {
     'guidance_version': string;
     'confirmation_copy_version': string;
     'confirmation_copy': string;
+    'interview_instrument': ApiArtworkDocumentationInterviewInstrument;
     'limits': { [key: string]: number; };
     'storage_mode': string;
     'submission_gate': string;
@@ -93,6 +95,12 @@ export class ApiArtworkDocumentationProfile {
             "name": "confirmation_copy",
             "baseName": "confirmation_copy",
             "type": "string",
+            "format": ""
+        },
+        {
+            "name": "interview_instrument",
+            "baseName": "interview_instrument",
+            "type": "ApiArtworkDocumentationInterviewInstrument",
             "format": ""
         },
         {

@@ -40,6 +40,8 @@ export * from '../models/ApiArtworkDocumentationGrant';
 export * from '../models/ApiArtworkDocumentationGrantRequest';
 export * from '../models/ApiArtworkDocumentationGrantsResponse';
 export * from '../models/ApiArtworkDocumentationIdBody';
+export * from '../models/ApiArtworkDocumentationInterviewInstrument';
+export * from '../models/ApiArtworkDocumentationInterviewPrompt';
 export * from '../models/ApiArtworkDocumentationLifecycleRequest';
 export * from '../models/ApiArtworkDocumentationModule';
 export * from '../models/ApiArtworkDocumentationOperation';
@@ -733,13 +735,15 @@ import { ApiArtworkDocumentationGrant } from '../models/ApiArtworkDocumentationG
 import { ApiArtworkDocumentationGrantRequest } from '../models/ApiArtworkDocumentationGrantRequest';
 import { ApiArtworkDocumentationGrantsResponse } from '../models/ApiArtworkDocumentationGrantsResponse';
 import { ApiArtworkDocumentationIdBody } from '../models/ApiArtworkDocumentationIdBody';
+import { ApiArtworkDocumentationInterviewInstrument } from '../models/ApiArtworkDocumentationInterviewInstrument';
+import { ApiArtworkDocumentationInterviewPrompt } from '../models/ApiArtworkDocumentationInterviewPrompt';
 import { ApiArtworkDocumentationLifecycleRequest, ApiArtworkDocumentationLifecycleRequestLifecycleEnum   } from '../models/ApiArtworkDocumentationLifecycleRequest';
 import { ApiArtworkDocumentationModule } from '../models/ApiArtworkDocumentationModule';
 import { ApiArtworkDocumentationOperation, ApiArtworkDocumentationOperationOpEnum     } from '../models/ApiArtworkDocumentationOperation';
 import { ApiArtworkDocumentationPatchModule } from '../models/ApiArtworkDocumentationPatchModule';
 import { ApiArtworkDocumentationPatchThread } from '../models/ApiArtworkDocumentationPatchThread';
 import { ApiArtworkDocumentationPreviewModule } from '../models/ApiArtworkDocumentationPreviewModule';
-import { ApiArtworkDocumentationProfile     , ApiArtworkDocumentationProfileReviewLanesEnum           } from '../models/ApiArtworkDocumentationProfile';
+import { ApiArtworkDocumentationProfile     , ApiArtworkDocumentationProfileReviewLanesEnum            } from '../models/ApiArtworkDocumentationProfile';
 import { ApiArtworkDocumentationProfileModule, ApiArtworkDocumentationProfileModuleIdEnum     } from '../models/ApiArtworkDocumentationProfileModule';
 import { ApiArtworkDocumentationProfilesResponse } from '../models/ApiArtworkDocumentationProfilesResponse';
 import { ApiArtworkDocumentationPublicPreview } from '../models/ApiArtworkDocumentationPublicPreview';
@@ -1601,6 +1605,8 @@ let typeMap: {[index: string]: any} = {
     "ApiArtworkDocumentationGrantRequest": ApiArtworkDocumentationGrantRequest,
     "ApiArtworkDocumentationGrantsResponse": ApiArtworkDocumentationGrantsResponse,
     "ApiArtworkDocumentationIdBody": ApiArtworkDocumentationIdBody,
+    "ApiArtworkDocumentationInterviewInstrument": ApiArtworkDocumentationInterviewInstrument,
+    "ApiArtworkDocumentationInterviewPrompt": ApiArtworkDocumentationInterviewPrompt,
     "ApiArtworkDocumentationLifecycleRequest": ApiArtworkDocumentationLifecycleRequest,
     "ApiArtworkDocumentationModule": ApiArtworkDocumentationModule,
     "ApiArtworkDocumentationOperation": ApiArtworkDocumentationOperation,

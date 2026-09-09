@@ -5,10 +5,10 @@ import {
   screen,
   waitFor,
 } from "@testing-library/react";
-import { createRef } from "react";
+import { createRef, type ComponentProps } from "react";
 import type {
   ArtworkDocumentationInlineHandle,
-  ArtworkDocumentationInlineProps,
+  ArtworkDocumentationInline,
 } from "@/components/artwork-documentation/ArtworkDocumentationInline";
 import type { ApiArtworkDocumentationContext } from "@/generated/models/ApiArtworkDocumentationContext";
 import MemesSubmissionDocumentation, {
@@ -29,9 +29,9 @@ jest.mock(
     const React = jest.requireActual<typeof import("react")>("react");
     return {
       __esModule: true,
-      default: React.forwardRef<
+      ArtworkDocumentationInline: React.forwardRef<
         ArtworkDocumentationInlineHandle,
-        ArtworkDocumentationInlineProps
+        ComponentProps<typeof ArtworkDocumentationInline>
       >(function Inline(props, ref) {
         React.useEffect(() => {
           mockMounted();

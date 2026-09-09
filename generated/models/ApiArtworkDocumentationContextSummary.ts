@@ -11,6 +11,7 @@
  * Do not edit the class manually.
  */
 
+import { ApiArtworkDocumentationReview } from '../models/ApiArtworkDocumentationReview';
 import { HttpFile } from '../http/http';
 
 export class ApiArtworkDocumentationContextSummary {
@@ -25,6 +26,7 @@ export class ApiArtworkDocumentationContextSummary {
     'updated_at': number;
     'profile_id': string;
     'profile_version': number;
+    'reviews': Array<ApiArtworkDocumentationReview>;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -96,6 +98,12 @@ export class ApiArtworkDocumentationContextSummary {
             "baseName": "profile_version",
             "type": "number",
             "format": "int64"
+        },
+        {
+            "name": "reviews",
+            "baseName": "reviews",
+            "type": "Array<ApiArtworkDocumentationReview>",
+            "format": ""
         }    ];
 
     static getAttributeTypeMap() {

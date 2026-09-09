@@ -1552,6 +1552,39 @@ paths:
             type: integer
             minimum: 1
             maximum: 100
+        - name: confirmation_status
+          in: query
+          schema:
+            type: string
+            enum:
+              - unconfirmed
+              - current
+              - newer_draft
+        - name: review_lane
+          in: query
+          schema:
+            type: string
+            enum:
+              - curatorial
+              - technical
+              - rights
+        - name: outstanding_action
+          in: query
+          schema:
+            type: string
+            enum:
+              - artist_confirmation
+              - review
+              - changes_requested
+        - name: profile_id
+          in: query
+          schema:
+            type: string
+        - name: profile_version
+          in: query
+          schema:
+            type: integer
+            minimum: 1
       responses:
         "200":
           description: Authorized private response
@@ -15466,6 +15499,447 @@ components:
       type: http
       scheme: bearer
   schemas:
+    AirdropAddressResponse:
+      type: object
+      required:
+        - tdh_wallet
+        - airdrop_address
+      properties:
+        tdh_wallet:
+          type: object
+          required:
+            - address
+            - ens
+          properties:
+            address:
+              type: string
+            ens:
+              type: string
+        airdrop_address:
+          type: object
+          required:
+            - address
+            - ens
+          properties:
+            address:
+              type: string
+            ens:
+              type: string
+    AllowlistNormalizedEntry:
+      type: object
+      required:
+        - phase
+        - spots
+        - spots_airdrop
+        - spots_allowlist
+      properties:
+        phase:
+          type: string
+        spots:
+          type: integer
+          format: int64
+        spots_airdrop:
+          type: integer
+          format: int64
+        spots_allowlist:
+          type: integer
+          format: int64
+    ApiAddReactionToDropRequest:
+      type: object
+      required:
+        - reaction
+      properties:
+        reaction:
+          type: string
+    ApiAggregatedActivity:
+      type: object
+      required:
+        - consolidation_key
+        - created_at
+        - updated_at
+        - primary_purchases_value
+        - primary_purchases_count
+        - secondary_purchases_value
+        - secondary_purchases_count
+        - burns
+        - sales_value
+        - sales_count
+        - airdrops
+        - transfers_in
+        - transfers_out
+        - primary_purchases_value_memes
+        - primary_purchases_count_memes
+        - secondary_purchases_value_memes
+        - secondary_purchases_count_memes
+        - burns_memes
+        - sales_value_memes
+        - sales_count_memes
+        - airdrops_memes
+        - transfers_in_memes
+        - transfers_out_memes
+        - primary_purchases_value_memelab
+        - primary_purchases_count_memelab
+        - secondary_purchases_value_memelab
+        - secondary_purchases_count_memelab
+        - burns_memelab
+        - sales_value_memelab
+        - sales_count_memelab
+        - airdrops_memelab
+        - transfers_in_memelab
+        - transfers_out_memelab
+        - primary_purchases_value_gradients
+        - primary_purchases_count_gradients
+        - secondary_purchases_value_gradients
+        - secondary_purchases_count_gradients
+        - burns_gradients
+        - sales_value_gradients
+        - sales_count_gradients
+        - airdrops_gradients
+        - transfers_in_gradients
+        - transfers_out_gradients
+        - primary_purchases_value_nextgen
+        - primary_purchases_count_nextgen
+        - secondary_purchases_value_nextgen
+        - secondary_purchases_count_nextgen
+        - burns_nextgen
+        - sales_value_nextgen
+        - sales_count_nextgen
+        - airdrops_nextgen
+        - transfers_in_nextgen
+        - transfers_out_nextgen
+      properties:
+        consolidation_key:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        primary_purchases_value:
+          type: integer
+          format: int64
+        primary_purchases_count:
+          type: integer
+          format: int64
+        secondary_purchases_value:
+          type: integer
+          format: int64
+        secondary_purchases_count:
+          type: integer
+          format: int64
+        burns:
+          type: integer
+          format: int64
+        sales_value:
+          type: integer
+          format: int64
+        sales_count:
+          type: integer
+          format: int64
+        airdrops:
+          type: integer
+          format: int64
+        transfers_in:
+          type: integer
+          format: int64
+        transfers_out:
+          type: integer
+          format: int64
+        primary_purchases_value_memes:
+          type: integer
+          format: int64
+        primary_purchases_count_memes:
+          type: integer
+          format: int64
+        secondary_purchases_value_memes:
+          type: integer
+          format: int64
+        secondary_purchases_count_memes:
+          type: integer
+          format: int64
+        burns_memes:
+          type: integer
+          format: int64
+        sales_value_memes:
+          type: integer
+          format: int64
+        sales_count_memes:
+          type: integer
+          format: int64
+        airdrops_memes:
+          type: integer
+          format: int64
+        transfers_in_memes:
+          type: integer
+          format: int64
+        transfers_out_memes:
+          type: integer
+          format: int64
+        primary_purchases_value_memelab:
+          type: integer
+          format: int64
+        primary_purchases_count_memelab:
+          type: integer
+          format: int64
+        secondary_purchases_value_memelab:
+          type: integer
+          format: int64
+        secondary_purchases_count_memelab:
+          type: integer
+          format: int64
+        burns_memelab:
+          type: integer
+          format: int64
+        sales_value_memelab:
+          type: integer
+          format: int64
+        sales_count_memelab:
+          type: integer
+          format: int64
+        airdrops_memelab:
+          type: integer
+          format: int64
+        transfers_in_memelab:
+          type: integer
+          format: int64
+        transfers_out_memelab:
+          type: integer
+          format: int64
+        primary_purchases_value_gradients:
+          type: integer
+          format: int64
+        primary_purchases_count_gradients:
+          type: integer
+          format: int64
+        secondary_purchases_value_gradients:
+          type: integer
+          format: int64
+        secondary_purchases_count_gradients:
+          type: integer
+          format: int64
+        burns_gradients:
+          type: integer
+          format: int64
+        sales_value_gradients:
+          type: integer
+          format: int64
+        sales_count_gradients:
+          type: integer
+          format: int64
+        airdrops_gradients:
+          type: integer
+          format: int64
+        transfers_in_gradients:
+          type: integer
+          format: int64
+        transfers_out_gradients:
+          type: integer
+          format: int64
+        primary_purchases_value_nextgen:
+          type: integer
+          format: int64
+        primary_purchases_count_nextgen:
+          type: integer
+          format: int64
+        secondary_purchases_value_nextgen:
+          type: integer
+          format: int64
+        secondary_purchases_count_nextgen:
+          type: integer
+          format: int64
+        burns_nextgen:
+          type: integer
+          format: int64
+        sales_value_nextgen:
+          type: integer
+          format: int64
+        sales_count_nextgen:
+          type: integer
+          format: int64
+        airdrops_nextgen:
+          type: integer
+          format: int64
+        transfers_in_nextgen:
+          type: integer
+          format: int64
+        transfers_out_nextgen:
+          type: integer
+          format: int64
+    ApiAggregatedActivityMemes:
+      type: object
+      required:
+        - consolidation_key
+        - created_at
+        - updated_at
+        - primary_purchases_value
+        - primary_purchases_count
+        - secondary_purchases_value
+        - secondary_purchases_count
+        - burns
+        - sales_value
+        - sales_count
+        - airdrops
+        - transfers_in
+        - transfers_out
+        - season
+      properties:
+        consolidation_key:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        primary_purchases_value:
+          type: integer
+          format: int64
+        primary_purchases_count:
+          type: integer
+          format: int64
+        secondary_purchases_value:
+          type: integer
+          format: int64
+        secondary_purchases_count:
+          type: integer
+          format: int64
+        burns:
+          type: integer
+          format: int64
+        sales_value:
+          type: integer
+          format: int64
+        sales_count:
+          type: integer
+          format: int64
+        airdrops:
+          type: integer
+          format: int64
+        transfers_in:
+          type: integer
+          format: int64
+        transfers_out:
+          type: integer
+          format: int64
+        season:
+          type: integer
+          format: int64
+    ApiAggregatedActivityPage:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/ApiPageWithNextUriBase"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiAggregatedActivity"
+    ApiArchiveProfileCmsPackageRequest:
+      type: object
+      properties:
+        expected_package_hash:
+          type: string
+    ApiArtistNameItem:
+      type: object
+      required:
+        - name
+        - cards
+      properties:
+        name:
+          type: string
+        cards:
+          type: array
+          items:
+            type: integer
+            format: int64
+    ApiAttachment:
+      type: object
+      required:
+        - attachment_id
+        - file_name
+        - mime_type
+        - kind
+        - status
+      properties:
+        attachment_id:
+          type: string
+        file_name:
+          type: string
+        mime_type:
+          $ref: "#/components/schemas/ApiAttachmentUploadMimeType"
+        kind:
+          $ref: "#/components/schemas/ApiAttachmentKind"
+        status:
+          $ref: "#/components/schemas/ApiAttachmentStatus"
+        url:
+          type: string
+          nullable: true
+        error_reason:
+          type: string
+          nullable: true
+        safety:
+          $ref: "#/components/schemas/ApiAttachmentSafety"
+    ApiAttachmentKind:
+      type: string
+      enum:
+        - pdf
+        - csv
+    ApiAttachmentSafety:
+      type: object
+      required:
+        - status
+        - scanner
+        - validation
+        - size_bytes
+        - sha256
+      properties:
+        status:
+          $ref: "#/components/schemas/ApiAttachmentSafetyStatus"
+        scanner:
+          nullable: true
+          allOf:
+            - $ref: "#/components/schemas/ApiAttachmentSafetyScanner"
+        validation:
+          nullable: true
+          allOf:
+            - $ref: "#/components/schemas/ApiAttachmentSafetyValidation"
+        size_bytes:
+          type: integer
+          format: int64
+          nullable: true
+        sha256:
+          type: string
+          nullable: true
+    ApiAttachmentSafetyScanner:
+      type: string
+      enum:
+        - guardduty
+    ApiAttachmentSafetyStatus:
+      type: string
+      enum:
+        - pending
+        - scanned_validated
+        - blocked
+        - failed
+    ApiAttachmentSafetyValidation:
+      type: string
+      enum:
+        - public_ipfs_validated
+    ApiAttachmentStatus:
+      type: string
+      enum:
+        - uploading
+        - verifying
+        - processing
+        - ready
+        - bad
+    ApiAttachmentUploadMimeType:
+      type: string
+      enum:
+        - application/pdf
+        - text/csv
     ApiArtworkDocumentationAnswer:
       type: object
       properties:
@@ -15965,6 +16439,10 @@ components:
         profile_version:
           type: integer
           format: int64
+        reviews:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiArtworkDocumentationReview"
       required:
         - id
         - work_id
@@ -15977,6 +16455,7 @@ components:
         - updated_at
         - profile_id
         - profile_version
+        - reviews
       additionalProperties: false
     ApiArtworkDocumentationCreateContext:
       type: object
@@ -16150,6 +16629,36 @@ components:
       required:
         - artist_record_revision_id
       additionalProperties: false
+    ApiArtworkDocumentationInterviewInstrument:
+      type: object
+      required:
+        - id
+        - version
+        - language
+        - prompts
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        version:
+          type: integer
+        language:
+          type: string
+        prompts:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiArtworkDocumentationInterviewPrompt"
+    ApiArtworkDocumentationInterviewPrompt:
+      type: object
+      required:
+        - id
+        - text
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        text:
+          type: string
     ApiArtworkDocumentationLifecycleRequest:
       type: object
       properties:
@@ -16271,6 +16780,8 @@ components:
           type: string
         confirmation_copy:
           type: string
+        interview_instrument:
+          $ref: "#/components/schemas/ApiArtworkDocumentationInterviewInstrument"
         limits:
           type: object
           additionalProperties:
@@ -16295,6 +16806,7 @@ components:
         - guidance_version
         - confirmation_copy_version
         - confirmation_copy
+        - interview_instrument
         - limits
         - storage_mode
         - submission_gate
@@ -16884,447 +17396,6 @@ components:
         - id
         - contexts
       additionalProperties: false
-    AirdropAddressResponse:
-      type: object
-      required:
-        - tdh_wallet
-        - airdrop_address
-      properties:
-        tdh_wallet:
-          type: object
-          required:
-            - address
-            - ens
-          properties:
-            address:
-              type: string
-            ens:
-              type: string
-        airdrop_address:
-          type: object
-          required:
-            - address
-            - ens
-          properties:
-            address:
-              type: string
-            ens:
-              type: string
-    AllowlistNormalizedEntry:
-      type: object
-      required:
-        - phase
-        - spots
-        - spots_airdrop
-        - spots_allowlist
-      properties:
-        phase:
-          type: string
-        spots:
-          type: integer
-          format: int64
-        spots_airdrop:
-          type: integer
-          format: int64
-        spots_allowlist:
-          type: integer
-          format: int64
-    ApiAddReactionToDropRequest:
-      type: object
-      required:
-        - reaction
-      properties:
-        reaction:
-          type: string
-    ApiAggregatedActivity:
-      type: object
-      required:
-        - consolidation_key
-        - created_at
-        - updated_at
-        - primary_purchases_value
-        - primary_purchases_count
-        - secondary_purchases_value
-        - secondary_purchases_count
-        - burns
-        - sales_value
-        - sales_count
-        - airdrops
-        - transfers_in
-        - transfers_out
-        - primary_purchases_value_memes
-        - primary_purchases_count_memes
-        - secondary_purchases_value_memes
-        - secondary_purchases_count_memes
-        - burns_memes
-        - sales_value_memes
-        - sales_count_memes
-        - airdrops_memes
-        - transfers_in_memes
-        - transfers_out_memes
-        - primary_purchases_value_memelab
-        - primary_purchases_count_memelab
-        - secondary_purchases_value_memelab
-        - secondary_purchases_count_memelab
-        - burns_memelab
-        - sales_value_memelab
-        - sales_count_memelab
-        - airdrops_memelab
-        - transfers_in_memelab
-        - transfers_out_memelab
-        - primary_purchases_value_gradients
-        - primary_purchases_count_gradients
-        - secondary_purchases_value_gradients
-        - secondary_purchases_count_gradients
-        - burns_gradients
-        - sales_value_gradients
-        - sales_count_gradients
-        - airdrops_gradients
-        - transfers_in_gradients
-        - transfers_out_gradients
-        - primary_purchases_value_nextgen
-        - primary_purchases_count_nextgen
-        - secondary_purchases_value_nextgen
-        - secondary_purchases_count_nextgen
-        - burns_nextgen
-        - sales_value_nextgen
-        - sales_count_nextgen
-        - airdrops_nextgen
-        - transfers_in_nextgen
-        - transfers_out_nextgen
-      properties:
-        consolidation_key:
-          type: string
-        created_at:
-          type: string
-          format: date-time
-        updated_at:
-          type: string
-          format: date-time
-        primary_purchases_value:
-          type: integer
-          format: int64
-        primary_purchases_count:
-          type: integer
-          format: int64
-        secondary_purchases_value:
-          type: integer
-          format: int64
-        secondary_purchases_count:
-          type: integer
-          format: int64
-        burns:
-          type: integer
-          format: int64
-        sales_value:
-          type: integer
-          format: int64
-        sales_count:
-          type: integer
-          format: int64
-        airdrops:
-          type: integer
-          format: int64
-        transfers_in:
-          type: integer
-          format: int64
-        transfers_out:
-          type: integer
-          format: int64
-        primary_purchases_value_memes:
-          type: integer
-          format: int64
-        primary_purchases_count_memes:
-          type: integer
-          format: int64
-        secondary_purchases_value_memes:
-          type: integer
-          format: int64
-        secondary_purchases_count_memes:
-          type: integer
-          format: int64
-        burns_memes:
-          type: integer
-          format: int64
-        sales_value_memes:
-          type: integer
-          format: int64
-        sales_count_memes:
-          type: integer
-          format: int64
-        airdrops_memes:
-          type: integer
-          format: int64
-        transfers_in_memes:
-          type: integer
-          format: int64
-        transfers_out_memes:
-          type: integer
-          format: int64
-        primary_purchases_value_memelab:
-          type: integer
-          format: int64
-        primary_purchases_count_memelab:
-          type: integer
-          format: int64
-        secondary_purchases_value_memelab:
-          type: integer
-          format: int64
-        secondary_purchases_count_memelab:
-          type: integer
-          format: int64
-        burns_memelab:
-          type: integer
-          format: int64
-        sales_value_memelab:
-          type: integer
-          format: int64
-        sales_count_memelab:
-          type: integer
-          format: int64
-        airdrops_memelab:
-          type: integer
-          format: int64
-        transfers_in_memelab:
-          type: integer
-          format: int64
-        transfers_out_memelab:
-          type: integer
-          format: int64
-        primary_purchases_value_gradients:
-          type: integer
-          format: int64
-        primary_purchases_count_gradients:
-          type: integer
-          format: int64
-        secondary_purchases_value_gradients:
-          type: integer
-          format: int64
-        secondary_purchases_count_gradients:
-          type: integer
-          format: int64
-        burns_gradients:
-          type: integer
-          format: int64
-        sales_value_gradients:
-          type: integer
-          format: int64
-        sales_count_gradients:
-          type: integer
-          format: int64
-        airdrops_gradients:
-          type: integer
-          format: int64
-        transfers_in_gradients:
-          type: integer
-          format: int64
-        transfers_out_gradients:
-          type: integer
-          format: int64
-        primary_purchases_value_nextgen:
-          type: integer
-          format: int64
-        primary_purchases_count_nextgen:
-          type: integer
-          format: int64
-        secondary_purchases_value_nextgen:
-          type: integer
-          format: int64
-        secondary_purchases_count_nextgen:
-          type: integer
-          format: int64
-        burns_nextgen:
-          type: integer
-          format: int64
-        sales_value_nextgen:
-          type: integer
-          format: int64
-        sales_count_nextgen:
-          type: integer
-          format: int64
-        airdrops_nextgen:
-          type: integer
-          format: int64
-        transfers_in_nextgen:
-          type: integer
-          format: int64
-        transfers_out_nextgen:
-          type: integer
-          format: int64
-    ApiAggregatedActivityMemes:
-      type: object
-      required:
-        - consolidation_key
-        - created_at
-        - updated_at
-        - primary_purchases_value
-        - primary_purchases_count
-        - secondary_purchases_value
-        - secondary_purchases_count
-        - burns
-        - sales_value
-        - sales_count
-        - airdrops
-        - transfers_in
-        - transfers_out
-        - season
-      properties:
-        consolidation_key:
-          type: string
-        created_at:
-          type: string
-          format: date-time
-        updated_at:
-          type: string
-          format: date-time
-        primary_purchases_value:
-          type: integer
-          format: int64
-        primary_purchases_count:
-          type: integer
-          format: int64
-        secondary_purchases_value:
-          type: integer
-          format: int64
-        secondary_purchases_count:
-          type: integer
-          format: int64
-        burns:
-          type: integer
-          format: int64
-        sales_value:
-          type: integer
-          format: int64
-        sales_count:
-          type: integer
-          format: int64
-        airdrops:
-          type: integer
-          format: int64
-        transfers_in:
-          type: integer
-          format: int64
-        transfers_out:
-          type: integer
-          format: int64
-        season:
-          type: integer
-          format: int64
-    ApiAggregatedActivityPage:
-      type: object
-      required:
-        - data
-      allOf:
-        - $ref: "#/components/schemas/ApiPageWithNextUriBase"
-      properties:
-        data:
-          type: array
-          items:
-            $ref: "#/components/schemas/ApiAggregatedActivity"
-    ApiArchiveProfileCmsPackageRequest:
-      type: object
-      properties:
-        expected_package_hash:
-          type: string
-    ApiArtistNameItem:
-      type: object
-      required:
-        - name
-        - cards
-      properties:
-        name:
-          type: string
-        cards:
-          type: array
-          items:
-            type: integer
-            format: int64
-    ApiAttachment:
-      type: object
-      required:
-        - attachment_id
-        - file_name
-        - mime_type
-        - kind
-        - status
-      properties:
-        attachment_id:
-          type: string
-        file_name:
-          type: string
-        mime_type:
-          $ref: "#/components/schemas/ApiAttachmentUploadMimeType"
-        kind:
-          $ref: "#/components/schemas/ApiAttachmentKind"
-        status:
-          $ref: "#/components/schemas/ApiAttachmentStatus"
-        url:
-          type: string
-          nullable: true
-        error_reason:
-          type: string
-          nullable: true
-        safety:
-          $ref: "#/components/schemas/ApiAttachmentSafety"
-    ApiAttachmentKind:
-      type: string
-      enum:
-        - pdf
-        - csv
-    ApiAttachmentSafety:
-      type: object
-      required:
-        - status
-        - scanner
-        - validation
-        - size_bytes
-        - sha256
-      properties:
-        status:
-          $ref: "#/components/schemas/ApiAttachmentSafetyStatus"
-        scanner:
-          nullable: true
-          allOf:
-            - $ref: "#/components/schemas/ApiAttachmentSafetyScanner"
-        validation:
-          nullable: true
-          allOf:
-            - $ref: "#/components/schemas/ApiAttachmentSafetyValidation"
-        size_bytes:
-          type: integer
-          format: int64
-          nullable: true
-        sha256:
-          type: string
-          nullable: true
-    ApiAttachmentSafetyScanner:
-      type: string
-      enum:
-        - guardduty
-    ApiAttachmentSafetyStatus:
-      type: string
-      enum:
-        - pending
-        - scanned_validated
-        - blocked
-        - failed
-    ApiAttachmentSafetyValidation:
-      type: string
-      enum:
-        - public_ipfs_validated
-    ApiAttachmentStatus:
-      type: string
-      enum:
-        - uploading
-        - verifying
-        - processing
-        - ready
-        - bad
-    ApiAttachmentUploadMimeType:
-      type: string
-      enum:
-        - application/pdf
-        - text/csv
     ApiAuthSettings:
       type: object
       required:

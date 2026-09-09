@@ -2,8 +2,9 @@
 
 The private `/artwork-documentation` workspace, list, historical versions and
 inline submission module use English source messages in
-`i18n/messages/artwork-documentation.ts` and
-`i18n/messages/artwork-documentation-fields.ts`.
+`i18n/messages/artwork-documentation.ts`,
+`i18n/messages/artwork-documentation-fields.ts` and
+`i18n/messages/artwork-documentation-integration.ts`.
 
 Supported non-source locales currently fall back to this English copy. Date and
 number formatting uses the browser locale through the existing `i18n/format`

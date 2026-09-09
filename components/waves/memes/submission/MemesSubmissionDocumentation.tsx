@@ -8,7 +8,8 @@ import {
   useRef,
   useState,
 } from "react";
-import ArtworkDocumentationInline, {
+import {
+  ArtworkDocumentationInline,
   type ArtworkDocumentationInlineHandle,
 } from "@/components/artwork-documentation/ArtworkDocumentationInline";
 import type { ApiArtworkDocumentationContext } from "@/generated/models/ApiArtworkDocumentationContext";
