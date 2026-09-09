@@ -300,7 +300,6 @@
     "__tests__/components/memes/drops/meme-participation-drop/MemeDropDescription.test.tsx": 1,
     "__tests__/components/memes/drops/meme-participation-drop/MemeDropVoteStats.test.tsx": 2,
     "__tests__/components/memes/drops/MemeParticipationDrop.test.tsx": 13,
-    "__tests__/components/memes/drops/MemesLeaderboardDrop.test.tsx": 2,
     "__tests__/components/memes/drops/MemesLeaderboardDropCard.test.tsx": 1,
     "__tests__/components/memes/drops/MemesLeaderboardDropVoteSummary.test.tsx": 1,
     "__tests__/components/memes/drops/MemeWinnerArtistInfo.test.tsx": 1,

@@ -1,0 +1,1254 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol:IStreamArtistRegistryV2#error:0xf8958cff",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol:IStreamArtistRegistryV2",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "enum IStreamArtistRegistryV2.ArtistExternalProviderV2",
+              "name": "provider",
+              "type": "uint8"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "expectedBindingHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "internalType": "bytes32",
+              "name": "suppliedBindingHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "ArtistRegistryExternalProviderBindingMismatch",
+          "selector": "0xf8958cff",
+          "signature": "ArtistRegistryExternalProviderBindingMismatch(uint8,bytes32,bytes32)"
+        },
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol:IStreamArtistRegistryV2#error:0x96e28507",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol:IStreamArtistRegistryV2",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "pinClass",
+              "type": "uint8"
+            },
+            {
+              "index": 1,
+              "internalType": "uint8",
+              "name": "pinIndex",
+              "type": "uint8"
+            }
+          ],
+          "name": "ArtistRegistryInvalidPin",
+          "selector": "0x96e28507",
+          "signature": "ArtistRegistryInvalidPin(uint8,uint8)"
+        },
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol:IStreamArtistRegistryV2#error:0x209009a3",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol:IStreamArtistRegistryV2",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "recipeSetHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "ArtistRegistryInvalidRecipeSetHash",
+          "selector": "0x209009a3",
+          "signature": "ArtistRegistryInvalidRecipeSetHash(bytes32)"
+        },
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol:IStreamArtistRegistryV2#error:0x0ea7e59b",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol:IStreamArtistRegistryV2",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "expectedAddress",
+              "type": "address"
+            }
+          ],
+          "name": "ArtistRegistryPinAddressAlias",
+          "selector": "0x0ea7e59b",
+          "signature": "ArtistRegistryPinAddressAlias(address)"
+        }
+      ],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol:IStreamArtistRegistryV2#function:0x7309443f",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol:IStreamArtistRegistryV2",
+          "inherited": false,
+          "inputs": [],
+          "name": "artistArchivePinV2",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "struct IStreamArtistRegistryV2.ArtistDirectoryPinV2",
+              "name": "",
+              "type": "(address,bytes32,bytes4,bytes32,bytes32,bytes32)"
+            }
+          ],
+          "selector": "0x7309443f",
+          "signature": "artistArchivePinV2()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol:IStreamArtistRegistryV2#function:0xa8e9a0c4",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol:IStreamArtistRegistryV2",
+          "inherited": false,
+          "inputs": [],
+          "name": "artistCoordinatorPinV2",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "struct IStreamArtistRegistryV2.ArtistDirectoryPinV2",
+              "name": "",
+              "type": "(address,bytes32,bytes4,bytes32,bytes32,bytes32)"
+            }
+          ],
+          "selector": "0xa8e9a0c4",
+          "signature": "artistCoordinatorPinV2()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol:IStreamArtistRegistryV2#function:0xb3ee9a4f",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol:IStreamArtistRegistryV2",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "enum IStreamArtistRegistryV2.ArtistExternalProviderV2",
+              "name": "provider",
+              "type": "uint8"
+            }
+          ],
+          "name": "artistExternalProviderPinV2",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "struct IStreamArtistRegistryV2.ArtistDirectoryPinV2",
+              "name": "",
+              "type": "(address,bytes32,bytes4,bytes32,bytes32,bytes32)"
+            }
+          ],
+          "selector": "0xb3ee9a4f",
+          "signature": "artistExternalProviderPinV2(uint8)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol:IStreamArtistRegistryV2#function:0x624085e5",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol:IStreamArtistRegistryV2",
+          "inherited": false,
+          "inputs": [],
+          "name": "artistRecipeSetHashV2",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x624085e5",
+          "signature": "artistRecipeSetHashV2()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol:IStreamArtistRegistryV2#function:0x0b9a2e95",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol:IStreamArtistRegistryV2",
+          "inherited": false,
+          "inputs": [],
+          "name": "artistRegistryBindingHashV2",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x0b9a2e95",
+          "signature": "artistRegistryBindingHashV2()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol:IStreamArtistRegistryV2#function:0xef830742",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol:IStreamArtistRegistryV2",
+          "inherited": false,
+          "inputs": [],
+          "name": "artistRegistryMarkerV2",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0xef830742",
+          "signature": "artistRegistryMarkerV2()",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol:IStreamArtistRegistryV2#function:0x7f86b1a4",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol:IStreamArtistRegistryV2",
+          "inherited": false,
+          "inputs": [],
+          "name": "artistRegistrySchemaHashV2",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x7f86b1a4",
+          "signature": "artistRegistrySchemaHashV2()",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol:IStreamArtistRegistryV2#function:0xbc02750a",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol:IStreamArtistRegistryV2",
+          "inherited": false,
+          "inputs": [],
+          "name": "artistRegistrySchemaV2",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint16",
+              "name": "",
+              "type": "uint16"
+            }
+          ],
+          "selector": "0xbc02750a",
+          "signature": "artistRegistrySchemaV2()",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol:IStreamArtistRegistryV2#function:0x7b12b1da",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol:IStreamArtistRegistryV2",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "enum IStreamArtistRegistryV2.ArtistSemanticDomainV2",
+              "name": "domain",
+              "type": "uint8"
+            }
+          ],
+          "name": "artistSemanticOwnerPinV2",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "struct IStreamArtistRegistryV2.ArtistDirectoryPinV2",
+              "name": "",
+              "type": "(address,bytes32,bytes4,bytes32,bytes32,bytes32)"
+            }
+          ],
+          "selector": "0x7b12b1da",
+          "signature": "artistSemanticOwnerPinV2(uint8)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/vendor/openzeppelin/IERC165.sol:IERC165#function:0x01ffc9a7",
+          "declaringDefinitionId": "smart-contracts/vendor/openzeppelin/IERC165.sol:IERC165",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "name": "supportsInterface",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x01ffc9a7",
+          "signature": "supportsInterface(bytes4)",
+          "stateMutability": "view"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "published_interface",
+    "classificationReason": "Listed in release-artifacts/contracts.json interfaces.",
+    "declarations": {
+      "enums": [
+        {
+          "memberDetails": [
+            {
+              "index": 0,
+              "name": "BindingLifecycle",
+              "range": {
+                "byteLength": 16,
+                "byteStart": 840,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol#L16",
+                "lineEnd": 16,
+                "lineStart": 16,
+                "snippetSha256": "sha256:8e61a1486c9e8afc54496036cb620a4ececcc14631583d070a8fe345e5cc6ad6",
+                "sourceSha256": "sha256:6b56d095a7abdde99967c18ebef1c089ef91e9cff1c5477c2c1cc5d601059a54"
+              }
+            },
+            {
+              "index": 1,
+              "name": "CollaboratorLifecycle",
+              "range": {
+                "byteLength": 21,
+                "byteStart": 866,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol#L17",
+                "lineEnd": 17,
+                "lineStart": 17,
+                "snippetSha256": "sha256:dab151f109db1fe3206357d47574f06bdbdcc40a3ff19538cc0bc8c5fcf33b05",
+                "sourceSha256": "sha256:6b56d095a7abdde99967c18ebef1c089ef91e9cff1c5477c2c1cc5d601059a54"
+              }
+            },
+            {
+              "index": 2,
+              "name": "IdentityAuthority",
+              "range": {
+                "byteLength": 17,
+                "byteStart": 897,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol#L18",
+                "lineEnd": 18,
+                "lineStart": 18,
+                "snippetSha256": "sha256:de3234fcd12c257790181dbe18ef951a470bad4f57fc88bef66e88377e317f33",
+                "sourceSha256": "sha256:6b56d095a7abdde99967c18ebef1c089ef91e9cff1c5477c2c1cc5d601059a54"
+              }
+            },
+            {
+              "index": 3,
+              "name": "AcceptanceLifecycle",
+              "range": {
+                "byteLength": 19,
+                "byteStart": 924,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol#L19",
+                "lineEnd": 19,
+                "lineStart": 19,
+                "snippetSha256": "sha256:af723ad517f54aad8bc2649d09e1452abf0dc7c847d037f2364c6e4a6b8734c1",
+                "sourceSha256": "sha256:6b56d095a7abdde99967c18ebef1c089ef91e9cff1c5477c2c1cc5d601059a54"
+              }
+            },
+            {
+              "index": 4,
+              "name": "AttributionLifecycle",
+              "range": {
+                "byteLength": 20,
+                "byteStart": 953,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol#L20",
+                "lineEnd": 20,
+                "lineStart": 20,
+                "snippetSha256": "sha256:8ecdc5173aede83164245e590ffd25173b36dd3e598377c468fe04a1c3fe5c0d",
+                "sourceSha256": "sha256:6b56d095a7abdde99967c18ebef1c089ef91e9cff1c5477c2c1cc5d601059a54"
+              }
+            },
+            {
+              "index": 5,
+              "name": "PayoutLifecycle",
+              "range": {
+                "byteLength": 15,
+                "byteStart": 983,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol#L21",
+                "lineEnd": 21,
+                "lineStart": 21,
+                "snippetSha256": "sha256:ea1db38f0a97031adbeedae7719eca5e82dd5b264764c8fe1c5d35dde6968506",
+                "sourceSha256": "sha256:6b56d095a7abdde99967c18ebef1c089ef91e9cff1c5477c2c1cc5d601059a54"
+              }
+            },
+            {
+              "index": 6,
+              "name": "ConsentFinality",
+              "range": {
+                "byteLength": 15,
+                "byteStart": 1008,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol#L22",
+                "lineEnd": 22,
+                "lineStart": 22,
+                "snippetSha256": "sha256:ebcd8e4517d7e1aa5fe90e16fa28777b8c9ba9b4710ab856e525b20c0e3c1150",
+                "sourceSha256": "sha256:6b56d095a7abdde99967c18ebef1c089ef91e9cff1c5477c2c1cc5d601059a54"
+              }
+            }
+          ],
+          "members": [
+            "BindingLifecycle",
+            "CollaboratorLifecycle",
+            "IdentityAuthority",
+            "AcceptanceLifecycle",
+            "AttributionLifecycle",
+            "PayoutLifecycle",
+            "ConsentFinality"
+          ],
+          "name": "ArtistSemanticDomainV2",
+          "natspec": "",
+          "range": {
+            "byteLength": 227,
+            "byteStart": 802,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol#L15-L23",
+            "lineEnd": 23,
+            "lineStart": 15,
+            "snippetSha256": "sha256:539f53d19a77fc184415c3b21e7601d4596ef9ab7748e0f4a77dd77557764968",
+            "sourceSha256": "sha256:6b56d095a7abdde99967c18ebef1c089ef91e9cff1c5477c2c1cc5d601059a54"
+          }
+        },
+        {
+          "memberDetails": [
+            {
+              "index": 0,
+              "name": "RoleRegistry",
+              "range": {
+                "byteLength": 12,
+                "byteStart": 1344,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol#L30",
+                "lineEnd": 30,
+                "lineStart": 30,
+                "snippetSha256": "sha256:3fe2147f96d69532cd077dd5cc90a06cd007ae5b67cbbd6d06ccc5778bd88dcb",
+                "sourceSha256": "sha256:6b56d095a7abdde99967c18ebef1c089ef91e9cff1c5477c2c1cc5d601059a54"
+              }
+            },
+            {
+              "index": 1,
+              "name": "Core",
+              "range": {
+                "byteLength": 4,
+                "byteStart": 1366,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol#L31",
+                "lineEnd": 31,
+                "lineStart": 31,
+                "snippetSha256": "sha256:70ea1983c983deacc1b61805aea3d43648afd932f346fb2e5d9b15facd4035c2",
+                "sourceSha256": "sha256:6b56d095a7abdde99967c18ebef1c089ef91e9cff1c5477c2c1cc5d601059a54"
+              }
+            },
+            {
+              "index": 2,
+              "name": "GovernanceV2",
+              "range": {
+                "byteLength": 12,
+                "byteStart": 1380,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol#L32",
+                "lineEnd": 32,
+                "lineStart": 32,
+                "snippetSha256": "sha256:d4c9580767e78ed87f907a635735ca8a7bcb887bcf5c2342270da9bc31bc1916",
+                "sourceSha256": "sha256:6b56d095a7abdde99967c18ebef1c089ef91e9cff1c5477c2c1cc5d601059a54"
+              }
+            },
+            {
+              "index": 3,
+              "name": "FinalityRegistry",
+              "range": {
+                "byteLength": 16,
+                "byteStart": 1402,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol#L33",
+                "lineEnd": 33,
+                "lineStart": 33,
+                "snippetSha256": "sha256:56f3b6fcee4209ee8d79cd2dcb2a4932cbcb9a5014976dbbea4bb1d90b45489d",
+                "sourceSha256": "sha256:6b56d095a7abdde99967c18ebef1c089ef91e9cff1c5477c2c1cc5d601059a54"
+              }
+            },
+            {
+              "index": 4,
+              "name": "ImportContinuity",
+              "range": {
+                "byteLength": 16,
+                "byteStart": 1428,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol#L34",
+                "lineEnd": 34,
+                "lineStart": 34,
+                "snippetSha256": "sha256:7633b2273647faae452db9cff4ec8f6fd441938fbdf114cc1d8f23825da7b9e0",
+                "sourceSha256": "sha256:6b56d095a7abdde99967c18ebef1c089ef91e9cff1c5477c2c1cc5d601059a54"
+              }
+            }
+          ],
+          "members": [
+            "RoleRegistry",
+            "Core",
+            "GovernanceV2",
+            "FinalityRegistry",
+            "ImportContinuity"
+          ],
+          "name": "ArtistExternalProviderV2",
+          "natspec": "",
+          "range": {
+            "byteLength": 146,
+            "byteStart": 1304,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol#L29-L35",
+            "lineEnd": 35,
+            "lineStart": 29,
+            "snippetSha256": "sha256:d4d53a41659db296e72a98320205f634ea3414fa90f40d22c2b50a640f9c988f",
+            "sourceSha256": "sha256:6b56d095a7abdde99967c18ebef1c089ef91e9cff1c5477c2c1cc5d601059a54"
+          }
+        }
+      ],
+      "errors": [
+        {
+          "astId": 84658,
+          "canonicalSignature": "ArtistRegistryInvalidRecipeSetHash(bytes32)",
+          "displaySignature": "ArtistRegistryInvalidRecipeSetHash(bytes32)",
+          "id": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol:IStreamArtistRegistryV2#error:0x209009a3",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "recipeSetHash",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVyZmFjZXMvc3RyZWFtL0lTdHJlYW1BcnRpc3RSZWdpc3RyeVYyLnNvbDpJU3RyZWFtQXJ0aXN0UmVnaXN0cnlWMiNlcnJvcjoweDIwOTAwOWEz",
+          "kind": "error",
+          "name": "ArtistRegistryInvalidRecipeSetHash",
+          "natspec": "@notice The frozen recipe-set commitment is zero.",
+          "range": {
+            "byteLength": 64,
+            "byteStart": 2304,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol#L58",
+            "lineEnd": 58,
+            "lineStart": 58,
+            "snippetSha256": "sha256:8f1b0836ca8413507559d78b1841e4463155db6d32d33dc7fe17b8dc1a8e45ae",
+            "sourceSha256": "sha256:6b56d095a7abdde99967c18ebef1c089ef91e9cff1c5477c2c1cc5d601059a54"
+          },
+          "selector": "0x209009a3"
+        },
+        {
+          "astId": 84665,
+          "canonicalSignature": "ArtistRegistryInvalidPin(uint8,uint8)",
+          "displaySignature": "ArtistRegistryInvalidPin(uint8,uint8)",
+          "id": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol:IStreamArtistRegistryV2#error:0x96e28507",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "pinClass",
+              "type": "uint8"
+            },
+            {
+              "index": 1,
+              "name": "pinIndex",
+              "type": "uint8"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVyZmFjZXMvc3RyZWFtL0lTdHJlYW1BcnRpc3RSZWdpc3RyeVYyLnNvbDpJU3RyZWFtQXJ0aXN0UmVnaXN0cnlWMiNlcnJvcjoweDk2ZTI4NTA3",
+          "kind": "error",
+          "name": "ArtistRegistryInvalidPin",
+          "natspec": "@notice One pin is zero, empty-code, or uses an invalid ERC-165 interface identifier.\n @param pinClass 0=Coordinator, 1=Archive, 2=semantic owner, 3=external provider.",
+          "range": {
+            "byteLength": 63,
+            "byteStart": 2557,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol#L62",
+            "lineEnd": 62,
+            "lineStart": 62,
+            "snippetSha256": "sha256:e5b80c0f02e35f712cf92d793e9caae7fb5790d7e4d5c626e7bcb11e221cd392",
+            "sourceSha256": "sha256:6b56d095a7abdde99967c18ebef1c089ef91e9cff1c5477c2c1cc5d601059a54"
+          },
+          "selector": "0x96e28507"
+        },
+        {
+          "astId": 84670,
+          "canonicalSignature": "ArtistRegistryPinAddressAlias(address)",
+          "displaySignature": "ArtistRegistryPinAddressAlias(address)",
+          "id": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol:IStreamArtistRegistryV2#error:0x0ea7e59b",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "expectedAddress",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVyZmFjZXMvc3RyZWFtL0lTdHJlYW1BcnRpc3RSZWdpc3RyeVYyLnNvbDpJU3RyZWFtQXJ0aXN0UmVnaXN0cnlWMiNlcnJvcjoweDBlYTdlNTli",
+          "kind": "error",
+          "name": "ArtistRegistryPinAddressAlias",
+          "natspec": "@notice Two typed directory positions use the same expected component address.",
+          "range": {
+            "byteLength": 61,
+            "byteStart": 2713,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol#L65",
+            "lineEnd": 65,
+            "lineStart": 65,
+            "snippetSha256": "sha256:db106c323c6017f882923e43961fd1abee108aa1aacc1357d8c94c97e1072abf",
+            "sourceSha256": "sha256:6b56d095a7abdde99967c18ebef1c089ef91e9cff1c5477c2c1cc5d601059a54"
+          },
+          "selector": "0x0ea7e59b"
+        },
+        {
+          "astId": 84680,
+          "canonicalSignature": "ArtistRegistryExternalProviderBindingMismatch(uint8,bytes32,bytes32)",
+          "displaySignature": "ArtistRegistryExternalProviderBindingMismatch(ArtistExternalProviderV2,bytes32,bytes32)",
+          "id": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol:IStreamArtistRegistryV2#error:0xf8958cff",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "provider",
+              "type": "ArtistExternalProviderV2"
+            },
+            {
+              "index": 1,
+              "name": "expectedBindingHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "suppliedBindingHash",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVyZmFjZXMvc3RyZWFtL0lTdHJlYW1BcnRpc3RSZWdpc3RyeVYyLnNvbDpJU3RyZWFtQXJ0aXN0UmVnaXN0cnlWMiNlcnJvcjoweGY4OTU4Y2Zm",
+          "kind": "error",
+          "name": "ArtistRegistryExternalProviderBindingMismatch",
+          "natspec": "@notice An external provider does not use the exact ADR 0023 binding formula.",
+          "range": {
+            "byteLength": 159,
+            "byteStart": 2866,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol#L68-L70",
+            "lineEnd": 70,
+            "lineStart": 68,
+            "snippetSha256": "sha256:41fcf5c3cc898b09e803184bf890b89ec3a59a284a8cfaa1c65959042a094bc7",
+            "sourceSha256": "sha256:6b56d095a7abdde99967c18ebef1c089ef91e9cff1c5477c2c1cc5d601059a54"
+          },
+          "selector": "0xf8958cff"
+        }
+      ],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "artistRegistryMarkerV2()",
+          "displaySignature": "artistRegistryMarkerV2()",
+          "functionKind": "function",
+          "id": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol:IStreamArtistRegistryV2#function:0xef830742",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVyZmFjZXMvc3RyZWFtL0lTdHJlYW1BcnRpc3RSZWdpc3RyeVYyLnNvbDpJU3RyZWFtQXJ0aXN0UmVnaXN0cnlWMiNmdW5jdGlvbjoweGVmODMwNzQy",
+          "kind": "function",
+          "modifiers": [],
+          "name": "artistRegistryMarkerV2",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 66,
+            "byteStart": 3031,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol#L72",
+            "lineEnd": 72,
+            "lineStart": 72,
+            "snippetSha256": "sha256:0e785a647f7e4b7fff0062acf3e2b0fb8f7455b9ec10b329b49299d21d410cfb",
+            "sourceSha256": "sha256:6b56d095a7abdde99967c18ebef1c089ef91e9cff1c5477c2c1cc5d601059a54"
+          },
+          "selector": "0xef830742",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "artistRegistrySchemaV2()",
+          "displaySignature": "artistRegistrySchemaV2()",
+          "functionKind": "function",
+          "id": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol:IStreamArtistRegistryV2#function:0xbc02750a",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVyZmFjZXMvc3RyZWFtL0lTdHJlYW1BcnRpc3RSZWdpc3RyeVYyLnNvbDpJU3RyZWFtQXJ0aXN0UmVnaXN0cnlWMiNmdW5jdGlvbjoweGJjMDI3NTBh",
+          "kind": "function",
+          "modifiers": [],
+          "name": "artistRegistrySchemaV2",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint16"
+            }
+          ],
+          "range": {
+            "byteLength": 65,
+            "byteStart": 3103,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol#L74",
+            "lineEnd": 74,
+            "lineStart": 74,
+            "snippetSha256": "sha256:d0f8f7ee0298249c09a0a23646273d612e33c22761453fa374bd563db6c4f1cc",
+            "sourceSha256": "sha256:6b56d095a7abdde99967c18ebef1c089ef91e9cff1c5477c2c1cc5d601059a54"
+          },
+          "selector": "0xbc02750a",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "artistRegistrySchemaHashV2()",
+          "displaySignature": "artistRegistrySchemaHashV2()",
+          "functionKind": "function",
+          "id": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol:IStreamArtistRegistryV2#function:0x7f86b1a4",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVyZmFjZXMvc3RyZWFtL0lTdHJlYW1BcnRpc3RSZWdpc3RyeVYyLnNvbDpJU3RyZWFtQXJ0aXN0UmVnaXN0cnlWMiNmdW5jdGlvbjoweDdmODZiMWE0",
+          "kind": "function",
+          "modifiers": [],
+          "name": "artistRegistrySchemaHashV2",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 70,
+            "byteStart": 3174,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol#L76",
+            "lineEnd": 76,
+            "lineStart": 76,
+            "snippetSha256": "sha256:dfe19810c5718608da8aa6df33acb26765d3260b9ac7eb209c072ec544e5e8f1",
+            "sourceSha256": "sha256:6b56d095a7abdde99967c18ebef1c089ef91e9cff1c5477c2c1cc5d601059a54"
+          },
+          "selector": "0x7f86b1a4",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "artistRecipeSetHashV2()",
+          "displaySignature": "artistRecipeSetHashV2()",
+          "functionKind": "function",
+          "id": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol:IStreamArtistRegistryV2#function:0x624085e5",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVyZmFjZXMvc3RyZWFtL0lTdHJlYW1BcnRpc3RSZWdpc3RyeVYyLnNvbDpJU3RyZWFtQXJ0aXN0UmVnaXN0cnlWMiNmdW5jdGlvbjoweDYyNDA4NWU1",
+          "kind": "function",
+          "modifiers": [],
+          "name": "artistRecipeSetHashV2",
+          "natspec": "@notice Commitment to the 57 ordered coordinator recipes; not an operation selector map.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 65,
+            "byteStart": 3347,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol#L79",
+            "lineEnd": 79,
+            "lineStart": 79,
+            "snippetSha256": "sha256:add0436f060b6065d82dc8cd99f1effd6af8d2e23846a68b6f94a582b330fab3",
+            "sourceSha256": "sha256:6b56d095a7abdde99967c18ebef1c089ef91e9cff1c5477c2c1cc5d601059a54"
+          },
+          "selector": "0x624085e5",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "artistRegistryBindingHashV2()",
+          "displaySignature": "artistRegistryBindingHashV2()",
+          "functionKind": "function",
+          "id": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol:IStreamArtistRegistryV2#function:0x0b9a2e95",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVyZmFjZXMvc3RyZWFtL0lTdHJlYW1BcnRpc3RSZWdpc3RyeVYyLnNvbDpJU3RyZWFtQXJ0aXN0UmVnaXN0cnlWMiNmdW5jdGlvbjoweDBiOWEyZTk1",
+          "kind": "function",
+          "modifiers": [],
+          "name": "artistRegistryBindingHashV2",
+          "natspec": "@notice Ordered commitment to this Registry and every exact typed directory pin.\n @dev Bound components must not include this composite in their own binding preimage;\n      using the aggregate in both directions would create a constructor hash cycle.\n      The preimage is `abi.encode(domain, chainId, registry, interfaceId, markerHash,\n      schemaVersion, schemaHash, recipeSetHash, coordinatorPinHash, archivePinHash,\n      orderedOwnerPinsHash, orderedProviderPinsHash)`.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 71,
+            "byteStart": 3937,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol#L87",
+            "lineEnd": 87,
+            "lineStart": 87,
+            "snippetSha256": "sha256:deb5e77bc63858f18782cb18be9b5e091a8cdd6a284ce6ee9b96f06d36a9e88a",
+            "sourceSha256": "sha256:6b56d095a7abdde99967c18ebef1c089ef91e9cff1c5477c2c1cc5d601059a54"
+          },
+          "selector": "0x0b9a2e95",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "artistCoordinatorPinV2()",
+          "displaySignature": "artistCoordinatorPinV2()",
+          "functionKind": "function",
+          "id": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol:IStreamArtistRegistryV2#function:0xa8e9a0c4",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVyZmFjZXMvc3RyZWFtL0lTdHJlYW1BcnRpc3RSZWdpc3RyeVYyLnNvbDpJU3RyZWFtQXJ0aXN0UmVnaXN0cnlWMiNmdW5jdGlvbjoweGE4ZTlhMGM0",
+          "kind": "function",
+          "modifiers": [],
+          "name": "artistCoordinatorPinV2",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "ArtistDirectoryPinV2"
+            }
+          ],
+          "range": {
+            "byteLength": 86,
+            "byteStart": 4014,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol#L89",
+            "lineEnd": 89,
+            "lineStart": 89,
+            "snippetSha256": "sha256:6f578c77e3a91c176811774a65b9085c4bf25c4099a406300d4a922e1cf88132",
+            "sourceSha256": "sha256:6b56d095a7abdde99967c18ebef1c089ef91e9cff1c5477c2c1cc5d601059a54"
+          },
+          "selector": "0xa8e9a0c4",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "artistArchivePinV2()",
+          "displaySignature": "artistArchivePinV2()",
+          "functionKind": "function",
+          "id": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol:IStreamArtistRegistryV2#function:0x7309443f",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVyZmFjZXMvc3RyZWFtL0lTdHJlYW1BcnRpc3RSZWdpc3RyeVYyLnNvbDpJU3RyZWFtQXJ0aXN0UmVnaXN0cnlWMiNmdW5jdGlvbjoweDczMDk0NDNm",
+          "kind": "function",
+          "modifiers": [],
+          "name": "artistArchivePinV2",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "ArtistDirectoryPinV2"
+            }
+          ],
+          "range": {
+            "byteLength": 82,
+            "byteStart": 4106,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol#L91",
+            "lineEnd": 91,
+            "lineStart": 91,
+            "snippetSha256": "sha256:dd874e5f17164143b83bb02390b140a921684a164c4ff9d9396730f082e786b4",
+            "sourceSha256": "sha256:6b56d095a7abdde99967c18ebef1c089ef91e9cff1c5477c2c1cc5d601059a54"
+          },
+          "selector": "0x7309443f",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "artistSemanticOwnerPinV2(uint8)",
+          "displaySignature": "artistSemanticOwnerPinV2(ArtistSemanticDomainV2)",
+          "functionKind": "function",
+          "id": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol:IStreamArtistRegistryV2#function:0x7b12b1da",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "domain",
+              "type": "ArtistSemanticDomainV2"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVyZmFjZXMvc3RyZWFtL0lTdHJlYW1BcnRpc3RSZWdpc3RyeVYyLnNvbDpJU3RyZWFtQXJ0aXN0UmVnaXN0cnlWMiNmdW5jdGlvbjoweDdiMTJiMWRh",
+          "kind": "function",
+          "modifiers": [],
+          "name": "artistSemanticOwnerPinV2",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "ArtistDirectoryPinV2"
+            }
+          ],
+          "range": {
+            "byteLength": 141,
+            "byteStart": 4194,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol#L93-L96",
+            "lineEnd": 96,
+            "lineStart": 93,
+            "snippetSha256": "sha256:fd41ac86dafecff32307142f9181fec038771b6ba2430941648f224cd0c9b600",
+            "sourceSha256": "sha256:6b56d095a7abdde99967c18ebef1c089ef91e9cff1c5477c2c1cc5d601059a54"
+          },
+          "selector": "0x7b12b1da",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "artistExternalProviderPinV2(uint8)",
+          "displaySignature": "artistExternalProviderPinV2(ArtistExternalProviderV2)",
+          "functionKind": "function",
+          "id": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol:IStreamArtistRegistryV2#function:0xb3ee9a4f",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "provider",
+              "type": "ArtistExternalProviderV2"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVyZmFjZXMvc3RyZWFtL0lTdHJlYW1BcnRpc3RSZWdpc3RyeVYyLnNvbDpJU3RyZWFtQXJ0aXN0UmVnaXN0cnlWMiNmdW5jdGlvbjoweGIzZWU5YTRm",
+          "kind": "function",
+          "modifiers": [],
+          "name": "artistExternalProviderPinV2",
+          "natspec": "@dev `expectedBindingHash` is exactly `keccak256(abi.encode(domain, chainId,\n      providerIdHash, address, runtimeCodeHash, interfaceId, markerHash, schemaHash))`,\n      where `providerIdHash` is the keccak of the enum's canonical `provider:*` id.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "ArtistDirectoryPinV2"
+            }
+          ],
+          "range": {
+            "byteLength": 148,
+            "byteStart": 4612,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol#L101-L104",
+            "lineEnd": 104,
+            "lineStart": 101,
+            "snippetSha256": "sha256:471c56ad12cb03d923104f0af8728f749d83a8b0b73784477660a7a3b64558c9",
+            "sourceSha256": "sha256:6b56d095a7abdde99967c18ebef1c089ef91e9cff1c5477c2c1cc5d601059a54"
+          },
+          "selector": "0xb3ee9a4f",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [
+        {
+          "members": [
+            {
+              "index": 0,
+              "name": "expectedAddress",
+              "natspec": "",
+              "range": {
+                "byteLength": 23,
+                "byteStart": 1679,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol#L40",
+                "lineEnd": 40,
+                "lineStart": 40,
+                "snippetSha256": "sha256:c98ed9d73aac87c3f50720ed1784021ac93a33a3abba1c024bf78efe12f48c18",
+                "sourceSha256": "sha256:6b56d095a7abdde99967c18ebef1c089ef91e9cff1c5477c2c1cc5d601059a54"
+              },
+              "type": "address",
+              "typeString": "address"
+            },
+            {
+              "index": 1,
+              "name": "expectedRuntimeCodeHash",
+              "natspec": "",
+              "range": {
+                "byteLength": 31,
+                "byteStart": 1712,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol#L41",
+                "lineEnd": 41,
+                "lineStart": 41,
+                "snippetSha256": "sha256:0122c5b5cea6c4531fa86d7114de858d49eb56b6f4552e2993fbd76714997b96",
+                "sourceSha256": "sha256:6b56d095a7abdde99967c18ebef1c089ef91e9cff1c5477c2c1cc5d601059a54"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "expectedInterfaceId",
+              "natspec": "",
+              "range": {
+                "byteLength": 26,
+                "byteStart": 1753,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol#L42",
+                "lineEnd": 42,
+                "lineStart": 42,
+                "snippetSha256": "sha256:066e52d1784a216f8735ac9200f2f9af1c90b73b97109e10c79407acf69c109d",
+                "sourceSha256": "sha256:6b56d095a7abdde99967c18ebef1c089ef91e9cff1c5477c2c1cc5d601059a54"
+              },
+              "type": "bytes4",
+              "typeString": "bytes4"
+            },
+            {
+              "index": 3,
+              "name": "expectedMarkerHash",
+              "natspec": "",
+              "range": {
+                "byteLength": 26,
+                "byteStart": 1789,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol#L43",
+                "lineEnd": 43,
+                "lineStart": 43,
+                "snippetSha256": "sha256:22df725134850f7bf2286112cb93f631b368b2c285db3b3b47629d0d3ae5b98f",
+                "sourceSha256": "sha256:6b56d095a7abdde99967c18ebef1c089ef91e9cff1c5477c2c1cc5d601059a54"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 4,
+              "name": "expectedSchemaHash",
+              "natspec": "",
+              "range": {
+                "byteLength": 26,
+                "byteStart": 1825,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol#L44",
+                "lineEnd": 44,
+                "lineStart": 44,
+                "snippetSha256": "sha256:8d9c0cfcf83fc04c8106765ef93a09bc74741715adc484e068763d36a36e5bcd",
+                "sourceSha256": "sha256:6b56d095a7abdde99967c18ebef1c089ef91e9cff1c5477c2c1cc5d601059a54"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 5,
+              "name": "expectedBindingHash",
+              "natspec": "",
+              "range": {
+                "byteLength": 27,
+                "byteStart": 1861,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol#L45",
+                "lineEnd": 45,
+                "lineStart": 45,
+                "snippetSha256": "sha256:ad3cea10323c3297e02a271d38a60896b69267431cca9addf0fb68d5c3d788b3",
+                "sourceSha256": "sha256:6b56d095a7abdde99967c18ebef1c089ef91e9cff1c5477c2c1cc5d601059a54"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            }
+          ],
+          "name": "ArtistDirectoryPinV2",
+          "natspec": "",
+          "range": {
+            "byteLength": 254,
+            "byteStart": 1641,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol#L39-L46",
+            "lineEnd": 46,
+            "lineStart": 39,
+            "snippetSha256": "sha256:de9bdfdd4df873c16a15bd32e774336d3ae484bd4965c8a55f69331493331cf4",
+            "sourceSha256": "sha256:6b56d095a7abdde99967c18ebef1c089ef91e9cff1c5477c2c1cc5d601059a54"
+          }
+        },
+        {
+          "members": [
+            {
+              "index": 0,
+              "name": "operationCoordinator",
+              "natspec": "",
+              "range": {
+                "byteLength": 41,
+                "byteStart": 2024,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol#L50",
+                "lineEnd": 50,
+                "lineStart": 50,
+                "snippetSha256": "sha256:5e09e945022d8eed6139bdabe11b478fac09dedb8f2377dca95b97616bf9554b",
+                "sourceSha256": "sha256:6b56d095a7abdde99967c18ebef1c089ef91e9cff1c5477c2c1cc5d601059a54"
+              },
+              "type": "ArtistDirectoryPinV2",
+              "typeString": "struct IStreamArtistRegistryV2.ArtistDirectoryPinV2"
+            },
+            {
+              "index": 1,
+              "name": "archive",
+              "natspec": "",
+              "range": {
+                "byteLength": 28,
+                "byteStart": 2075,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol#L51",
+                "lineEnd": 51,
+                "lineStart": 51,
+                "snippetSha256": "sha256:ca0ce5bb35f62290161ac00fe9aa9e2cbb628e371ca40ed1df051494ce20dd55",
+                "sourceSha256": "sha256:6b56d095a7abdde99967c18ebef1c089ef91e9cff1c5477c2c1cc5d601059a54"
+              },
+              "type": "ArtistDirectoryPinV2",
+              "typeString": "struct IStreamArtistRegistryV2.ArtistDirectoryPinV2"
+            },
+            {
+              "index": 2,
+              "name": "semanticOwners",
+              "natspec": "",
+              "range": {
+                "byteLength": 38,
+                "byteStart": 2113,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol#L52",
+                "lineEnd": 52,
+                "lineStart": 52,
+                "snippetSha256": "sha256:dd7d67419602d4d15942acab8987cc1d7206951710935a58d52833ccde6c6128",
+                "sourceSha256": "sha256:6b56d095a7abdde99967c18ebef1c089ef91e9cff1c5477c2c1cc5d601059a54"
+              },
+              "type": "ArtistDirectoryPinV2[7]",
+              "typeString": "struct IStreamArtistRegistryV2.ArtistDirectoryPinV2[7]"
+            },
+            {
+              "index": 3,
+              "name": "externalProviders",
+              "natspec": "",
+              "range": {
+                "byteLength": 41,
+                "byteStart": 2161,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol#L53",
+                "lineEnd": 53,
+                "lineStart": 53,
+                "snippetSha256": "sha256:2aa7a4ca507c20c8c223aa430a7160ad160083e76320525178ddc9ff6f185891",
+                "sourceSha256": "sha256:6b56d095a7abdde99967c18ebef1c089ef91e9cff1c5477c2c1cc5d601059a54"
+              },
+              "type": "ArtistDirectoryPinV2[5]",
+              "typeString": "struct IStreamArtistRegistryV2.ArtistDirectoryPinV2[5]"
+            },
+            {
+              "index": 4,
+              "name": "recipeSetHash",
+              "natspec": "",
+              "range": {
+                "byteLength": 21,
+                "byteStart": 2212,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol#L54",
+                "lineEnd": 54,
+                "lineStart": 54,
+                "snippetSha256": "sha256:2c37bfc02260f4930a355298df2f402aa62615dc901e2727515fb63e43ada2b1",
+                "sourceSha256": "sha256:6b56d095a7abdde99967c18ebef1c089ef91e9cff1c5477c2c1cc5d601059a54"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            }
+          ],
+          "name": "ArtistRegistryConfigurationV2",
+          "natspec": "",
+          "range": {
+            "byteLength": 263,
+            "byteStart": 1977,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol#L49-L55",
+            "lineEnd": 55,
+            "lineStart": 49,
+            "snippetSha256": "sha256:dbb17dd261d2a6c238e5b511677ea22b997e66efd608d458980f91e9d932baa0",
+            "sourceSha256": "sha256:6b56d095a7abdde99967c18ebef1c089ef91e9cff1c5477c2c1cc5d601059a54"
+          }
+        }
+      ],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol:IStreamArtistRegistryV2",
+    "inheritance": [
+      {
+        "definitionId": "smart-contracts/vendor/openzeppelin/IERC165.sol:IERC165",
+        "name": "IERC165"
+      }
+    ],
+    "interface": {
+      "abiSha256": "sha256:f82b7c7ff620f951859308a954b046749df58288e0ef22d641a60a20a15d2276",
+      "interfaceId": "0x56c1a7f2",
+      "interfaceIdSource": "configured",
+      "published": true
+    },
+    "key": "c21hcnQtY29udHJhY3RzL2ludGVyZmFjZXMvc3RyZWFtL0lTdHJlYW1BcnRpc3RSZWdpc3RyeVYyLnNvbDpJU3RyZWFtQXJ0aXN0UmVnaXN0cnlWMg",
+    "kind": "interface",
+    "linearizedDefinitionIds": [
+      "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol:IStreamArtistRegistryV2",
+      "smart-contracts/vendor/openzeppelin/IERC165.sol:IERC165"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": "published_interface"
+    },
+    "name": "IStreamArtistRegistryV2",
+    "natspec": "@notice Typed immutable directory commitments for the proposed artist-authority successor.\n @dev This interface exposes expected identities only. It owns no artist semantic state,\n      authorization, replay decision, record, current/latest answer, or operation recipe.",
+    "range": {
+      "byteLength": 4375,
+      "byteStart": 387,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol#L9-L105",
+      "lineEnd": 105,
+      "lineStart": 9,
+      "snippetSha256": "sha256:68ea6c0a7a450cc7fdae970eef4bf95205798ae4a8d0ddf765db1f14da2a2e7e",
+      "sourceSha256": "sha256:6b56d095a7abdde99967c18ebef1c089ef91e9cff1c5477c2c1cc5d601059a54"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-09-09.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 6
+    },
+    "byCode": {
+      "MISSING_FUNCTION_NATSPEC": 6
+    },
+    "totalCount": 6
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol:IStreamArtistRegistryV2#function:0x7309443f",
+      "definitionId": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol:IStreamArtistRegistryV2",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol:IStreamArtistRegistryV2#function:0x7b12b1da",
+      "definitionId": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol:IStreamArtistRegistryV2",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol:IStreamArtistRegistryV2#function:0x7f86b1a4",
+      "definitionId": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol:IStreamArtistRegistryV2",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol:IStreamArtistRegistryV2#function:0xa8e9a0c4",
+      "definitionId": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol:IStreamArtistRegistryV2",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol:IStreamArtistRegistryV2#function:0xbc02750a",
+      "definitionId": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol:IStreamArtistRegistryV2",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol:IStreamArtistRegistryV2#function:0xef830742",
+      "definitionId": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol:IStreamArtistRegistryV2",
+      "severity": "advisory"
+    }
+  ]
+}

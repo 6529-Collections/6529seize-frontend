@@ -3,6 +3,23 @@ import { render, screen } from "@testing-library/react";
 import { PublicReviewMarkdown } from "@/components/public-review/PublicReviewMarkdown";
 
 describe("PublicReviewMarkdown", () => {
+  it("inserts trusted section content once without changing duplicate anchors", () => {
+    const { container } = render(
+      <PublicReviewMarkdown
+        markdown={"## Same section\n\nFirst.\n\n## Same section\n\nSecond."}
+        sectionIntros={{
+          "same-section": <figure aria-label="First diagram">Visual</figure>,
+        }}
+      />
+    );
+    expect(screen.getAllByRole("figure")).toHaveLength(1);
+    const headings = screen.getAllByRole("heading", { level: 2 });
+    expect(headings[0]).toHaveAttribute("id", "same-section");
+    expect(headings[1]).toHaveAttribute("id", "same-section-2");
+    expect(container.querySelector("h2 + figure")).toBeInTheDocument();
+    expect(screen.getByText("Second.")).toBeInTheDocument();
+  });
+
   it("assigns anchors only to unique level-two review sections", () => {
     const { container } = render(
       <PublicReviewMarkdown

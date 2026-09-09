@@ -10,6 +10,8 @@ import {
   PublicReviewNavigation,
 } from "@/components/public-review/PublicReviewNavigation";
 import { PublicReviewReadingLayout } from "@/components/public-review/PublicReviewReadingLayout";
+import { PublicReviewRelatedTopics } from "./PublicReviewRelatedTopics";
+import { PublicReviewHashScrollRestorer } from "./PublicReviewHashScrollRestorer";
 import { PublicReviewStatusBanner } from "@/components/public-review/PublicReviewStatusBanner";
 import { formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
@@ -94,6 +96,7 @@ function PublicReviewPageStepper({
 
 export function PublicReviewShell({
   editorialMarkdown,
+  sectionIntros,
   page,
   review,
   reviewVersion,
@@ -106,8 +109,11 @@ export function PublicReviewShell({
   showAudiencePaths = true,
   showEditorialContent = true,
   source,
+  primaryPageIds,
+  relatedPages,
 }: {
   readonly editorialMarkdown: string;
+  readonly sectionIntros?: Readonly<Record<string, ReactNode>> | undefined;
   readonly page: PublicReviewPageDefinition;
   readonly review: PublicReviewDefinition;
   readonly reviewVersion: PublicReviewVersionDefinition;
@@ -120,17 +126,24 @@ export function PublicReviewShell({
   readonly showAudiencePaths?: boolean;
   readonly showEditorialContent?: boolean;
   readonly source: PublicReviewSource;
+  readonly primaryPageIds?: readonly string[] | undefined;
+  readonly relatedPages?: readonly PublicReviewPageDefinition[] | undefined;
 }) {
   const pageIndex = reviewVersion.pages.findIndex(
     (candidate) => candidate.id === page.id
   );
   const currentPageNumber = pageIndex >= 0 ? pageIndex + 1 : 1;
   const routes = createPublicReviewRouteBuilder(review.slug);
+  const isEntryGuide = primaryPageIds?.includes(page.id) ?? false;
+  const guideLabelKey = isEntryGuide
+    ? "publicReview.navigation.shortGuide"
+    : "publicReview.navigation.topicGuide";
 
   return (
     <div className="tailwind-scope tw-min-h-screen tw-bg-[#0D0D0F] tw-text-iron-50">
       <div className="tw-w-full lg:tw-grid lg:tw-grid-cols-[17.5rem_minmax(0,1fr)] lg:tw-items-stretch">
         <PublicReviewNavigation
+          primaryPageIds={primaryPageIds}
           currentPage={page}
           feedbackHref={routes.getFeedbackHref(routeVersion)}
           historyHref={
@@ -154,6 +167,7 @@ export function PublicReviewShell({
             feedbackAvailable={review.feedbackAvailable}
             mobileNavigation={
               <PublicReviewMobileNavigation
+                primaryPageIds={primaryPageIds}
                 currentPage={page}
                 feedbackHref={routes.getFeedbackHref(routeVersion)}
                 historyHref={
@@ -175,22 +189,25 @@ export function PublicReviewShell({
             toolbar={
               <p
                 key="review-page-position"
-                className="tw-m-0 tw-font-mono tw-text-[0.68rem] tw-font-medium tw-uppercase tw-tracking-[0.12em] tw-text-iron-400"
+                className={`tw-m-0 tw-font-mono tw-text-[0.68rem] tw-font-medium tw-uppercase tw-tracking-[0.12em] tw-text-iron-400 ${primaryPageIds ? "tw-hidden sm:tw-block" : ""}`}
               >
-                {t(DEFAULT_LOCALE, "publicReview.navigation.pagePosition", {
-                  current: formatInteger(DEFAULT_LOCALE, currentPageNumber),
-                  total: formatInteger(
-                    DEFAULT_LOCALE,
-                    reviewVersion.pages.length
-                  ),
-                })}
+                {primaryPageIds
+                  ? t(DEFAULT_LOCALE, guideLabelKey)
+                  : t(DEFAULT_LOCALE, "publicReview.navigation.pagePosition", {
+                      current: formatInteger(DEFAULT_LOCALE, currentPageNumber),
+                      total: formatInteger(
+                        DEFAULT_LOCALE,
+                        reviewVersion.pages.length
+                      ),
+                    })}
               </p>
             }
             content={
               <div
                 key="review-reading-content"
-                className="tw-mx-auto tw-w-full tw-max-w-[68rem] tw-px-4 tw-pb-20 sm:tw-px-7 lg:tw-px-10"
+                className="tw-mx-auto tw-w-full tw-max-w-[68rem] tw-px-4 tw-pb-20 sm:tw-px-7 lg:tw-px-10 [&_details_[id]]:tw-scroll-mt-24"
               >
+                <PublicReviewHashScrollRestorer />
                 <div className="tw-pt-6 sm:tw-pt-8">
                   <PublicReviewStatusBanner
                     review={review}
@@ -200,7 +217,9 @@ export function PublicReviewShell({
                   />
                 </div>
 
-                <header className="tw-mt-12 tw-w-full tw-max-w-[52rem] sm:tw-mt-16">
+                <header
+                  className={`tw-w-full tw-max-w-[52rem] ${isEntryGuide ? "tw-mt-8 sm:tw-mt-10" : "tw-mt-12 sm:tw-mt-16"}`}
+                >
                   <p className="tw-m-0 tw-text-[0.7rem] tw-font-semibold tw-uppercase tw-tracking-[0.14em] tw-text-primary-300">
                     {t(DEFAULT_LOCALE, "publicReview.eyebrow", {
                       contract: review.contractName,
@@ -236,10 +255,12 @@ export function PublicReviewShell({
                     <>
                       <article className="tw-pb-8">
                         <PublicReviewMarkdown
+                          compactTables={isEntryGuide}
                           internalLinkBasePath={routes.getRootHref(
                             routeVersion
                           )}
                           markdown={editorialMarkdown}
+                          sectionIntros={sectionIntros}
                         />
                       </article>
 
@@ -251,12 +272,19 @@ export function PublicReviewShell({
                     </>
                   ) : null}
 
-                  <PublicReviewPageStepper
-                    currentPage={page}
-                    pages={reviewVersion.pages}
-                    routes={routes}
-                    version={routeVersion}
-                  />
+                  {relatedPages ? (
+                    <PublicReviewRelatedTopics
+                      pages={relatedPages}
+                      routes={routes}
+                    />
+                  ) : (
+                    <PublicReviewPageStepper
+                      currentPage={page}
+                      pages={reviewVersion.pages}
+                      routes={routes}
+                      version={routeVersion}
+                    />
+                  )}
                 </div>
               </div>
             }

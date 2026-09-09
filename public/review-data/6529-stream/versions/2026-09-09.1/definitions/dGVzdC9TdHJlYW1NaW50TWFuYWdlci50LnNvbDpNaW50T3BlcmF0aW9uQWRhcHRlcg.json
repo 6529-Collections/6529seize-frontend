@@ -1,0 +1,346 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamMintManager.t.sol:MintOperationAdapter#function:0xffa733e7",
+          "declaringDefinitionId": "test/StreamMintManager.t.sol:MintOperationAdapter",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "struct IStreamMintManager.MintBatch",
+              "name": "batch",
+              "type": "(uint256,bytes32,address,address,address[],address[],bytes[],bytes32[],bytes32,bytes32,bytes32,bytes)"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes",
+              "name": "gateData",
+              "type": "bytes"
+            }
+          ],
+          "name": "execute",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256[]",
+              "name": "tokenIds",
+              "type": "uint256[]"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "operationRoot",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "internalType": "bytes32[]",
+              "name": "operationIds",
+              "type": "bytes32[]"
+            }
+          ],
+          "selector": "0xffa733e7",
+          "signature": "execute((uint256,bytes32,address,address,address[],address[],bytes[],bytes32[],bytes32,bytes32,bytes32,bytes),bytes)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMintManager.t.sol:MintOperationAdapter#function:0xb62d2c64",
+          "declaringDefinitionId": "test/StreamMintManager.t.sol:MintOperationAdapter",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "struct IStreamMintManager.MintBatch",
+              "name": "batch",
+              "type": "(uint256,bytes32,address,address,address[],address[],bytes[],bytes32[],bytes32,bytes32,bytes32,bytes)"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes",
+              "name": "gateData",
+              "type": "bytes"
+            }
+          ],
+          "name": "preview",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "operationRoot",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32[]",
+              "name": "operationIds",
+              "type": "bytes32[]"
+            }
+          ],
+          "selector": "0xb62d2c64",
+          "signature": "preview((uint256,bytes32,address,address,address[],address[],bytes[],bytes32[],bytes32,bytes32,bytes32,bytes),bytes)",
+          "stateMutability": "view"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": null,
+          "displaySignature": "constructor(IStreamMintManager)",
+          "functionKind": "constructor",
+          "id": "test/StreamMintManager.t.sol:MintOperationAdapter#function:constructor(IStreamMintManager)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "manager_",
+              "type": "IStreamMintManager"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1NaW50TWFuYWdlci50LnNvbDpNaW50T3BlcmF0aW9uQWRhcHRlciNmdW5jdGlvbjpjb25zdHJ1Y3RvcihJU3RyZWFtTWludE1hbmFnZXIp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "constructor",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 76,
+            "byteStart": 4610,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamMintManager.t.sol#L122-L124",
+            "lineEnd": 124,
+            "lineStart": 122,
+            "snippetSha256": "sha256:a5b567f3ac5633924decf3a1a898be286717b2571473387936efbeeacabef76c",
+            "sourceSha256": "sha256:3e732239dead3e8af8f0f42af9b411b7d61770618395ac874ba3a138f34bdb3a"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "preview((uint256,bytes32,address,address,address[],address[],bytes[],bytes32[],bytes32,bytes32,bytes32,bytes),bytes)",
+          "displaySignature": "preview(IStreamMintManager.MintBatch,bytes)",
+          "functionKind": "function",
+          "id": "test/StreamMintManager.t.sol:MintOperationAdapter#function:0xb62d2c64",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "batch",
+              "storageLocation": "calldata",
+              "type": "IStreamMintManager.MintBatch"
+            },
+            {
+              "index": 1,
+              "name": "gateData",
+              "storageLocation": "calldata",
+              "type": "bytes"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1NaW50TWFuYWdlci50LnNvbDpNaW50T3BlcmF0aW9uQWRhcHRlciNmdW5jdGlvbjoweGI2MmQyYzY0",
+          "kind": "function",
+          "modifiers": [],
+          "name": "preview",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "operationRoot",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "operationIds",
+              "storageLocation": "memory",
+              "type": "bytes32[]"
+            }
+          ],
+          "range": {
+            "byteLength": 271,
+            "byteStart": 4692,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamMintManager.t.sol#L126-L132",
+            "lineEnd": 132,
+            "lineStart": 126,
+            "snippetSha256": "sha256:33081131ac3f78d15223234b42bff7d59d75e413304f7197c6ea5ba01c9f580d",
+            "sourceSha256": "sha256:3e732239dead3e8af8f0f42af9b411b7d61770618395ac874ba3a138f34bdb3a"
+          },
+          "selector": "0xb62d2c64",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "execute((uint256,bytes32,address,address,address[],address[],bytes[],bytes32[],bytes32,bytes32,bytes32,bytes),bytes)",
+          "displaySignature": "execute(IStreamMintManager.MintBatch,bytes)",
+          "functionKind": "function",
+          "id": "test/StreamMintManager.t.sol:MintOperationAdapter#function:0xffa733e7",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "batch",
+              "storageLocation": "calldata",
+              "type": "IStreamMintManager.MintBatch"
+            },
+            {
+              "index": 1,
+              "name": "gateData",
+              "storageLocation": "calldata",
+              "type": "bytes"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1NaW50TWFuYWdlci50LnNvbDpNaW50T3BlcmF0aW9uQWRhcHRlciNmdW5jdGlvbjoweGZmYTczM2U3",
+          "kind": "function",
+          "modifiers": [],
+          "name": "execute",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "tokenIds",
+              "storageLocation": "memory",
+              "type": "uint256[]"
+            },
+            {
+              "index": 1,
+              "name": "operationRoot",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "operationIds",
+              "storageLocation": "memory",
+              "type": "bytes32[]"
+            }
+          ],
+          "range": {
+            "byteLength": 276,
+            "byteStart": 4969,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamMintManager.t.sol#L134-L139",
+            "lineEnd": 139,
+            "lineStart": 134,
+            "snippetSha256": "sha256:2dbf0e2e26e3dade7a20ba7bc5d13c6d6e155b60724102d584dc31d3b447f5d6",
+            "sourceSha256": "sha256:3e732239dead3e8af8f0f42af9b411b7d61770618395ac874ba3a138f34bdb3a"
+          },
+          "selector": "0xffa733e7",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": true,
+          "name": "manager",
+          "natspec": "",
+          "range": {
+            "byteLength": 44,
+            "byteStart": 4559,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamMintManager.t.sol#L120",
+            "lineEnd": 120,
+            "lineStart": 120,
+            "snippetSha256": "sha256:0c1a9b969e9be2b5a076cb44d976297936aaa7d0ce8216c8b15858fddcc33e6d",
+            "sourceSha256": "sha256:3e732239dead3e8af8f0f42af9b411b7d61770618395ac874ba3a138f34bdb3a"
+          },
+          "selector": null,
+          "type": "IStreamMintManager",
+          "typeString": "contract IStreamMintManager",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamMintManager.t.sol:MintOperationAdapter",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1NaW50TWFuYWdlci50LnNvbDpNaW50T3BlcmF0aW9uQWRhcHRlcg",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamMintManager.t.sol:MintOperationAdapter"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "MintOperationAdapter",
+    "natspec": "",
+    "range": {
+      "byteLength": 724,
+      "byteStart": 4523,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/test/StreamMintManager.t.sol#L119-L140",
+      "lineEnd": 140,
+      "lineStart": 119,
+      "snippetSha256": "sha256:1fe7cd9deb908632b9dbd08c5aa1ee3e45b315245c9f55771cc8334226ffc0d0",
+      "sourceSha256": "sha256:3e732239dead3e8af8f0f42af9b411b7d61770618395ac874ba3a138f34bdb3a"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamMintManager.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-09-09.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 4
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 3
+    },
+    "totalCount": 4
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamMintManager.t.sol:MintOperationAdapter",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintManager.t.sol:MintOperationAdapter#function:0xb62d2c64",
+      "definitionId": "test/StreamMintManager.t.sol:MintOperationAdapter",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintManager.t.sol:MintOperationAdapter#function:0xffa733e7",
+      "definitionId": "test/StreamMintManager.t.sol:MintOperationAdapter",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintManager.t.sol:MintOperationAdapter#function:constructor(IStreamMintManager)",
+      "definitionId": "test/StreamMintManager.t.sol:MintOperationAdapter",
+      "severity": "advisory"
+    }
+  ]
+}

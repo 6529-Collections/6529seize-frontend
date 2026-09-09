@@ -3,7 +3,7 @@ export const PUBLIC_REVIEW_STREAM_CONCEPT_PREVIEW_MESSAGES = {
     "Concept example · Stream is not live",
   "publicReview.conceptPreview.heading": "Follow one artwork",
   "publicReview.conceptPreview.description":
-    "Move through five simple steps, from the artist's plan to a lasting record.",
+    "Explore an intended release flow, from the artist's plan to a lasting record. The complete workflow is not built yet.",
   "publicReview.conceptPreview.disclaimer":
     "Nothing here buys, signs, uploads, or saves anything.",
   "publicReview.conceptPreview.navigationLabel":
@@ -33,9 +33,9 @@ export const PUBLIC_REVIEW_STREAM_CONCEPT_PREVIEW_MESSAGES = {
   "publicReview.conceptPreview.approval.heading":
     "The artist checks the exact plan",
   "publicReview.conceptPreview.approval.description":
-    "Mira reviews the artwork, supply, price, and payment split together.",
+    "The proposed screen would let Mira review the artwork, supply, price, and payment split together.",
   "publicReview.conceptPreview.approval.takeaway":
-    "If an important detail changes, she must approve again.",
+    "The required artist approval checks still need to be completed. This example does not demonstrate an enforced signature over the whole plan.",
   "publicReview.conceptPreview.collector.heading":
     "The collector sees the same plan",
   "publicReview.conceptPreview.collector.description":

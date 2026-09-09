@@ -65,10 +65,12 @@ right sidebar, and what users see for loading and empty states.
 
 ## Common Scenarios
 
-- Memes waves show media-rich winner cards with traits and vote context.
+- Memes waves show media-rich winner cards with traits and vote context. Their
+  background, default border, and neutral hover highlight match the leaderboard
+  list cards.
 - In The Memes Main Stage wave, mapped winners show a `The Memes #N` link that
   opens the Meme card minted from that submission. The same link appears when
-  the winning drop is open directly, where the minted outcome and larger Meme
+  the winning drop is open directly, where the minted outcome and compact Meme
   link use their own row below the drop metadata. The frontend uses only the
   explicit mapping returned in the V2 submission context; it never infers a
   Meme ID from winner order. The link is omitted when no mapping is known.

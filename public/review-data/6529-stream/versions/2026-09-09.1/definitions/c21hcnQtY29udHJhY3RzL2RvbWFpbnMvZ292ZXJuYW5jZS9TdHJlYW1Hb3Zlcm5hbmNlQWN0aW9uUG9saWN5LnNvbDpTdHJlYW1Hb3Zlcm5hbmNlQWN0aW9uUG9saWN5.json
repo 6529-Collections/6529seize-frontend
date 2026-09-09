@@ -1,0 +1,1548 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamGovernanceExecutor.sol:IStreamGovernanceExecutor#error:0x0ffdba41",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamGovernanceExecutor.sol:IStreamGovernanceExecutor",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "callIndex",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "uint8",
+              "name": "expectedCallType",
+              "type": "uint8"
+            },
+            {
+              "index": 2,
+              "internalType": "uint8",
+              "name": "actualCallType",
+              "type": "uint8"
+            }
+          ],
+          "name": "GovernanceActionPolicyCallTypeMismatch",
+          "selector": "0x0ffdba41",
+          "signature": "GovernanceActionPolicyCallTypeMismatch(uint256,uint8,uint8)"
+        },
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamGovernanceExecutor.sol:IStreamGovernanceExecutor#error:0xf107e7a1",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamGovernanceExecutor.sol:IStreamGovernanceExecutor",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "expected",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "actual",
+              "type": "bytes32"
+            }
+          ],
+          "name": "GovernanceActionPolicyCatalogHashMismatch",
+          "selector": "0xf107e7a1",
+          "signature": "GovernanceActionPolicyCatalogHashMismatch(bytes32,bytes32)"
+        },
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamGovernanceExecutor.sol:IStreamGovernanceExecutor#error:0x6acf28fc",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamGovernanceExecutor.sol:IStreamGovernanceExecutor",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "index",
+              "type": "uint256"
+            }
+          ],
+          "name": "GovernanceActionPolicyEntriesNotSorted",
+          "selector": "0x6acf28fc",
+          "signature": "GovernanceActionPolicyEntriesNotSorted(uint256)"
+        },
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamGovernanceExecutor.sol:IStreamGovernanceExecutor#error:0x1f51f14e",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamGovernanceExecutor.sol:IStreamGovernanceExecutor",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "callIndex",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "expected",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "internalType": "bytes32",
+              "name": "actual",
+              "type": "bytes32"
+            }
+          ],
+          "name": "GovernanceActionPolicyEntryHashMismatch",
+          "selector": "0x1f51f14e",
+          "signature": "GovernanceActionPolicyEntryHashMismatch(uint256,bytes32,bytes32)"
+        },
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamGovernanceExecutor.sol:IStreamGovernanceExecutor#error:0xa5b742e2",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamGovernanceExecutor.sol:IStreamGovernanceExecutor",
+          "inherited": true,
+          "inputs": [],
+          "name": "GovernanceActionPolicyNotBound",
+          "selector": "0xa5b742e2",
+          "signature": "GovernanceActionPolicyNotBound()"
+        },
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamGovernanceExecutor.sol:IStreamGovernanceExecutor#error:0x25ccae3e",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamGovernanceExecutor.sol:IStreamGovernanceExecutor",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "callIndex",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "internalType": "bytes32",
+              "name": "expected",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "internalType": "bytes32",
+              "name": "actual",
+              "type": "bytes32"
+            }
+          ],
+          "name": "GovernanceActionPolicyTargetCodeHashMismatch",
+          "selector": "0x25ccae3e",
+          "signature": "GovernanceActionPolicyTargetCodeHashMismatch(uint256,address,bytes32,bytes32)"
+        },
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamGovernanceExecutor.sol:IStreamGovernanceExecutor#error:0x67318682",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamGovernanceExecutor.sol:IStreamGovernanceExecutor",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "callIndex",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "uint8",
+              "name": "actionClass",
+              "type": "uint8"
+            },
+            {
+              "index": 2,
+              "internalType": "address",
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "internalType": "bytes4",
+              "name": "selector",
+              "type": "bytes4"
+            }
+          ],
+          "name": "GovernanceActionPolicyUnknown",
+          "selector": "0x67318682",
+          "signature": "GovernanceActionPolicyUnknown(uint256,uint8,address,bytes4)"
+        },
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamGovernanceExecutor.sol:IStreamGovernanceExecutor#error:0xdd09ff18",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamGovernanceExecutor.sol:IStreamGovernanceExecutor",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "callIndex",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "uint8",
+              "name": "valuePolicy",
+              "type": "uint8"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "internalType": "uint256",
+              "name": "valueLimit",
+              "type": "uint256"
+            }
+          ],
+          "name": "GovernanceActionPolicyValueRejected",
+          "selector": "0xdd09ff18",
+          "signature": "GovernanceActionPolicyValueRejected(uint256,uint8,uint256,uint256)"
+        },
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamGovernanceExecutor.sol:IStreamGovernanceExecutor#error:0xe520f60d",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamGovernanceExecutor.sol:IStreamGovernanceExecutor",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "candidateProfileHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "InvalidGovernanceActionPolicyCandidate",
+          "selector": "0xe520f60d",
+          "signature": "InvalidGovernanceActionPolicyCandidate(bytes32)"
+        },
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamGovernanceExecutor.sol:IStreamGovernanceExecutor#error:0xd6b8cb68",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamGovernanceExecutor.sol:IStreamGovernanceExecutor",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "index",
+              "type": "uint256"
+            }
+          ],
+          "name": "InvalidGovernanceActionPolicyEntry",
+          "selector": "0xd6b8cb68",
+          "signature": "InvalidGovernanceActionPolicyEntry(uint256)"
+        },
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamGovernanceExecutor.sol:IStreamGovernanceExecutor#error:0x87308fbf",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamGovernanceExecutor.sol:IStreamGovernanceExecutor",
+          "inherited": true,
+          "inputs": [],
+          "name": "InvalidSystemManifestBootstrap",
+          "selector": "0x87308fbf",
+          "signature": "InvalidSystemManifestBootstrap()"
+        }
+      ],
+      "events": [
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol:StreamGovernanceActionPolicy#event:GovernanceActionPolicyBound(uint16,bytes32,bytes32,uint256)",
+          "declaringDefinitionId": "smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol:StreamGovernanceActionPolicy",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "candidateProfileHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "catalogHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "entryCount",
+              "type": "uint256"
+            }
+          ],
+          "name": "GovernanceActionPolicyBound",
+          "signature": "GovernanceActionPolicyBound(uint16,bytes32,bytes32,uint256)",
+          "topic0": "0x8ec697c733bbf3d789554695334e5cc0ad382caff7d4e7c8f7c5b0ea874ca1bf"
+        }
+      ],
+      "functions": [
+        {
+          "canonicalAbiSelector": "0xec02ee6c",
+          "declarationId": "smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol:StreamGovernanceActionPolicy#function:0x9122a6d5",
+          "declaringDefinitionId": "smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol:StreamGovernanceActionPolicy",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "executor",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "candidateProfileHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "internalType": "struct GovernanceActionPolicyEntry[]",
+              "name": "entries",
+              "type": "(uint8,address,bytes4,bytes32,bytes32,uint8,uint8,uint256,bytes32)[]"
+            }
+          ],
+          "name": "expectedCatalogHash",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "catalogHash",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x9122a6d5",
+          "selectorSource": "compiler_ast_library",
+          "signature": "expectedCatalogHash(address,bytes32,(uint8,address,bytes4,bytes32,bytes32,uint8,uint8,uint256,bytes32)[])",
+          "stateMutability": "view"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "production_support_library",
+    "classificationReason": "First-party protocol library outside the production contract catalog.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [
+        {
+          "anonymous": false,
+          "astId": 24544,
+          "canonicalSignature": "GovernanceActionPolicyBound(uint16,bytes32,bytes32,uint256)",
+          "displaySignature": "GovernanceActionPolicyBound(uint16,bytes32,bytes32,uint256)",
+          "id": "smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol:StreamGovernanceActionPolicy#event:GovernanceActionPolicyBound(uint16,bytes32,bytes32,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "candidateProfileHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "name": "catalogHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "name": "entryCount",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2RvbWFpbnMvZ292ZXJuYW5jZS9TdHJlYW1Hb3Zlcm5hbmNlQWN0aW9uUG9saWN5LnNvbDpTdHJlYW1Hb3Zlcm5hbmNlQWN0aW9uUG9saWN5I2V2ZW50OkdvdmVybmFuY2VBY3Rpb25Qb2xpY3lCb3VuZCh1aW50MTYsYnl0ZXMzMixieXRlczMyLHVpbnQyNTYp",
+          "kind": "event",
+          "name": "GovernanceActionPolicyBound",
+          "natspec": "",
+          "range": {
+            "byteLength": 181,
+            "byteStart": 2067,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol#L45-L50",
+            "lineEnd": 50,
+            "lineStart": 45,
+            "snippetSha256": "sha256:c824ad1b793f5a5301838c4173457bfceca9bc9dc62264f352ca2aced98566ce",
+            "sourceSha256": "sha256:459e62ffaf3aa8969b39cd200ea27d99cc42b4560636954d03c15985d3843404"
+          },
+          "topic0": "0x8ec697c733bbf3d789554695334e5cc0ad382caff7d4e7c8f7c5b0ea874ca1bf"
+        }
+      ],
+      "functions": [
+        {
+          "canonicalSignature": null,
+          "displaySignature": "bind(State,bytes32,bytes32,GovernanceActionPolicyEntry[])",
+          "functionKind": "function",
+          "id": "smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol:StreamGovernanceActionPolicy#function:0xc69db2c2",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "state",
+              "storageLocation": "storage",
+              "type": "State"
+            },
+            {
+              "index": 1,
+              "name": "candidateProfileHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "expectedHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "name": "entries",
+              "storageLocation": "calldata",
+              "type": "GovernanceActionPolicyEntry[]"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2RvbWFpbnMvZ292ZXJuYW5jZS9TdHJlYW1Hb3Zlcm5hbmNlQWN0aW9uUG9saWN5LnNvbDpTdHJlYW1Hb3Zlcm5hbmNlQWN0aW9uUG9saWN5I2Z1bmN0aW9uOjB4YzY5ZGIyYzI",
+          "kind": "function",
+          "modifiers": [],
+          "name": "bind",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2065,
+            "byteStart": 2254,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol#L52-L98",
+            "lineEnd": 98,
+            "lineStart": 52,
+            "snippetSha256": "sha256:0a968a80899b9fd5b04800ea339f1c5d30e24d805febf2bbe95485fc1455013a",
+            "sourceSha256": "sha256:459e62ffaf3aa8969b39cd200ea27d99cc42b4560636954d03c15985d3843404"
+          },
+          "selector": "0xc69db2c2",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "validateCalls(State,bytes32,bytes32,uint256,uint8,GovernanceCall[],bytes[])",
+          "functionKind": "function",
+          "id": "smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol:StreamGovernanceActionPolicy#function:0x0b12fdc9",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "state",
+              "storageLocation": "storage",
+              "type": "State"
+            },
+            {
+              "index": 1,
+              "name": "expectedCandidateProfileHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "manifestCatalogHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "name": "expectedEntryCount",
+              "type": "uint256"
+            },
+            {
+              "index": 4,
+              "name": "actionClass",
+              "type": "uint8"
+            },
+            {
+              "index": 5,
+              "name": "calls",
+              "storageLocation": "memory",
+              "type": "GovernanceCall[]"
+            },
+            {
+              "index": 6,
+              "name": "callDatas",
+              "storageLocation": "memory",
+              "type": "bytes[]"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2RvbWFpbnMvZ292ZXJuYW5jZS9TdHJlYW1Hb3Zlcm5hbmNlQWN0aW9uUG9saWN5LnNvbDpTdHJlYW1Hb3Zlcm5hbmNlQWN0aW9uUG9saWN5I2Z1bmN0aW9uOjB4MGIxMmZkYzk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "validateCalls",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 563,
+            "byteStart": 4325,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol#L100-L115",
+            "lineEnd": 115,
+            "lineStart": 100,
+            "snippetSha256": "sha256:f49bfc4dac07de86a49cd6f103de73a8f488e7d82998087f064a047399341f01",
+            "sourceSha256": "sha256:459e62ffaf3aa8969b39cd200ea27d99cc42b4560636954d03c15985d3843404"
+          },
+          "selector": "0x0b12fdc9",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "expectedCatalogHash(address,bytes32,(uint8,address,bytes4,bytes32,bytes32,uint8,uint8,uint256,bytes32)[])",
+          "displaySignature": "expectedCatalogHash(address,bytes32,GovernanceActionPolicyEntry[])",
+          "functionKind": "function",
+          "id": "smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol:StreamGovernanceActionPolicy#function:0x9122a6d5",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "executor",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "candidateProfileHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "entries",
+              "storageLocation": "memory",
+              "type": "GovernanceActionPolicyEntry[]"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2RvbWFpbnMvZ292ZXJuYW5jZS9TdHJlYW1Hb3Zlcm5hbmNlQWN0aW9uUG9saWN5LnNvbDpTdHJlYW1Hb3Zlcm5hbmNlQWN0aW9uUG9saWN5I2Z1bmN0aW9uOjB4OTEyMmE2ZDU",
+          "kind": "function",
+          "modifiers": [],
+          "name": "expectedCatalogHash",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "catalogHash",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 1288,
+            "byteStart": 4894,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol#L117-L141",
+            "lineEnd": 141,
+            "lineStart": 117,
+            "snippetSha256": "sha256:78e542184e0ee94a0186655bd21e6dbedc24d5a394cea8140be153cb54ca4d78",
+            "sourceSha256": "sha256:459e62ffaf3aa8969b39cd200ea27d99cc42b4560636954d03c15985d3843404"
+          },
+          "selector": "0x9122a6d5",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_requireBoundCatalog(State,bytes32,bytes32,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol:StreamGovernanceActionPolicy#function:_requireBoundCatalog(State,bytes32,bytes32,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "state",
+              "storageLocation": "storage",
+              "type": "State"
+            },
+            {
+              "index": 1,
+              "name": "expectedCandidateProfileHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "manifestCatalogHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "name": "expectedEntryCount",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2RvbWFpbnMvZ292ZXJuYW5jZS9TdHJlYW1Hb3Zlcm5hbmNlQWN0aW9uUG9saWN5LnNvbDpTdHJlYW1Hb3Zlcm5hbmNlQWN0aW9uUG9saWN5I2Z1bmN0aW9uOl9yZXF1aXJlQm91bmRDYXRhbG9nKFN0YXRlLGJ5dGVzMzIsYnl0ZXMzMix1aW50MjU2KQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_requireBoundCatalog",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1089,
+            "byteStart": 6188,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol#L143-L166",
+            "lineEnd": 166,
+            "lineStart": 143,
+            "snippetSha256": "sha256:047c128523c3de91d96a634e3155ed76b907c8fe4d846ee901d5edff8b8a01f2",
+            "sourceSha256": "sha256:459e62ffaf3aa8969b39cd200ea27d99cc42b4560636954d03c15985d3843404"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_validateCall(State,uint8,GovernanceCall,bytes,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol:StreamGovernanceActionPolicy#function:_validateCall(State,uint8,GovernanceCall,bytes,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "state",
+              "storageLocation": "storage",
+              "type": "State"
+            },
+            {
+              "index": 1,
+              "name": "actionClass",
+              "type": "uint8"
+            },
+            {
+              "index": 2,
+              "name": "call_",
+              "storageLocation": "memory",
+              "type": "GovernanceCall"
+            },
+            {
+              "index": 3,
+              "name": "callData",
+              "storageLocation": "memory",
+              "type": "bytes"
+            },
+            {
+              "index": 4,
+              "name": "callIndex",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2RvbWFpbnMvZ292ZXJuYW5jZS9TdHJlYW1Hb3Zlcm5hbmNlQWN0aW9uUG9saWN5LnNvbDpTdHJlYW1Hb3Zlcm5hbmNlQWN0aW9uUG9saWN5I2Z1bmN0aW9uOl92YWxpZGF0ZUNhbGwoU3RhdGUsdWludDgsR292ZXJuYW5jZUNhbGwsYnl0ZXMsdWludDI1Nik",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_validateCall",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 3034,
+            "byteStart": 7283,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol#L168-L231",
+            "lineEnd": 231,
+            "lineStart": 168,
+            "snippetSha256": "sha256:96a9946ec1ddc5ce916e66794c3a0234708248cdf3a6ec3a62df7e9e943dc073",
+            "sourceSha256": "sha256:459e62ffaf3aa8969b39cd200ea27d99cc42b4560636954d03c15985d3843404"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "policyKey(uint8,address,bytes4)",
+          "functionKind": "function",
+          "id": "smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol:StreamGovernanceActionPolicy#function:policyKey(uint8,address,bytes4)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "actionClass",
+              "type": "uint8"
+            },
+            {
+              "index": 1,
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "selector",
+              "type": "bytes4"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2RvbWFpbnMvZ292ZXJuYW5jZS9TdHJlYW1Hb3Zlcm5hbmNlQWN0aW9uUG9saWN5LnNvbDpTdHJlYW1Hb3Zlcm5hbmNlQWN0aW9uUG9saWN5I2Z1bmN0aW9uOnBvbGljeUtleSh1aW50OCxhZGRyZXNzLGJ5dGVzNCk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "policyKey",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 206,
+            "byteStart": 10323,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol#L233-L239",
+            "lineEnd": 239,
+            "lineStart": 233,
+            "snippetSha256": "sha256:a8d44758acccc9ba105f10e621a0d016122a2835214dd1ebf1299bdd22702a7f",
+            "sourceSha256": "sha256:459e62ffaf3aa8969b39cd200ea27d99cc42b4560636954d03c15985d3843404"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_validateEntry(GovernanceActionPolicyEntry,uint256,bool)",
+          "functionKind": "function",
+          "id": "smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol:StreamGovernanceActionPolicy#function:_validateEntry(GovernanceActionPolicyEntry,uint256,bool)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "entry",
+              "storageLocation": "memory",
+              "type": "GovernanceActionPolicyEntry"
+            },
+            {
+              "index": 1,
+              "name": "index",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "requireLiveTarget",
+              "type": "bool"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2RvbWFpbnMvZ292ZXJuYW5jZS9TdHJlYW1Hb3Zlcm5hbmNlQWN0aW9uUG9saWN5LnNvbDpTdHJlYW1Hb3Zlcm5hbmNlQWN0aW9uUG9saWN5I2Z1bmN0aW9uOl92YWxpZGF0ZUVudHJ5KEdvdmVybmFuY2VBY3Rpb25Qb2xpY3lFbnRyeSx1aW50MjU2LGJvb2wp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_validateEntry",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1691,
+            "byteStart": 10535,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol#L241-L272",
+            "lineEnd": 272,
+            "lineStart": 241,
+            "snippetSha256": "sha256:628659ad94776dd9eb08197d14ae8c8d3e733d4ef7a700d75057010d01f9198a",
+            "sourceSha256": "sha256:459e62ffaf3aa8969b39cd200ea27d99cc42b4560636954d03c15985d3843404"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_validateValueShape(GovernanceActionPolicyEntry,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol:StreamGovernanceActionPolicy#function:_validateValueShape(GovernanceActionPolicyEntry,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "entry",
+              "storageLocation": "memory",
+              "type": "GovernanceActionPolicyEntry"
+            },
+            {
+              "index": 1,
+              "name": "index",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2RvbWFpbnMvZ292ZXJuYW5jZS9TdHJlYW1Hb3Zlcm5hbmNlQWN0aW9uUG9saWN5LnNvbDpTdHJlYW1Hb3Zlcm5hbmNlQWN0aW9uUG9saWN5I2Z1bmN0aW9uOl92YWxpZGF0ZVZhbHVlU2hhcGUoR292ZXJuYW5jZUFjdGlvblBvbGljeUVudHJ5LHVpbnQyNTYp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_validateValueShape",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 731,
+            "byteStart": 12232,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol#L274-L289",
+            "lineEnd": 289,
+            "lineStart": 274,
+            "snippetSha256": "sha256:df8d35e7ce92b884b01a5a4e87acec198a422f433bec3d507504fd8f5a2ec822",
+            "sourceSha256": "sha256:459e62ffaf3aa8969b39cd200ea27d99cc42b4560636954d03c15985d3843404"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_validateValue(uint8,uint256,uint256,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol:StreamGovernanceActionPolicy#function:_validateValue(uint8,uint256,uint256,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "valuePolicy",
+              "type": "uint8"
+            },
+            {
+              "index": 1,
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "valueLimit",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "callIndex",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2RvbWFpbnMvZ292ZXJuYW5jZS9TdHJlYW1Hb3Zlcm5hbmNlQWN0aW9uUG9saWN5LnNvbDpTdHJlYW1Hb3Zlcm5hbmNlQWN0aW9uUG9saWN5I2Z1bmN0aW9uOl92YWxpZGF0ZVZhbHVlKHVpbnQ4LHVpbnQyNTYsdWludDI1Nix1aW50MjU2KQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_validateValue",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 587,
+            "byteStart": 12969,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol#L291-L305",
+            "lineEnd": 305,
+            "lineStart": 291,
+            "snippetSha256": "sha256:3253837f2ced50139159bb8e2855336ea0d2761133105cd6d059908d6f409344",
+            "sourceSha256": "sha256:459e62ffaf3aa8969b39cd200ea27d99cc42b4560636954d03c15985d3843404"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_entryHash(GovernanceActionPolicyEntry,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol:StreamGovernanceActionPolicy#function:_entryHash(GovernanceActionPolicyEntry,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "entry",
+              "storageLocation": "memory",
+              "type": "GovernanceActionPolicyEntry"
+            },
+            {
+              "index": 1,
+              "name": "index",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2RvbWFpbnMvZ292ZXJuYW5jZS9TdHJlYW1Hb3Zlcm5hbmNlQWN0aW9uUG9saWN5LnNvbDpTdHJlYW1Hb3Zlcm5hbmNlQWN0aW9uUG9saWN5I2Z1bmN0aW9uOl9lbnRyeUhhc2goR292ZXJuYW5jZUFjdGlvblBvbGljeUVudHJ5LHVpbnQyNTYp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_entryHash",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 363,
+            "byteStart": 13562,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol#L307-L315",
+            "lineEnd": 315,
+            "lineStart": 307,
+            "snippetSha256": "sha256:33e450024d8899e15c5d02b88b64b9fd40c8804f303f7bf1dbcd40b50dc03d1f",
+            "sourceSha256": "sha256:459e62ffaf3aa8969b39cd200ea27d99cc42b4560636954d03c15985d3843404"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_appendEntryHash(bytes32,bytes32,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol:StreamGovernanceActionPolicy#function:_appendEntryHash(bytes32,bytes32,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "chainHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "entryHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "index",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2RvbWFpbnMvZ292ZXJuYW5jZS9TdHJlYW1Hb3Zlcm5hbmNlQWN0aW9uUG9saWN5LnNvbDpTdHJlYW1Hb3Zlcm5hbmNlQWN0aW9uUG9saWN5I2Z1bmN0aW9uOl9hcHBlbmRFbnRyeUhhc2goYnl0ZXMzMixieXRlczMyLHVpbnQyNTYp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_appendEntryHash",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 302,
+            "byteStart": 13931,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol#L317-L324",
+            "lineEnd": 324,
+            "lineStart": 317,
+            "snippetSha256": "sha256:f7ab5ce48b1c33815c0e7ba33ba11bb7a049716b8ec04d19947ad25cdc79f930",
+            "sourceSha256": "sha256:459e62ffaf3aa8969b39cd200ea27d99cc42b4560636954d03c15985d3843404"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_catalogHash(address,bytes32,uint256,bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol:StreamGovernanceActionPolicy#function:_catalogHash(address,bytes32,uint256,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "executor",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "candidateProfileHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "entryCount",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "chainHash",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2RvbWFpbnMvZ292ZXJuYW5jZS9TdHJlYW1Hb3Zlcm5hbmNlQWN0aW9uUG9saWN5LnNvbDpTdHJlYW1Hb3Zlcm5hbmNlQWN0aW9uUG9saWN5I2Z1bmN0aW9uOl9jYXRhbG9nSGFzaChhZGRyZXNzLGJ5dGVzMzIsdWludDI1NixieXRlczMyKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_catalogHash",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 604,
+            "byteStart": 14239,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol#L326-L344",
+            "lineEnd": 344,
+            "lineStart": 326,
+            "snippetSha256": "sha256:5cdc0831e4a4b4f9bfc8e258fc2cca06e0982ec7452625452062f4fa99c10972",
+            "sourceSha256": "sha256:459e62ffaf3aa8969b39cd200ea27d99cc42b4560636954d03c15985d3843404"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_isEip7702DelegatedEOA(address)",
+          "functionKind": "function",
+          "id": "smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol:StreamGovernanceActionPolicy#function:_isEip7702DelegatedEOA(address)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2RvbWFpbnMvZ292ZXJuYW5jZS9TdHJlYW1Hb3Zlcm5hbmNlQWN0aW9uUG9saWN5LnNvbDpTdHJlYW1Hb3Zlcm5hbmNlQWN0aW9uUG9saWN5I2Z1bmN0aW9uOl9pc0VpcDc3MDJEZWxlZ2F0ZWRFT0EoYWRkcmVzcyk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_isEip7702DelegatedEOA",
+          "natspec": "@dev EIP-7702 designations are exactly `0xef0100 || delegate`.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "delegated",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 323,
+            "byteStart": 14920,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol#L347-L355",
+            "lineEnd": 355,
+            "lineStart": 347,
+            "snippetSha256": "sha256:a3897352ef696c95936dcd86b60032d4d3bd60edf989dbcd01467010f185bb6e",
+            "sourceSha256": "sha256:459e62ffaf3aa8969b39cd200ea27d99cc42b4560636954d03c15985d3843404"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "SCHEMA_VERSION",
+          "natspec": "",
+          "range": {
+            "byteLength": 42,
+            "byteStart": 725,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol#L15",
+            "lineEnd": 15,
+            "lineStart": 15,
+            "snippetSha256": "sha256:94861f8bd556011251a7300360fba5b4be878a32efc2f46eba803f2c4ec29b7c",
+            "sourceSha256": "sha256:459e62ffaf3aa8969b39cd200ea27d99cc42b4560636954d03c15985d3843404"
+          },
+          "selector": null,
+          "type": "uint16",
+          "typeString": "uint16",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 766,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol#L15",
+            "lineEnd": 15,
+            "lineStart": 15,
+            "snippetSha256": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+            "sourceSha256": "sha256:459e62ffaf3aa8969b39cd200ea27d99cc42b4560636954d03c15985d3843404"
+          },
+          "valueSource": "1",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "MAX_ACTION_POLICY_ENTRIES",
+          "natspec": "",
+          "range": {
+            "byteLength": 58,
+            "byteStart": 933,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol#L18",
+            "lineEnd": 18,
+            "lineStart": 18,
+            "snippetSha256": "sha256:a61d9f2cc3de5d3e16259814e37783094a539806381596693395eb3796b0fcea",
+            "sourceSha256": "sha256:459e62ffaf3aa8969b39cd200ea27d99cc42b4560636954d03c15985d3843404"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 5,
+            "byteStart": 986,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol#L18",
+            "lineEnd": 18,
+            "lineStart": 18,
+            "snippetSha256": "sha256:fc82b5b0eeb2415608f16524263e20b2084fc0a968a52d14a1f1c447a200c49e",
+            "sourceSha256": "sha256:459e62ffaf3aa8969b39cd200ea27d99cc42b4560636954d03c15985d3843404"
+          },
+          "valueSource": "1_024",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "CALL_TYPE_DIRECT",
+          "natspec": "",
+          "range": {
+            "byteLength": 44,
+            "byteStart": 998,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol#L20",
+            "lineEnd": 20,
+            "lineStart": 20,
+            "snippetSha256": "sha256:3494a7c08115114f9c87ea9c3eb78cdf6cecbda5c6cd53a5db1b0e5f1fa51f55",
+            "sourceSha256": "sha256:459e62ffaf3aa8969b39cd200ea27d99cc42b4560636954d03c15985d3843404"
+          },
+          "selector": null,
+          "type": "uint8",
+          "typeString": "uint8",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 1041,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol#L20",
+            "lineEnd": 20,
+            "lineStart": 20,
+            "snippetSha256": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+            "sourceSha256": "sha256:459e62ffaf3aa8969b39cd200ea27d99cc42b4560636954d03c15985d3843404"
+          },
+          "valueSource": "1",
+          "visibility": "internal"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "CALL_TYPE_NATIVE_TRANSFER",
+          "natspec": "",
+          "range": {
+            "byteLength": 53,
+            "byteStart": 1048,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol#L21",
+            "lineEnd": 21,
+            "lineStart": 21,
+            "snippetSha256": "sha256:08ba6319126831558279918d1438715eef00f14794c8bd9e03b921bcbe852c95",
+            "sourceSha256": "sha256:459e62ffaf3aa8969b39cd200ea27d99cc42b4560636954d03c15985d3843404"
+          },
+          "selector": null,
+          "type": "uint8",
+          "typeString": "uint8",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 1100,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol#L21",
+            "lineEnd": 21,
+            "lineStart": 21,
+            "snippetSha256": "sha256:d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+            "sourceSha256": "sha256:459e62ffaf3aa8969b39cd200ea27d99cc42b4560636954d03c15985d3843404"
+          },
+          "valueSource": "2",
+          "visibility": "internal"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "VALUE_POLICY_ZERO",
+          "natspec": "",
+          "range": {
+            "byteLength": 45,
+            "byteStart": 1107,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol#L22",
+            "lineEnd": 22,
+            "lineStart": 22,
+            "snippetSha256": "sha256:3efdf47a1ad9ac233400c13d45e8b81ca46f5f138923dc0ad35bc9ad20356a3e",
+            "sourceSha256": "sha256:459e62ffaf3aa8969b39cd200ea27d99cc42b4560636954d03c15985d3843404"
+          },
+          "selector": null,
+          "type": "uint8",
+          "typeString": "uint8",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 1151,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol#L22",
+            "lineEnd": 22,
+            "lineStart": 22,
+            "snippetSha256": "sha256:5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+            "sourceSha256": "sha256:459e62ffaf3aa8969b39cd200ea27d99cc42b4560636954d03c15985d3843404"
+          },
+          "valueSource": "0",
+          "visibility": "internal"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "VALUE_POLICY_EXACT",
+          "natspec": "",
+          "range": {
+            "byteLength": 46,
+            "byteStart": 1158,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol#L23",
+            "lineEnd": 23,
+            "lineStart": 23,
+            "snippetSha256": "sha256:d94ab19727bd2527add41ac4d6f8f26b210e23b73e0ab5dacd3e6fd96daf54e8",
+            "sourceSha256": "sha256:459e62ffaf3aa8969b39cd200ea27d99cc42b4560636954d03c15985d3843404"
+          },
+          "selector": null,
+          "type": "uint8",
+          "typeString": "uint8",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 1203,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol#L23",
+            "lineEnd": 23,
+            "lineStart": 23,
+            "snippetSha256": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+            "sourceSha256": "sha256:459e62ffaf3aa8969b39cd200ea27d99cc42b4560636954d03c15985d3843404"
+          },
+          "valueSource": "1",
+          "visibility": "internal"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "VALUE_POLICY_BOUNDED",
+          "natspec": "",
+          "range": {
+            "byteLength": 48,
+            "byteStart": 1210,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol#L24",
+            "lineEnd": 24,
+            "lineStart": 24,
+            "snippetSha256": "sha256:5ce22d77e68a8751ee83ac788e5726b79c5b470ef7614ca2feddff23f8054084",
+            "sourceSha256": "sha256:459e62ffaf3aa8969b39cd200ea27d99cc42b4560636954d03c15985d3843404"
+          },
+          "selector": null,
+          "type": "uint8",
+          "typeString": "uint8",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 1257,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol#L24",
+            "lineEnd": 24,
+            "lineStart": 24,
+            "snippetSha256": "sha256:d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+            "sourceSha256": "sha256:459e62ffaf3aa8969b39cd200ea27d99cc42b4560636954d03c15985d3843404"
+          },
+          "valueSource": "2",
+          "visibility": "internal"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "VALUE_SEMANTICS_CALLER_EXACT_TARGET_ATOMIC_V1",
+          "natspec": "",
+          "range": {
+            "byteLength": 163,
+            "byteStart": 1265,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol#L26-L27",
+            "lineEnd": 27,
+            "lineStart": 26,
+            "snippetSha256": "sha256:65bb712139d5bdcc7ee14b840e808384e6117826cf5459c3ca51e826aaca7682",
+            "sourceSha256": "sha256:459e62ffaf3aa8969b39cd200ea27d99cc42b4560636954d03c15985d3843404"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 81,
+            "byteStart": 1347,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol#L27",
+            "lineEnd": 27,
+            "lineStart": 27,
+            "snippetSha256": "sha256:7729659eb691d07771fcd0e14f9aa806498395fcb6d57f513f3d58be3c305c97",
+            "sourceSha256": "sha256:459e62ffaf3aa8969b39cd200ea27d99cc42b4560636954d03c15985d3843404"
+          },
+          "valueSource": "keccak256(\"6529STREAM_NATIVE_VALUE_CALLER_EXACT_TARGET_ATOMIC_REVERT_SURPLUS_V1\")",
+          "visibility": "internal"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "ACTION_POLICY_ENTRY_V1",
+          "natspec": "",
+          "range": {
+            "byteLength": 115,
+            "byteStart": 1435,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol#L29-L30",
+            "lineEnd": 30,
+            "lineStart": 29,
+            "snippetSha256": "sha256:0643f5a574d917ed4ec2b09bf573719928bd71c7022990afce98bc64a2159352",
+            "sourceSha256": "sha256:459e62ffaf3aa8969b39cd200ea27d99cc42b4560636954d03c15985d3843404"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 57,
+            "byteStart": 1493,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol#L30",
+            "lineEnd": 30,
+            "lineStart": 30,
+            "snippetSha256": "sha256:230a8cbc8878038b28416bd1f3611d2cf2c8ef5d903acd693dfb123ad488fede",
+            "sourceSha256": "sha256:459e62ffaf3aa8969b39cd200ea27d99cc42b4560636954d03c15985d3843404"
+          },
+          "valueSource": "keccak256(\"6529STREAM_GOVERNANCE_ACTION_POLICY_ENTRY_V1\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "ACTION_POLICY_CHAIN_V1",
+          "natspec": "",
+          "range": {
+            "byteLength": 115,
+            "byteStart": 1556,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol#L31-L32",
+            "lineEnd": 32,
+            "lineStart": 31,
+            "snippetSha256": "sha256:480b3984182144f27d9acdcf2338ed1cf85a8789e7aada8fb20d6eee00552e4a",
+            "sourceSha256": "sha256:459e62ffaf3aa8969b39cd200ea27d99cc42b4560636954d03c15985d3843404"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 57,
+            "byteStart": 1614,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol#L32",
+            "lineEnd": 32,
+            "lineStart": 32,
+            "snippetSha256": "sha256:ef9972c435d494fb8a65572d3aa4c430c99ec10761b980752a786cbf618b4f07",
+            "sourceSha256": "sha256:459e62ffaf3aa8969b39cd200ea27d99cc42b4560636954d03c15985d3843404"
+          },
+          "valueSource": "keccak256(\"6529STREAM_GOVERNANCE_ACTION_POLICY_CHAIN_V1\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "ACTION_POLICY_CATALOG_V1",
+          "natspec": "",
+          "range": {
+            "byteLength": 119,
+            "byteStart": 1677,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol#L33-L34",
+            "lineEnd": 34,
+            "lineStart": 33,
+            "snippetSha256": "sha256:b35d65c84c9935bad769f63c04fc0ac2053d46f1250d7a6fa1d06c1c1aa5d4c6",
+            "sourceSha256": "sha256:459e62ffaf3aa8969b39cd200ea27d99cc42b4560636954d03c15985d3843404"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 59,
+            "byteStart": 1737,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol#L34",
+            "lineEnd": 34,
+            "lineStart": 34,
+            "snippetSha256": "sha256:da5684392d1f182a1706522bc918997f8414c2a1e417580f60319381c91acd89",
+            "sourceSha256": "sha256:459e62ffaf3aa8969b39cd200ea27d99cc42b4560636954d03c15985d3843404"
+          },
+          "valueSource": "keccak256(\"6529STREAM_GOVERNANCE_ACTION_POLICY_CATALOG_V1\")",
+          "visibility": "private"
+        }
+      ],
+      "structs": [
+        {
+          "members": [
+            {
+              "index": 0,
+              "name": "bound",
+              "natspec": "",
+              "range": {
+                "byteLength": 10,
+                "byteStart": 1826,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol#L37",
+                "lineEnd": 37,
+                "lineStart": 37,
+                "snippetSha256": "sha256:c65d1b1fb32ea28f29011b987748797cbf5489efe59f7b38c6c66dbd329c2cd1",
+                "sourceSha256": "sha256:459e62ffaf3aa8969b39cd200ea27d99cc42b4560636954d03c15985d3843404"
+              },
+              "type": "bool",
+              "typeString": "bool"
+            },
+            {
+              "index": 1,
+              "name": "candidateProfileHash",
+              "natspec": "",
+              "range": {
+                "byteLength": 28,
+                "byteStart": 1846,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol#L38",
+                "lineEnd": 38,
+                "lineStart": 38,
+                "snippetSha256": "sha256:b40ce6743df716db2b09f031bd05cd174027666c13fa4266a5cb5ca590bbc4ef",
+                "sourceSha256": "sha256:459e62ffaf3aa8969b39cd200ea27d99cc42b4560636954d03c15985d3843404"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "catalogHash",
+              "natspec": "",
+              "range": {
+                "byteLength": 19,
+                "byteStart": 1884,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol#L39",
+                "lineEnd": 39,
+                "lineStart": 39,
+                "snippetSha256": "sha256:81d63faef432c9b83b308a56a963b35d308448813955b83ef531132b47ba93b1",
+                "sourceSha256": "sha256:459e62ffaf3aa8969b39cd200ea27d99cc42b4560636954d03c15985d3843404"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 3,
+              "name": "entries",
+              "natspec": "",
+              "range": {
+                "byteLength": 37,
+                "byteStart": 1913,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol#L40",
+                "lineEnd": 40,
+                "lineStart": 40,
+                "snippetSha256": "sha256:d4aa854b7f32bfb2f6413074b0627cac541032c747fdc82f89b49b65deb35068",
+                "sourceSha256": "sha256:459e62ffaf3aa8969b39cd200ea27d99cc42b4560636954d03c15985d3843404"
+              },
+              "type": "GovernanceActionPolicyEntry[]",
+              "typeString": "struct GovernanceActionPolicyEntry[]"
+            },
+            {
+              "index": 4,
+              "name": "entryIndexPlusOne",
+              "natspec": "",
+              "range": {
+                "byteLength": 45,
+                "byteStart": 1960,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol#L41",
+                "lineEnd": 41,
+                "lineStart": 41,
+                "snippetSha256": "sha256:5d1dbd643fe29f29277d27955b6c12e406fad61a86708999ac51da5ebe215a83",
+                "sourceSha256": "sha256:459e62ffaf3aa8969b39cd200ea27d99cc42b4560636954d03c15985d3843404"
+              },
+              "type": "mapping(bytes32 => uint256)",
+              "typeString": "mapping(bytes32 => uint256)"
+            },
+            {
+              "index": 5,
+              "name": "entryHashes",
+              "natspec": "",
+              "range": {
+                "byteLength": 39,
+                "byteStart": 2015,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol#L42",
+                "lineEnd": 42,
+                "lineStart": 42,
+                "snippetSha256": "sha256:0b0757d2ade01e82fc569bb9ae572bfe2b1d42a99e98c33d865140f82934f36a",
+                "sourceSha256": "sha256:459e62ffaf3aa8969b39cd200ea27d99cc42b4560636954d03c15985d3843404"
+              },
+              "type": "mapping(bytes32 => bytes32)",
+              "typeString": "mapping(bytes32 => bytes32)"
+            }
+          ],
+          "name": "State",
+          "natspec": "",
+          "range": {
+            "byteLength": 258,
+            "byteStart": 1803,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol#L36-L43",
+            "lineEnd": 43,
+            "lineStart": 36,
+            "snippetSha256": "sha256:90cbd1791925828d49701d6b728605788de04b6cc2bd0e2def379abe83fc3632",
+            "sourceSha256": "sha256:459e62ffaf3aa8969b39cd200ea27d99cc42b4560636954d03c15985d3843404"
+          }
+        }
+      ],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol:StreamGovernanceActionPolicy",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "c21hcnQtY29udHJhY3RzL2RvbWFpbnMvZ292ZXJuYW5jZS9TdHJlYW1Hb3Zlcm5hbmNlQWN0aW9uUG9saWN5LnNvbDpTdHJlYW1Hb3Zlcm5hbmNlQWN0aW9uUG9saWN5",
+    "kind": "library",
+    "linearizedDefinitionIds": [
+      "smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol:StreamGovernanceActionPolicy"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamGovernanceActionPolicy",
+    "natspec": "@notice Closed-world Governance V2 action and native-value policy.\n @dev The catalog is materialized once during bootstrap, has no mutation\n      entrypoint, and stores a commitment for every selected-entry proof.\n      Scheduling and execution both verify the bound catalog commitment plus\n      every selected entry's immutable hash, exact live target, and value\n      policy. Public functions execute by DELEGATECALL from\n      `StreamGovernanceExecutor`, so the catalog commitment is\n      domain-separated by the exact Executor.",
+    "range": {
+      "byteLength": 14563,
+      "byteStart": 682,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol#L14-L356",
+      "lineEnd": 356,
+      "lineStart": 14,
+      "snippetSha256": "sha256:05947cdf999db797a13560c05c95b2a61b5221151a2dff3b10adda1a2517522a",
+      "sourceSha256": "sha256:459e62ffaf3aa8969b39cd200ea27d99cc42b4560636954d03c15985d3843404"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-09-09.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 3
+    },
+    "byCode": {
+      "MISSING_FUNCTION_NATSPEC": 3
+    },
+    "totalCount": 3
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol:StreamGovernanceActionPolicy#function:0x0b12fdc9",
+      "definitionId": "smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol:StreamGovernanceActionPolicy",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol:StreamGovernanceActionPolicy#function:0x9122a6d5",
+      "definitionId": "smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol:StreamGovernanceActionPolicy",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol:StreamGovernanceActionPolicy#function:0xc69db2c2",
+      "definitionId": "smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol:StreamGovernanceActionPolicy",
+      "severity": "advisory"
+    }
+  ]
+}

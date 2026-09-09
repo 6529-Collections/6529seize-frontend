@@ -62,7 +62,7 @@ describe("StreamReviewDevelopmentStatus", () => {
     ).toHaveLength(0);
     expect(document.querySelector("time")).toHaveAttribute(
       "datetime",
-      "2026-08-01T00:00:00.000Z"
+      "2026-09-09T00:00:00.000Z"
     );
   });
 

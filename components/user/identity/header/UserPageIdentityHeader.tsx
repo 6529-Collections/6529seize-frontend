@@ -14,10 +14,10 @@ export default function UserPageIdentityHeader({
   return (
     <div className="tw-px-6 tw-pt-6">
       <div className="tw-mb-6">
-        <h2 className="tw-mb-1 tw-text-xl tw-font-semibold tw-text-iron-100">
+        <h2 className="tw-mb-1 tw-mt-0 tw-text-xl tw-font-semibold tw-text-iron-100">
           Network Identity Check (NIC)
         </h2>
-        <p className="tw-mb-0 tw-text-sm tw-font-normal tw-leading-relaxed tw-text-iron-500">
+        <p className="tw-m-0 tw-text-sm tw-font-normal tw-leading-relaxed tw-text-iron-500">
           Does the network believe this profile accurately represents its
           identity?
         </p>

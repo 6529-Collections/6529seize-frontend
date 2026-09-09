@@ -68,6 +68,12 @@ Use browser request blocking only in your testing session; remove the rules afte
   HTTP 410, the address-only error, and `Cache-Control: no-store`. This is a
   separate BE deployment check; the FE release alone does not guarantee it.
 
+The shared network/open-data E2E empty-query check accepts either the legacy
+400 (`query is required`) or retired 410 (address-only error), with the matching
+body and `no-store` header. This supports both deployments; a passing shared
+check does not prove retirement. The direct post-migration checks above and
+the route unit test still require 410.
+
 ## Shared picker regression and accessibility
 
 - [ ] In Meme Card Set configuration, add valid Meme card IDs/ranges and

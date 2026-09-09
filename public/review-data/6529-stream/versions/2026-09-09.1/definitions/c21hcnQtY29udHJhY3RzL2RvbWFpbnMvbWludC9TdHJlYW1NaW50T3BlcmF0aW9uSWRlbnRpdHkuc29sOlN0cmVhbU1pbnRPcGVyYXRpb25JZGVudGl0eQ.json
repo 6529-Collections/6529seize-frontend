@@ -1,0 +1,2800 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamMintManager.sol:IStreamMintManager#error:0xb57f553b",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamMintManager.sol:IStreamMintManager",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "counterId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "enum IStreamMintManager.CounterKeyMode",
+              "name": "keyMode",
+              "type": "uint8"
+            }
+          ],
+          "name": "MintCounterSubjectMissing",
+          "selector": "0xb57f553b",
+          "signature": "MintCounterSubjectMissing(bytes32,uint8)"
+        },
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamMintManager.sol:IStreamMintManager#error:0x3bde9aea",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamMintManager.sol:IStreamMintManager",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "firstIndex",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "secondIndex",
+              "type": "uint256"
+            }
+          ],
+          "name": "MintOperationIdDuplicate",
+          "selector": "0x3bde9aea",
+          "signature": "MintOperationIdDuplicate(uint256,uint256)"
+        },
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamMintManager.sol:IStreamMintManager#error:0x320b658f",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamMintManager.sol:IStreamMintManager",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "tokenIndex",
+              "type": "uint256"
+            }
+          ],
+          "name": "MintOperationIdRequired",
+          "selector": "0x320b658f",
+          "signature": "MintOperationIdRequired(uint256)"
+        },
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamMintManager.sol:IStreamMintManager#error:0x963f2548",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamMintManager.sol:IStreamMintManager",
+          "inherited": true,
+          "inputs": [],
+          "name": "MintOperationRootRequired",
+          "selector": "0x963f2548",
+          "signature": "MintOperationRootRequired()"
+        }
+      ],
+      "events": [],
+      "functions": [
+        {
+          "canonicalAbiSelector": "0x7f61da23",
+          "declarationId": "smart-contracts/domains/mint/StreamMintOperationIdentity.sol:StreamMintOperationIdentity#function:0xdda1b693",
+          "declaringDefinitionId": "smart-contracts/domains/mint/StreamMintOperationIdentity.sol:StreamMintOperationIdentity",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "struct IStreamMintManager.MintPhaseConfig",
+              "name": "phaseConfig",
+              "type": "(bool,uint64,uint64,uint32,bytes32,bytes32)"
+            },
+            {
+              "index": 1,
+              "internalType": "struct IStreamMintManager.MintGateConfig",
+              "name": "gateConfig",
+              "type": "(address,bytes32,bytes32,bytes32,uint32,uint32)"
+            },
+            {
+              "index": 2,
+              "internalType": "bytes32[]",
+              "name": "counterIds",
+              "type": "bytes32[]"
+            },
+            {
+              "index": 3,
+              "internalType": "struct IStreamMintManager.MintCounterConfig[]",
+              "name": "counterConfigs",
+              "type": "(bool,IStreamMintManager.CounterKeyMode,IStreamMintLedger.CounterCapMode,IStreamMintLedger.CounterDeltaMode,uint64,uint64,bytes32)[]"
+            },
+            {
+              "index": 4,
+              "internalType": "address[]",
+              "name": "executors",
+              "type": "address[]"
+            },
+            {
+              "index": 5,
+              "internalType": "struct StreamMintOperationIdentity.PolicyContext",
+              "name": "context",
+              "type": "(uint256,address,address,address,uint16,uint256,bytes32)"
+            }
+          ],
+          "name": "computePolicyHash",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0xdda1b693",
+          "selectorSource": "compiler_ast_library",
+          "signature": "computePolicyHash((bool,uint64,uint64,uint32,bytes32,bytes32),(address,bytes32,bytes32,bytes32,uint32,uint32),bytes32[],(bool,IStreamMintManager.CounterKeyMode,IStreamMintLedger.CounterCapMode,IStreamMintLedger.CounterDeltaMode,uint64,uint64,bytes32)[],address[],(uint256,address,address,address,uint16,uint256,bytes32))",
+          "stateMutability": "pure"
+        },
+        {
+          "canonicalAbiSelector": "0x10ed9e30",
+          "declarationId": "smart-contracts/domains/mint/StreamMintOperationIdentity.sol:StreamMintOperationIdentity#function:0xc8175901",
+          "declaringDefinitionId": "smart-contracts/domains/mint/StreamMintOperationIdentity.sol:StreamMintOperationIdentity",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "struct IStreamMintManager.MintBatch",
+              "name": "batch",
+              "type": "(uint256,bytes32,address,address,address[],address[],bytes[],bytes32[],bytes32,bytes32,bytes32,bytes)"
+            },
+            {
+              "index": 1,
+              "internalType": "struct StreamMintOperationIdentity.MintAuthorization",
+              "name": "authorization",
+              "type": "(bytes32,bytes32[],address,IStreamMintManager.AuthorizerKind,uint64,bytes32)"
+            },
+            {
+              "index": 2,
+              "internalType": "struct IStreamMintLedger.CounterConsumption[]",
+              "name": "consumptions",
+              "type": "(bytes32,uint256,bytes32,bytes32,bytes32,address,address,address,address,uint64,uint64,bytes32,bytes32)[]"
+            },
+            {
+              "index": 3,
+              "internalType": "struct StreamMintOperationIdentity.TranscriptContext",
+              "name": "context",
+              "type": "(uint256,address,address,address,address,address,bytes32,bytes32,bytes32,uint256,uint256)"
+            }
+          ],
+          "name": "derive",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "operationRoot",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32[]",
+              "name": "operationIds",
+              "type": "bytes32[]"
+            }
+          ],
+          "selector": "0xc8175901",
+          "selectorSource": "compiler_ast_library",
+          "signature": "derive((uint256,bytes32,address,address,address[],address[],bytes[],bytes32[],bytes32,bytes32,bytes32,bytes),(bytes32,bytes32[],address,IStreamMintManager.AuthorizerKind,uint64,bytes32),(bytes32,uint256,bytes32,bytes32,bytes32,address,address,address,address,uint64,uint64,bytes32,bytes32)[],(uint256,address,address,address,address,address,bytes32,bytes32,bytes32,uint256,uint256))",
+          "stateMutability": "pure"
+        },
+        {
+          "canonicalAbiSelector": "0x899514f4",
+          "declarationId": "smart-contracts/domains/mint/StreamMintOperationIdentity.sol:StreamMintOperationIdentity#function:0x95467091",
+          "declaringDefinitionId": "smart-contracts/domains/mint/StreamMintOperationIdentity.sol:StreamMintOperationIdentity",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "struct IStreamMintManager.MintBatch",
+              "name": "batch",
+              "type": "(uint256,bytes32,address,address,address[],address[],bytes[],bytes32[],bytes32,bytes32,bytes32,bytes)"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "quantity",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "bytes32[]",
+              "name": "counterIds",
+              "type": "bytes32[]"
+            },
+            {
+              "index": 3,
+              "internalType": "struct IStreamMintManager.MintCounterConfig[]",
+              "name": "counterConfigs",
+              "type": "(bool,IStreamMintManager.CounterKeyMode,IStreamMintLedger.CounterCapMode,IStreamMintLedger.CounterDeltaMode,uint64,uint64,bytes32)[]"
+            },
+            {
+              "index": 4,
+              "internalType": "struct StreamMintOperationIdentity.CounterContext",
+              "name": "context",
+              "type": "(uint256,address,address,address,address)"
+            }
+          ],
+          "name": "deriveCounterConsumptions",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "struct IStreamMintLedger.CounterConsumption[]",
+              "name": "consumptions",
+              "type": "(bytes32,uint256,bytes32,bytes32,bytes32,address,address,address,address,uint64,uint64,bytes32,bytes32)[]"
+            }
+          ],
+          "selector": "0x95467091",
+          "selectorSource": "compiler_ast_library",
+          "signature": "deriveCounterConsumptions((uint256,bytes32,address,address,address[],address[],bytes[],bytes32[],bytes32,bytes32,bytes32,bytes),uint256,bytes32[],(bool,IStreamMintManager.CounterKeyMode,IStreamMintLedger.CounterCapMode,IStreamMintLedger.CounterDeltaMode,uint64,uint64,bytes32)[],(uint256,address,address,address,address))",
+          "stateMutability": "pure"
+        },
+        {
+          "canonicalAbiSelector": "0xe1bcff21",
+          "declarationId": "smart-contracts/domains/mint/StreamMintOperationIdentity.sol:StreamMintOperationIdentity#function:0x38598a3b",
+          "declaringDefinitionId": "smart-contracts/domains/mint/StreamMintOperationIdentity.sol:StreamMintOperationIdentity",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "enum IStreamMintManager.CounterKeyMode",
+              "name": "keyMode",
+              "type": "IStreamMintManager.CounterKeyMode"
+            },
+            {
+              "index": 1,
+              "internalType": "struct StreamMintOperationIdentity.SubjectContext",
+              "name": "context",
+              "type": "(uint256,address,uint256,bytes32,bytes32,address,address,address,address,bytes32)"
+            }
+          ],
+          "name": "subjectKey",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x38598a3b",
+          "selectorSource": "compiler_ast_library",
+          "signature": "subjectKey(IStreamMintManager.CounterKeyMode,(uint256,address,uint256,bytes32,bytes32,address,address,address,address,bytes32))",
+          "stateMutability": "pure"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "production_support_library",
+    "classificationReason": "First-party protocol library outside the production contract catalog.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "derive((uint256,bytes32,address,address,address[],address[],bytes[],bytes32[],bytes32,bytes32,bytes32,bytes),(bytes32,bytes32[],address,IStreamMintManager.AuthorizerKind,uint64,bytes32),(bytes32,uint256,bytes32,bytes32,bytes32,address,address,address,address,uint64,uint64,bytes32,bytes32)[],(uint256,address,address,address,address,address,bytes32,bytes32,bytes32,uint256,uint256))",
+          "displaySignature": "derive(IStreamMintManager.MintBatch,MintAuthorization,IStreamMintLedger.CounterConsumption[],TranscriptContext)",
+          "functionKind": "function",
+          "id": "smart-contracts/domains/mint/StreamMintOperationIdentity.sol:StreamMintOperationIdentity#function:0xc8175901",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "batch",
+              "storageLocation": "calldata",
+              "type": "IStreamMintManager.MintBatch"
+            },
+            {
+              "index": 1,
+              "name": "authorization",
+              "storageLocation": "memory",
+              "type": "MintAuthorization"
+            },
+            {
+              "index": 2,
+              "name": "consumptions",
+              "storageLocation": "memory",
+              "type": "IStreamMintLedger.CounterConsumption[]"
+            },
+            {
+              "index": 3,
+              "name": "context",
+              "storageLocation": "memory",
+              "type": "TranscriptContext"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2RvbWFpbnMvbWludC9TdHJlYW1NaW50T3BlcmF0aW9uSWRlbnRpdHkuc29sOlN0cmVhbU1pbnRPcGVyYXRpb25JZGVudGl0eSNmdW5jdGlvbjoweGM4MTc1OTAx",
+          "kind": "function",
+          "modifiers": [],
+          "name": "derive",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "operationRoot",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "operationIds",
+              "storageLocation": "memory",
+              "type": "bytes32[]"
+            }
+          ],
+          "range": {
+            "byteLength": 871,
+            "byteStart": 4612,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L129-L145",
+            "lineEnd": 145,
+            "lineStart": 129,
+            "snippetSha256": "sha256:53572b7dc547f9bd1bd3aa84f1562b59d529cd0f1657138e901f13e4442799b4",
+            "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+          },
+          "selector": "0xc8175901",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "deriveCounterConsumptions((uint256,bytes32,address,address,address[],address[],bytes[],bytes32[],bytes32,bytes32,bytes32,bytes),uint256,bytes32[],(bool,IStreamMintManager.CounterKeyMode,IStreamMintLedger.CounterCapMode,IStreamMintLedger.CounterDeltaMode,uint64,uint64,bytes32)[],(uint256,address,address,address,address))",
+          "displaySignature": "deriveCounterConsumptions(IStreamMintManager.MintBatch,uint256,bytes32[],IStreamMintManager.MintCounterConfig[],CounterContext)",
+          "functionKind": "function",
+          "id": "smart-contracts/domains/mint/StreamMintOperationIdentity.sol:StreamMintOperationIdentity#function:0x95467091",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "batch",
+              "storageLocation": "calldata",
+              "type": "IStreamMintManager.MintBatch"
+            },
+            {
+              "index": 1,
+              "name": "quantity",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "counterIds",
+              "storageLocation": "memory",
+              "type": "bytes32[]"
+            },
+            {
+              "index": 3,
+              "name": "counterConfigs",
+              "storageLocation": "memory",
+              "type": "IStreamMintManager.MintCounterConfig[]"
+            },
+            {
+              "index": 4,
+              "name": "context",
+              "storageLocation": "memory",
+              "type": "CounterContext"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2RvbWFpbnMvbWludC9TdHJlYW1NaW50T3BlcmF0aW9uSWRlbnRpdHkuc29sOlN0cmVhbU1pbnRPcGVyYXRpb25JZGVudGl0eSNmdW5jdGlvbjoweDk1NDY3MDkx",
+          "kind": "function",
+          "modifiers": [],
+          "name": "deriveCounterConsumptions",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "consumptions",
+              "storageLocation": "memory",
+              "type": "IStreamMintLedger.CounterConsumption[]"
+            }
+          ],
+          "range": {
+            "byteLength": 975,
+            "byteStart": 5489,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L147-L168",
+            "lineEnd": 168,
+            "lineStart": 147,
+            "snippetSha256": "sha256:238ee867d3cd0d14be5902b01f005f7fea349b6bd11e2eddd64c6a86afce1d58",
+            "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+          },
+          "selector": "0x95467091",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "subjectKey(IStreamMintManager.CounterKeyMode,(uint256,address,uint256,bytes32,bytes32,address,address,address,address,bytes32))",
+          "displaySignature": "subjectKey(IStreamMintManager.CounterKeyMode,SubjectContext)",
+          "functionKind": "function",
+          "id": "smart-contracts/domains/mint/StreamMintOperationIdentity.sol:StreamMintOperationIdentity#function:0x38598a3b",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "keyMode",
+              "type": "IStreamMintManager.CounterKeyMode"
+            },
+            {
+              "index": 1,
+              "name": "context",
+              "storageLocation": "memory",
+              "type": "SubjectContext"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2RvbWFpbnMvbWludC9TdHJlYW1NaW50T3BlcmF0aW9uSWRlbnRpdHkuc29sOlN0cmVhbU1pbnRPcGVyYXRpb25JZGVudGl0eSNmdW5jdGlvbjoweDM4NTk4YTNi",
+          "kind": "function",
+          "modifiers": [],
+          "name": "subjectKey",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 207,
+            "byteStart": 6470,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L170-L176",
+            "lineEnd": 176,
+            "lineStart": 170,
+            "snippetSha256": "sha256:f3fe5938d45ac578db4a242fed322b96c86e17a50412e6eb89f98a3e96ba45f6",
+            "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+          },
+          "selector": "0x38598a3b",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "computePolicyHash((bool,uint64,uint64,uint32,bytes32,bytes32),(address,bytes32,bytes32,bytes32,uint32,uint32),bytes32[],(bool,IStreamMintManager.CounterKeyMode,IStreamMintLedger.CounterCapMode,IStreamMintLedger.CounterDeltaMode,uint64,uint64,bytes32)[],address[],(uint256,address,address,address,uint16,uint256,bytes32))",
+          "displaySignature": "computePolicyHash(IStreamMintManager.MintPhaseConfig,IStreamMintManager.MintGateConfig,bytes32[],IStreamMintManager.MintCounterConfig[],address[],PolicyContext)",
+          "functionKind": "function",
+          "id": "smart-contracts/domains/mint/StreamMintOperationIdentity.sol:StreamMintOperationIdentity#function:0xdda1b693",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "phaseConfig",
+              "storageLocation": "memory",
+              "type": "IStreamMintManager.MintPhaseConfig"
+            },
+            {
+              "index": 1,
+              "name": "gateConfig",
+              "storageLocation": "memory",
+              "type": "IStreamMintManager.MintGateConfig"
+            },
+            {
+              "index": 2,
+              "name": "counterIds",
+              "storageLocation": "memory",
+              "type": "bytes32[]"
+            },
+            {
+              "index": 3,
+              "name": "counterConfigs",
+              "storageLocation": "memory",
+              "type": "IStreamMintManager.MintCounterConfig[]"
+            },
+            {
+              "index": 4,
+              "name": "executors",
+              "storageLocation": "memory",
+              "type": "address[]"
+            },
+            {
+              "index": 5,
+              "name": "context",
+              "storageLocation": "memory",
+              "type": "PolicyContext"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2RvbWFpbnMvbWludC9TdHJlYW1NaW50T3BlcmF0aW9uSWRlbnRpdHkuc29sOlN0cmVhbU1pbnRPcGVyYXRpb25JZGVudGl0eSNmdW5jdGlvbjoweGRkYTFiNjkz",
+          "kind": "function",
+          "modifiers": [],
+          "name": "computePolicyHash",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 2599,
+            "byteStart": 6683,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L178-L239",
+            "lineEnd": 239,
+            "lineStart": 178,
+            "snippetSha256": "sha256:47463074cd55324e40181ae6d4a904609b7b8286e45fa2e49b09ff0f1c463f18",
+            "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+          },
+          "selector": "0xdda1b693",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_validatedResultHash(address,bytes32,MintAuthorization,IStreamMintLedger.CounterConsumption[])",
+          "functionKind": "function",
+          "id": "smart-contracts/domains/mint/StreamMintOperationIdentity.sol:StreamMintOperationIdentity#function:_validatedResultHash(address,bytes32,MintAuthorization,IStreamMintLedger.CounterConsumption[])",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "gate",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "authorizationId",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "authorization",
+              "storageLocation": "memory",
+              "type": "MintAuthorization"
+            },
+            {
+              "index": 3,
+              "name": "consumptions",
+              "storageLocation": "memory",
+              "type": "IStreamMintLedger.CounterConsumption[]"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2RvbWFpbnMvbWludC9TdHJlYW1NaW50T3BlcmF0aW9uSWRlbnRpdHkuc29sOlN0cmVhbU1pbnRPcGVyYXRpb25JZGVudGl0eSNmdW5jdGlvbjpfdmFsaWRhdGVkUmVzdWx0SGFzaChhZGRyZXNzLGJ5dGVzMzIsTWludEF1dGhvcml6YXRpb24sSVN0cmVhbU1pbnRMZWRnZXIuQ291bnRlckNvbnN1bXB0aW9uW10p",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_validatedResultHash",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 914,
+            "byteStart": 9288,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L241-L264",
+            "lineEnd": 264,
+            "lineStart": 241,
+            "snippetSha256": "sha256:549092b53f7cf25bda813b764eef0ebe722c29db23b0fbf3611ef6969faadb93",
+            "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_requestCommitment(IStreamMintManager.MintBatch,bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/domains/mint/StreamMintOperationIdentity.sol:StreamMintOperationIdentity#function:_requestCommitment(IStreamMintManager.MintBatch,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "batch",
+              "storageLocation": "calldata",
+              "type": "IStreamMintManager.MintBatch"
+            },
+            {
+              "index": 1,
+              "name": "validatedResultHash",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2RvbWFpbnMvbWludC9TdHJlYW1NaW50T3BlcmF0aW9uSWRlbnRpdHkuc29sOlN0cmVhbU1pbnRPcGVyYXRpb25JZGVudGl0eSNmdW5jdGlvbjpfcmVxdWVzdENvbW1pdG1lbnQoSVN0cmVhbU1pbnRNYW5hZ2VyLk1pbnRCYXRjaCxieXRlczMyKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_requestCommitment",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 772,
+            "byteStart": 10208,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L266-L283",
+            "lineEnd": 283,
+            "lineStart": 266,
+            "snippetSha256": "sha256:67d32a6103f720948254383e4185091a99c5c096ed64a5877d335fbf21bfb091",
+            "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_operationRoot(IStreamMintManager.MintBatch,TranscriptContext,bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/domains/mint/StreamMintOperationIdentity.sol:StreamMintOperationIdentity#function:_operationRoot(IStreamMintManager.MintBatch,TranscriptContext,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "batch",
+              "storageLocation": "calldata",
+              "type": "IStreamMintManager.MintBatch"
+            },
+            {
+              "index": 1,
+              "name": "context",
+              "storageLocation": "memory",
+              "type": "TranscriptContext"
+            },
+            {
+              "index": 2,
+              "name": "requestCommitmentHash",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2RvbWFpbnMvbWludC9TdHJlYW1NaW50T3BlcmF0aW9uSWRlbnRpdHkuc29sOlN0cmVhbU1pbnRPcGVyYXRpb25JZGVudGl0eSNmdW5jdGlvbjpfb3BlcmF0aW9uUm9vdChJU3RyZWFtTWludE1hbmFnZXIuTWludEJhdGNoLFRyYW5zY3JpcHRDb250ZXh0LGJ5dGVzMzIp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_operationRoot",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 1265,
+            "byteStart": 10986,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L285-L309",
+            "lineEnd": 309,
+            "lineStart": 285,
+            "snippetSha256": "sha256:c2b3c0e0b4b44671b441e4bade192251b3eaccce128069fb651c8befd23c5ac2",
+            "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_operationIds(IStreamMintManager.MintBatch,bytes32,uint256,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/domains/mint/StreamMintOperationIdentity.sol:StreamMintOperationIdentity#function:_operationIds(IStreamMintManager.MintBatch,bytes32,uint256,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "batch",
+              "storageLocation": "calldata",
+              "type": "IStreamMintManager.MintBatch"
+            },
+            {
+              "index": 1,
+              "name": "operationRoot",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "firstOperationNonce",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "quantity",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2RvbWFpbnMvbWludC9TdHJlYW1NaW50T3BlcmF0aW9uSWRlbnRpdHkuc29sOlN0cmVhbU1pbnRPcGVyYXRpb25JZGVudGl0eSNmdW5jdGlvbjpfb3BlcmF0aW9uSWRzKElTdHJlYW1NaW50TWFuYWdlci5NaW50QmF0Y2gsYnl0ZXMzMix1aW50MjU2LHVpbnQyNTYp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_operationIds",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "operationIds",
+              "storageLocation": "memory",
+              "type": "bytes32[]"
+            }
+          ],
+          "range": {
+            "byteLength": 1082,
+            "byteStart": 12257,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L311-L339",
+            "lineEnd": 339,
+            "lineStart": 311,
+            "snippetSha256": "sha256:a968680019702a9f2974c673176881e89a66603565df5c0572bd5a412834dcec",
+            "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_counterConsumption(IStreamMintManager.MintBatch,uint256,bytes32,IStreamMintManager.MintCounterConfig,address,CounterContext)",
+          "functionKind": "function",
+          "id": "smart-contracts/domains/mint/StreamMintOperationIdentity.sol:StreamMintOperationIdentity#function:_counterConsumption(IStreamMintManager.MintBatch,uint256,bytes32,IStreamMintManager.MintCounterConfig,address,CounterContext)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "batch",
+              "storageLocation": "calldata",
+              "type": "IStreamMintManager.MintBatch"
+            },
+            {
+              "index": 1,
+              "name": "tokenIndex",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "counterId",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "name": "config",
+              "storageLocation": "memory",
+              "type": "IStreamMintManager.MintCounterConfig"
+            },
+            {
+              "index": 4,
+              "name": "recipient",
+              "type": "address"
+            },
+            {
+              "index": 5,
+              "name": "context",
+              "storageLocation": "memory",
+              "type": "CounterContext"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2RvbWFpbnMvbWludC9TdHJlYW1NaW50T3BlcmF0aW9uSWRlbnRpdHkuc29sOlN0cmVhbU1pbnRPcGVyYXRpb25JZGVudGl0eSNmdW5jdGlvbjpfY291bnRlckNvbnN1bXB0aW9uKElTdHJlYW1NaW50TWFuYWdlci5NaW50QmF0Y2gsdWludDI1NixieXRlczMyLElTdHJlYW1NaW50TWFuYWdlci5NaW50Q291bnRlckNvbmZpZyxhZGRyZXNzLENvdW50ZXJDb250ZXh0KQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_counterConsumption",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "consumption",
+              "storageLocation": "memory",
+              "type": "IStreamMintLedger.CounterConsumption"
+            }
+          ],
+          "range": {
+            "byteLength": 2179,
+            "byteStart": 13345,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L341-L398",
+            "lineEnd": 398,
+            "lineStart": 341,
+            "snippetSha256": "sha256:08fb642e22939689ed98381651942c2c4466d6f40b5155c04f7b78fe70cdadb6",
+            "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_appendCounterConsumptions(IStreamMintManager.MintBatch,IStreamMintLedger.CounterConsumption[],uint256,uint256,bytes32,IStreamMintManager.MintCounterConfig,CounterContext)",
+          "functionKind": "function",
+          "id": "smart-contracts/domains/mint/StreamMintOperationIdentity.sol:StreamMintOperationIdentity#function:_appendCounterConsumptions(IStreamMintManager.MintBatch,IStreamMintLedger.CounterConsumption[],uint256,uint256,bytes32,IStreamMintManager.MintCounterConfig,CounterContext)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "batch",
+              "storageLocation": "calldata",
+              "type": "IStreamMintManager.MintBatch"
+            },
+            {
+              "index": 1,
+              "name": "consumptions",
+              "storageLocation": "memory",
+              "type": "IStreamMintLedger.CounterConsumption[]"
+            },
+            {
+              "index": 2,
+              "name": "cursor",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "quantity",
+              "type": "uint256"
+            },
+            {
+              "index": 4,
+              "name": "counterId",
+              "type": "bytes32"
+            },
+            {
+              "index": 5,
+              "name": "config",
+              "storageLocation": "memory",
+              "type": "IStreamMintManager.MintCounterConfig"
+            },
+            {
+              "index": 6,
+              "name": "context",
+              "storageLocation": "memory",
+              "type": "CounterContext"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2RvbWFpbnMvbWludC9TdHJlYW1NaW50T3BlcmF0aW9uSWRlbnRpdHkuc29sOlN0cmVhbU1pbnRPcGVyYXRpb25JZGVudGl0eSNmdW5jdGlvbjpfYXBwZW5kQ291bnRlckNvbnN1bXB0aW9ucyhJU3RyZWFtTWludE1hbmFnZXIuTWludEJhdGNoLElTdHJlYW1NaW50TGVkZ2VyLkNvdW50ZXJDb25zdW1wdGlvbltdLHVpbnQyNTYsdWludDI1NixieXRlczMyLElTdHJlYW1NaW50TWFuYWdlci5NaW50Q291bnRlckNvbmZpZyxDb3VudGVyQ29udGV4dCk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_appendCounterConsumptions",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 950,
+            "byteStart": 15530,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L400-L422",
+            "lineEnd": 422,
+            "lineStart": 400,
+            "snippetSha256": "sha256:2b4395c4a5d4bda81f649504198f668a7219cd2a9cb3f6b6f9894e690951227b",
+            "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_subjectKey(IStreamMintManager.CounterKeyMode,SubjectContext)",
+          "functionKind": "function",
+          "id": "smart-contracts/domains/mint/StreamMintOperationIdentity.sol:StreamMintOperationIdentity#function:_subjectKey(IStreamMintManager.CounterKeyMode,SubjectContext)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "keyMode",
+              "type": "IStreamMintManager.CounterKeyMode"
+            },
+            {
+              "index": 1,
+              "name": "context",
+              "storageLocation": "memory",
+              "type": "SubjectContext"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2RvbWFpbnMvbWludC9TdHJlYW1NaW50T3BlcmF0aW9uSWRlbnRpdHkuc29sOlN0cmVhbU1pbnRPcGVyYXRpb25JZGVudGl0eSNmdW5jdGlvbjpfc3ViamVjdEtleShJU3RyZWFtTWludE1hbmFnZXIuQ291bnRlcktleU1vZGUsU3ViamVjdENvbnRleHQp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_subjectKey",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 1722,
+            "byteStart": 16486,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L424-L465",
+            "lineEnd": 465,
+            "lineStart": 424,
+            "snippetSha256": "sha256:6e2ef9eb529c4e0c0927ab02e265cd967f6bf3ae327c34955aef7dbb01b9304e",
+            "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_addressSubjectKey(IStreamMintManager.CounterKeyMode,address,SubjectContext)",
+          "functionKind": "function",
+          "id": "smart-contracts/domains/mint/StreamMintOperationIdentity.sol:StreamMintOperationIdentity#function:_addressSubjectKey(IStreamMintManager.CounterKeyMode,address,SubjectContext)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "keyMode",
+              "type": "IStreamMintManager.CounterKeyMode"
+            },
+            {
+              "index": 1,
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "context",
+              "storageLocation": "memory",
+              "type": "SubjectContext"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2RvbWFpbnMvbWludC9TdHJlYW1NaW50T3BlcmF0aW9uSWRlbnRpdHkuc29sOlN0cmVhbU1pbnRPcGVyYXRpb25JZGVudGl0eSNmdW5jdGlvbjpfYWRkcmVzc1N1YmplY3RLZXkoSVN0cmVhbU1pbnRNYW5hZ2VyLkNvdW50ZXJLZXlNb2RlLGFkZHJlc3MsU3ViamVjdENvbnRleHQp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_addressSubjectKey",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 444,
+            "byteStart": 18214,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L467-L477",
+            "lineEnd": 477,
+            "lineStart": 467,
+            "snippetSha256": "sha256:aaff7b1932adc8459f3b17b7174f4c1d47f1a73cd7d69eb679a96385513148d3",
+            "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_sortAddresses(address[])",
+          "functionKind": "function",
+          "id": "smart-contracts/domains/mint/StreamMintOperationIdentity.sol:StreamMintOperationIdentity#function:_sortAddresses(address[])",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "values",
+              "storageLocation": "memory",
+              "type": "address[]"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2RvbWFpbnMvbWludC9TdHJlYW1NaW50T3BlcmF0aW9uSWRlbnRpdHkuc29sOlN0cmVhbU1pbnRPcGVyYXRpb25JZGVudGl0eSNmdW5jdGlvbjpfc29ydEFkZHJlc3NlcyhhZGRyZXNzW10p",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_sortAddresses",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 385,
+            "byteStart": 18664,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L479-L489",
+            "lineEnd": 489,
+            "lineStart": 479,
+            "snippetSha256": "sha256:033fa18647855a77d10118c45c63567567c5d6db69dad640c684c2185bd9e5ab",
+            "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "MINT_REQUEST_COMMITMENT_DOMAIN",
+          "natspec": "",
+          "range": {
+            "byteLength": 116,
+            "byteStart": 385,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L10-L11",
+            "lineEnd": 11,
+            "lineStart": 10,
+            "snippetSha256": "sha256:a3c3480fe4aef7eb7811f2f0805c5fda1252835d98c0aa6133df4fa84702bd9b",
+            "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 50,
+            "byteStart": 451,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L11",
+            "lineEnd": 11,
+            "lineStart": 11,
+            "snippetSha256": "sha256:0a9aff9a240fc35bc002e9c0d51430b6a301696c1eb90c59aaf7361f87f51d04",
+            "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+          },
+          "valueSource": "keccak256(\"6529STREAM_MINT_REQUEST_COMMITMENT_V1\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "MINT_VALIDATED_RESULT_DOMAIN",
+          "natspec": "",
+          "range": {
+            "byteLength": 112,
+            "byteStart": 507,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L12-L13",
+            "lineEnd": 13,
+            "lineStart": 12,
+            "snippetSha256": "sha256:06206af4a19cc7bdee42b51d3fdfa59de86b763fae0421d67f749f480438bf4b",
+            "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 48,
+            "byteStart": 571,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L13",
+            "lineEnd": 13,
+            "lineStart": 13,
+            "snippetSha256": "sha256:c849dcee64580e11e6092c948a1bc664a14084136136b4204494e87eedc34a06",
+            "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+          },
+          "valueSource": "keccak256(\"6529STREAM_MINT_VALIDATED_RESULT_V1\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "MINT_COUNTER_CONSUMPTIONS_DOMAIN",
+          "natspec": "",
+          "range": {
+            "byteLength": 120,
+            "byteStart": 625,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L14-L15",
+            "lineEnd": 15,
+            "lineStart": 14,
+            "snippetSha256": "sha256:51c9e8dc9304984d143ed204fb96ef4a095d61ec8b50dff67b365f1cdcad3b0f",
+            "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 52,
+            "byteStart": 693,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L15",
+            "lineEnd": 15,
+            "lineStart": 15,
+            "snippetSha256": "sha256:08401412c954cec67277cfd47887d9df2204c45a78fef05424e931688c9e9441",
+            "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+          },
+          "valueSource": "keccak256(\"6529STREAM_MINT_COUNTER_CONSUMPTIONS_V1\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "MINT_NULLIFIERS_DOMAIN",
+          "natspec": "",
+          "range": {
+            "byteLength": 92,
+            "byteStart": 751,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L16",
+            "lineEnd": 16,
+            "lineStart": 16,
+            "snippetSha256": "sha256:5f6cbadc90d3af492014cdb0cd134fbbb141fd2b2eb998ea3a55279e49876313",
+            "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 42,
+            "byteStart": 801,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L16",
+            "lineEnd": 16,
+            "lineStart": 16,
+            "snippetSha256": "sha256:4c14cb98bf8af2e2ff59c7401984a1357ab49cd60dc10a4f122959f31491ef8e",
+            "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+          },
+          "valueSource": "keccak256(\"6529STREAM_MINT_NULLIFIERS_V1\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "MINT_OPERATION_ROOT_DOMAIN",
+          "natspec": "",
+          "range": {
+            "byteLength": 108,
+            "byteStart": 849,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L17-L18",
+            "lineEnd": 18,
+            "lineStart": 17,
+            "snippetSha256": "sha256:4264204b8b94583019f8237daae57814b82daba1bed5194cac95b56ead4e3c3a",
+            "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 46,
+            "byteStart": 911,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L18",
+            "lineEnd": 18,
+            "lineStart": 18,
+            "snippetSha256": "sha256:8cd9b1896f61b5a2853bd23d2eb592fd3a183b7acf225e76f6c0509105e9a442",
+            "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+          },
+          "valueSource": "keccak256(\"6529STREAM_MINT_OPERATION_ROOT_V1\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "MINT_TOKEN_OPERATION_ID_DOMAIN",
+          "natspec": "",
+          "range": {
+            "byteLength": 116,
+            "byteStart": 963,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L19-L20",
+            "lineEnd": 20,
+            "lineStart": 19,
+            "snippetSha256": "sha256:265f11f856776572bb4a615c498398a229e54e31a27c90af5cfa5f6a5a5b1e13",
+            "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 50,
+            "byteStart": 1029,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L20",
+            "lineEnd": 20,
+            "lineStart": 20,
+            "snippetSha256": "sha256:c5dd6be07f48f78b7789f1e3c29e6314ee2ecaf1ffe4d8a005e1c18a545c13f2",
+            "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+          },
+          "valueSource": "keccak256(\"6529STREAM_MINT_TOKEN_OPERATION_ID_V1\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "BATCH_RECIPIENTS_DOMAIN",
+          "natspec": "",
+          "range": {
+            "byteLength": 107,
+            "byteStart": 1085,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L21-L22",
+            "lineEnd": 22,
+            "lineStart": 21,
+            "snippetSha256": "sha256:8583d14a9185e21f018d2ee2458439ee097c1acc38c3799dd56cda5409fdbdbc",
+            "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 48,
+            "byteStart": 1144,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L22",
+            "lineEnd": 22,
+            "lineStart": 22,
+            "snippetSha256": "sha256:da7035a31ad86ec6358900a3c446c6989ed03a5b64c0d24537d389376beb6b06",
+            "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+          },
+          "valueSource": "keccak256(\"6529STREAM_MINT_BATCH_RECIPIENTS_V1\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "BATCH_BENEFICIARIES_DOMAIN",
+          "natspec": "",
+          "range": {
+            "byteLength": 113,
+            "byteStart": 1198,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L23-L24",
+            "lineEnd": 24,
+            "lineStart": 23,
+            "snippetSha256": "sha256:c502c7c5633178b0597be7a49f17a1982213ca269f74eef2b5dee59d3045d639",
+            "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 51,
+            "byteStart": 1260,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L24",
+            "lineEnd": 24,
+            "lineStart": 24,
+            "snippetSha256": "sha256:00b37696392e7100c30f4a6bd9652563dda4bfed33a6fece0d93ebd79e96c490",
+            "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+          },
+          "valueSource": "keccak256(\"6529STREAM_MINT_BATCH_BENEFICIARIES_V1\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "BATCH_TOKEN_DATA_DOMAIN",
+          "natspec": "",
+          "range": {
+            "byteLength": 107,
+            "byteStart": 1317,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L25-L26",
+            "lineEnd": 26,
+            "lineStart": 25,
+            "snippetSha256": "sha256:953166a80f8eeeed02f2465e87b2356384161d3f11b3baa2b436636cfbf8b4e6",
+            "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 48,
+            "byteStart": 1376,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L26",
+            "lineEnd": 26,
+            "lineStart": 26,
+            "snippetSha256": "sha256:a01722173247a7c261d50ee31b2293217363d6a1189181f359542a05c9d29041",
+            "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+          },
+          "valueSource": "keccak256(\"6529STREAM_MINT_BATCH_TOKEN_DATA_V1\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "BATCH_COMMITMENTS_DOMAIN",
+          "natspec": "",
+          "range": {
+            "byteLength": 109,
+            "byteStart": 1430,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L27-L28",
+            "lineEnd": 28,
+            "lineStart": 27,
+            "snippetSha256": "sha256:7d085a57fc70dcd06cb848ec9cadfb3423aca8a842b14cdb08ade32240d288c8",
+            "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 49,
+            "byteStart": 1490,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L28",
+            "lineEnd": 28,
+            "lineStart": 28,
+            "snippetSha256": "sha256:b4b23fd4ca0a5cf395fce2ee92e9c9648fe0c6620bbf4550f34affbb252d471a",
+            "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+          },
+          "valueSource": "keccak256(\"6529STREAM_MINT_BATCH_COMMITMENTS_V1\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "SUBJECT_DOMAIN",
+          "natspec": "",
+          "range": {
+            "byteLength": 89,
+            "byteStart": 1545,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L29",
+            "lineEnd": 29,
+            "lineStart": 29,
+            "snippetSha256": "sha256:5b83ea61e00a8c4941fe8a6ef0da35c265c45c35f9729f49168c7809b7256442",
+            "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 47,
+            "byteStart": 1587,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L29",
+            "lineEnd": 29,
+            "lineStart": 29,
+            "snippetSha256": "sha256:04cdca79060a243d576a4055dced09594efdb7dd9819d7daff92da4efac1b6c5",
+            "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+          },
+          "valueSource": "keccak256(\"6529STREAM_MINT_COUNTER_SUBJECT_V1\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "RESOLUTION_DOMAIN",
+          "natspec": "",
+          "range": {
+            "byteLength": 95,
+            "byteStart": 1640,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L30",
+            "lineEnd": 30,
+            "lineStart": 30,
+            "snippetSha256": "sha256:dc6bf593a31e64512a06c405f34864cd910442998bad238fdb12d0d013546258",
+            "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 50,
+            "byteStart": 1685,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L30",
+            "lineEnd": 30,
+            "lineStart": 30,
+            "snippetSha256": "sha256:38b1434e6ed5cb83c5d708bee9327b6f33b575b2fdfc58e29c168122112855d2",
+            "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+          },
+          "valueSource": "keccak256(\"6529STREAM_MINT_COUNTER_RESOLUTION_V1\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "VALUE_KEY_DOMAIN",
+          "natspec": "",
+          "range": {
+            "byteLength": 93,
+            "byteStart": 1741,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L31",
+            "lineEnd": 31,
+            "lineStart": 31,
+            "snippetSha256": "sha256:55b50dcd3d56a76a033951044693727c7d5c6a44405fe2e0e143dd51c012e440",
+            "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 49,
+            "byteStart": 1785,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L31",
+            "lineEnd": 31,
+            "lineStart": 31,
+            "snippetSha256": "sha256:b77a090ce3c87637a0999a2d6564f73d91327d22bce14247676f50c877a9ee29",
+            "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+          },
+          "valueSource": "keccak256(\"6529STREAM_MINT_COUNTER_VALUE_KEY_V1\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "POLICY_DOMAIN",
+          "natspec": "",
+          "range": {
+            "byteLength": 87,
+            "byteStart": 1840,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L32",
+            "lineEnd": 32,
+            "lineStart": 32,
+            "snippetSha256": "sha256:1fdaab47a6d3d8bffae824e5fc8908081eb211d2b3d95f28d903b850006e97bd",
+            "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 46,
+            "byteStart": 1881,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L32",
+            "lineEnd": 32,
+            "lineStart": 32,
+            "snippetSha256": "sha256:5823b1aad3461bbe660f8a7526a1b8ab14cfbd72ef6af9cef13a4bd2f3a42d14",
+            "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+          },
+          "valueSource": "keccak256(\"6529STREAM_MINT_MANAGER_POLICY_V1\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "PHASE_CONFIG_DOMAIN",
+          "natspec": "",
+          "range": {
+            "byteLength": 107,
+            "byteStart": 1933,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L33-L34",
+            "lineEnd": 34,
+            "lineStart": 33,
+            "snippetSha256": "sha256:8dbcb0d200cf733f878996730ff4b3d9ea5a63aecd972c04f3e2e6022d6fda3c",
+            "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 52,
+            "byteStart": 1988,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L34",
+            "lineEnd": 34,
+            "lineStart": 34,
+            "snippetSha256": "sha256:e0c80911894a6df35b44c8fe44a403fa1812a843679858804703493a1212531f",
+            "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+          },
+          "valueSource": "keccak256(\"6529STREAM_MINT_MANAGER_PHASE_CONFIG_V1\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "COUNTER_CONFIG_DOMAIN",
+          "natspec": "",
+          "range": {
+            "byteLength": 111,
+            "byteStart": 2046,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L35-L36",
+            "lineEnd": 36,
+            "lineStart": 35,
+            "snippetSha256": "sha256:9fdadd16df31639c446f09e29253e853213a5a320012db5f2beff2010e1fdbb4",
+            "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 54,
+            "byteStart": 2103,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L36",
+            "lineEnd": 36,
+            "lineStart": 36,
+            "snippetSha256": "sha256:efa3e17faf93622f89e290c4cd3995fba2e19095301a86946dfcfa52a7fc9e31",
+            "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+          },
+          "valueSource": "keccak256(\"6529STREAM_MINT_MANAGER_COUNTER_CONFIG_V1\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "GATE_CONFIG_DOMAIN",
+          "natspec": "",
+          "range": {
+            "byteLength": 105,
+            "byteStart": 2163,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L37-L38",
+            "lineEnd": 38,
+            "lineStart": 37,
+            "snippetSha256": "sha256:6f5c9ca1922c1ee8c8b45d64d79de0f736d5a6746fbd16b07bd9b0eb4cb53558",
+            "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 51,
+            "byteStart": 2217,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L38",
+            "lineEnd": 38,
+            "lineStart": 38,
+            "snippetSha256": "sha256:48d327fc3ea07220ff05feb8911b390d684bddf49a57b961e8a8d9ed562b4993",
+            "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+          },
+          "valueSource": "keccak256(\"6529STREAM_MINT_MANAGER_GATE_CONFIG_V1\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "EXECUTOR_SET_DOMAIN",
+          "natspec": "",
+          "range": {
+            "byteLength": 107,
+            "byteStart": 2274,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L39-L40",
+            "lineEnd": 40,
+            "lineStart": 39,
+            "snippetSha256": "sha256:2f0cc2f2f1c49061702beb0c452a6e51b8f8cc7107f449fafd951e56fca63f87",
+            "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 52,
+            "byteStart": 2329,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L40",
+            "lineEnd": 40,
+            "lineStart": 40,
+            "snippetSha256": "sha256:7ed18da90f320535df402285543ab6d9743f8fec26923d83e8f5985573edccda",
+            "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+          },
+          "valueSource": "keccak256(\"6529STREAM_MINT_MANAGER_EXECUTOR_SET_V1\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "BATCH_COUNTER_TOKEN_INDEX",
+          "natspec": "",
+          "range": {
+            "byteLength": 70,
+            "byteStart": 2387,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L41",
+            "lineEnd": 41,
+            "lineStart": 41,
+            "snippetSha256": "sha256:7cb280df22cdfa21796bc0d0856c47f8b89742aafd564b1517524ad706c30fff",
+            "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 17,
+            "byteStart": 2440,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L41",
+            "lineEnd": 41,
+            "lineStart": 41,
+            "snippetSha256": "sha256:e84e602a57608a780d7e5195120128b7ec30afae9ec7187a4b9478eb97f460ba",
+            "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+          },
+          "valueSource": "type(uint256).max",
+          "visibility": "private"
+        }
+      ],
+      "structs": [
+        {
+          "members": [
+            {
+              "index": 0,
+              "name": "authorizationId",
+              "natspec": "",
+              "range": {
+                "byteLength": 23,
+                "byteStart": 2499,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L44",
+                "lineEnd": 44,
+                "lineStart": 44,
+                "snippetSha256": "sha256:2724af7d714a42ce733b5be373a7289bb68c79953ec32980d2671c3a4cf10b6f",
+                "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "nullifiers",
+              "natspec": "",
+              "range": {
+                "byteLength": 20,
+                "byteStart": 2532,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L45",
+                "lineEnd": 45,
+                "lineStart": 45,
+                "snippetSha256": "sha256:053ff02232487523f254b18b0647b2ddd0208cf5fb86242758e128f9b33cdc05",
+                "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+              },
+              "type": "bytes32[]",
+              "typeString": "bytes32[]"
+            },
+            {
+              "index": 2,
+              "name": "authorizer",
+              "natspec": "",
+              "range": {
+                "byteLength": 18,
+                "byteStart": 2562,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L46",
+                "lineEnd": 46,
+                "lineStart": 46,
+                "snippetSha256": "sha256:2fcb69f90b0960b3247543f1382dfcc7e6395c130aaa2841dbd0d0c4ebf7e65b",
+                "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+              },
+              "type": "address",
+              "typeString": "address"
+            },
+            {
+              "index": 3,
+              "name": "authorizerKind",
+              "natspec": "",
+              "range": {
+                "byteLength": 48,
+                "byteStart": 2590,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L47",
+                "lineEnd": 47,
+                "lineStart": 47,
+                "snippetSha256": "sha256:104ef38544e272ca1aaba9c02a90e3b4b16c66ba0a89a9bdc83e28334006878b",
+                "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+              },
+              "type": "IStreamMintManager.AuthorizerKind",
+              "typeString": "enum IStreamMintManager.AuthorizerKind"
+            },
+            {
+              "index": 4,
+              "name": "maxQuantity",
+              "natspec": "",
+              "range": {
+                "byteLength": 18,
+                "byteStart": 2648,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L48",
+                "lineEnd": 48,
+                "lineStart": 48,
+                "snippetSha256": "sha256:37939f67656c234fd0e73005035c831b76ae3ae9fca4ad2575928e651f8a2a07",
+                "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+              },
+              "type": "uint64",
+              "typeString": "uint64"
+            },
+            {
+              "index": 5,
+              "name": "gateHash",
+              "natspec": "",
+              "range": {
+                "byteLength": 16,
+                "byteStart": 2676,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L49",
+                "lineEnd": 49,
+                "lineStart": 49,
+                "snippetSha256": "sha256:275ae52b7a8c55bfb99708753963ee62410ef9b27803e312022ce806fa8ee440",
+                "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            }
+          ],
+          "name": "MintAuthorization",
+          "natspec": "",
+          "range": {
+            "byteLength": 235,
+            "byteStart": 2464,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L43-L50",
+            "lineEnd": 50,
+            "lineStart": 43,
+            "snippetSha256": "sha256:0926b3e5bb707f697a21d886a642ba10ec4b279b9a781d8628c5a82ee4536248",
+            "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+          }
+        },
+        {
+          "members": [
+            {
+              "index": 0,
+              "name": "chainId",
+              "natspec": "",
+              "range": {
+                "byteLength": 15,
+                "byteStart": 2740,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L53",
+                "lineEnd": 53,
+                "lineStart": 53,
+                "snippetSha256": "sha256:fd6a4dd841f90c6927932cd5c99efdd50a83dc2a6517a3449b2d645dc20a76e4",
+                "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "manager",
+              "natspec": "",
+              "range": {
+                "byteLength": 15,
+                "byteStart": 2765,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L54",
+                "lineEnd": 54,
+                "lineStart": 54,
+                "snippetSha256": "sha256:87db33596ef8ae1cd9ff4adc46f987dfb48f1b91a6df7e0d34dc6be730dbc312",
+                "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+              },
+              "type": "address",
+              "typeString": "address"
+            },
+            {
+              "index": 2,
+              "name": "coreAddress",
+              "natspec": "",
+              "range": {
+                "byteLength": 19,
+                "byteStart": 2790,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L55",
+                "lineEnd": 55,
+                "lineStart": 55,
+                "snippetSha256": "sha256:3ce4516e2d9c972eaf55aeb604cb9a73d9ec7b00a257815fd7b84be548d0c8e8",
+                "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+              },
+              "type": "address",
+              "typeString": "address"
+            },
+            {
+              "index": 3,
+              "name": "ledgerAddress",
+              "natspec": "",
+              "range": {
+                "byteLength": 21,
+                "byteStart": 2819,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L56",
+                "lineEnd": 56,
+                "lineStart": 56,
+                "snippetSha256": "sha256:aea73625586b573bc3feafa33a02dd53f573a9fb92c93c376da64de24a195dde",
+                "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+              },
+              "type": "address",
+              "typeString": "address"
+            },
+            {
+              "index": 4,
+              "name": "gate",
+              "natspec": "",
+              "range": {
+                "byteLength": 12,
+                "byteStart": 2850,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L57",
+                "lineEnd": 57,
+                "lineStart": 57,
+                "snippetSha256": "sha256:68c8f50908c1efde0b8e1d4d29a9e655cfcab08d07faf6b06b91789f1223ce05",
+                "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+              },
+              "type": "address",
+              "typeString": "address"
+            },
+            {
+              "index": 5,
+              "name": "executor",
+              "natspec": "",
+              "range": {
+                "byteLength": 16,
+                "byteStart": 2872,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L58",
+                "lineEnd": 58,
+                "lineStart": 58,
+                "snippetSha256": "sha256:7b9d50cff2ba0e4bd5cdf1eb8a9637f3ddee488aaed28f15fb1b87b6038fe6c7",
+                "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+              },
+              "type": "address",
+              "typeString": "address"
+            },
+            {
+              "index": 6,
+              "name": "executionPath",
+              "natspec": "",
+              "range": {
+                "byteLength": 21,
+                "byteStart": 2898,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L59",
+                "lineEnd": 59,
+                "lineStart": 59,
+                "snippetSha256": "sha256:ab352f211dd87669f50a698260a26bd7e8d9d666e23a5fe1a5c00b9144681ace",
+                "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 7,
+              "name": "currentPolicyHash",
+              "natspec": "",
+              "range": {
+                "byteLength": 25,
+                "byteStart": 2929,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L60",
+                "lineEnd": 60,
+                "lineStart": 60,
+                "snippetSha256": "sha256:21971990f2b5280593ed9bcc252fd6c12146f923a3c1b9e9b4e4d4411edca1da",
+                "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 8,
+              "name": "boundPolicyHash",
+              "natspec": "",
+              "range": {
+                "byteLength": 23,
+                "byteStart": 2964,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L61",
+                "lineEnd": 61,
+                "lineStart": 61,
+                "snippetSha256": "sha256:549de9a9cb2b8f06dc77e03a419c9a8a245607f53a730e07eb582d085b35c10f",
+                "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 9,
+              "name": "firstOperationNonce",
+              "natspec": "",
+              "range": {
+                "byteLength": 27,
+                "byteStart": 2997,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L62",
+                "lineEnd": 62,
+                "lineStart": 62,
+                "snippetSha256": "sha256:2529888fd148922dc546f2be8589806a50af10a57b9af5ec1573783ea5fd98ab",
+                "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 10,
+              "name": "quantity",
+              "natspec": "",
+              "range": {
+                "byteLength": 16,
+                "byteStart": 3034,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L63",
+                "lineEnd": 63,
+                "lineStart": 63,
+                "snippetSha256": "sha256:fee28edf234eed36cf2000b44d195e7948b203ec42a5ba8d868cce246aea64a9",
+                "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            }
+          ],
+          "name": "TranscriptContext",
+          "natspec": "",
+          "range": {
+            "byteLength": 352,
+            "byteStart": 2705,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L52-L64",
+            "lineEnd": 64,
+            "lineStart": 52,
+            "snippetSha256": "sha256:7c1fb0147a2bf01cad2933d2f569e16484172b078001e1bca4cedc0d8c773832",
+            "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+          }
+        },
+        {
+          "members": [
+            {
+              "index": 0,
+              "name": "chainId",
+              "natspec": "",
+              "range": {
+                "byteLength": 15,
+                "byteStart": 3102,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L67",
+                "lineEnd": 67,
+                "lineStart": 67,
+                "snippetSha256": "sha256:fd6a4dd841f90c6927932cd5c99efdd50a83dc2a6517a3449b2d645dc20a76e4",
+                "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "manager",
+              "natspec": "",
+              "range": {
+                "byteLength": 15,
+                "byteStart": 3127,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L68",
+                "lineEnd": 68,
+                "lineStart": 68,
+                "snippetSha256": "sha256:87db33596ef8ae1cd9ff4adc46f987dfb48f1b91a6df7e0d34dc6be730dbc312",
+                "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+              },
+              "type": "address",
+              "typeString": "address"
+            },
+            {
+              "index": 2,
+              "name": "coreAddress",
+              "natspec": "",
+              "range": {
+                "byteLength": 19,
+                "byteStart": 3152,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L69",
+                "lineEnd": 69,
+                "lineStart": 69,
+                "snippetSha256": "sha256:3ce4516e2d9c972eaf55aeb604cb9a73d9ec7b00a257815fd7b84be548d0c8e8",
+                "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+              },
+              "type": "address",
+              "typeString": "address"
+            },
+            {
+              "index": 3,
+              "name": "ledgerAddress",
+              "natspec": "",
+              "range": {
+                "byteLength": 21,
+                "byteStart": 3181,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L70",
+                "lineEnd": 70,
+                "lineStart": 70,
+                "snippetSha256": "sha256:aea73625586b573bc3feafa33a02dd53f573a9fb92c93c376da64de24a195dde",
+                "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+              },
+              "type": "address",
+              "typeString": "address"
+            },
+            {
+              "index": 4,
+              "name": "executionPath",
+              "natspec": "",
+              "range": {
+                "byteLength": 21,
+                "byteStart": 3212,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L71",
+                "lineEnd": 71,
+                "lineStart": 71,
+                "snippetSha256": "sha256:ab352f211dd87669f50a698260a26bd7e8d9d666e23a5fe1a5c00b9144681ace",
+                "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 5,
+              "name": "collectionId",
+              "natspec": "",
+              "range": {
+                "byteLength": 20,
+                "byteStart": 3243,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L72",
+                "lineEnd": 72,
+                "lineStart": 72,
+                "snippetSha256": "sha256:59d930bd0f2dfed41bacd10f1ff469fcacef2b565f94ee3556e462d42461f316",
+                "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 6,
+              "name": "phaseId",
+              "natspec": "",
+              "range": {
+                "byteLength": 15,
+                "byteStart": 3273,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L73",
+                "lineEnd": 73,
+                "lineStart": 73,
+                "snippetSha256": "sha256:3978b5acb6899597c4a6f59b9f64917317d63766942cfcb68a340a1ce6c0586d",
+                "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 7,
+              "name": "currentPolicyHash",
+              "natspec": "",
+              "range": {
+                "byteLength": 25,
+                "byteStart": 3298,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L74",
+                "lineEnd": 74,
+                "lineStart": 74,
+                "snippetSha256": "sha256:21971990f2b5280593ed9bcc252fd6c12146f923a3c1b9e9b4e4d4411edca1da",
+                "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 8,
+              "name": "boundPolicyHash",
+              "natspec": "",
+              "range": {
+                "byteLength": 23,
+                "byteStart": 3333,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L75",
+                "lineEnd": 75,
+                "lineStart": 75,
+                "snippetSha256": "sha256:549de9a9cb2b8f06dc77e03a419c9a8a245607f53a730e07eb582d085b35c10f",
+                "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 9,
+              "name": "authorizationId",
+              "natspec": "",
+              "range": {
+                "byteLength": 23,
+                "byteStart": 3366,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L76",
+                "lineEnd": 76,
+                "lineStart": 76,
+                "snippetSha256": "sha256:2724af7d714a42ce733b5be373a7289bb68c79953ec32980d2671c3a4cf10b6f",
+                "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 10,
+              "name": "requestCommitmentHash",
+              "natspec": "",
+              "range": {
+                "byteLength": 29,
+                "byteStart": 3399,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L77",
+                "lineEnd": 77,
+                "lineStart": 77,
+                "snippetSha256": "sha256:41f348c8c19bb5ab8d1c52bd62c875a0d9115bed20419f8a29e7aac8992e7bb7",
+                "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 11,
+              "name": "contextHash",
+              "natspec": "",
+              "range": {
+                "byteLength": 19,
+                "byteStart": 3438,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L78",
+                "lineEnd": 78,
+                "lineStart": 78,
+                "snippetSha256": "sha256:e081491bff05923c57957798809b7c61694209f4d3007db647c3db912f60eb8a",
+                "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 12,
+              "name": "executor",
+              "natspec": "",
+              "range": {
+                "byteLength": 16,
+                "byteStart": 3467,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L79",
+                "lineEnd": 79,
+                "lineStart": 79,
+                "snippetSha256": "sha256:7b9d50cff2ba0e4bd5cdf1eb8a9637f3ddee488aaed28f15fb1b87b6038fe6c7",
+                "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+              },
+              "type": "address",
+              "typeString": "address"
+            },
+            {
+              "index": 13,
+              "name": "firstOperationNonce",
+              "natspec": "",
+              "range": {
+                "byteLength": 27,
+                "byteStart": 3493,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L80",
+                "lineEnd": 80,
+                "lineStart": 80,
+                "snippetSha256": "sha256:2529888fd148922dc546f2be8589806a50af10a57b9af5ec1573783ea5fd98ab",
+                "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 14,
+              "name": "quantity",
+              "natspec": "",
+              "range": {
+                "byteLength": 16,
+                "byteStart": 3530,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L81",
+                "lineEnd": 81,
+                "lineStart": 81,
+                "snippetSha256": "sha256:fee28edf234eed36cf2000b44d195e7948b203ec42a5ba8d868cce246aea64a9",
+                "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            }
+          ],
+          "name": "OperationRootPreimage",
+          "natspec": "",
+          "range": {
+            "byteLength": 490,
+            "byteStart": 3063,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L66-L82",
+            "lineEnd": 82,
+            "lineStart": 66,
+            "snippetSha256": "sha256:26c0bcafd53170ff807ac773bbc6659b3eecd7a10bf29bd1badd8c8a716b2539",
+            "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+          }
+        },
+        {
+          "members": [
+            {
+              "index": 0,
+              "name": "chainId",
+              "natspec": "",
+              "range": {
+                "byteLength": 15,
+                "byteStart": 3591,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L85",
+                "lineEnd": 85,
+                "lineStart": 85,
+                "snippetSha256": "sha256:fd6a4dd841f90c6927932cd5c99efdd50a83dc2a6517a3449b2d645dc20a76e4",
+                "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "manager",
+              "natspec": "",
+              "range": {
+                "byteLength": 15,
+                "byteStart": 3616,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L86",
+                "lineEnd": 86,
+                "lineStart": 86,
+                "snippetSha256": "sha256:87db33596ef8ae1cd9ff4adc46f987dfb48f1b91a6df7e0d34dc6be730dbc312",
+                "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+              },
+              "type": "address",
+              "typeString": "address"
+            },
+            {
+              "index": 2,
+              "name": "ledger",
+              "natspec": "",
+              "range": {
+                "byteLength": 14,
+                "byteStart": 3641,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L87",
+                "lineEnd": 87,
+                "lineStart": 87,
+                "snippetSha256": "sha256:8eb814165808db95962ca39fee0b147f68c5f6fc9a0a79e437de9702d1a5f601",
+                "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+              },
+              "type": "address",
+              "typeString": "address"
+            },
+            {
+              "index": 3,
+              "name": "executor",
+              "natspec": "",
+              "range": {
+                "byteLength": 16,
+                "byteStart": 3665,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L88",
+                "lineEnd": 88,
+                "lineStart": 88,
+                "snippetSha256": "sha256:7b9d50cff2ba0e4bd5cdf1eb8a9637f3ddee488aaed28f15fb1b87b6038fe6c7",
+                "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+              },
+              "type": "address",
+              "typeString": "address"
+            },
+            {
+              "index": 4,
+              "name": "authorizer",
+              "natspec": "",
+              "range": {
+                "byteLength": 18,
+                "byteStart": 3691,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L89",
+                "lineEnd": 89,
+                "lineStart": 89,
+                "snippetSha256": "sha256:2fcb69f90b0960b3247543f1382dfcc7e6395c130aaa2841dbd0d0c4ebf7e65b",
+                "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+              },
+              "type": "address",
+              "typeString": "address"
+            }
+          ],
+          "name": "CounterContext",
+          "natspec": "",
+          "range": {
+            "byteLength": 157,
+            "byteStart": 3559,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L84-L90",
+            "lineEnd": 90,
+            "lineStart": 84,
+            "snippetSha256": "sha256:a7d24e9f02f76a80991c42e289e4594cc54a7a41ceec8d2830999869533f0cbc",
+            "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+          }
+        },
+        {
+          "members": [
+            {
+              "index": 0,
+              "name": "chainId",
+              "natspec": "",
+              "range": {
+                "byteLength": 15,
+                "byteStart": 3754,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L93",
+                "lineEnd": 93,
+                "lineStart": 93,
+                "snippetSha256": "sha256:fd6a4dd841f90c6927932cd5c99efdd50a83dc2a6517a3449b2d645dc20a76e4",
+                "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "ledger",
+              "natspec": "",
+              "range": {
+                "byteLength": 14,
+                "byteStart": 3779,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L94",
+                "lineEnd": 94,
+                "lineStart": 94,
+                "snippetSha256": "sha256:8eb814165808db95962ca39fee0b147f68c5f6fc9a0a79e437de9702d1a5f601",
+                "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+              },
+              "type": "address",
+              "typeString": "address"
+            },
+            {
+              "index": 2,
+              "name": "collectionId",
+              "natspec": "",
+              "range": {
+                "byteLength": 20,
+                "byteStart": 3803,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L95",
+                "lineEnd": 95,
+                "lineStart": 95,
+                "snippetSha256": "sha256:59d930bd0f2dfed41bacd10f1ff469fcacef2b565f94ee3556e462d42461f316",
+                "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "phaseId",
+              "natspec": "",
+              "range": {
+                "byteLength": 15,
+                "byteStart": 3833,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L96",
+                "lineEnd": 96,
+                "lineStart": 96,
+                "snippetSha256": "sha256:3978b5acb6899597c4a6f59b9f64917317d63766942cfcb68a340a1ce6c0586d",
+                "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 4,
+              "name": "counterId",
+              "natspec": "",
+              "range": {
+                "byteLength": 17,
+                "byteStart": 3858,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L97",
+                "lineEnd": 97,
+                "lineStart": 97,
+                "snippetSha256": "sha256:5b95cdd5f388ea0b01b6c60b8b57d728023e2592a49dcddd41de13138418e33c",
+                "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 5,
+              "name": "payer",
+              "natspec": "",
+              "range": {
+                "byteLength": 13,
+                "byteStart": 3885,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L98",
+                "lineEnd": 98,
+                "lineStart": 98,
+                "snippetSha256": "sha256:8564827c1f7f42fa027684a6c3b150798262726908409a46935c582691c56eaa",
+                "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+              },
+              "type": "address",
+              "typeString": "address"
+            },
+            {
+              "index": 6,
+              "name": "recipient",
+              "natspec": "",
+              "range": {
+                "byteLength": 17,
+                "byteStart": 3908,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L99",
+                "lineEnd": 99,
+                "lineStart": 99,
+                "snippetSha256": "sha256:91531000e2c59c408e2d745c8842f319c279c32d4b372286eb98b03c4294e3fb",
+                "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+              },
+              "type": "address",
+              "typeString": "address"
+            },
+            {
+              "index": 7,
+              "name": "executor",
+              "natspec": "",
+              "range": {
+                "byteLength": 16,
+                "byteStart": 3935,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L100",
+                "lineEnd": 100,
+                "lineStart": 100,
+                "snippetSha256": "sha256:7b9d50cff2ba0e4bd5cdf1eb8a9637f3ddee488aaed28f15fb1b87b6038fe6c7",
+                "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+              },
+              "type": "address",
+              "typeString": "address"
+            },
+            {
+              "index": 8,
+              "name": "authorizer",
+              "natspec": "",
+              "range": {
+                "byteLength": 18,
+                "byteStart": 3961,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L101",
+                "lineEnd": 101,
+                "lineStart": 101,
+                "snippetSha256": "sha256:2fcb69f90b0960b3247543f1382dfcc7e6395c130aaa2841dbd0d0c4ebf7e65b",
+                "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+              },
+              "type": "address",
+              "typeString": "address"
+            },
+            {
+              "index": 9,
+              "name": "contextHash",
+              "natspec": "",
+              "range": {
+                "byteLength": 19,
+                "byteStart": 3989,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L102",
+                "lineEnd": 102,
+                "lineStart": 102,
+                "snippetSha256": "sha256:e081491bff05923c57957798809b7c61694209f4d3007db647c3db912f60eb8a",
+                "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            }
+          ],
+          "name": "SubjectContext",
+          "natspec": "",
+          "range": {
+            "byteLength": 293,
+            "byteStart": 3722,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L92-L103",
+            "lineEnd": 103,
+            "lineStart": 92,
+            "snippetSha256": "sha256:81b7ca9890459af6c3139b13398a0ccccfab5e8b44d1400a66ea36e27200e00f",
+            "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+          }
+        },
+        {
+          "members": [
+            {
+              "index": 0,
+              "name": "chainId",
+              "natspec": "",
+              "range": {
+                "byteLength": 15,
+                "byteStart": 4052,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L106",
+                "lineEnd": 106,
+                "lineStart": 106,
+                "snippetSha256": "sha256:fd6a4dd841f90c6927932cd5c99efdd50a83dc2a6517a3449b2d645dc20a76e4",
+                "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "manager",
+              "natspec": "",
+              "range": {
+                "byteLength": 15,
+                "byteStart": 4077,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L107",
+                "lineEnd": 107,
+                "lineStart": 107,
+                "snippetSha256": "sha256:87db33596ef8ae1cd9ff4adc46f987dfb48f1b91a6df7e0d34dc6be730dbc312",
+                "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+              },
+              "type": "address",
+              "typeString": "address"
+            },
+            {
+              "index": 2,
+              "name": "ledger",
+              "natspec": "",
+              "range": {
+                "byteLength": 14,
+                "byteStart": 4102,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L108",
+                "lineEnd": 108,
+                "lineStart": 108,
+                "snippetSha256": "sha256:8eb814165808db95962ca39fee0b147f68c5f6fc9a0a79e437de9702d1a5f601",
+                "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+              },
+              "type": "address",
+              "typeString": "address"
+            },
+            {
+              "index": 3,
+              "name": "moduleRegistry",
+              "natspec": "",
+              "range": {
+                "byteLength": 22,
+                "byteStart": 4126,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L109",
+                "lineEnd": 109,
+                "lineStart": 109,
+                "snippetSha256": "sha256:90737766ea7ea470cd954faaee5e3d586d96e39f625011aaabcd2e2045a40cb7",
+                "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+              },
+              "type": "address",
+              "typeString": "address"
+            },
+            {
+              "index": 4,
+              "name": "schemaVersion",
+              "natspec": "",
+              "range": {
+                "byteLength": 20,
+                "byteStart": 4158,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L110",
+                "lineEnd": 110,
+                "lineStart": 110,
+                "snippetSha256": "sha256:38686a8cca115d435578bcc5d7fa8742e51c8f18512a89869d0d65c793b1a04f",
+                "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+              },
+              "type": "uint16",
+              "typeString": "uint16"
+            },
+            {
+              "index": 5,
+              "name": "collectionId",
+              "natspec": "",
+              "range": {
+                "byteLength": 20,
+                "byteStart": 4188,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L111",
+                "lineEnd": 111,
+                "lineStart": 111,
+                "snippetSha256": "sha256:59d930bd0f2dfed41bacd10f1ff469fcacef2b565f94ee3556e462d42461f316",
+                "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 6,
+              "name": "phaseId",
+              "natspec": "",
+              "range": {
+                "byteLength": 15,
+                "byteStart": 4218,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L112",
+                "lineEnd": 112,
+                "lineStart": 112,
+                "snippetSha256": "sha256:3978b5acb6899597c4a6f59b9f64917317d63766942cfcb68a340a1ce6c0586d",
+                "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            }
+          ],
+          "name": "PolicyContext",
+          "natspec": "",
+          "range": {
+            "byteLength": 219,
+            "byteStart": 4021,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L105-L113",
+            "lineEnd": 113,
+            "lineStart": 105,
+            "snippetSha256": "sha256:f53082df2a390273d199392ed681a4839de749af2e2e0bff43f55235818579e5",
+            "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+          }
+        },
+        {
+          "members": [
+            {
+              "index": 0,
+              "name": "chainId",
+              "natspec": "",
+              "range": {
+                "byteLength": 15,
+                "byteStart": 4278,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L116",
+                "lineEnd": 116,
+                "lineStart": 116,
+                "snippetSha256": "sha256:fd6a4dd841f90c6927932cd5c99efdd50a83dc2a6517a3449b2d645dc20a76e4",
+                "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "manager",
+              "natspec": "",
+              "range": {
+                "byteLength": 15,
+                "byteStart": 4303,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L117",
+                "lineEnd": 117,
+                "lineStart": 117,
+                "snippetSha256": "sha256:87db33596ef8ae1cd9ff4adc46f987dfb48f1b91a6df7e0d34dc6be730dbc312",
+                "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+              },
+              "type": "address",
+              "typeString": "address"
+            },
+            {
+              "index": 2,
+              "name": "ledger",
+              "natspec": "",
+              "range": {
+                "byteLength": 14,
+                "byteStart": 4328,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L118",
+                "lineEnd": 118,
+                "lineStart": 118,
+                "snippetSha256": "sha256:8eb814165808db95962ca39fee0b147f68c5f6fc9a0a79e437de9702d1a5f601",
+                "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+              },
+              "type": "address",
+              "typeString": "address"
+            },
+            {
+              "index": 3,
+              "name": "moduleRegistry",
+              "natspec": "",
+              "range": {
+                "byteLength": 22,
+                "byteStart": 4352,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L119",
+                "lineEnd": 119,
+                "lineStart": 119,
+                "snippetSha256": "sha256:90737766ea7ea470cd954faaee5e3d586d96e39f625011aaabcd2e2045a40cb7",
+                "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+              },
+              "type": "address",
+              "typeString": "address"
+            },
+            {
+              "index": 4,
+              "name": "schemaVersion",
+              "natspec": "",
+              "range": {
+                "byteLength": 20,
+                "byteStart": 4384,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L120",
+                "lineEnd": 120,
+                "lineStart": 120,
+                "snippetSha256": "sha256:38686a8cca115d435578bcc5d7fa8742e51c8f18512a89869d0d65c793b1a04f",
+                "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+              },
+              "type": "uint16",
+              "typeString": "uint16"
+            },
+            {
+              "index": 5,
+              "name": "collectionId",
+              "natspec": "",
+              "range": {
+                "byteLength": 20,
+                "byteStart": 4414,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L121",
+                "lineEnd": 121,
+                "lineStart": 121,
+                "snippetSha256": "sha256:59d930bd0f2dfed41bacd10f1ff469fcacef2b565f94ee3556e462d42461f316",
+                "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 6,
+              "name": "phaseId",
+              "natspec": "",
+              "range": {
+                "byteLength": 15,
+                "byteStart": 4444,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L122",
+                "lineEnd": 122,
+                "lineStart": 122,
+                "snippetSha256": "sha256:3978b5acb6899597c4a6f59b9f64917317d63766942cfcb68a340a1ce6c0586d",
+                "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 7,
+              "name": "phaseConfigHash",
+              "natspec": "",
+              "range": {
+                "byteLength": 23,
+                "byteStart": 4469,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L123",
+                "lineEnd": 123,
+                "lineStart": 123,
+                "snippetSha256": "sha256:3438214d1ea84d1a68b42628deb10d11428964121f5a4d8a26183ede1d95258a",
+                "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 8,
+              "name": "gateConfigHash",
+              "natspec": "",
+              "range": {
+                "byteLength": 22,
+                "byteStart": 4502,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L124",
+                "lineEnd": 124,
+                "lineStart": 124,
+                "snippetSha256": "sha256:665c4262bed22626fad0b734034a01de242d5e4cd3f1c806969ba9ba5b3a2f9b",
+                "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 9,
+              "name": "orderedCounterConfigHash",
+              "natspec": "",
+              "range": {
+                "byteLength": 32,
+                "byteStart": 4534,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L125",
+                "lineEnd": 125,
+                "lineStart": 125,
+                "snippetSha256": "sha256:af29b0b4e5690c76865e7867446e3ebcf85eaa28e2c9e3e74f223709d9629cae",
+                "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 10,
+              "name": "executorSetHash",
+              "natspec": "",
+              "range": {
+                "byteLength": 23,
+                "byteStart": 4576,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L126",
+                "lineEnd": 126,
+                "lineStart": 126,
+                "snippetSha256": "sha256:5ec3f5f9065a9c656aff9c3047f5dc1b402282d1bdd34c491e7c0cb6e1610258",
+                "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            }
+          ],
+          "name": "PolicyPreimage",
+          "natspec": "",
+          "range": {
+            "byteLength": 360,
+            "byteStart": 4246,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L115-L127",
+            "lineEnd": 127,
+            "lineStart": 115,
+            "snippetSha256": "sha256:f14866e59f5aecea589feba5f31dd6f44d7588102c8c79031990f1bb132ffd24",
+            "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+          }
+        }
+      ],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/domains/mint/StreamMintOperationIdentity.sol:StreamMintOperationIdentity",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "c21hcnQtY29udHJhY3RzL2RvbWFpbnMvbWludC9TdHJlYW1NaW50T3BlcmF0aW9uSWRlbnRpdHkuc29sOlN0cmVhbU1pbnRPcGVyYXRpb25JZGVudGl0eQ",
+    "kind": "library",
+    "linearizedDefinitionIds": [
+      "smart-contracts/domains/mint/StreamMintOperationIdentity.sol:StreamMintOperationIdentity"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamMintOperationIdentity",
+    "natspec": "@notice Canonical batch-operation identity derivation for StreamMintManager.\n @dev Kept in a linked library so the manager remains below the EIP-170 runtime limit.",
+    "range": {
+      "byteLength": 18708,
+      "byteStart": 343,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/domains/mint/StreamMintOperationIdentity.sol#L9-L490",
+      "lineEnd": 490,
+      "lineStart": 9,
+      "snippetSha256": "sha256:561cdd620e918eea1f3326dc8c19062e0fc4e27e601569905a06242e195a4a11",
+      "sourceSha256": "sha256:32d16ebb07475ce16f03516dd0ced1fea3a4e9f32c4c58e70be7b73cab3e8e7b"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/domains/mint/StreamMintOperationIdentity.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-09-09.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 4
+    },
+    "byCode": {
+      "MISSING_FUNCTION_NATSPEC": 4
+    },
+    "totalCount": 4
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/domains/mint/StreamMintOperationIdentity.sol:StreamMintOperationIdentity#function:0x38598a3b",
+      "definitionId": "smart-contracts/domains/mint/StreamMintOperationIdentity.sol:StreamMintOperationIdentity",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/domains/mint/StreamMintOperationIdentity.sol:StreamMintOperationIdentity#function:0x95467091",
+      "definitionId": "smart-contracts/domains/mint/StreamMintOperationIdentity.sol:StreamMintOperationIdentity",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/domains/mint/StreamMintOperationIdentity.sol:StreamMintOperationIdentity#function:0xc8175901",
+      "definitionId": "smart-contracts/domains/mint/StreamMintOperationIdentity.sol:StreamMintOperationIdentity",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/domains/mint/StreamMintOperationIdentity.sol:StreamMintOperationIdentity#function:0xdda1b693",
+      "definitionId": "smart-contracts/domains/mint/StreamMintOperationIdentity.sol:StreamMintOperationIdentity",
+      "severity": "advisory"
+    }
+  ]
+}

@@ -1,0 +1,752 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/interfaces/stream/IStreamSystemManifest.sol:IStreamSystemManifest#event:StreamSystemManifestPublished(uint16,bytes32,address,bytes32)",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamSystemManifest.sol:IStreamSystemManifest",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "manifestHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "address",
+              "name": "payloadPointer",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "actionId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "StreamSystemManifestPublished",
+          "signature": "StreamSystemManifestPublished(uint16,bytes32,address,bytes32)",
+          "topic0": "0x46b4507137a35524e302b6794c5e4fb40783c10d6be0a72c1aa58d7386203793"
+        }
+      ],
+      "functions": [
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamSystemManifest.sol:IStreamSystemManifest#function:0x09b1b5c6",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamSystemManifest.sol:IStreamSystemManifest",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "payloadPointer",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "struct StreamSystemManifestUpdate",
+              "name": "update",
+              "type": "(bytes32,string,bytes32,bytes32,bytes32,bytes32,bytes32,bytes32,bytes32)"
+            }
+          ],
+          "name": "publishStreamSystemManifest",
+          "outputs": [],
+          "selector": "0x09b1b5c6",
+          "signature": "publishStreamSystemManifest(address,(bytes32,string,bytes32,bytes32,bytes32,bytes32,bytes32,bytes32,bytes32))",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamSystemManifest.sol:IStreamSystemManifest#function:0x97c93f10",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamSystemManifest.sol:IStreamSystemManifest",
+          "inherited": false,
+          "inputs": [],
+          "name": "streamSystemManifest",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "manifestHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "string",
+              "name": "manifestURI",
+              "type": "string"
+            },
+            {
+              "index": 2,
+              "internalType": "address",
+              "name": "revenueResolver",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "internalType": "address",
+              "name": "metadataRouter",
+              "type": "address"
+            },
+            {
+              "index": 4,
+              "internalType": "address",
+              "name": "collectionMetadata",
+              "type": "address"
+            },
+            {
+              "index": 5,
+              "internalType": "address",
+              "name": "entropyCoordinator",
+              "type": "address"
+            },
+            {
+              "index": 6,
+              "internalType": "address",
+              "name": "mintManager",
+              "type": "address"
+            },
+            {
+              "index": 7,
+              "internalType": "address",
+              "name": "mintLedger",
+              "type": "address"
+            },
+            {
+              "index": 8,
+              "internalType": "address",
+              "name": "artistRegistry",
+              "type": "address"
+            },
+            {
+              "index": 9,
+              "internalType": "address",
+              "name": "streamAdminsOrGovernance",
+              "type": "address"
+            },
+            {
+              "index": 10,
+              "internalType": "address",
+              "name": "artworkFinalityRegistry",
+              "type": "address"
+            },
+            {
+              "index": 11,
+              "internalType": "address",
+              "name": "moduleRegistry",
+              "type": "address"
+            },
+            {
+              "index": 12,
+              "internalType": "address",
+              "name": "stateExportPublisher",
+              "type": "address"
+            },
+            {
+              "index": 13,
+              "internalType": "bytes32",
+              "name": "eventCatalogHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 14,
+              "internalType": "bytes32",
+              "name": "compatibilityMatrixHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 15,
+              "internalType": "bytes32",
+              "name": "numericIdCatalogHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 16,
+              "internalType": "bytes32",
+              "name": "schemaCatalogHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 17,
+              "internalType": "bytes32",
+              "name": "canonicalizationCatalogHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 18,
+              "internalType": "bytes32",
+              "name": "specBundleHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 19,
+              "internalType": "bytes32",
+              "name": "reconstructionClientHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 20,
+              "internalType": "uint64",
+              "name": "revision",
+              "type": "uint64"
+            }
+          ],
+          "selector": "0x97c93f10",
+          "signature": "streamSystemManifest()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamSystemManifest.sol:IStreamSystemManifest#function:0x7b3a36b1",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamSystemManifest.sol:IStreamSystemManifest",
+          "inherited": false,
+          "inputs": [],
+          "name": "streamSystemManifestPointer",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "payloadPointer",
+              "type": "address"
+            }
+          ],
+          "selector": "0x7b3a36b1",
+          "signature": "streamSystemManifestPointer()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamSystemManifest.sol:IStreamSystemManifest#function:0x893aae03",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamSystemManifest.sol:IStreamSystemManifest",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "index",
+              "type": "uint256"
+            }
+          ],
+          "name": "streamSystemManifestPointerAt",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "payloadPointer",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "manifestHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "internalType": "uint64",
+              "name": "updatedAt",
+              "type": "uint64"
+            }
+          ],
+          "selector": "0x893aae03",
+          "signature": "streamSystemManifestPointerAt(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamSystemManifest.sol:IStreamSystemManifest#function:0x5b1e1cba",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamSystemManifest.sol:IStreamSystemManifest",
+          "inherited": false,
+          "inputs": [],
+          "name": "streamSystemManifestPointerCount",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x5b1e1cba",
+          "signature": "streamSystemManifestPointerCount()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/vendor/openzeppelin/IERC165.sol:IERC165#function:0x01ffc9a7",
+          "declaringDefinitionId": "smart-contracts/vendor/openzeppelin/IERC165.sol:IERC165",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "name": "supportsInterface",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x01ffc9a7",
+          "signature": "supportsInterface(bytes4)",
+          "stateMutability": "view"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "published_interface",
+    "classificationReason": "Listed in release-artifacts/contracts.json interfaces.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [
+        {
+          "anonymous": false,
+          "astId": 93099,
+          "canonicalSignature": "StreamSystemManifestPublished(uint16,bytes32,address,bytes32)",
+          "displaySignature": "StreamSystemManifestPublished(uint16,bytes32,address,bytes32)",
+          "id": "smart-contracts/interfaces/stream/IStreamSystemManifest.sol:IStreamSystemManifest#event:StreamSystemManifestPublished(uint16,bytes32,address,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "manifestHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "name": "payloadPointer",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "indexed": true,
+              "name": "actionId",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVyZmFjZXMvc3RyZWFtL0lTdHJlYW1TeXN0ZW1NYW5pZmVzdC5zb2w6SVN0cmVhbVN5c3RlbU1hbmlmZXN0I2V2ZW50OlN0cmVhbVN5c3RlbU1hbmlmZXN0UHVibGlzaGVkKHVpbnQxNixieXRlczMyLGFkZHJlc3MsYnl0ZXMzMik",
+          "kind": "event",
+          "name": "StreamSystemManifestPublished",
+          "natspec": "",
+          "range": {
+            "byteLength": 184,
+            "byteStart": 932,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamSystemManifest.sol#L26-L31",
+            "lineEnd": 31,
+            "lineStart": 26,
+            "snippetSha256": "sha256:c38b3d9e87515c85b4cf0b7648dedcab72d1b3d78347b1a20539b64f2d0cb117",
+            "sourceSha256": "sha256:f9a7e43952adeb20a2b4f48fbc0cc10f9caa2f50db236dc64492d5623629dda0"
+          },
+          "topic0": "0x46b4507137a35524e302b6794c5e4fb40783c10d6be0a72c1aa58d7386203793"
+        }
+      ],
+      "functions": [
+        {
+          "canonicalSignature": "streamSystemManifest()",
+          "displaySignature": "streamSystemManifest()",
+          "functionKind": "function",
+          "id": "smart-contracts/interfaces/stream/IStreamSystemManifest.sol:IStreamSystemManifest#function:0x97c93f10",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVyZmFjZXMvc3RyZWFtL0lTdHJlYW1TeXN0ZW1NYW5pZmVzdC5zb2w6SVN0cmVhbVN5c3RlbU1hbmlmZXN0I2Z1bmN0aW9uOjB4OTdjOTNmMTA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "streamSystemManifest",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "manifestHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "manifestURI",
+              "storageLocation": "memory",
+              "type": "string"
+            },
+            {
+              "index": 2,
+              "name": "revenueResolver",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "name": "metadataRouter",
+              "type": "address"
+            },
+            {
+              "index": 4,
+              "name": "collectionMetadata",
+              "type": "address"
+            },
+            {
+              "index": 5,
+              "name": "entropyCoordinator",
+              "type": "address"
+            },
+            {
+              "index": 6,
+              "name": "mintManager",
+              "type": "address"
+            },
+            {
+              "index": 7,
+              "name": "mintLedger",
+              "type": "address"
+            },
+            {
+              "index": 8,
+              "name": "artistRegistry",
+              "type": "address"
+            },
+            {
+              "index": 9,
+              "name": "streamAdminsOrGovernance",
+              "type": "address"
+            },
+            {
+              "index": 10,
+              "name": "artworkFinalityRegistry",
+              "type": "address"
+            },
+            {
+              "index": 11,
+              "name": "moduleRegistry",
+              "type": "address"
+            },
+            {
+              "index": 12,
+              "name": "stateExportPublisher",
+              "type": "address"
+            },
+            {
+              "index": 13,
+              "name": "eventCatalogHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 14,
+              "name": "compatibilityMatrixHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 15,
+              "name": "numericIdCatalogHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 16,
+              "name": "schemaCatalogHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 17,
+              "name": "canonicalizationCatalogHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 18,
+              "name": "specBundleHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 19,
+              "name": "reconstructionClientHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 20,
+              "name": "revision",
+              "type": "uint64"
+            }
+          ],
+          "range": {
+            "byteLength": 909,
+            "byteStart": 1122,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamSystemManifest.sol#L33-L58",
+            "lineEnd": 58,
+            "lineStart": 33,
+            "snippetSha256": "sha256:c4570c1c6fac11ab406bac4daf2f0dc521a9f1615ad3e5669619cf97aa9d8228",
+            "sourceSha256": "sha256:f9a7e43952adeb20a2b4f48fbc0cc10f9caa2f50db236dc64492d5623629dda0"
+          },
+          "selector": "0x97c93f10",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "streamSystemManifestPointer()",
+          "displaySignature": "streamSystemManifestPointer()",
+          "functionKind": "function",
+          "id": "smart-contracts/interfaces/stream/IStreamSystemManifest.sol:IStreamSystemManifest#function:0x7b3a36b1",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVyZmFjZXMvc3RyZWFtL0lTdHJlYW1TeXN0ZW1NYW5pZmVzdC5zb2w6SVN0cmVhbVN5c3RlbU1hbmlmZXN0I2Z1bmN0aW9uOjB4N2IzYTM2YjE",
+          "kind": "function",
+          "modifiers": [],
+          "name": "streamSystemManifestPointer",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "payloadPointer",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 86,
+            "byteStart": 2037,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamSystemManifest.sol#L60",
+            "lineEnd": 60,
+            "lineStart": 60,
+            "snippetSha256": "sha256:a8a597554a648d97426dfb6916f6696f6c75ca2acd9e3974e7bca718e219c924",
+            "sourceSha256": "sha256:f9a7e43952adeb20a2b4f48fbc0cc10f9caa2f50db236dc64492d5623629dda0"
+          },
+          "selector": "0x7b3a36b1",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "streamSystemManifestPointerCount()",
+          "displaySignature": "streamSystemManifestPointerCount()",
+          "functionKind": "function",
+          "id": "smart-contracts/interfaces/stream/IStreamSystemManifest.sol:IStreamSystemManifest#function:0x5b1e1cba",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVyZmFjZXMvc3RyZWFtL0lTdHJlYW1TeXN0ZW1NYW5pZmVzdC5zb2w6SVN0cmVhbVN5c3RlbU1hbmlmZXN0I2Z1bmN0aW9uOjB4NWIxZTFjYmE",
+          "kind": "function",
+          "modifiers": [],
+          "name": "streamSystemManifestPointerCount",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 76,
+            "byteStart": 2129,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamSystemManifest.sol#L62",
+            "lineEnd": 62,
+            "lineStart": 62,
+            "snippetSha256": "sha256:a499dc17c329d4463600a88504616c631480ca921d92461b08c6ae0af52b504a",
+            "sourceSha256": "sha256:f9a7e43952adeb20a2b4f48fbc0cc10f9caa2f50db236dc64492d5623629dda0"
+          },
+          "selector": "0x5b1e1cba",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "streamSystemManifestPointerAt(uint256)",
+          "displaySignature": "streamSystemManifestPointerAt(uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/interfaces/stream/IStreamSystemManifest.sol:IStreamSystemManifest#function:0x893aae03",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "index",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVyZmFjZXMvc3RyZWFtL0lTdHJlYW1TeXN0ZW1NYW5pZmVzdC5zb2w6SVN0cmVhbVN5c3RlbU1hbmlmZXN0I2Z1bmN0aW9uOjB4ODkzYWFlMDM",
+          "kind": "function",
+          "modifiers": [],
+          "name": "streamSystemManifestPointerAt",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "payloadPointer",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "manifestHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "updatedAt",
+              "type": "uint64"
+            }
+          ],
+          "range": {
+            "byteLength": 165,
+            "byteStart": 2211,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamSystemManifest.sol#L64-L67",
+            "lineEnd": 67,
+            "lineStart": 64,
+            "snippetSha256": "sha256:87afbde902d3a288a1bd2c0ea6a8693849e8b9cb9b11ea58e33d1ffad642ce73",
+            "sourceSha256": "sha256:f9a7e43952adeb20a2b4f48fbc0cc10f9caa2f50db236dc64492d5623629dda0"
+          },
+          "selector": "0x893aae03",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "publishStreamSystemManifest(address,(bytes32,string,bytes32,bytes32,bytes32,bytes32,bytes32,bytes32,bytes32))",
+          "displaySignature": "publishStreamSystemManifest(address,StreamSystemManifestUpdate)",
+          "functionKind": "function",
+          "id": "smart-contracts/interfaces/stream/IStreamSystemManifest.sol:IStreamSystemManifest#function:0x09b1b5c6",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "payloadPointer",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "update",
+              "storageLocation": "calldata",
+              "type": "StreamSystemManifestUpdate"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVyZmFjZXMvc3RyZWFtL0lTdHJlYW1TeXN0ZW1NYW5pZmVzdC5zb2w6SVN0cmVhbVN5c3RlbU1hbmlmZXN0I2Z1bmN0aW9uOjB4MDliMWI1YzY",
+          "kind": "function",
+          "modifiers": [],
+          "name": "publishStreamSystemManifest",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 136,
+            "byteStart": 2382,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamSystemManifest.sol#L69-L72",
+            "lineEnd": 72,
+            "lineStart": 69,
+            "snippetSha256": "sha256:50f0f01f734cdaa1e4c4a29301bb5e68be85265cba5592d9cb24718a805d1dd3",
+            "sourceSha256": "sha256:f9a7e43952adeb20a2b4f48fbc0cc10f9caa2f50db236dc64492d5623629dda0"
+          },
+          "selector": "0x09b1b5c6",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/interfaces/stream/IStreamSystemManifest.sol:IStreamSystemManifest",
+    "inheritance": [
+      {
+        "definitionId": "smart-contracts/vendor/openzeppelin/IERC165.sol:IERC165",
+        "name": "IERC165"
+      }
+    ],
+    "interface": {
+      "abiSha256": "sha256:207890576cf794e85a334afc009e9da0c041ebed8b0ad9bed4852f3662072005",
+      "interfaceId": "0x3699c779",
+      "interfaceIdSource": "selector_xor",
+      "published": true
+    },
+    "key": "c21hcnQtY29udHJhY3RzL2ludGVyZmFjZXMvc3RyZWFtL0lTdHJlYW1TeXN0ZW1NYW5pZmVzdC5zb2w6SVN0cmVhbVN5c3RlbU1hbmlmZXN0",
+    "kind": "interface",
+    "linearizedDefinitionIds": [
+      "smart-contracts/interfaces/stream/IStreamSystemManifest.sol:IStreamSystemManifest",
+      "smart-contracts/vendor/openzeppelin/IERC165.sol:IERC165"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": "published_interface"
+    },
+    "name": "IStreamSystemManifest",
+    "natspec": "@notice State-only aggregate and append-only payload-history surface for\n         discovering the active Stream deployment.\n @dev The two immutable binding reads (`core()` and\n      `governanceExecutor()`) are deliberately outside this five-function\n      interface. The five selectors below XOR to `0x37660ede`.",
+    "range": {
+      "byteLength": 1637,
+      "byteStart": 883,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamSystemManifest.sol#L25-L73",
+      "lineEnd": 73,
+      "lineStart": 25,
+      "snippetSha256": "sha256:7c76abfeca501241eb36aa9ca601daaa06b37ffbfec7c4aa217e05792c7bbf2a",
+      "sourceSha256": "sha256:f9a7e43952adeb20a2b4f48fbc0cc10f9caa2f50db236dc64492d5623629dda0"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/interfaces/stream/IStreamSystemManifest.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-09-09.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 5
+    },
+    "byCode": {
+      "MISSING_FUNCTION_NATSPEC": 5
+    },
+    "totalCount": 5
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/interfaces/stream/IStreamSystemManifest.sol:IStreamSystemManifest#function:0x09b1b5c6",
+      "definitionId": "smart-contracts/interfaces/stream/IStreamSystemManifest.sol:IStreamSystemManifest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/interfaces/stream/IStreamSystemManifest.sol:IStreamSystemManifest#function:0x5b1e1cba",
+      "definitionId": "smart-contracts/interfaces/stream/IStreamSystemManifest.sol:IStreamSystemManifest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/interfaces/stream/IStreamSystemManifest.sol:IStreamSystemManifest#function:0x7b3a36b1",
+      "definitionId": "smart-contracts/interfaces/stream/IStreamSystemManifest.sol:IStreamSystemManifest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/interfaces/stream/IStreamSystemManifest.sol:IStreamSystemManifest#function:0x893aae03",
+      "definitionId": "smart-contracts/interfaces/stream/IStreamSystemManifest.sol:IStreamSystemManifest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/interfaces/stream/IStreamSystemManifest.sol:IStreamSystemManifest#function:0x97c93f10",
+      "definitionId": "smart-contracts/interfaces/stream/IStreamSystemManifest.sol:IStreamSystemManifest",
+      "severity": "advisory"
+    }
+  ]
+}

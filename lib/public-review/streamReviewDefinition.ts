@@ -15,7 +15,8 @@ import {
   STREAM_REVIEW_LIFECYCLE_STATE,
 } from "@/lib/public-review/streamReviewPublication";
 
-export const STREAM_REVIEW_VERSION = "2026-08-01.1";
+export const STREAM_REVIEW_VERSION = "2026-09-09.1";
+export const STREAM_REVIEW_AUGUST_VERSION = "2026-08-01.1";
 export const STREAM_REVIEW_PREVIOUS_VERSION = "2026-07-30.1";
 export const STREAM_REVIEW_OLDER_VERSION = "2026-07-27.1";
 export const STREAM_REVIEW_LEGACY_VERSION = "2026-07-26.1";
@@ -334,11 +335,24 @@ const STREAM_REVIEW_2026_07_30_PAGES = defineStreamReviewNarrativePages({
   readiness: "currentImplementationAndReadiness",
 });
 
-export const STREAM_REVIEW_PAGES = defineStreamReviewNarrativePages({
+const STREAM_REVIEW_AUGUST_PAGES = defineStreamReviewNarrativePages({
   roles: "whoCanDoWhat",
   governance: "changesEmergenciesAndFutureContracts",
   readiness: "whereDevelopmentStands",
 });
+
+export const STREAM_REVIEW_PAGES = STREAM_REVIEW_AUGUST_PAGES.map((page) => ({
+  ...page,
+  summaryKey:
+    `publicReview.pages.currentSnapshot.${page.id}.summary` as MessageKey,
+  evidenceStates: [
+    "IMPLEMENTED",
+    "PROPOSED",
+    "OPEN_FOR_FEEDBACK",
+    "AUDIT_PENDING",
+    "KNOWN_LIMITATION",
+  ] as const,
+}));
 
 const STREAM_REVIEW_AUDIENCE_ENTRY_PAGE_IDS = {
   community: "community-review",
@@ -353,7 +367,7 @@ export const STREAM_REVIEW_DEFINITION: PublicReviewDefinition = {
   contractName: "6529 Stream",
   title: "6529 Stream Contract Review",
   description:
-    "A source-grounded public review of an artist-centered contract system for serious 1/1 digital art.",
+    "A source-grounded public review of an artist-centered contract system for digital art, including unique works and editions.",
   activeVersion: STREAM_REVIEW_VERSION,
   versions: [
     {
@@ -366,6 +380,26 @@ export const STREAM_REVIEW_DEFINITION: PublicReviewDefinition = {
         commit: STREAM_REVIEW_SOURCE_COMMIT,
       },
       pages: STREAM_REVIEW_PAGES,
+      audienceEntryPageIds: STREAM_REVIEW_AUDIENCE_ENTRY_PAGE_IDS,
+    },
+    {
+      version: STREAM_REVIEW_AUGUST_VERSION,
+      status: getStreamReviewVersionLifecycleState(
+        STREAM_REVIEW_AUGUST_VERSION
+      ),
+      deploymentStatus: getStreamReviewVersionPublication(
+        STREAM_REVIEW_AUGUST_VERSION
+      ).deploymentStatus,
+      auditStatus: getStreamReviewVersionPublication(
+        STREAM_REVIEW_AUGUST_VERSION
+      ).auditStatus,
+      source: {
+        repository: "6529-Collections/6529Stream",
+        commit: getStreamReviewVersionSourceCommit(
+          STREAM_REVIEW_AUGUST_VERSION
+        ),
+      },
+      pages: STREAM_REVIEW_AUGUST_PAGES,
       audienceEntryPageIds: STREAM_REVIEW_AUDIENCE_ENTRY_PAGE_IDS,
     },
     {

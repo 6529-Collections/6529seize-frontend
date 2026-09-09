@@ -1177,6 +1177,18 @@ function createStatusRecords({
   developmentStatus,
 }) {
   const records = [];
+  const statusAnchors =
+    compareReviewVersions(reviewVersion, "2026-09-09.1") >= 0
+      ? {
+          reviewState: "what-this-snapshot-covers",
+          evidence: "evidence-still-needed",
+          risk: "review-priorities",
+        }
+      : {
+          reviewState: "current-path",
+          evidence: "release-blockers",
+          risk: "known-limitations-and-unresolved-blockers",
+        };
   const readiness = reference.auditorEvidence?.readiness;
   const release = reference.auditorEvidence?.release;
   const riskRegister = reference.auditorEvidence?.riskRegister;
@@ -1224,7 +1236,7 @@ function createStatusRecords({
         "what remains before launch",
       ],
       exactKeys: ["status:latest-development", latest.source.commit],
-      canonicalPath: `/reviews/${reviewId}#development-update`,
+      canonicalPath: `/reviews/${reviewId}/security-testing-and-known-limitations#stream-launch-readiness`,
       summary: developmentFacts.join(" "),
       structured: latest,
       provenance: {
@@ -1251,7 +1263,11 @@ function createStatusRecords({
       "production release",
     ],
     exactKeys: [`status:${reviewVersion}:review-state`, reviewVersion],
-    canonicalPath: statusCanonicalPath(reviewId, reviewVersion, "current-path"),
+    canonicalPath: statusCanonicalPath(
+      reviewId,
+      reviewVersion,
+      statusAnchors.reviewState
+    ),
     summary: stateFacts.join(" "),
     structured: {
       lifecycleState: publication.lifecycleState,
@@ -1297,7 +1313,7 @@ function createStatusRecords({
       canonicalPath: statusCanonicalPath(
         reviewId,
         reviewVersion,
-        "release-blockers"
+        statusAnchors.evidence
       ),
       summary,
       structured: requirement,
@@ -1343,7 +1359,7 @@ function createStatusRecords({
       canonicalPath: statusCanonicalPath(
         reviewId,
         reviewVersion,
-        "known-limitations-and-unresolved-blockers"
+        statusAnchors.risk
       ),
       summary,
       structured: risk,
@@ -1385,7 +1401,7 @@ function createStatusRecords({
       canonicalPath: statusCanonicalPath(
         reviewId,
         reviewVersion,
-        "release-blockers"
+        statusAnchors.evidence
       ),
       summary: `${report.path} is retained as ${report.sha256}.`,
       structured: report,

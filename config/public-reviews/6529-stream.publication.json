@@ -41,8 +41,15 @@
     },
     {
       "version": "2026-08-01.1",
-      "lifecycleState": "PUBLIC_REVIEW",
+      "lifecycleState": "REVIEW_CLOSED",
       "sourceCommit": "513bd7e079eafe109df6ae1ae21bfbca6fec6786",
+      "deploymentStatus": "NOT_DEPLOYED",
+      "auditStatus": "PRE_AUDIT"
+    },
+    {
+      "version": "2026-09-09.1",
+      "lifecycleState": "PUBLIC_REVIEW",
+      "sourceCommit": "92ea123380917032f01aae09691141a2a72df935",
       "deploymentStatus": "NOT_DEPLOYED",
       "auditStatus": "PRE_AUDIT"
     }
