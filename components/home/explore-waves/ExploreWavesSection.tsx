@@ -24,6 +24,7 @@ const DEFAULT_WAVES_LIMIT = 6;
 
 interface ExploreWavesSectionProps {
   readonly cardVariant?: ExploreWaveCardVariant | undefined;
+  readonly headingVariant?: "default" | "page" | undefined;
   readonly title?: string | undefined;
   readonly subtitle?: string | null | undefined;
   readonly limit?: number | undefined;
@@ -46,6 +47,7 @@ interface ExploreWavesSectionProps {
 
 export function ExploreWavesSection({
   cardVariant = "default",
+  headingVariant = "default",
   title = "Tired of bot replies? Join the most interesting chats in crypto",
   subtitle = "Most active waves",
   limit = DEFAULT_WAVES_LIMIT,
@@ -144,16 +146,24 @@ export function ExploreWavesSection({
     ? "tw-mb-8 tw-flex tw-flex-col tw-items-start tw-gap-5"
     : "tw-mb-8 tw-flex tw-flex-col tw-items-start tw-gap-4 md:tw-items-end";
   const titleClassName =
-    "tw-w-full tw-max-w-sm md:tw-mx-auto md:tw-max-w-xl md:tw-text-center lg:tw-max-w-full";
+    headingVariant === "page"
+      ? "tw-w-full tw-max-w-4xl tw-text-left"
+      : "tw-w-full tw-max-w-sm md:tw-mx-auto md:tw-max-w-xl md:tw-text-center lg:tw-max-w-full";
 
   return (
     <section className="tw-px-4 tw-py-10 md:tw-px-6 md:tw-py-16 lg:tw-px-8">
       <div>
         <div className={headerClassName}>
           <div className={titleClassName}>
-            <span className="tw-m-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-iron-200 md:tw-text-2xl">
-              {title}
-            </span>
+            {headingVariant === "page" ? (
+              <h1 className="tw-m-0 tw-text-balance tw-text-2xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-100 md:tw-text-3xl xl:tw-text-4xl">
+                {title}
+              </h1>
+            ) : (
+              <span className="tw-m-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-iron-200 md:tw-text-2xl">
+                {title}
+              </span>
+            )}
             {subtitle && (
               <p className="tw-mb-0 tw-mt-2 tw-text-base tw-text-iron-500">
                 {subtitle}

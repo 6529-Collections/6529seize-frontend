@@ -10,7 +10,7 @@ function DiscoverFallback() {
       aria-label="Loading waves"
       className="tw-px-4 tw-py-10 md:tw-px-6 md:tw-py-16 lg:tw-px-8"
     >
-      <div className="tw-mx-auto tw-h-8 tw-max-w-xl tw-rounded-md tw-bg-iron-900" />
+      <div className="tw-h-8 tw-w-3/4 tw-max-w-4xl tw-rounded-md tw-bg-iron-900 md:tw-h-9 xl:tw-h-10" />
       <div className="tw-mt-8 tw-grid tw-grid-cols-1 tw-gap-x-3 tw-gap-y-4 sm:tw-grid-cols-2 sm:tw-gap-6 lg:tw-grid-cols-3">
         {Array.from({ length: 6 }).map((_, index) => (
           <div
