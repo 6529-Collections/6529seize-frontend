@@ -1,8 +1,6 @@
 import "next/dist/compiled/server-only";
 
 import { connection } from "next/server";
-import { STREAM_REVIEW_FOR_ARTISTS_GUIDE_SECTIONS } from "@/components/public-review/StreamReviewForArtistsGuide";
-import { STREAM_REVIEW_FOR_ARTISTS_DETAIL_SECTIONS } from "@/components/public-review/StreamReviewForArtistsDetails";
 
 import { getPublicReviewEnvironment } from "@/config/publicReviews";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
@@ -189,14 +187,6 @@ async function loadEditorialPageOptions(
               source: reviewVersion.source,
             })
           : undefined;
-      const retainedArtistSections =
-        version === STREAM_REVIEW_LEGACY_ENTRY_FEEDBACK_VERSION &&
-        page.id === "for-artists"
-          ? [
-              ...STREAM_REVIEW_FOR_ARTISTS_GUIDE_SECTIONS,
-              ...STREAM_REVIEW_FOR_ARTISTS_DETAIL_SECTIONS,
-            ]
-          : [];
       return {
         value: page.id,
         label: t(DEFAULT_LOCALE, page.titleKey),
@@ -205,7 +195,6 @@ async function loadEditorialPageOptions(
             [
               ...extractPublicReviewSections(markdown),
               ...extractPublicReviewSections(entryMarkdown ?? ""),
-              ...retainedArtistSections,
               ...(version === STREAM_REVIEW_LEGACY_ENTRY_FEEDBACK_VERSION
                 ? (STREAM_REVIEW_LEGACY_ENTRY_SECTIONS[page.id] ?? []).map(
                     (id) => ({ id })

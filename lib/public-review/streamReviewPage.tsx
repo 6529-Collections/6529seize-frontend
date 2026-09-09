@@ -457,16 +457,14 @@ async function renderStreamReviewRoute(route: StreamReviewRouteModel) {
     currentPages,
     editorialMarkdown: displayedEditorialMarkdown,
   });
+  const feedbackSections = currentPages.forArtists
+    ? [...displayedSections, ...extractPublicReviewSections(editorialMarkdown)]
+    : displayedSections;
   const displayedFeedbackConfig = getDisplayedFeedbackConfig({
     retainSections: entryMarkdown !== undefined,
     feedbackConfig,
     pageId: route.page.id,
-    sections: currentPages.forArtists
-      ? [
-          ...displayedSections,
-          ...extractPublicReviewSections(editorialMarkdown),
-        ]
-      : displayedSections,
+    sections: feedbackSections,
   });
 
   return (
@@ -541,7 +539,7 @@ async function renderStreamReviewRoute(route: StreamReviewRouteModel) {
             version: contentVersion,
             currentRoute: route.version === undefined,
           })}
-          sections={displayedSections}
+          sections={feedbackSections}
         />
       }
     />

@@ -47,15 +47,24 @@ jest.mock("@/components/public-review/PublicReviewEditorialFeedback", () => ({
   PublicReviewEditorialFeedback: ({
     config,
     page,
+    sections,
   }: {
     config: { pages: { value: string; sectionValues?: string[] }[] };
     page: { pageId: string };
+    sections: readonly { id: string; title: string }[];
   }) => (
-    <div data-testid="feedback-sections">
-      {config.pages
-        .find((p) => p.value === page.pageId)
-        ?.sectionValues?.join(",")}
-    </div>
+    <>
+      <div data-testid="feedback-sections">
+        {config.pages
+          .find((p) => p.value === page.pageId)
+          ?.sectionValues?.join(",")}
+      </div>
+      <div data-testid="feedback-panel-sections">
+        {sections
+          .map((section) => `${section.id}: ${section.title}`)
+          .join("\n")}
+      </div>
+    </>
   ),
 }));
 jest.mock("@/components/public-review/StreamReviewBotAuthorshipNote", () => ({
@@ -209,6 +218,9 @@ describe("Stream versioned page rendering", () => {
     )) {
       expect(screen.getByTestId("feedback-sections")).toHaveTextContent(
         section.id
+      );
+      expect(screen.getByTestId("feedback-panel-sections")).toHaveTextContent(
+        `${section.id}: ${section.title}`
       );
     }
   });

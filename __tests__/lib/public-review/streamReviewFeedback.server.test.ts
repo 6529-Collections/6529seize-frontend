@@ -202,6 +202,11 @@ describe("Stream review feedback manifest binding", () => {
           value: "for-artists",
           sectionValues: expect.arrayContaining([
             "know-what-your-approval-covers",
+            "stream-artist-artwork-heading",
+            "stream-artist-evidence-heading",
+            "stream-artist-details-heading",
+            "approving-a-specific-collection-state",
+            "questions-for-artists",
           ]),
         }),
       ])
