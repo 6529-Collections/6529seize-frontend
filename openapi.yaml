@@ -9412,6 +9412,36 @@ paths:
                 format: binary
         "400":
           description: Unsupported sort field or TDH view
+  /tdh/rules:
+    get:
+      tags:
+        - TDH
+      summary: Get current TDH boost definitions evaluated for the latest completed snapshot
+      description: >-
+        Returns the current TDH boost definitions evaluated against the latest
+        completed snapshot's eligible Meme card range, including the snapshot
+        block, season set bonuses, full-collection bonuses, Season 1 partial
+        bonuses, Gradient bonus, and the complete configured season bonus
+        schedule. Rule definitions are current server configuration, not
+        historical or versioned inputs persisted with that snapshot.
+      operationId: getTdhRules
+      security: []
+      x-6529-router:
+        enabled: true
+        auth: none
+        cache: true
+        handler:
+          import: "@/api/tdh/get-tdh-rules.handler"
+          name: handleGetTdhRules
+      responses:
+        "200":
+          description: Current TDH rules evaluated for the latest completed snapshot
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiTdhRules"
+        "404":
+          description: No completed TDH snapshot found
   /tdh/consolidation/{identity}:
     get:
       tags:
@@ -22738,6 +22768,37 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiIdentitySubscriptionTargetAction"
+    ApiTdhBoostRules:
+      type: object
+      required:
+        - base_multiplier
+        - final_rounding_decimals
+        - season_schedule
+        - season_sets
+        - full_collection
+        - season_one_partials
+        - gradients
+      properties:
+        base_multiplier:
+          type: number
+          format: double
+        final_rounding_decimals:
+          type: integer
+          format: int32
+        season_schedule:
+          $ref: "#/components/schemas/ApiTdhSeasonScheduleRule"
+        season_sets:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiTdhSeasonSetRule"
+        full_collection:
+          $ref: "#/components/schemas/ApiTdhFullCollectionRule"
+        season_one_partials:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiTdhSeasonOnePartialRule"
+        gradients:
+          $ref: "#/components/schemas/ApiTdhGradientRule"
     ApiTdhEdition:
       type: object
       required:
@@ -22785,6 +22846,130 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiTdhEdition"
+    ApiTdhFullCollectionRule:
+      type: object
+      required:
+        - first_set_bonus
+        - additional_set_initial_bonus
+        - additional_set_decay_ratio
+        - additional_sets_limit_bonus
+      properties:
+        first_set_bonus:
+          type: number
+          format: double
+        additional_set_initial_bonus:
+          type: number
+          format: double
+        additional_set_decay_ratio:
+          type: number
+          format: double
+        additional_sets_limit_bonus:
+          type: number
+          format: double
+    ApiTdhGradientRule:
+      type: object
+      required:
+        - bonus_per_token
+        - max_count
+        - max_bonus
+      properties:
+        bonus_per_token:
+          type: number
+          format: double
+        max_count:
+          type: integer
+          format: int32
+        max_bonus:
+          type: number
+          format: double
+    ApiTdhRules:
+      type: object
+      required:
+        - snapshot
+        - boost
+      properties:
+        snapshot:
+          $ref: "#/components/schemas/ApiTdhRulesSnapshot"
+        boost:
+          $ref: "#/components/schemas/ApiTdhBoostRules"
+    ApiTdhRulesSnapshot:
+      type: object
+      required:
+        - block_number
+        - block_timestamp
+        - eligible_memes_count
+      properties:
+        block_number:
+          type: integer
+          format: int64
+        block_timestamp:
+          type: string
+          format: date-time
+        eligible_memes_count:
+          type: integer
+          format: int64
+    ApiTdhSeasonOnePartialKey:
+      type: string
+      enum:
+        - genesis
+        - nakamoto
+    ApiTdhSeasonOnePartialRule:
+      type: object
+      required:
+        - key
+        - token_ids
+        - bonus
+      properties:
+        key:
+          $ref: "#/components/schemas/ApiTdhSeasonOnePartialKey"
+        token_ids:
+          type: array
+          items:
+            type: integer
+            format: int64
+        bonus:
+          type: number
+          format: double
+    ApiTdhSeasonScheduleRule:
+      type: object
+      required:
+        - bonus_per_season
+        - last_boosted_season
+        - max_bonus
+      properties:
+        bonus_per_season:
+          type: number
+          format: double
+        last_boosted_season:
+          type: integer
+          format: int64
+        max_bonus:
+          type: number
+          format: double
+    ApiTdhSeasonSetRule:
+      type: object
+      required:
+        - season
+        - start_index
+        - end_index
+        - count
+        - bonus
+      properties:
+        season:
+          type: integer
+          format: int64
+        start_index:
+          type: integer
+          format: int64
+        end_index:
+          type: integer
+          format: int64
+        count:
+          type: integer
+          format: int64
+        bonus:
+          type: number
+          format: double
     ApiToggleHideLinkPreviewRequest:
       type: object
       properties:
