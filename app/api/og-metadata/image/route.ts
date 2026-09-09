@@ -6,13 +6,19 @@ import {
 } from "@/lib/security/urlGuard";
 import { OG_IMAGE_PROXY_MAX_BYTES } from "@/app/api/og-metadata/_lib/imageProxyPolicy";
 import { NextResponse, type NextRequest } from "next/server";
-import sharp, { type Sharp } from "sharp";
+import sharp, { type Metadata } from "sharp";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 const DEFAULT_WIDTH = 1200;
 const MAX_WIDTH = 1200;
+const MAX_HEIGHT = 12000;
+const MAX_INPUT_PIXELS = 512_000_000;
+const MAX_INPUT_DIMENSION = 65_536;
+// Admit before fetching to bound both compressed buffers and native image work.
+// Do not queue requests while the process is already handling a large image.
+let imageRequestActive = false;
 const OVERSIZED_GIF_PREVIEW_MAX_BYTES = 8 * 1024 * 1024;
 const PNG_CONTENT_TYPE = "image/png";
 const GIF_CONTENT_TYPE = "image/gif";
@@ -215,6 +221,7 @@ const fetchImageBuffer = async (url: URL): Promise<Buffer> => {
   );
 
   if (!response.ok) {
+    await cancelResponseBody(response);
     throw new Error(`Image request failed: ${response.status}`);
   }
 
@@ -226,7 +233,12 @@ const fetchImageBuffer = async (url: URL): Promise<Buffer> => {
   }
 
   if (contentLength !== null) {
-    ensureAllowedImageSize(contentLength);
+    try {
+      ensureAllowedImageSize(contentLength);
+    } catch (error) {
+      await cancelResponseBody(response);
+      throw error;
+    }
   }
 
   return readImageResponseBuffer(response);
@@ -298,36 +310,40 @@ const normalizeImageToPng = async ({
     throw new Error("Upstream response is not an image.");
   }
 
-  const image =
-    detectedContentType === GIF_CONTENT_TYPE
-      ? await createGifPreviewImage(buffer)
-      : sharp(buffer, {
-          limitInputPixels: false,
-          pages: 1,
-          sequentialRead: true,
-        });
+  const image = sharp(buffer, {
+    limitInputPixels: MAX_INPUT_PIXELS,
+    page: 0,
+    pages: 1,
+    sequentialRead: true,
+  }).timeout({ seconds: 7 });
+  // Read only the first frame, so animation length does not consume the pixel
+  // budget. Sharp enforces its finite pixel limit while opening this metadata.
+  ensureAllowedImageDimensions(await image.metadata());
 
   return image
-    .timeout({ seconds: 7 })
     .rotate()
-    .resize(width, undefined, { withoutEnlargement: true })
+    .resize(width, MAX_HEIGHT, {
+      fit: "inside",
+      withoutEnlargement: true,
+    })
     .png({ quality: 100 })
     .toBuffer();
 };
 
-const createGifPreviewImage = async (buffer: Buffer): Promise<Sharp> => {
-  await sharp(buffer, {
-    animated: true,
-    limitInputPixels: false,
-    sequentialRead: true,
-  }).metadata();
-
-  return sharp(buffer, {
-    limitInputPixels: false,
-    page: 0,
-    pages: 1,
-    sequentialRead: true,
-  });
+const ensureAllowedImageDimensions = (metadata: Metadata): void => {
+  const width = metadata.width;
+  const height = metadata.pageHeight ?? metadata.height;
+  if (
+    !Number.isSafeInteger(width) ||
+    !Number.isSafeInteger(height) ||
+    width < 1 ||
+    height < 1 ||
+    width > MAX_INPUT_DIMENSION ||
+    height > MAX_INPUT_DIMENSION ||
+    width * height > MAX_INPUT_PIXELS
+  ) {
+    throw new Error("Image dimensions exceeded supported limits.");
+  }
 };
 
 const parseImageUrl = (value: string | null): URL => {
@@ -337,9 +353,21 @@ const parseImageUrl = (value: string | null): URL => {
 };
 
 export async function GET(request: NextRequest) {
+  let admitted = false;
   try {
     const imageUrl = parseImageUrl(request.nextUrl.searchParams.get("url"));
     const width = parseWidth(request.nextUrl.searchParams.get("w"));
+    if (imageRequestActive) {
+      return NextResponse.json(
+        { error: "Image processing busy" },
+        {
+          status: 503,
+          headers: { "Cache-Control": "no-store", "Retry-After": "1" },
+        }
+      );
+    }
+    imageRequestActive = true;
+    admitted = true;
     const buffer = await fetchImageBuffer(imageUrl);
     const png = await normalizeImageToPng({ buffer, width });
 
@@ -352,5 +380,9 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error("Unable to normalize OG metadata image.", error);
     return mapErrorToResponse(error);
+  } finally {
+    if (admitted) {
+      imageRequestActive = false;
+    }
   }
 }
