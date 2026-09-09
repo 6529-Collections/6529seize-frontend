@@ -28,7 +28,7 @@ export default function WaveHeaderRestrictionButton({
       ariaLabel={label}
       content={
         <div className="tw-w-[min(82vw,18rem)] tw-p-1">
-          <p className="tw-mb-0 tw-text-xs tw-font-semibold tw-text-iron-100">
+          <p className="tw-m-0 tw-text-xs tw-font-semibold tw-text-iron-100">
             {label}
           </p>
           <p className="tw-mb-0 tw-mt-1.5 tw-text-xs tw-leading-5 tw-text-iron-400">
