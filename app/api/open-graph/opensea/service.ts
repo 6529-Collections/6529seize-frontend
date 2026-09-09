@@ -40,7 +40,6 @@ const OPENSEA_ITEM_PATH_PATTERN =
   /^\/item\/([^/]+)\/(0x[a-f0-9]{40})\/([^/?#]+)\/?$/i;
 const OPENSEA_ASSET_PATH_PATTERN =
   /^\/assets\/([^/]+)\/(0x[a-f0-9]{40})\/([^/?#]+)\/?$/i;
-const TOKEN_URI_FETCH_TIMEOUT_MS = 4000;
 
 const ALCHEMY_NETWORK_BY_OPENSEA_CHAIN: Record<string, string> = {
   arbitrum: "arb-mainnet",
@@ -279,44 +278,11 @@ const fetchTokenUriMetadataCandidate = async (
   deps: CreateOpenSeaPlanDeps
 ): Promise<TokenUriMetadata | null> => {
   try {
-    await deps.assertPublicUrl(candidateUrl);
+    const payload = await deps.fetchTokenMetadata(candidateUrl);
+    return extractTokenUriMetadata(payload).metadata;
   } catch {
     return null;
   }
-
-  const controller = new AbortController();
-  const timeout = setTimeout(
-    () => controller.abort(),
-    TOKEN_URI_FETCH_TIMEOUT_MS
-  );
-
-  let response: Response;
-  try {
-    response = await fetch(candidateUrl.toString(), {
-      headers: { Accept: "application/json" },
-      signal: controller.signal,
-    });
-  } catch (error) {
-    if (error instanceof Error && error.name === "AbortError") {
-      return null;
-    }
-    return null;
-  } finally {
-    clearTimeout(timeout);
-  }
-
-  if (!response.ok) {
-    return null;
-  }
-
-  let payload: unknown;
-  try {
-    payload = (await response.json()) as unknown;
-  } catch {
-    return null;
-  }
-
-  return extractTokenUriMetadata(payload).metadata;
 };
 
 async function resolveTokenUriFallbackImage(

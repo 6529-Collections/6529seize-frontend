@@ -41,6 +41,8 @@ import { createEtherscanPlan } from "./etherscan/service";
 import { buildFarcasterEmbedResponse } from "./farcaster/service";
 import { detectEnsTarget, fetchEnsPreview, EnsPreviewError } from "./ens";
 import { HTML_FETCH_HEADERS, createFetchConfig } from "./fetchConfig";
+import { fetchTokenUriJson } from "./tokenUriMetadata";
+import { copyPreviewCacheEntry } from "./previewCacheBudget";
 
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const CACHE_MAX_ITEMS = 500;
@@ -526,10 +528,12 @@ async function resolveLinkPreview(
     createOpenSeaPlan(targetUrl, {
       fetchHtml,
       assertPublicUrl: (url) => assertPublicUrl(url, PUBLIC_URL_OPTIONS),
+      fetchTokenMetadata: (url) => fetchTokenUriJson(url, PUBLIC_URL_OPTIONS),
     }) ??
     createTransientPlan(targetUrl, {
       fetchHtml,
       assertPublicUrl: (url) => assertPublicUrl(url, PUBLIC_URL_OPTIONS),
+      fetchTokenMetadata: (url) => fetchTokenUriJson(url, PUBLIC_URL_OPTIONS),
     }) ??
     createCompoundPlan(targetUrl) ??
     createGenericPlan(targetUrl);
@@ -621,7 +625,10 @@ async function executePlan(plan: PreviewPlan): Promise<LinkPreviewResponse> {
   }
 
   const { data, ttl } = await plan.execute();
-  cache.set(plan.cacheKey, data, ttl);
+  const cacheEntry = copyPreviewCacheEntry(plan.cacheKey, data);
+  if (cacheEntry) {
+    cache.set(cacheEntry.key, cacheEntry.data, ttl);
+  }
 
   return data;
 }
