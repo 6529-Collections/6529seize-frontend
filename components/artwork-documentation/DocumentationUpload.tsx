@@ -16,6 +16,8 @@ import {
   linkDocumentationAsset,
   startDocumentationUpload,
 } from "@/services/api/artwork-documentation-assets-api";
+import { pollDocumentationProcessing } from "@/lib/artwork-documentation/poll-processing";
+import { getDocumentationContext } from "@/services/api/artwork-documentation-api";
 import { documentationOptionLabel } from "@/i18n/messages/artwork-documentation-fields";
 import { formatNumber } from "@/i18n/format";
 import {
@@ -139,47 +141,66 @@ export default function DocumentationUpload({ context, controller }: Props) {
   };
   useEffect(() => {
     if (status !== "processing" || !session) return;
-    const polling = new AbortController();
-    const timer = setInterval(() => {
-      void getDocumentationUpload(context.id, session.upload_id, polling.signal)
-        .then(async (result) => {
-          if (polling.signal.aborted) return;
-          if (result.asset.state === "ready") {
-            clearInterval(timer);
-            const attached = await attach(
-              result.asset.id,
-              result.asset.role,
-              result.asset.intended_visibility,
-              result.asset.filename
-            );
-            if (mounted.current && !polling.signal.aborted) {
-              setStatus(attached ? "idle" : "failed");
-              setFile(null);
-              setSession(null);
-              startKey.current = crypto.randomUUID();
-            }
-          } else if (
-            ["failed", "quarantined", "expired", "cancelled"].includes(
-              result.asset.state
-            )
-          ) {
-            clearInterval(timer);
-            setStatus("failed");
+    return pollDocumentationProcessing({
+      expiresAt: session.expires_at,
+      onError: () => setStatus("failed"),
+      poll: async (signal) => {
+        const result = await getDocumentationUpload(
+          context.id,
+          session.upload_id,
+          signal
+        );
+        if (signal.aborted) return false;
+        if (result.asset.state === "ready") {
+          const attached = await attach(
+            result.asset.id,
+            result.asset.role,
+            result.asset.intended_visibility,
+            result.asset.filename
+          );
+          if (mounted.current && !signal.aborted) {
+            setStatus(attached ? "idle" : "failed");
+            setFile(null);
+            setSession(null);
+            startKey.current = crypto.randomUUID();
           }
-        })
-        .catch(() => {
-          if (!polling.signal.aborted) {
-            clearInterval(timer);
-            setStatus("failed");
-          }
-        });
-    }, 3000);
-    return () => {
-      clearInterval(timer);
-      polling.abort();
-    };
-    // The accepted manifest supplies the label, including when resuming another session.
+          return false;
+        }
+        if (
+          ["failed", "quarantined", "expired", "cancelled"].includes(
+            result.asset.state
+          )
+        ) {
+          setStatus("failed");
+          return false;
+        }
+        return true;
+      },
+    });
   }, [status, session, context.id, controller]);
+  useEffect(() => {
+    if (status === "processing") return;
+    const restored = context.assets.find(
+      (asset) => asset.state === "processing"
+    );
+    if (!restored) return;
+    return pollDocumentationProcessing({
+      expiresAt: restored.expires_at ?? Date.now() + 15 * 60_000,
+      onError: () => setActionError(true),
+      poll: async (signal) => {
+        const result = await getDocumentationUpload(
+          context.id,
+          restored.id,
+          signal
+        );
+        if (signal.aborted) return false;
+        if (result.asset.state === "processing") return true;
+        return !(await controller.mutate((current, currentSignal) =>
+          getDocumentationContext(current.id, currentSignal)
+        ));
+      },
+    });
+  }, [context.assets, context.id, controller, status]);
   const download = async (assetId: string) => {
     setActionError(false);
     try {
@@ -279,9 +300,8 @@ export default function DocumentationUpload({ context, controller }: Props) {
               disabled={
                 !file ||
                 busy ||
-                (!!file &&
-                  file.size >
-                    (context.profile.limits["asset_bytes"] ?? 4294967296))
+                file.size >
+                  (context.profile.limits["asset_bytes"] ?? 4294967296)
               }
               onClick={() => {
                 void run(session?.upload_id);

@@ -145,12 +145,17 @@ function FeedbackThread({
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(false);
-  const action = async (operation: () => Promise<unknown>) => {
+  const action = async (
+    operation: () => Promise<unknown>,
+    clearDraft = false
+  ) => {
+    const submittedText = text;
     setBusy(true);
     setError(false);
     try {
       await operation();
-      setText("");
+      if (clearDraft)
+        setText((current) => (current === submittedText ? "" : current));
       refresh();
     } catch {
       setError(true);
@@ -190,8 +195,9 @@ function FeedbackThread({
           secondary
           disabled={busy || !text.trim() || Array.from(text).length > 4000}
           onClick={() => {
-            void action(() =>
-              commentDocumentationThread(contextId, thread.id, text)
+            void action(
+              () => commentDocumentationThread(contextId, thread.id, text),
+              true
             );
           }}
         >

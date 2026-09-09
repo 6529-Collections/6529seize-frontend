@@ -60,6 +60,14 @@ export const createAdditionalDocumentationContext = (
     signal,
     errorMode: "structured",
   });
+export const documentationProfileKey = (
+  profile: ApiArtworkDocumentationProfile
+) =>
+  JSON.stringify([
+    profile.profile_id,
+    profile.program_id ?? null,
+    profile.version,
+  ]);
 export const documentationWorkspacePath = (workId: string, contextId: string) =>
   `/artwork-documentation/works/${encodeURIComponent(workId)}/contexts/${encodeURIComponent(contextId)}`;
 export const getDocumentationProfiles = (signal?: AbortSignal) =>

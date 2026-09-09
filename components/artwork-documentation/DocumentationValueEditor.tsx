@@ -193,7 +193,10 @@ export default function DocumentationValueEditor(props: Props) {
           onChange={(event) =>
             onChange(
               editor.kind === "number"
-                ? Number(event.target.value)
+                ? event.target.value === "" ||
+                  !Number.isFinite(event.target.valueAsNumber)
+                  ? ""
+                  : event.target.valueAsNumber
                 : event.target.value
             )
           }

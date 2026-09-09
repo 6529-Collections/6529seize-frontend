@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react";
+import DocumentationValueEditor from "@/components/artwork-documentation/DocumentationValueEditor";
 import DocumentationModules from "@/components/artwork-documentation/DocumentationModules";
 import { documentationFixture } from "@/__tests__/fixtures/artwork-documentation";
 
@@ -102,5 +103,25 @@ describe("artwork documentation modules", () => {
         name: "What does this particular threshold mean to you?",
       })
     ).toBeInTheDocument();
+  });
+  it("lets an artist clear an optional numeric member without changing it to zero", () => {
+    const onChange = jest.fn();
+    render(
+      <DocumentationValueEditor
+        id="dimensions"
+        label="Dimensions"
+        editor={{
+          kind: "object",
+          fields: { width: { kind: "number" }, height: { kind: "number" } },
+        }}
+        value={{ width: 1200, height: 800 }}
+        onChange={onChange}
+      />
+    );
+    fireEvent.change(
+      screen.getByRole("spinbutton", { name: "Width in pixels" }),
+      { target: { value: "" } }
+    );
+    expect(onChange).toHaveBeenLastCalledWith({ height: 800 });
   });
 });

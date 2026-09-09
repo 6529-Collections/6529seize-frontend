@@ -130,4 +130,53 @@ describe("archival file transfer", () => {
     ).rejects.toThrow("PART_UPLOAD_FAILED");
     expect(completeDocumentationUpload).not.toHaveBeenCalled();
   });
+  it("aborts sibling parts and waits for them to settle before returning the first failure", async () => {
+    let rejectFirst!: (error: unknown) => void;
+    let rejectSibling!: (error: unknown) => void;
+    let siblingSignal!: AbortSignal;
+    jest
+      .mocked(globalThis.fetch)
+      .mockImplementationOnce(
+        () =>
+          new Promise((_resolve, reject) => {
+            rejectFirst = reject;
+          })
+      )
+      .mockImplementationOnce((_url, init) => {
+        siblingSignal = init!.signal!;
+        return new Promise((_resolve, reject) => {
+          rejectSibling = reject;
+        });
+      });
+    const progress = jest.fn();
+    let settled = false;
+    const request = transferDocumentationFile({
+      contextId: "context",
+      session: session(),
+      file: file("abcdef"),
+      signal: new AbortController().signal,
+      onProgress: progress,
+    });
+    const outcome = request.then(
+      () => {
+        settled = true;
+      },
+      (error: unknown) => {
+        settled = true;
+        return error;
+      }
+    );
+    for (let attempt = 0; attempt < 100 && !rejectSibling; attempt++)
+      await new Promise((resolve) => setTimeout(resolve, 1));
+    expect(rejectSibling).toBeDefined();
+    const failure = new Error("first storage failure");
+    rejectFirst(failure);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(siblingSignal.aborted).toBe(true);
+    expect(settled).toBe(false);
+    expect(progress).not.toHaveBeenCalled();
+    rejectSibling(new DOMException("Aborted", "AbortError"));
+    expect(await outcome).toBe(failure);
+    expect(completeDocumentationUpload).not.toHaveBeenCalled();
+  });
 });

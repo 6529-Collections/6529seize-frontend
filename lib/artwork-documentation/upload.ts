@@ -57,29 +57,39 @@ export async function transferDocumentationFile({
     1,
     Math.min(Number(session.policy["parallel_parts"]) || 3, 3)
   );
+  const workersAbort = new AbortController();
+  const cancelWorkers = () => workersAbort.abort();
+  signal.addEventListener("abort", cancelWorkers, { once: true });
+  if (signal.aborted) workersAbort.abort();
+  const workerSignal = workersAbort.signal;
+  let failure: unknown;
+  let failed = false;
   let cursor = 0;
   const transfer = async () => {
     while (cursor < remaining.length) {
       const partNumber = remaining[cursor++];
       if (partNumber === undefined) return;
-      if (signal.aborted) throw new DOMException("Aborted", "AbortError");
+      if (workerSignal.aborted) throw new DOMException("Aborted", "AbortError");
       const start = (partNumber - 1) * partSize;
       const bytes = file.slice(start, Math.min(start + partSize, file.size));
       const checksum = await sha256Base64(bytes);
+      if (workerSignal.aborted) throw new DOMException("Aborted", "AbortError");
       const signed = await signDocumentationParts(
         contextId,
         session.upload_id,
         [{ part_number: partNumber, checksum_sha256: checksum }],
-        signal
+        workerSignal
       );
+      if (workerSignal.aborted) throw new DOMException("Aborted", "AbortError");
       const part = signed.parts[0];
       if (!part) throw new Error("MISSING_SIGNED_PART");
       const response = await fetch(part.url, {
         method: "PUT",
         body: bytes,
         headers: part.headers,
-        signal,
+        signal: workerSignal,
       });
+      if (workerSignal.aborted) throw new DOMException("Aborted", "AbortError");
       const etag = response.headers.get("etag");
       if (!response.ok || !etag) throw new Error("PART_UPLOAD_FAILED");
       completed.set(partNumber, {
@@ -91,7 +101,24 @@ export async function transferDocumentationFile({
       onProgress(sent);
     }
   };
-  await Promise.all(Array.from({ length: parallel }, transfer));
+  try {
+    await Promise.allSettled(
+      Array.from({ length: parallel }, async () => {
+        try {
+          await transfer();
+        } catch (error) {
+          if (!failed) {
+            failed = true;
+            failure = error;
+            workersAbort.abort();
+          }
+        }
+      })
+    );
+  } finally {
+    signal.removeEventListener("abort", cancelWorkers);
+  }
+  if (failed) throw failure;
   return completeDocumentationUpload(
     contextId,
     session.upload_id,

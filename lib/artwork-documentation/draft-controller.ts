@@ -286,7 +286,13 @@ export class DocumentationDraftController {
   async resolveConflict(keepChanges: boolean) {
     const generation = this.generation;
     const signal = this.abort.signal;
-    const latest = await this.transport.read(this.context.id, signal);
+    let latest: ApiArtworkDocumentationContext;
+    try {
+      latest = await this.transport.read(this.context.id, signal);
+    } catch (error) {
+      if (generation === this.generation) await this.handleFailure(error);
+      return false;
+    }
     if (signal.aborted || generation !== this.generation) return false;
     this.context = latest;
     this.latest = null;

@@ -220,11 +220,12 @@ function DocumentationLaneReviews({
   readonly controller: DocumentationDraftController;
 }) {
   const { msg } = useDocumentationMessages();
-  const [reason, setReason] = useState("");
+  const [reasons, setReasons] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(false);
   const decide = async (lane: string, status: string, version: number) => {
     if (!context.latest_revision_id) return;
+    const reason = reasons[lane] ?? "";
     setBusy(true);
     setError(false);
     try {
@@ -237,7 +238,10 @@ function DocumentationLaneReviews({
       await controller.mutate((current, signal) =>
         getDocumentationContext(current.id, signal)
       );
-      setReason("");
+      setReasons((current) => ({
+        ...current,
+        [lane]: current[lane] === reason ? "" : (current[lane] ?? ""),
+      }));
     } catch {
       setError(true);
     } finally {
@@ -249,6 +253,7 @@ function DocumentationLaneReviews({
       <p className="tw-text-sm tw-text-iron-400">{msg("reviewScope")}</p>
       {error && <DocumentationNotice error>{msg("error")}</DocumentationNotice>}
       {context.profile.review_lanes.map((lane) => {
+        const reason = reasons[lane] ?? "";
         const review = context.reviews.find(
           (item) => String(item.lane) === String(lane)
         );
@@ -278,7 +283,12 @@ function DocumentationLaneReviews({
                     rows={3}
                     className={`${inputClass} tw-mt-2`}
                     value={reason}
-                    onChange={(event) => setReason(event.target.value)}
+                    onChange={(event) =>
+                      setReasons((current) => ({
+                        ...current,
+                        [lane]: event.target.value,
+                      }))
+                    }
                   />
                 </label>
                 <div className="tw-flex tw-flex-wrap tw-gap-3">

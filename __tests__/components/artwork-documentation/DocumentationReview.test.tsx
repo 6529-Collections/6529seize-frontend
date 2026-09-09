@@ -1,9 +1,18 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import DocumentationReview from "@/components/artwork-documentation/DocumentationReview";
 import { documentationFixture } from "@/__tests__/fixtures/artwork-documentation";
 import { DocumentationDraftController } from "@/lib/artwork-documentation/draft-controller";
-import { getDocumentationPublicPreview } from "@/services/api/artwork-documentation-api";
+import {
+  reviewDocumentationRevision,
+  getDocumentationPublicPreview,
+} from "@/services/api/artwork-documentation-api";
 import type { ApiArtworkDocumentationPublicPreview } from "@/generated/models/ApiArtworkDocumentationPublicPreview";
 
 jest.mock("@/hooks/useBrowserLocale", () => ({
@@ -21,6 +30,7 @@ jest.mock("@/services/api/artwork-documentation-api", () => ({
     .fn()
     .mockResolvedValue({ data: [], next_cursor: null }),
   getDocumentationPublicPreview: jest.fn(),
+  reviewDocumentationRevision: jest.fn().mockResolvedValue({}),
 }));
 
 it("waits for the server public projection and never falls back to private draft answers", async () => {
@@ -74,6 +84,64 @@ it("waits for the server public projection and never falls back to private draft
     await screen.findByText("মুক্তিযুদ্ধ — A long title")
   ).toBeInTheDocument();
   expect(screen.queryByText("private@example.invalid")).not.toBeInTheDocument();
+  controller.dispose();
+  client.clear();
+});
+
+it("keeps reviewer notes separate for each lane and clears only the submitted lane", async () => {
+  const context = documentationFixture();
+  context.latest_revision_id = "revision";
+  context.confirmation_status = "current" as never;
+  context.capabilities.review_lanes = ["technical", "rights"] as never;
+  const controller = new DocumentationDraftController(
+    context,
+    { read: jest.fn(), save: jest.fn() },
+    jest.fn()
+  );
+  jest.spyOn(controller, "mutate").mockResolvedValue(true);
+  const client = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  render(
+    <QueryClientProvider client={client}>
+      <DocumentationReview
+        context={context}
+        controller={controller}
+        saveState="clean"
+      />
+    </QueryClientProvider>
+  );
+  const technical = within(
+    screen.getByRole("heading", { name: "Technical review" }).parentElement!
+  );
+  const rights = within(
+    screen.getByRole("heading", { name: "Rights review" }).parentElement!
+  );
+  fireEvent.change(technical.getByRole("textbox", { name: "Review note" }), {
+    target: { value: "Technical note" },
+  });
+  fireEvent.change(rights.getByRole("textbox", { name: "Review note" }), {
+    target: { value: "Rights note" },
+  });
+  fireEvent.click(
+    technical.getByRole("button", { name: "Accept this version" })
+  );
+  await waitFor(() =>
+    expect(reviewDocumentationRevision).toHaveBeenCalledWith(
+      context.id,
+      "revision",
+      "technical",
+      expect.objectContaining({ reason: "Technical note" })
+    )
+  );
+  await waitFor(() =>
+    expect(technical.getByRole("textbox", { name: "Review note" })).toHaveValue(
+      ""
+    )
+  );
+  expect(rights.getByRole("textbox", { name: "Review note" })).toHaveValue(
+    "Rights note"
+  );
   controller.dispose();
   client.clear();
 });

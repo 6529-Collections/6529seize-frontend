@@ -217,4 +217,30 @@ describe("documentation draft controller", () => {
     expect(controller.snapshot().contentEdits).toEqual([]);
     controller.dispose();
   });
+  it.each([
+    [403, "auth_expired"],
+    [503, "offline"],
+  ])(
+    "classifies a failed conflict refresh (%s) without discarding local text",
+    async (status, expected) => {
+      const context = documentationFixture();
+      const read = jest
+        .fn()
+        .mockResolvedValueOnce(context)
+        .mockRejectedValueOnce({ status });
+      const controller = new DocumentationDraftController(
+        context,
+        { read, save: jest.fn().mockRejectedValue({ status: 409 }) },
+        jest.fn()
+      );
+      controller.edit("artwork", titleOperation("unsaved"));
+      await controller.flush();
+      expect(await controller.resolveConflict(true)).toBe(false);
+      expect(controller.snapshot().state).toBe(expected);
+      expect(controller.snapshot().edits[0]?.operation.answer?.value).toBe(
+        "unsaved"
+      );
+      controller.dispose();
+    }
+  );
 });

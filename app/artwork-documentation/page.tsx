@@ -2,8 +2,14 @@ import ArtworkDocumentationList from "@/components/artwork-documentation/Artwork
 export default async function ArtworkDocumentationPage({
   searchParams,
 }: {
-  readonly searchParams: Promise<{ sourceDropId?: string }>;
+  readonly searchParams: Promise<{ sourceDropId?: string | string[] }>;
 }) {
   const { sourceDropId } = await searchParams;
-  return <ArtworkDocumentationList sourceDropId={sourceDropId} />;
+  return (
+    <ArtworkDocumentationList
+      sourceDropId={
+        Array.isArray(sourceDropId) ? sourceDropId[0] : sourceDropId
+      }
+    />
+  );
 }

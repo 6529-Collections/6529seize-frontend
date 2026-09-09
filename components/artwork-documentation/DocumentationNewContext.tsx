@@ -8,6 +8,7 @@ import { useArtworkDocumentationAccess } from "@/hooks/artwork-documentation/use
 import {
   createAdditionalDocumentationContext,
   documentationWorkspacePath,
+  documentationProfileKey,
 } from "@/services/api/artwork-documentation-api";
 import { documentationOptionLabel } from "@/i18n/messages/artwork-documentation-fields";
 import {
@@ -39,7 +40,8 @@ export default function DocumentationNewContext({
   const [error, setError] = useState(false);
   const key = useRef(crypto.randomUUID());
   const profile =
-    profiles.find((item) => item.profile_id === profileId) ?? profiles[0];
+    profiles.find((item) => documentationProfileKey(item) === profileId) ??
+    profiles[0];
   if (!context.capabilities.confirm_as_artist || !profiles.length) return null;
   const create = async () => {
     if (!profile || !(await controller.flush())) return;
@@ -71,7 +73,7 @@ export default function DocumentationNewContext({
         {msg("profile")}
         <select
           className={`${inputClass} tw-my-3`}
-          value={profile?.profile_id ?? ""}
+          value={profile ? documentationProfileKey(profile) : ""}
           onChange={(event) => {
             setProfileId(event.target.value);
             key.current = crypto.randomUUID();
@@ -79,8 +81,15 @@ export default function DocumentationNewContext({
           }}
         >
           {profiles.map((item) => (
-            <option key={item.profile_id} value={item.profile_id}>
+            <option
+              key={documentationProfileKey(item)}
+              value={documentationProfileKey(item)}
+            >
               {documentationOptionLabel(item.profile_id)}
+              {item.program_id
+                ? ` · ${documentationOptionLabel(item.program_id)}`
+                : ""}{" "}
+              · v{item.version}
             </option>
           ))}
         </select>

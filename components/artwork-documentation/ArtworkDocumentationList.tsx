@@ -12,6 +12,7 @@ import {
 import {
   createDocumentationWork,
   documentationWorkspacePath,
+  documentationProfileKey,
   getDocumentationWorks,
   type DocumentationQueueFilters,
 } from "@/services/api/artwork-documentation-api";
@@ -90,8 +91,9 @@ function DocumentationListContent({
     ),
   ];
   const selected =
-    access.profiles.find((profile) => profile.profile_id === profileId) ??
-    access.profiles[0];
+    access.profiles.find(
+      (profile) => documentationProfileKey(profile) === profileId
+    ) ?? access.profiles[0];
   const start = async () => {
     if (!selected) return;
     setStarting(true);
@@ -164,15 +166,22 @@ function DocumentationListContent({
                 {msg("profile")}
                 <select
                   className={`${inputClass} tw-mt-2`}
-                  value={selected?.profile_id ?? ""}
+                  value={selected ? documentationProfileKey(selected) : ""}
                   onChange={(event) => {
                     setProfileId(event.target.value);
                     createKey.current = crypto.randomUUID();
                   }}
                 >
                   {access.profiles.map((profile) => (
-                    <option key={profile.profile_id} value={profile.profile_id}>
+                    <option
+                      key={documentationProfileKey(profile)}
+                      value={documentationProfileKey(profile)}
+                    >
                       {documentationOptionLabel(profile.profile_id)}
+                      {profile.program_id
+                        ? ` · ${documentationOptionLabel(profile.program_id)}`
+                        : ""}{" "}
+                      · v{profile.version}
                     </option>
                   ))}
                 </select>
@@ -240,9 +249,20 @@ function DocumentationListContent({
                   }
                 >
                   <option value="">{msg("all")}</option>
-                  {access.profiles.map((profile) => (
+                  {[
+                    ...new Map(
+                      access.profiles.map((profile) => [
+                        profile.profile_id,
+                        profile,
+                      ])
+                    ).values(),
+                  ].map((profile) => (
                     <option key={profile.profile_id} value={profile.profile_id}>
                       {documentationOptionLabel(profile.profile_id)}
+                      {profile.program_id
+                        ? ` · ${documentationOptionLabel(profile.program_id)}`
+                        : ""}{" "}
+                      · v{profile.version}
                     </option>
                   ))}
                 </select>

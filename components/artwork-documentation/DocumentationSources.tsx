@@ -88,7 +88,7 @@ function SourceReceipt({
     setBusy(true);
     try {
       if (controller.snapshot().dirty) {
-        await controller.flush();
+        if (!(await controller.flush())) return;
         await query.refetch();
         setSelected([]);
         return;
