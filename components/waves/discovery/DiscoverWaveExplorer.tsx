@@ -216,6 +216,7 @@ function ScoreFormulaLink() {
       aria-label="View wave score formula"
       variant="tertiary"
       size="sm"
+      className="!tw-bg-black active:!tw-bg-iron-900 desktop-hover:hover:!tw-bg-iron-950"
     >
       <CalculatorIcon className="tw-size-4" aria-hidden="true" />
       Score formula
@@ -237,10 +238,10 @@ function DiscoverWaveControls({
   const scoreFiltersEnabled = isScoreSort(activeSort);
 
   return (
-    <fieldset className="tw-m-0 tw-flex tw-w-full tw-min-w-0 tw-flex-col tw-gap-2 tw-rounded-lg tw-border-0 tw-bg-black/20 tw-p-1.5 tw-ring-1 tw-ring-inset tw-ring-white/5 xl:tw-flex-row xl:tw-items-center">
+    <fieldset className="tw-m-0 tw-w-full tw-min-w-0 tw-rounded-lg tw-border-0 tw-bg-black/20 tw-p-1.5">
       <legend className="tw-sr-only">Discovery controls</legend>
-      <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-y-3 xl:tw-flex-row xl:tw-items-center xl:tw-gap-x-4">
-        <div className="tw-min-w-0">
+      <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-3">
+        <div className="tw-w-max tw-min-w-0 tw-max-w-full">
           <CommonTabs<DiscoverSort>
             items={SORT_ITEMS}
             activeItem={activeSort}
@@ -250,11 +251,7 @@ function DiscoverWaveControls({
             fill={false}
           />
         </div>
-        <div
-          className="tw-hidden tw-h-6 tw-w-px tw-flex-shrink-0 tw-bg-white/10 xl:tw-block"
-          aria-hidden="true"
-        />
-        <div className="tw-no-scrollbar tw-flex tw-min-w-0 tw-items-center tw-gap-4 tw-overflow-x-auto tw-scroll-smooth tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/60">
+        <div className="tw-no-scrollbar tw-flex tw-w-max tw-min-w-0 tw-max-w-full tw-items-center tw-gap-4 tw-overflow-x-auto tw-scroll-smooth tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/60">
           <div
             role="radiogroup"
             className={`tw-flex tw-flex-shrink-0 tw-flex-nowrap tw-gap-1.5 tw-transition-opacity ${
@@ -287,7 +284,7 @@ function DiscoverWaveControls({
                   className={`tw-flex tw-h-9 tw-flex-shrink-0 tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-text-xs tw-font-medium tw-leading-5 tw-transition-all tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 ${
                     visuallySelected
                       ? "tw-border-primary-500/50 tw-bg-primary-500/10 tw-text-primary-400 desktop-hover:hover:tw-border-primary-400/70 desktop-hover:hover:tw-bg-primary-500/15 desktop-hover:hover:tw-text-primary-300"
-                      : "tw-border-white/5 tw-bg-iron-950 tw-text-iron-300 disabled:tw-cursor-not-allowed disabled:tw-opacity-60 desktop-hover:hover:tw-border-white/10 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-iron-100"
+                      : "tw-border-transparent tw-bg-transparent tw-text-iron-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-60 desktop-hover:hover:tw-bg-iron-900/70 desktop-hover:hover:tw-text-iron-100"
                   }`}
                 >
                   {option.label}
@@ -367,6 +364,7 @@ export function DiscoverWaveExplorer() {
 
   return (
     <ExploreWavesSection
+      headingVariant="page"
       title={title}
       subtitle={null}
       limit={20}
