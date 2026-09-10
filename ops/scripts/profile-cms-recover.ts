@@ -1,5 +1,6 @@
 /* eslint-disable security/detect-non-literal-fs-filename -- Explicit CLI input files; outputs require a new directory, contained paths and exclusive writes. */
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { createReadStream } from "node:fs";
+import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, isAbsolute, relative, resolve } from "node:path";
 import { parseArgs } from "node:util";
 import { Contract, JsonRpcProvider } from "ethers";
@@ -131,14 +132,23 @@ async function main(): Promise<void> {
 async function readBoundedFile(path: string): Promise<Uint8Array> {
   // Local input paths are explicitly selected by the CLI operator, not by a
   // remote request or recovered manifest. This command promises no input root.
-  const bytes = await readFile(path); // NOSONAR S8707: intentional operator-selected local input, not an agent filesystem sandbox.
-  if (bytes.length > MAX_DOCUMENT_BYTES)
-    throw new CmsRecoveryError("CMS recovery document exceeds 8 MiB");
-  return bytes;
+  // Read at most the limit plus one byte, including if the file grows while read.
+  const stream = createReadStream(path, { end: MAX_DOCUMENT_BYTES }); // NOSONAR S8707: intentional operator-selected local input, not an agent filesystem sandbox.
+  const chunks: Uint8Array[] = [];
+  let size = 0;
+  for await (const chunk of stream) {
+    if (!(chunk instanceof Uint8Array))
+      throw new CmsRecoveryError("CMS recovery requires binary file content");
+    size += chunk.length;
+    if (size > MAX_DOCUMENT_BYTES)
+      throw new CmsRecoveryError("CMS recovery document exceeds 8 MiB");
+    chunks.push(chunk);
+  }
+  return Buffer.concat(chunks, size);
 }
 
 async function readDecentralized(uri: string): Promise<Uint8Array> {
-  if (!/^(ar|arweave|ipfs):\/\//.test(uri)) {
+  if (!/^(ar|arweave|ipfs):\/\//i.test(uri)) {
     throw new CmsRecoveryError(
       "CMS recovery requires an ar:// or ipfs:// content address"
     );
