@@ -37,6 +37,7 @@ export {
   shouldFilterBrowserExtensionMessagingConnectionError,
   shouldFilterBrowserExtensionSendMessageError,
   shouldFilterBrowserExtensionWalletRejection,
+  shouldFilterExodusProviderAccountTimeout,
 } from "./sentry-client-filters/extension-messaging";
 export { shouldFilterPoperBlockerOrphanFetchRejection } from "./sentry-client-filters/extension-fetch";
 export { shouldFilterExpectedWaveRequestReplacementAbort } from "./sentry-client-filters/wave-abort";
