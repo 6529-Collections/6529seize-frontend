@@ -6607,7 +6607,7 @@ paths:
     get:
       tags:
         - Profile CMS
-      summary: Get a profile"s primary published CMS package
+      summary: Get a profile's primary published CMS package
       description: >-
         Public mutable lookup used by profile-native sites, including
         /{handle}/index.html. Returns 404 when the profile has no primary
@@ -6640,11 +6640,11 @@ paths:
         - Profile CMS
       summary: Create a wallet NFT holdings snapshot for CMS gallery generation
       description: >-
-        Creates a bounded deterministic snapshot from the backend"s currently
+        Creates a bounded deterministic snapshot from the backend's currently
         indexed NFT ownership tables. This endpoint does not live-index wallets
-        or mutate CMS package hash/signing semantics. It is gated by
-        FEATURE_PROFILE_CMS_WALLET_GALLERY while the gallery generator contract
-        is being integrated.
+        or mutate CMS package hash/signing semantics. It is enabled when
+        FEATURE_PROFILE_CMS_WALLET_GALLERY is absent or exactly true. Any other
+        configured value disables the endpoint.
       operationId: createProfileCmsWalletGallerySnapshot
       x-6529-router:
         enabled: true
@@ -15523,6 +15523,90 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/ApiArtworkDocumentationCreateContext"
+  /profile-cms/packages/{id}/storage/upload:
+    post:
+      tags:
+        - Profile CMS
+      summary: Upload a draft CMS package to decentralized storage
+      description: >-
+        Requires the profile owner or delegated CMS publisher. Uploads the
+        canonical JSON for a DRAFT package to Arweave and records the resulting
+        receipt. Idempotent: if a canonical Arweave receipt already exists for
+        the current package hash, it is returned without re-uploading.
+      operationId: uploadProfileCmsPackageStorage
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/profile-cms/profile-cms.handlers"
+          name: handleUploadProfileCmsPackageStorage
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiProfileCmsPackageStorageUploadResult"
+        "400":
+          description: Package is not a draft, or the stored package hash is invalid
+        "403":
+          description: Missing CMS publish permissions
+        "404":
+          description: CMS package not found
+        "409":
+          description: An upload is already in progress; retry shortly
+        "413":
+          description: Canonical content exceeds the 2 MiB limit
+        "429":
+          description: Profile storage upload quota exhausted
+        "503":
+          description: Arweave storage is not configured
+        "502":
+          description: Arweave upload failed
+  /profile-cms/packages/{id}/unpublish:
+    post:
+      tags:
+        - Profile CMS
+      summary: Remove the profile's current published CMS site
+      operationId: unpublishProfileCmsPackage
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/profile-cms/profile-cms.handlers"
+          name: handleUnpublishProfileCmsPackage
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiUnpublishProfileCmsPackageRequest"
+      responses:
+        "200":
+          description: Primary pointer removed; immutable content remains recoverable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiProfileCmsPackage"
+        "403":
+          description: Missing CMS publish permissions
+        "404":
+          description: CMS package not found
+        "409":
+          description: Current primary no longer matches the expected version
+
 components:
   securitySchemes:
     bearerAuth:
@@ -24613,6 +24697,53 @@ components:
         - BOT
         - PARODY
         - COLLECTION
+    ApiUnpublishProfileCmsPackageRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - expected_current_package_id
+        - expected_current_package_hash
+      properties:
+        expected_current_package_id:
+          type: string
+        expected_current_package_hash:
+          type: string
+          pattern: "^sha256:[a-f0-9]{64}$"
+    ApiProfileCmsStorageReceipt:
+      type: object
+      required:
+        - provider
+        - uri
+        - content_hash
+        - canonical
+        - recorded_at
+      properties:
+        provider:
+          type: string
+          enum:
+            - ipfs
+            - arweave
+            - s3
+            - fixture
+        uri:
+          type: string
+        content_hash:
+          type: string
+        provider_content_id:
+          type: string
+        pinned:
+          type: boolean
+        canonical:
+          type: boolean
+        recorded_at:
+          type: string
+    ApiProfileCmsPackageStorageUploadResult:
+      type: object
+      required:
+        - receipt
+      properties:
+        receipt:
+          $ref: "#/components/schemas/ApiProfileCmsStorageReceipt"
     ApiProfileCmsAgentPatchValidationResult:
       type: object
       required:
@@ -24902,6 +25033,10 @@ components:
         - updated_at
         - created_at
       properties:
+        is_primary:
+          type: boolean
+        recovery_receipt:
+          $ref: "#/components/schemas/ApiProfileCmsStorageReceipt"
         id:
           type: string
         package:
@@ -24948,6 +25083,10 @@ components:
         - pointer_events
         - updated_at
       properties:
+        is_primary:
+          type: boolean
+        recovery_receipt:
+          $ref: "#/components/schemas/ApiProfileCmsStorageReceipt"
         package:
           type: object
           additionalProperties: true
@@ -25020,6 +25159,7 @@ components:
             - supersede
             - rollback
             - archive
+            - unpublish
         profile_id:
           type: string
         profile_handle:
@@ -25041,6 +25181,11 @@ components:
           type: string
         signer_address:
           type: string
+        signature:
+          type: string
+        typed_data:
+          type: object
+          additionalProperties: true
         typed_data_hash:
           type: string
         storage_receipt:
@@ -25708,6 +25853,12 @@ components:
         - chain_id
         - deadline
       properties:
+        expected_current_package_id:
+          description: Omit or pass null only when no current primary is expected.
+          type: string
+          nullable: true
+        expected_current_package_hash:
+          type: string
         expected_package_hash:
           type: string
         expected_payload_hash:
@@ -26142,6 +26293,7 @@ components:
       properties:
         expected_current_package_id:
           type: string
+          nullable: true
         expected_current_package_hash:
           type: string
     ApiSaveEulaConsentRequest:

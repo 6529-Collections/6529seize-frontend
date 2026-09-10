@@ -5409,15 +5409,18 @@
       ],
       "keywords": ["profile", "cms", "builder", "homepage", "edit", "agent"],
       "facts": [
-        "Profile CMS builder behavior is documented under profile docs.",
-        "The builder is for profile-owned custom page/content management surfaces.",
-        "Builder access and editing depend on the connected profile and permissions."
+        "Open /{user}/cms/builder directly to edit a profile-owned website; there is no public profile navigation link.",
+        "Saving, server validation, and publishing require the connected non-proxy owner profile. Publishing uploads content and asks the wallet to sign.",
+        "The builder supports saved drafts, browser recovery, gallery snapshots, full-package JSON and Agent editing, and published version history.",
+        "Restore selects a previous publication. Unpublish removes the active website pointer but does not delete immutable content or version history.",
+        "Published CMS pages use /{user}/index.html and additional package paths. Keep the signed publication manifest for independent recovery."
       ],
       "canonical_path": "/{user}/cms/builder",
       "related_paths": ["/{user}"],
       "tags": ["profiles", "cms"],
       "source_refs": [
         "app/[user]/cms/builder/page.tsx",
+        "ops/docs/profiles/feature-profile-cms-builder.md",
         "ops/docs/profiles/feature-profile-cms-builder-ai-agent-affordances.md"
       ]
     },

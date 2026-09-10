@@ -170,7 +170,7 @@ export function EditorPanel({
           </Fieldset>
 
           <Fieldset title={t(locale, "profileCms.builder.blocks.title")}>
-            <div className="tw-flex tw-flex-wrap tw-gap-2">
+            <div className="tw-flex tw-flex-wrap tw-gap-2 md:tw-col-span-2">
               {BLOCK_OPTIONS.map((option) => (
                 <button
                   className="tw-min-h-10 tw-border tw-border-solid tw-border-iron-700 tw-bg-black tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-text-iron-100 hover:tw-border-primary-400"
@@ -182,7 +182,7 @@ export function EditorPanel({
                 </button>
               ))}
             </div>
-            <div className="tw-mt-4 tw-flex tw-flex-col tw-gap-4">
+            <div className="tw-mt-4 tw-flex tw-flex-col tw-gap-4 md:tw-col-span-2">
               {state.blocks.map((block, index) => (
                 <BlockEditor
                   block={block}

@@ -14,6 +14,11 @@
 import { HttpFile } from '../http/http';
 
 export class ApiPublishProfileCmsPackageRequest {
+    /**
+    * Omit or pass null only when no current primary is expected.
+    */
+    'expected_current_package_id'?: string | null;
+    'expected_current_package_hash'?: string;
     'expected_package_hash'?: string;
     'expected_payload_hash'?: string;
     /**
@@ -46,6 +51,18 @@ export class ApiPublishProfileCmsPackageRequest {
     static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
+        {
+            "name": "expected_current_package_id",
+            "baseName": "expected_current_package_id",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "expected_current_package_hash",
+            "baseName": "expected_current_package_hash",
+            "type": "string",
+            "format": ""
+        },
         {
             "name": "expected_package_hash",
             "baseName": "expected_package_hash",

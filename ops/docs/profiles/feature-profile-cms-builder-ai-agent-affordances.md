@@ -2,11 +2,11 @@
 
 ## Overview
 
-The hidden profile CMS builder route `/{user}/cms/builder` includes a draft-only
+The profile CMS builder route `/{user}/cms/builder` includes a draft-only
 Agent workspace for users who bring their own AI or local tools.
 
-The route remains behind the CMS builder feature flags and is not linked from
-public profile navigation.
+Open the route directly; it is not linked from public profile navigation.
+An operator can disable builder access with the CMS builder feature flags.
 
 ## Exports
 
@@ -48,6 +48,16 @@ Patch review rejects:
 
 ## Ownership Boundary
 
-Agent patch import is local draft editing. Backend save and server validation
-remain gated to the connected non-proxy owner profile, and publish remains
-blocked until the signed decentralized storage flow exists.
+Agent patch import is local draft editing. Backend save, server validation, and
+publishing require the connected non-proxy owner profile. Publishing is a separate
+action that uploads content to decentralized storage and asks the wallet to sign.
+An agent patch cannot trigger publication.
+
+Imported packages retain their complete pages, galleries, and advanced blocks.
+Packages that the visual editor cannot safely represent stay editable through the
+JSON and Agent workspaces, with a preview of the whole package.
+
+## Related Pages
+
+- [Profile CMS Builder](feature-profile-cms-builder.md)
+- [Recover a Signed Profile CMS Website](../developer/profile-cms-recovery.md)

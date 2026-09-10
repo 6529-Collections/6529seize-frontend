@@ -33,6 +33,11 @@ current pages; those guides are not invented as historical snapshot routes.
 The EMMA record covers the five fixed collection shortcuts, Memes season
 selection, Intern JPG token IDs, and the manual contract path in Create Snapshots.
 
+The profile CMS builder record covers direct route access, owner-only server
+actions, draft recovery, gallery snapshots, wallet-signed publishing, version
+restoration, and unpublishing. It distinguishes removing the active website
+pointer from deleting immutable storage and links to the builder's user guide.
+
 ## Goals
 
 - Define frontend-owned source material for 6529 Help Bot answers.
