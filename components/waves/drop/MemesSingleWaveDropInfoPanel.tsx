@@ -2,7 +2,6 @@
 
 import { MobileVotingModal, VotingModal } from "@/components/voting";
 import { useVotingModalState } from "@/components/voting/useVotingModalState";
-import type { ApiDropVoteDistribution } from "@/generated/models/ApiDropVoteDistribution";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { getFileInfoFromUrl } from "@/helpers/file.helpers";
 import {
@@ -17,10 +16,14 @@ import { useCallback, useMemo } from "react";
 import { MemesDropArtworkHero } from "./MemesDropArtworkHero";
 import { MemesDropDetailsSection } from "./MemesDropDetailsSection";
 import { MemesDropSummarySection } from "./MemesDropSummarySection";
+import {
+  DISABLED_DROP_VOTE_SUMMARY_STATE,
+  type DropVoteSummaryState,
+} from "./useDropVoteSummary";
 
 interface MemesSingleWaveDropInfoPanelProps {
   readonly drop: ExtendedDrop;
-  readonly voteDistribution?: ApiDropVoteDistribution | undefined;
+  readonly voteSummary?: DropVoteSummaryState | undefined;
   readonly wave: ApiWave | null;
   readonly onClose?: (() => void) | undefined;
   readonly isVotingClosed?: boolean | undefined;
@@ -30,7 +33,7 @@ interface MemesSingleWaveDropInfoPanelProps {
 
 export const MemesSingleWaveDropInfoPanel = ({
   drop,
-  voteDistribution,
+  voteSummary = DISABLED_DROP_VOTE_SUMMARY_STATE,
   wave,
   onClose,
   isVotingClosed = false,
@@ -140,7 +143,7 @@ export const MemesSingleWaveDropInfoPanel = ({
 
         <MemesDropDetailsSection
           drop={drop}
-          voteDistribution={voteDistribution}
+          voteSummary={voteSummary}
           wave={wave}
           artworkMedia={artworkMedia}
           fileInfo={fileInfo}

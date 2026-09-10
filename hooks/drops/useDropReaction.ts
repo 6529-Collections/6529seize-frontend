@@ -2,7 +2,6 @@
 
 import { useAuth } from "@/components/auth/Auth";
 import { QueryKey as AppQueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { updateDropInCachedDrops } from "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { useWaveEligibility } from "@/contexts/wave/WaveEligibilityContext";
 import type { ApiDropReaction } from "@/generated/models/ApiDropReaction";
@@ -11,8 +10,11 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ChatRestriction } from "@/hooks/useDropPriviledges";
 import type { ApiDropContextProfileContext } from "@/generated/models/ApiDropContextProfileContext";
 import { recordReaction } from "@/helpers/reactions/reactionHistory";
-import { enqueueDropReactionRequest } from "@/helpers/reactions/dropReactionRequestQueue";
-import type { Drop, ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import {
+  enqueueDropReactionRequest,
+  isDropReactionRequestTimeout,
+} from "@/helpers/reactions/dropReactionRequestQueue";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import { COMMUNITY_CURATIONS_DROPS_QUERY_KEY } from "@/hooks/useCommunityCurationsDrops";
 import {
@@ -25,9 +27,10 @@ import {
 } from "@/hooks/drops/optimisticReactionQueryCache";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { commonApiDelete, commonApiPost } from "@/services/api/common-api";
-import { fetchDropByIdBatched } from "@/services/api/drop-api";
 import { useWebsocketStatus } from "@/services/websocket/useWebSocketMessage";
-import type { InfiniteData, QueryClient } from "@tanstack/react-query";
+import type { InfiniteData } from "@tanstack/react-query";
+import { useDropReactionRecovery } from "@/hooks/drops/useDropReactionRecovery";
+import { t } from "@/i18n/messages";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useRef, type RefObject } from "react";
 import {
@@ -366,60 +369,6 @@ const useOptimisticCurationDropReaction = ({
   );
 };
 
-const useRefreshCanonicalDropAfterLatestFailure = ({
-  applyOptimisticDropUpdate,
-  dropId,
-  queryClient,
-  updateNotificationQueriesWithCanonicalDrop,
-  waveId,
-}: {
-  readonly applyOptimisticDropUpdate: ReturnType<
-    typeof useMyStream
-  >["applyOptimisticDropUpdate"];
-  readonly dropId: string;
-  readonly queryClient: QueryClient;
-  readonly updateNotificationQueriesWithCanonicalDrop: (drop: ApiDrop) => void;
-  readonly waveId: string;
-}) =>
-  useCallback(async () => {
-    try {
-      const apiDrop = (await fetchDropByIdBatched(dropId)) as ApiDrop | null;
-      if (apiDrop === null) {
-        return;
-      }
-
-      updateDropInCachedDrops(queryClient, apiDrop);
-      updateNotificationQueriesWithCanonicalDrop(apiDrop);
-      applyOptimisticDropUpdate({
-        waveId,
-        dropId,
-        update: (draft): Drop => {
-          if (draft.type !== DropSize.FULL) {
-            return draft;
-          }
-
-          return {
-            ...apiDrop,
-            type: DropSize.FULL,
-            stableKey: draft.stableKey,
-            stableHash: draft.stableHash,
-          };
-        },
-      });
-    } catch (error) {
-      console.error(
-        "Failed to refresh drop after failed reaction request:",
-        error
-      );
-    }
-  }, [
-    applyOptimisticDropUpdate,
-    dropId,
-    queryClient,
-    updateNotificationQueriesWithCanonicalDrop,
-    waveId,
-  ]);
-
 const sendReactionRequest = async ({
   endpoint,
   isRemoving,
@@ -532,26 +481,34 @@ export function useDropReaction(
       connectedProfile,
       dropId,
     });
-  const refreshCanonicalDropAfterLatestFailure =
-    useRefreshCanonicalDropAfterLatestFailure({
-      applyOptimisticDropUpdate,
-      dropId,
-      queryClient,
-      updateNotificationQueriesWithCanonicalDrop,
-      waveId,
-    });
+  const {
+    captureOwner,
+    isCurrentMutation,
+    refreshAfterFailure,
+    reconcileTimeout,
+  } = useDropReactionRecovery({
+    activeProfileProxy,
+    applyOptimisticDropUpdate,
+    connectedProfile,
+    dropId,
+    queryClient,
+    updateNotificationQueriesWithCanonicalDrop,
+    waveId,
+  });
 
   const react = useCallback(
     async (reactionCode: string) => {
       if (!canReact || isDropReactionAuthRecoveryPending()) return;
 
       const authStateFingerprint = getDropReactionAuthStateFingerprint();
+      const owner = captureOwner(authStateFingerprint);
       const isRemoving = reactionCode === contextProfileContext?.reaction;
       const intendedReaction = isRemoving ? null : reactionCode;
       const endpoint = `drops/${drop.id}/reaction`;
       const method = isRemoving ? "DELETE" : "POST";
 
       const mutation = beginReactionMutation({
+        isCurrentOwner: owner.isCurrent,
         dropId,
         waveId,
         source,
@@ -565,6 +522,7 @@ export function useDropReaction(
         profileId: connectedProfile?.id ?? null,
         websocketStatus,
       });
+      const isCurrent = () => isCurrentMutation(mutation, owner.isCurrent);
 
       rollbackRef.current = toOwnedRollback(
         mutation.mutationId,
@@ -580,26 +538,37 @@ export function useDropReaction(
         recordReaction(reactionCode);
       }
 
-      let succeeded = false;
-
-      try {
-        await enqueueDropReactionRequest(dropId, async (signal) => {
-          await sendReactionRequest({
-            endpoint,
-            isRemoving,
-            mutation,
-            reactionCode,
-            signal,
+      const handleTimeout = async () => {
+        const reconciliation = await reconcileTimeout(
+          mutation,
+          intendedReaction,
+          isCurrent
+        );
+        if (!isCurrent()) return;
+        clearRollbackForMutation(rollbackRef, mutation.mutationId);
+        if (reconciliation.outcome === "confirmed") {
+          if (owner.isMounted()) runReactionSuccessCallback(onSuccess);
+        } else if (
+          reconciliation.outcome === "unconfirmed" &&
+          owner.isVisible()
+        ) {
+          setToast({
+            title: t(locale, "drops.reactions.unconfirmed"),
+            type: "warning",
+            autoClose: 8_000,
           });
-        });
-        const result = recordReactionRequestSucceeded(mutation);
-        if (result.isLatestMutation) {
-          clearRollbackForMutation(rollbackRef, mutation.mutationId);
-          succeeded = true;
         }
-      } catch (error) {
+      };
+
+      const handleFailure = async (error: unknown) => {
         const result = recordReactionRequestFailed(mutation, error);
-        if (!result.isLatestMutation) {
+        if (!result.isLatestMutation || !isCurrent()) {
+          clearRollbackForMutation(rollbackRef, mutation.mutationId);
+          return;
+        }
+
+        if (isDropReactionRequestTimeout(error)) {
+          await handleTimeout();
           return;
         }
 
@@ -627,15 +596,39 @@ export function useDropReaction(
           isRemoving ? "Error removing reaction" : "Error adding reaction",
           locale
         );
-        setToast({ message: errorMessage, type: "error" });
+        if (owner.isVisible())
+          setToast({ message: errorMessage, type: "error" });
         if (runRollbackForMutation(rollbackRef, mutation.mutationId)) {
           recordReactionRollbackApplied(mutation);
         }
-        await refreshCanonicalDropAfterLatestFailure();
+        await refreshAfterFailure(isCurrent);
         await authRecovery;
+      };
+
+      let succeeded = false;
+
+      try {
+        await enqueueDropReactionRequest(dropId, async (signal) => {
+          if (!owner.isCurrent()) return;
+          await sendReactionRequest({
+            endpoint,
+            isRemoving,
+            mutation,
+            reactionCode,
+            signal,
+          });
+        });
+        const result = recordReactionRequestSucceeded(mutation);
+        if (result.isLatestMutation && isCurrent()) {
+          clearRollbackForMutation(rollbackRef, mutation.mutationId);
+          succeeded = true;
+        }
+      } catch (error) {
+        await handleFailure(error);
+        return;
       }
 
-      if (succeeded) {
+      if (succeeded && owner.isMounted() && isCurrent()) {
         runReactionSuccessCallback(onSuccess);
       }
     },
@@ -651,7 +644,10 @@ export function useDropReaction(
       locale,
       setToast,
       onSuccess,
-      refreshCanonicalDropAfterLatestFailure,
+      captureOwner,
+      isCurrentMutation,
+      refreshAfterFailure,
+      reconcileTimeout,
       recoverFromUnauthorized,
       source,
       updateEligibility,

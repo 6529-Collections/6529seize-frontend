@@ -17,7 +17,7 @@ export const DefaultSingleWaveDrop: React.FC<DefaultSingleWaveDropProps> = ({
   drop: initialDrop,
   onClose,
 }) => {
-  const { drop, wave, extendedDrop, voteDistribution } = useSingleWaveDropData(
+  const { drop, wave, extendedDrop, voteSummary } = useSingleWaveDropData(
     initialDrop,
     onClose
   );
@@ -47,7 +47,7 @@ export const DefaultSingleWaveDrop: React.FC<DefaultSingleWaveDropProps> = ({
       <ContentModerationDropGate drop={extendedDrop}>
         <SingleWaveDropInfoPanel
           drop={extendedDrop}
-          voteDistribution={voteDistribution}
+          voteSummary={voteSummary}
           isVotingClosed={isVotingClosed}
           isVotingControlsLocked={isVotingControlsLocked}
           winningThreshold={winningThreshold}
