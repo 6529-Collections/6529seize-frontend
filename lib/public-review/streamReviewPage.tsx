@@ -270,6 +270,7 @@ function getDisplayedEditorialMarkdown({
   return editorialMarkdown;
 }
 
+/** Selects current-route summaries while preserving saved page definitions. */
 function getDisplayedPage(
   page: PublicReviewPageDefinition,
   currentPages: CurrentStreamReviewPages
@@ -408,6 +409,10 @@ function StreamReviewIntroNotice({
   );
 }
 
+/**
+ * Loads a review's pinned content and evidence, then renders its reading view.
+ * Current routes receive checked corrections; saved routes retain their content.
+ */
 async function renderStreamReviewRoute(route: StreamReviewRouteModel) {
   const contentVersion =
     route.version ?? STREAM_REVIEW_DEFINITION.activeVersion;

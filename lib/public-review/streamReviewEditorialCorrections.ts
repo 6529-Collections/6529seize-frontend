@@ -190,6 +190,11 @@ const CORRECTIONS: Readonly<Record<string, Correction>> = {
   },
 };
 
+/**
+ * Applies localized corrections only to the pinned current reading view.
+ * Saved routes and unaffected chapters keep their original Markdown.
+ * @throws When the source identity or saved content no longer matches the corrections.
+ */
 export function getCurrentStreamEditorialMarkdown({
   pageId,
   markdown,

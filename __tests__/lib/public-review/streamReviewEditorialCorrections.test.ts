@@ -27,6 +27,7 @@ const pages = [
   "security-testing-and-known-limitations",
 ];
 
+/** Reads the saved chapter fixture used to check correction and anchor guards. */
 function readPage(pageId: string) {
   return fs.readFileSync(
     path.join(
