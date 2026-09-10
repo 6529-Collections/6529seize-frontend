@@ -608,7 +608,8 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
       "Primary-tab transition feedback is covered on Capacitor simulations"
     );
 
-    let requestedPath: "/notifications" | "/the-memes" | null = null;
+    let notificationRequests = 0;
+    let collectionRequests = 0;
     let releaseNotifications!: () => void;
     let releaseCollections!: () => void;
     const notificationsReleased = new Promise<void>((resolve) => {
@@ -620,14 +621,16 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
 
     await page.route("**/*", async (route) => {
       const url = new URL(route.request().url());
-      if (!url.searchParams.has("_rsc") || url.pathname !== requestedPath) {
-        await route.continue();
-        return;
+      if (url.searchParams.has("_rsc")) {
+        if (url.pathname === "/notifications") {
+          notificationRequests += 1;
+          await notificationsReleased;
+        } else if (url.pathname === "/the-memes") {
+          collectionRequests += 1;
+          await collectionsReleased;
+        }
       }
 
-      await (requestedPath === "/notifications"
-        ? notificationsReleased
-        : collectionsReleased);
       await route.continue();
     });
 
@@ -643,14 +646,14 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
     });
 
     try {
-      requestedPath = "/notifications";
       await notifications.tap({ noWaitAfter: true });
+      await expect.poll(() => notificationRequests).toBeGreaterThan(0);
       await expect(
         notifications.getByTestId("nav-item-pending-indicator")
       ).toHaveCount(0);
 
-      requestedPath = "/the-memes";
       await collections.tap({ noWaitAfter: true });
+      await expect.poll(() => collectionRequests).toBeGreaterThan(0);
       await expect(
         collections.getByTestId("nav-item-pending-indicator")
       ).toHaveCount(0);
