@@ -29,6 +29,7 @@ import {
   getSessionRefreshKey,
   isAbortError,
   withCrossTabWebSessionRefreshLock,
+  withSessionRefreshAbort,
   type AuthSessionClientType,
 } from "./session-refresh-coordination.utils";
 
@@ -62,7 +63,10 @@ interface SessionNativeResponse {
 
 type SessionLoginResponse = SessionWebResponse | SessionNativeResponse;
 type SessionRefreshResponse = SessionWebResponse | SessionNativeResponse;
-type SessionRefreshFailureCooldown = { readonly type: SessionRefreshFailureCooldownType; readonly expiresAtMs: number };
+type SessionRefreshFailureCooldown = {
+  readonly type: SessionRefreshFailureCooldownType;
+  readonly expiresAtMs: number;
+};
 type SessionRefreshInFlight = {
   readonly controller: AbortController;
   readonly promise: Promise<SessionRefreshResponse | null>;
@@ -102,6 +106,7 @@ interface NativeConnectionShareSourceProof {
 }
 
 const sessionRefreshInFlight = new Map<string, SessionRefreshInFlight>();
+const SESSION_REFRESH_TIMEOUT_MS = 30_000;
 const sessionRefreshFailureCooldowns = new Map<
   string,
   SessionRefreshFailureCooldown
@@ -135,8 +140,7 @@ function rememberSessionRefreshFailure(
   sessionRefreshFailureCooldowns.set(key, {
     type,
     expiresAtMs:
-      Date.now() +
-      getSessionRefreshFailureCooldownMs(type, cooldownMsOverride),
+      Date.now() + getSessionRefreshFailureCooldownMs(type, cooldownMsOverride),
   });
 }
 
@@ -339,12 +343,15 @@ async function executeSessionRefreshV2({
   refreshKey,
 }: {
   readonly address: string;
-  readonly abortSignal?: AbortSignal | undefined;
+  readonly abortSignal: AbortSignal;
   readonly clientType: AuthSessionClientType;
   readonly refreshKey: string;
 }): Promise<SessionRefreshResponse | null> {
   if (clientType !== "web") {
     const nativeRefreshToken = await getNativeRefreshToken(address);
+    if (abortSignal.aborted) {
+      throw createAbortError();
+    }
     if (!nativeRefreshToken) {
       recordSessionRefreshOutcome({
         clientType,
@@ -354,6 +361,7 @@ async function executeSessionRefreshV2({
     }
 
     return await executeSessionRefreshRequest({
+      abortSignal,
       clientType,
       request: () =>
         commonApiPost<
@@ -383,6 +391,7 @@ async function executeSessionRefreshV2({
     abortSignal,
     task: async () =>
       await executeSessionRefreshRequest({
+        abortSignal,
         clientType,
         request: () =>
           commonApiPost<
@@ -407,9 +416,11 @@ async function executeSessionRefreshV2({
 }
 
 async function executeSessionRefreshRequest<T extends SessionRefreshResponse>({
+  abortSignal,
   clientType,
   request,
 }: {
+  readonly abortSignal: AbortSignal;
   readonly clientType: AuthSessionClientType;
   readonly request: () => Promise<T>;
 }): Promise<T | null> {
@@ -420,7 +431,10 @@ async function executeSessionRefreshRequest<T extends SessionRefreshResponse>({
   });
 
   try {
-    const response = await request();
+    const response = await withSessionRefreshAbort({
+      abortSignal,
+      task: request,
+    });
     recordSessionRefreshOutcome({
       clientType,
       outcome: "success",
@@ -439,6 +453,46 @@ async function executeSessionRefreshRequest<T extends SessionRefreshResponse>({
     }
     throw error;
   }
+}
+
+function createSessionRefreshEntry({
+  address,
+  clientType,
+  refreshKey,
+}: {
+  readonly address: string;
+  readonly clientType: AuthSessionClientType;
+  readonly refreshKey: string;
+}): SessionRefreshInFlight {
+  // Background consumers must not keep every later action on a stalled request.
+  const controller = new AbortController();
+  let timeoutId: ReturnType<typeof globalThis.setTimeout> | undefined;
+  const timeout = new Promise<never>((_resolve, reject) => {
+    timeoutId = globalThis.setTimeout(() => {
+      const error = new Error("Session refresh timed out. Please try again.");
+      error.name = "TimeoutError";
+      reject(error);
+      controller.abort();
+    }, SESSION_REFRESH_TIMEOUT_MS);
+  });
+  const request = withSessionRefreshAbort({
+    abortSignal: controller.signal,
+    task: () =>
+      executeSessionRefreshV2({
+        address,
+        abortSignal: controller.signal,
+        clientType,
+        refreshKey,
+      }),
+  });
+
+  return {
+    controller,
+    activeConsumers: 1,
+    promise: Promise.race([request, timeout]).finally(() => {
+      globalThis.clearTimeout(timeoutId);
+    }),
+  };
 }
 
 export async function refreshSessionV2({
@@ -477,8 +531,7 @@ export async function refreshSessionV2({
     });
     await withSessionRefreshAbortTelemetry({
       clientType,
-      task: () =>
-        waitForSessionRefreshRetryCooldown({ cooldown, abortSignal }),
+      task: () => waitForSessionRefreshRetryCooldown({ cooldown, abortSignal }),
     });
     if (sessionRefreshFailureCooldowns.get(key) === cooldown) {
       sessionRefreshFailureCooldowns.delete(key);
@@ -508,22 +561,19 @@ export async function refreshSessionV2({
     });
   }
 
-  const controller = new AbortController();
-  const entry: SessionRefreshInFlight = {
-    controller,
-    activeConsumers: 1,
-    promise: executeSessionRefreshV2({
-      address,
-      abortSignal: abortSignal ? controller.signal : undefined,
-      clientType,
-      refreshKey: key,
-    }),
-  };
+  const entry = createSessionRefreshEntry({
+    address,
+    clientType,
+    refreshKey: key,
+  });
   sessionRefreshInFlight.set(key, entry);
 
   void (async () => {
     try {
       const response = await entry.promise;
+      if (sessionRefreshInFlight.get(key) !== entry) {
+        return;
+      }
       if (response) {
         clearSessionRefreshFailure(key);
         return;
@@ -531,6 +581,9 @@ export async function refreshSessionV2({
 
       rememberSessionRefreshFailure(key, "empty");
     } catch (error: unknown) {
+      if (sessionRefreshInFlight.get(key) !== entry) {
+        return;
+      }
       if (isAbortError(error)) {
         return;
       }

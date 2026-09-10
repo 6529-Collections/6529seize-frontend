@@ -77,6 +77,11 @@ is blocked.
 
 ## Posting and Submission Checks
 
+- Post waits for a session check, then shows a connection or timeout error:
+  the draft stays in the composer. Wait for the loading state to finish, check
+  your connection, complete sign-in if prompted, then retry Post. A stalled
+  session check expires so a later attempt can check the session again; the
+  failed attempt does not automatically post your draft.
 - Footer shows `Connect your wallet to participate in this wave`:
   both chat and submission are blocked because the current viewer is signed out.
 - Footer shows `Create a profile to participate in this wave`:

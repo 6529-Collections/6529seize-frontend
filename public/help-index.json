@@ -1324,12 +1324,16 @@
         "On desktop web, the collapsed sidebar account avatar highlights on hover but opens its account dropdown only when activated; the dropdown stays aligned with the sidebar on centered wide-screen layouts.",
         "Sign out all clears every connected profile in one visible transition without switching through the remaining profiles.",
         "If wallet connection is not working, retry from the header wallet controls and confirm the wallet modal is completed before using write actions.",
+        "If Post cannot finish its session check, the draft stays in the composer. Wait for loading to finish, check the connection, complete sign-in if prompted, then retry Post. A stalled session check expires so a later attempt can check again; it does not automatically post the draft.",
         "Some write actions, settings, and subscriptions require a connected profile."
       ],
       "canonical_path": "/",
       "related_paths": ["/access"],
       "tags": ["auth", "wallet", "profiles"],
-      "source_refs": ["ops/docs/navigation/feature-wallet-account-controls.md"]
+      "source_refs": [
+        "ops/docs/navigation/feature-wallet-account-controls.md",
+        "ops/docs/waves/troubleshooting-wave-navigation-and-posting.md"
+      ]
     },
     {
       "id": "wallet.connection-sharing",

@@ -440,7 +440,7 @@ describe("session-v2.utils", () => {
         client_type: "web",
         client_address: "0xabc",
       },
-      signal: undefined,
+      signal: expect.any(AbortSignal),
       credentials: "include",
       errorMode: "structured",
       includeWalletAuth: false,
@@ -490,7 +490,7 @@ describe("session-v2.utils", () => {
 
     expect(requestLock).toHaveBeenCalledWith(
       "6529:auth-session-refresh:web:0xabc",
-      { mode: "exclusive" },
+      { mode: "exclusive", signal: expect.any(AbortSignal) },
       expect.any(Function)
     );
     expect(commonApiPost).toHaveBeenCalledWith(
@@ -608,7 +608,7 @@ describe("session-v2.utils", () => {
         client_type: "web",
         client_address: "0xabc",
       },
-      signal: undefined,
+      signal: expect.any(AbortSignal),
       credentials: "include",
       errorMode: "structured",
       includeWalletAuth: false,
@@ -714,6 +714,204 @@ describe("session-v2.utils", () => {
       "success",
     ]);
     expectNoSensitiveRefreshTelemetry(getSessionRefreshInfoTelemetry());
+  });
+
+  it("expires a stalled background refresh so later actions can start a fresh request", async () => {
+    jest.useFakeTimers();
+    const sessionResponse = {
+      client_type: "web",
+      address: "0xabc",
+      role: null,
+      access_token: "access-token",
+      access_token_expires_at: "2026-06-10T00:00:00.000Z",
+    };
+    const manualController = new AbortController();
+    let backgroundError: unknown;
+    let internalSignal: AbortSignal | undefined;
+    (commonApiPost as jest.Mock)
+      .mockImplementationOnce(
+        ({ signal }: { readonly signal?: AbortSignal }) => {
+          internalSignal = signal;
+          return new Promise(() => {});
+        }
+      )
+      .mockResolvedValueOnce(sessionResponse);
+
+    try {
+      const backgroundRefresh = refreshSessionV2({ address: "0xabc" }).catch(
+        (error: unknown) => {
+          backgroundError = error;
+        }
+      );
+      const manualRefresh = refreshSessionV2({
+        address: "0xABC",
+        abortSignal: manualController.signal,
+      });
+      manualController.abort();
+      await expect(manualRefresh).rejects.toMatchObject({ name: "AbortError" });
+      expect(commonApiPost).toHaveBeenCalledTimes(1);
+
+      await jest.advanceTimersByTimeAsync(30_000);
+
+      expect(backgroundError).toMatchObject({ name: "TimeoutError" });
+      expect(internalSignal?.aborted).toBe(true);
+      await backgroundRefresh;
+      const retry = refreshSessionV2({ address: "0xabc" });
+      expect(commonApiPost).toHaveBeenCalledTimes(1);
+      await jest.advanceTimersByTimeAsync(250);
+      await expect(retry).resolves.toBe(sessionResponse);
+      expect(commonApiPost).toHaveBeenCalledTimes(2);
+      expect(jest.getTimerCount()).toBe(0);
+    } finally {
+      __resetSessionRefreshStateForTests();
+      jest.useRealTimers();
+    }
+  });
+
+  it.each(["success", "unauthorized", "rate-limit"] as const)(
+    "ignores a timed-out refresh's late %s settlement while a replacement request is active",
+    async (lateOutcome) => {
+      jest.useFakeTimers();
+      const sessionResponse = {
+        client_type: "web",
+        address: "0xabc",
+        role: null,
+        access_token: "access-token",
+        access_token_expires_at: "2026-06-10T00:00:00.000Z",
+      };
+      let resolveStalled!: (value: typeof sessionResponse) => void;
+      let rejectStalled!: (error: Error) => void;
+      let resolveReplacement!: (value: typeof sessionResponse) => void;
+      const stalled = new Promise<typeof sessionResponse>((resolve, reject) => {
+        resolveStalled = resolve;
+        rejectStalled = reject;
+      });
+      const replacement = new Promise<typeof sessionResponse>((resolve) => {
+        resolveReplacement = resolve;
+      });
+      (commonApiPost as jest.Mock)
+        .mockReturnValueOnce(stalled)
+        .mockReturnValueOnce(replacement)
+        .mockResolvedValueOnce(sessionResponse);
+
+      try {
+        let timeoutError: unknown;
+        const expired = refreshSessionV2({ address: "0xabc" }).catch(
+          (error: unknown) => {
+            timeoutError = error;
+          }
+        );
+        await jest.advanceTimersByTimeAsync(30_000);
+        expect(timeoutError).toMatchObject({ name: "TimeoutError" });
+        await expired;
+
+        const fresh = refreshSessionV2({ address: "0xabc" });
+        await jest.advanceTimersByTimeAsync(250);
+        expect(commonApiPost).toHaveBeenCalledTimes(2);
+        if (lateOutcome === "success") {
+          resolveStalled(sessionResponse);
+        } else {
+          rejectStalled(
+            Object.assign(new Error(lateOutcome), {
+              status: lateOutcome === "unauthorized" ? 401 : 429,
+            })
+          );
+        }
+        await jest.advanceTimersByTimeAsync(0);
+
+        const joined = refreshSessionV2({ address: "0xABC" });
+        expect(commonApiPost).toHaveBeenCalledTimes(2);
+        resolveReplacement(sessionResponse);
+        await expect(fresh).resolves.toBe(sessionResponse);
+        await expect(joined).resolves.toBe(sessionResponse);
+        await expect(refreshSessionV2({ address: "0xabc" })).resolves.toBe(
+          sessionResponse
+        );
+        expect(commonApiPost).toHaveBeenCalledTimes(3);
+      } finally {
+        __resetSessionRefreshStateForTests();
+        jest.useRealTimers();
+      }
+    }
+  );
+
+  it.each(["waiting", "acquired"] as const)(
+    "expires a stalled refresh with its cross-tab lock %s",
+    async (lockState) => {
+      jest.useFakeTimers();
+      let lockSignal: AbortSignal | undefined;
+      let lockReleased = false;
+      let timeoutError: unknown;
+      const requestLock = jest.fn(
+        async <T>(
+          _name: string,
+          options: LockOptions,
+          callback: (lock: Lock | null) => Promise<T>
+        ): Promise<T> => {
+          lockSignal = options.signal;
+          if (lockState === "waiting") {
+            return await new Promise<T>(() => {});
+          }
+          try {
+            return await callback(null);
+          } finally {
+            lockReleased = true;
+          }
+        }
+      );
+      setNavigatorLocks({ request: requestLock } as unknown as LockManager);
+      (commonApiPost as jest.Mock).mockReturnValueOnce(new Promise(() => {}));
+
+      try {
+        const refresh = refreshSessionV2({ address: "0xabc" }).catch(
+          (error: unknown) => {
+            timeoutError = error;
+          }
+        );
+        await jest.advanceTimersByTimeAsync(30_000);
+
+        expect(timeoutError).toMatchObject({ name: "TimeoutError" });
+        await refresh;
+        expect(lockSignal?.aborted).toBe(true);
+        expect(lockReleased).toBe(lockState === "acquired");
+        expect(commonApiPost).toHaveBeenCalledTimes(
+          lockState === "acquired" ? 1 : 0
+        );
+      } finally {
+        __resetSessionRefreshStateForTests();
+        jest.useRealTimers();
+      }
+    }
+  );
+
+  it("does not send a native refresh if token storage resolves after the deadline", async () => {
+    jest.useFakeTimers();
+    (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(true);
+    let resolveStoredToken!: (token: string) => void;
+    let timeoutError: unknown;
+    (getNativeRefreshToken as jest.Mock).mockReturnValueOnce(
+      new Promise<string>((resolve) => {
+        resolveStoredToken = resolve;
+      })
+    );
+
+    try {
+      const refresh = refreshSessionV2({ address: "0xabc" }).catch(
+        (error: unknown) => {
+          timeoutError = error;
+        }
+      );
+      await jest.advanceTimersByTimeAsync(30_000);
+
+      expect(timeoutError).toMatchObject({ name: "TimeoutError" });
+      await refresh;
+      resolveStoredToken("native-refresh-token");
+      await jest.advanceTimersByTimeAsync(0);
+      expect(commonApiPost).not.toHaveBeenCalled();
+    } finally {
+      __resetSessionRefreshStateForTests();
+      jest.useRealTimers();
+    }
   });
 
   it("blocks invalid web session refreshes until persisted auth clears the block", async () => {
@@ -1043,7 +1241,7 @@ describe("session-v2.utils", () => {
         client_type: "web",
         client_address: "0xabc",
       },
-      signal: undefined,
+      signal: expect.any(AbortSignal),
       credentials: "include",
       errorMode: "structured",
       includeWalletAuth: false,
@@ -1175,7 +1373,7 @@ describe("session-v2.utils", () => {
         client_address: "0xabc",
         native_refresh_token: "native-refresh-token",
       },
-      signal: undefined,
+      signal: expect.any(AbortSignal),
       credentials: "include",
       errorMode: "structured",
       includeWalletAuth: false,

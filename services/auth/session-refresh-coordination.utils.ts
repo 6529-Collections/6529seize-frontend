@@ -26,6 +26,32 @@ export const isAbortError = (error: unknown): boolean =>
   "name" in error &&
   error.name === "AbortError";
 
+export async function withSessionRefreshAbort<T>({
+  abortSignal,
+  task,
+}: {
+  readonly abortSignal: AbortSignal;
+  readonly task: () => Promise<T>;
+}): Promise<T> {
+  if (abortSignal.aborted) {
+    throw createAbortError();
+  }
+
+  let rejectOnAbort: ((error: DOMException) => void) | undefined;
+  const aborted = new Promise<never>((_resolve, reject) => {
+    rejectOnAbort = reject;
+  });
+  const onAbort = () => rejectOnAbort?.(createAbortError());
+  abortSignal.addEventListener("abort", onAbort, { once: true });
+
+  try {
+    // Release callers and held Web Locks even if the transport ignores abort.
+    return await Promise.race([task(), aborted]);
+  } finally {
+    abortSignal.removeEventListener("abort", onAbort);
+  }
+}
+
 export async function withCrossTabWebSessionRefreshLock<T>({
   refreshKey,
   abortSignal,
@@ -35,10 +61,9 @@ export async function withCrossTabWebSessionRefreshLock<T>({
   readonly abortSignal?: AbortSignal | undefined;
   readonly task: () => Promise<T>;
 }): Promise<T> {
-  const runtimeNavigator = Reflect.get(
-    globalThis,
-    "navigator"
-  ) as NavigatorWithOptionalLocks | undefined;
+  const runtimeNavigator = Reflect.get(globalThis, "navigator") as
+    | NavigatorWithOptionalLocks
+    | undefined;
   const lockManager = runtimeNavigator?.locks;
   if (!lockManager) {
     return await task();
