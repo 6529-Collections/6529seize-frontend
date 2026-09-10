@@ -1,7 +1,6 @@
 "use client";
 
 import { useAuth } from "@/components/auth/Auth";
-import { updateDropInCachedDrops } from "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops";
 import type { useEmoji } from "@/contexts/EmojiContext";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { useWaveEligibility } from "@/contexts/wave/WaveEligibilityContext";
@@ -12,9 +11,11 @@ import { ChatRestriction } from "@/hooks/useDropPriviledges";
 import type { ApiDropReaction } from "@/generated/models/ApiDropReaction";
 import { formatLargeNumber } from "@/helpers/Helpers";
 import { recordReaction } from "@/helpers/reactions/reactionHistory";
-import { enqueueDropReactionRequest } from "@/helpers/reactions/dropReactionRequestQueue";
+import {
+  enqueueDropReactionRequest,
+  isDropReactionRequestTimeout,
+} from "@/helpers/reactions/dropReactionRequestQueue";
 import { buildTooltipId } from "@/helpers/tooltip.helpers";
-import type { Drop } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import {
   useCanonicalNotificationDropUpdate,
@@ -28,7 +29,8 @@ import {
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useLongPressInteraction from "@/hooks/useLongPressInteraction";
 import { commonApiDelete, commonApiPost } from "@/services/api/common-api";
-import { fetchDropByIdBatched } from "@/services/api/drop-api";
+import { useDropReactionRecovery } from "@/hooks/drops/useDropReactionRecovery";
+import { t } from "@/i18n/messages";
 import { useWebsocketStatus } from "@/services/websocket/useWebSocketMessage";
 import { useQueryClient } from "@tanstack/react-query";
 import clsx from "clsx";
@@ -519,48 +521,20 @@ function WaveDropReaction({
     ]
   );
 
-  const refreshCanonicalDropAfterLatestFailure = useCallback(async () => {
-    try {
-      // Keep the recovery path defensive if no canonical drop is available.
-      const apiDrop = (await fetchDropByIdBatched(drop.id)) as
-        | ApiDrop
-        | null
-        | undefined;
-      if (apiDrop === null || apiDrop === undefined) {
-        return;
-      }
-
-      updateDropInCachedDrops(queryClient, apiDrop);
-      updateNotificationQueriesWithCanonicalDrop(apiDrop);
-      applyOptimisticDropUpdate({
-        waveId,
-        dropId: drop.id,
-        update: (draft): Drop => {
-          if (draft.type !== DropSize.FULL) {
-            return draft;
-          }
-
-          return {
-            ...apiDrop,
-            type: DropSize.FULL,
-            stableKey: draft.stableKey,
-            stableHash: draft.stableHash,
-          };
-        },
-      });
-    } catch (error) {
-      console.error(
-        "Failed to refresh drop after failed reaction request:",
-        error
-      );
-    }
-  }, [
+  const {
+    captureOwner,
+    isCurrentMutation,
+    refreshAfterFailure,
+    reconcileTimeout,
+  } = useDropReactionRecovery({
+    activeProfileProxy,
     applyOptimisticDropUpdate,
-    drop.id,
+    connectedProfile,
+    dropId: drop.id,
     queryClient,
     updateNotificationQueriesWithCanonicalDrop,
     waveId,
-  ]);
+  });
 
   const handleClick = useCallback(async () => {
     if (
@@ -572,11 +546,14 @@ function WaveDropReaction({
     }
 
     const authStateFingerprint = getDropReactionAuthStateFingerprint();
+    const owner = captureOwner(authStateFingerprint);
+    const previousSelection = selected;
     const intendedReaction = selected ? null : reaction.reaction;
     const endpoint = `drops/${drop.id}/reaction`;
     const method = selected ? "DELETE" : "POST";
 
     const mutation = beginReactionMutation({
+      isCurrentOwner: owner.isCurrent,
       dropId: drop.id,
       waveId,
       source: "chip",
@@ -590,6 +567,7 @@ function WaveDropReaction({
       profileId: connectedProfile?.id ?? null,
       websocketStatus,
     });
+    const isCurrent = () => isCurrentMutation(mutation, owner.isCurrent);
 
     setSelected((s) => !s);
     setTotal((n) => Math.max(0, n + (selected ? -1 : 1)));
@@ -604,8 +582,71 @@ function WaveDropReaction({
       recordReaction(reaction.reaction);
     }
 
+    const handleTimeout = async () => {
+      const reconciliation = await reconcileTimeout(
+        mutation,
+        intendedReaction,
+        isCurrent
+      );
+      if (!isCurrent()) return;
+      clearRollbackForMutation(rollbackRef, mutation.mutationId);
+      if (owner.isMounted() && reconciliation.drop) {
+        setSelected(
+          reconciliation.drop.context_profile_context?.reaction ===
+            reaction.reaction
+        );
+        const canonicalReaction = reconciliation.drop.reactions.find(
+          (entry) => entry.reaction === reaction.reaction
+        );
+        setTotal(canonicalReaction ? getReactionCount(canonicalReaction) : 0);
+      }
+      if (reconciliation.outcome === "unconfirmed" && owner.isVisible()) {
+        setToast({
+          title: t(locale, "drops.reactions.unconfirmed"),
+          type: "warning",
+          autoClose: 8_000,
+        });
+      }
+    };
+
+    const handleFailure = async (error: unknown) => {
+      const result = recordReactionRequestFailed(mutation, error);
+      if (!result.isLatestMutation || !isCurrent()) {
+        clearRollbackForMutation(rollbackRef, mutation.mutationId);
+        return;
+      }
+
+      if (isDropReactionRequestTimeout(error)) {
+        await handleTimeout();
+        return;
+      }
+
+      const authRecovery = recoverFromUnauthorized(error, authStateFingerprint);
+
+      updateEligibilityAfterExpectedDisabledReaction(error, method);
+
+      const msg = getReactionErrorMessage(
+        error,
+        selected ? "Error removing reaction" : "Error adding reaction",
+        locale
+      );
+      if (owner.isVisible()) {
+        setToast({ message: msg, type: "error" });
+      }
+      if (owner.isMounted()) {
+        setSelected(previousSelection);
+        setTotal((n) => Math.max(0, n + (selected ? 1 : -1)));
+      }
+      if (runRollbackForMutation(rollbackRef, mutation.mutationId)) {
+        recordReactionRollbackApplied(mutation);
+      }
+      await refreshAfterFailure(isCurrent);
+      await authRecovery;
+    };
+
     try {
       await enqueueDropReactionRequest(drop.id, async (signal) => {
+        if (!owner.isCurrent()) return;
         const body = { reaction: reaction.reaction };
         if (selected) {
           recordReactionRequestSent(mutation, {
@@ -632,33 +673,11 @@ function WaveDropReaction({
         });
       });
       const result = recordReactionRequestSucceeded(mutation);
-      if (result.isLatestMutation) {
+      if (result.isLatestMutation && isCurrent()) {
         clearRollbackForMutation(rollbackRef, mutation.mutationId);
       }
     } catch (error) {
-      const result = recordReactionRequestFailed(mutation, error);
-      if (!result.isLatestMutation) {
-        return;
-      }
-
-      const authRecovery = recoverFromUnauthorized(error, authStateFingerprint);
-
-      updateEligibilityAfterExpectedDisabledReaction(error, method);
-
-      const msg = getReactionErrorMessage(
-        error,
-        selected ? "Error removing reaction" : "Error adding reaction",
-        locale
-      );
-      setToast({ message: msg, type: "error" });
-
-      setSelected((s) => !s);
-      setTotal((n) => Math.max(0, n + (selected ? 1 : -1)));
-      if (runRollbackForMutation(rollbackRef, mutation.mutationId)) {
-        recordReactionRollbackApplied(mutation);
-      }
-      await refreshCanonicalDropAfterLatestFailure();
-      await authRecovery;
+      await handleFailure(error);
     }
   }, [
     applyOptimisticReactionChange,
@@ -670,7 +689,10 @@ function WaveDropReaction({
     locale,
     reaction.reaction,
     recoverFromUnauthorized,
-    refreshCanonicalDropAfterLatestFailure,
+    captureOwner,
+    isCurrentMutation,
+    refreshAfterFailure,
+    reconcileTimeout,
     selected,
     setToast,
     updateEligibilityAfterExpectedDisabledReaction,

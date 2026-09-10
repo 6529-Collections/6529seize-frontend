@@ -1,5 +1,6 @@
 "use client";
 
+import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropV2 } from "@/generated/models/ApiDropV2";
 import type { ApiDropV2PageWithoutCount } from "@/generated/models/ApiDropV2PageWithoutCount";
@@ -10,7 +11,8 @@ import { mapLeaderboardDropV2 } from "@/services/api/wave-drops-v2-api";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 
-export const COMMUNITY_CURATIONS_DROPS_QUERY_KEY = "COMMUNITY_CURATIONS_DROPS";
+export const COMMUNITY_CURATIONS_DROPS_QUERY_KEY =
+  QueryKey.COMMUNITY_CURATIONS_DROPS;
 
 interface UseCommunityCurationsDropsProps {
   readonly limit: number;
