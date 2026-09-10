@@ -2,6 +2,7 @@ import { createDeferredPromise } from "@/__tests__/utils/deferredPromise";
 import {
   __resetDropReactionRequestQueueForTests,
   enqueueDropReactionRequest,
+  DropReactionRequestTimeoutError,
 } from "@/helpers/reactions/dropReactionRequestQueue";
 
 describe("dropReactionRequestQueue", () => {
@@ -110,6 +111,38 @@ describe("dropReactionRequestQueue", () => {
 
       expect(firstSignal?.aborted).toBe(true);
       expect(secondRequest).toHaveBeenCalledTimes(1);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it("ignores late completion of a timed-out request without releasing the next request early", async () => {
+    jest.useFakeTimers();
+    try {
+      const late = createDeferredPromise<void>();
+      const second = createDeferredPromise<void>();
+      const firstRequest = enqueueDropReactionRequest(
+        "late-drop",
+        () => late.promise,
+        { timeoutMs: 100 }
+      );
+      const failure = expect(firstRequest).rejects.toBeInstanceOf(
+        DropReactionRequestTimeoutError
+      );
+      const secondRequest = enqueueDropReactionRequest(
+        "late-drop",
+        () => second.promise
+      );
+      const third = jest.fn(async () => undefined);
+      const thirdRequest = enqueueDropReactionRequest("late-drop", third);
+      await jest.advanceTimersByTimeAsync(100);
+      await failure;
+      late.resolve();
+      await jest.advanceTimersByTimeAsync(1);
+      expect(third).not.toHaveBeenCalled();
+      second.resolve();
+      await Promise.all([secondRequest, thirdRequest]);
+      expect(third).toHaveBeenCalledTimes(1);
     } finally {
       jest.useRealTimers();
     }

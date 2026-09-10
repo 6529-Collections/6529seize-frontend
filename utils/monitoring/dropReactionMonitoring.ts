@@ -2,6 +2,7 @@
 
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { extractRetryAfterMs } from "@/helpers/reactions/reactionRateLimit";
+import { isDropReactionRequestTimeout } from "@/helpers/reactions/dropReactionRequestQueue";
 import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
 import { getAwsRumPageId } from "@/utils/monitoring/mobileLaunchTimingSanitizers";
 import * as Sentry from "@sentry/nextjs";
@@ -32,6 +33,9 @@ type ReactionDurationBucket =
   | "5s_15s"
   | "over_15s";
 interface ReactionMutationContext {
+  readonly isCurrentOwner?: (() => boolean) | undefined;
+  timeoutRecoveryPending?: boolean;
+  timeoutConfirmedAt?: number;
   readonly mutationId: string;
   readonly dropMutationSeq: number;
   readonly dropId: string;
@@ -269,6 +273,9 @@ function recordSupersededResponse(
   context: ReactionMutationContext,
   now: number
 ): ReactionMutationResult {
+  if (context.isCurrentOwner?.() === false) {
+    return { isLatestMutation: false, supersededByMutationId: null };
+  }
   const latestMutationId = latestMutationIdByDrop.get(context.dropId);
   if (!latestMutationId || latestMutationId === context.mutationId) {
     return {
@@ -321,6 +328,7 @@ export function deriveReactionAction(
 }
 
 export function beginReactionMutation(params: {
+  isCurrentOwner?: (() => boolean) | undefined;
   dropId: string;
   waveId: string;
   source: ReactionSource;
@@ -338,6 +346,7 @@ export function beginReactionMutation(params: {
   dropMutationSeqByDrop.set(params.dropId, nextSeq);
 
   const context: ReactionMutationContext = {
+    isCurrentOwner: params.isCurrentOwner,
     mutationId: createMutationId(),
     dropMutationSeq: nextSeq,
     dropId: params.dropId,
@@ -409,10 +418,6 @@ export function recordReactionRequestSucceeded(
     ),
   });
 
-  if (result.isLatestMutation && context.realtimeReconciledAt !== null) {
-    clearActiveIntentForContext(context);
-  }
-
   return result;
 }
 
@@ -426,6 +431,7 @@ export function recordReactionRequestFailed(
   const result = recordSupersededResponse(context, now);
 
   const { statusCode, errorKind } = classifyReactionError(error);
+  context.timeoutRecoveryPending = isDropReactionRequestTimeout(error);
   const latencyMs = now - (context.requestSentAt ?? context.startedAt);
   const errorMessage = toErrorMessage(error);
   const retryAfterMs =
@@ -533,7 +539,7 @@ export function recordReactionRequestFailed(
 
   if (!shouldCaptureEvent(dedupeKey, now)) {
     context.failureCaptured = true;
-    clearActiveIntentForContext(context);
+    if (!context.timeoutRecoveryPending) clearActiveIntentForContext(context);
     return result;
   }
 
@@ -558,8 +564,21 @@ export function recordReactionRequestFailed(
   });
 
   context.failureCaptured = true;
-  clearActiveIntentForContext(context);
+  if (!context.timeoutRecoveryPending) clearActiveIntentForContext(context);
   return result;
+}
+
+export function recordReactionTimeoutReconciled(
+  context: ReactionMutationContext,
+  outcome: "confirmed" | "unconfirmed" | "superseded"
+): void {
+  context.timeoutRecoveryPending = false;
+  addReactionBreadcrumb("reaction.timeout_reconciled", context, { outcome });
+  if (outcome === "confirmed") {
+    context.timeoutConfirmedAt = Date.now();
+  } else {
+    clearActiveIntentForContext(context);
+  }
 }
 
 export function recordReactionRollbackApplied(
@@ -599,8 +618,32 @@ export function recordReactionRealtimeReconciliation(params: {
     return defaultResult;
   }
 
+  if (context.isCurrentOwner?.() === false) {
+    clearActiveIntentForContext(context);
+    return defaultResult;
+  }
+
   const expectedReaction = context.intendedReaction;
   const timeSinceMutationMs = now - context.startedAt;
+  // Queueing can outlast the reconciliation window. Start protection from
+  // the request/confirmation, and keep it through out-of-order WS refetches.
+  const reconciliationStartedAt =
+    context.timeoutConfirmedAt ??
+    context.apiSucceededAt ??
+    context.requestSentAt ??
+    context.startedAt;
+  const withinReconciliationWindow =
+    now - reconciliationStartedAt <= RECONCILIATION_WINDOW_MS;
+  if (
+    !withinReconciliationWindow &&
+    !context.timeoutRecoveryPending &&
+    (context.timeoutConfirmedAt !== undefined ||
+      (context.realtimeReconciledAt !== null &&
+        context.apiSucceededAt !== null))
+  ) {
+    clearActiveIntentForContext(context);
+    return defaultResult;
+  }
   const websocketStatus =
     toWebsocketStatus(params.websocketStatus) ?? undefined;
   const resultBase = {
@@ -608,7 +651,10 @@ export function recordReactionRealtimeReconciliation(params: {
     serverReaction,
   };
 
-  if (serverReaction === expectedReaction) {
+  if (
+    params.drop.context_profile_context &&
+    serverReaction === expectedReaction
+  ) {
     context.realtimeReconciledAt = now;
     addReactionBreadcrumb("reaction.realtime_reconciled", context, {
       reconciled_from: "ws_refetch",
@@ -619,16 +665,17 @@ export function recordReactionRealtimeReconciliation(params: {
         getReactionDurationBucket(timeSinceMutationMs),
       websocket_status: websocketStatus,
     });
-    if (context.apiSucceededAt !== null) {
-      clearActiveIntentForContext(context);
-    }
     return {
       ...resultBase,
       shouldApplyCanonicalDrop: true,
     };
   }
 
-  if (timeSinceMutationMs <= RECONCILIATION_WINDOW_MS) {
+  if (
+    context.timeoutRecoveryPending ||
+    (context.requestSentAt === null && context.apiFailedAt === null) ||
+    withinReconciliationWindow
+  ) {
     addReactionBreadcrumb(
       "reaction.realtime_superseded",
       context,

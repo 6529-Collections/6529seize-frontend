@@ -5,6 +5,7 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropReaction } from "@/generated/models/ApiDropReaction";
 
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
+import { useDropReactionView } from "@/hooks/drops/useDropReactionView";
 import { useQuery } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
 import React, { useCallback, useMemo, useRef, useState } from "react";
@@ -28,6 +29,7 @@ interface DetailedReactionsState {
 }
 
 const WaveDropReactions: React.FC<WaveDropReactionsProps> = ({ drop }) => {
+  useDropReactionView(drop.id);
   const { emojiMap, findNativeEmoji, loadEmojiData } = useEmoji();
   const [dialogReaction, setDialogReaction] = useState<string | null>(null);
   const [detailedReactionsState, setDetailedReactionsState] =
@@ -128,7 +130,7 @@ const WaveDropReactions: React.FC<WaveDropReactionsProps> = ({ drop }) => {
     <>
       {reactionsWithDetails.map((reaction) => (
         <WaveDropReaction
-          key={`${reaction.reaction}-${getReactionCount(reaction)}`}
+          key={`${drop.id}-${reaction.reaction}`}
           drop={drop}
           emojiMap={emojiMap}
           findNativeEmoji={findNativeEmoji}

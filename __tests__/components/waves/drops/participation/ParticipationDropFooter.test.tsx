@@ -43,6 +43,39 @@ describe("ParticipationDropFooter", () => {
     useDropInteractionRules.mockReturnValue({ canShowVote: true });
   });
 
+  it.each([undefined, 10])(
+    "preserves the reaction view across an empty row with threshold %s",
+    (winningThreshold) => {
+      const drop = createDrop({
+        reactions: [{ reaction: ":wave:", profiles: [] }],
+      });
+      const { rerender } = render(
+        <ParticipationDropFooter
+          drop={drop}
+          winningThreshold={winningThreshold}
+        />
+      );
+      const view = screen.getByTestId("reactions");
+      expect(view).toBeVisible();
+      rerender(
+        <ParticipationDropFooter
+          drop={{ ...drop, reactions: [] }}
+          winningThreshold={winningThreshold}
+        />
+      );
+      expect(screen.getByTestId("reactions")).toBe(view);
+      expect(view).not.toBeVisible();
+      rerender(
+        <ParticipationDropFooter
+          drop={drop}
+          winningThreshold={winningThreshold}
+        />
+      );
+      expect(screen.getByTestId("reactions")).toBe(view);
+      expect(view).toBeVisible();
+    }
+  );
+
   it("renders ratings when the drop has raters", () => {
     render(<ParticipationDropFooter drop={createDrop()} />);
 

@@ -81,6 +81,31 @@ describe("MemeParticipationDrop", () => {
     useMobileScreen.mockReturnValue(false);
   });
 
+  it("preserves the reaction view while the last chip disappears and returns", () => {
+    rules.mockReturnValue({ canShowVote: false });
+    const withReaction = {
+      ...drop,
+      reactions: [{ reaction: ":wave:", profiles: [] }],
+    };
+    const props = {
+      activeDrop: null,
+      showReplyAndQuote: true,
+      location: DropLocation.MY_STREAM,
+      onReply: jest.fn(),
+    };
+    const { rerender } = render(
+      <MemeParticipationDrop {...props} drop={withReaction} />
+    );
+    const view = screen.getByTestId("reactions");
+    expect(view).toBeVisible();
+    rerender(<MemeParticipationDrop {...props} drop={drop} />);
+    expect(screen.getByTestId("reactions")).toBe(view);
+    expect(view).not.toBeVisible();
+    rerender(<MemeParticipationDrop {...props} drop={withReaction} />);
+    expect(screen.getByTestId("reactions")).toBe(view);
+    expect(view).toBeVisible();
+  });
+
   it("renders voting modal variant based on screen size", () => {
     rules.mockReturnValue({ canShowVote: true });
     const { rerender } = render(
