@@ -12,9 +12,12 @@
  */
 
 import { ApiProfileCmsPackageStatus } from '../models/ApiProfileCmsPackageStatus';
+import { ApiProfileCmsStorageReceipt } from '../models/ApiProfileCmsStorageReceipt';
 import { HttpFile } from '../http/http';
 
 export class ApiProfileCmsPackage {
+    'is_primary'?: boolean;
+    'recovery_receipt'?: ApiProfileCmsStorageReceipt;
     'id': string;
     '_package': { [key: string]: any; };
     'profile_id': string;
@@ -33,6 +36,18 @@ export class ApiProfileCmsPackage {
     static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
+        {
+            "name": "is_primary",
+            "baseName": "is_primary",
+            "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "recovery_receipt",
+            "baseName": "recovery_receipt",
+            "type": "ApiProfileCmsStorageReceipt",
+            "format": ""
+        },
         {
             "name": "id",
             "baseName": "id",

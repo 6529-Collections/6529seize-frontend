@@ -18,9 +18,10 @@ Coverage includes:
   (including integrated stats/details), xTDH, Subscriptions, and Proxy tab
   behavior.
 - [About](about/README.md): public `/about/primary-address` route behavior, table states, and row-link expectations.
+- [Profile CMS Builder](feature-profile-cms-builder.md): draft editing and recovery,
+  gallery snapshots, wallet signing, publication, and version management.
 - [Profile CMS Builder AI-Agent Affordances](feature-profile-cms-builder-ai-agent-affordances.md):
-  hidden builder route exports, source packet boundaries, patch review, and
-  draft-only ownership rules.
+  exports, source packet boundaries, patch review, and draft-only agent actions.
 
 ## Flows
 

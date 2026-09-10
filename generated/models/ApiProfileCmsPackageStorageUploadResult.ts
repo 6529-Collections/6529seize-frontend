@@ -11,11 +11,11 @@
  * Do not edit the class manually.
  */
 
+import { ApiProfileCmsStorageReceipt } from '../models/ApiProfileCmsStorageReceipt';
 import { HttpFile } from '../http/http';
 
-export class ApiRollbackProfileCmsPackageRequest {
-    'expected_current_package_id': string | null;
-    'expected_current_package_hash'?: string;
+export class ApiProfileCmsPackageStorageUploadResult {
+    'receipt': ApiProfileCmsStorageReceipt;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -23,20 +23,14 @@ export class ApiRollbackProfileCmsPackageRequest {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "expected_current_package_id",
-            "baseName": "expected_current_package_id",
-            "type": "string",
-            "format": ""
-        },
-        {
-            "name": "expected_current_package_hash",
-            "baseName": "expected_current_package_hash",
-            "type": "string",
+            "name": "receipt",
+            "baseName": "receipt",
+            "type": "ApiProfileCmsStorageReceipt",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiRollbackProfileCmsPackageRequest.attributeTypeMap;
+        return ApiProfileCmsPackageStorageUploadResult.attributeTypeMap;
     }
 
     public constructor() {
