@@ -469,6 +469,8 @@ export const baseGlobalIgnores = Object.freeze([
   "**/public",
   "**/coverage",
   "**/generated",
+  // Bundled from config/env.schema.ts by scripts/build-env-schema.cjs.
+  "config/env.schema.runtime.cjs",
   // Expand test lint coverage one subtree at a time; keep directory traversal
   // enabled so the selected runtime tests can be reached.
   "**/__tests__/**/*",

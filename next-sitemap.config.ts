@@ -47,6 +47,7 @@ const NEXTGEN_COLLECTION_SUBPAGES = [
 const EXACT_EXCLUDED_PATHS = new Set([
   "/accept-connection-sharing",
   "/access",
+  "/artwork-documentation",
   "/cdn-cgi/l/email-protection",
   "/error",
   "/messages",
@@ -62,7 +63,7 @@ const EXACT_EXCLUDED_PATHS = new Set([
   "/waves/create",
 ]);
 
-const PREFIX_EXCLUDED_PATHS = ["/reviews/"] as const;
+const PREFIX_EXCLUDED_PATHS = ["/reviews/", "/artwork-documentation/"] as const;
 const LEGACY_MUSEUM_PREFIXES = [
   "/museum/network/accessions",
   "/museum/network/collection/",

@@ -35,6 +35,8 @@ import { PUBLIC_REVIEW_MESSAGES } from "@/i18n/messages/public-review";
 import { CONTENT_MODERATION_MESSAGES } from "@/i18n/messages/content-moderation";
 import { EULA_MESSAGES } from "@/i18n/messages/eula";
 import { PROFILE_CURATION_MESSAGES } from "@/i18n/messages/profile-curation";
+import { ARTWORK_DOCUMENTATION_MESSAGES } from "@/i18n/messages/artwork-documentation";
+import { ARTWORK_DOCUMENTATION_INTEGRATION_MESSAGES } from "@/i18n/messages/artwork-documentation-integration";
 
 type MessageEntry = readonly [key: string, value: string];
 
@@ -3842,6 +3844,8 @@ export const EN_US_MESSAGES = {
   ...WAVE_NAVIGATION_MESSAGES,
   ...MY_STREAM_CURATION_MESSAGES,
   ...PROFILE_CURATION_MESSAGES,
+  ...ARTWORK_DOCUMENTATION_MESSAGES,
+  ...ARTWORK_DOCUMENTATION_INTEGRATION_MESSAGES,
   ...WAVE_SCORE_NAVIGATION_MESSAGES,
   ...MEMES_QUICK_VOTE_MESSAGES,
   ...MEMES_SUBMISSION_MESSAGES,
