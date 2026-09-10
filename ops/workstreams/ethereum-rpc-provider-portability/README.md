@@ -1,11 +1,14 @@
 # Ethereum RPC provider portability
 
-Status: Implemented in [frontend PR #3911](https://github.com/6529-Collections/6529seize-frontend/pull/3911)
+Status: Implemented in [frontend PR #3911](https://github.com/6529-Collections/6529seize-frontend/pull/3911);
+implementation does not imply merge or deployment.
 
 The cross-repository architecture decision and complete migration plan are
 owned by the backend repository:
 
-- [Canonical Ethereum RPC provider portability record](https://github.com/6529-Collections/6529seize-backend/blob/main/docs/ethereum-rpc-provider-portability.md)
+- [Canonical Ethereum RPC provider portability plan, backend PR #1979](https://github.com/6529-Collections/6529seize-backend/pull/1979).
+  The record is `docs/ethereum-rpc-provider-portability.md` in that PR; use the
+  PR while the document is not yet merged into backend `main`.
 
 ## Objective
 
@@ -20,13 +23,13 @@ remain explicitly Alchemy-backed until separately replaced.
 
 ## Current frontend state
 
-- Server-side Open Graph code creates multiple Viem clients using default,
-  hard-coded `rpc1.6529.io`, and public-node transports.
+- This PR routes server-owned ordinary mainnet Open Graph reads through the
+  shared lazy Viem client configured by `ETHEREUM_RPC_URL`.
 - Active `/api/alchemy/*` routes and Open Graph NFT metadata fallbacks call
   Alchemy NFT REST APIs through the server-only `ALCHEMY_API_KEY`.
-- `services/alchemy-api.ts` and
-  `services/alchemy/{index,collections,owner-nfts,tokens}.ts` have no production
-  importers. Their only importer is `__tests__/services/alchemy-api.test.ts`.
+- The unused `services/alchemy-api.ts` facade,
+  `services/alchemy/{index,collections,owner-nfts,tokens}.ts`, and their orphaned
+  test were removed in merged frontend PR #3915.
 - `services/alchemy/types.ts` and `services/alchemy/utils.ts` are active and
   must be retained while their production importers remain.
 
