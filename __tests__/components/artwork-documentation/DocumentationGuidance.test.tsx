@@ -137,7 +137,7 @@ describe("worked artwork documentation examples", () => {
       <DocumentationNarrativeStarter
         id="caption"
         label="Caption"
-        structure="I made [your own account]."
+        structure="I made [[your own account]]."
         editor={{ kind: "localized", max: 3000 }}
         disabled={false}
         hasAnswer={false}
@@ -182,7 +182,7 @@ describe("worked artwork documentation examples", () => {
     const props = {
       id: "description",
       label: "Description",
-      structure: "[My account]",
+      structure: "[[My account]]",
       editor: { kind: "text" as const, multiline: true },
       disabled: false,
       hasAnswer: false,
@@ -204,13 +204,51 @@ describe("worked artwork documentation examples", () => {
     expect(props.onApply).not.toHaveBeenCalled();
   });
 
+  it.each([
+    "I made [[a renamed prompt]].",
+    "I made [[an unfinished prompt.",
+    "I made an unfinished prompt]].",
+  ])("keeps a remaining reserved prompt unsaved: %s", (text) => {
+    const onApply = jest.fn();
+    render(
+      <DocumentationNarrativeStarter
+        id="description"
+        label="Description"
+        structure="I made [[my account]]."
+        editor={{ kind: "text", multiline: true }}
+        disabled={false}
+        hasAnswer={false}
+        validate={() => true}
+        onApply={onApply}
+      />
+    );
+    fireEvent.click(
+      screen.getByRole("button", { name: "Adapt this writing structure" })
+    );
+    fireEvent.change(screen.getByRole("textbox"), {
+      target: { value: text },
+    });
+    const apply = screen.getByRole("button", { name: "Use my answer" });
+    expect(apply).toBeDisabled();
+    fireEvent.click(apply);
+    expect(onApply).not.toHaveBeenCalled();
+    fireEvent.change(screen.getByRole("textbox"), {
+      target: { value: "I refer to the catalogue [1] in my account." },
+    });
+    expect(apply).toBeEnabled();
+    fireEvent.click(apply);
+    expect(onApply).toHaveBeenCalledWith(
+      "I refer to the catalogue [1] in my account."
+    );
+  });
+
   it("leaves rejected or discarded working text out of the form", () => {
     const onApply = jest.fn();
     render(
       <DocumentationNarrativeStarter
         id="description"
         label="Description"
-        structure="[My account]"
+        structure="[[My account]]"
         editor={{ kind: "text", multiline: true }}
         disabled={false}
         hasAnswer={false}

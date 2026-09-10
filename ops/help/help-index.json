@@ -35,7 +35,7 @@
         "Only the artist can confirm a documentation revision through a direct authenticated session. Confirmation preserves a dated immutable version in the database; it is not a wallet signature, mint instruction, or automatic effect of a proposed license. Curatorial, technical and rights reviews are separate.",
         "New edits preserve earlier confirmed versions. Shared artist information is versioned and pinned per work. Keys and Gates uses a photography documentation profile; selection does not establish minting, purchase or Museum accession.",
         "Every section offers a complete fictional worked example for The Space Between by Ari Example. Empty sections open the example; existing records can reopen it. Examples never automatically save artist facts. Selected empty narrative fields offer an unsaved writing structure; explicit Use my answer adds only the artist-reviewed answer to ordinary autosave.",
-        "Questions for the team at the end of review are a separate drafting conversation. Questions and replies are excluded from artwork answers, confirmed versions and future publication. Resolve questions before finalizing and add relevant public answers to the artwork form.",
+        "Questions for the team at the end of review are a separate drafting conversation. Questions and replies are excluded from artwork answers, confirmed versions and future publication. Resolved questions remain available as drafting history and can be reopened. Resolve questions before finalizing and add relevant public answers to the artwork form.",
         "Mint preparation and on-chain, IPFS or Arweave publication are deferred. The documentation form does not perform them."
       ],
       "canonical_path": "/artwork-documentation",

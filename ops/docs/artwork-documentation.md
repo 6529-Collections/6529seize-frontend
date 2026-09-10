@@ -62,9 +62,9 @@ follow the questions available in your record. They are separate from your
 artwork: reading one never adds an answer, chooses a file or confirms a fact.
 
 For selected empty narrative fields, **Adapt this writing structure** opens
-working text with prompts to replace. Write in your own voice and enter the
+working text with `[[prompts]]` to replace. Write in your own voice and enter the
 language for a language-specific answer. **Use my answer** adds your reviewed
-text to the form, where ordinary autosave applies. Remaining bracketed prompts,
+text to the form, where ordinary autosave applies. Remaining double-bracket prompts,
 invalid answers and attempts to replace an existing answer are blocked. This
 working text is kept only in the current section until applied or discarded.
 Dates, identity, equipment, rights, permissions and file choices remain your
@@ -115,6 +115,7 @@ they do not use the artwork form's autosave. If sending fails, the unsent text
 stays in the current window so you can retry.
 
 The artist and authorized reviewers can discuss and resolve each question.
+Resolved questions remain available as drafting history and can be reopened.
 This conversation is a drafting tool: questions and replies stay outside the
 artwork answers, confirmed artwork versions and future publication record.
 Resolve the discussion, then put any relevant final answer into the artwork

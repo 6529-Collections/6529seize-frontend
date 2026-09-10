@@ -58,6 +58,17 @@ function canContinueUpload(
   return mounted.current && !signal.aborted;
 }
 
+function canUseUpload(
+  context: ApiArtworkDocumentationContext,
+  asset: { readonly role: string; readonly intended_visibility: string }
+): boolean {
+  return (
+    canPublishDocumentationAsset(context, asset.role) &&
+    (!isPublicationOnly(context.profile) ||
+      asset.intended_visibility === "public_record")
+  );
+}
+
 export default function DocumentationUpload({ context, controller }: Props) {
   const { msg, locale } = useDocumentationMessages();
   const publicationOnly = isPublicationOnly(context.profile);
@@ -68,7 +79,7 @@ export default function DocumentationUpload({ context, controller }: Props) {
     useState<ApiArtworkDocumentationUploadSession | null>(null);
   const [sent, setSent] = useState(0);
   const [status, setStatus] = useState<
-    "idle" | "uploading" | "processing" | "failed" | "changed"
+    "idle" | "uploading" | "processing" | "cancelling" | "failed" | "changed"
   >("idle");
   const abort = useRef<AbortController | null>(null);
   const startKey = useRef(crypto.randomUUID());
@@ -83,11 +94,17 @@ export default function DocumentationUpload({ context, controller }: Props) {
   }, []);
   const sizeLabel = (size: number) =>
     `${formatNumber(locale, size / (1024 * 1024), { maximumFractionDigits: 1 })} MiB`;
-  const busy = status === "uploading" || status === "processing";
+  const busy =
+    status === "uploading" ||
+    status === "processing" ||
+    status === "cancelling";
   const roles = publicationOnly
     ? PUBLICATION_DOCUMENTATION_ASSET_ROLES
     : DOCUMENTATION_ASSET_ROLES;
   const rolePermitted = canPublishDocumentationAsset(context, role);
+  const transferPermitted = session
+    ? canUseUpload(context, session.asset)
+    : rolePermitted;
   const chosenVisibility = publicationOnly ? "public_record" : visibility;
   const uploadVisibility =
     !publicationOnly && restrictedRoles.has(role)
@@ -122,8 +139,13 @@ export default function DocumentationUpload({ context, controller }: Props) {
       filename: string
     ) =>
       controller.mutate((current, signal) => {
-        if (!canPublishDocumentationAsset(current, assetRole))
-          throw new Error("INTERVIEW_PUBLICATION_PERMISSION_REQUIRED");
+        if (
+          !canUseUpload(current, {
+            role: assetRole,
+            intended_visibility: assetVisibility,
+          })
+        )
+          throw new Error("PUBLICATION_ASSET_ROLE_REQUIRED");
         return linkDocumentationAsset(
           current,
           {
@@ -131,9 +153,7 @@ export default function DocumentationUpload({ context, controller }: Props) {
             role: assetRole,
             label: filename,
             description: "",
-            intended_visibility: isPublicationOnly(current.profile)
-              ? "public_record"
-              : assetVisibility,
+            intended_visibility: assetVisibility,
             source_of_asset: isPublicationOnly(current.profile)
               ? "unknown"
               : "self",
@@ -152,7 +172,7 @@ export default function DocumentationUpload({ context, controller }: Props) {
     [controller]
   );
   const run = async (resumeId?: string) => {
-    if (!file || !rolePermitted) return;
+    if (!file || (!resumeId && !rolePermitted)) return;
     const controllerAbort = new AbortController();
     abort.current = controllerAbort;
     setStatus("uploading");
@@ -177,9 +197,22 @@ export default function DocumentationUpload({ context, controller }: Props) {
             controllerAbort.signal
           );
       if (!canContinueUpload(controllerAbort.signal, mounted)) return;
-      if (!canPublishDocumentationAsset(context, upload.asset.role))
-        throw new Error("PUBLICATION_ASSET_ROLE_REQUIRED");
       setSession(upload);
+      if (!canUseUpload(controller.snapshot().context, upload.asset)) {
+        // Keep a resumed session intact: its permission may only need correcting.
+        // A newly rejected reservation is forgotten only after cancellation succeeds.
+        if (!resumeId) {
+          await cancelDocumentationUpload(
+            context.id,
+            upload.upload_id,
+            controllerAbort.signal
+          );
+          if (!canContinueUpload(controllerAbort.signal, mounted)) return;
+          setSession(null);
+          startKey.current = crypto.randomUUID();
+        }
+        throw new Error("PUBLICATION_ASSET_ROLE_REQUIRED");
+      }
       await transferDocumentationFile({
         contextId: context.id,
         session: upload,
@@ -194,6 +227,30 @@ export default function DocumentationUpload({ context, controller }: Props) {
         setStatus(
           error instanceof DocumentationFileChangedError ? "changed" : "failed"
         );
+    }
+  };
+  const cancel = async () => {
+    abort.current?.abort();
+    const controllerAbort = new AbortController();
+    abort.current = controllerAbort;
+    setStatus("cancelling");
+    setActionError(false);
+    try {
+      if (session)
+        await cancelDocumentationUpload(
+          context.id,
+          session.upload_id,
+          controllerAbort.signal
+        );
+      if (!canContinueUpload(controllerAbort.signal, mounted)) return;
+      setStatus("idle");
+      setSession(null);
+      startKey.current = crypto.randomUUID();
+    } catch {
+      if (canContinueUpload(controllerAbort.signal, mounted)) {
+        setStatus("failed");
+        setActionError(true);
+      }
     }
   };
   useEffect(() => {
@@ -364,7 +421,7 @@ export default function DocumentationUpload({ context, controller }: Props) {
               disabled={
                 !file ||
                 busy ||
-                !rolePermitted ||
+                !transferPermitted ||
                 file.size >
                   (context.profile.limits["asset_bytes"] ?? 4294967296)
               }
@@ -374,19 +431,12 @@ export default function DocumentationUpload({ context, controller }: Props) {
             >
               {session ? msg("retry") : msg("uploadStart")}
             </DocumentationButton>
-            {busy && (
+            {(busy || session !== null) && (
               <DocumentationButton
                 secondary
+                disabled={status === "cancelling"}
                 onClick={() => {
-                  abort.current?.abort();
-                  if (session)
-                    void cancelDocumentationUpload(
-                      context.id,
-                      session.upload_id
-                    ).catch(() => setActionError(true));
-                  setStatus("idle");
-                  setSession(null);
-                  startKey.current = crypto.randomUUID();
+                  void cancel();
                 }}
               >
                 {msg("uploadCancel")}
@@ -494,6 +544,7 @@ export default function DocumentationUpload({ context, controller }: Props) {
                   disabled={
                     !file ||
                     busy ||
+                    (session !== null && session.upload_id !== asset.id) ||
                     !canPublishDocumentationAsset(context, asset.role)
                   }
                   onClick={() => {

@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { ApiArtworkDocumentationContext } from "@/generated/models/ApiArtworkDocumentationContext";
 import type { ApiArtworkDocumentationAssetLink } from "@/generated/models/ApiArtworkDocumentationAssetLink";
 import type { ApiArtworkDocumentationAssetLinkRequest } from "@/generated/models/ApiArtworkDocumentationAssetLinkRequest";
+import { ApiArtworkDocumentationAssetTermsKindEnum } from "@/generated/models/ApiArtworkDocumentationAssetTerms";
 import type { DocumentationDraftController } from "@/lib/artwork-documentation/draft-controller";
 import type {
   FieldValue,
@@ -23,6 +24,7 @@ import { isPublicationOnly } from "@/lib/artwork-documentation/intake";
 import DocumentationValueEditor from "./DocumentationValueEditor";
 import {
   DocumentationButton,
+  DocumentationNotice,
   inputClass,
   useDocumentationMessages,
 } from "./DocumentationControls";
@@ -59,6 +61,33 @@ const detailsEditor = (publicationOnly: boolean): ValueEditor => ({
   },
 });
 
+function canEditAssetDetails(
+  context: ApiArtworkDocumentationContext,
+  assetId: string
+): boolean {
+  if (!isPublicationOnly(context.profile)) return true;
+  const allowed = (asset: {
+    readonly role: string;
+    readonly intended_visibility: string;
+  }) =>
+    asset.intended_visibility === "public_record" &&
+    canPublishDocumentationAsset(context, asset.role);
+  const asset = context.assets.find((item) => item.id === assetId);
+  return (
+    asset !== undefined &&
+    allowed(asset) &&
+    context.asset_links
+      .filter((link) => link.asset_id === assetId)
+      .every(
+        (link) =>
+          allowed(link) &&
+          allowed(link.manifest) &&
+          link.intended_terms.kind !==
+            ApiArtworkDocumentationAssetTermsKindEnum.PrivateDeposit
+      )
+  );
+}
+
 export default function DocumentationAssetDetails({
   context,
   assetId,
@@ -76,21 +105,24 @@ export default function DocumentationAssetDetails({
     : DOCUMENTATION_ASSET_ROLES;
   const rolePermitted = canPublishDocumentationAsset(context, role);
   const links = context.asset_links.filter((link) => link.asset_id === assetId);
-  const asset = context.assets.find((item) => item.id === assetId);
   const addRole = () =>
     controller.mutate((current, signal) => {
-      if (!canPublishDocumentationAsset(current, role))
-        throw new Error("INTERVIEW_PUBLICATION_PERMISSION_REQUIRED");
+      if (
+        !canEditAssetDetails(current, assetId) ||
+        !canPublishDocumentationAsset(current, role)
+      )
+        throw new Error("PUBLICATION_ASSET_ROLE_REQUIRED");
+      const asset = current.assets.find((item) => item.id === assetId);
       return linkDocumentationAsset(
         current,
         {
           asset_id: assetId,
           role,
-          intended_visibility: publicationOnly
-            ? "public_record"
-            : (asset?.intended_visibility ?? "restricted"),
+          intended_visibility: asset?.intended_visibility ?? "restricted",
           intended_terms: {
-            kind: publicationOnly ? "unspecified" : "private_deposit",
+            kind: isPublicationOnly(current.profile)
+              ? "unspecified"
+              : "private_deposit",
           },
         } as ApiArtworkDocumentationAssetLinkRequest,
         signal
@@ -103,6 +135,12 @@ export default function DocumentationAssetDetails({
       return msg("publicationProcessRole");
     return documentationOptionLabel(value);
   };
+  if (!canEditAssetDetails(context, assetId))
+    return (
+      <DocumentationNotice error>
+        {msg("publicationAssetUnavailable")}
+      </DocumentationNotice>
+    );
   return (
     <details className="tw-mt-3">
       <summary className="tw-cursor-pointer tw-py-2 tw-text-xs tw-text-iron-300">
@@ -183,7 +221,6 @@ function ManifestEditor({
       (next as Record<string, FieldValue>)["intended_visibility"] ??
       link.intended_visibility;
     if (restricted) nextVisibility = "restricted";
-    if (publicationOnly) nextVisibility = "public_record";
     const body = {
       ...(next as Record<string, FieldValue>),
       intended_visibility: nextVisibility,
@@ -191,8 +228,15 @@ function ManifestEditor({
     controller.queueContent(
       `asset-link:${link.id}`,
       body,
-      (current, key, signal) =>
-        patchDocumentationAssetLink(current, link.id, body, signal, key)
+      (current, key, signal) => {
+        if (
+          !canEditAssetDetails(current, link.asset_id) ||
+          (isPublicationOnly(current.profile) &&
+            body.intended_visibility !== "public_record")
+        )
+          throw new Error("PUBLICATION_ASSET_ROLE_REQUIRED");
+        return patchDocumentationAssetLink(current, link.id, body, signal, key);
+      }
     );
   };
   const intendedVisibility =

@@ -123,3 +123,67 @@ it("sends publication drafting questions outside the artwork revision and preser
   expect(context.modules["context"]!.answers).toEqual({});
   client.clear();
 });
+
+it("keeps resolved publication questions available without mixing revision feedback into the conversation", async () => {
+  const context = documentationFixture();
+  context.profile.intake_mode = "publication_only" as never;
+  context.profile.version = 2;
+  jest.mocked(getDocumentationThreads).mockResolvedValue({
+    data: [
+      {
+        id: "answered-question",
+        context_id: context.id,
+        field_path: null,
+        revision_id: null,
+        thread_version: 2,
+        resolved: true,
+        audience: "artist_and_reviewers",
+        restricted_class: "ordinary",
+        comments: [
+          {
+            id: "answer",
+            actor_profile_id: "artist-a",
+            text: "The team clarified which display instructions to use.",
+            created_at: 1788998400000,
+          },
+        ],
+      },
+      {
+        id: "revision-feedback",
+        context_id: context.id,
+        field_path: "artwork.title",
+        revision_id: "confirmed-artwork",
+        thread_version: 1,
+        resolved: false,
+        audience: "artist_and_reviewers",
+        restricted_class: "ordinary",
+        comments: [
+          {
+            id: "revision-comment",
+            actor_profile_id: "artist-a",
+            text: "Feedback about the prior artwork title.",
+            created_at: 1788998400000,
+          },
+        ],
+      },
+    ],
+  } as never);
+  const client = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  render(
+    <QueryClientProvider client={client}>
+      <DocumentationFeedback context={context} />
+    </QueryClientProvider>
+  );
+  await screen.findByText(
+    "The team clarified which display instructions to use."
+  );
+  expect(
+    screen.getByRole("button", { name: "Reopen conversation" })
+  ).toBeInTheDocument();
+  expect(
+    screen.queryByText("Feedback about the prior artwork title.")
+  ).not.toBeInTheDocument();
+  client.clear();
+});

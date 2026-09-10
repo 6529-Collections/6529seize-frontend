@@ -1,4 +1,6 @@
 export const ARTWORK_DOCUMENTATION_GUIDANCE_MESSAGES = {
+  "artworkDocumentation.publicationAssetUnavailable":
+    "This file cannot be included in this publication record. Add material intended for publication, or use Questions for the team to resolve this before finalizing.",
   "artworkDocumentation.publication.reviewAll": "Return to the artwork review",
   "artworkDocumentation.publication.previewNotice":
     "This previews the artwork information intended for publication. It is still a draft; nothing is published or minted here. Drafting questions and team discussion are not part of the artwork record.",
@@ -49,7 +51,7 @@ export const ARTWORK_DOCUMENTATION_GUIDANCE_MESSAGES = {
     "Close the example and write my answers",
   "artworkDocumentation.examples.adapt": "Adapt this writing structure",
   "artworkDocumentation.examples.unsaved":
-    "Replace the bracketed prompts with your own words, or write freely. This working text is not saved. Use only information you want included with the artwork, then choose Use my answer to add it to your draft.",
+    "Replace each [[prompt]] with your own words, or write freely. This working text is not saved. Use only information you want included with the artwork, then choose Use my answer to add it to your draft.",
   "artworkDocumentation.examples.yourAnswer": "Your answer for {field}",
   "artworkDocumentation.examples.language":
     "Language of your answer (for example, en or es)",

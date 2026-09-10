@@ -17,7 +17,7 @@ sections open the example; completed sections keep it available. Examples
 follow supported profile fields and the pinned interview instrument. They
 never become artist data merely by opening or reviewing them.
 
-Selected empty narrative fields offer a bracketed writing structure in a
+Selected empty narrative fields offer a `[[prompt]]` writing structure in a
 local, unsaved editor. The artist replaces the prompts and explicitly applies
 their own schema-valid answer through ordinary draft saving. Facts, identities,
 rights, permissions, dates and asset references have no one-click insertion.

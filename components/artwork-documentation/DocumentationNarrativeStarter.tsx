@@ -45,9 +45,8 @@ export default function DocumentationNarrativeStarter(props: Props) {
     : text.trim();
   const valid =
     text.trim().length > 0 &&
-    !(props.structure.match(/\[[^\]]+\]/g) ?? []).some((prompt) =>
-      text.includes(prompt)
-    ) &&
+    !text.includes("[[") &&
+    !text.includes("]]") &&
     (!localized || language.trim().length > 0) &&
     props.validate(value);
   if (!open && (props.disabled || props.hasAnswer))
