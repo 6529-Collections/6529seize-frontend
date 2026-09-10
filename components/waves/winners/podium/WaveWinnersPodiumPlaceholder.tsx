@@ -17,14 +17,23 @@ export const WaveWinnersPodiumPlaceholder: React.FC<
       className={`tw-flex tw-h-full tw-min-w-0 tw-flex-col tw-items-center ${loading ? "motion-safe:tw-animate-pulse" : ""}`}
     >
       <div
-        className={`tw-relative tw-z-10 -tw-mb-4 tw-flex-shrink-0 tw-rounded-xl tw-bg-iron-900 tw-ring-1 tw-ring-iron-700 ${styles.pfpSize}`}
-      />
-      <div
-        className={`${podiumSurfaceClassName} ${styles.height} tw-justify-center tw-gap-2`}
+        className={`${podiumSurfaceClassName} ${styles.surface} ${styles.height}`}
       >
-        <div className="tw-h-3 tw-w-3/4 tw-max-w-24 tw-rounded-md tw-bg-iron-800" />
-        <div className="tw-h-3 tw-w-2/3 tw-max-w-20 tw-rounded-md tw-bg-iron-800" />
-        <div className="tw-h-3 tw-w-1/2 tw-max-w-16 tw-rounded-md tw-bg-iron-800" />
+        <div className="tw-flex tw-w-full tw-items-center tw-justify-between tw-border-0 tw-border-b tw-border-solid tw-border-white/[0.05] tw-pb-3">
+          <div className="tw-h-2 tw-w-12 tw-rounded-full tw-bg-iron-800" />
+          <div className="tw-h-2 tw-w-5 tw-rounded-full tw-bg-iron-800" />
+        </div>
+        <div className="tw-flex tw-w-full tw-flex-1 tw-flex-col tw-items-center tw-justify-center tw-gap-3 tw-py-4">
+          <div
+            className={`${styles.pfpSize} tw-flex-shrink-0 tw-rounded-full tw-bg-iron-800 tw-ring-1 tw-ring-iron-700`}
+          />
+          <div className="tw-h-3 tw-w-3/4 tw-max-w-28 tw-rounded-full tw-bg-iron-800" />
+          <div className="tw-h-2 tw-w-1/2 tw-max-w-20 tw-rounded-full tw-bg-iron-800" />
+        </div>
+        <div className="tw-flex tw-w-full tw-items-center tw-justify-center tw-gap-2">
+          <div className="tw-h-8 tw-w-16 tw-rounded-lg tw-bg-iron-800" />
+          <div className="tw-h-8 tw-w-16 tw-rounded-lg tw-bg-iron-800" />
+        </div>
       </div>
     </div>
   );

@@ -55,7 +55,7 @@ export const WaveWinnersPodiumContent: React.FC<
             outcomesVisible={outcomesVisible}
           />
         </div>
-        <div className="tw-min-w-0">
+        <div className={`tw-min-w-0 ${podiumPositionStyles.first.offset}`}>
           <ModeratedPodiumItem
             winner={firstPlaceWinner}
             onDropClick={onDropClick}
