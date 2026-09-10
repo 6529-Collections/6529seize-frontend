@@ -1,0 +1,10 @@
+{
+  "emma.snapshots.collections": "Use a 6529 collection",
+  "emma.snapshots.manualTitle": "Or enter another collection",
+  "emma.snapshots.manualHelp": "Enter a collection name and full contract address, or review the details filled by a shortcut.",
+  "emma.snapshots.contractAddress": "Contract address",
+  "emma.snapshots.loadingTokens": "Loading collection token IDs…",
+  "emma.snapshots.seasonsTitle": "Select \"The Memes by 6529\" Seasons",
+  "emma.snapshots.seasons": "Seasons",
+  "emma.snapshots.select": "Select"
+}

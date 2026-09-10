@@ -30,6 +30,9 @@ The Stream review record includes its four current entry guides and the
 **All topics** navigation. Its collector and code-review guide links refer to
 current pages; those guides are not invented as historical snapshot routes.
 
+The EMMA record covers the five fixed collection shortcuts, Memes season
+selection, Intern JPG token IDs, and the manual contract path in Create Snapshots.
+
 ## Goals
 
 - Define frontend-owned source material for 6529 Help Bot answers.

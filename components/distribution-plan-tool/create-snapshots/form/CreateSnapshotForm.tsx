@@ -13,10 +13,17 @@ import {
   distributionPlanApiFetch,
   distributionPlanApiPost,
 } from "@/services/distribution-plan-api";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { Tooltip } from "react-tooltip";
-import CreateSnapshotFormSearchCollection from "./CreateSnapshotFormSearchCollection";
+import CreateSnapshotFormCollections from "./CreateSnapshotFormCollections";
+import {
+  INTERN_JPGS_COLLECTION_ID,
+  type SnapshotCollectionSelection,
+} from "./snapshot-collections";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 interface CreateSnapshotFormValues {
+  collectionId: string | null;
   name: string;
   contract: string;
   blockNo: string;
@@ -24,11 +31,21 @@ interface CreateSnapshotFormValues {
 }
 
 export default function CreateSnapshotForm() {
+  const locale = useBrowserLocale();
+  const collectionRequest = useRef(0);
+  const [loadingCollectionId, setLoadingCollectionId] = useState<string | null>(
+    null
+  );
+  const cancelCollectionRequest = () => {
+    collectionRequest.current += 1;
+    setLoadingCollectionId(null);
+  };
   const { distributionPlan, fetchOperations } = useContext(
     DistributionPlanToolContext
   );
 
   const [formValues, setFormValues] = useState<CreateSnapshotFormValues>({
+    collectionId: null,
     name: "",
     contract: "",
     blockNo: "",
@@ -38,6 +55,7 @@ export default function CreateSnapshotForm() {
   const [consolidateBlockNo, setConsolidateBlockNo] = useState<string>("");
 
   const getContractMetadata = async (contract: string) => {
+    const request = collectionRequest.current;
     const endpoint = `/other/contract-metadata/${contract}`;
     const { success, data } =
       await distributionPlanApiFetch<DistributionPlanSearchContractMetadataResult | null>(
@@ -46,14 +64,24 @@ export default function CreateSnapshotForm() {
     if (!success) {
       return;
     }
-    if (data?.name && !formValues.name) {
-      setFormValues((prev) => ({ ...prev, name: data.name }));
+    if (data?.name && request === collectionRequest.current) {
+      setFormValues((prev) =>
+        prev.contract === contract && !prev.name
+          ? { ...prev, name: data.name }
+          : prev
+      );
     }
   };
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
-    setFormValues((prev) => ({ ...prev, [name]: value }));
+    const changesCollection = name !== "blockNo";
+    if (changesCollection) cancelCollectionRequest();
+    setFormValues((prev) => ({
+      ...prev,
+      [name]: value,
+      collectionId: changesCollection ? null : prev.collectionId,
+    }));
     if (name === "contract" && isEthereumAddress(value) && !formValues.name) {
       getContractMetadata(value);
     }
@@ -72,7 +100,7 @@ export default function CreateSnapshotForm() {
     success: boolean;
   }> => {
     if (!distributionPlan) return { success: false };
-    if (isLoading) return { success: false };
+    if (isLoading || loadingCollectionId) return { success: false };
     setIsLoading(true);
     const endpoint = `/allowlists/${distributionPlan.id}/operations`;
     const tokenPoolId = getRandomObjectId();
@@ -121,8 +149,10 @@ export default function CreateSnapshotForm() {
   const addSnapshot = async () => {
     const { success } = await addTokenPool();
     if (!success) return;
+    cancelCollectionRequest();
     setFormValues((prev) => ({
       ...prev,
+      collectionId: null,
       name: "",
       contract: "",
       tokenIds: "",
@@ -147,16 +177,25 @@ export default function CreateSnapshotForm() {
     fetchLatestBlock();
   }, []);
 
-  const setCollection = (param: {
-    name: string;
-    address: string;
-    tokenIds: string | null;
-  }) => {
+  const setCollection = async (param: SnapshotCollectionSelection) => {
+    const request = ++collectionRequest.current;
+    let tokenIds = param.tokenIds;
+    if (param.id === INTERN_JPGS_COLLECTION_ID) {
+      setLoadingCollectionId(param.id);
+      const { data } = await distributionPlanApiFetch<{ tokenIds: string }>(
+        `/other/contract-token-ids-as-string/${param.id}`
+      );
+      const fetchedTokenIds = data?.tokenIds ?? "";
+      tokenIds = fetchedTokenIds.length > 0 ? fetchedTokenIds : null;
+    }
+    if (request !== collectionRequest.current) return;
+    setLoadingCollectionId(null);
     setFormValues((prev) => ({
       ...prev,
+      collectionId: param.id,
       contract: param.address.toLowerCase(),
       name: param.name,
-      tokenIds: param.tokenIds ?? "",
+      tokenIds: tokenIds ?? "",
     }));
   };
 
@@ -166,11 +205,21 @@ export default function CreateSnapshotForm() {
 
   return (
     <>
-      <CreateSnapshotFormSearchCollection setCollection={setCollection} />
-      <form
-        className="tw-mt-8 tw-grid tw-gap-5"
-        onSubmit={handleSubmit}
-      >
+      <CreateSnapshotFormCollections
+        selectedCollectionId={formValues.collectionId}
+        loadingCollectionId={loadingCollectionId}
+        setCollection={setCollection}
+        onSelectionStart={cancelCollectionRequest}
+      />
+      <form className="tw-mt-8 tw-grid tw-gap-5" onSubmit={handleSubmit}>
+        <div>
+          <h2 className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-100">
+            {t(locale, "emma.snapshots.manualTitle")}
+          </h2>
+          <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-text-iron-300">
+            {t(locale, "emma.snapshots.manualHelp")}
+          </p>
+        </div>
         <div className="tw-grid tw-w-full tw-grid-cols-1 tw-gap-4 md:tw-grid-cols-3">
           <div className="tw-min-w-0">
             <label
@@ -198,7 +247,7 @@ export default function CreateSnapshotForm() {
               htmlFor="snapshot-contract"
               className="tw-flex tw-min-h-8 tw-items-center tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-100"
             >
-              Contract number
+              {t(locale, "emma.snapshots.contractAddress")}
             </label>
             <div className="tw-mt-2">
               <input
@@ -209,7 +258,7 @@ export default function CreateSnapshotForm() {
                 onChange={handleChange}
                 required
                 autoComplete="off"
-                placeholder="Contract number"
+                placeholder={t(locale, "emma.snapshots.contractAddress")}
                 className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-700/40 tw-px-3 tw-py-3 tw-text-base tw-font-light tw-text-white tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700/40 tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-500 hover:tw-ring-iron-700 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 sm:tw-leading-6"
               />
             </div>
@@ -342,7 +391,9 @@ export default function CreateSnapshotForm() {
           </div>
           <div className="tw-flex tw-min-w-0 tw-items-end">
             <div className="tw-w-full sm:tw-max-w-[8.375rem]">
-              <DistributionPlanAddOperationBtn loading={isLoading}>
+              <DistributionPlanAddOperationBtn
+                loading={isLoading || !!loadingCollectionId}
+              >
                 Add snapshot
               </DistributionPlanAddOperationBtn>
             </div>
