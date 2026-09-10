@@ -21,7 +21,7 @@ import {
   formatInteger,
 } from "./market-depth-format";
 
-export const MARKET_DEPTH_QUERY_KEY = QueryKey.NFT_MARKET_DEPTH;
+const MARKET_DEPTH_QUERY_KEY = QueryKey.NFT_MARKET_DEPTH;
 
 const PAGE_SIZE = 40;
 const MAX_LEVELS = 8;
