@@ -2127,6 +2127,8 @@
         "Daily xTDH rate is xtdh_rate = produced_today - granted_out_today + received_today.",
         "Total xTDH accumulates as xtdh_total = xtdh_total_previous + xtdh_rate.",
         "The key idea is grants: a profile that produces xTDH can grant future xTDH flow to all tokens in an external ERC-721 collection or to a selected subset of tokens.",
+        "To select a collection in Create New Grant, paste its Ethereum contract address (0x followed by 40 hexadecimal characters), select the ERC-721 result, then choose all tokens, individual IDs, or ranges. Collection-name search, ENS names, and marketplace URLs are not supported for this lookup.",
+        "If collection metadata fails to load, use Try again. A missing or non-ERC-721 result cannot be selected. Contract metadata lookup is not a spam or authenticity check.",
         "If you own a token with an active grant, you receive your share of that grant while you own the token.",
         "Per-token grant flow is grant_amount_per_token = rate / denominator, where the denominator is either the collection total supply for full-collection grants or the number of selected tokens for partial grants.",
         "Transfers inside the same consolidation group do not reset the ownership window; sales or transfers across groups do reset it.",
