@@ -13,8 +13,7 @@ export const FR_FR_MESSAGES = {
   "navigation.primary.loading.discovery": "Chargement de la découverte",
   "navigation.primary.loading.network": "Chargement du réseau",
   "navigation.primary.loading.collections": "Chargement des collections",
-  "navigation.primary.loading.notifications":
-    "Chargement des notifications",
+  "navigation.primary.loading.notifications": "Chargement des notifications",
   "headerSearch.wave.byAuthor": "par {author}",
   "headerSearch.wave.serial": "Wave nº {serial}",
   "headerSearch.wave.label": "Wave",
