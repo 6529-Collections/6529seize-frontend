@@ -17,6 +17,15 @@ const makeFetchJson =
   };
 
 describe("next-sitemap config", () => {
+  it.each([
+    "/artwork-documentation",
+    "/artwork-documentation?sourceDropId=example",
+    "/artwork-documentation/programs/example",
+    "/artwork-documentation/works/work/contexts/context/revisions/revision",
+  ])("excludes private artwork documentation from sitemaps: %s", (path) => {
+    expect(shouldExcludeSitemapPath(path)).toBe(true);
+  });
+
   it("builds canonical NFT detail paths without wallet-specific focus URLs", () => {
     const paths = getNftSitemapPaths("/the-memes/1").map((path) => path.loc);
 
