@@ -382,10 +382,10 @@ export function ExploreWaveCard({
         {hasDrops && (
           <div
             className={clsx(
-              "tw-mt-auto tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-pt-4",
+              "tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1",
               isDiscover
-                ? "tw-text-xs tw-text-iron-400"
-                : "tw-text-[11px] tw-text-iron-600"
+                ? "tw-mt-4 tw-text-xs tw-text-iron-400"
+                : "tw-mt-auto tw-pt-4 tw-text-[11px] tw-text-iron-600"
             )}
           >
             {isDiscover ? (
