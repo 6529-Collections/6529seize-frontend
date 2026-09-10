@@ -216,6 +216,7 @@ function ScoreFormulaLink() {
       aria-label="View wave score formula"
       variant="tertiary"
       size="sm"
+      className="!tw-bg-black active:!tw-bg-iron-900 desktop-hover:hover:!tw-bg-iron-950"
     >
       <CalculatorIcon className="tw-size-4" aria-hidden="true" />
       Score formula
