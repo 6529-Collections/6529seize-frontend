@@ -27,6 +27,7 @@ import {
   PublicReviewEditorialContentError,
 } from "@/lib/public-review/editorialContent";
 import { extractPublicReviewSections } from "@/lib/public-review/editorialSections";
+import { getCurrentStreamEditorialMarkdown } from "@/lib/public-review/streamReviewEditorialCorrections";
 import type {
   PublicReviewPageDefinition,
   PublicReviewSectionDefinition,
@@ -274,6 +275,9 @@ function getDisplayedPage(
   currentPages: CurrentStreamReviewPages
 ): PublicReviewPageDefinition {
   if (page.summaryKey.startsWith("publicReview.pages.currentSnapshot.")) {
+    if (currentPages.revenueSplits) {
+      return { ...page, summaryKey: "publicReview.corrections.revenueSummary" };
+    }
     return page;
   }
   if (currentPages.artworkLifecycle) {
@@ -420,6 +424,13 @@ async function renderStreamReviewRoute(route: StreamReviewRouteModel) {
   if (editorialMarkdown === undefined) {
     notFound();
   }
+  const currentEditorialMarkdown = getCurrentStreamEditorialMarkdown({
+    pageId: route.page.id,
+    markdown: editorialMarkdown,
+    version: contentVersion,
+    routeVersion: route.version,
+    source: manifest.source,
+  });
   const feedbackConfig = await createStreamReviewFeedbackConfig({ manifest });
   const currentPages = getCurrentStreamReviewPages(route);
   const displayedReviewVersion = {
@@ -442,7 +453,7 @@ async function renderStreamReviewRoute(route: StreamReviewRouteModel) {
     getDisplayedEditorialMarkdown({
       contentVersion,
       currentPages,
-      editorialMarkdown,
+      editorialMarkdown: currentEditorialMarkdown,
       source: manifest.source,
     });
   const diagramPresentation = getStreamReviewDiagramPresentation({
@@ -533,7 +544,7 @@ async function renderStreamReviewRoute(route: StreamReviewRouteModel) {
                   )}
                 </summary>
                 <PublicReviewMarkdown
-                  markdown={editorialMarkdown}
+                  markdown={currentEditorialMarkdown}
                   internalLinkBasePath="/reviews/6529-stream"
                 />
               </details>
