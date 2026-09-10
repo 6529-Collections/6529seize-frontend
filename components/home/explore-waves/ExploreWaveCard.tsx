@@ -302,7 +302,7 @@ export function ExploreWaveCard({
       className={clsx(
         "tw-group tw-relative tw-flex tw-h-full tw-transform-gpu tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-text-left tw-no-underline tw-transition-[transform,border-color,background-color,box-shadow] tw-duration-500 tw-ease-out focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/60 desktop-hover:hover:-tw-translate-y-1 motion-reduce:tw-transform-none motion-reduce:tw-transition-none",
         isDiscover
-          ? "tw-min-h-[22rem] tw-border-white/[0.05] tw-bg-[#111113] tw-shadow-[inset_0_1px_0_rgba(255,255,255,0.025),0_10px_28px_rgba(0,0,0,0.28)] desktop-hover:hover:tw-border-white/15 desktop-hover:hover:tw-shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_14px_34px_rgba(0,0,0,0.45)]"
+          ? "tw-border-white/[0.04] tw-bg-[#0A0A0E] tw-shadow-[inset_0_1px_0_rgba(255,255,255,0.025),0_10px_28px_rgba(0,0,0,0.28)] desktop-hover:hover:tw-border-white/15 desktop-hover:hover:tw-shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_14px_34px_rgba(0,0,0,0.45)]"
           : "tw-border-white/[0.04] tw-bg-iron-950 tw-p-2 desktop-hover:hover:tw-border-white/10 desktop-hover:hover:tw-bg-iron-900/70"
       )}
       aria-label={cardAriaLabel}
@@ -311,7 +311,7 @@ export function ExploreWaveCard({
         className={clsx(
           "tw-overflow-hidden tw-bg-iron-900",
           isDiscover
-            ? "tw-absolute tw-inset-0"
+            ? "tw-relative tw-h-48 tw-flex-shrink-0 sm:tw-h-52 lg:tw-h-48 xl:tw-h-52"
             : "tw-relative tw-h-32 tw-flex-shrink-0 tw-rounded-lg sm:tw-h-36 lg:tw-h-32 xl:tw-h-36"
         )}
         style={imageAreaStyle}
@@ -332,20 +332,19 @@ export function ExploreWaveCard({
             )}
           />
         )}
+        {isDiscover && (
+          <div
+            aria-hidden="true"
+            className="tw-pointer-events-none tw-absolute tw-inset-x-0 tw-bottom-0 tw-h-2/3 tw-bg-gradient-to-t tw-from-[#0A0A0E] tw-via-[#0A0A0E]/50 tw-to-transparent"
+          />
+        )}
       </div>
-
-      {isDiscover && (
-        <div
-          aria-hidden="true"
-          className="tw-pointer-events-none tw-absolute tw-inset-0 tw-bg-[linear-gradient(to_top,#050505_0%,rgba(5,5,5,0.98)_30%,rgba(5,5,5,0.84)_48%,rgba(5,5,5,0.42)_66%,transparent_84%)]"
-        />
-      )}
 
       <div
         className={clsx(
           "tw-relative tw-z-10 tw-flex tw-flex-1 tw-flex-col",
           isDiscover
-            ? "tw-justify-end tw-px-5 tw-pb-5 tw-pt-40"
+            ? "tw-px-5 tw-pb-5 tw-pt-1"
             : "tw-px-3 tw-pb-3 tw-pt-4 sm:tw-px-4 sm:tw-pb-4"
         )}
       >
