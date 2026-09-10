@@ -3605,6 +3605,10 @@ export const EN_US_MESSAGES = {
   "profileCms.builder.gallery.snapshot.loading": "Requesting...",
   "profileCms.builder.gallery.snapshot.loadingDetail":
     "Collecting holdings and media candidates for review.",
+  "profileCms.builder.gallery.snapshot.signInRequired":
+    "Sign in to request a wallet snapshot.",
+  "profileCms.builder.gallery.snapshot.sessionExpired":
+    "Your session could not be verified. Sign in again to request a wallet snapshot.",
   "profileCms.builder.gallery.snapshot.failed":
     "Gallery snapshot could not be created.",
   "profileCms.builder.gallery.snapshot.fixture": "Fixture snapshot",
