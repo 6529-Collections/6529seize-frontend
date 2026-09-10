@@ -134,7 +134,11 @@
         "EMMA is the Editor for Managing Multiphase Allowlists and the first reference implementation of Janus.",
         "The EMMA landing route lives at /emma and the plans route lives at /emma/plans.",
         "The distribution plan tool helps build mint plans with airdrops, allowlists, and public minting in one or more phases.",
-        "EMMA uses TDH as a lightweight anti-spam/rate-limit measure for allowlist creation."
+        "EMMA uses TDH as a lightweight anti-spam/rate-limit measure for allowlist creation.",
+        "In Create Snapshots at /emma/plans/{planId}, Use a 6529 collection presents five image rows: The Memes by 6529 (ERC1155), Meme Lab (ERC1155), 6529 Gradient (ERC721), 6529 RAW (ERC721), and 6529 Intern JPGs (ERC1155). Tab reaches each shortcut; Enter or Space selects it.",
+        "The Memes shortcut opens a season picker; choosing all or no seasons uses the full collection. Intern JPGs loads its subcollection token IDs. The other shortcuts fill name and contract address and clear old token IDs. Switching shortcuts preserves block numbers.",
+        "Or enter another collection keeps manual name and full contract address entry available, together with block number, optional token IDs, and optional consolidation block number. A full address can autofill an empty name. If metadata lookup fails, enter the name yourself. Collection-name search is unavailable.",
+        "The five shortcuts remain available without metadata lookup. If Intern JPG token IDs fail to load or are empty, the form stays unchanged and shows an error. Select the shortcut to retry, or enter its name, contract address, and token IDs manually; leaving token IDs empty selects all tokens in the shared contract."
       ],
       "canonical_path": "/emma",
       "related_paths": [
