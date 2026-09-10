@@ -137,15 +137,17 @@ it.each([
       author: { handle: longIdentityLabel, pfp: "pfp.png" },
     },
   },
-])("fits $name labels within the podium card", ({ dropOverrides }) => {
-  renderWinner(dropOverrides);
+])(
+  "keeps $name labels to one line within the podium card",
+  ({ dropOverrides }) => {
+    renderWinner(dropOverrides);
 
-  expect(screen.getByText(longIdentityLabel)).toHaveClass(
-    "[overflow-wrap:anywhere]",
-    "tw-whitespace-normal",
-    "tw-break-words"
-  );
-});
+    expect(screen.getByText(longIdentityLabel)).toHaveClass(
+      "tw-min-w-0",
+      "tw-truncate"
+    );
+  }
+);
 
 it("calls onDropClick when clicked", () => {
   const onDropClick = jest.fn();
@@ -178,7 +180,7 @@ it("keeps static voter text when vote details are explicitly disabled", () => {
   expect(screen.getByText("voter")).toBeInTheDocument();
 });
 
-it("renders a wrapping vote details trigger with a comfortable target", () => {
+it("keeps the vote details trigger on one line with responsive height", () => {
   render(
     <WavePodiumItem
       winner={{ drop } as any}
@@ -187,11 +189,17 @@ it("renders a wrapping vote details trigger with a comfortable target", () => {
     />
   );
 
-  expect(
-    screen.getByRole("button", {
-      name: "View voters and vote log for 1 voter",
-    })
-  ).toHaveClass("tw-flex-wrap", "tw-min-h-8");
+  const trigger = screen.getByRole("button", {
+    name: "View voters and vote log for 1 voter",
+  });
+
+  expect(trigger).toHaveClass("tw-flex-nowrap", "tw-min-h-7", "sm:tw-min-h-8");
+  expect(trigger.parentElement).toHaveClass(
+    "tw-flex-col",
+    "@[42rem]/podium:tw-flex-row"
+  );
+  expect(trigger.querySelector("span")).toHaveClass("tw-whitespace-nowrap");
+  expect(trigger.querySelector("span")).not.toHaveClass("tw-truncate");
 });
 
 it("opens vote details without triggering the podium click", () => {

@@ -162,11 +162,11 @@ export const WavePodiumItemContentOutcomes: React.FC<
     <>
       <button
         type="button"
-        className="tw-flex tw-min-h-8 tw-max-w-full tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700/50 tw-bg-iron-800/40 tw-px-2 tw-py-1 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-border-iron-600 desktop-hover:hover:tw-bg-iron-800/60"
+        className="tw-flex tw-min-h-7 tw-max-w-full tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700/50 tw-bg-iron-800/40 tw-px-1 tw-py-0.5 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-border-iron-600 desktop-hover:hover:tw-bg-iron-800/60 min-[360px]:tw-px-1.5 sm:tw-min-h-8 sm:tw-px-2 sm:tw-py-1"
         data-tooltip-id={tooltipId}
         aria-describedby={outcomeDescriptionId}
       >
-        <span className="tw-text-xs tw-font-medium tw-text-iron-300 sm:tw-text-sm">
+        <span className="tw-text-[10px] tw-font-semibold tw-text-iron-300 min-[360px]:tw-text-[11px] sm:tw-text-xs">
           {t(locale, "waves.leaderboard.podium.outcome")}
         </span>
       </button>

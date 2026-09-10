@@ -11,7 +11,6 @@ import { formatInteger } from "@/i18n/format";
 import { t, tRich } from "@/i18n/messages";
 import {
   type MouseEvent as ReactMouseEvent,
-  Fragment,
   useCallback,
   useEffect,
   useLayoutEffect,
@@ -45,7 +44,7 @@ const DENSITY_CLASS_NAMES: Record<VoteDetailsTriggerDensity, string> = {
   gallery: "tw-box-border tw-h-8 tw-gap-1 tw-px-2.5 tw-py-0 tw-leading-4",
   tight: "tw-gap-1 tw-px-2 tw-py-1 tw-leading-5",
   podium:
-    "tw-min-h-8 tw-min-w-0 tw-max-w-full tw-flex-wrap tw-justify-center tw-gap-1 tw-px-1.5 tw-py-1 tw-leading-4",
+    "tw-min-h-7 tw-min-w-0 tw-max-w-full tw-flex-nowrap tw-justify-center tw-gap-1 tw-px-2 tw-py-0.5 tw-leading-4 sm:tw-min-h-8 sm:tw-px-2.5 sm:tw-py-1",
 };
 
 const isSmallDensity = (density: VoteDetailsTriggerDensity): boolean =>
@@ -55,6 +54,10 @@ const getTriggerTextSizeClassName = (
   density: VoteDetailsTriggerDensity,
   isMemesVariant: boolean
 ): string => {
+  if (density === "podium") {
+    return "tw-text-[10px] min-[360px]:tw-text-[11px] sm:tw-text-xs";
+  }
+
   if (isSmallDensity(density)) {
     return "tw-text-xs";
   }
@@ -86,7 +89,7 @@ const getTriggerClassNames = (
   const triggerTextClassName = `${getTriggerTextSizeClassName(
     density,
     isMemesVariant
-  )} tw-font-semibold`;
+  )} tw-font-normal`;
   const appearanceClassName = getTriggerAppearanceClassName(isMemesVariant);
   const triggerClassName = `tw-inline-flex tw-cursor-pointer tw-items-center tw-border tw-border-solid tw-transition-colors tw-duration-200 tw-ease-out focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/60 ${appearanceClassName} ${DENSITY_CLASS_NAMES[density]}`;
   const chevronSizeClassName = isSmallDensity(density)
@@ -391,9 +394,6 @@ export default function ParticipationDropVoteDetailsTrigger({
       ? "waves.voteDetails.trigger.one"
       : "waves.voteDetails.trigger.other";
   const formattedVoterCount = formatInteger(locale, drop.raters_count);
-  const softWrappedVoterCountParts = formattedVoterCount.split(
-    /(?<=[,.\u00a0\u202f])/u
-  );
 
   return (
     <>
@@ -411,23 +411,14 @@ export default function ParticipationDropVoteDetailsTrigger({
         <span
           className={`${triggerTextClassName} ${labelTextColorClassName} ${
             density === "podium"
-              ? "tw-min-w-0 tw-max-w-full [overflow-wrap:anywhere]"
+              ? "tw-min-w-0 tw-max-w-full tw-whitespace-nowrap"
               : ""
           }`}
         >
           {tRich(locale, voterMessageKey, {
             count: (
               <span key="count" className={countTextColorClassName}>
-                {density === "podium"
-                  ? softWrappedVoterCountParts.map((part, partIndex) => (
-                      <Fragment key={`${part}-${partIndex}`}>
-                        {part}
-                        {partIndex < softWrappedVoterCountParts.length - 1 && (
-                          <wbr />
-                        )}
-                      </Fragment>
-                    ))
-                  : formattedVoterCount}
+                {formattedVoterCount}
               </span>
             ),
           })}
