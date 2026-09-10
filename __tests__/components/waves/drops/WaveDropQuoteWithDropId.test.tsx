@@ -11,10 +11,8 @@ jest.mock("@/components/waves/drops/WaveDropQuote", () => (props: any) => {
 });
 
 const useQuery = jest.fn();
-const getQueryData = jest.fn();
 jest.mock("@tanstack/react-query", () => ({
   useQuery: (opts: any) => useQuery(opts),
-  useQueryClient: () => ({ getQueryData }),
   keepPreviousData: "keep",
 }));
 
@@ -43,7 +41,6 @@ describe("WaveDropQuoteWithDropId", () => {
   beforeEach(() => {
     capturedProps = undefined;
     jest.clearAllMocks();
-    getQueryData.mockReturnValue(undefined);
     useMyStreamOptional.mockReturnValue(null);
   });
 
@@ -77,9 +74,7 @@ describe("WaveDropQuoteWithDropId", () => {
       wave: { id: "old-wave" },
       hide_link_preview: true,
     };
-    useQuery.mockImplementation((opts: any) => {
-      return { data: opts.initialData };
-    });
+    useQuery.mockReturnValue({ data: undefined });
 
     render(
       <WaveDropQuoteWithDropId
@@ -96,17 +91,14 @@ describe("WaveDropQuoteWithDropId", () => {
     const call = useQuery.mock.calls[0][0];
     expect(call.queryKey).toEqual([QueryKey.DROP, { drop_id: "d1" }]);
     expect(call.enabled).toBe(false);
-    expect(call.initialData).toBe(maybeDrop);
+    expect(call).not.toHaveProperty("initialData");
     expect(call).not.toHaveProperty("initialDataUpdatedAt");
     expect(fetchDropByIdBatchedMock).not.toHaveBeenCalled();
   });
 
-  it("uses an already cached drop without fetching fresh data", () => {
+  it("uses an already cached detail drop without reseeding the query", () => {
     const cachedDrop = { id: "d1", wave: { id: "cached-wave" } };
-    getQueryData.mockReturnValue(cachedDrop);
-    useQuery.mockImplementation((opts: any) => {
-      return { data: opts.initialData };
-    });
+    useQuery.mockReturnValue({ data: cachedDrop });
 
     render(
       <WaveDropQuoteWithDropId
@@ -119,8 +111,8 @@ describe("WaveDropQuoteWithDropId", () => {
 
     expect(capturedProps.drop).toBe(cachedDrop);
     const call = useQuery.mock.calls[0][0];
-    expect(call.enabled).toBe(false);
-    expect(call.initialData).toBe(cachedDrop);
+    expect(call.enabled).toBe(true);
+    expect(call).not.toHaveProperty("initialData");
   });
 
   it("uses a full drop from wave messages without fetching by id", () => {
@@ -140,9 +132,7 @@ describe("WaveDropQuoteWithDropId", () => {
         unsubscribe: jest.fn(),
       },
     });
-    useQuery.mockImplementation((opts: any) => {
-      return { data: opts.initialData };
-    });
+    useQuery.mockReturnValue({ data: undefined });
 
     render(
       <WaveDropQuoteWithDropId
@@ -157,7 +147,7 @@ describe("WaveDropQuoteWithDropId", () => {
     expect(capturedProps.drop).toBe(waveDrop);
     const call = useQuery.mock.calls[0][0];
     expect(call.enabled).toBe(false);
-    expect(call.initialData).toBe(waveDrop);
+    expect(call).not.toHaveProperty("initialData");
   });
 
   it("keeps active-wave hydration neutral until the moderated record arrives", () => {
@@ -174,7 +164,6 @@ describe("WaveDropQuoteWithDropId", () => {
       type: "FULL",
       moderation: { status: "MODERATOR_REMOVED", can_view: false },
     };
-    getQueryData.mockReturnValue(staleCachedDrop);
     useMyStreamOptional.mockReturnValue({
       activeWave: { id: "w1" },
       waveMessagesStore: {
