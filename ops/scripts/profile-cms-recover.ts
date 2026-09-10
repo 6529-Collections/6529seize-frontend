@@ -143,13 +143,17 @@ async function readDecentralized(uri: string): Promise<Uint8Array> {
       "CMS recovery requires an ar:// or ipfs:// content address"
     );
   }
-  const url = independentCmsUri(uri);
-  if (!url) throw new CmsRecoveryError("Invalid decentralized content address");
+  const gatewayUri = independentCmsUri(uri);
+  if (!gatewayUri)
+    throw new CmsRecoveryError("Invalid decentralized content address");
+  const url = new URL(gatewayUri);
+  // Fetch exact transaction bytes without the gateway's browser sandbox redirect.
+  if (url.hostname === "arweave.net") url.pathname = `/raw${url.pathname}`;
   const response = await fetch(url, {
     signal: AbortSignal.timeout(30_000),
     redirect: "error",
   });
-  if (!response.ok || !response.body)
+  if (response.status !== 200 || !response.body)
     throw new CmsRecoveryError(
       `CMS artifact retrieval failed (HTTP ${response.status})`
     );
