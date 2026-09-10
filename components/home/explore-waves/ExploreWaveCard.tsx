@@ -287,10 +287,10 @@ export function ExploreWaveCard({
       href={waveHref}
       prefetch={false}
       className={clsx(
-        "tw-group tw-relative tw-flex tw-h-full tw-transform-gpu tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-bg-iron-950 tw-text-left tw-no-underline tw-transition-[transform,border-color,background-color] tw-duration-500 tw-ease-out focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/60 desktop-hover:hover:-tw-translate-y-1 desktop-hover:hover:tw-bg-iron-900/70 motion-reduce:tw-transform-none motion-reduce:tw-transition-none",
+        "tw-group tw-relative tw-flex tw-h-full tw-transform-gpu tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-text-left tw-no-underline tw-transition-[transform,border-color,background-color,box-shadow] tw-duration-500 tw-ease-out focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/60 desktop-hover:hover:-tw-translate-y-1 motion-reduce:tw-transform-none motion-reduce:tw-transition-none",
         isDiscover
-          ? "tw-min-h-[22rem] tw-border-iron-800/80 desktop-hover:hover:tw-border-iron-700"
-          : "tw-border-white/[0.04] tw-p-2 desktop-hover:hover:tw-border-white/10"
+          ? "tw-min-h-[22rem] tw-border-white/[0.05] tw-bg-[#0a0a0b] tw-shadow-[inset_0_1px_0_rgba(255,255,255,0.025),0_10px_28px_rgba(0,0,0,0.28)] desktop-hover:hover:tw-border-white/15 desktop-hover:hover:tw-shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_14px_34px_rgba(0,0,0,0.45)]"
+          : "tw-border-white/[0.04] tw-bg-iron-950 tw-p-2 desktop-hover:hover:tw-border-white/10 desktop-hover:hover:tw-bg-iron-900/70"
       )}
       aria-label={cardAriaLabel}
     >
@@ -324,7 +324,7 @@ export function ExploreWaveCard({
       {isDiscover && (
         <div
           aria-hidden="true"
-          className="tw-pointer-events-none tw-absolute tw-inset-0 tw-bg-gradient-to-t tw-from-iron-950 tw-from-[20%] tw-via-iron-950/95 tw-via-[68%] tw-to-transparent"
+          className="tw-pointer-events-none tw-absolute tw-inset-0 tw-bg-gradient-to-t tw-from-[#0a0a0b] tw-from-[20%] tw-via-[#0a0a0b]/95 tw-via-[68%] tw-to-transparent"
         />
       )}
 
@@ -338,10 +338,10 @@ export function ExploreWaveCard({
       >
         <span
           className={clsx(
-            "tw-m-0 tw-line-clamp-1 tw-break-words tw-font-semibold tw-leading-tight tw-text-iron-100 tw-transition-colors tw-duration-300 desktop-hover:group-hover:tw-text-white",
+            "tw-m-0 tw-line-clamp-1 tw-break-words tw-font-semibold tw-leading-tight tw-transition-colors tw-duration-300 desktop-hover:group-hover:tw-text-white",
             isDiscover
-              ? "tw-text-xl tw-tracking-tight"
-              : "tw-text-base sm:tw-text-lg"
+              ? "tw-text-xl tw-tracking-tight tw-text-iron-50"
+              : "tw-text-base tw-text-iron-100 sm:tw-text-lg"
           )}
         >
           {wave.name}
@@ -412,7 +412,7 @@ function ExploreWaveCompactMetrics({
       className={clsx(
         "explore-wave-card-metrics tw-flex tw-items-center",
         isDiscover
-          ? "tw-mt-3 tw-min-h-6 tw-flex-wrap tw-gap-1"
+          ? "tw-mt-3 tw-min-h-6 tw-flex-wrap tw-gap-x-3 tw-gap-y-2"
           : "tw-mt-2.5 tw-flex-nowrap tw-gap-2 tw-overflow-hidden"
       )}
     >
@@ -427,12 +427,7 @@ function ExploreWaveCompactMetrics({
             </span>
           )}
           <span
-            className={clsx(
-              METRIC_CHIP_CLASSES,
-              isDiscover
-                ? "tw-gap-0.5 tw-rounded-full tw-bg-black/35 tw-px-1.5 tw-py-1.5 tw-text-[10px] tw-ring-1 tw-ring-inset tw-ring-white/10"
-                : "tw-gap-1 tw-text-[11px]"
-            )}
+            className={`${METRIC_CHIP_CLASSES} tw-gap-1 tw-text-[11px]`}
             aria-label={metric.ariaLabel}
           >
             <span className={metric.iconToneClasses}>{metric.icon}</span>
@@ -442,7 +437,7 @@ function ExploreWaveCompactMetrics({
             <span
               className={
                 isDiscover
-                  ? "tw-font-semibold tw-tabular-nums tw-text-iron-100"
+                  ? "tw-font-semibold tw-tabular-nums tw-text-iron-200"
                   : METRIC_VALUE_CLASSES
               }
             >
@@ -480,7 +475,7 @@ function MessagePreviewContent({
       textClassName={clsx(
         "tw-line-clamp-2 tw-break-words tw-font-normal",
         isDiscover
-          ? "tw-text-sm tw-leading-5 tw-text-iron-300"
+          ? "tw-text-sm tw-leading-5 tw-text-iron-400"
           : "tw-text-xs tw-leading-relaxed"
       )}
       linkify={false}

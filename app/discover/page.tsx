@@ -26,7 +26,7 @@ function DiscoverFallback() {
 
 export default function DiscoverPage() {
   return (
-    <main className="tailwind-scope tw-min-h-screen tw-bg-black">
+    <main className="tailwind-scope tw-min-h-screen tw-overflow-x-hidden tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-800 tw-bg-black">
       <Suspense fallback={<DiscoverFallback />}>
         <DiscoverWaveExplorer />
       </Suspense>

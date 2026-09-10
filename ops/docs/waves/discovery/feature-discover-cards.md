@@ -41,7 +41,7 @@ from home discovery.
 - Open a DM-targeting card to jump into `/messages/{waveId}`.
 - Review the compact preview row when a wave description drop has usable text
   or media content.
-- Read the available metrics in labelled chips: `Score` is the visibility
+- Read the available labelled metrics: `Score` is the visibility
   score, `Hot` is the hotness score, and `REP` is Wave REP. Visibility and hotness
   are scores out of 100. REP shows a signed, compact raw total when available;
   otherwise it shows the Wave REP score out of 100. Screen-reader labels

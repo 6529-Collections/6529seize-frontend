@@ -85,9 +85,9 @@ why a section can disappear.
 - `Boosted Drops` has no `View all` action on the homepage.
 - `Most active waves` is capped to six cards on home.
 - The dedicated `/discover` route uses the same wave information in cards with
-  full-card artwork and labelled score chips, with up to 20 results, no subtitle,
-  no footer link, and backend exclude-followed filtering. Home keeps its compact
-  card layout.
+  full-card artwork and labelled inline scores, with up to 20 results, no
+  subtitle, no footer link, and backend exclude-followed filtering. Home keeps
+  its compact card layout.
 - Boosted ranking uses a recent boost window and updates while the page stays open.
 
 ## Related Pages
