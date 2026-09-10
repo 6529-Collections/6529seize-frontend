@@ -23,6 +23,7 @@ const AUTH_SENSITIVE_QUERY_KEYS = [
   QueryKey.DROPS_LEADERBOARD,
   QueryKey.DROP,
   QueryKey.FEED_ITEMS,
+  QueryKey.COMMUNITY_CURATIONS_DROPS,
 ] as const;
 
 const AUTH_SENSITIVE_QUERY_KEY_SET = new Set<QueryKey>(
@@ -35,6 +36,7 @@ const VIEWER_CONTEXT_QUERY_KEYS = [
   QueryKey.DROPS_LEADERBOARD,
   QueryKey.PROFILE_DROPS,
   QueryKey.FEED_ITEMS,
+  QueryKey.COMMUNITY_CURATIONS_DROPS,
 ] as const;
 
 export const createGeneralQueryHandlers = (

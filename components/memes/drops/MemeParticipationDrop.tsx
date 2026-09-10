@@ -235,8 +235,15 @@ export default function MemeParticipationDrop({
             )}
           </div>
 
-          {showInteractions && drop.reactions.length > 0 && (
-            <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-px-4 tw-pb-4">
+          {showInteractions && (
+            <div
+              hidden={drop.reactions.length === 0}
+              className={
+                drop.reactions.length > 0
+                  ? "tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-px-4 tw-pb-4"
+                  : undefined
+              }
+            >
               <WaveDropReactions drop={drop} />
             </div>
           )}

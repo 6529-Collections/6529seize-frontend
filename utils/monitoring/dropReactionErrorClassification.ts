@@ -6,6 +6,7 @@ const WAVE_REACTION_DISABLED_MESSAGE =
   "Chatting and reacting is not enabled in this wave";
 
 type ReactionErrorKind =
+  | "timeout"
   | "network"
   | "auth"
   | "rate-limit"
@@ -53,7 +54,15 @@ export function classifyReactionError(error: unknown): {
   statusCode: number | null;
   errorKind: ReactionErrorKind;
 } {
-  const statusCode = extractErrorStatusCode(error);
+  // DOMException.code is a browser exception code, never an HTTP status.
+  if (error instanceof DOMException && error.name === "TimeoutError") {
+    return { statusCode: null, errorKind: "timeout" };
+  }
+  const extractedStatus = extractErrorStatusCode(error);
+  const statusCode =
+    extractedStatus !== null && extractedStatus >= 100 && extractedStatus <= 599
+      ? extractedStatus
+      : null;
 
   if (statusCode === 401 || statusCode === 403) {
     return { statusCode, errorKind: "auth" };

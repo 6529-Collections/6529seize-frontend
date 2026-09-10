@@ -9,7 +9,10 @@ import {
   recordReactionRequestSent,
   recordReactionRequestSucceeded,
   recordReactionRollbackApplied,
+  recordReactionTimeoutReconciled,
 } from "@/utils/monitoring/dropReactionMonitoring";
+import { DropReactionRequestTimeoutError } from "@/helpers/reactions/dropReactionRequestQueue";
+import type { ApiDropContextProfileContext } from "@/generated/models/ApiDropContextProfileContext";
 import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
 
 const mockSetExtras = jest.fn();
@@ -50,6 +53,106 @@ describe("dropReactionMonitoring", () => {
     expect(deriveReactionAction(null, ":smile:")).toBe("add");
     expect(deriveReactionAction(":wave:", null)).toBe("remove");
     expect(deriveReactionAction(":wave:", ":smile:")).toBe("replace");
+  });
+
+  it("does not confirm a timed-out removal from a websocket read missing viewer context", () => {
+    const mutation = beginReactionMutation({
+      dropId: "missing-viewer",
+      waveId: "wave-1",
+      source: "chip",
+      action: "remove",
+      previousReaction: ":joy:",
+      intendedReaction: null,
+      optimisticReaction: null,
+      profileId: "profile-1",
+    });
+    recordReactionRequestFailed(
+      mutation,
+      new DropReactionRequestTimeoutError()
+    );
+    const result = recordReactionRealtimeReconciliation({
+      drop: {
+        id: "missing-viewer",
+        wave: { id: "wave-1" },
+        context_profile_context: null,
+      },
+    });
+    expect(result.shouldApplyCanonicalDrop).toBe(false);
+    expect(mutation.realtimeReconciledAt).toBeNull();
+    recordReactionRealtimeReconciliation({
+      drop: {
+        id: "missing-viewer",
+        wave: { id: "wave-1" },
+        context_profile_context: {
+          reaction: null,
+        } as ApiDropContextProfileContext,
+      },
+    });
+    expect(mutation.realtimeReconciledAt).toBe(1_000);
+  });
+
+  it("keeps timeout telemetry and protects intent from old websocket reads during recovery", () => {
+    const mutation = beginReactionMutation({
+      dropId: "timeout-drop",
+      waveId: "wave",
+      source: "picker",
+      action: "add",
+      previousReaction: null,
+      intendedReaction: ":smile:",
+      optimisticReaction: ":smile:",
+      profileId: "profile",
+    });
+    dateNowSpy.mockReturnValue(16_000);
+    recordReactionRequestFailed(
+      mutation,
+      new DropReactionRequestTimeoutError()
+    );
+    expect(mockSetExtras).toHaveBeenCalledWith(
+      expect.objectContaining({ error_kind: "timeout", status_code: undefined })
+    );
+    const reconcile = (reaction: string | null) =>
+      recordReactionRealtimeReconciliation({
+        drop: {
+          id: "timeout-drop",
+          wave: { id: "wave" },
+          context_profile_context: { reaction } as ApiDropContextProfileContext,
+        },
+      });
+    dateNowSpy.mockReturnValue(20_000);
+    expect(reconcile(null).shouldApplyCanonicalDrop).toBe(false);
+    expect(reconcile(":smile:").shouldApplyCanonicalDrop).toBe(true);
+    recordReactionTimeoutReconciled(mutation, "confirmed");
+    expect(reconcile(null).shouldApplyCanonicalDrop).toBe(false);
+    dateNowSpy.mockReturnValue(36_000);
+    expect(reconcile(null).shouldApplyCanonicalDrop).toBe(true);
+    expect(captureExceptionMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not let a previous account's intent filter the new account's websocket state", () => {
+    const isCurrentOwner = jest.fn(() => true);
+    beginReactionMutation({
+      dropId: "owned-drop",
+      waveId: "wave",
+      source: "picker",
+      action: "add",
+      previousReaction: null,
+      intendedReaction: ":smile:",
+      optimisticReaction: ":smile:",
+      profileId: "old-profile",
+      isCurrentOwner,
+    });
+    isCurrentOwner.mockReturnValue(false);
+    expect(
+      recordReactionRealtimeReconciliation({
+        drop: {
+          id: "owned-drop",
+          wave: { id: "wave" },
+          context_profile_context: {
+            reaction: null,
+          } as ApiDropContextProfileContext,
+        },
+      }).shouldApplyCanonicalDrop
+    ).toBe(true);
   });
 
   it("records breadcrumbs for a successful reaction request", () => {
@@ -887,7 +990,7 @@ describe("dropReactionMonitoring", () => {
     expect(captureExceptionMock).not.toHaveBeenCalled();
   });
 
-  it("keeps the realtime guard until the matching request succeeds", () => {
+  it("keeps the realtime guard briefly after confirmation, then expires it", () => {
     const mutation = beginReactionMutation({
       dropId: "drop-5-pending",
       waveId: "wave-1",
@@ -954,12 +1057,75 @@ describe("dropReactionMonitoring", () => {
     });
 
     expect(laterResult).toEqual({
+      shouldApplyCanonicalDrop: false,
+      expectedReaction: ":joy:",
+      serverReaction: null,
+      supersededByMutationId: mutation.mutationId,
+    });
+    addBreadcrumbMock.mockClear();
+    dateNowSpy.mockReturnValue(16_401);
+    expect(
+      recordReactionRealtimeReconciliation({
+        drop: {
+          id: "drop-5-pending",
+          wave: { id: "wave-1" },
+          context_profile_context: {
+            reaction: null,
+          } as ApiDropContextProfileContext,
+        },
+      })
+    ).toEqual({
       shouldApplyCanonicalDrop: true,
       expectedReaction: null,
       serverReaction: null,
     });
     expect(addBreadcrumbMock).not.toHaveBeenCalled();
     expect(captureExceptionMock).not.toHaveBeenCalled();
+  });
+
+  it("protects the latest queued intent after an older request times out, including late WS reads after success", () => {
+    const params = {
+      dropId: "drop-queued",
+      waveId: "wave-1",
+      source: "chip" as const,
+      action: "replace" as const,
+      previousReaction: ":wave:",
+      intendedReaction: ":joy:",
+      optimisticReaction: ":joy:",
+      profileId: "profile-1",
+    };
+    const older = beginReactionMutation(params);
+    recordReactionRequestSent(older, {
+      endpoint: "drops/drop-queued/reaction",
+      method: "POST",
+    });
+    dateNowSpy.mockReturnValue(1_200);
+    const latest = beginReactionMutation({
+      ...params,
+      intendedReaction: ":smile:",
+      optimisticReaction: ":smile:",
+    });
+    dateNowSpy.mockReturnValue(16_300);
+    recordReactionRequestFailed(older, new DropReactionRequestTimeoutError());
+    const read = (reaction: string) =>
+      recordReactionRealtimeReconciliation({
+        drop: {
+          id: "drop-queued",
+          wave: { id: "wave-1" },
+          context_profile_context: { reaction } as ApiDropContextProfileContext,
+        },
+      });
+    expect(read(":joy:").shouldApplyCanonicalDrop).toBe(false);
+    recordReactionRequestSent(latest, {
+      endpoint: "drops/drop-queued/reaction",
+      method: "POST",
+    });
+    expect(read(":joy:").shouldApplyCanonicalDrop).toBe(false);
+    recordReactionRequestSucceeded(latest);
+    expect(read(":smile:").shouldApplyCanonicalDrop).toBe(true);
+    expect(read(":joy:").shouldApplyCanonicalDrop).toBe(false);
+    dateNowSpy.mockReturnValue(31_301);
+    expect(read(":joy:").shouldApplyCanonicalDrop).toBe(true);
   });
 
   it("resets the per-drop sequence when the last tracked mutation ages out", () => {
