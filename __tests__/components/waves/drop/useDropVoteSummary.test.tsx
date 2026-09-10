@@ -73,6 +73,40 @@ describe("useDropVoteSummary", () => {
     });
   });
 
+  it("preserves valid data when a refresh returns a malformed distribution", () => {
+    useQueryMock.mockReturnValue({
+      data: { vote_distribution: distribution },
+      isFetching: false,
+      refetch,
+    } as ReturnType<typeof useQuery>);
+
+    const { result, rerender } = renderSummary();
+    const structuralSharing = useQueryMock.mock.calls[0]?.[0].structuralSharing;
+    if (typeof structuralSharing !== "function") {
+      throw new Error("Expected vote summary structural sharing");
+    }
+    const malformed = {
+      ...distribution,
+      positive_votes: [{ vote: -100, voter: { id: "opponent" } }],
+    };
+    const preserved = structuralSharing(
+      { vote_distribution: distribution },
+      { vote_distribution: malformed }
+    );
+    useQueryMock.mockReturnValue({
+      data: preserved,
+      isFetching: false,
+      refetch,
+    } as ReturnType<typeof useQuery>);
+    rerender();
+
+    expect(result.current).toEqual({
+      status: "ready",
+      voteDistribution: distribution,
+      retry: expect.any(Function),
+    });
+  });
+
   it("does not expose cached data for an ineligible drop", () => {
     useQueryMock.mockReturnValue({
       data: { vote_distribution: distribution },
