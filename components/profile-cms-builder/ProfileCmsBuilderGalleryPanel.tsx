@@ -6,6 +6,7 @@ import { formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import {
+  WALLET_GALLERY_BACKEND_WARNING_CODES,
   WALLET_GALLERY_FIXTURE_WARNING_CODES,
   type WalletGalleryBuilderState,
   type WalletGallerySnapshotAsset,
@@ -270,6 +271,18 @@ function formatGallerySnapshotWarning(
   warning: string
 ): string {
   switch (warning) {
+    case WALLET_GALLERY_BACKEND_WARNING_CODES.unresolvedWallets:
+      return t(
+        locale,
+        "profileCms.builder.gallery.snapshot.warning.unresolvedWallets"
+      );
+    case WALLET_GALLERY_BACKEND_WARNING_CODES.truncated:
+      return t(locale, "profileCms.builder.gallery.snapshot.warning.truncated");
+    case "backend_snapshot_unmeasured_images":
+      return t(
+        locale,
+        "profileCms.builder.gallery.snapshot.warning.unmeasuredImages"
+      );
     case WALLET_GALLERY_FIXTURE_WARNING_CODES.backendDisabled:
       return t(
         locale,
