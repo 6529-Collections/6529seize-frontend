@@ -412,6 +412,10 @@ export const EN_GB_MESSAGES = {
   "profileCms.builder.gallery.review.title": "Snapshot review",
   "profileCms.builder.gallery.settings": "Gallery settings",
   "profileCms.builder.gallery.snapshot.api": "Backend snapshot",
+  "profileCms.builder.gallery.snapshot.signInRequired":
+    "Sign in to request a wallet snapshot.",
+  "profileCms.builder.gallery.snapshot.sessionExpired":
+    "Your session could not be verified. Sign in again to request a wallet snapshot.",
   "profileCms.builder.gallery.snapshot.failed":
     "Gallery snapshot could not be created.",
   "profileCms.builder.gallery.snapshot.fixture": "Fixture snapshot",

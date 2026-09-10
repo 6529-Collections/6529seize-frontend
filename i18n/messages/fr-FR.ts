@@ -440,6 +440,10 @@ export const FR_FR_MESSAGES = {
   "profileCms.builder.gallery.review.title": "Examen de la copie d'écran",
   "profileCms.builder.gallery.settings": "Paramètres de la galerie",
   "profileCms.builder.gallery.snapshot.api": "Copie d'écran du serveur",
+  "profileCms.builder.gallery.snapshot.signInRequired":
+    "Connectez-vous pour demander un instantané de portefeuille.",
+  "profileCms.builder.gallery.snapshot.sessionExpired":
+    "Votre session n’a pas pu être vérifiée. Reconnectez-vous pour demander un instantané de portefeuille.",
   "profileCms.builder.gallery.snapshot.failed":
     "Impossible de créer la copie d'écran de la galerie.",
   "profileCms.builder.gallery.snapshot.fixture":
