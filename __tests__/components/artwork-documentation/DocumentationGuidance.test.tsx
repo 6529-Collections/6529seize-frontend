@@ -69,7 +69,7 @@ describe("worked artwork documentation examples", () => {
 
   it("opens an empty section's complete fictional example without adding any answers", () => {
     const context = documentationFixture();
-    context.modules.artwork!.answers = {};
+    context.modules["artwork"]!.answers = {};
     const before = JSON.stringify(context);
     render(
       <DocumentationWorkedExample

@@ -120,6 +120,6 @@ it("sends publication drafting questions outside the artwork revision and preser
   );
   await waitFor(() => expect(input).toHaveValue(""));
   expect(context.latest_revision_id).toBe("confirmed-artwork");
-  expect(context.modules.context!.answers).toEqual({});
+  expect(context.modules["context"]!.answers).toEqual({});
   client.clear();
 });

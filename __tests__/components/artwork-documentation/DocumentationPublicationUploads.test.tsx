@@ -100,7 +100,7 @@ describe("publication-only artwork uploads", () => {
       received_parts: [],
       policy: {},
     } as Awaited<ReturnType<typeof startDocumentationUpload>>);
-    jest.mocked(transferDocumentationFile).mockResolvedValue(undefined);
+    jest.mocked(transferDocumentationFile).mockResolvedValue({ asset });
     render(<DocumentationUpload context={context} controller={controller} />);
     fireEvent.change(screen.getByLabelText("Select file"), {
       target: {

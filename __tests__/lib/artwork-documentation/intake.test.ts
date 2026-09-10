@@ -27,7 +27,7 @@ describe("publication intake boundaries", () => {
   it("cannot copy restricted or unsupported source answers into a publication record", () => {
     const context = documentationFixture();
     context.profile.intake_mode = "publication_only" as never;
-    const publicAnswer = context.modules.artwork!.answers.title!;
+    const publicAnswer = context.modules["artwork"]!.answers["title"]!;
     expect(
       canImportDocumentationAnswer(
         context.profile,
