@@ -22,9 +22,6 @@ export const WaveWinnersPodiumPlaceholder: React.FC<
       <div
         className={`${podiumSurfaceClassName} ${styles.height} tw-justify-center tw-gap-2`}
       >
-        <div
-          className={`tw-absolute tw-inset-0 tw-rounded-xl tw-bg-gradient-to-b ${styles.surface} tw-to-transparent`}
-        />
         <div className="tw-h-3 tw-w-3/4 tw-max-w-24 tw-rounded-md tw-bg-iron-800" />
         <div className="tw-h-3 tw-w-2/3 tw-max-w-20 tw-rounded-md tw-bg-iron-800" />
         <div className="tw-h-3 tw-w-1/2 tw-max-w-16 tw-rounded-md tw-bg-iron-800" />

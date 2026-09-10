@@ -1,4 +1,4 @@
-// Keep the podium stagger and rank colors consistent across all states.
+// Keep the podium stagger and finished-winner rank colors consistent.
 export const podiumPositionStyles = {
   first: {
     offset: "",
