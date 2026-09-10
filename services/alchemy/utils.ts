@@ -6,11 +6,9 @@ import type {
   AlchemyContractMetadataResponse,
   AlchemyContractResult,
   AlchemyOpenSeaMetadata,
-  AlchemySearchResponse,
   AlchemyTokenMetadataEntry,
   AlchemyTokenMetadataResponse,
   OwnerNft,
-  SearchContractsResult,
 } from "./types";
 import type {
   ContractOverview,
@@ -224,27 +222,6 @@ function extractContract(contract: AlchemyContractResult): Suggestion | null {
     isSpam,
     safelist,
     deployer: deployer ?? null,
-  };
-}
-
-export function processSearchResponse(
-  payload: AlchemySearchResponse | undefined,
-  hideSpam: boolean
-): SearchContractsResult {
-  const contracts = payload?.contracts ?? [];
-  const suggestions = contracts
-    .map((contract) => extractContract(contract))
-    .filter((suggestion): suggestion is Suggestion => suggestion !== null);
-  const hiddenCount = hideSpam
-    ? suggestions.filter((suggestion) => suggestion.isSpam).length
-    : 0;
-  const visibleItems = hideSpam
-    ? suggestions.filter((suggestion) => !suggestion.isSpam)
-    : suggestions;
-  return {
-    items: visibleItems,
-    hiddenCount,
-    nextPageKey: payload?.pageKey,
   };
 }
 
