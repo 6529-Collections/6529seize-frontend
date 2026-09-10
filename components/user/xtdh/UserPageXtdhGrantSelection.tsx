@@ -20,7 +20,6 @@ export default function UserPageXtdhGrantSelection({
       onContractChange={onContractChange}
       allowRanges
       allowAll
-      hideSpam
       outputMode="number"
     />
   );

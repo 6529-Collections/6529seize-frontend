@@ -117,12 +117,39 @@ Current chapters use three plain status labels:
   integration, or evidence.
 - **Still proposed:** the design awaits acceptance.
 
-The pages distinguish permanent-Core manager minting from the older signed-sale
-rehearsal, which imports a test-only legacy Core. They explain the permanent
-Core's terminal collection closure, resolver-backed royalties, and restricted
-metadata refresh helpers. ADR 0018 is accepted and implemented. Complete artist
-authority and launch sale/payment connections remain unfinished; later payment,
-recovery, and artist-architecture proposals retain their stated status.
+The current pages distinguish implemented minting components from a working
+connection: the real manager and ledger fail permanent-Core installation checks.
+The older signed-sale rehearsal imports a test-only legacy Core. ADR 0018's mint
+accounting is accepted and implemented, but that does not prove installation or
+complete the sale, payment, artist-authority, and replacement connections.
+
+Core's royalty lookup exists, but its resolver cannot be installed, so ordinary
+configuration reports zero royalties. The artist-registry connection is also
+disabled. Current guides explain these as work required before deploying Core,
+separately from a marketplace's decision whether to pay royalties.
+
+Burn blocking must precede Core freeze; both can happen in one transaction once
+the required governance conditions are met. No extra block delay is required.
+Wider artwork finality has separate requirements, including a registry whose
+Core installation remains blocked. The detailed sale, payment, and randomness
+pages explain the older code's delivery, withdrawal, economic-change, and
+callback-recovery limitations.
+
+Current reading pages include source-checked editorial corrections while saved
+versions preserve their original text, source identity, and section anchors.
+The technical reference's source commit and source tree are different identifiers
+for the same pinned source; its source commit date is separate from the review date.
+
+The audience guides explain Core and minting in everyday language. Detailed
+chapters define terms such as TDH, metadata, signer epoch, and pointer where they
+are used. Renamed minting and metadata headings retain their existing feedback
+anchors. The randomness chapter distinguishes the coordinator address stored by
+Core from the mint commitment passed to that coordinator.
+
+The code guide and development-status page explain that the specification
+inventory still lists Draft documents. Accepted design decisions do not make
+those specifications Final; the policy requires the governing specifications to
+reach Final before deployment, with permanent interfaces and rules completed.
 
 Artist and collector guides explain that all Stream collections share one Core
 address. Separate marketplace collection presentation depends on support for
@@ -199,6 +226,21 @@ bundle used by the pages. There is no separate Help Bot publication flag:
 public versions include matching knowledge and `DRAFT` versions include none.
 The active pack also contains the dated development update with its separate
 Stream source commit.
+
+The current reading corrections are also applied to the active Help Bot pack
+during packaging. The website and pack share the pinned correction catalog and
+English messages. Saved Markdown, source knowledge packs, older published
+packs, and Solidity reference evidence remain unchanged. The active runtime
+pack retains its existing URLs and record IDs, but corrected evidence links to
+the current reading pages. Its `currentView` metadata binds the saved pack's
+checksum, correction inputs, and projection code. Recomputed search, shard,
+and manifest checksums invalidate the backend's previous evidence cache.
+Packaging rejects any bytes outside that exact projection. The launch-status
+record also uses the same readiness summary and before-launch items as the
+current page, while retaining the dated source evidence.
+The checked date, requirement and blocker counts, completed work, work in
+progress, and detailed launch steps remain in searchable text so the bot can
+retrieve them before it loads the full status record.
 
 ## Lifecycle Capabilities
 
