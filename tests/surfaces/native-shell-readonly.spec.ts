@@ -236,17 +236,6 @@ async function readNotificationHistoryPushCount(page: Page) {
   );
 }
 
-async function expectLatestPrimaryNavigationFeedback(link: Locator) {
-  await expect
-    .poll(async () => {
-      const isCurrent = (await link.getAttribute("aria-current")) === "page";
-      const showsPending =
-        (await link.getByTestId("nav-item-pending-indicator").count()) > 0;
-      return isCurrent || showsPending;
-    })
-    .toBe(true);
-}
-
 test.describe("Native and Electron simulated shell read-only coverage @surface @medium @readonly", () => {
   test("Capacitor simulations expose native runtime signals", async ({
     page,
@@ -611,7 +600,7 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
     }
   });
 
-  test("Capacitor primary tabs keep feedback on the latest delayed destination", async ({
+  test("Capacitor primary tabs keep the latest delayed destination without restyling icons", async ({
     page,
   }, testInfo) => {
     test.skip(
@@ -656,13 +645,14 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
     try {
       requestedPath = "/notifications";
       await notifications.tap({ noWaitAfter: true });
-      await expectLatestPrimaryNavigationFeedback(notifications);
+      await expect(
+        notifications.getByTestId("nav-item-pending-indicator")
+      ).toHaveCount(0);
 
       requestedPath = "/the-memes";
       await collections.tap({ noWaitAfter: true });
-      await expectLatestPrimaryNavigationFeedback(collections);
       await expect(
-        notifications.getByTestId("nav-item-pending-indicator")
+        collections.getByTestId("nav-item-pending-indicator")
       ).toHaveCount(0);
 
       releaseCollections();

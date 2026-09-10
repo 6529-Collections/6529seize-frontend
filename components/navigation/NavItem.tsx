@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import Link, { useLinkStatus } from "next/link";
+import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import type { MouseEvent, PointerEvent } from "react";
 import { useEffect, useRef, useState } from "react";
@@ -47,34 +47,6 @@ const getIconSlotClass = ({
 const FixedActiveNavIndicator = () => (
   <div className="tw-absolute tw-left-0 tw-top-0 tw-h-0.5 tw-w-full tw-rounded-full tw-bg-white" />
 );
-
-const PendingNavIndicator = ({
-  compact,
-  variant,
-}: {
-  readonly compact: boolean;
-  readonly variant: "floating" | "fixed";
-}) => {
-  if (variant === "fixed") {
-    return (
-      <div
-        aria-hidden="true"
-        data-testid="nav-item-pending-indicator"
-        className="tw-absolute tw-left-0 tw-top-0 tw-h-0.5 tw-w-full tw-animate-pulse tw-rounded-full tw-bg-white/60 motion-reduce:tw-animate-none"
-      />
-    );
-  }
-
-  return (
-    <div
-      aria-hidden="true"
-      data-testid="nav-item-pending-indicator"
-      className={`tw-pointer-events-none tw-absolute tw-left-1/2 tw-top-1/2 tw-z-0 -tw-translate-x-1/2 -tw-translate-y-1/2 tw-animate-pulse tw-rounded-full tw-bg-white/[0.14] tw-ring-1 tw-ring-inset tw-ring-white/40 motion-reduce:tw-animate-none ${
-        compact ? "tw-size-9 sm:tw-size-10" : "tw-size-10 sm:tw-size-11"
-      }`}
-    />
-  );
-};
 
 const getHomeIconSizeClass = ({
   compact,
@@ -153,12 +125,10 @@ const NavItemLinkContent = ({
   readonly compact: boolean;
   readonly variant: "floating" | "fixed";
 }) => {
-  const { pending } = useLinkStatus();
-  const isHighlighted = isActive || pending;
   const IconComponent = item.iconComponent;
   const iconTextColorClass = getIconTextColorClass({
     isActive,
-    isHighlighted,
+    isHighlighted: isActive,
     item,
     variant,
   });
@@ -170,9 +140,6 @@ const NavItemLinkContent = ({
   return (
     <div className={getIconSlotClass({ compact, variant })}>
       {isActive && variant === "fixed" && <FixedActiveNavIndicator />}
-      {pending && !isActive && (
-        <PendingNavIndicator compact={compact} variant={variant} />
-      )}
       {IconComponent ? (
         <IconComponent
           className={`tw-relative tw-z-10 ${resolvedIconSizeClass} ${iconTextColorClass}`}

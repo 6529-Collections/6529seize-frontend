@@ -36,9 +36,8 @@ Profile access stays in the app drawer/account surfaces.
    - `Network` -> `/network`
    - `Collections` -> `/the-memes`
    - `Notifications` -> `/notifications`
-3. The pressed icon dims immediately. If route work is still pending after the
-   tap, a subtle pulse stays on the requested destination until navigation
-   commits.
+3. The pressed icon dims immediately. When a cold destination needs more time,
+   its lightweight route shell opens while the complete content loads.
 4. Active-tab highlight updates from route path plus `wave`/`view` query state.
 5. Keep switching primary sections without opening the app sidebar.
 
@@ -50,9 +49,8 @@ Profile access stays in the app drawer/account surfaces.
 - Tap the bell at the right end of the bar to open `Notifications`. The tap
   area includes the space around the bell, in both expanded and compact states.
 - Icons dim while pressed to acknowledge the touch.
-- If a destination cannot commit immediately, its icon keeps a pending pulse
-  while the currently committed tab remains active. The pulse follows the most
-  recent destination during rapid switching.
+- Primary-tab icons and active states keep their established visual design
+  while route content is loading.
 - Use the app drawer/profile avatar when you need your own profile route.
 - From `/waves/{waveId}`, tap `Waves` once to clear cached wave thread state
   and return to `/waves`.

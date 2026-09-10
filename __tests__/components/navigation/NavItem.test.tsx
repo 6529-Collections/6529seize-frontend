@@ -454,42 +454,18 @@ describe("NavItem notifications", () => {
     expect(recordNavClick).toHaveBeenCalledTimes(1);
   });
 
-  it("shows a pending destination without marking it current", () => {
+  it("keeps pending navigations from drawing a second active highlight", () => {
     mockUseLinkStatus.mockReturnValue({ pending: true });
     const item = {
       kind: "view",
       name: "DMs",
       viewKey: "messages",
       icon: "messages",
-      iconComponent: TestIcon,
     } as any;
 
-    const { container, getByRole, getByTestId } = render(
-      <NavItem item={item} />
-    );
-
-    expect(getByTestId("nav-item-pending-indicator")).toBeInTheDocument();
-    expect(getByRole("link")).not.toHaveAttribute("aria-current");
-    expect(container.querySelector("span[aria-hidden='true']")).toHaveClass(
-      "tw-text-white"
-    );
-  });
-
-  it("does not draw a pending indicator over the current destination", () => {
-    mockUseLinkStatus.mockReturnValue({ pending: true });
-    (isNavItemActive as jest.Mock).mockReturnValue(true);
-    const item = {
-      kind: "route",
-      name: "Network",
-      href: "/network",
-      icon: "network",
-      iconComponent: TestIcon,
-    } as any;
-
-    const { getByRole, queryByTestId } = render(<NavItem item={item} />);
+    const { queryByTestId } = render(<NavItem item={item} />);
 
     expect(queryByTestId("nav-item-pending-indicator")).not.toBeInTheDocument();
-    expect(getByRole("link")).toHaveAttribute("aria-current", "page");
   });
 
   it("colors the home logo through the active nav text color", () => {
