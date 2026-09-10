@@ -119,6 +119,9 @@ describe("production exact-artifact deployment contract", () => {
     expect(deploySource).toContain(
       'OptionName:"ETHEREUM_RPC_URL",Value:$ethereum_rpc_url'
     );
+    expect(deploySource).toContain(
+      "node ops/scripts/validate-ethereum-rpc-url.cjs"
+    );
     expect(deploySource).not.toContain("NEXT_PUBLIC_ETHEREUM_RPC_URL");
   });
 

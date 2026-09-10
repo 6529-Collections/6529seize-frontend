@@ -516,6 +516,15 @@ EOF
   return 0
 }
 
+validate_ethereum_rpc_url() {
+  if ! printf '%s' "$ETHEREUM_RPC_URL" | \
+    node "$REPO_ROOT/ops/scripts/validate-ethereum-rpc-url.cjs"; then
+    color red "ETHEREUM_RPC_URL must be a complete HTTP(S) URL."
+    exit 1
+  fi
+  return 0
+}
+
 # ---------- Main ----------
 
 main() {
@@ -524,11 +533,12 @@ main() {
 
   # 0) Gather ALL user input up front (single interaction)
   collect_all_inputs
-  create_env_file
 
   # 1) Prerequisites
   require_sudo_if_linux
   ensure_node_ge20
+  validate_ethereum_rpc_url
+  create_env_file
   activate_pnpm_with_corepack
   install_socket_firewall
   install_pm2

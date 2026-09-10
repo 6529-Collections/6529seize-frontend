@@ -33,6 +33,7 @@ import WaveDropActionsRestoreLinkPreviews from "./WaveDropActionsRestoreLinkPrev
 import WaveDropActionsSetPinnedDrop from "./WaveDropActionsSetPinnedDrop";
 import ContentModerationDropActions from "@/components/content-moderation/ContentModerationDropActions";
 import ReportDropModal from "@/components/content-moderation/ReportDropModal";
+import WaveDropDocumentationAction from "./WaveDropDocumentationAction";
 
 interface WaveDropActionsMoreProps {
   readonly drop: ExtendedDrop;
@@ -243,6 +244,12 @@ export default function WaveDropActionsMore({
                   isDropdownItem={true}
                   onOpen={closeDropdown}
                 />
+                {isOpen && (
+                  <WaveDropDocumentationAction
+                    drop={drop}
+                    onSelected={closeDropdown}
+                  />
+                )}
                 {canSetPinnedDrop && (
                   <WaveDropActionsSetPinnedDrop
                     drop={drop}

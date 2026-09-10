@@ -8,6 +8,7 @@ jest.mock("@/config/alchemyEnv", () => ({
 describe("createTransientPlan", () => {
   const fetchHtml = jest.fn();
   const assertPublicUrl = jest.fn();
+  const fetchTokenMetadata = jest.fn();
   const mockedGetAlchemyApiKey = getAlchemyApiKey as jest.MockedFunction<
     typeof getAlchemyApiKey
   >;
@@ -22,6 +23,13 @@ describe("createTransientPlan", () => {
     mockFetch.mockReset();
     mockedGetAlchemyApiKey.mockReset();
     assertPublicUrl.mockResolvedValue(undefined);
+    fetchTokenMetadata.mockReset();
+    fetchTokenMetadata.mockImplementation(async (url: URL) => {
+      await assertPublicUrl(url);
+      const response = await mockFetch(url.toString());
+      if (!response.ok) throw new Error("Metadata unavailable");
+      return response.json();
+    });
     mockedGetAlchemyApiKey.mockReturnValue("test-alchemy-key");
     global.fetch = mockFetch as unknown as typeof fetch;
   });
@@ -36,7 +44,7 @@ describe("createTransientPlan", () => {
       new URL(
         "https://www.transient.xyz/nfts/ethereum/0xda48f4db41415fc2873efb487eec1068626fad60/7"
       ),
-      { fetchHtml, assertPublicUrl }
+      { fetchHtml, assertPublicUrl, fetchTokenMetadata }
     );
 
     expect(plan).not.toBeNull();
@@ -48,6 +56,7 @@ describe("createTransientPlan", () => {
       createTransientPlan(new URL("https://www.transient.xyz/about"), {
         fetchHtml,
         assertPublicUrl,
+        fetchTokenMetadata,
       })
     ).toBeNull();
     expect(
@@ -58,6 +67,7 @@ describe("createTransientPlan", () => {
         {
           fetchHtml,
           assertPublicUrl,
+          fetchTokenMetadata,
         }
       )
     ).toBeNull();
@@ -83,6 +93,7 @@ describe("createTransientPlan", () => {
     const plan = createTransientPlan(new URL(url), {
       fetchHtml,
       assertPublicUrl,
+      fetchTokenMetadata,
     });
     const result = await plan?.execute();
 
@@ -140,6 +151,7 @@ describe("createTransientPlan", () => {
     const plan = createTransientPlan(new URL(url), {
       fetchHtml,
       assertPublicUrl,
+      fetchTokenMetadata,
     });
     const result = await plan?.execute();
 
@@ -193,6 +205,7 @@ describe("createTransientPlan", () => {
     const plan = createTransientPlan(new URL(url), {
       fetchHtml,
       assertPublicUrl,
+      fetchTokenMetadata,
     });
     const result = await plan?.execute();
 
@@ -235,6 +248,7 @@ describe("createTransientPlan", () => {
     const plan = createTransientPlan(new URL(url), {
       fetchHtml,
       assertPublicUrl,
+      fetchTokenMetadata,
     });
     const result = await plan?.execute();
 
@@ -281,6 +295,7 @@ describe("createTransientPlan", () => {
     const plan = createTransientPlan(new URL(url), {
       fetchHtml,
       assertPublicUrl,
+      fetchTokenMetadata,
     });
     const result = await plan?.execute();
 
@@ -319,6 +334,7 @@ describe("createTransientPlan", () => {
     const plan = createTransientPlan(new URL(url), {
       fetchHtml,
       assertPublicUrl,
+      fetchTokenMetadata,
     });
     const result = await plan?.execute();
 

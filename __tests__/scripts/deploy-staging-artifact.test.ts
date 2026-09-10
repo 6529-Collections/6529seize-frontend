@@ -40,7 +40,8 @@ function runHostPreflight(
   repo: string,
   pm2Current?: string,
   afterPreflight = "",
-  lockHeld = false
+  lockHeld = false,
+  ethereumRpcUrl = "https://eth-mainnet.example.test"
 ) {
   // Exercise the real path adoption, PM2 validation and rollback functions;
   // replace only host privileges, PM2, the lock command and HTTP transport.
@@ -102,9 +103,8 @@ curl() { command cat "$REPO_DIR/.deploy/current/version.json"; }
         PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64: "e30=",
         SSR_CLIENT_ID_B64: "Y2xpZW50",
         SSR_CLIENT_SECRET_B64: "c2VjcmV0",
-        ETHEREUM_RPC_URL_B64: Buffer.from(
-          "https://eth-mainnet.example.test"
-        ).toString("base64"),
+        ETHEREUM_RPC_URL_B64:
+          Buffer.from(ethereumRpcUrl).toString("base64"),
         TEST_PM2_JSON: JSON.stringify(pm2Processes),
         TEST_LOCK_HELD: String(lockHeld),
       },
@@ -121,6 +121,11 @@ describe("staging runtime directory", () => {
       fs.mkdtempSync(path.join(os.tmpdir(), "staging-runtime-"))
     );
     fs.mkdirSync(path.join(repo, ".git"));
+    fs.mkdirSync(path.join(repo, "ops", "scripts"), { recursive: true });
+    fs.copyFileSync(
+      path.join(root, "ops", "scripts", "validate-ethereum-rpc-url.cjs"),
+      path.join(repo, "ops", "scripts", "validate-ethereum-rpc-url.cjs")
+    );
     runtimeRoot = path.join(repo, ".deploy");
   });
 
@@ -200,6 +205,16 @@ describe("staging runtime directory", () => {
     expect(result.status).toBe(0);
     expect(fs.lstatSync(runtimeRoot).isDirectory()).toBe(true);
     expect(fs.existsSync(path.join(runtimeRoot, "deploy.lock"))).toBe(true);
+  });
+
+  it("rejects a malformed Ethereum RPC URL before changing runtime state", () => {
+    const result = runHostPreflight(repo, undefined, "", false, "https://");
+
+    expect(result.status).toBe(1);
+    expect(result.stderr).toContain(
+      "ETHEREUM_RPC_URL must be a complete HTTP(S) URL"
+    );
+    expect(fs.existsSync(runtimeRoot)).toBe(false);
   });
 
   it("keeps an already healthy exact artifact idempotent", () => {

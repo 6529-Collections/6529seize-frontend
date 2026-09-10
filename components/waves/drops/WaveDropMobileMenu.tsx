@@ -43,6 +43,7 @@ import WaveDropMobileMenuCopyText from "./WaveDropMobileMenuCopyText";
 import ContentModerationDropActions from "@/components/content-moderation/ContentModerationDropActions";
 import ReportDropModal from "@/components/content-moderation/ReportDropModal";
 import WaveDropMobileMenuReactionPicker from "./WaveDropMobileMenuReactionPicker";
+import WaveDropDocumentationAction from "./WaveDropDocumentationAction";
 
 export interface WaveDropMobileMenuProps {
   readonly drop: ApiDrop;
@@ -273,6 +274,8 @@ function WaveDropMobileMenuAuthenticatedActions({
           <WaveDropMobileMenuCopyLink drop={drop} onCopy={closeMenu} />
         </>
       )}
+
+      <WaveDropDocumentationAction drop={drop} onSelected={closeMenu} mobile />
 
       {quickAddCuration && (
         <button

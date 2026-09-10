@@ -160,9 +160,8 @@ export async function readLimitedText(
   source: BodySource,
   maxBytes: number
 ): Promise<string> {
-  assertReadableSize(source.headers, maxBytes);
-
   if (!source.body) {
+    assertReadableSize(source.headers, maxBytes);
     return "";
   }
 
@@ -172,6 +171,12 @@ export async function readLimitedText(
   let text = "";
 
   try {
+    try {
+      assertReadableSize(source.headers, maxBytes);
+    } catch (error) {
+      await cancelReader(reader);
+      throw error;
+    }
     while (true) {
       const { done, value } = await reader.read();
       if (done) {

@@ -229,8 +229,8 @@ jobs:
           PUBLIC_REVIEW_DISCUSSION_DESTINATIONS: ${{ secrets.PUBLIC_REVIEW_PRODUCTION_DISCUSSION_DESTINATIONS }}
         run: |
           set -euo pipefail
-          test -n "$ETHEREUM_RPC_URL"
-          [[ "$ETHEREUM_RPC_URL" =~ ^https?:// ]]
+          printf '%s' "$ETHEREUM_RPC_URL" |
+            node ops/scripts/validate-ethereum-rpc-url.cjs
           jq -e '
             type == "object" and
             keys == ["production"] and

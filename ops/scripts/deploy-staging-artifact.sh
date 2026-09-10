@@ -36,7 +36,7 @@ id "$RUN_AS" >/dev/null 2>&1 || {
   exit 1
 }
 
-for command in base64 curl flock grep jq sha256sum sudo unzip; do
+for command in base64 curl flock grep jq node sha256sum sudo unzip; do
   command -v "$command" >/dev/null 2>&1 || {
     echo "Required staging command '$command' is unavailable." >&2
     exit 1
@@ -50,11 +50,15 @@ sudo -H -u "$RUN_AS" pm2 --version >/dev/null 2>&1 || {
 ssr_client_id="$(printf '%s' "$SSR_CLIENT_ID_B64" | base64 -d)"
 ssr_client_secret="$(printf '%s' "$SSR_CLIENT_SECRET_B64" | base64 -d)"
 ethereum_rpc_url="$(printf '%s' "$ETHEREUM_RPC_URL_B64" | base64 -d)"
-[[ -n "$ssr_client_id" && -n "$ssr_client_secret" && \
-  "$ethereum_rpc_url" =~ ^https?:// ]] || {
-  echo "Decoded staging runtime values are missing or invalid." >&2
+[[ -n "$ssr_client_id" && -n "$ssr_client_secret" ]] || {
+  echo "Decoded staging SSR credentials must be non-empty." >&2
   exit 1
 }
+if ! printf '%s' "$ethereum_rpc_url" | \
+  node "$REPO_DIR/ops/scripts/validate-ethereum-rpc-url.cjs"; then
+  echo "Decoded staging Ethereum RPC URL is invalid." >&2
+  exit 1
+fi
 
 release_root="$REPO_DIR/.deploy"
 if [[ -L "$release_root" ]]; then

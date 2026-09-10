@@ -1,9 +1,12 @@
 import reactYouMightNotNeedAnEffect from "eslint-plugin-react-you-might-not-need-an-effect";
 import { baseGlobalIgnores, createEslintConfig } from "./eslint.config.mjs";
 
-const tightGlobalIgnores = baseGlobalIgnores.filter(
-  (pattern) => pattern !== "**/test-results/**"
-);
+// Roll out the existing base rules first, preserving the tighter ruleset's scope.
+const tightGlobalIgnores = [
+  ...baseGlobalIgnores.filter((pattern) => pattern !== "**/test-results/**"),
+  "**/__tests__/**",
+  "config/**",
+];
 
 const tightRuleOverrides = {
   // Preserve every rule explicitly enabled by the legacy tight config. Some of

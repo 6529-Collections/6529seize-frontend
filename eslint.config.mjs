@@ -469,12 +469,17 @@ export const baseGlobalIgnores = Object.freeze([
   "**/public",
   "**/coverage",
   "**/generated",
-  "**/__tests__/**",
+  // Bundled from config/env.schema.ts by scripts/build-env-schema.cjs.
+  "config/env.schema.runtime.cjs",
+  // Expand test lint coverage one subtree at a time; keep directory traversal
+  // enabled so the selected runtime tests can be reached.
+  "**/__tests__/**/*",
+  "!**/__tests__/**/",
+  "!**/__tests__/lib/profile-cms/runtime/**",
   "**/tests/**",
   "**/__mocks__/**",
   "**/e2e/**",
   "**/test-results/**",
-  "config/**",
   "*.js",
   "*.mjs",
   "*.ts",
@@ -495,10 +500,6 @@ export const typeCheckedFileIgnores = Object.freeze([
   "scripts/**",
   "**/next.config.*",
   "**/.next-static-export/**",
-  "config/env.ts",
-  "config/serverEnv.ts",
-  "config/alchemyEnv.ts",
-  "config/reviewbotUsageEnv.ts",
   "__tests__/config/env.base-endpoint.test.ts",
   "**/playwright.config.ts",
   "tests/**",
@@ -593,6 +594,28 @@ export const createEslintConfig = ({
               "Accessing process.env is restricted. Use environment variables safely.",
           },
         ],
+      },
+    },
+
+    // These existing adapters form the raw environment boundary. Keep them
+    // type-checked, and keep the env-access restriction on other config files.
+    {
+      files: [
+        "config/alchemyEnv.ts",
+        "config/assets.ts",
+        "config/deploymentEnv.ts",
+        "config/env.ts",
+        "config/ethereumRpcEnv.ts",
+        "config/museumPublicationEnv.server.ts",
+        "config/nextConfig.ts",
+        "config/publicReviewDestinationEnv.server.ts",
+        "config/reviewbotUsageEnv.ts",
+        "config/runtimeConfig.ts",
+        "config/serverEnv.ts",
+        "config/version.ts",
+      ],
+      rules: {
+        "no-restricted-syntax": "off",
       },
     },
 

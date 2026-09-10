@@ -36,7 +36,19 @@ the `1200x630` image dimensions and `summary_large_image` Twitter card.
   overrides for `artist`, `badge`, `collection`, `image`, `subtitle`, and
   `title`.
 - `/api/og-metadata/image?url={url}&w={width}` safely normalizes allowed remote
-  images for card rendering.
+  images to PNG for card rendering. Images retain their aspect ratio and fit
+  within the requested width (at most 1,200 pixels) and 12,000 pixels high,
+  without cropping or enlarging smaller originals. GIF previews use the first
+  frame, and SVG artwork is supported.
+  - Source downloads are limited to 50 MiB. Larger GIFs can still produce a
+    preview when the source supports a partial download of the first 8 MiB.
+  - Each processed frame must be at most 512 million pixels, with neither
+    dimension exceeding 65,536 pixels. Sources outside these limits do not
+    produce a normalized preview.
+  - Images are processed one at a time per server process. Up to 32 requests can
+    wait for at most 15 seconds before downloading, so a card's banner, avatar,
+    and artwork can all render. A full queue or expired wait produces a
+    temporary `503` response with a one-second retry interval.
 
 ## Standard Route Contract
 
