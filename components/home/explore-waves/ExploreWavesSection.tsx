@@ -156,7 +156,7 @@ export function ExploreWavesSection({
         <div className={headerClassName}>
           <div className={titleClassName}>
             {headingVariant === "page" ? (
-              <h1 className="tw-m-0 tw-mb-5 tw-max-w-2xl tw-text-balance tw-text-3xl tw-font-semibold tw-leading-[1.05] tw-tracking-[-0.035em] tw-text-iron-50 md:tw-text-4xl">
+              <h1 className="tw-m-0 tw-mb-5 tw-text-balance tw-text-3xl tw-font-semibold tw-leading-[1.05] tw-tracking-[-0.035em] tw-text-iron-50 md:tw-text-4xl">
                 {title}
               </h1>
             ) : (
