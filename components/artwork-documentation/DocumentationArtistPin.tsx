@@ -5,6 +5,11 @@ import type { DocumentationDraftController } from "@/lib/artwork-documentation/d
 import { pinDocumentationArtistRecord } from "@/services/api/artwork-documentation-api";
 import { DocumentationValueSummary } from "./DocumentationSummary";
 import {
+  canImportDocumentationAnswer,
+  isPublicationOnly,
+} from "@/lib/artwork-documentation/intake";
+import { isRedacted } from "@/lib/artwork-documentation/answers";
+import {
   DocumentationButton,
   panelClass,
   useDocumentationMessages,
@@ -21,10 +26,28 @@ export default function DocumentationArtistPin({
   const candidate = context.available_artist_record;
   const revisionId = candidate?.id;
   if (
+    !candidate ||
     typeof revisionId !== "string" ||
     revisionId === context.artist_record_revision_id
   )
     return null;
+  if (
+    isPublicationOnly(context.profile) &&
+    Object.entries(candidate.answers).some(
+      ([field, answer]) =>
+        isRedacted(answer) ||
+        !canImportDocumentationAnswer(
+          context.profile,
+          `identity.${field}`,
+          answer
+        )
+    )
+  )
+    return (
+      <p className="tw-text-sm tw-leading-relaxed tw-text-iron-300">
+        {msg("publication.pinBlocked")}
+      </p>
+    );
   return (
     <details className={panelClass}>
       <summary className="tw-cursor-pointer tw-py-2 tw-text-sm tw-font-medium">
@@ -46,7 +69,7 @@ export default function DocumentationArtistPin({
           <h3 className="tw-text-sm tw-font-semibold">
             {msg("conflict.server")}
           </h3>
-          <DocumentationValueSummary value={candidate?.answers} />
+          <DocumentationValueSummary value={candidate.answers} />
         </div>
       </div>
       <DocumentationButton

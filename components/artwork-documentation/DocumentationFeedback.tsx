@@ -13,6 +13,11 @@ import {
 } from "@/services/api/artwork-documentation-api";
 import { documentationOptionLabel } from "@/i18n/messages/artwork-documentation-fields";
 import { formatDate } from "@/i18n/format";
+import { isPublicationOnly } from "@/lib/artwork-documentation/intake";
+import {
+  ApiArtworkDocumentationThreadAudienceEnum,
+  ApiArtworkDocumentationThreadRestrictedClassEnum,
+} from "@/generated/models/ApiArtworkDocumentationThread";
 import { useDocumentationActor } from "./DocumentationAuthGate";
 import {
   DocumentationButton,
@@ -28,6 +33,7 @@ export default function DocumentationFeedback({
   readonly context: ApiArtworkDocumentationContext;
 }) {
   const { msg } = useDocumentationMessages();
+  const questions = isPublicationOnly(context.profile);
   const { connectedProfile, actorKey } = useDocumentationActor();
   const [text, setText] = useState("");
   const [audience, setAudience] = useState("artist_and_reviewers");
@@ -52,9 +58,9 @@ export default function DocumentationFeedback({
     try {
       await createDocumentationThread(context.id, {
         text,
-        audience,
-        restricted_class: restrictedClass,
-        ...(context.latest_revision_id
+        audience: questions ? "artist_and_reviewers" : audience,
+        restricted_class: questions ? "ordinary" : restrictedClass,
+        ...(!questions && context.latest_revision_id
           ? { revision_id: context.latest_revision_id }
           : {}),
       });
@@ -66,13 +72,31 @@ export default function DocumentationFeedback({
       setBusy(false);
     }
   };
+  const threads =
+    query.data?.data.filter(
+      (thread) =>
+        !questions ||
+        (!thread.field_path &&
+          !thread.revision_id &&
+          thread.audience ===
+            ApiArtworkDocumentationThreadAudienceEnum.ArtistAndReviewers &&
+          thread.restricted_class ===
+            ApiArtworkDocumentationThreadRestrictedClassEnum.Ordinary)
+    ) ?? [];
   return (
     <section className={`${panelClass} tw-space-y-4`}>
-      <h3 className="tw-m-0 tw-text-lg tw-font-semibold">{msg("feedback")}</h3>
+      <h3 className="tw-m-0 tw-text-lg tw-font-semibold">
+        {msg(questions ? "questions.title" : "feedback")}
+      </h3>
+      {questions && (
+        <p className="tw-text-sm tw-leading-relaxed tw-text-iron-300">
+          {msg("questions.help")}
+        </p>
+      )}
       {(error || query.isError) && (
         <DocumentationNotice error>{msg("error")}</DocumentationNotice>
       )}
-      {query.data?.data.map((thread) => (
+      {threads.map((thread) => (
         <FeedbackThread
           key={thread.id}
           contextId={context.id}
@@ -82,32 +106,50 @@ export default function DocumentationFeedback({
           }}
         />
       ))}
-      {!query.isLoading && (query.data?.data.length ?? 0) === 0 && (
-        <p className="tw-text-sm tw-text-iron-400">{msg("noFeedback")}</p>
+      {!query.isLoading && threads.length === 0 && (
+        <p className="tw-text-sm tw-text-iron-400">
+          {msg(questions ? "questions.empty" : "noFeedback")}
+        </p>
       )}
       <label className="tw-block tw-text-sm tw-text-iron-300">
-        {msg("comment")}
+        {msg(questions ? "questions.label" : "comment")}
         <textarea
           rows={3}
           className={`${inputClass} tw-mt-2`}
           value={text}
+          disabled={busy}
+          aria-describedby={
+            questions ? "documentation-question-help" : undefined
+          }
           onChange={(event) => setText(event.target.value)}
         />
       </label>
-      <label className="tw-block tw-text-sm tw-text-iron-300">
-        {msg("audience")}
-        <select
-          className={`${inputClass} tw-mt-2`}
-          value={audience}
-          onChange={(event) => setAudience(event.target.value)}
+      {questions && (
+        <p
+          id="documentation-question-help"
+          className="tw-text-sm tw-leading-relaxed tw-text-iron-400"
         >
-          <option value="artist_and_reviewers">{msg("artistReviewers")}</option>
-          {context.capabilities.review_lanes.length > 0 && (
-            <option value="reviewers_only">{msg("reviewersOnly")}</option>
-          )}
-        </select>
-      </label>
-      {context.capabilities.read_rights_evidence && (
+          {msg("questions.hint")} {msg("questions.notSaved")}
+        </p>
+      )}
+      {!questions && (
+        <label className="tw-block tw-text-sm tw-text-iron-300">
+          {msg("audience")}
+          <select
+            className={`${inputClass} tw-mt-2`}
+            value={audience}
+            onChange={(event) => setAudience(event.target.value)}
+          >
+            <option value="artist_and_reviewers">
+              {msg("artistReviewers")}
+            </option>
+            {context.capabilities.review_lanes.length > 0 && (
+              <option value="reviewers_only">{msg("reviewersOnly")}</option>
+            )}
+          </select>
+        </label>
+      )}
+      {!questions && context.capabilities.read_rights_evidence && (
         <label className="tw-block tw-text-sm tw-text-iron-300">
           {msg("visibility")}
           <select
@@ -126,7 +168,7 @@ export default function DocumentationFeedback({
           void create();
         }}
       >
-        {msg("sendComment")}
+        {msg(questions ? "questions.send" : "sendComment")}
       </DocumentationButton>
     </section>
   );
