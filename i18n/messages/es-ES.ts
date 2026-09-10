@@ -9,6 +9,11 @@ import stormComposerEsMessages from "@/i18n/messages/stormComposer.es-ES.json";
 import type { MessageKey } from "@/i18n/messages/en-US";
 
 export const ES_ES_MESSAGES = {
+  "navigation.primary.loading.home": "Cargando inicio",
+  "navigation.primary.loading.discovery": "Cargando descubrimiento",
+  "navigation.primary.loading.network": "Cargando la red",
+  "navigation.primary.loading.collections": "Cargando colecciones",
+  "navigation.primary.loading.notifications": "Cargando notificaciones",
   "headerSearch.wave.byAuthor": "por {author}",
   "headerSearch.wave.serial": "Wave n.º {serial}",
   "headerSearch.wave.label": "Wave",

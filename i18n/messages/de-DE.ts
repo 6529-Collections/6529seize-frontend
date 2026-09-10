@@ -11,6 +11,12 @@ import type { MessageKey } from "@/i18n/messages/en-US";
 const RETRY_LABEL = "Erneut versuchen";
 
 export const DE_DE_MESSAGES = {
+  "navigation.primary.loading.home": "Startseite wird geladen",
+  "navigation.primary.loading.discovery": "Entdecken wird geladen",
+  "navigation.primary.loading.network": "Netzwerk wird geladen",
+  "navigation.primary.loading.collections": "Sammlungen werden geladen",
+  "navigation.primary.loading.notifications":
+    "Benachrichtigungen werden geladen",
   "headerSearch.wave.byAuthor": "von {author}",
   "headerSearch.wave.serial": "Wave Nr. {serial}",
   "headerSearch.wave.label": "Wave",

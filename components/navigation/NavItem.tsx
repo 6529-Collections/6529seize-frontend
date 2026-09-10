@@ -125,11 +125,10 @@ const NavItemLinkContent = ({
   readonly compact: boolean;
   readonly variant: "floating" | "fixed";
 }) => {
-  const isHighlighted = isActive;
   const IconComponent = item.iconComponent;
   const iconTextColorClass = getIconTextColorClass({
     isActive,
-    isHighlighted,
+    isHighlighted: isActive,
     item,
     variant,
   });
