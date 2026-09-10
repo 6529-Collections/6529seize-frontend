@@ -1,4 +1,4 @@
-import { generateMetadata } from "@/app/page";
+import { generateMetadata } from "@/app/(home)/page";
 import { getAppEnvironment } from "@/config/appEnvironment";
 import { publicEnv } from "@/config/env";
 

@@ -10,12 +10,12 @@ function DiscoverFallback() {
       aria-label="Loading waves"
       className="tw-px-4 tw-py-10 md:tw-px-6 md:tw-py-16 lg:tw-px-8"
     >
-      <div className="tw-mx-auto tw-h-8 tw-max-w-xl tw-rounded-md tw-bg-iron-900" />
+      <div className="tw-h-8 tw-w-3/4 tw-max-w-4xl tw-rounded-md tw-bg-iron-900 md:tw-h-9 xl:tw-h-10" />
       <div className="tw-mt-8 tw-grid tw-grid-cols-1 tw-gap-x-3 tw-gap-y-4 sm:tw-grid-cols-2 sm:tw-gap-6 lg:tw-grid-cols-3">
         {Array.from({ length: 6 }).map((_, index) => (
           <div
             key={index}
-            className="tw-h-64 tw-rounded-xl tw-bg-iron-950 tw-ring-1 tw-ring-inset tw-ring-white/10"
+            className="tw-h-[22rem] tw-rounded-xl tw-bg-iron-950 tw-ring-1 tw-ring-inset tw-ring-white/10"
           />
         ))}
       </div>
@@ -26,7 +26,7 @@ function DiscoverFallback() {
 
 export default function DiscoverPage() {
   return (
-    <main className="tailwind-scope tw-min-h-screen tw-bg-black">
+    <main className="tailwind-scope tw-min-h-screen tw-overflow-x-hidden tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-800 tw-bg-black">
       <Suspense fallback={<DiscoverFallback />}>
         <DiscoverWaveExplorer />
       </Suspense>

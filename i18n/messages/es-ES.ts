@@ -9,6 +9,11 @@ import stormComposerEsMessages from "@/i18n/messages/stormComposer.es-ES.json";
 import type { MessageKey } from "@/i18n/messages/en-US";
 
 export const ES_ES_MESSAGES = {
+  "navigation.primary.loading.home": "Cargando inicio",
+  "navigation.primary.loading.discovery": "Cargando descubrimiento",
+  "navigation.primary.loading.network": "Cargando la red",
+  "navigation.primary.loading.collections": "Cargando colecciones",
+  "navigation.primary.loading.notifications": "Cargando notificaciones",
   "headerSearch.wave.byAuthor": "por {author}",
   "headerSearch.wave.serial": "Wave n.º {serial}",
   "headerSearch.wave.label": "Wave",
@@ -917,6 +922,24 @@ export const ES_ES_MESSAGES = {
   "waves.leaderboard.grid.authorProfile": "Ver el perfil de {author}",
   "waves.leaderboard.grid.voters.one": "{count} votante",
   "waves.leaderboard.grid.voters.other": "{count} votantes",
+  "waves.leaderboard.podium.place.first": "1.º",
+  "waves.leaderboard.podium.place.second": "2.º",
+  "waves.leaderboard.podium.place.third": "3.º",
+  "waves.leaderboard.podium.open.first": "Abrir el 1.er puesto: {name}",
+  "waves.leaderboard.podium.open.second": "Abrir el 2.º puesto: {name}",
+  "waves.leaderboard.podium.open.third": "Abrir el 3.er puesto: {name}",
+  "waves.leaderboard.podium.avatar": "Avatar de {name}",
+  "waves.leaderboard.podium.selfNominated": "autonominado",
+  "waves.leaderboard.podium.nominatedBy": "nominado por {nominator}",
+  "waves.leaderboard.podium.outcome": "Resultado",
+  "waves.leaderboard.podium.empty.title": "No hay ganadores que mostrar",
+  "waves.leaderboard.podium.empty.description":
+    "Esta wave terminó sin propuestas",
+  "waves.voteDetails.title": "Votos",
+  "waves.voteDetails.trigger.one":
+    "Ver votantes y el registro para {count} votante",
+  "waves.voteDetails.trigger.other":
+    "Ver votantes y el registro para {count} votantes",
   "waves.leaderboard.grid.you": "Tú",
   "waves.leaderboard.grid.votesNow": "Votos actuales",
   "waves.leaderboard.grid.status.approved": "Aprobado",
