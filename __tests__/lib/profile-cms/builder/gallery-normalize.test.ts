@@ -1,4 +1,6 @@
 import type { ApiProfileCmsWalletGallerySnapshot } from "@/generated/models/ApiProfileCmsWalletGallerySnapshot";
+import { ApiProfileCmsWalletGalleryExcludedAssetReasonEnum } from "@/generated/models/ApiProfileCmsWalletGalleryExcludedAsset";
+import { ApiProfileCmsWalletGalleryWalletStatusEnum } from "@/generated/models/ApiProfileCmsWalletGalleryWallet";
 import { normalizeWalletGallerySnapshotResponse } from "@/lib/profile-cms/builder/gallery-normalize";
 import type { WalletGallerySource } from "@/lib/profile-cms/builder/gallery";
 import { enrichWalletGalleryImageDimensions } from "@/lib/profile-cms/builder/gallery-media";
@@ -24,7 +26,7 @@ function buildBackendSnapshot(
         address: "0xf58fe66af1a8c792cd64d8d706eddabadfcb2fd0",
         ens: "punk6529.eth",
         display: "punk6529.eth",
-        status: "resolved",
+        status: ApiProfileCmsWalletGalleryWalletStatusEnum.Resolved,
         reason: null,
       },
     ],
@@ -178,7 +180,7 @@ describe("wallet gallery snapshot normalization", () => {
       buildBackendSnapshot({
         assets: [
           {
-            ...buildBackendSnapshot().assets[0],
+            ...buildBackendSnapshot().assets[0]!,
             media: {
               image: null,
               image_preview: null,
@@ -202,7 +204,7 @@ describe("wallet gallery snapshot normalization", () => {
       buildBackendSnapshot({
         assets: [
           {
-            ...buildBackendSnapshot().assets[0],
+            ...buildBackendSnapshot().assets[0]!,
             media: {
               image: null,
               image_preview: "https://media.6529.io/previews/1.png",
@@ -231,7 +233,8 @@ describe("wallet gallery snapshot normalization", () => {
             contract: "0x0000000000000000000000000000000000dead",
             token_id: 99,
             owner_wallet: "0xf58fe66af1a8c792cd64d8d706eddabadfcb2fd0",
-            reason: "asset_excluded",
+            reason:
+              ApiProfileCmsWalletGalleryExcludedAssetReasonEnum.AssetExcluded,
           },
         ],
       }),
@@ -252,9 +255,9 @@ describe("wallet gallery snapshot normalization", () => {
     const snapshot = normalizeWalletGallerySnapshotResponse(
       buildBackendSnapshot({
         assets: [
-          buildBackendSnapshot().assets[0],
+          buildBackendSnapshot().assets[0]!,
           {
-            ...buildBackendSnapshot().assets[0],
+            ...buildBackendSnapshot().assets[0]!,
             token_id: 2,
             name: "The Memes #2",
           },
@@ -334,7 +337,7 @@ describe("wallet gallery snapshot normalization", () => {
             address: "0xf58fe66af1a8c792cd64d8d706eddabadfcb2fd0",
             ens: "punk6529.eth",
             display: "punk6529.eth",
-            status: "resolved",
+            status: ApiProfileCmsWalletGalleryWalletStatusEnum.Resolved,
             reason: null,
           },
           {
@@ -342,7 +345,7 @@ describe("wallet gallery snapshot normalization", () => {
             address: null,
             ens: null,
             display: null,
-            status: "unresolved",
+            status: ApiProfileCmsWalletGalleryWalletStatusEnum.Unresolved,
             reason: "unresolvable_input",
           },
         ],
@@ -370,7 +373,7 @@ describe("wallet gallery snapshot normalization", () => {
             address: null,
             ens: null,
             display: null,
-            status: "unresolved",
+            status: ApiProfileCmsWalletGalleryWalletStatusEnum.Unresolved,
             reason: "unresolvable_input",
           },
         ],

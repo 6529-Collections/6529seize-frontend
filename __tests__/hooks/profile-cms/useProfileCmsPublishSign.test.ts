@@ -57,17 +57,24 @@ describe("useProfileCmsPublishSign", () => {
   });
 
   it("converts uint256 fields to bigint before signing and returns the signature", async () => {
-    const signTypedDataAsync = jest.fn(async () => "0xsignature");
+    type WalletSignTypedData = ReturnType<
+      typeof useSignTypedData
+    >["signTypedDataAsync"];
+    const signTypedDataAsync = jest
+      .fn<ReturnType<WalletSignTypedData>, Parameters<WalletSignTypedData>>()
+      .mockResolvedValue("0xsignature");
     useSignTypedDataMock.mockReturnValue({ signTypedDataAsync });
 
     const { result } = renderHook(() => useProfileCmsPublishSign());
     const signed = await result.current.signTypedData(typedData);
 
     expect(signed).toEqual({ ok: true, signature: "0xsignature" });
-    const call = signTypedDataAsync.mock.calls[0][0];
-    expect(call.message.version).toBe(3n);
-    expect(call.message.deadline).toBe(1_792_345_678_000n);
-    expect(call.domain.verifyingContract).toBeUndefined();
+    const call = signTypedDataAsync.mock.calls[0]?.[0];
+    if (!call) throw new Error("Expected a wallet signing request");
+    expect(call.message).toEqual(
+      expect.objectContaining({ version: 3n, deadline: 1_792_345_678_000n })
+    );
+    expect(call.domain).not.toHaveProperty("verifyingContract");
     expect(result.current.chainId).toBe(1);
     expect(result.current.signerAddress).toBe("0xowner");
     expect(result.current.isSafe).toBe(false);

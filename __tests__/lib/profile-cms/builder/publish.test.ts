@@ -1,5 +1,5 @@
 import { ethers } from "ethers";
-import { hashTypedData } from "viem";
+import { getAddress, hashTypedData } from "viem";
 
 import {
   getProfileCmsPackageById,
@@ -152,14 +152,22 @@ describe("profile CMS publish orchestration", () => {
         "0x1fe21ab2829931ed7cd8777ad1ead3300701b7e8d5dcc2e56de8be396e3b0372";
       expect(
         ethers.TypedDataEncoder.hash(
-          typedData.domain,
-          typedData.types,
+          {
+            ...typedData.domain,
+            verifyingContract: typedData.domain.verifyingContract ?? null,
+          },
+          { ProfileCmsPublish: [...typedData.types.ProfileCmsPublish] },
           typedData.message
         )
       ).toBe(expectedHash);
       expect(
         hashTypedData({
-          domain: typedData.domain,
+          domain: {
+            ...typedData.domain,
+            verifyingContract: typedData.domain.verifyingContract
+              ? getAddress(typedData.domain.verifyingContract)
+              : undefined,
+          },
           types: typedData.types,
           primaryType: "ProfileCmsPublish",
           message: {
