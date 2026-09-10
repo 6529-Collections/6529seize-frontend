@@ -53,7 +53,7 @@ export default function ParticipationDropFooter({
   const shouldShowRatingsOnlyFooter = !canShowVoting && shouldShowRatings;
   const shouldShowReactionsFooter = hasReactions;
   const shouldShowReactionsBeforeVoteFooter =
-    hasWinningThreshold && shouldShowVoteFooter && shouldShowReactionsFooter;
+    hasWinningThreshold && shouldShowVoteFooter;
   const isProposalCard = contentPresentation === "proposalCard";
   const isChatProposal = isProposalCard && !indentContent;
   const hasProposalVoteWithoutRatings =
@@ -81,7 +81,12 @@ export default function ParticipationDropFooter({
     <>
       {shouldShowReactionsBeforeVoteFooter && (
         <div
-          className={`${contentOffsetClass} tw-mt-4 tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-px-4 tw-pb-4`}
+          hidden={!hasReactions}
+          className={
+            hasReactions
+              ? `${contentOffsetClass} tw-mt-4 tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-px-4 tw-pb-4`
+              : undefined
+          }
         >
           <WaveDropReactions drop={drop} />
         </div>
@@ -149,9 +154,14 @@ export default function ParticipationDropFooter({
         </div>
       )}
 
-      {shouldShowReactionsFooter && !shouldShowReactionsBeforeVoteFooter && (
+      {!shouldShowReactionsBeforeVoteFooter && (
         <div
-          className={`${contentOffsetClass} tw-mt-4 tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-px-4 tw-pb-4`}
+          hidden={!hasReactions}
+          className={
+            hasReactions
+              ? `${contentOffsetClass} tw-mt-4 tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-px-4 tw-pb-4`
+              : undefined
+          }
         >
           <WaveDropReactions drop={drop} />
         </div>
