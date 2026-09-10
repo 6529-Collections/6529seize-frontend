@@ -337,7 +337,7 @@ export function ExploreWaveCard({
       {isDiscover && (
         <div
           aria-hidden="true"
-          className="tw-pointer-events-none tw-absolute tw-inset-0 tw-bg-[linear-gradient(to_top,#050505_0%,rgba(5,5,5,0.98)_30%,rgba(5,5,5,0.84)_48%,rgba(5,5,5,0.42)_66%,transparent_84%)] before:tw-absolute before:tw-inset-0 before:tw-content-[''] before:tw-backdrop-blur-[10px] before:tw-backdrop-saturate-[1.06] before:[mask-image:linear-gradient(to_bottom,transparent_38%,rgba(0,0,0,.32)_52%,#000_72%)]"
+          className="tw-pointer-events-none tw-absolute tw-inset-0 tw-bg-[linear-gradient(to_top,#050505_0%,rgba(5,5,5,0.98)_30%,rgba(5,5,5,0.84)_48%,rgba(5,5,5,0.42)_66%,transparent_84%)]"
         />
       )}
 
