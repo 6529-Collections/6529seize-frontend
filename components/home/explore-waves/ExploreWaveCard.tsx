@@ -391,7 +391,7 @@ export function ExploreWaveCard({
             {isDiscover ? (
               <ClockIcon
                 aria-hidden="true"
-                className="tw-size-3 tw-flex-shrink-0 tw-text-emerald-400"
+                className="tw-size-3 tw-flex-shrink-0"
                 strokeWidth={1.75}
               />
             ) : (
