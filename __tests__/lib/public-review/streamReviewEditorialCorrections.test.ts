@@ -13,6 +13,7 @@ const source = {
   commit: "92ea123380917032f01aae09691141a2a72df935",
 };
 const pages = [
+  "overview",
   "artwork-lifecycle",
   "for-artists",
   "roles-and-trust",

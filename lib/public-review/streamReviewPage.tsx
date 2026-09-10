@@ -187,6 +187,7 @@ function getCurrentStreamReviewPages(
   };
 }
 
+/** Selects current corrections and entry guides while preserving saved review text. */
 function getDisplayedEditorialMarkdown({
   contentVersion,
   currentPages,
@@ -387,6 +388,7 @@ function getDisplayedFeedbackConfig({
   };
 }
 
+/** Explains the review status and source boundary above the reading content. */
 function StreamReviewIntroNotice({
   currentPages,
   isVersioned,

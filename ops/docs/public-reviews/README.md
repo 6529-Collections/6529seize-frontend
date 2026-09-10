@@ -227,6 +227,18 @@ public versions include matching knowledge and `DRAFT` versions include none.
 The active pack also contains the dated development update with its separate
 Stream source commit.
 
+The current reading corrections are also applied to the active Help Bot pack
+during packaging. The website and pack share the pinned correction catalog and
+English messages. Saved Markdown, source knowledge packs, older published
+packs, and Solidity reference evidence remain unchanged. The active runtime
+pack retains its existing URLs and record IDs, but corrected evidence links to
+the current reading pages. Its `currentView` metadata binds the saved pack's
+checksum, correction inputs, and projection code. Recomputed search, shard,
+and manifest checksums invalidate the backend's previous evidence cache.
+Packaging rejects any bytes outside that exact projection. The launch-status
+record also uses the same readiness summary and before-launch items as the
+current page, while retaining the dated source evidence.
+
 ## Lifecycle Capabilities
 
 The reusable review module supports `DRAFT`, `SCHEDULED`, `PUBLIC_REVIEW`,
