@@ -487,6 +487,9 @@ const resolveReleasePreview = async (
 
   try {
     const release = await fetchGithubJson<GithubReleaseApiResponse>(endpoint);
+    if (release.draft !== false) {
+      return fallbackReleasePreview(resource);
+    }
     return buildReleasePreview(resource, release);
   } catch (error) {
     if (isGithubApiNotFoundError(error)) {
@@ -612,6 +615,8 @@ const resolveDiscussionPreview = async (
       ? `
         query GithubDiscussionPreview($owner: String!, $repo: String!, $number: Int!) {
           repository(owner: $owner, name: $repo) {
+            visibility
+            isPrivate
             discussion(number: $number) {
               title
               url
@@ -627,6 +632,8 @@ const resolveDiscussionPreview = async (
       : `
         query GithubDiscussionsPreview($owner: String!, $repo: String!) {
           repository(owner: $owner, name: $repo) {
+            visibility
+            isPrivate
             discussions(first: 1, orderBy: { field: UPDATED_AT, direction: DESC }) {
               totalCount
               nodes {
@@ -648,6 +655,15 @@ const resolveDiscussionPreview = async (
       ...(resource.number ? { number: resource.number } : {}),
     }
   );
+
+  // Keep the visibility decision in the response that supplies the metadata;
+  // a separately cached repository preflight cannot authorize this body.
+  if (
+    data.repository?.visibility !== "PUBLIC" ||
+    data.repository.isPrivate !== false
+  ) {
+    throw new Error("GitHub discussion preview metadata is unavailable.");
+  }
 
   const discussion =
     data.repository?.discussion ??

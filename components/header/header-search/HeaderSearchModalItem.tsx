@@ -25,6 +25,10 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import { formatStatFloor, getProfileTargetRoute } from "@/helpers/Helpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { formatInteger } from "@/i18n/format";
+import { t } from "@/i18n/messages";
+import type { SidebarWave } from "@/types/waves.types";
 
 import HeaderSearchModalItemMedia from "./HeaderSearchModalItemMedia";
 import HeaderSearchModalPfp from "./HeaderSearchModalPfp";
@@ -47,10 +51,12 @@ export interface PageSearchResult {
   icon?: ComponentType<{ className?: string | undefined }>;
 }
 
+export type HeaderSearchWave = ApiWave | SidebarWave;
+
 export type HeaderSearchModalItemType =
   | CommunityMemberMinimal
   | NFTSearchResult
-  | ApiWave
+  | HeaderSearchWave
   | PageSearchResult;
 
 type HeaderSearchWaveDirectMessageCandidate = {
@@ -63,17 +69,21 @@ type HeaderSearchWaveDirectMessageCandidate = {
   } | null;
 };
 
-export const isHeaderSearchWaveDirectMessage = (wave: ApiWave): boolean =>
-  Boolean(
+export const isHeaderSearchWaveDirectMessage = (
+  wave: HeaderSearchWave
+): boolean => {
+  if ("isDirectMessage" in wave) return wave.isDirectMessage;
+  return Boolean(
     (wave as HeaderSearchWaveDirectMessageCandidate).chat?.scope?.group
       ?.is_direct_message
   );
+};
 
 export const getHeaderSearchWavePath = ({
   wave,
   isApp,
 }: {
-  readonly wave: ApiWave;
+  readonly wave: HeaderSearchWave;
   readonly isApp: boolean;
 }): string =>
   getWaveRoute({
@@ -103,7 +113,8 @@ export const getNftCollectionMap = () => ({
 
 const isPageResult = (
   content: HeaderSearchModalItemType
-): content is PageSearchResult => "type" in content;
+): content is PageSearchResult =>
+  (content as { readonly type?: unknown }).type === "PAGE";
 
 const isNftResult = (
   content: HeaderSearchModalItemType
@@ -113,8 +124,10 @@ const isProfileResult = (
   content: HeaderSearchModalItemType
 ): content is CommunityMemberMinimal => "wallet" in content;
 
-const isWaveResult = (content: HeaderSearchModalItemType): content is ApiWave =>
-  "serial_no" in content;
+const isWaveResult = (
+  content: HeaderSearchModalItemType
+): content is HeaderSearchWave =>
+  "serial_no" in content || "isDirectMessage" in content;
 
 const renderHighlightedText = (text: string, query: string): ReactNode => {
   const needle = query.trim();
@@ -160,8 +173,9 @@ export default function HeaderSearchModalItem({
   readonly content: HeaderSearchModalItemType;
   readonly onHover: (state: boolean) => void;
   readonly onClose: () => void;
-  readonly onWaveSelect?: (wave: ApiWave) => void;
+  readonly onWaveSelect?: (wave: HeaderSearchWave) => void;
 }) {
+  const locale = useBrowserLocale();
   const pathname = usePathname();
   const { isApp } = useDeviceInfo();
 
@@ -253,10 +267,16 @@ export default function HeaderSearchModalItem({
         ? content.breadcrumbs.join(" • ")
         : content.href;
     }
-    const authorCandidate = (content as Partial<ApiWave>).author;
+    const authorCandidate =
+      "creator" in content ? content.creator : content.author;
     const author =
       authorCandidate?.handle ?? authorCandidate?.primary_address ?? null;
-    return author ? `by ${author}` : `Wave #${content.serial_no}`;
+    if (author) return t(locale, "headerSearch.wave.byAuthor", { author });
+    return "serial_no" in content
+      ? t(locale, "headerSearch.wave.serial", {
+          serial: formatInteger(locale, content.serial_no),
+        })
+      : t(locale, "headerSearch.wave.label");
   };
 
   const primaryText = getPrimaryText();

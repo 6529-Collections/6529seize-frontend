@@ -8,6 +8,7 @@ jest.mock("@/config/alchemyEnv", () => ({
 describe("createOpenSeaPlan", () => {
   const fetchHtml = jest.fn();
   const assertPublicUrl = jest.fn();
+  const fetchTokenMetadata = jest.fn();
   const mockedGetAlchemyApiKey = getAlchemyApiKey as jest.MockedFunction<
     typeof getAlchemyApiKey
   >;
@@ -22,6 +23,13 @@ describe("createOpenSeaPlan", () => {
     mockFetch.mockReset();
     mockedGetAlchemyApiKey.mockReset();
     assertPublicUrl.mockResolvedValue(undefined);
+    fetchTokenMetadata.mockReset();
+    fetchTokenMetadata.mockImplementation(async (url: URL) => {
+      await assertPublicUrl(url);
+      const response = await mockFetch(url.toString());
+      if (!response.ok) throw new Error("Metadata unavailable");
+      return response.json();
+    });
     mockedGetAlchemyApiKey.mockReturnValue("test-alchemy-key");
     global.fetch = mockFetch as unknown as typeof fetch;
   });
@@ -39,6 +47,7 @@ describe("createOpenSeaPlan", () => {
       {
         fetchHtml,
         assertPublicUrl,
+        fetchTokenMetadata,
       }
     );
 
@@ -54,6 +63,7 @@ describe("createOpenSeaPlan", () => {
       {
         fetchHtml,
         assertPublicUrl,
+        fetchTokenMetadata,
       }
     );
 
@@ -66,6 +76,7 @@ describe("createOpenSeaPlan", () => {
       {
         fetchHtml,
         assertPublicUrl,
+        fetchTokenMetadata,
       }
     );
 
@@ -80,6 +91,7 @@ describe("createOpenSeaPlan", () => {
       {
         fetchHtml,
         assertPublicUrl,
+        fetchTokenMetadata,
       }
     );
 
@@ -105,6 +117,7 @@ describe("createOpenSeaPlan", () => {
     const plan = createOpenSeaPlan(new URL(url), {
       fetchHtml,
       assertPublicUrl,
+      fetchTokenMetadata,
     });
     const result = await plan?.execute();
 
@@ -147,6 +160,7 @@ describe("createOpenSeaPlan", () => {
     const plan = createOpenSeaPlan(new URL(url), {
       fetchHtml,
       assertPublicUrl,
+      fetchTokenMetadata,
     });
     const result = await plan?.execute();
 
@@ -191,6 +205,7 @@ describe("createOpenSeaPlan", () => {
     const plan = createOpenSeaPlan(new URL(url), {
       fetchHtml,
       assertPublicUrl,
+      fetchTokenMetadata,
     });
     const result = await plan?.execute();
 
@@ -260,6 +275,7 @@ describe("createOpenSeaPlan", () => {
     const plan = createOpenSeaPlan(new URL(url), {
       fetchHtml,
       assertPublicUrl,
+      fetchTokenMetadata,
     });
     const result = await plan?.execute();
 
@@ -312,6 +328,7 @@ describe("createOpenSeaPlan", () => {
       {
         fetchHtml,
         assertPublicUrl,
+        fetchTokenMetadata,
       }
     );
     const result = await plan?.execute();
@@ -363,6 +380,7 @@ describe("createOpenSeaPlan", () => {
       {
         fetchHtml,
         assertPublicUrl,
+        fetchTokenMetadata,
       }
     );
     const result = await plan?.execute();
@@ -410,6 +428,7 @@ describe("createOpenSeaPlan", () => {
       {
         fetchHtml,
         assertPublicUrl,
+        fetchTokenMetadata,
       }
     );
     const result = await plan?.execute();
@@ -455,6 +474,7 @@ describe("createOpenSeaPlan", () => {
     const plan = createOpenSeaPlan(new URL(url), {
       fetchHtml,
       assertPublicUrl,
+      fetchTokenMetadata,
     });
     const result = await plan?.execute();
 
@@ -502,6 +522,7 @@ describe("createOpenSeaPlan", () => {
     const plan = createOpenSeaPlan(new URL(url), {
       fetchHtml,
       assertPublicUrl,
+      fetchTokenMetadata,
     });
     const result = await plan?.execute();
 
