@@ -14,8 +14,10 @@ published website uses `/{user}/index.html` and the additional paths in its pack
 ## Entry Points
 
 Open the builder URL directly. There is no public profile navigation link.
-Connect the wallet for the profile you want to edit. Server actions require the
-owner profile; a proxy session cannot save or publish.
+Connect the wallet for the profile you want to edit. Saving, server validation,
+and publishing require the owner profile; a proxy session cannot save or publish.
+Requesting a live gallery snapshot requires a signed-in session, but you can
+request holdings for another wallet.
 
 ## User Journey
 
@@ -38,10 +40,11 @@ owner profile; a proxy session cannot save or publish.
 - **Recover local work:** the builder keeps a browser recovery copy scoped to the
   profile. Use the recovery prompt to restore or discard it. Save to the server
   for access from another browser or device.
-- **Create a gallery:** request a wallet snapshot, choose supported collection
-  filters, then select and order artworks. A snapshot records the returned set;
-  request another snapshot to update it. Saving or publishing a gallery requires
-  a real snapshot; offline example holdings are for preview.
+- **Create a gallery:** sign in, enter wallet addresses or ENS names, and request
+  a wallet snapshot. Choose supported collection filters, then select and order
+  artworks. A snapshot records the returned set; request another snapshot to
+  update it. Saving or publishing a gallery requires a real snapshot; offline
+  example holdings are for preview.
 - **Restore a previous publication:** choose the version in history and confirm
   the restore. If another session changed the active version, refresh history
   before trying again.
@@ -68,6 +71,11 @@ owner profile; a proxy session cannot save or publish.
   the snapshot to try again.
 
 ## Failure and Recovery
+
+**Request snapshot** is disabled while signed out, with a sign-in explanation.
+If a session can no longer be verified, sign in again and retry. An ENS name
+without a resolved address appears as an unresolved wallet; check the name or
+enter the wallet address directly.
 
 Validation findings identify issues in the package. Fix them, save, and validate
 again. A rejected wallet signature does not publish the draft; retry signing when

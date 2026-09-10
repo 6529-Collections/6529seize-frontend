@@ -24,6 +24,7 @@ import {
 import type { GallerySnapshotStatus } from "@/components/profile-cms-builder/ProfileCmsBuilderEditorPanel";
 
 export function WalletGalleryPanel({
+  canRequestSnapshot,
   gallery,
   locale,
   onRequestSnapshot,
@@ -33,6 +34,7 @@ export function WalletGalleryPanel({
   updateGallery,
   updateState,
 }: {
+  readonly canRequestSnapshot: boolean;
   readonly gallery: WalletGalleryBuilderState;
   readonly locale: SupportedLocale;
   readonly onRequestSnapshot: () => void;
@@ -43,6 +45,13 @@ export function WalletGalleryPanel({
   readonly updateState: (patch: Partial<CmsBuilderState>) => void;
 }) {
   const snapshot = gallery.snapshot;
+  const snapshotDescription =
+    [
+      !canRequestSnapshot ? "cms-builder-gallery-sign-in" : null,
+      snapshotError ? "cms-builder-gallery-snapshot-error" : null,
+    ]
+      .filter(Boolean)
+      .join(" ") || undefined;
   const orderedAssets = snapshot
     ? orderGalleryAssets(snapshot.assets, gallery.orderedAssetIds)
     : [];
@@ -118,7 +127,8 @@ export function WalletGalleryPanel({
         <div className="tw-flex tw-flex-col tw-gap-2 md:tw-col-span-2">
           <div>
             <BuilderActionButton
-              disabled={snapshotStatus === "loading"}
+              describedBy={snapshotDescription}
+              disabled={!canRequestSnapshot || snapshotStatus === "loading"}
               label={
                 snapshotStatus === "loading"
                   ? t(locale, "profileCms.builder.gallery.snapshot.loading")
@@ -128,6 +138,14 @@ export function WalletGalleryPanel({
               variant="primary"
             />
           </div>
+          {!canRequestSnapshot ? (
+            <p
+              className="tw-text-sm tw-leading-6 tw-text-iron-300"
+              id="cms-builder-gallery-sign-in"
+            >
+              {t(locale, "profileCms.builder.gallery.snapshot.signInRequired")}
+            </p>
+          ) : null}
           <p className="tw-text-sm tw-leading-6 tw-text-iron-400">
             {t(locale, "profileCms.builder.gallery.wallets.help")}
           </p>
@@ -142,6 +160,7 @@ export function WalletGalleryPanel({
           {snapshotError ? (
             <p
               className="tw-border tw-border-solid tw-border-red tw-bg-red/10 tw-p-3 tw-text-sm tw-text-red"
+              id="cms-builder-gallery-snapshot-error"
               role="alert"
             >
               {snapshotError}

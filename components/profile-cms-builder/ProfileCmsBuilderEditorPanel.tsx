@@ -35,6 +35,7 @@ const BLOCK_OPTIONS: ReadonlyArray<{
 
 export function EditorPanel({
   addBlock,
+  canRequestGallerySnapshot,
   gallerySnapshotError,
   gallerySnapshotStatus,
   locale,
@@ -47,6 +48,7 @@ export function EditorPanel({
   updateState,
 }: {
   readonly addBlock: (kind: CmsBuilderBlockKind) => void;
+  readonly canRequestGallerySnapshot: boolean;
   readonly gallerySnapshotError: string;
   readonly gallerySnapshotStatus: GallerySnapshotStatus;
   readonly locale: SupportedLocale;
@@ -104,6 +106,7 @@ export function EditorPanel({
 
       {state.template === "wallet_gallery" ? (
         <WalletGalleryPanel
+          canRequestSnapshot={canRequestGallerySnapshot}
           gallery={state.gallery}
           locale={locale}
           onRequestSnapshot={onRequestGallerySnapshot}
