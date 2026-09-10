@@ -9,6 +9,11 @@ import stormComposerFrMessages from "@/i18n/messages/stormComposer.fr-FR.json";
 import type { MessageKey } from "@/i18n/messages/en-US";
 
 export const FR_FR_MESSAGES = {
+  "navigation.primary.loading.home": "Chargement de l’accueil",
+  "navigation.primary.loading.discovery": "Chargement de la découverte",
+  "navigation.primary.loading.network": "Chargement du réseau",
+  "navigation.primary.loading.collections": "Chargement des collections",
+  "navigation.primary.loading.notifications": "Chargement des notifications",
   "headerSearch.wave.byAuthor": "par {author}",
   "headerSearch.wave.serial": "Wave nº {serial}",
   "headerSearch.wave.label": "Wave",
@@ -927,6 +932,24 @@ export const FR_FR_MESSAGES = {
   "waves.leaderboard.grid.authorProfile": "Voir le profil de {author}",
   "waves.leaderboard.grid.voters.one": "{count} votant",
   "waves.leaderboard.grid.voters.other": "{count} votants",
+  "waves.leaderboard.podium.place.first": "1er",
+  "waves.leaderboard.podium.place.second": "2e",
+  "waves.leaderboard.podium.place.third": "3e",
+  "waves.leaderboard.podium.open.first": "Ouvrir la 1re place : {name}",
+  "waves.leaderboard.podium.open.second": "Ouvrir la 2e place : {name}",
+  "waves.leaderboard.podium.open.third": "Ouvrir la 3e place : {name}",
+  "waves.leaderboard.podium.avatar": "Avatar de {name}",
+  "waves.leaderboard.podium.selfNominated": "auto-nommé",
+  "waves.leaderboard.podium.nominatedBy": "nommé par {nominator}",
+  "waves.leaderboard.podium.outcome": "Résultat",
+  "waves.leaderboard.podium.empty.title": "Aucun gagnant à afficher",
+  "waves.leaderboard.podium.empty.description":
+    "Cette wave s’est terminée sans aucune soumission",
+  "waves.voteDetails.title": "Votes",
+  "waves.voteDetails.trigger.one":
+    "Voir les votants et le journal pour {count} votant",
+  "waves.voteDetails.trigger.other":
+    "Voir les votants et le journal pour {count} votants",
   "waves.leaderboard.grid.you": "Vous",
   "waves.leaderboard.grid.votesNow": "Votes actuels",
   "waves.leaderboard.grid.status.approved": "Approuvé",

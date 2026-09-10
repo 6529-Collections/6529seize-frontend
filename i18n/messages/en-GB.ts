@@ -6,6 +6,11 @@ import { TRANSFER_MESSAGES } from "@/i18n/messages/transfer";
 import type { MessageKey } from "@/i18n/messages/en-US";
 
 export const EN_GB_MESSAGES = {
+  "navigation.primary.loading.home": "Loading home",
+  "navigation.primary.loading.discovery": "Loading discovery",
+  "navigation.primary.loading.network": "Loading network",
+  "navigation.primary.loading.collections": "Loading collections",
+  "navigation.primary.loading.notifications": "Loading notifications",
   "headerSearch.wave.byAuthor": "by {author}",
   "headerSearch.wave.serial": "Wave #{serial}",
   "headerSearch.wave.label": "Wave",
@@ -886,6 +891,23 @@ export const EN_GB_MESSAGES = {
   "waves.profileFeed.emptyTitle": "No profile posts yet",
   "waves.profileFeed.emptyDescription":
     "New posts from members’ Profile Waves will appear here.",
+  "waves.leaderboard.podium.place.first": "1st",
+  "waves.leaderboard.podium.place.second": "2nd",
+  "waves.leaderboard.podium.place.third": "3rd",
+  "waves.leaderboard.podium.open.first": "Open 1st {name}",
+  "waves.leaderboard.podium.open.second": "Open 2nd {name}",
+  "waves.leaderboard.podium.open.third": "Open 3rd {name}",
+  "waves.leaderboard.podium.avatar": "{name} avatar",
+  "waves.leaderboard.podium.selfNominated": "self-nominated",
+  "waves.leaderboard.podium.nominatedBy": "nominated by {nominator}",
+  "waves.leaderboard.podium.outcome": "Outcome",
+  "waves.leaderboard.podium.empty.title": "No Winners to Display",
+  "waves.leaderboard.podium.empty.description":
+    "This wave ended without any submissions",
+  "waves.voteDetails.title": "Votes",
+  "waves.voteDetails.trigger.one": "View voters and vote log for {count} voter",
+  "waves.voteDetails.trigger.other":
+    "View voters and vote log for {count} voters",
   "waves.leaderboard.timeline.toggle": "Toggle decision timeline",
   "waves.leaderboard.timeline.decisionTimeline": "Decision Timeline",
   "waves.leaderboard.timeline.announcementHistory": "Announcement history",

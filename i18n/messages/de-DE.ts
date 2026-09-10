@@ -11,6 +11,12 @@ import type { MessageKey } from "@/i18n/messages/en-US";
 const RETRY_LABEL = "Erneut versuchen";
 
 export const DE_DE_MESSAGES = {
+  "navigation.primary.loading.home": "Startseite wird geladen",
+  "navigation.primary.loading.discovery": "Entdecken wird geladen",
+  "navigation.primary.loading.network": "Netzwerk wird geladen",
+  "navigation.primary.loading.collections": "Sammlungen werden geladen",
+  "navigation.primary.loading.notifications":
+    "Benachrichtigungen werden geladen",
   "headerSearch.wave.byAuthor": "von {author}",
   "headerSearch.wave.serial": "Wave Nr. {serial}",
   "headerSearch.wave.label": "Wave",
@@ -919,6 +925,24 @@ export const DE_DE_MESSAGES = {
   "waves.leaderboard.grid.authorProfile": "Profil von {author} ansehen",
   "waves.leaderboard.grid.voters.one": "{count} abstimmende Person",
   "waves.leaderboard.grid.voters.other": "{count} abstimmende Personen",
+  "waves.leaderboard.podium.place.first": "1.",
+  "waves.leaderboard.podium.place.second": "2.",
+  "waves.leaderboard.podium.place.third": "3.",
+  "waves.leaderboard.podium.open.first": "1. Platz öffnen: {name}",
+  "waves.leaderboard.podium.open.second": "2. Platz öffnen: {name}",
+  "waves.leaderboard.podium.open.third": "3. Platz öffnen: {name}",
+  "waves.leaderboard.podium.avatar": "Avatar von {name}",
+  "waves.leaderboard.podium.selfNominated": "selbst nominiert",
+  "waves.leaderboard.podium.nominatedBy": "nominiert von {nominator}",
+  "waves.leaderboard.podium.outcome": "Ergebnis",
+  "waves.leaderboard.podium.empty.title": "Keine Gewinner zum Anzeigen",
+  "waves.leaderboard.podium.empty.description":
+    "Diese Wave endete ohne Einreichungen",
+  "waves.voteDetails.title": "Stimmen",
+  "waves.voteDetails.trigger.one":
+    "Abstimmende und Protokoll für {count} Person anzeigen",
+  "waves.voteDetails.trigger.other":
+    "Abstimmende und Protokoll für {count} Personen anzeigen",
   "waves.leaderboard.grid.you": "Du",
   "waves.leaderboard.grid.votesNow": "Stimmen jetzt",
   "waves.leaderboard.grid.status.approved": "Genehmigt",
