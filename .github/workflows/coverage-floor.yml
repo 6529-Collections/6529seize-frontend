@@ -1,4 +1,4 @@
-name: Coverage Floor
+name: Full Jest suite and coverage
 
 # Full Jest suite with coverage on every push to main. Fails when global
 # coverage drops more than the tolerance below the checked-in baseline
@@ -35,7 +35,7 @@ concurrency:
 
 jobs:
   coverage-floor:
-    name: Coverage floor
+    name: Full Jest suite and coverage
     if: >-
       github.event_name != 'pull_request' ||
       github.event.pull_request.head.repo.full_name == github.repository
@@ -78,13 +78,42 @@ jobs:
         run: ./bin/6529 ci
 
       - name: Run full Jest suite with coverage
+        id: jest
         run: |
           NODE_ENV=test ./bin/6529 exec jest --silent --verbose=false --ci \
             --coverage --coverageReporters=json-summary
 
       - name: Check coverage against baseline
+        id: coverage
         if: always() && hashFiles('coverage/coverage-summary.json') != ''
         run: node scripts/coverage-floor.cjs
+
+      - name: Summarize test and coverage outcomes
+        if: always()
+        env:
+          JEST_OUTCOME: ${{ steps.jest.outcome }}
+          COVERAGE_OUTCOME: ${{ steps.coverage.outcome }}
+        run: |
+          {
+            echo "## Full Jest suite and coverage results"
+            echo ""
+            echo "| Check | Outcome |"
+            echo "| --- | --- |"
+            printf '| Full Jest suite | %s |\n' "$JEST_OUTCOME"
+            printf '| Coverage floor | %s |\n' "$COVERAGE_OUTCOME"
+            echo ""
+            if [ "$JEST_OUTCOME" = failure ]; then
+              echo "The Jest step failed. Inspect its failing tests or runner error; a passing coverage floor does not make the suite pass."
+            fi
+            if [ "$COVERAGE_OUTCOME" = failure ]; then
+              echo "The coverage floor step failed. Inspect its report for a coverage regression or invalid coverage data."
+            elif [ "$COVERAGE_OUTCOME" = skipped ]; then
+              echo "Coverage was not checked because no coverage summary was produced."
+            fi
+            if [ "$JEST_OUTCOME" = skipped ]; then
+              echo "The Jest suite did not run. Inspect earlier setup steps."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload coverage summary
         if: always()
