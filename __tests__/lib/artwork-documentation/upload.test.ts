@@ -89,12 +89,68 @@ describe("archival file transfer", () => {
     expect(
       jest.mocked(signDocumentationParts).mock.calls[0]?.[2][0]?.part_number
     ).toBe(2);
-    expect(
-      jest
-        .mocked(completeDocumentationUpload)
-        .mock.calls[0]?.[2].map((part) => part.part_number)
-    ).toEqual([1, 2]);
+    expect(jest.mocked(completeDocumentationUpload).mock.calls[0]?.[2]).toEqual(
+      [
+        {
+          part_number: 1,
+          etag: '"first"',
+          checksum_sha256: await sha256Base64(bytes("abc")),
+        },
+        {
+          part_number: 2,
+          etag: '"part-etag"',
+          checksum_sha256: await sha256Base64(bytes("def")),
+        },
+      ]
+    );
     expect(progress).toHaveBeenLastCalledWith(6);
+  });
+
+  it("completes already accepted parts without forwarding response-only metadata", async () => {
+    const upload = session();
+    upload.asset.size_bytes = 5;
+    upload.received_parts = [
+      {
+        part_number: 1,
+        size_bytes: 3,
+        etag: '"first"',
+        checksum_sha256: await sha256Base64(bytes("abc")),
+      },
+      {
+        part_number: 2,
+        size_bytes: 2,
+        etag: '"last-short-part"',
+        checksum_sha256: await sha256Base64(bytes("de")),
+      },
+    ];
+    const signal = new AbortController().signal;
+    await transferDocumentationFile({
+      contextId: "context",
+      session: upload,
+      file: file("abcde"),
+      signal,
+      onProgress: jest.fn(),
+    });
+    expect(signDocumentationParts).not.toHaveBeenCalled();
+    expect(globalThis.fetch).not.toHaveBeenCalled();
+    expect(completeDocumentationUpload).toHaveBeenCalledWith(
+      "context",
+      "upload",
+      [
+        {
+          part_number: 1,
+          etag: '"first"',
+          checksum_sha256: await sha256Base64(bytes("abc")),
+        },
+        {
+          part_number: 2,
+          etag: '"last-short-part"',
+          checksum_sha256: await sha256Base64(bytes("de")),
+        },
+      ],
+      "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+      signal
+    );
   });
 
   it("rejects a changed local file before signing or uploading any new part", async () => {
