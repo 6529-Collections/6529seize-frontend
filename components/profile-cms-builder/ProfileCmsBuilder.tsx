@@ -63,6 +63,7 @@ import {
   updateCmsBuilderState,
 } from "@/lib/profile-cms/builder/editor";
 import { getProfileCmsPackageById } from "@/lib/profile-cms/builder/api";
+import { getStructuredApiErrorStatus } from "@/services/api/common-api";
 
 export default function ProfileCmsBuilder(
   props: ComponentProps<typeof ProfileCmsBuilderWorkspace>
@@ -117,7 +118,7 @@ function ProfileCmsBuilderWorkspace({
   const actionRequestIdRef = useRef(0);
   const gallerySnapshotRequestIdRef = useRef(0);
   const stateVersionRef = useRef(0);
-  const { activeProfileProxy, connectedProfile } = useAuth();
+  const { activeProfileProxy, connectedProfile, isAuthenticated } = useAuth();
   const { address } = useSeizeConnectContext();
 
   const validation = useMemo(() => validateCmsBuilderState(state), [state]);
@@ -130,6 +131,8 @@ function ProfileCmsBuilderWorkspace({
     connectedProfile?.id,
     !!activeProfileProxy
   );
+  const canRequestGallerySnapshot =
+    !isProfileCmsBuilderApiEnabledEnv() || isAuthenticated === true;
   const busy = isCmsBuilderBusy(
     isSubmitting,
     isPublishing,
@@ -244,6 +247,13 @@ function ProfileCmsBuilderWorkspace({
   };
 
   const requestGallerySnapshot = async () => {
+    if (!canRequestGallerySnapshot) {
+      setGallerySnapshotStatus("error");
+      setGallerySnapshotError(
+        t(locale, "profileCms.builder.gallery.snapshot.signInRequired")
+      );
+      return;
+    }
     const parsed = parseWalletGallerySources(state.gallery.walletInput);
     if (!parsed.ok) {
       setGallerySnapshotStatus("error");
@@ -280,13 +290,18 @@ function ProfileCmsBuilderWorkspace({
       );
       clearActionResult();
       setGallerySnapshotStatus("ready");
-    } catch {
+    } catch (error) {
       if (requestId !== gallerySnapshotRequestIdRef.current) {
         return;
       }
       setGallerySnapshotStatus("error");
       setGallerySnapshotError(
-        t(locale, "profileCms.builder.gallery.snapshot.failed")
+        t(
+          locale,
+          getStructuredApiErrorStatus(error) === 401
+            ? "profileCms.builder.gallery.snapshot.sessionExpired"
+            : "profileCms.builder.gallery.snapshot.failed"
+        )
       );
     }
   };
@@ -560,6 +575,7 @@ function ProfileCmsBuilderWorkspace({
             {activeTab === "editor" && canVisuallyEditCmsPackage(state) ? (
               <EditorPanel
                 addBlock={addBlock}
+                canRequestGallerySnapshot={canRequestGallerySnapshot}
                 gallerySnapshotError={gallerySnapshotError}
                 gallerySnapshotStatus={gallerySnapshotStatus}
                 locale={locale}

@@ -29,6 +29,8 @@ jest.mock("@/components/auth/Auth", () => ({
 }));
 
 jest.mock("@/services/api/common-api", () => ({
+  getStructuredApiErrorStatus: jest.requireActual("@/services/api/common-api")
+    .getStructuredApiErrorStatus,
   commonApiPost: jest.fn(),
   commonApiFetch: jest.fn(async () => []),
 }));
@@ -109,6 +111,7 @@ describe("ProfileCmsBuilder", () => {
     useAuthMock.mockReturnValue({
       activeProfileProxy: null,
       connectedProfile: null,
+      isAuthenticated: false,
     });
   });
 
@@ -375,6 +378,10 @@ describe("ProfileCmsBuilder", () => {
     await user.click(screen.getByRole("button", { name: "Request snapshot" }));
 
     expect(await screen.findByText("Fixture snapshot")).toBeInTheDocument();
+    expect(commonApiPostMock).not.toHaveBeenCalled();
+    expect(
+      screen.queryByText("Sign in to request a wallet snapshot.")
+    ).not.toBeInTheDocument();
     expect(screen.getByText("The Memes #1")).toBeInTheDocument();
     expect(screen.getAllByText("Media pending").length).toBeGreaterThan(0);
 
@@ -418,6 +425,7 @@ describe("ProfileCmsBuilder", () => {
     useAuthMock.mockReturnValue({
       activeProfileProxy: null,
       connectedProfile: { id: "profile" },
+      isAuthenticated: true,
     });
     const snapshot = {
       ...createMockWalletGallerySnapshot({ handle: "punk6529", sources: [] }),

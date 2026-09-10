@@ -438,6 +438,10 @@ export const DE_DE_MESSAGES = {
   "profileCms.builder.gallery.review.title": "Snapshot-Überprüfung",
   "profileCms.builder.gallery.settings": "Galerieeinstellungen",
   "profileCms.builder.gallery.snapshot.api": "Server-Snapshot",
+  "profileCms.builder.gallery.snapshot.signInRequired":
+    "Melden Sie sich an, um einen Wallet-Snapshot anzufordern.",
+  "profileCms.builder.gallery.snapshot.sessionExpired":
+    "Ihre Sitzung konnte nicht bestätigt werden. Melden Sie sich erneut an, um einen Wallet-Snapshot anzufordern.",
   "profileCms.builder.gallery.snapshot.failed":
     "Galerie-Snapshot konnte nicht erstellt werden.",
   "profileCms.builder.gallery.snapshot.fixture": "Fixture-Snapshot",
