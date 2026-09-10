@@ -77,12 +77,9 @@ export default function CreateSnapshotFormCollections({
         ))}
       </ul>
       {loadingCollectionId && (
-        <p
-          role="status"
-          className="tw-mb-0 tw-mt-2 tw-text-sm tw-text-iron-300"
-        >
+        <output className="tw-mb-0 tw-mt-2 tw-block tw-text-sm tw-text-iron-300">
           {t(locale, "emma.snapshots.loadingTokens")}
-        </p>
+        </output>
       )}
       <MobileWrapperDialog
         isOpen={isOnMemesCollection}
