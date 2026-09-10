@@ -20,6 +20,11 @@ import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
 import { mainnet } from "viem/chains";
 
+jest.mock(
+  "@/components/header/user/HeaderArtworkDocumentationLink",
+  () => () => null
+);
+
 jest.mock("@/components/header/user/HeaderUserProxyDropdownItem", () => () => (
   <div data-testid="item" />
 ));

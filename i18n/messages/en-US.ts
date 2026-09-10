@@ -19,6 +19,10 @@ import join6529Messages from "@/i18n/messages/join6529.en-US.json";
 import museumMessages from "@/i18n/messages/museum.en-US.json";
 import networkMetricsMessages from "@/i18n/messages/networkMetrics.en-US.json";
 import networkTdhMessages from "@/i18n/messages/networkTdh.en-US.json";
+import networkTdhExplainerMessages from "@/i18n/messages/networkTdhExplainer.en-US.json";
+import networkTdhExampleMessages from "@/i18n/messages/networkTdhExample.en-US.json";
+import networkTdhProfileMessages from "@/i18n/messages/networkTdhProfile.en-US.json";
+import networkTdhRulesMessages from "@/i18n/messages/networkTdhRules.en-US.json";
 import toolsMessages from "@/i18n/messages/tools.en-US.json";
 import wavesRightPanelMessages from "@/i18n/messages/wavesRightPanel.en-US.json";
 import { QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
@@ -31,6 +35,8 @@ import { PUBLIC_REVIEW_MESSAGES } from "@/i18n/messages/public-review";
 import { CONTENT_MODERATION_MESSAGES } from "@/i18n/messages/content-moderation";
 import { EULA_MESSAGES } from "@/i18n/messages/eula";
 import { PROFILE_CURATION_MESSAGES } from "@/i18n/messages/profile-curation";
+import { ARTWORK_DOCUMENTATION_MESSAGES } from "@/i18n/messages/artwork-documentation";
+import { ARTWORK_DOCUMENTATION_INTEGRATION_MESSAGES } from "@/i18n/messages/artwork-documentation-integration";
 
 type MessageEntry = readonly [key: string, value: string];
 
@@ -2598,6 +2604,9 @@ const COLLECTION_DELEGATION_MESSAGES = objectMessages("delegation.collection", {
 } as const);
 
 const HEADER_SEARCH_MESSAGES = objectMessages("headerSearch", {
+  "wave.byAuthor": "by {author}",
+  "wave.serial": "Wave #{serial}",
+  "wave.label": "Wave",
   "category.all": "All",
   "category.nfts": "NFTs",
   "category.pages": "Pages",
@@ -3793,6 +3802,10 @@ export const EN_US_MESSAGES = {
   ...museumMessages,
   ...networkMetricsMessages,
   ...networkTdhMessages,
+  ...networkTdhExplainerMessages,
+  ...networkTdhExampleMessages,
+  ...networkTdhProfileMessages,
+  ...networkTdhRulesMessages,
   ...toolsMessages,
   ...ABOUT_TECH_MESSAGES,
   ...REVIEWBOT_USAGE_MESSAGES,
@@ -3817,6 +3830,8 @@ export const EN_US_MESSAGES = {
   ...WAVE_NAVIGATION_MESSAGES,
   ...MY_STREAM_CURATION_MESSAGES,
   ...PROFILE_CURATION_MESSAGES,
+  ...ARTWORK_DOCUMENTATION_MESSAGES,
+  ...ARTWORK_DOCUMENTATION_INTEGRATION_MESSAGES,
   ...WAVE_SCORE_NAVIGATION_MESSAGES,
   ...MEMES_QUICK_VOTE_MESSAGES,
   ...MEMES_SUBMISSION_MESSAGES,

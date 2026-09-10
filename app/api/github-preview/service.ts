@@ -3,6 +3,8 @@ import type { GithubPreviewResponse } from "@/services/api/github-preview-api";
 import { getResourceCacheKey, parseGithubResource } from "./service/resource";
 import { resolvePreviewForResource } from "./service/previews";
 
+// Only public metadata passes the fetchers/preview gates. Previously public
+// snapshots can remain visible for this TTL after upstream visibility changes.
 const CACHE_TTL_MS = 2 * 60 * 1000;
 const CACHE_MAX_ITEMS = 500;
 

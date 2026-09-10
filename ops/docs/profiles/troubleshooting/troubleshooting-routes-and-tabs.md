@@ -73,6 +73,13 @@ Scope:
   - Meaning: canonical-handle normalization.
   - Action: save the canonical URL.
 
+- Symptom: a published custom profile page ending in `/index.html` cannot be found.
+  - Meaning: the profile handle is case-insensitive, but page names after the
+    handle remain case-sensitive. The page must exist in the published site.
+  - Action: use the published page or navigation link and preserve its page-name
+    capitalization. Changing only the handle capitalization does not select a
+    different page.
+
 - Symptom: `/{user}/stats` shows `USER OR PAGE`.
   - Meaning: the standalone `Stats` route was removed.
   - Action: open `/{user}/collected` and use `Details` for profile stats behavior.

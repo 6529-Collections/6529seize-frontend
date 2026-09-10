@@ -13,6 +13,11 @@ import { render, screen } from "@testing-library/react";
 import type { ComponentProps } from "react";
 import userEvent from "@testing-library/user-event";
 
+jest.mock(
+  "@/components/waves/drops/WaveDropDocumentationAction",
+  () => () => null
+);
+
 const mockIsMemesWave = jest.fn();
 const mockIsQuorumWave = jest.fn();
 const writeText = jest.fn().mockResolvedValue(undefined);

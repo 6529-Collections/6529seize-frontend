@@ -7,36 +7,35 @@ import { DeepLinkScope } from "@/hooks/useDeepLinkNavigation";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { getMobileDestination } from "./mobileDestination";
 
 const APPS_LOCALE = DEFAULT_LOCALE;
 
 export default function OpenMobilePage() {
   const searchParams = useSearchParams();
-  const pathParam = searchParams?.get("path") || "";
-  const [decodedPath, setDecodedPath] = useState<string | null>(null);
+  const pathParam = searchParams.get("path");
+  const destination =
+    typeof window === "undefined"
+      ? null
+      : getMobileDestination(pathParam, window.location.origin);
   const { isAppleMobile } = useDeviceInfo();
 
   useEffect(() => {
-    if (typeof window === "undefined" || !pathParam) {
+    if (!destination) {
       return;
     }
 
     const appScheme = publicEnv.MOBILE_APP_SCHEME ?? "mobile6529";
-    const decoded = decodeURIComponent(pathParam);
-    const deepLink = `${appScheme}://${DeepLinkScope.NAVIGATE}${decoded}`;
+    const deepLink = `${appScheme}://${DeepLinkScope.NAVIGATE}${destination}`;
 
-    setDecodedPath(decoded);
     window.open(deepLink, "_self");
-  }, [pathParam]);
+  }, [destination]);
 
   const handleBack = () => {
-    if (decodedPath) {
-      window.open(`${window.location.origin}${decodedPath}`, "_self");
-    } else {
-      window.open(window.location.origin, "_self");
-    }
+    const returnUrl = new URL(destination ?? "/", window.location.origin);
+    window.open(returnUrl.href, "_self");
   };
 
   const printMobileApps = () => {

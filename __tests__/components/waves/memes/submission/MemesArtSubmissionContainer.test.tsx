@@ -11,6 +11,11 @@ import { useAuth } from "@/components/auth/Auth";
 import { commonApiDelete } from "@/services/api/common-api";
 import type { InteractiveMediaMimeType } from "@/components/waves/memes/submission/constants/media";
 
+jest.mock(
+  "@/components/waves/memes/submission/MemesSubmissionDocumentation",
+  () => () => null
+);
+
 jest.mock("@/components/auth/Auth");
 jest.mock("@/components/waves/memes/submission/hooks/useArtworkSubmissionForm");
 jest.mock(
