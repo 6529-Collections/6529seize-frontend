@@ -64,7 +64,12 @@ export function ProfileCmsAgentPanel({
   };
 
   const applyPatch = () => {
-    if (!patchReview?.ok) {
+    if (
+      !patchReview?.ok ||
+      patchReview.patch.target.base_package_hash !==
+        validation.cmsPackage.integrity.package_hash ||
+      patchReview.patch.target.base_version !== currentDraftVersion
+    ) {
       return;
     }
 

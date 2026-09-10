@@ -12,7 +12,13 @@ import type { ReactNode } from "react";
 import { useAuth } from "@/components/auth/Auth";
 import ProfileCmsBuilder from "@/components/profile-cms-builder/ProfileCmsBuilder";
 import { publicEnv } from "@/config/env";
-import { commonApiPost } from "@/services/api/common-api";
+import { commonApiPost, commonApiFetch } from "@/services/api/common-api";
+import * as cmsApi from "@/lib/profile-cms/builder/api";
+import { createMockWalletGallerySnapshot } from "@/lib/profile-cms/builder/gallery";
+import {
+  buildCmsPackageCandidate,
+  createDefaultCmsBuilderState,
+} from "@/lib/profile-cms/builder/package";
 
 jest.mock("@/config/env", () => {
   const actual = jest.requireActual("@/config/env");
@@ -25,6 +31,7 @@ jest.mock("@/components/auth/Auth", () => ({
 
 jest.mock("@/services/api/common-api", () => ({
   commonApiPost: jest.fn(),
+  commonApiFetch: jest.fn(async () => []),
 }));
 
 jest.mock("next/link", () => ({
@@ -50,6 +57,22 @@ jest.mock("next/navigation", () => ({
   }),
 }));
 
+jest.mock("@/components/auth/SeizeConnectContext", () => ({
+  useSeizeConnectContext: () => ({
+    address: "0x0000000000000000000000000000000000000001",
+    isConnected: true,
+    isSafeWallet: false,
+  }),
+}));
+jest.mock("@/hooks/profile-cms/useProfileCmsPublishSign", () => ({
+  useProfileCmsPublishSign: () => ({
+    signerAddress: "0x0000000000000000000000000000000000000001",
+    isConnected: true,
+    chainId: 1,
+    isSafe: false,
+    signTypedData: jest.fn(),
+  }),
+}));
 const useAuthMock = useAuth as jest.Mock;
 const commonApiPostMock = commonApiPost as jest.Mock;
 const createObjectUrlMock = jest.fn(() => "blob:cms-export");
@@ -68,6 +91,7 @@ class CapturedBlob extends NativeBlob {
 describe("ProfileCmsBuilder", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.mocked(commonApiFetch).mockResolvedValue([]);
     Object.defineProperty(globalThis, "Blob", {
       configurable: true,
       value: CapturedBlob,
@@ -80,7 +104,8 @@ describe("ProfileCmsBuilder", () => {
       configurable: true,
       value: revokeObjectUrlMock,
     });
-    delete publicEnv.PROFILE_CMS_BUILDER_API_ENABLED;
+    publicEnv.PROFILE_CMS_BUILDER_API_ENABLED = "false";
+    localStorage.clear();
     delete publicEnv.NEXT_PUBLIC_PROFILE_CMS_BUILDER_API_ENABLED;
     useAuthMock.mockReturnValue({
       activeProfileProxy: null,
@@ -93,6 +118,23 @@ describe("ProfileCmsBuilder", () => {
       configurable: true,
       value: NativeBlob,
     });
+  });
+
+  it("disables backend actions for another profile and while the API is disabled", () => {
+    render(
+      <ProfileCmsBuilder
+        handle="punk6529"
+        profileId="profile-punk6529"
+        title="Profile CMS builder"
+      />
+    );
+    expect(screen.getByRole("button", { name: "Save draft" })).toBeDisabled();
+    expect(
+      screen.getByRole("button", { name: "Server validate" })
+    ).toBeDisabled();
+    expect(
+      screen.getByRole("button", { name: "Publish website" })
+    ).toBeDisabled();
   });
 
   it("edits homepage content and previews with the real CMS renderer", async () => {
@@ -320,96 +362,10 @@ describe("ProfileCmsBuilder", () => {
     await user.click(screen.getByRole("button", { name: "Save draft" }));
 
     expect(commonApiPostMock).not.toHaveBeenCalled();
+    expect(screen.getByRole("button", { name: "Save draft" })).toBeDisabled();
     expect(
-      screen.getByText(
-        "Connect as this profile before using backend builder actions."
-      )
-    ).toBeInTheDocument();
-  });
-
-  it("keeps publish honest when backend writes are disabled", async () => {
-    const user = userEvent.setup();
-    useAuthMock.mockReturnValue({
-      activeProfileProxy: null,
-      connectedProfile: { id: "profile-punk6529" },
-    });
-    render(
-      <ProfileCmsBuilder
-        handle="punk6529"
-        profileId="profile-punk6529"
-        title="Profile CMS builder"
-      />
-    );
-
-    await user.click(screen.getByRole("button", { name: "Save draft" }));
-
-    const statePanel = screen.getByRole("heading", {
-      name: "Draft and publish state",
-    }).parentElement;
-    expect(statePanel).not.toBeNull();
-    expect(
-      within(statePanel as HTMLElement).getByText(
-        "Builder API writes are not enabled in this frontend environment."
-      )
-    ).toBeInTheDocument();
-    expect(
-      within(statePanel as HTMLElement).getByText("profile-cms/packages")
-    ).toBeInTheDocument();
-  });
-
-  it("blocks draft saves unless the connected profile owns the target", async () => {
-    const user = userEvent.setup();
-    publicEnv.PROFILE_CMS_BUILDER_API_ENABLED = "true";
-    useAuthMock.mockReturnValue({
-      activeProfileProxy: null,
-      connectedProfile: { id: "profile-other" },
-    });
-
-    render(
-      <ProfileCmsBuilder
-        handle="punk6529"
-        profileId="profile-punk6529"
-        title="Profile CMS builder"
-      />
-    );
-
-    await user.click(screen.getByRole("button", { name: "Save draft" }));
-
-    expect(commonApiPostMock).not.toHaveBeenCalled();
-    expect(
-      screen.getByText(
-        "Connect as this profile before using backend builder actions."
-      )
-    ).toBeInTheDocument();
-  });
-
-  it("blocks server validation unless the connected profile owns the target", async () => {
-    const user = userEvent.setup();
-    publicEnv.PROFILE_CMS_BUILDER_API_ENABLED = "true";
-    useAuthMock.mockReturnValue({
-      activeProfileProxy: null,
-      connectedProfile: { id: "profile-other" },
-    });
-
-    render(
-      <ProfileCmsBuilder
-        handle="punk6529"
-        profileId="profile-punk6529"
-        title="Profile CMS builder"
-      />
-    );
-
-    await user.click(screen.getByRole("button", { name: "Server validate" }));
-
-    expect(commonApiPostMock).not.toHaveBeenCalled();
-    expect(
-      screen.getByText(
-        "Connect as this profile before using backend builder actions."
-      )
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText("profile-cms/packages/validate")
-    ).toBeInTheDocument();
+      screen.getByRole("button", { name: "Server validate" })
+    ).toBeDisabled();
   });
 
   it("requests a fixture wallet snapshot and previews the generated gallery", async () => {
@@ -457,6 +413,52 @@ describe("ProfileCmsBuilder", () => {
     expect(commonApiPostMock).not.toHaveBeenCalled();
   });
 
+  it("disables publishing while refreshing an already publishable gallery snapshot", async () => {
+    const user = userEvent.setup();
+    publicEnv.PROFILE_CMS_BUILDER_API_ENABLED = "true";
+    useAuthMock.mockReturnValue({
+      activeProfileProxy: null,
+      connectedProfile: { id: "profile" },
+    });
+    const snapshot = {
+      ...createMockWalletGallerySnapshot({ handle: "punk6529", sources: [] }),
+      source: "backend" as const,
+    };
+    let resolveRefresh!: (value: typeof snapshot) => void;
+    const refresh = new Promise<typeof snapshot>((resolve) => {
+      resolveRefresh = resolve;
+    });
+    const request = jest
+      .spyOn(cmsApi, "requestProfileCmsGallerySnapshot")
+      .mockResolvedValueOnce(snapshot)
+      .mockReturnValueOnce(refresh);
+    render(
+      <ProfileCmsBuilder
+        handle="punk6529"
+        profileId="profile"
+        title="Builder"
+      />
+    );
+    await user.click(screen.getByRole("button", { name: "Wallet gallery" }));
+    await user.click(screen.getByRole("button", { name: "Request snapshot" }));
+    await waitFor(() =>
+      expect(
+        screen.getByRole("button", { name: "Publish website" })
+      ).toBeEnabled()
+    );
+    await user.click(screen.getByRole("button", { name: "Request snapshot" }));
+    expect(
+      screen.getByRole("button", { name: "Publish website" })
+    ).toBeDisabled();
+    await act(async () => resolveRefresh(snapshot));
+    await waitFor(() =>
+      expect(
+        screen.getByRole("button", { name: "Publish website" })
+      ).toBeEnabled()
+    );
+    request.mockRestore();
+  });
+
   it("updates hide, feature, and priority controls for reviewed works", async () => {
     const user = userEvent.setup();
     render(<ProfileCmsBuilder handle="punk6529" title="Profile CMS builder" />);
@@ -486,95 +488,6 @@ describe("ProfileCmsBuilder", () => {
     ).toBeGreaterThan(0);
   });
 
-  it("does not show a stale save result after edits during the request", async () => {
-    const user = userEvent.setup();
-    publicEnv.PROFILE_CMS_BUILDER_API_ENABLED = "true";
-    useAuthMock.mockReturnValue({
-      activeProfileProxy: null,
-      connectedProfile: { id: "profile-punk6529" },
-    });
-    let resolvePost:
-      | ((value: { draft_id: string; package_hash: string }) => void)
-      | undefined;
-    commonApiPostMock.mockImplementation(
-      () =>
-        new Promise((resolve) => {
-          resolvePost = resolve;
-        })
-    );
-
-    render(
-      <ProfileCmsBuilder
-        handle="punk6529"
-        profileId="profile-punk6529"
-        title="Profile CMS builder"
-      />
-    );
-
-    await user.click(screen.getByRole("button", { name: "Save draft" }));
-    await user.clear(screen.getByLabelText("Page title"));
-    await user.type(screen.getByLabelText("Page title"), "Changed draft");
-    await act(async () => {
-      resolvePost?.({ draft_id: "draft-1", package_hash: "hash-1" });
-    });
-
-    expect(screen.queryByText("Draft saved.")).not.toBeInTheDocument();
-    expect(screen.queryByText("draft-1")).not.toBeInTheDocument();
-  });
-
-  it("keeps production publish disabled until the signed storage flow exists", async () => {
-    const user = userEvent.setup();
-    useAuthMock.mockReturnValue({
-      activeProfileProxy: null,
-      connectedProfile: { id: "profile-punk6529" },
-    });
-    render(
-      <ProfileCmsBuilder
-        handle="punk6529"
-        profileId="profile-punk6529"
-        title="Profile CMS builder"
-      />
-    );
-
-    await user.click(screen.getByRole("button", { name: "Publish" }));
-
-    expect(
-      screen.getByText(
-        "Publishing needs the signed decentralized storage flow and is not enabled in this MVP."
-      )
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText("profile-cms/packages/:id/publish")
-    ).toBeInTheDocument();
-  });
-
-  it("blocks publish unless the connected profile owns the target", async () => {
-    const user = userEvent.setup();
-    useAuthMock.mockReturnValue({
-      activeProfileProxy: null,
-      connectedProfile: { id: "profile-other" },
-    });
-
-    render(
-      <ProfileCmsBuilder
-        handle="punk6529"
-        profileId="profile-punk6529"
-        title="Profile CMS builder"
-      />
-    );
-
-    await user.click(screen.getByRole("button", { name: "Publish" }));
-
-    expect(
-      screen.getByText(
-        "Connect as this profile before using backend builder actions."
-      )
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText("profile-cms/packages/:id/publish")
-    ).toBeInTheDocument();
-  });
-
   it("adds a 3D room primitive and previews it through the CMS renderer", async () => {
     const user = userEvent.setup();
     render(<ProfileCmsBuilder handle="punk6529" title="Profile CMS builder" />);
@@ -594,6 +507,163 @@ describe("ProfileCmsBuilder", () => {
     expect(
       screen.getByRole("link", { name: "Builder Room Work" })
     ).toHaveAttribute("href", "/punk6529/rooms/work-4/index.html");
+  });
+
+  it("retains unapplied JSON across tabs and blocks saving until it is applied or discarded", async () => {
+    const user = userEvent.setup();
+    publicEnv.PROFILE_CMS_BUILDER_API_ENABLED = "true";
+    useAuthMock.mockReturnValue({
+      activeProfileProxy: null,
+      connectedProfile: { id: "profile" },
+    });
+    render(
+      <ProfileCmsBuilder
+        handle="punk6529"
+        profileId="profile"
+        title="Builder"
+      />
+    );
+    await user.click(screen.getByRole("button", { name: "JSON" }));
+    fireEvent.change(screen.getByLabelText("Package candidate"), {
+      target: { value: "{ unfinished" },
+    });
+    await user.click(screen.getByRole("button", { name: "Preview" }));
+    expect(screen.getByRole("button", { name: "Save draft" })).toBeDisabled();
+    expect(
+      screen.getByRole("button", { name: "Publish website" })
+    ).toBeDisabled();
+    await user.click(screen.getByRole("button", { name: "JSON" }));
+    expect(screen.getByLabelText("Package candidate")).toHaveValue(
+      "{ unfinished"
+    );
+    fireEvent.change(screen.getByLabelText("Package candidate"), {
+      target: { value: "" },
+    });
+    expect(screen.getByLabelText("Package candidate")).toHaveValue("");
+    const confirm = jest.spyOn(globalThis, "confirm").mockReturnValue(true);
+    await user.click(
+      screen.getByRole("button", { name: "Discard JSON changes" })
+    );
+    expect(screen.getByRole("button", { name: "Save draft" })).toBeEnabled();
+    confirm.mockRestore();
+  });
+
+  it("recovers local edits only after the same profile and wallet explicitly choose recovery", async () => {
+    const user = userEvent.setup();
+    useAuthMock.mockReturnValue({
+      activeProfileProxy: null,
+      connectedProfile: { id: "profile" },
+    });
+    const first = render(
+      <ProfileCmsBuilder
+        handle="punk6529"
+        profileId="profile"
+        title="Builder"
+      />
+    );
+    fireEvent.change(screen.getByLabelText("Page title"), {
+      target: { value: "Local working copy" },
+    });
+    first.unmount();
+    render(
+      <ProfileCmsBuilder
+        handle="punk6529"
+        profileId="profile"
+        title="Builder"
+      />
+    );
+    expect(screen.getByLabelText("Page title")).toHaveValue("punk6529");
+    await user.click(
+      await screen.findByRole("button", { name: "Recover draft" })
+    );
+    expect(screen.getByLabelText("Page title")).toHaveValue(
+      "Local working copy"
+    );
+  });
+
+  it("loads the exact saved package and edits a previously published site", async () => {
+    const user = userEvent.setup();
+    publicEnv.PROFILE_CMS_BUILDER_API_ENABLED = "true";
+    useAuthMock.mockReturnValue({
+      activeProfileProxy: null,
+      connectedProfile: { id: "profile" },
+    });
+    const cmsPackage = buildCmsPackageCandidate({
+      ...createDefaultCmsBuilderState("punk6529"),
+      pageTitle: "Published title",
+    });
+    const record = {
+      id: "saved-id",
+      profile_id: "profile",
+      profile_handle: "punk6529",
+      package_id: cmsPackage.package_id,
+      version: 7,
+      package: cmsPackage,
+      package_hash: cmsPackage.integrity.package_hash,
+      payload_hash: cmsPackage.integrity.payload_hash,
+      status: "published",
+      is_primary: true,
+      created_at: Date.now(),
+      updated_at: Date.now(),
+      published_at: Date.now(),
+    };
+    jest
+      .mocked(commonApiFetch)
+      .mockImplementation(
+        async ({ endpoint }) =>
+          (endpoint === "profile-cms/packages/saved-id"
+            ? record
+            : [record]) as never
+      );
+    render(
+      <ProfileCmsBuilder
+        handle="punk6529"
+        profileId="profile"
+        title="Builder"
+      />
+    );
+    await user.click(await screen.findByRole("button", { name: "Load" }));
+    await waitFor(() =>
+      expect(screen.getByLabelText("Page title")).toHaveValue("Published title")
+    );
+    await user.click(screen.getByRole("button", { name: "JSON" }));
+    expect(
+      JSON.parse(
+        (screen.getByLabelText("Package candidate") as HTMLTextAreaElement)
+          .value
+      )
+    ).toEqual(cmsPackage);
+    await user.click(screen.getByRole("button", { name: "Editor" }));
+    fireEvent.change(screen.getByLabelText("Page title"), {
+      target: { value: "Next publication" },
+    });
+    commonApiPostMock.mockResolvedValue({
+      ...record,
+      id: "new-revision",
+      version: 8,
+    });
+    await user.click(screen.getByRole("button", { name: "Save draft" }));
+    await waitFor(() =>
+      expect(commonApiPostMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          endpoint: "profile-cms/packages",
+          body: expect.objectContaining({
+            profile_id: "profile",
+            cms_package: expect.objectContaining({
+              payload: expect.objectContaining({
+                pages: expect.arrayContaining([
+                  expect.objectContaining({
+                    metadata: expect.objectContaining({
+                      title: "Next publication",
+                    }),
+                  }),
+                ]),
+              }),
+            }),
+          }),
+        })
+      )
+    );
   });
 });
 
