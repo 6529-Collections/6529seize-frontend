@@ -2,7 +2,6 @@ import Download from "@/components/download/Download";
 import WaveDropDeleteButton from "@/components/utils/button/WaveDropDeleteButton";
 import { MemesArtResubmitAction } from "@/components/waves/memes/submission/MemesArtResubmitAction";
 import { ApiDropType } from "@/generated/models/ApiDropType";
-import type { ApiDropVoteDistribution } from "@/generated/models/ApiDropVoteDistribution";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { SingleWaveDropInfoDetails } from "./SingleWaveDropInfoDetails";
@@ -13,10 +12,11 @@ import type {
   MemesDropFileInfo,
   MemesDropMedia,
 } from "./memesDropPanelTypes";
+import type { DropVoteSummaryState } from "./useDropVoteSummary";
 
 interface MemesDropDetailsSectionProps {
   readonly drop: ExtendedDrop;
-  readonly voteDistribution?: ApiDropVoteDistribution | undefined;
+  readonly voteSummary: DropVoteSummaryState;
   readonly wave: ApiWave | null;
   readonly artworkMedia?: MemesDropMedia | null | undefined;
   readonly fileInfo: MemesDropFileInfo | null;
@@ -29,7 +29,7 @@ interface MemesDropDetailsSectionProps {
 
 export function MemesDropDetailsSection({
   drop,
-  voteDistribution,
+  voteSummary,
   wave,
   artworkMedia,
   fileInfo,
@@ -47,10 +47,7 @@ export function MemesDropDetailsSection({
     <div className="tw-px-4 tw-pb-8 sm:tw-px-6 md:tw-pb-10 xl:tw-px-20">
       <div className="tw-mx-auto tw-max-w-3xl tw-space-y-8">
         <SingleWaveDropTraits drop={drop} />
-        <SingleWaveDropInfoDetails
-          drop={drop}
-          voteDistribution={voteDistribution}
-        />
+        <SingleWaveDropInfoDetails drop={drop} voteSummary={voteSummary} />
         <WaveDropAdditionalInfo drop={drop} />
 
         {hasDownloads ? (
