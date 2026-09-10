@@ -384,7 +384,7 @@ export function ExploreWaveCard({
             className={clsx(
               "tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1",
               isDiscover
-                ? "tw-mt-3 tw-text-xs tw-text-iron-400"
+                ? "tw-mt-3 tw-text-xs tw-text-iron-500"
                 : "tw-mt-auto tw-pt-4 tw-text-[11px] tw-text-iron-600"
             )}
           >
@@ -405,7 +405,7 @@ export function ExploreWaveCard({
           <div
             className={
               isDiscover
-                ? "tw-mt-3 tw-text-xs tw-text-iron-400"
+                ? "tw-mt-3 tw-text-xs tw-text-iron-500"
                 : "tw-mt-auto tw-pt-4 tw-text-[11px] tw-text-iron-600"
             }
           >
