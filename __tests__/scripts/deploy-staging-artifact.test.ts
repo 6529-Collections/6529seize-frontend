@@ -40,7 +40,9 @@ function runHostPreflight(
   repo: string,
   pm2Current?: string,
   afterPreflight = "",
-  lockHeld = false
+  lockHeld = false,
+  ethereumRpcUrl = "https://eth-mainnet.example.test",
+  alchemyApiKey = "staging-test-key"
 ) {
   // Exercise the real path adoption, PM2 validation and rollback functions;
   // replace only host privileges, PM2, the lock command and HTTP transport.
@@ -102,6 +104,8 @@ curl() { command cat "$REPO_DIR/.deploy/current/version.json"; }
         PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64: "e30=",
         SSR_CLIENT_ID_B64: "Y2xpZW50",
         SSR_CLIENT_SECRET_B64: "c2VjcmV0",
+        ETHEREUM_RPC_URL_B64: Buffer.from(ethereumRpcUrl).toString("base64"),
+        ALCHEMY_API_KEY_B64: Buffer.from(alchemyApiKey).toString("base64"),
         TEST_PM2_JSON: JSON.stringify(pm2Processes),
         TEST_LOCK_HELD: String(lockHeld),
       },
@@ -118,6 +122,11 @@ describe("staging runtime directory", () => {
       fs.mkdtempSync(path.join(os.tmpdir(), "staging-runtime-"))
     );
     fs.mkdirSync(path.join(repo, ".git"));
+    fs.mkdirSync(path.join(repo, "ops", "scripts"), { recursive: true });
+    fs.copyFileSync(
+      path.join(root, "ops", "scripts", "validate-ethereum-rpc-url.cjs"),
+      path.join(repo, "ops", "scripts", "validate-ethereum-rpc-url.cjs")
+    );
     runtimeRoot = path.join(repo, ".deploy");
   });
 
@@ -197,6 +206,70 @@ describe("staging runtime directory", () => {
     expect(result.status).toBe(0);
     expect(fs.lstatSync(runtimeRoot).isDirectory()).toBe(true);
     expect(fs.existsSync(path.join(runtimeRoot, "deploy.lock"))).toBe(true);
+  });
+
+  it("rejects a malformed Ethereum RPC URL before changing runtime state", () => {
+    const result = runHostPreflight(repo, undefined, "", false, "https://");
+
+    expect(result.status).toBe(1);
+    expect(result.stderr).toContain(
+      "ETHEREUM_RPC_URL must be a complete HTTP(S) URL"
+    );
+    expect(fs.existsSync(runtimeRoot)).toBe(false);
+  });
+
+  it.each(["", "\n"])(
+    "rejects an empty Alchemy key before changing runtime state (%j)",
+    (key) => {
+      const result = runHostPreflight(
+        repo,
+        undefined,
+        "",
+        false,
+        undefined,
+        key
+      );
+
+      expect(result.status).toBe(1);
+      expect(result.stderr).toMatch(/ALCHEMY_API_KEY_B64|Alchemy API key/);
+      expect(fs.existsSync(runtimeRoot)).toBe(false);
+      expect(fs.existsSync(path.join(repo, "pm2-events"))).toBe(false);
+    }
+  );
+
+  it("passes the staging Alchemy key through the private runtime store into PM2", () => {
+    createRelease(runtimeRoot, `${expectedSha}-${expectedDigest}`, expectedSha);
+    const key = "test-key-'\"$;\\value";
+    const runtimeSetup = script.slice(
+      script.indexOf('runtime_secrets_tmp="$(mktemp'),
+      script.indexOf('\nif [[ "$process_kind" == legacy ]]')
+    );
+    const result = runHostPreflight(
+      repo,
+      undefined,
+      runtimeSetup,
+      false,
+      undefined,
+      key
+    );
+
+    expect(result.status).toBe(0);
+    expect(result.stderr).toBe("");
+    expect(`${result.stdout}${result.stderr}`).not.toContain(key);
+    expect(`${result.stdout}${result.stderr}`).not.toContain(
+      Buffer.from(key).toString("base64")
+    );
+    const secretsPath = path.join(runtimeRoot, "runtime-secrets.json");
+    expect(JSON.parse(fs.readFileSync(secretsPath, "utf8"))).toEqual({
+      SSR_CLIENT_ID: "client",
+      SSR_CLIENT_SECRET: "secret",
+      ETHEREUM_RPC_URL: "https://eth-mainnet.example.test",
+      ALCHEMY_API_KEY: key,
+    });
+    expect(fs.statSync(secretsPath).mode & 0o777).toBe(0o600);
+    const config = require(path.join(runtimeRoot, "ecosystem.config.cjs"));
+    expect(config.apps[0].env.ALCHEMY_API_KEY).toBe(key);
+    expect(config.apps[0].env).not.toHaveProperty("STAGING_ALCHEMY_API_KEY");
   });
 
   it("keeps an already healthy exact artifact idempotent", () => {
@@ -311,7 +384,7 @@ describe("staging immutable artifact deployment", () => {
     expect(script).not.toMatch(/\beval\b/u);
   });
 
-  it("loads required SSR credentials from deployment secrets", () => {
+  it("loads required server runtime values from deployment secrets", () => {
     expect(script).toContain(
       'runtime_secrets_file="$release_root/runtime-secrets.json"'
     );
@@ -325,18 +398,44 @@ describe("staging immutable artifact deployment", () => {
     expect(script).toContain(
       "['SSR_CLIENT_SECRET']: requireRuntimeEnv('SSR_CLIENT_SECRET')"
     );
+    expect(script).toContain(
+      "['ETHEREUM_RPC_URL']: requireRuntimeEnv('ETHEREUM_RPC_URL')"
+    );
+    expect(script).toContain(
+      "['ALCHEMY_API_KEY']: requireRuntimeEnv('ALCHEMY_API_KEY')"
+    );
     expect(workflowSource).toContain(
       "STAGING_SSR_CLIENT_ID: ${{ secrets.STAGING_SSR_CLIENT_ID }}"
     );
     expect(workflowSource).toContain(
       "STAGING_SSR_CLIENT_SECRET: ${{ secrets.STAGING_SSR_CLIENT_SECRET }}"
     );
+    expect(workflowSource).toContain(
+      "STAGING_ETHEREUM_RPC_URL: ${{ secrets.STAGING_ETHEREUM_RPC_URL }}"
+    );
     expect(workflowSource).not.toContain("secrets.SSR_CLIENT_");
+    expect(workflowSource).toContain(
+      "STAGING_ALCHEMY_API_KEY: ${{ secrets.STAGING_ALCHEMY_API_KEY }}"
+    );
+    expect(workflowSource).not.toContain("secrets.ALCHEMY_API_KEY");
+    expect(workflowSource).toContain('test -n "$STAGING_ALCHEMY_API_KEY"');
+    expect(workflowSource).toContain(
+      "printf '%s' \"$STAGING_ALCHEMY_API_KEY\" | base64 -w0"
+    );
+    expect(workflowSource).toContain(
+      "ALCHEMY_API_KEY_B64=$alchemy_api_key_b64_q"
+    );
+    expect(workflowSource).toContain(
+      'ALCHEMY_API_KEY_B64="$ALCHEMY_API_KEY_B64" \\'
+    );
     expect(workflowSource).toContain(
       'SSR_CLIENT_ID_B64="$SSR_CLIENT_ID_B64" \\'
     );
     expect(workflowSource).toContain(
       'SSR_CLIENT_SECRET_B64="$SSR_CLIENT_SECRET_B64" \\'
+    );
+    expect(workflowSource).toContain(
+      'ETHEREUM_RPC_URL_B64="$ETHEREUM_RPC_URL_B64" \\'
     );
     expect(
       workflowSource.indexOf(

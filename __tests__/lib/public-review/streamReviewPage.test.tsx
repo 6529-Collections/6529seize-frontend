@@ -119,10 +119,7 @@ import {
   getStreamReviewVersion,
   STREAM_REVIEW_VERSION,
 } from "@/lib/public-review/streamReviewDefinition";
-import {
-  STREAM_REVIEW_CURRENT_PAGES,
-  STREAM_REVIEW_ENTRY_PAGES,
-} from "@/lib/public-review/streamReviewEntryGuides";
+import { STREAM_REVIEW_CURRENT_PAGES } from "@/lib/public-review/streamReviewEntryGuides";
 import { extractPublicReviewSections } from "@/lib/public-review/editorialSections";
 import {
   STREAM_REVIEW_LEGACY_ENTRY_FEEDBACK_VERSION,
@@ -173,6 +170,44 @@ afterEach(() => {
 });
 
 describe("Stream versioned page rendering", () => {
+  it("shows mint installation and royalty limits in the current guides and diagrams", async () => {
+    await show("review-the-code");
+    expect(screen.getByRole("main")).toHaveTextContent(
+      "The real manager and ledger cannot yet pass Core's installation checks"
+    );
+    cleanup();
+    await show("for-artists");
+    expect(screen.getByTestId("editorial")).toHaveTextContent(
+      "This candidate cannot yet activate that connection"
+    );
+    expect(screen.getByTestId("artist-details")).toHaveTextContent(
+      "This candidate cannot install its royalty resolver"
+    );
+  });
+
+  it("keeps the freezing diagram and chapter consistent without changing feedback anchors", async () => {
+    await show("freezing-preservation-and-artwork-finality");
+    expect(screen.getByRole("figure")).toHaveTextContent(
+      "the same transaction is allowed once governance conditions are met"
+    );
+    expect(screen.getByTestId("editorial")).toHaveTextContent(
+      "Core does not require an extra block between them"
+    );
+    expect(screen.getByRole("main")).not.toHaveTextContent(
+      "in an earlier block"
+    );
+    for (const section of extractPublicReviewSections(
+      readEditorial(
+        STREAM_REVIEW_VERSION,
+        "freezing-preservation-and-artwork-finality"
+      )
+    )) {
+      expect(screen.getByTestId("feedback-sections")).toHaveTextContent(
+        section.id
+      );
+    }
+  });
+
   it.each(STREAM_REVIEW_CURRENT_PAGES)(
     "renders current $id against the new candidate",
     async (page) => {
@@ -188,14 +223,7 @@ describe("Stream versioned page rendering", () => {
       expect(
         screen.getByTestId("editorial").textContent!.length
       ).toBeGreaterThan(100);
-      if (
-        !STREAM_REVIEW_ENTRY_PAGES.some((entry) => entry.id === page.id) &&
-        ![
-          "roles-and-trust",
-          "revenue-splits-and-royalties",
-          "freezing-preservation-and-artwork-finality",
-        ].includes(page.id)
-      ) {
+      if (page.id === "community-review") {
         expect(screen.getByTestId("editorial").textContent).toBe(
           readEditorial(STREAM_REVIEW_VERSION, page.id)
         );
@@ -204,31 +232,35 @@ describe("Stream versioned page rendering", () => {
     }
   );
 
-  it.each(getStreamReviewVersion("2026-08-01.1")!.pages)(
-    "preserves August $id content and source",
-    async (page) => {
-      await show(page.id, "2026-08-01.1");
-      expect(screen.getByTestId("editorial").textContent).toBe(
-        readEditorial("2026-08-01.1", page.id)
-      );
-      expect(screen.getByRole("main")).toHaveAttribute(
-        "data-source",
-        "513bd7e079eafe109df6ae1ae21bfbca6fec6786"
-      );
-      expect(
-        screen.queryByText("Artwork concept preview")
-      ).not.toBeInTheDocument();
-      expect(screen.queryByTestId("artist-details")).not.toBeInTheDocument();
-      expect(screen.queryByRole("figure")).not.toBeInTheDocument();
-    }
-  );
+  it.each(
+    ["2026-08-01.1", STREAM_REVIEW_VERSION].flatMap((version) =>
+      getStreamReviewVersion(version)!.pages.map((page) => ({
+        ...page,
+        version,
+      }))
+    )
+  )("preserves saved $version/$id content and source", async (page) => {
+    await show(page.id, page.version);
+    expect(screen.getByTestId("editorial").textContent).toBe(
+      readEditorial(page.version, page.id)
+    );
+    expect(screen.getByRole("main")).toHaveAttribute(
+      "data-source",
+      getStreamReviewVersion(page.version)!.source.commit
+    );
+    expect(
+      screen.queryByText("Artwork concept preview")
+    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId("artist-details")).not.toBeInTheDocument();
+    expect(screen.queryByRole("figure")).not.toBeInTheDocument();
+  });
 
   it("keeps the artist details closed and includes their feedback targets", async () => {
     await show("for-artists");
     const details = screen.getByText("Full artist details").closest("details");
     expect(details).not.toHaveAttribute("open");
-    expect(screen.getByTestId("artist-details").textContent).toBe(
-      readEditorial(STREAM_REVIEW_VERSION, "for-artists")
+    expect(screen.getByTestId("artist-details")).toHaveTextContent(
+      "This candidate cannot install its royalty resolver"
     );
     for (const section of extractPublicReviewSections(
       readEditorial(STREAM_REVIEW_VERSION, "for-artists")

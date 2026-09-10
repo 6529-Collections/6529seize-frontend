@@ -20,9 +20,8 @@ import type {
 } from "@/entities/INextgen";
 import type { ApiMemesExtendedData } from "@/generated/models/ApiMemesExtendedData";
 import { matchesDomainOrSubdomain } from "@/lib/url/domains";
+import { getEthereumMainnetClient } from "@/lib/ethereum/mainnetClient";
 import type { SeizeCollectionLinkPreview } from "@/services/api/link-preview-api";
-import { createPublicClient, fallback, http } from "viem";
-import { mainnet } from "viem/chains";
 import {
   fetchFirstPageItem,
   fetchOptionalApiJson,
@@ -62,19 +61,8 @@ import {
 
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const FIRST_PARTY_HOST = "6529.io";
-const MAINNET_RPC_TIMEOUT_MS = 5_000;
 const NEXTGEN_TOKEN_ID_MULTIPLIER = 10_000_000_000;
 const NEXTGEN_SHORT_TOKEN_LOOKUP_MAX_COLLECTIONS = 5;
-
-const mainnetPublicClient = createPublicClient({
-  chain: mainnet,
-  transport: fallback([
-    http("https://rpc1.6529.io", { timeout: MAINNET_RPC_TIMEOUT_MS }),
-    http("https://ethereum.publicnode.com", {
-      timeout: MAINNET_RPC_TIMEOUT_MS,
-    }),
-  ]),
-});
 
 type NftRecord = Partial<BaseNFT> &
   Partial<NFT> &
@@ -222,7 +210,7 @@ async function fetchTheMemesManifoldEditionSize(
   const tokenId = BigInt(decimalTokenId);
 
   try {
-    const data = await mainnetPublicClient.readContract({
+    const data = await getEthereumMainnetClient().readContract({
       address: MANIFOLD_LAZY_CLAIM_CONTRACT,
       abi: MEMES_MANIFOLD_PROXY_ABI,
       functionName: "getClaimForToken",

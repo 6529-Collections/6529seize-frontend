@@ -435,6 +435,7 @@ collect_all_inputs() {
 
   # Required / optional keys
   prompt_input_required ALCHEMY_API_KEY "Enter ALCHEMY_API_KEY"
+  prompt_input_required ETHEREUM_RPC_URL "Enter ETHEREUM_RPC_URL"
   exec 3</dev/tty || true
   read -u 3 -r -p "Enter GIPHY_API_KEY (optional, can be empty): " GIPHY_API_KEY || true
   exec 3<&- || true
@@ -493,6 +494,7 @@ BASE_ENDPOINT=$base_endpoint
 
 # API KEYS
 ALCHEMY_API_KEY=$ALCHEMY_API_KEY
+ETHEREUM_RPC_URL=$ETHEREUM_RPC_URL
 
 # GIPHY API KEY (optional)
 GIPHY_API_KEY=$GIPHY_API_KEY
@@ -514,6 +516,15 @@ EOF
   return 0
 }
 
+validate_ethereum_rpc_url() {
+  if ! printf '%s' "$ETHEREUM_RPC_URL" | \
+    node "$REPO_ROOT/ops/scripts/validate-ethereum-rpc-url.cjs"; then
+    color red "ETHEREUM_RPC_URL must be a complete HTTP(S) URL."
+    exit 1
+  fi
+  return 0
+}
+
 # ---------- Main ----------
 
 main() {
@@ -522,11 +533,12 @@ main() {
 
   # 0) Gather ALL user input up front (single interaction)
   collect_all_inputs
-  create_env_file
 
   # 1) Prerequisites
   require_sudo_if_linux
   ensure_node_ge20
+  validate_ethereum_rpc_url
+  create_env_file
   activate_pnpm_with_corepack
   install_socket_firewall
   install_pm2
