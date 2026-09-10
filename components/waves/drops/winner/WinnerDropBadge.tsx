@@ -9,6 +9,7 @@ interface WinnerDropBadgeProps {
   position?: number | undefined;
   decisionTime: number | null;
   variant?: "default" | "simple" | undefined;
+  surface?: "translucent" | "solid" | undefined;
 }
 
 const WinnerDropBadge: React.FC<WinnerDropBadgeProps> = ({
@@ -16,6 +17,7 @@ const WinnerDropBadge: React.FC<WinnerDropBadgeProps> = ({
   position = 1,
   decisionTime,
   variant = "default",
+  surface = "translucent",
 }) => {
   const effectiveRank = rank ?? position;
   if (effectiveRank === 0 || Number.isNaN(effectiveRank)) return null;
@@ -44,24 +46,31 @@ const WinnerDropBadge: React.FC<WinnerDropBadgeProps> = ({
   let colorClasses = "";
   let textColorClass = "";
   const rankText = formatOrdinal(rankNumber);
+  const useSolidSurface = surface === "solid";
 
   switch (rankNumber) {
     case 1:
-      colorClasses =
-        "tw-bg-yellow-500/10 tw-text-[#ffc107] tw-border-yellow-500/20";
+      colorClasses = useSolidSurface
+        ? "tw-bg-[#2A230D] tw-text-[#ffc107] tw-border-yellow-500/30"
+        : "tw-bg-yellow-500/10 tw-text-[#ffc107] tw-border-yellow-500/20";
       textColorClass = "tw-text-[#ffc107]";
       break;
     case 2:
-      colorClasses = "tw-bg-iron-400/10 tw-text-iron-300 tw-border-iron-400/20";
+      colorClasses = useSolidSurface
+        ? "tw-bg-iron-800 tw-text-iron-300 tw-border-iron-400/30"
+        : "tw-bg-iron-400/10 tw-text-iron-300 tw-border-iron-400/20";
       textColorClass = "tw-text-iron-300";
       break;
     case 3:
-      colorClasses =
-        "tw-bg-amber-600/10 tw-text-amber-500 tw-border-amber-600/20";
+      colorClasses = useSolidSurface
+        ? "tw-bg-[#2A1C12] tw-text-amber-500 tw-border-amber-600/30"
+        : "tw-bg-amber-600/10 tw-text-amber-500 tw-border-amber-600/20";
       textColorClass = "tw-text-amber-600";
       break;
     default:
-      colorClasses = "tw-bg-iron-600/20 tw-text-iron-400 tw-border-iron-600/20";
+      colorClasses = useSolidSurface
+        ? "tw-bg-iron-800 tw-text-iron-400 tw-border-iron-600/30"
+        : "tw-bg-iron-600/20 tw-text-iron-400 tw-border-iron-600/20";
       textColorClass = "tw-text-iron-500";
   }
 
