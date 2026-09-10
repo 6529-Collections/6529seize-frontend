@@ -809,7 +809,10 @@ describe("session-v2.utils", () => {
         await jest.advanceTimersByTimeAsync(250);
         expect(commonApiPost).toHaveBeenCalledTimes(2);
         if (lateOutcome === "success") {
-          resolveStalled(sessionResponse);
+          resolveStalled({
+            ...sessionResponse,
+            access_token: "stale-access-token",
+          });
         } else {
           rejectStalled(
             Object.assign(new Error(lateOutcome), {
