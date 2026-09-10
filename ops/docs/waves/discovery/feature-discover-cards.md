@@ -4,8 +4,9 @@
 
 `/discover` renders a dedicated grid of active-wave cards.
 
-- Cards use the same wave information as home `Most active waves`, with artwork
-  that fills rounded cards and fades into a dark background behind the text.
+- Cards share the same artwork-led design and wave information as home
+  `Most active waves`, with artwork that fills rounded cards and fades into a
+  dark background behind the text.
 - The dedicated route expands the list to 20 cards.
 - The route requests discovery data with `exclude_followed=true`.
 - There is no `View all` footer because `/discover` is already the expanded

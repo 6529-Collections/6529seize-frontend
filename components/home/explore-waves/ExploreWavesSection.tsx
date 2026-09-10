@@ -14,16 +14,12 @@ import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import {
-  ExploreWaveCard,
-  type ExploreWaveCardVariant,
-} from "./ExploreWaveCard";
+import { ExploreWaveCard } from "./ExploreWaveCard";
 import { ExploreWaveCardSkeleton } from "./ExploreWaveCardSkeleton";
 
 const DEFAULT_WAVES_LIMIT = 6;
 
 interface ExploreWavesSectionProps {
-  readonly cardVariant?: ExploreWaveCardVariant | undefined;
   readonly headingVariant?: "default" | "page" | undefined;
   readonly title?: string | undefined;
   readonly subtitle?: string | null | undefined;
@@ -46,7 +42,6 @@ interface ExploreWavesSectionProps {
 }
 
 export function ExploreWavesSection({
-  cardVariant = "default",
   headingVariant = "default",
   title = "Tired of bot replies? Join the most interesting chats in crypto",
   subtitle = "Most active waves",
@@ -191,12 +186,12 @@ export function ExploreWavesSection({
                     key={`skeleton-${index}`}
                     className="tw-h-full tw-w-full"
                   >
-                    <ExploreWaveCardSkeleton variant={cardVariant} />
+                    <ExploreWaveCardSkeleton />
                   </div>
                 ))
               : waves?.map((wave) => (
                   <div key={wave.id} className="tw-h-full tw-w-full">
-                    <ExploreWaveCard wave={wave} variant={cardVariant} />
+                    <ExploreWaveCard wave={wave} />
                   </div>
                 ))}
           </div>

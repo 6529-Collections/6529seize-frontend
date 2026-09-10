@@ -18,16 +18,12 @@ import {
   ScaleIcon,
   ShieldCheckIcon,
 } from "@heroicons/react/24/outline";
-import clsx from "clsx";
 import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
-export type ExploreWaveCardVariant = "default" | "discover";
-
 interface ExploreWaveCardProps {
   readonly wave: SidebarWave;
-  readonly variant?: ExploreWaveCardVariant | undefined;
 }
 
 interface ExploreWaveMetric {
@@ -42,9 +38,6 @@ const EXPLORE_WAVE_CARD_LOCALE = DEFAULT_LOCALE;
 const METRIC_CHIP_CLASSES =
   "tw-inline-flex tw-cursor-help tw-items-center tw-whitespace-nowrap tw-font-medium tw-leading-none";
 const METRIC_ICON_CLASSES = "tw-size-3 tw-flex-shrink-0";
-const METRIC_VALUE_CLASSES = "tw-text-[11px] tw-font-medium tw-text-iron-500";
-const METRIC_SEPARATOR_CLASSES =
-  "tw-text-[11px] tw-leading-none tw-text-iron-600";
 
 const getDropsCountMessageKey = (
   count: number,
@@ -240,11 +233,7 @@ const getMetricsSummaryLabel = (
   return metrics.map((metric) => metric.ariaLabel).join(". ");
 };
 
-export function ExploreWaveCard({
-  wave,
-  variant = "default",
-}: ExploreWaveCardProps) {
-  const isDiscover = variant === "discover";
+export function ExploreWaveCard({ wave }: ExploreWaveCardProps) {
   const waveHref = getWaveRoute({
     waveId: wave.id,
     isDirectMessage: wave.isDirectMessage,
@@ -267,7 +256,7 @@ export function ExploreWaveCard({
     wave.totalDropsCount
   );
   const timeAgoLabel = hasDrops ? getTimeAgoShort(lastMessageTime) : "";
-  const shouldAppendAgo = isDiscover && /^\d+[hm]$/.test(timeAgoLabel);
+  const shouldAppendAgo = /^\d+[hm]$/.test(timeAgoLabel);
   const dropsCountLabel = hasDrops
     ? t(
         EXPLORE_WAVE_CARD_LOCALE,
@@ -298,21 +287,11 @@ export function ExploreWaveCard({
     <Link
       href={waveHref}
       prefetch={false}
-      className={clsx(
-        "tw-group tw-relative tw-flex tw-h-full tw-transform-gpu tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-text-left tw-no-underline tw-transition-[transform,border-color,background-color,box-shadow] tw-duration-500 tw-ease-out focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/60 desktop-hover:hover:-tw-translate-y-1 motion-reduce:tw-transform-none motion-reduce:tw-transition-none",
-        isDiscover
-          ? "tw-border-white/[0.04] tw-bg-iron-950 tw-shadow-[inset_0_0_0_1px_rgba(255,255,255,0.025),0_10px_28px_rgba(0,0,0,0.28)] desktop-hover:hover:tw-border-white/15 desktop-hover:hover:tw-shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04),0_14px_34px_rgba(0,0,0,0.45)]"
-          : "tw-border-white/[0.04] tw-bg-iron-950 tw-p-2 desktop-hover:hover:tw-border-white/10 desktop-hover:hover:tw-bg-iron-900/70"
-      )}
+      className="tw-group tw-relative tw-flex tw-h-full tw-transform-gpu tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.04] tw-bg-iron-950 tw-text-left tw-no-underline tw-shadow-[inset_0_0_0_1px_rgba(255,255,255,0.025),0_10px_28px_rgba(0,0,0,0.28)] tw-transition-[transform,border-color,background-color,box-shadow] tw-duration-500 tw-ease-out focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/60 desktop-hover:hover:-tw-translate-y-1 desktop-hover:hover:tw-border-white/15 desktop-hover:hover:tw-shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04),0_14px_34px_rgba(0,0,0,0.45)] motion-reduce:tw-transform-none motion-reduce:tw-transition-none"
       aria-label={cardAriaLabel}
     >
       <div
-        className={clsx(
-          "tw-overflow-hidden tw-bg-iron-900",
-          isDiscover
-            ? "tw-relative tw-h-48 tw-flex-shrink-0 tw-rounded-t-xl sm:tw-h-52 lg:tw-h-48 xl:tw-h-52"
-            : "tw-relative tw-h-32 tw-flex-shrink-0 tw-rounded-lg sm:tw-h-36 lg:tw-h-32 xl:tw-h-36"
-        )}
+        className="tw-relative tw-h-48 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-t-xl tw-bg-iron-900 sm:tw-h-52 lg:tw-h-48 xl:tw-h-52"
         style={imageAreaStyle}
       >
         {wave.picture && (
@@ -323,82 +302,37 @@ export function ExploreWaveCard({
             })}
             fill
             sizes="(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 33vw"
-            className={clsx(
-              "tw-transform-gpu tw-object-cover tw-duration-700 tw-ease-out desktop-hover:group-hover:tw-scale-105 motion-reduce:tw-transform-none motion-reduce:tw-transition-none",
-              isDiscover
-                ? "tw-saturate-[.9] tw-transition-[transform,filter] group-focus-visible:tw-saturate-100 desktop-hover:group-hover:tw-saturate-100 touch-only:tw-saturate-100"
-                : "tw-transition-transform"
-            )}
+            className="tw-transform-gpu tw-object-cover tw-saturate-[.9] tw-transition-[transform,filter] tw-duration-700 tw-ease-out group-focus-visible:tw-saturate-100 desktop-hover:group-hover:tw-scale-105 desktop-hover:group-hover:tw-saturate-100 touch-only:tw-saturate-100 motion-reduce:tw-transform-none motion-reduce:tw-transition-none"
           />
         )}
-        {isDiscover && (
-          <div
-            aria-hidden="true"
-            className="tw-pointer-events-none tw-absolute tw-inset-x-0 tw-bottom-0 tw-h-2/3 tw-bg-gradient-to-t tw-from-iron-950 tw-via-iron-950/50 tw-to-transparent"
-          />
-        )}
+        <div
+          aria-hidden="true"
+          className="tw-pointer-events-none tw-absolute tw-inset-x-0 tw-bottom-0 tw-h-2/3 tw-bg-gradient-to-t tw-from-iron-950 tw-via-iron-950/50 tw-to-transparent"
+        />
       </div>
 
-      <div
-        className={clsx(
-          "tw-relative tw-z-10 tw-flex tw-flex-1 tw-flex-col",
-          isDiscover
-            ? "tw-px-5 tw-pb-5 tw-pt-1"
-            : "tw-px-3 tw-pb-3 tw-pt-4 sm:tw-px-4 sm:tw-pb-4"
-        )}
-      >
-        {isDiscover ? (
-          <span className="tw-m-0 tw-line-clamp-1 tw-min-w-0 tw-break-words tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 tw-transition-colors tw-duration-300 group-focus-visible:tw-text-primary-300 desktop-hover:group-hover:tw-text-primary-300">
-            {wave.name}
-          </span>
-        ) : (
-          <span className="tw-m-0 tw-line-clamp-1 tw-break-words tw-text-base tw-font-semibold tw-leading-tight tw-text-iron-100 tw-transition-colors tw-duration-300 desktop-hover:group-hover:tw-text-white sm:tw-text-lg">
-            {wave.name}
-          </span>
-        )}
-        {!isDiscover && (
-          <ExploreWaveCompactMetrics metrics={metrics} variant={variant} />
-        )}
+      <div className="tw-relative tw-z-10 tw-flex tw-flex-1 tw-flex-col tw-px-5 tw-pb-5 tw-pt-1">
+        <span className="tw-m-0 tw-line-clamp-1 tw-min-w-0 tw-break-words tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 tw-transition-colors tw-duration-300 group-focus-visible:tw-text-primary-300 desktop-hover:group-hover:tw-text-primary-300">
+          {wave.name}
+        </span>
 
-        <MessagePreviewContent
-          previewContent={descriptionPreview}
-          variant={variant}
-        />
+        <MessagePreviewContent previewContent={descriptionPreview} />
 
-        {isDiscover && (
-          <ExploreWaveCompactMetrics metrics={metrics} variant={variant} />
-        )}
+        <ExploreWaveCompactMetrics metrics={metrics} />
 
         {hasDrops && (
-          <div
-            className={clsx(
-              "tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1",
-              isDiscover
-                ? "tw-mt-3 tw-text-xs tw-text-iron-500"
-                : "tw-mt-auto tw-pt-4 tw-text-[11px] tw-text-iron-600"
-            )}
-          >
-            {isDiscover ? (
-              <ClockIcon
-                aria-hidden="true"
-                className="tw-size-3 tw-flex-shrink-0"
-                strokeWidth={1.75}
-              />
-            ) : (
-              <span className="tw-size-1.5 tw-flex-shrink-0 tw-rounded-full tw-bg-success/80" />
-            )}
+          <div className="tw-mt-3 tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-text-xs tw-text-iron-500">
+            <ClockIcon
+              aria-hidden="true"
+              className="tw-size-3 tw-flex-shrink-0"
+              strokeWidth={1.75}
+            />
             <span>{dropsCountLabel}</span>
           </div>
         )}
 
         {!hasDrops && (
-          <div
-            className={
-              isDiscover
-                ? "tw-mt-3 tw-text-xs tw-text-iron-500"
-                : "tw-mt-auto tw-pt-4 tw-text-[11px] tw-text-iron-600"
-            }
-          >
+          <div className="tw-mt-3 tw-text-xs tw-text-iron-500">
             {t(EXPLORE_WAVE_CARD_LOCALE, "waves.explore.card.noDropsYet")}
           </div>
         )}
@@ -409,50 +343,23 @@ export function ExploreWaveCard({
 
 function ExploreWaveCompactMetrics({
   metrics,
-  variant,
 }: {
   readonly metrics: readonly ExploreWaveMetric[];
-  readonly variant: ExploreWaveCardVariant;
 }) {
-  const isDiscover = variant === "discover";
-  if (metrics.length === 0 && !isDiscover) {
-    return null;
-  }
-
   return (
-    <span
-      className={clsx(
-        "explore-wave-card-metrics tw-flex tw-items-center",
-        isDiscover
-          ? "tw-mt-4 tw-min-h-6 tw-flex-wrap tw-gap-x-3 tw-gap-y-2"
-          : "tw-mt-2.5 tw-flex-nowrap tw-gap-2 tw-overflow-hidden"
-      )}
-    >
-      {metrics.map((metric, index) => (
+    <span className="explore-wave-card-metrics tw-mt-4 tw-flex tw-min-h-6 tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-2">
+      {metrics.map((metric) => (
         <span
           key={`${metric.ariaLabel}-${metric.value}`}
           className="tw-contents"
         >
-          {index > 0 && !isDiscover && (
-            <span className={METRIC_SEPARATOR_CLASSES} aria-hidden="true">
-              &bull;
-            </span>
-          )}
           <span
             className={`${METRIC_CHIP_CLASSES} tw-gap-1 tw-text-[11px]`}
             aria-label={metric.ariaLabel}
           >
             <span className={metric.iconToneClasses}>{metric.icon}</span>
-            {isDiscover && (
-              <span className="tw-text-iron-400">{metric.label}</span>
-            )}
-            <span
-              className={
-                isDiscover
-                  ? "tw-font-semibold tw-tabular-nums tw-text-iron-200"
-                  : METRIC_VALUE_CLASSES
-              }
-            >
+            <span className="tw-text-iron-400">{metric.label}</span>
+            <span className="tw-font-semibold tw-tabular-nums tw-text-iron-200">
               {metric.value}
             </span>
           </span>
@@ -464,34 +371,19 @@ function ExploreWaveCompactMetrics({
 
 function MessagePreviewContent({
   previewContent,
-  variant,
 }: {
   readonly previewContent: ProcessedContent | null;
-  readonly variant: ExploreWaveCardVariant;
 }) {
-  const isDiscover = variant === "discover";
   if (!previewContent) {
-    return isDiscover ? (
-      <div aria-hidden="true" className="tw-mt-2 tw-min-h-10" />
-    ) : null;
+    return <div aria-hidden="true" className="tw-mt-2 tw-min-h-10" />;
   }
 
   return (
     <ContentDisplay
       content={previewContent}
       shouldClamp={false}
-      className={clsx(
-        "tw-flex tw-min-w-0 tw-items-start tw-gap-1 tw-overflow-hidden",
-        isDiscover
-          ? "tw-mt-2 tw-min-h-10"
-          : "tw-mt-3 tw-text-iron-500"
-      )}
-      textClassName={clsx(
-        "tw-line-clamp-2 tw-break-words tw-font-normal",
-        isDiscover
-          ? "tw-text-sm tw-leading-5 tw-text-iron-400"
-          : "tw-text-xs tw-leading-relaxed"
-      )}
+      className="tw-mt-2 tw-flex tw-min-h-10 tw-min-w-0 tw-items-start tw-gap-1 tw-overflow-hidden"
+      textClassName="tw-line-clamp-2 tw-break-words tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-400"
       linkify={false}
     />
   );

@@ -364,7 +364,6 @@ export function DiscoverWaveExplorer() {
 
   return (
     <ExploreWavesSection
-      cardVariant="discover"
       headingVariant="page"
       title={title}
       subtitle={null}
