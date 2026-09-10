@@ -5,9 +5,7 @@ import type { ApiMarketDepth } from "@/generated/models/ApiMarketDepth";
 import { ApiMarketDepthStatusEnum } from "@/generated/models/ApiMarketDepth";
 import type { ApiMarketDepthLevel } from "@/generated/models/ApiMarketDepthLevel";
 import type { SupportedLocale } from "@/i18n/locales";
-import {
-  formatInteger as formatLocalizedInteger,
-} from "@/i18n/format";
+import { formatInteger as formatLocalizedInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
@@ -39,14 +37,12 @@ interface MarketDepthPanelProps {
 interface MarketDepthState {
   readonly status: MarketDepthStatus;
   readonly data: ApiMarketDepth | null;
-  readonly error: string | null;
   readonly requestKey: string | null;
 }
 
 const INITIAL_STATE: MarketDepthState = {
   status: "loading",
   data: null,
-  error: null,
   requestKey: null,
 };
 
@@ -97,6 +93,26 @@ function statusClassName(status: ApiMarketDepth["status"]): string {
     default:
       return "tw-border-iron-700 tw-bg-iron-900 tw-text-iron-300";
   }
+}
+
+function DecimalValue({
+  locale,
+  value,
+}: {
+  readonly locale: SupportedLocale;
+  readonly value: string | null | undefined;
+}) {
+  const formatted = formatDecimal(locale, value);
+  if (formatted !== "—") return formatted;
+
+  return (
+    <>
+      <span aria-hidden="true">—</span>
+      <span className="tw-sr-only">
+        {t(locale, "nftActivity.notAvailable")}
+      </span>
+    </>
+  );
 }
 
 function LevelTable({
@@ -224,10 +240,7 @@ export default function MarketDepthPanel({
   const [state, setState] = useState<MarketDepthState>(INITIAL_STATE);
   const [retryVersion, setRetryVersion] = useState(0);
   const [loadingMoreKey, setLoadingMoreKey] = useState<string | null>(null);
-  const [loadMoreError, setLoadMoreError] = useState<{
-    readonly requestKey: string;
-    readonly message: string;
-  } | null>(null);
+  const [loadMoreErrorKey, setLoadMoreErrorKey] = useState<string | null>(null);
   const loadMoreAbortControllerRef = useRef<AbortController | null>(null);
   const queryKey = useMemo(
     () => [MARKET_DEPTH_QUERY_KEY, contract, String(tokenId)] as const,
@@ -259,7 +272,9 @@ export default function MarketDepthPanel({
     state.requestKey === requestKey ? state.status : "loading";
   const isLoadingMore = loadingMoreKey === requestKey;
   const currentLoadMoreError =
-    loadMoreError?.requestKey === requestKey ? loadMoreError.message : null;
+    loadMoreErrorKey === requestKey
+      ? t(resolvedLocale, "marketDepth.moreError")
+      : null;
 
   useEffect(() => {
     const abortController = new AbortController();
@@ -270,20 +285,15 @@ export default function MarketDepthPanel({
           setState({
             status: "ready",
             data: loadedData,
-            error: null,
             requestKey,
           });
         }
-      } catch (error: unknown) {
+      } catch {
         if (!abortController.signal.aborted) {
           setState({
             status: "error",
             data: null,
             requestKey,
-            error:
-              error instanceof Error
-                ? error.message
-                : t(resolvedLocale, "marketDepth.error"),
           });
         }
       }
@@ -293,14 +303,14 @@ export default function MarketDepthPanel({
       abortController.abort();
       loadMoreAbortControllerRef.current?.abort();
     };
-  }, [loadDepth, requestKey, resolvedLocale]);
+  }, [loadDepth, requestKey]);
 
   const loadMore = useCallback(async () => {
     if (!data?.next || isLoadingMore) {
       return;
     }
 
-    setLoadMoreError(null);
+    setLoadMoreErrorKey(null);
     const capturedRequestKey = requestKey;
     const abortController = new AbortController();
     loadMoreAbortControllerRef.current = abortController;
@@ -322,7 +332,6 @@ export default function MarketDepthPanel({
         );
         return {
           status: "ready",
-          error: null,
           requestKey: capturedRequestKey,
           data: {
             ...current.data,
@@ -331,15 +340,9 @@ export default function MarketDepthPanel({
           },
         };
       });
-    } catch (error: unknown) {
+    } catch {
       if (!abortController.signal.aborted) {
-        setLoadMoreError({
-          requestKey: capturedRequestKey,
-          message:
-            error instanceof Error
-              ? error.message
-              : t(resolvedLocale, "marketDepth.moreError"),
-        });
+        setLoadMoreErrorKey(capturedRequestKey);
       }
     } finally {
       if (loadMoreAbortControllerRef.current === abortController) {
@@ -347,7 +350,7 @@ export default function MarketDepthPanel({
         setLoadingMoreKey(null);
       }
     }
-  }, [data, isLoadingMore, loadDepth, requestKey, resolvedLocale]);
+  }, [data, isLoadingMore, loadDepth, requestKey]);
 
   const ethBook = data
     ? getBookByAddress(data.books, NATIVE_ETH_ADDRESS)
@@ -428,7 +431,7 @@ export default function MarketDepthPanel({
       {effectiveStatus === "error" && (
         <div className="tw-mt-5 tw-rounded-lg tw-border tw-border-solid tw-border-rose-400/20 tw-bg-rose-400/5 tw-p-4">
           <p role="alert" className="tw-m-0 tw-text-sm tw-text-rose-200">
-            {state.error ?? t(resolvedLocale, "marketDepth.error")}
+            {t(resolvedLocale, "marketDepth.error")}
           </p>
           <button
             type="button"
@@ -464,7 +467,10 @@ export default function MarketDepthPanel({
                     {t(resolvedLocale, "marketDepth.bestAsk")}
                   </div>
                   <div className="tw-mt-1 tw-text-2xl tw-font-semibold tw-text-emerald-100">
-                    {formatDecimal(resolvedLocale, ethBook?.best_ask)}
+                    <DecimalValue
+                      locale={resolvedLocale}
+                      value={ethBook?.best_ask}
+                    />
                   </div>
                 </div>
                 <div className="tw-rounded-lg tw-border tw-border-solid tw-border-sky-400/15 tw-bg-sky-400/5 tw-p-4">
@@ -472,7 +478,10 @@ export default function MarketDepthPanel({
                     {t(resolvedLocale, "marketDepth.bestBid")}
                   </div>
                   <div className="tw-mt-1 tw-text-2xl tw-font-semibold tw-text-sky-100">
-                    {formatDecimal(resolvedLocale, wethBook?.best_bid)}
+                    <DecimalValue
+                      locale={resolvedLocale}
+                      value={wethBook?.best_bid}
+                    />
                   </div>
                 </div>
               </div>

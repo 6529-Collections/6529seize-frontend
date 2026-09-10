@@ -122,6 +122,7 @@ export function MemePageActivity(
           filter={getNftActivityFilter(activityTypeFilter)}
           pageSize={props.pageSize}
           compact
+          locale={locale}
         />
       </section>
     </section>

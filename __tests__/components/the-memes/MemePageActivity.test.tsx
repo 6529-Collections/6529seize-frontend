@@ -9,24 +9,31 @@ const mockNftMarketActivity = jest.fn(
     contract,
     tokenId,
     filter,
+    locale,
   }: {
     contract: string;
     tokenId: string;
     filter: string;
+    locale?: string;
   }) => (
     <div
       data-testid="nft-market-activity"
       data-contract={contract}
       data-token-id={tokenId}
       data-filter={filter}
+      data-locale={locale}
     />
   )
 );
 
 jest.mock("@/components/nft-market-activity/NftMarketActivity", () => ({
   __esModule: true,
-  default: (props: { contract: string; tokenId: string; filter: string }) =>
-    mockNftMarketActivity(props),
+  default: (props: {
+    contract: string;
+    tokenId: string;
+    filter: string;
+    locale?: string;
+  }) => mockNftMarketActivity(props),
 }));
 
 const nft = {
@@ -65,6 +72,15 @@ describe("MemePageActivity", () => {
     expect(screen.getByTestId("nft-market-activity")).toHaveAttribute(
       "data-filter",
       "all"
+    );
+  });
+
+  it("passes the route locale to merged card activity", () => {
+    render(<MemePageActivity show nft={nft} pageSize={25} locale="de-DE" />);
+
+    expect(screen.getByTestId("nft-market-activity")).toHaveAttribute(
+      "data-locale",
+      "de-DE"
     );
   });
 

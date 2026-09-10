@@ -20,7 +20,8 @@ jest.mock("framer-motion", () => ({
 
 describe("ActivityFilters", () => {
   const getTypeLabel = (type: TypeFilter) =>
-    getActivityTypeItems("en-US").find((item) => item.value === type)?.label;
+    getActivityTypeItems("en-US").find((item) => item.value === type)?.label ??
+    type;
 
   const mockProps = {
     typeFilter: TypeFilter.ALL,

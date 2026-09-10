@@ -24,7 +24,8 @@ import {
 } from "@/helpers/Helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useNFTCollections } from "@/hooks/useNFTCollections";
-import { formatDate } from "@/i18n/format";
+import { formatDate, formatDecimalString } from "@/i18n/format";
+import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import { commonApiFetch } from "@/services/api/common-api";
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
@@ -55,6 +56,7 @@ interface Props {
   readonly filter?: NftActivityFilter | undefined;
   readonly pageSize?: number | undefined;
   readonly compact?: boolean | undefined;
+  readonly locale?: SupportedLocale | undefined;
 }
 
 const ACTION_KEYS: Partial<Record<string, MessageKey>> = {
@@ -76,12 +78,6 @@ const ACTION_KEYS: Partial<Record<string, MessageKey>> = {
 };
 
 const ADDRESS_PATTERN = /^0x[0-9a-fA-F]{40}$/;
-
-function displayAction(action: string): string {
-  return action
-    .replaceAll("_", " ")
-    .replace(/\b\w/g, (letter) => letter.toUpperCase());
-}
 
 function isZeroDecimal(value: string): boolean {
   return (
@@ -108,6 +104,9 @@ function getEvidenceLabel(
   evidence: string,
   locale: ReturnType<typeof useBrowserLocale>
 ): string | null {
+  if (evidence === "provider_event") {
+    return t(locale, "nftActivity.providerEvent");
+  }
   if (evidence === "provider_order_status") {
     return t(locale, "nftActivity.providerStatus");
   }
@@ -120,10 +119,15 @@ function getEvidenceLabel(
   return null;
 }
 
-function formatTotalPrice(event: ApiNftActivityEvent): string | null {
+function formatTotalPrice(
+  event: ApiNftActivityEvent,
+  locale: ReturnType<typeof useBrowserLocale>
+): string | null {
   if (event.price === null) return null;
+  const formattedPrice = formatDecimalString(locale, event.price);
+  if (formattedPrice === "—") return null;
   const symbol = event.currency?.symbol.trim();
-  return symbol ? `${event.price} ${symbol}` : event.price;
+  return symbol ? `${formattedPrice} ${symbol}` : formattedPrice;
 }
 
 function getNextgenCollection(
@@ -152,12 +156,21 @@ function getNextgenCollection(
 
 function getCollectionLabel(
   event: ApiNftActivityEvent,
-  collection?: NextGenCollection
+  collection: NextGenCollection | undefined,
+  locale: ReturnType<typeof useBrowserLocale>
 ): string {
-  if (isMemesContract(event.contract)) return "The Memes";
-  if (isMemeLabContract(event.contract)) return "Meme Lab";
-  if (isGradientsContract(event.contract)) return "6529 Gradient";
-  if (isNextgenContract(event.contract)) return collection?.name ?? "NextGen";
+  if (isMemesContract(event.contract)) {
+    return t(locale, "nftActivity.collections.memes");
+  }
+  if (isMemeLabContract(event.contract)) {
+    return t(locale, "nftActivity.collections.memeLab");
+  }
+  if (isGradientsContract(event.contract)) {
+    return t(locale, "nftActivity.collections.gradients");
+  }
+  if (isNextgenContract(event.contract)) {
+    return collection?.name ?? t(locale, "nftActivity.collections.nextgen");
+  }
   return event.collection_slug ?? event.contract;
 }
 
@@ -178,12 +191,13 @@ function getCollectionHref(
 
 function getTokenHref(event: ApiNftActivityEvent): string | undefined {
   if (event.token_id === null) return undefined;
-  if (isMemesContract(event.contract)) return `/the-memes/${event.token_id}`;
-  if (isMemeLabContract(event.contract)) return `/meme-lab/${event.token_id}`;
+  const encodedTokenId = encodeURIComponent(event.token_id);
+  if (isMemesContract(event.contract)) return `/the-memes/${encodedTokenId}`;
+  if (isMemeLabContract(event.contract)) return `/meme-lab/${encodedTokenId}`;
   if (isGradientsContract(event.contract))
-    return `/6529-gradient/${event.token_id}`;
+    return `/6529-gradient/${encodedTokenId}`;
   if (isNextgenContract(event.contract)) {
-    return `/nextgen/token/${event.token_id}/provenance`;
+    return `/nextgen/token/${encodedTokenId}/provenance`;
   }
   return undefined;
 }
@@ -209,11 +223,22 @@ function getTokenDisplayId(event: ApiNftActivityEvent): string | null {
 function WalletIdentity({
   wallet,
   display,
+  locale,
 }: {
   readonly wallet: string | null;
   readonly display?: string | null | undefined;
+  readonly locale: ReturnType<typeof useBrowserLocale>;
 }) {
-  if (!wallet) return <span aria-hidden="true">—</span>;
+  if (!wallet) {
+    return (
+      <>
+        <span aria-hidden="true">—</span>
+        <span className="tw-sr-only">
+          {t(locale, "nftActivity.notAvailable")}
+        </span>
+      </>
+    );
+  }
   if (!ADDRESS_PATTERN.test(wallet)) return <span>{wallet}</span>;
   return (
     <Address
@@ -240,7 +265,7 @@ function EventItem({
   const nextgenCollection = isNextgen
     ? getNextgenCollection(event, nextgenCollections)
     : undefined;
-  const collectionLabel = getCollectionLabel(event, nextgenCollection);
+  const collectionLabel = getCollectionLabel(event, nextgenCollection, locale);
   const itemHref =
     getTokenHref(event) ?? getCollectionHref(event, nextgenCollection);
   const tokenDisplayId = getTokenDisplayId(event);
@@ -324,13 +349,19 @@ function EventRow({
 }) {
   const action = getAction(event);
   const actionKey = ACTION_KEYS[action];
-  const actionLabel = actionKey ? t(locale, actionKey) : displayAction(action);
+  const actionLabel = actionKey
+    ? t(locale, actionKey)
+    : t(locale, "nftActivity.actions.unknown", { action });
   const evidenceLabel = getEvidenceLabel(event.evidence, locale);
-  const totalPrice = formatTotalPrice(event);
+  const totalPrice = formatTotalPrice(event, locale);
   const occurredAt = formatDate(locale, event.occurred_at, {
     dateStyle: "medium",
     timeStyle: "short",
   });
+  const occurredAtDate = new Date(event.occurred_at);
+  const occurredAtDateTime = Number.isNaN(occurredAtDate.getTime())
+    ? undefined
+    : occurredAtDate.toISOString();
   const fromDisplay = event.transaction_details?.from_display;
   const toDisplay = event.transaction_details?.to_display;
   return (
@@ -354,19 +385,36 @@ function EventRow({
         />
       </td>
       <td className="tw-px-3 tw-py-3 tw-align-top tw-text-sm tw-text-iron-200">
-        <WalletIdentity wallet={event.maker} display={fromDisplay} />
+        <WalletIdentity
+          wallet={event.maker}
+          display={fromDisplay}
+          locale={locale}
+        />
       </td>
       <td className="tw-px-3 tw-py-3 tw-align-top tw-text-sm tw-text-iron-200">
-        <WalletIdentity wallet={event.taker} display={toDisplay} />
+        <WalletIdentity
+          wallet={event.taker}
+          display={toDisplay}
+          locale={locale}
+        />
       </td>
       <td className="tw-whitespace-nowrap tw-px-3 tw-py-3 tw-align-top tw-font-medium tw-text-iron-100">
-        {totalPrice ?? <span aria-hidden="true">—</span>}
+        {totalPrice ?? (
+          <>
+            <span aria-hidden="true">—</span>
+            <span className="tw-sr-only">
+              {t(locale, "nftActivity.notAvailable")}
+            </span>
+          </>
+        )}
       </td>
       <td className="tw-whitespace-nowrap tw-px-3 tw-py-3 tw-align-top tw-text-sm tw-text-iron-300">
         <div className="tw-flex tw-items-center tw-gap-2">
-          <time dateTime={new Date(event.occurred_at).toISOString()}>
-            {occurredAt}
-          </time>
+          {occurredAtDateTime ? (
+            <time dateTime={occurredAtDateTime}>{occurredAt}</time>
+          ) : (
+            <span>{occurredAt}</span>
+          )}
           {event.transaction_hash && (
             <Link
               href={`https://etherscan.io/tx/${encodeURIComponent(event.transaction_hash)}`}
@@ -394,8 +442,10 @@ export default function NftMarketActivity({
   filter = "all",
   pageSize = 50,
   compact = false,
+  locale: localeOverride,
 }: Readonly<Props>) {
-  const locale = useBrowserLocale();
+  const browserLocale = useBrowserLocale();
+  const locale = localeOverride ?? browserLocale;
   const { nfts, nextgenCollections } = useNFTCollections();
   const query = useInfiniteQuery({
     queryKey: [
@@ -436,121 +486,139 @@ export default function NftMarketActivity({
   }, [query.data?.pages]);
   const historyStartedAt = query.data?.pages[0]?.market_history_started_at;
 
+  const initialError = query.isError && events.length === 0;
+  const isEmpty = !query.isPending && !initialError && events.length === 0;
+  let statusMessage = "";
   if (query.isPending) {
-    return (
-      <p role="status" aria-live="polite" className="tw-py-5 tw-text-iron-400">
-        {t(locale, "nftActivity.loading")}
-      </p>
-    );
-  }
-  if (query.isError && events.length === 0) {
-    return (
-      <div
-        role="alert"
-        className="tw-flex tw-flex-wrap tw-items-center tw-gap-3 tw-py-5 tw-text-error"
-      >
-        <span>{t(locale, "nftActivity.error")}</span>
-        <button
-          type="button"
-          onClick={() => void query.refetch()}
-          className="tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-800 tw-px-3 tw-py-2 tw-font-semibold tw-text-white hover:tw-bg-iron-700 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
-        >
-          {t(locale, "nftActivity.retry")}
-        </button>
-      </div>
-    );
-  }
-  if (events.length === 0) {
-    return (
-      <p role="status" className="tw-py-5 tw-text-iron-400">
-        {t(locale, "nftActivity.empty")}
-      </p>
-    );
+    statusMessage = t(locale, "nftActivity.loading");
+  } else if (initialError) {
+    statusMessage = t(locale, "nftActivity.error");
+  } else if (isEmpty) {
+    statusMessage = t(locale, "nftActivity.empty");
   }
 
   return (
-    <div className={compact ? "tw-min-w-0" : "tw-min-w-0 tw-pt-3"}>
+    <>
       <div
-        role="region"
-        aria-label={t(locale, "nftActivity.scrollRegion")}
-        tabIndex={0}
-        className="tw-overflow-x-auto tw-rounded-lg tw-border tw-border-solid tw-border-white/10 before:tw-content-none after:tw-content-none focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 [&_*]:before:tw-content-none [&_*]:after:tw-content-none"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+        className="tw-sr-only"
       >
-        <table
-          className="tw-w-full tw-min-w-[980px] tw-border-collapse"
-          aria-label={t(locale, "nftActivity.tableLabel")}
-        >
-          <thead className="tw-bg-black/20">
-            <tr className="tw-border-b tw-border-solid tw-border-white/20 tw-text-left tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-400">
-              <th scope="col" className="tw-px-3 tw-py-2">
-                {t(locale, "nftActivity.action")}
-              </th>
-              <th scope="col" className="tw-px-3 tw-py-2">
-                {t(locale, "nftActivity.item")}
-              </th>
-              <th scope="col" className="tw-px-3 tw-py-2">
-                {t(locale, "nftActivity.maker")}
-              </th>
-              <th scope="col" className="tw-px-3 tw-py-2">
-                {t(locale, "nftActivity.recipient")}
-              </th>
-              <th scope="col" className="tw-px-3 tw-py-2">
-                {t(locale, "nftActivity.totalPrice")}
-              </th>
-              <th scope="col" className="tw-px-3 tw-py-2">
-                {t(locale, "nftActivity.date")}
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {events.map((event) => (
-              <EventRow
-                key={event.event_id}
-                event={event}
-                nfts={nfts}
-                nextgenCollections={nextgenCollections}
-                locale={locale}
-              />
-            ))}
-          </tbody>
-        </table>
+        {statusMessage}
       </div>
-      {query.isFetchNextPageError && (
+      {query.isPending && (
+        <p className="tw-py-5 tw-text-iron-400">
+          {t(locale, "nftActivity.loading")}
+        </p>
+      )}
+      {initialError && (
         <div
           role="alert"
-          className="tw-flex tw-flex-wrap tw-items-center tw-justify-center tw-gap-3 tw-py-3 tw-text-error"
+          className="tw-flex tw-flex-wrap tw-items-center tw-gap-3 tw-py-5 tw-text-error"
         >
-          <span>{t(locale, "nftActivity.moreError")}</span>
+          <span>{t(locale, "nftActivity.error")}</span>
           <button
             type="button"
-            onClick={() => void query.fetchNextPage()}
+            onClick={() => void query.refetch()}
             className="tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-800 tw-px-3 tw-py-2 tw-font-semibold tw-text-white hover:tw-bg-iron-700 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
           >
             {t(locale, "nftActivity.retry")}
           </button>
         </div>
       )}
-      {query.hasNextPage && !query.isFetchNextPageError && (
-        <div className="tw-py-3 tw-text-center">
-          <button
-            type="button"
-            disabled={query.isFetchingNextPage}
-            onClick={() => void query.fetchNextPage()}
-            className="tw-min-h-11 tw-rounded-lg tw-border tw-border-solid tw-border-white/20 tw-bg-iron-900 tw-px-4 tw-py-2 tw-font-semibold tw-text-white hover:tw-bg-iron-800 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-wait disabled:tw-opacity-60"
-          >
-            {query.isFetchingNextPage
-              ? t(locale, "nftActivity.loadingMore")
-              : t(locale, "nftActivity.loadMore")}
-          </button>
-        </div>
-      )}
-      {historyStartedAt && (
-        <p className="tw-mb-0 tw-mt-2 tw-text-xs tw-leading-5 tw-text-iron-500">
-          {t(locale, "nftActivity.marketHistory", {
-            date: formatDate(locale, historyStartedAt, { dateStyle: "medium" }),
-          })}
+      {isEmpty && (
+        <p className="tw-py-5 tw-text-iron-400">
+          {t(locale, "nftActivity.empty")}
         </p>
       )}
-    </div>
+      {events.length > 0 && (
+        <div className={compact ? "tw-min-w-0" : "tw-min-w-0 tw-pt-3"}>
+          <div
+            role="region"
+            aria-label={t(locale, "nftActivity.scrollRegion")}
+            tabIndex={0}
+            className="tw-overflow-x-auto tw-rounded-lg tw-border tw-border-solid tw-border-white/10 before:tw-content-none after:tw-content-none focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 [&_*]:before:tw-content-none [&_*]:after:tw-content-none"
+          >
+            <table
+              className="tw-w-full tw-min-w-[980px] tw-border-collapse"
+              aria-label={t(locale, "nftActivity.tableLabel")}
+            >
+              <thead className="tw-bg-black/20">
+                <tr className="tw-border-b tw-border-solid tw-border-white/20 tw-text-left tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-400">
+                  <th scope="col" className="tw-px-3 tw-py-2">
+                    {t(locale, "nftActivity.action")}
+                  </th>
+                  <th scope="col" className="tw-px-3 tw-py-2">
+                    {t(locale, "nftActivity.item")}
+                  </th>
+                  <th scope="col" className="tw-px-3 tw-py-2">
+                    {t(locale, "nftActivity.maker")}
+                  </th>
+                  <th scope="col" className="tw-px-3 tw-py-2">
+                    {t(locale, "nftActivity.recipient")}
+                  </th>
+                  <th scope="col" className="tw-px-3 tw-py-2">
+                    {t(locale, "nftActivity.totalPrice")}
+                  </th>
+                  <th scope="col" className="tw-px-3 tw-py-2">
+                    {t(locale, "nftActivity.date")}
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {events.map((event) => (
+                  <EventRow
+                    key={event.event_id}
+                    event={event}
+                    nfts={nfts}
+                    nextgenCollections={nextgenCollections}
+                    locale={locale}
+                  />
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {query.isFetchNextPageError && (
+            <div
+              role="alert"
+              className="tw-flex tw-flex-wrap tw-items-center tw-justify-center tw-gap-3 tw-py-3 tw-text-error"
+            >
+              <span>{t(locale, "nftActivity.moreError")}</span>
+              <button
+                type="button"
+                onClick={() => void query.fetchNextPage()}
+                className="tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-800 tw-px-3 tw-py-2 tw-font-semibold tw-text-white hover:tw-bg-iron-700 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+              >
+                {t(locale, "nftActivity.retry")}
+              </button>
+            </div>
+          )}
+          {query.hasNextPage && !query.isFetchNextPageError && (
+            <div className="tw-py-3 tw-text-center">
+              <button
+                type="button"
+                disabled={query.isFetchingNextPage}
+                onClick={() => void query.fetchNextPage()}
+                className="tw-min-h-11 tw-rounded-lg tw-border tw-border-solid tw-border-white/20 tw-bg-iron-900 tw-px-4 tw-py-2 tw-font-semibold tw-text-white hover:tw-bg-iron-800 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-wait disabled:tw-opacity-60"
+              >
+                {query.isFetchingNextPage
+                  ? t(locale, "nftActivity.loadingMore")
+                  : t(locale, "nftActivity.loadMore")}
+              </button>
+            </div>
+          )}
+          {historyStartedAt && (
+            <p className="tw-mb-0 tw-mt-2 tw-text-xs tw-leading-5 tw-text-iron-500">
+              {t(locale, "nftActivity.marketHistory", {
+                date: formatDate(locale, historyStartedAt, {
+                  dateStyle: "medium",
+                }),
+              })}
+            </p>
+          )}
+        </div>
+      )}
+    </>
   );
 }

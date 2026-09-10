@@ -137,18 +137,27 @@ jest.mock("@/components/latest-activity/LatestActivityRow", () => ({
 }));
 
 const mockNftMarketActivity = jest.fn(
-  ({ contract, tokenId }: { contract: string; tokenId: string }) => (
+  ({
+    contract,
+    tokenId,
+    locale,
+  }: {
+    contract: string;
+    tokenId: string;
+    locale?: string;
+  }) => (
     <div
       data-testid="nft-market-activity"
       data-contract={contract}
       data-token-id={tokenId}
+      data-locale={locale}
     />
   )
 );
 
 jest.mock("@/components/nft-market-activity/NftMarketActivity", () => ({
   __esModule: true,
-  default: (props: { contract: string; tokenId: string }) =>
+  default: (props: { contract: string; tokenId: string; locale?: string }) =>
     mockNftMarketActivity(props),
 }));
 jest.mock("@/components/nft-market-depth/MarketDepthPanel", () => ({
@@ -566,12 +575,16 @@ describe("MemeLabPageComponent", () => {
     mockSearchParamsWithFocus(MEME_FOCUS.ACTIVITY);
 
     await act(async () => {
-      renderWithQueryClient(<MemeLabPageComponent nftId="1" />);
+      renderWithQueryClient(<MemeLabPageComponent nftId="1" locale="de-DE" />);
     });
 
     expect(await screen.findByTestId("nft-market-activity")).toHaveAttribute(
       "data-token-id",
       "1"
+    );
+    expect(screen.getByTestId("nft-market-activity")).toHaveAttribute(
+      "data-locale",
+      "de-DE"
     );
   });
 

@@ -98,6 +98,38 @@ describe("MarketDepthPanel", () => {
     fetchMock.mockReset();
   });
 
+  it("shows a safe error and does not refetch when only the locale changes", async () => {
+    fetchMock.mockRejectedValue(new Error("private provider diagnostic"));
+    const { rerender } = render(
+      <MarketDepthPanel contract="0x1" tokenId="7" locale="en-US" />
+    );
+    expect(
+      await screen.findByText("Market depth could not be loaded.")
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText("private provider diagnostic")
+    ).not.toBeInTheDocument();
+    rerender(<MarketDepthPanel contract="0x1" tokenId="7" locale="fr-FR" />);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps captured depth visible when another page fails without exposing diagnostics", async () => {
+    fetchMock
+      .mockResolvedValueOnce(depth({ next: "cursor-1" }))
+      .mockRejectedValueOnce(new Error("private order diagnostic"));
+    render(<MarketDepthPanel contract="0x1" tokenId="7" locale="en-US" />);
+    await screen.findByText("Best ask · ETH");
+    fireEvent.click(screen.getByText("Order details (1)"));
+    fireEvent.click(screen.getByRole("button", { name: "Load more orders" }));
+    expect(
+      await screen.findByText("More order details could not be loaded.")
+    ).toBeInTheDocument();
+    expect(screen.getByText("Best ask · ETH")).toBeInTheDocument();
+    expect(
+      screen.queryByText("private order diagnostic")
+    ).not.toBeInTheDocument();
+  });
+
   it("keeps currencies separate and labels criteria applicability", async () => {
     fetchMock.mockResolvedValue(depth());
 

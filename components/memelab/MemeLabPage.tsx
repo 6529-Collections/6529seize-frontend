@@ -531,6 +531,7 @@ export default function MemeLabPageComponent({
             filter={getNftActivityFilter(activityTypeFilter)}
             pageSize={ACTIVITY_PAGE_SIZE}
             compact
+            locale={locale}
           />
         </section>
       </section>

@@ -104,6 +104,7 @@ describe("NftMarketActivity", () => {
     expect(
       screen.getByRole("columnheader", { name: "Total" })
     ).toBeInTheDocument();
+    expect(screen.getAllByText("Not available")).toHaveLength(2);
     expect(
       screen.queryByRole("link", { name: /Etherscan/i })
     ).not.toBeInTheDocument();
@@ -161,6 +162,108 @@ describe("NftMarketActivity", () => {
       "href",
       `https://etherscan.io/tx/0x${"a".repeat(64)}`
     );
+  });
+
+  it("localizes unknown actions and keeps exact prices and invalid dates safe", async () => {
+    mockFetch.mockResolvedValueOnce({
+      data: [
+        marketEvent({
+          event_id: "provider-action-1",
+          action: "provider_custom",
+          occurred_at: "not-a-date",
+          price: "12345678901234567890.000000000000000001",
+          currency: {
+            address: "0x3333333333333333333333333333333333333333",
+            symbol: "ETH",
+            decimals: 18,
+          },
+        }),
+      ],
+      next: null,
+      market_history_started_at: null,
+      notes: [],
+    });
+
+    renderFeed({ locale: "en-US" });
+
+    expect(
+      await screen.findByText("Unknown action (provider_custom)")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("12,345,678,901,234,567,890.000000000000000001 ETH")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("row", { name: /Unknown action/ }).querySelector("time")
+    ).toBeNull();
+  });
+
+  it("uses an explicitly supplied route locale for activity values", async () => {
+    mockFetch.mockResolvedValueOnce({
+      data: [
+        marketEvent({
+          event_id: "localized-price-1",
+          price: "1234.5",
+          currency: {
+            address: "0x3333333333333333333333333333333333333333",
+            symbol: "ETH",
+            decimals: 18,
+          },
+        }),
+      ],
+      next: null,
+      market_history_started_at: null,
+      notes: [],
+    });
+
+    renderFeed({ locale: "de-DE" });
+
+    expect(await screen.findByText("1.234,5 ETH")).toBeInTheDocument();
+  });
+
+  it("keeps the full NextGen on-chain id in the provenance link", async () => {
+    const fullTokenId = "10000000007";
+    mockFetch.mockResolvedValueOnce({
+      data: [
+        marketEvent({
+          event_id: "nextgen-token-1",
+          contract: NEXTGEN_CONTRACT,
+          token_id: fullTokenId,
+        }),
+      ],
+      next: null,
+      market_history_started_at: null,
+      notes: [],
+    });
+
+    renderFeed({ locale: "en-US" });
+
+    expect(
+      await screen.findByRole("link", { name: "NextGen #7" })
+    ).toHaveAttribute("href", `/nextgen/token/${fullTokenId}/provenance`);
+  });
+
+  it("keeps a persistent live status node across loading and empty states", async () => {
+    let resolvePending: ((page: unknown) => void) | undefined;
+    const pending = new Promise<unknown>((resolve) => {
+      resolvePending = resolve;
+    });
+    mockFetch.mockReturnValueOnce(pending as Promise<never>);
+
+    renderFeed({ locale: "en-US" });
+    const status = screen.getByRole("status");
+    expect(status).toHaveTextContent("Loading NFT activity…");
+
+    resolvePending?.({
+      data: [],
+      next: null,
+      market_history_started_at: null,
+      notes: [],
+    });
+    expect(await screen.findAllByText("No NFT activity found.")).toHaveLength(
+      2
+    );
+    expect(status).toBeInTheDocument();
+    expect(status).toHaveTextContent("No NFT activity found.");
   });
 
   it("distinguishes airdrops and elapsed expirations", async () => {
