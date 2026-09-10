@@ -26,11 +26,14 @@ import {
 } from "./session-refresh-rate-limit.utils";
 import {
   createAbortError,
+  createSessionRefreshEntry,
   getSessionRefreshKey,
   isAbortError,
+  waitForSessionRefreshRetryCooldown,
   withCrossTabWebSessionRefreshLock,
   withSessionRefreshAbort,
   type AuthSessionClientType,
+  type SessionRefreshEntry,
 } from "./session-refresh-coordination.utils";
 
 type RefreshTokenSessionClientType = Exclude<AuthSessionClientType, "web">;
@@ -67,11 +70,8 @@ type SessionRefreshFailureCooldown = {
   readonly type: SessionRefreshFailureCooldownType;
   readonly expiresAtMs: number;
 };
-type SessionRefreshInFlight = {
-  readonly controller: AbortController;
-  readonly promise: Promise<SessionRefreshResponse | null>;
-  activeConsumers: number;
-};
+type SessionRefreshInFlight =
+  SessionRefreshEntry<SessionRefreshResponse | null>;
 
 interface CreateConnectionShareResponse {
   readonly connection_share_code: string;
@@ -106,7 +106,6 @@ interface NativeConnectionShareSourceProof {
 }
 
 const sessionRefreshInFlight = new Map<string, SessionRefreshInFlight>();
-const SESSION_REFRESH_TIMEOUT_MS = 30_000;
 const sessionRefreshFailureCooldowns = new Map<
   string,
   SessionRefreshFailureCooldown
@@ -157,42 +156,6 @@ function clearSessionRefreshFailureForSession(
       clientType: response.client_type,
     })
   );
-}
-
-async function waitForSessionRefreshRetryCooldown({
-  cooldown,
-  abortSignal,
-}: {
-  readonly cooldown: SessionRefreshFailureCooldown;
-  readonly abortSignal?: AbortSignal | undefined;
-}): Promise<void> {
-  const delayMs = Math.max(0, cooldown.expiresAtMs - Date.now());
-  if (delayMs === 0) {
-    return;
-  }
-  if (abortSignal?.aborted) {
-    throw createAbortError();
-  }
-
-  await new Promise<void>((resolve, reject) => {
-    let timeoutId: ReturnType<typeof setTimeout> | undefined = undefined;
-    const cleanup = () => {
-      if (timeoutId !== undefined) {
-        clearTimeout(timeoutId);
-      }
-      abortSignal?.removeEventListener("abort", onAbort);
-    };
-    const onAbort = () => {
-      cleanup();
-      reject(createAbortError());
-    };
-
-    timeoutId = setTimeout(() => {
-      cleanup();
-      resolve();
-    }, delayMs);
-    abortSignal?.addEventListener("abort", onAbort, { once: true });
-  });
 }
 
 function settleSessionRefreshConsumer(
@@ -455,46 +418,6 @@ async function executeSessionRefreshRequest<T extends SessionRefreshResponse>({
   }
 }
 
-function createSessionRefreshEntry({
-  address,
-  clientType,
-  refreshKey,
-}: {
-  readonly address: string;
-  readonly clientType: AuthSessionClientType;
-  readonly refreshKey: string;
-}): SessionRefreshInFlight {
-  // Background consumers must not keep every later action on a stalled request.
-  const controller = new AbortController();
-  let timeoutId: ReturnType<typeof globalThis.setTimeout> | undefined;
-  const timeout = new Promise<never>((_resolve, reject) => {
-    timeoutId = globalThis.setTimeout(() => {
-      const error = new Error("Session refresh timed out. Please try again.");
-      error.name = "TimeoutError";
-      reject(error);
-      controller.abort();
-    }, SESSION_REFRESH_TIMEOUT_MS);
-  });
-  const request = withSessionRefreshAbort({
-    abortSignal: controller.signal,
-    task: () =>
-      executeSessionRefreshV2({
-        address,
-        abortSignal: controller.signal,
-        clientType,
-        refreshKey,
-      }),
-  });
-
-  return {
-    controller,
-    activeConsumers: 1,
-    promise: Promise.race([request, timeout]).finally(() => {
-      globalThis.clearTimeout(timeoutId);
-    }),
-  };
-}
-
 export async function refreshSessionV2({
   address,
   abortSignal,
@@ -561,11 +484,14 @@ export async function refreshSessionV2({
     });
   }
 
-  const entry = createSessionRefreshEntry({
-    address,
-    clientType,
-    refreshKey: key,
-  });
+  const entry = createSessionRefreshEntry((signal) =>
+    executeSessionRefreshV2({
+      address,
+      abortSignal: signal,
+      clientType,
+      refreshKey: key,
+    })
+  );
   sessionRefreshInFlight.set(key, entry);
 
   void (async () => {
