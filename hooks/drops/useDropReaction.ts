@@ -538,47 +538,33 @@ export function useDropReaction(
         recordReaction(reactionCode);
       }
 
-      let succeeded = false;
-
-      try {
-        await enqueueDropReactionRequest(dropId, async (signal) => {
-          if (!owner.isCurrent()) return;
-          await sendReactionRequest({
-            endpoint,
-            isRemoving,
-            mutation,
-            reactionCode,
-            signal,
+      const handleTimeout = async () => {
+        const reconciliation = await reconcileTimeout(
+          mutation,
+          intendedReaction,
+          isCurrent
+        );
+        if (!isCurrent()) return;
+        clearRollbackForMutation(rollbackRef, mutation.mutationId);
+        if (reconciliation.outcome === "confirmed") {
+          if (owner.isMounted()) runReactionSuccessCallback(onSuccess);
+        } else if (owner.isVisible()) {
+          setToast({
+            title: t(locale, "drops.reactions.unconfirmed"),
+            type: "warning",
+            autoClose: 8_000,
           });
-        });
-        const result = recordReactionRequestSucceeded(mutation);
-        if (result.isLatestMutation && isCurrent()) {
-          clearRollbackForMutation(rollbackRef, mutation.mutationId);
-          succeeded = true;
         }
-      } catch (error) {
+      };
+
+      const handleFailure = async (error: unknown) => {
         const result = recordReactionRequestFailed(mutation, error);
         if (!result.isLatestMutation || !isCurrent()) {
           return;
         }
 
         if (isDropReactionRequestTimeout(error)) {
-          const reconciliation = await reconcileTimeout(
-            mutation,
-            intendedReaction,
-            isCurrent
-          );
-          if (!isCurrent()) return;
-          clearRollbackForMutation(rollbackRef, mutation.mutationId);
-          if (reconciliation.outcome === "confirmed") {
-            if (owner.isMounted()) runReactionSuccessCallback(onSuccess);
-          } else if (owner.isVisible()) {
-            setToast({
-              title: t(locale, "drops.reactions.unconfirmed"),
-              type: "warning",
-              autoClose: 8_000,
-            });
-          }
+          await handleTimeout();
           return;
         }
 
@@ -613,6 +599,29 @@ export function useDropReaction(
         }
         await refreshAfterFailure(isCurrent);
         await authRecovery;
+      };
+
+      let succeeded = false;
+
+      try {
+        await enqueueDropReactionRequest(dropId, async (signal) => {
+          if (!owner.isCurrent()) return;
+          await sendReactionRequest({
+            endpoint,
+            isRemoving,
+            mutation,
+            reactionCode,
+            signal,
+          });
+        });
+        const result = recordReactionRequestSucceeded(mutation);
+        if (result.isLatestMutation && isCurrent()) {
+          clearRollbackForMutation(rollbackRef, mutation.mutationId);
+          succeeded = true;
+        }
+      } catch (error) {
+        await handleFailure(error);
+        return;
       }
 
       if (succeeded && owner.isMounted() && isCurrent()) {

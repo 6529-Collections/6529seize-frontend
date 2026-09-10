@@ -11,7 +11,8 @@ const canonical = (reaction: string | null) =>
   ({
     id: "drop-1",
     context_profile_context: { reaction },
-  }) as ApiDrop;
+    reactions: [],
+  }) as unknown as ApiDrop;
 const reconcile = (intendedReaction: string | null, isCurrent = () => true) =>
   reconcileDropReaction({ dropId: "drop-1", intendedReaction, isCurrent });
 
@@ -88,6 +89,22 @@ describe("reconcileDropReaction", () => {
       drop: null,
     });
   });
+
+  it.each([undefined, null, {}])(
+    "does not apply a partial drop with invalid reactions %s",
+    async (reactions) => {
+      fetchDrop.mockResolvedValue({
+        ...canonical(":smile:"),
+        reactions,
+      } as unknown as ApiDrop);
+      const result = reconcile(":smile:");
+      await jest.advanceTimersByTimeAsync(3_000);
+      await expect(result).resolves.toEqual({
+        outcome: "unconfirmed",
+        drop: null,
+      });
+    }
+  );
 
   it("discards an in-flight read once a newer intent owns the drop", async () => {
     const late = createDeferredPromise<ApiDrop>();

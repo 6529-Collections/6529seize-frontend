@@ -1,4 +1,5 @@
 import { useDropReaction } from "@/hooks/drops/useDropReaction";
+import { COMMUNITY_CURATIONS_DROPS_QUERY_KEY } from "@/hooks/useCommunityCurationsDrops";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import { ApiDropType } from "@/generated/models/ApiDropType";
@@ -25,6 +26,7 @@ const applyOptimisticDropUpdateMock = jest.fn(() => ({
 }));
 const mockQueryCacheFindAll = jest.fn(() => []);
 const mockSetQueryData = jest.fn();
+const mockSetQueriesData = jest.fn();
 const mockGetEligibility = jest.fn();
 const mockUpdateEligibility = jest.fn();
 const requestAuthMock = jest.fn(async () => ({ success: true }));
@@ -70,7 +72,7 @@ jest.mock("@tanstack/react-query", () => ({
   useQueryClient: jest.fn(() => ({
     getQueryCache: jest.fn(() => ({ findAll: mockQueryCacheFindAll })),
     setQueryData: mockSetQueryData,
-    setQueriesData: jest.fn(),
+    setQueriesData: mockSetQueriesData,
   })),
 }));
 
@@ -208,6 +210,78 @@ const createNotificationQuery = ({
 };
 
 describe("useDropReaction", () => {
+  it.each([null, ":smile:"])(
+    "reconciles community-curation cards with canonical reaction %s after a timeout",
+    async (canonicalReaction) => {
+      jest.useFakeTimers();
+      try {
+        const otherDrop = { ...mockDrop, id: "other-drop" };
+        const query = {
+          queryKey: [COMMUNITY_CURATIONS_DROPS_QUERY_KEY, { limit: 20 }],
+          state: {
+            data: {
+              pages: [{ data: [mockDrop, otherDrop], next: true }],
+              pageParams: [1],
+            },
+          },
+        };
+        (mockQueryCacheFindAll as jest.Mock).mockImplementation(
+          ({ predicate }: { predicate: (entry: typeof query) => boolean }) =>
+            [query].filter(predicate)
+        );
+        mockSetQueryData.mockImplementation(
+          (_key, data: typeof query.state.data) => {
+            query.state.data = data;
+          }
+        );
+        mockSetQueriesData.mockImplementation(
+          (
+            { queryKey }: { queryKey: readonly unknown[] },
+            update: (data: typeof query.state.data) => typeof query.state.data
+          ) => {
+            if (queryKey[0] === COMMUNITY_CURATIONS_DROPS_QUERY_KEY)
+              query.state.data = update(query.state.data);
+          }
+        );
+        const canonicalDrop = {
+          ...mockDrop,
+          context_profile_context: {
+            ...mockDrop.context_profile_context,
+            reaction: canonicalReaction,
+          },
+          reactions: [{ reaction: ":wave:", count: 4, profiles: [] }],
+        };
+        (fetchDropByIdBatched as jest.Mock).mockResolvedValue(canonicalDrop);
+        jest
+          .mocked(commonApi.commonApiPost)
+          .mockRejectedValueOnce(new DropReactionRequestTimeoutError());
+        const { result } = renderHook(() =>
+          useDropReaction(mockDrop, { updateCurationCache: true })
+        );
+        await act(async () => {
+          const pending = result.current.react(":smile:");
+          expect(
+            query.state.data.pages[0]!.data[0]!.context_profile_context
+              ?.reaction
+          ).toBe(":smile:");
+          await jest.advanceTimersByTimeAsync(3_000);
+          await pending;
+        });
+        expect(
+          query.state.data.pages[0]!.data[0]!.context_profile_context?.reaction
+        ).toBe(canonicalReaction);
+        expect(query.state.data.pages[0]!.data[0]!.reactions).toEqual(
+          canonicalDrop.reactions
+        );
+        expect(query.state.data.pages[0]!.data[1]).toBe(otherDrop);
+        expect(query.state.data.pages[0]!.next).toBe(true);
+        expect(query.state.data.pageParams).toEqual([1]);
+        expect(rollbackMock).not.toHaveBeenCalled();
+      } finally {
+        jest.useRealTimers();
+      }
+    }
+  );
   it.each([
     { previous: null, intended: ":smile:" },
     { previous: ":wave:", intended: ":smile:" },
@@ -372,6 +446,7 @@ describe("useDropReaction", () => {
     );
     requestAuthMock.mockResolvedValue({ success: true });
     mockSetQueryData.mockReset();
+    mockSetQueriesData.mockReset();
     mockGetEligibility.mockReturnValue(null);
     mockQueryCacheFindAll.mockReturnValue([]);
     applyOptimisticDropUpdateMock.mockReset();

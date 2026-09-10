@@ -207,6 +207,47 @@ const createDeferred = <T,>() => {
 };
 
 describe("WaveDropReactions", () => {
+  it("keeps a stable chip synchronized with externally updated count and selection", async () => {
+    mockUseEmoji.mockReturnValue(
+      createEmojiContextValue([
+        {
+          category: "people",
+          emojis: [{ id: "gm", skins: [{ src: "/gm.png" }] }],
+        },
+      ])
+    );
+    const drop = createMockDrop({
+      reactions: [
+        {
+          reaction: ":gm:",
+          count: 1,
+          profiles: [{ id: "other", handle: "other" }],
+        },
+      ],
+      context_profile_context: { reaction: null },
+    }) as unknown as ApiDrop;
+    const { rerender } = render(<WaveDropReactions drop={drop} />);
+    const originalButton = screen.getAllByRole("button")[0]!;
+    const updatedReaction = { ...drop.reactions[0]!, count: 3 };
+    rerender(
+      <WaveDropReactions
+        drop={{
+          ...drop,
+          context_profile_context: {
+            ...drop.context_profile_context!,
+            reaction: ":gm:",
+          },
+          reactions: [updatedReaction],
+        }}
+      />
+    );
+    await waitFor(() => expect(originalButton).toHaveTextContent("3"));
+    expect(originalButton).toHaveClass("tw-border-primary-500");
+    expect(screen.getAllByRole("button")[0]).toBe(originalButton);
+    rerender(<WaveDropReactions drop={drop} />);
+    await waitFor(() => expect(originalButton).toHaveTextContent("1"));
+    expect(originalButton).not.toHaveClass("tw-border-primary-500");
+  });
   it.each([null, ":wave:", ":gm:"])(
     "reconciles a saved chip reaction after timeout (previous %s)",
     async (previous) => {

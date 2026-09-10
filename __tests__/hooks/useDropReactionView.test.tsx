@@ -1,6 +1,7 @@
 import { useAuth } from "@/components/auth/Auth";
 import { useDropReactionView } from "@/hooks/drops/useDropReactionView";
 import { act, render, renderHook } from "@testing-library/react";
+import { StrictMode, type PropsWithChildren } from "react";
 
 jest.mock("@/components/auth/Auth", () => ({ useAuth: jest.fn() }));
 
@@ -13,6 +14,27 @@ const auth = (id: string, proxy: string | null = null) =>
 
 describe("reaction feedback visibility", () => {
   beforeEach(() => mockUseAuth.mockReturnValue(auth("profile-1")));
+
+  it("keeps mounted feedback visible through StrictMode's effect replay", async () => {
+    const { result, unmount } = renderHook(
+      () => useDropReactionView("strict-drop"),
+      {
+        wrapper: ({ children }: PropsWithChildren) => (
+          <StrictMode>{children}</StrictMode>
+        ),
+      }
+    );
+    const isVisible = result.current();
+    await act(async () => {
+      await Promise.resolve();
+    });
+    expect(isVisible()).toBe(true);
+    unmount();
+    await act(async () => {
+      await Promise.resolve();
+    });
+    expect(isVisible()).toBe(false);
+  });
 
   it("keeps pending feedback attached to a drop remounted in the same commit", async () => {
     let captureView: ReturnType<typeof useDropReactionView> = () => () => false;
@@ -38,6 +60,41 @@ describe("reaction feedback visibility", () => {
     });
     renderHook(() => useDropReactionView("drop-return"));
     expect(isVisible()).toBe(false);
+  });
+
+  it("keeps the view active while independently mounted consumers remain", async () => {
+    const parent = renderHook(() => useDropReactionView("shared-drop"));
+    const chip = renderHook(() => useDropReactionView("shared-drop"));
+    const isVisible = chip.result.current();
+    chip.unmount();
+    await act(async () => {
+      await Promise.resolve();
+    });
+    expect(isVisible()).toBe(true);
+    parent.unmount();
+    await act(async () => {
+      await Promise.resolve();
+    });
+    expect(isVisible()).toBe(false);
+  });
+
+  it("preserves the old drop's remaining consumer when another changes keys", async () => {
+    const first = renderHook(({ dropId }) => useDropReactionView(dropId), {
+      initialProps: { dropId: "old-shared-drop" },
+    });
+    const second = renderHook(() => useDropReactionView("old-shared-drop"));
+    const oldIsVisible = second.result.current();
+    first.rerender({ dropId: "new-shared-drop" });
+    await act(async () => {
+      await Promise.resolve();
+    });
+    expect(oldIsVisible()).toBe(true);
+    second.unmount();
+    await act(async () => {
+      await Promise.resolve();
+    });
+    expect(oldIsVisible()).toBe(false);
+    expect(first.result.current()()).toBe(true);
   });
 
   it.each(["profile", "proxy", "drop"])(

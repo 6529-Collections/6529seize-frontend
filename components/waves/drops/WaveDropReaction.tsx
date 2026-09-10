@@ -547,6 +547,7 @@ function WaveDropReaction({
 
     const authStateFingerprint = getDropReactionAuthStateFingerprint();
     const owner = captureOwner(authStateFingerprint);
+    const previousSelection = selected;
     const intendedReaction = selected ? null : reaction.reaction;
     const endpoint = `drops/${drop.id}/reaction`;
     const method = selected ? "DELETE" : "POST";
@@ -581,6 +582,67 @@ function WaveDropReaction({
       recordReaction(reaction.reaction);
     }
 
+    const handleTimeout = async () => {
+      const reconciliation = await reconcileTimeout(
+        mutation,
+        intendedReaction,
+        isCurrent
+      );
+      if (!isCurrent()) return;
+      clearRollbackForMutation(rollbackRef, mutation.mutationId);
+      if (owner.isMounted() && reconciliation.drop) {
+        setSelected(
+          reconciliation.drop.context_profile_context?.reaction ===
+            reaction.reaction
+        );
+        const canonicalReaction = reconciliation.drop.reactions.find(
+          (entry) => entry.reaction === reaction.reaction
+        );
+        setTotal(canonicalReaction ? getReactionCount(canonicalReaction) : 0);
+      }
+      if (reconciliation.outcome === "unconfirmed" && owner.isVisible()) {
+        setToast({
+          title: t(locale, "drops.reactions.unconfirmed"),
+          type: "warning",
+          autoClose: 8_000,
+        });
+      }
+    };
+
+    const handleFailure = async (error: unknown) => {
+      const result = recordReactionRequestFailed(mutation, error);
+      if (!result.isLatestMutation || !isCurrent()) {
+        return;
+      }
+
+      if (isDropReactionRequestTimeout(error)) {
+        await handleTimeout();
+        return;
+      }
+
+      const authRecovery = recoverFromUnauthorized(error, authStateFingerprint);
+
+      updateEligibilityAfterExpectedDisabledReaction(error, method);
+
+      const msg = getReactionErrorMessage(
+        error,
+        selected ? "Error removing reaction" : "Error adding reaction",
+        locale
+      );
+      if (owner.isVisible()) {
+        setToast({ message: msg, type: "error" });
+      }
+      if (owner.isMounted()) {
+        setSelected(previousSelection);
+        setTotal((n) => Math.max(0, n + (selected ? 1 : -1)));
+      }
+      if (runRollbackForMutation(rollbackRef, mutation.mutationId)) {
+        recordReactionRollbackApplied(mutation);
+      }
+      await refreshAfterFailure(isCurrent);
+      await authRecovery;
+    };
+
     try {
       await enqueueDropReactionRequest(drop.id, async (signal) => {
         if (!owner.isCurrent()) return;
@@ -614,60 +676,7 @@ function WaveDropReaction({
         clearRollbackForMutation(rollbackRef, mutation.mutationId);
       }
     } catch (error) {
-      const result = recordReactionRequestFailed(mutation, error);
-      if (!result.isLatestMutation || !isCurrent()) {
-        return;
-      }
-
-      if (isDropReactionRequestTimeout(error)) {
-        const reconciliation = await reconcileTimeout(
-          mutation,
-          intendedReaction,
-          isCurrent
-        );
-        if (!isCurrent()) return;
-        clearRollbackForMutation(rollbackRef, mutation.mutationId);
-        if (owner.isMounted() && reconciliation.drop) {
-          setSelected(
-            reconciliation.drop.context_profile_context?.reaction ===
-              reaction.reaction
-          );
-          const canonicalReaction = reconciliation.drop.reactions.find(
-            (entry) => entry.reaction === reaction.reaction
-          );
-          setTotal(canonicalReaction ? getReactionCount(canonicalReaction) : 0);
-        }
-        if (reconciliation.outcome === "unconfirmed" && owner.isVisible()) {
-          setToast({
-            title: t(locale, "drops.reactions.unconfirmed"),
-            type: "warning",
-            autoClose: 8_000,
-          });
-        }
-        return;
-      }
-
-      const authRecovery = recoverFromUnauthorized(error, authStateFingerprint);
-
-      updateEligibilityAfterExpectedDisabledReaction(error, method);
-
-      const msg = getReactionErrorMessage(
-        error,
-        selected ? "Error removing reaction" : "Error adding reaction",
-        locale
-      );
-      if (owner.isVisible()) {
-        setToast({ message: msg, type: "error" });
-      }
-      if (owner.isMounted()) {
-        setSelected(selected);
-        setTotal((n) => Math.max(0, n + (selected ? 1 : -1)));
-      }
-      if (runRollbackForMutation(rollbackRef, mutation.mutationId)) {
-        recordReactionRollbackApplied(mutation);
-      }
-      await refreshAfterFailure(isCurrent);
-      await authRecovery;
+      await handleFailure(error);
     }
   }, [
     applyOptimisticReactionChange,

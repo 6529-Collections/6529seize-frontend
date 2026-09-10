@@ -11,15 +11,39 @@ import {
 import { DropSize, type Drop } from "@/helpers/waves/drop.helpers";
 import { getDropReactionAuthStateFingerprint } from "@/hooks/drops/useDropReactionAuthRecovery";
 import { useDropReactionView } from "@/hooks/drops/useDropReactionView";
+import { COMMUNITY_CURATIONS_DROPS_QUERY_KEY } from "@/hooks/useCommunityCurationsDrops";
 import {
   isReactionMutationLatest,
   recordReactionTimeoutReconciled,
   type beginReactionMutation,
 } from "@/utils/monitoring/dropReactionMonitoring";
-import type { QueryClient } from "@tanstack/react-query";
+import type { InfiniteData, QueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useRef } from "react";
 
 type ReactionMutation = ReturnType<typeof beginReactionMutation>;
+type CurationCacheData = InfiniteData<{ readonly data: readonly ApiDrop[] }>;
+
+const reconcileCurationReactions = (
+  data: CurationCacheData | undefined,
+  canonical: ApiDrop
+): CurationCacheData | undefined => {
+  if (!data) return data;
+  return {
+    ...data,
+    pages: data.pages.map((page) => ({
+      ...page,
+      data: page.data.map((drop) =>
+        drop.id === canonical.id
+          ? {
+              ...drop,
+              reactions: canonical.reactions,
+              context_profile_context: canonical.context_profile_context,
+            }
+          : drop
+      ),
+    })),
+  };
+};
 
 export const useDropReactionRecovery = ({
   activeProfileProxy,
@@ -72,6 +96,10 @@ export const useDropReactionRecovery = ({
     (apiDrop: ApiDrop) => {
       updateDropInCachedDrops(queryClient, apiDrop);
       updateNotificationQueriesWithCanonicalDrop(apiDrop);
+      queryClient.setQueriesData<CurationCacheData>(
+        { queryKey: [COMMUNITY_CURATIONS_DROPS_QUERY_KEY] },
+        (data) => reconcileCurationReactions(data, apiDrop)
+      );
       applyOptimisticDropUpdate({
         waveId,
         dropId,

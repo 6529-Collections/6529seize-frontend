@@ -1,7 +1,7 @@
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { fetchDropByIdBatched } from "@/services/api/drop-api";
 
-export type ReactionReconciliation = {
+type ReactionReconciliation = {
   readonly outcome: "confirmed" | "unconfirmed" | "superseded";
   readonly drop: ApiDrop | null;
 };
@@ -19,12 +19,14 @@ export const readReactionDrop = async (
 ): Promise<ApiDrop | null> => {
   let timeout: ReturnType<typeof globalThis.setTimeout> | undefined;
   try {
-    return await Promise.race([
+    const drop = await Promise.race([
       fetchDropByIdBatched(dropId),
       new Promise<null>((resolve) => {
         timeout = globalThis.setTimeout(() => resolve(null), READ_TIMEOUT_MS);
       }),
     ]);
+    // Do not propagate a partial response into drop caches or chip rendering.
+    return drop && Array.isArray(drop.reactions) ? drop : null;
   } catch {
     return null;
   } finally {

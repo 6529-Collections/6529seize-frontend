@@ -8,6 +8,7 @@ const reactionViews = new Map<string, ReactionView>();
 
 // Stream cache updates can remount a drop, and removing its last reaction
 // unmounts a chip. Feedback belongs to the visible drop/account, not that chip.
+// Consumers have independent lifetimes; each owns one balanced registration.
 export const useDropReactionView = (dropId: string) => {
   const { connectedProfile, activeProfileProxy } = useAuth();
   const key = JSON.stringify([
