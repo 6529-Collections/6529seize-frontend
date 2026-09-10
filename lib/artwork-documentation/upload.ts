@@ -49,7 +49,11 @@ export async function transferDocumentationFile({
     const bytes = file.slice(start, Math.min(start + partSize, file.size));
     if ((await sha256Base64(bytes)) !== received.checksum_sha256)
       throw new DocumentationFileChangedError();
-    completed.set(received.part_number, received);
+    completed.set(received.part_number, {
+      part_number: received.part_number,
+      etag: received.etag,
+      checksum_sha256: received.checksum_sha256,
+    });
     sent += bytes.size;
     onProgress(sent);
   }
