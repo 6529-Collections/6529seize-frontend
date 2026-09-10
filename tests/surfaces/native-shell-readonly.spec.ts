@@ -564,6 +564,11 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
     await expect(page).toHaveURL(/\/about$/);
     expect(await readNotificationHistoryPushCount(page)).toBe(0);
     await expect(bell).not.toHaveAttribute("data-pressed");
+
+    await bell.focus();
+    await page.keyboard.press("Enter");
+    await expect(page).toHaveURL(/\/notifications$/);
+    await expect.poll(() => readNotificationHistoryPushCount(page)).toBe(1);
   });
 
   test("Capacitor app-wallet shell renders the simulated empty wallet state", async ({

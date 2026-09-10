@@ -24,6 +24,8 @@ interface Props {
   readonly fullPrefetch?: boolean;
 }
 
+const POINTER_CLICK_SUPPRESSION_MS = 500;
+
 const getIconSlotClass = ({
   compact,
   variant,
@@ -185,10 +187,7 @@ const NavItemContent = ({
     };
   } | null>(null);
   const recoveryClickInProgressRef = useRef(false);
-  const suppressedClickPointRef = useRef<{
-    readonly x: number;
-    readonly y: number;
-  } | null>(null);
+  const suppressPointerClickUntilRef = useRef(0);
   const pathname = usePathname();
   // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense
   const searchParams = useSearchParams();
@@ -296,19 +295,15 @@ const NavItemContent = ({
   const handleClick = (event: MouseEvent<HTMLAnchorElement>) => {
     if (recoveryClickInProgressRef.current) {
       recoveryClickInProgressRef.current = false;
-    } else {
-      const suppressedClickPoint = suppressedClickPointRef.current;
-      suppressedClickPointRef.current = null;
-      if (
-        suppressedClickPoint !== null &&
-        Math.hypot(
-          event.clientX - suppressedClickPoint.x,
-          event.clientY - suppressedClickPoint.y
-        ) <= 2
-      ) {
-        event.preventDefault();
-        return;
-      }
+    } else if (
+      event.detail > 0 &&
+      Date.now() <= suppressPointerClickUntilRef.current
+    ) {
+      suppressPointerClickUntilRef.current = 0;
+      event.preventDefault();
+      return;
+    } else if (Date.now() > suppressPointerClickUntilRef.current) {
+      suppressPointerClickUntilRef.current = 0;
     }
 
     if (item.kind === "route" && item.name === "Profile" && !address) {
@@ -340,7 +335,7 @@ const NavItemContent = ({
 
   const handlePointerDown = (event: PointerEvent<HTMLAnchorElement>) => {
     if (variant === "floating" && event.isPrimary && event.button === 0) {
-      suppressedClickPointRef.current = null;
+      suppressPointerClickUntilRef.current = 0;
       recoveryClickInProgressRef.current = false;
       const bounds = event.currentTarget.getBoundingClientRect();
       pointerStartRef.current = {
@@ -371,10 +366,8 @@ const NavItemContent = ({
       event.clientY - pointerStart.y
     );
     if (movedByUser > 8) {
-      suppressedClickPointRef.current = {
-        x: event.clientX,
-        y: event.clientY,
-      };
+      suppressPointerClickUntilRef.current =
+        Date.now() + POINTER_CLICK_SUPPRESSION_MS;
       return;
     }
 
@@ -390,13 +383,11 @@ const NavItemContent = ({
     if (!targetMoved) return;
 
     // Complete a stationary tap when the dock moved underneath it. The
-    // programmatic click is marked so the browser's follow-up native click at
-    // the same coordinates can be ignored without racing a timer.
+    // programmatic click is marked so the browser's pointer-generated
+    // follow-up click can be ignored without racing a timer.
     event.preventDefault();
-    suppressedClickPointRef.current = {
-      x: event.clientX,
-      y: event.clientY,
-    };
+    suppressPointerClickUntilRef.current =
+      Date.now() + POINTER_CLICK_SUPPRESSION_MS;
     recoveryClickInProgressRef.current = true;
     try {
       link.click();
@@ -407,10 +398,12 @@ const NavItemContent = ({
   const handlePointerCancel = () => {
     pointerStartRef.current = null;
     recoveryClickInProgressRef.current = false;
-    suppressedClickPointRef.current = null;
     setPressed(false);
   };
   const clearPressed = () => setPressed(false);
+  const clearPointerClickSuppression = () => {
+    suppressPointerClickUntilRef.current = 0;
+  };
 
   return (
     <Link
@@ -423,6 +416,7 @@ const NavItemContent = ({
       onPointerUp={handlePointerUp}
       onPointerCancel={handlePointerCancel}
       onLostPointerCapture={clearPressed}
+      onKeyDown={clearPointerClickSuppression}
       onBlur={clearPressed}
       {...(fullPrefetch ? { prefetch: true } : {})}
       className={linkClassName}

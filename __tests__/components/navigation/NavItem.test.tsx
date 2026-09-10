@@ -349,11 +349,61 @@ describe("NavItem notifications", () => {
     expect(link).not.toHaveAttribute("data-pressed");
 
     // A native click synthesized after pointerup is ignored for this gesture.
-    fireEvent.click(link, { clientX: 110, clientY: 120 });
+    fireEvent.click(link, { clientX: 110, clientY: 120, detail: 1 });
     expect(recordNavClick).toHaveBeenCalledTimes(1);
   });
 
-  it("does not activate the floating target after a drag", () => {
+  it("uses the native click path when the floating target does not move", () => {
+    const item = {
+      kind: "route",
+      name: "Notifications",
+      href: "/notifications",
+      icon: "notifications",
+      iconComponent: TestIcon,
+    } as any;
+    const { getByRole } = render(<NavItem item={item} />);
+    const link = getByRole("link", { name: "Notifications" });
+    const bounds = {
+      bottom: 164,
+      height: 64,
+      left: 100,
+      right: 148,
+      top: 100,
+      width: 48,
+      x: 100,
+      y: 100,
+      toJSON: () => ({}),
+    } as DOMRect;
+    jest.spyOn(link, "getBoundingClientRect").mockReturnValue(bounds);
+    const programmaticClick = jest.spyOn(link, "click");
+    Object.defineProperty(link, "setPointerCapture", {
+      configurable: true,
+      value: jest.fn(),
+    });
+
+    dispatchPrimaryPointerEvent({
+      clientX: 110,
+      clientY: 120,
+      element: link,
+      pointerId: 8,
+      type: "pointerdown",
+    });
+    dispatchPrimaryPointerEvent({
+      clientX: 110,
+      clientY: 120,
+      element: link,
+      pointerId: 8,
+      type: "pointerup",
+    });
+
+    expect(programmaticClick).not.toHaveBeenCalled();
+    expect(recordNavClick).not.toHaveBeenCalled();
+
+    fireEvent.click(link, { clientX: 110, clientY: 120, detail: 1 });
+    expect(recordNavClick).toHaveBeenCalledTimes(1);
+  });
+
+  it("rejects a drag without blocking the next keyboard activation", () => {
     const item = {
       kind: "route",
       name: "Notifications",
@@ -384,20 +434,24 @@ describe("NavItem notifications", () => {
       clientX: 110,
       clientY: 120,
       element: link,
-      pointerId: 8,
+      pointerId: 9,
       type: "pointerdown",
     });
     dispatchPrimaryPointerEvent({
       clientX: 130,
       clientY: 120,
       element: link,
-      pointerId: 8,
+      pointerId: 9,
       type: "pointerup",
     });
-    fireEvent.click(link, { clientX: 130, clientY: 120 });
+    fireEvent.click(link, { clientX: 130, clientY: 120, detail: 1 });
 
     expect(recordNavClick).not.toHaveBeenCalled();
     expect(link).not.toHaveAttribute("data-pressed");
+
+    fireEvent.keyDown(link, { key: "Enter" });
+    fireEvent.click(link, { detail: 0 });
+    expect(recordNavClick).toHaveBeenCalledTimes(1);
   });
 
   it("keeps pending navigations from drawing a second active highlight", () => {
