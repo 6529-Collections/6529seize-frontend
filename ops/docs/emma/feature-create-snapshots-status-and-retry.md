@@ -7,7 +7,7 @@ and track the background jobs that build holder data for the plan.
 
 This step covers:
 
-- searching for a collection before filling the snapshot form
+- choosing a 6529 collection shortcut or entering any contract manually
 - adding snapshot rows with contract, block, token, and consolidation inputs
 - live status, stage, progress, and failure reporting for each snapshot job
 - retrying failed or stalled snapshots
@@ -17,7 +17,7 @@ This step covers:
 
 - Route: `/emma/plans/{planId}`
 - Plan step: `Create Snapshots`
-- Surfaces: collection search, add-snapshot form, snapshots table, step footer
+- Surfaces: collection shortcuts, add-snapshot form, snapshots table, step footer
 
 ## Entry Points
 
@@ -29,12 +29,21 @@ This step covers:
 ## User Journey
 
 1. Open `Create Snapshots`.
-2. Optionally use `Search NFT collection` to prefill the form.
-   - For `The Memes by 6529`, EMMA opens a season picker before filling the
-     contract and token IDs.
+2. Optionally select a row under `Use a 6529 collection`. Each row shows its
+   image, full name, and token standard:
+   - `The Memes by 6529` (ERC1155) opens the season picker. Choose individual
+     seasons, or leave all or none selected to use the full collection.
+   - `Meme Lab` (ERC1155), `6529 Gradient` (ERC721), and `6529 RAW` (ERC721)
+     fill the name and contract address and clear any previous token IDs.
+   - `6529 Intern JPGs` (ERC1155) loads the token IDs for that subcollection.
+   - Use Tab to reach a row and Enter or Space to select it. The selected row
+     stays highlighted until you edit the collection details or add the snapshot.
+   - For an arbitrary collection, use `Or enter another collection` and enter
+     its name and full contract address. There is no collection-name search.
+     A full address can fill an empty name automatically; you can edit it.
 3. Enter or review:
    - `Name`
-   - `Contract number`
+   - `Contract address`
    - `Block number`
    - optional `Token ID(s)` (`Empty for All tokens`)
    - optional `Consolidation block number`
@@ -74,7 +83,9 @@ This step covers:
 
 ## Common Scenarios
 
-- Search for a known collection instead of typing the contract manually.
+- Choose one of the five 6529 shortcuts instead of typing the contract manually.
+- Enter another collection by name and full contract address.
+- Switching shortcuts keeps the snapshot and consolidation block numbers.
 - Leave `Token ID(s)` empty to snapshot the full collection.
 - Set `Consolidation block number` when you want holder consolidation before
   downstream plan use.
@@ -99,6 +110,14 @@ This step covers:
   status text instead of detailed counters.
 
 ## Failure and Recovery
+
+- The five shortcuts stay available when metadata lookup is unavailable.
+- If address metadata lookup cannot fill a name, enter the name yourself.
+- Intern JPG token IDs load before the form is filled. If that lookup fails or
+  returns no token IDs, an error explains that your current collection details
+  have not changed. Select the shortcut again to retry, or enter its name,
+  contract address, and subcollection token IDs manually. Leaving token IDs
+  empty uses all tokens in the shared contract.
 
 - When one or more snapshot rows fail, EMMA shows `Snapshot attention required`
   above the step.
