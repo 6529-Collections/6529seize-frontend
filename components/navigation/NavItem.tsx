@@ -3,8 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import type { MouseEvent } from "react";
-import { useEffect } from "react";
+import type { MouseEvent, PointerEvent } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTitle } from "@/contexts/TitleContext";
 import { useUnreadIndicator } from "@/hooks/useUnreadIndicator";
 import { useUnreadNotifications } from "@/hooks/useUnreadNotifications";
@@ -24,6 +24,8 @@ interface Props {
   readonly fullPrefetch?: boolean;
 }
 
+const POINTER_CLICK_SUPPRESSION_MS = 500;
+
 const getIconSlotClass = ({
   compact,
   variant,
@@ -39,7 +41,7 @@ const getIconSlotClass = ({
     ? "tw-h-8 tw-scale-[0.82] sm:tw-h-9 sm:tw-scale-[0.88]"
     : "tw-h-8 tw-scale-[0.9]";
 
-  return `tw-relative tw-z-10 tw-flex tw-items-center tw-justify-center tw-transition-transform tw-duration-300 tw-ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:tw-transition-none ${compactClassName}`;
+  return `tw-relative tw-z-10 tw-flex tw-items-center tw-justify-center tw-transition-transform tw-duration-300 tw-ease-[cubic-bezier(0.22,1,0.36,1)] group-active:tw-opacity-50 group-data-[pressed=true]:tw-opacity-50 motion-reduce:tw-transition-none ${compactClassName}`;
 };
 
 const FixedActiveNavIndicator = () => (
@@ -172,6 +174,20 @@ const NavItemContent = ({
   isCurrentWaveDm = false,
   fullPrefetch = false,
 }: Props) => {
+  const [pressed, setPressed] = useState(false);
+  const pointerStartRef = useRef<{
+    readonly pointerId: number;
+    readonly x: number;
+    readonly y: number;
+    readonly bounds: {
+      readonly bottom: number;
+      readonly left: number;
+      readonly right: number;
+      readonly top: number;
+    };
+  } | null>(null);
+  const recoveryClickInProgressRef = useRef(false);
+  const suppressPointerClickUntilRef = useRef(0);
   const pathname = usePathname();
   // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense
   const searchParams = useSearchParams();
@@ -277,6 +293,19 @@ const NavItemContent = ({
   const href = getNavHref(resolvedItem);
 
   const handleClick = (event: MouseEvent<HTMLAnchorElement>) => {
+    if (recoveryClickInProgressRef.current) {
+      recoveryClickInProgressRef.current = false;
+    } else if (
+      event.detail > 0 &&
+      Date.now() <= suppressPointerClickUntilRef.current
+    ) {
+      suppressPointerClickUntilRef.current = 0;
+      event.preventDefault();
+      return;
+    } else if (Date.now() > suppressPointerClickUntilRef.current) {
+      suppressPointerClickUntilRef.current = 0;
+    }
+
     if (item.kind === "route" && item.name === "Profile" && !address) {
       event.preventDefault();
       seizeConnect();
@@ -302,29 +331,94 @@ const NavItemContent = ({
   const linkClassName =
     variant === "fixed"
       ? "tw-relative tw-flex tw-h-full tw-w-full tw-min-w-0 tw-flex-col tw-items-center tw-justify-start tw-border-0 tw-bg-transparent tw-transition-colors focus:tw-outline-none focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-3px] focus-visible:tw-outline-primary-400"
-      : "tw-relative tw-flex tw-h-full tw-w-full tw-min-w-0 tw-flex-col tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-transition-colors focus:tw-outline-none focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-3px] focus-visible:tw-outline-primary-400";
+      : "tw-group tw-relative tw-flex tw-h-full tw-w-full tw-min-w-0 tw-touch-manipulation tw-flex-col tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-transition-colors focus:tw-outline-none focus-visible:!tw-outline focus-visible:!tw-outline-2 focus-visible:tw-outline-offset-[-3px] focus-visible:!tw-outline-primary-400";
 
-  if (fullPrefetch) {
-    return (
-      <Link
-        href={href}
-        aria-label={name}
-        aria-current={isActive ? "page" : undefined}
-        onClick={handleClick}
-        prefetch={true}
-        className={linkClassName}
-      >
-        {linkContent}
-      </Link>
+  const handlePointerDown = (event: PointerEvent<HTMLAnchorElement>) => {
+    if (variant === "floating" && event.isPrimary && event.button === 0) {
+      suppressPointerClickUntilRef.current = 0;
+      recoveryClickInProgressRef.current = false;
+      const bounds = event.currentTarget.getBoundingClientRect();
+      pointerStartRef.current = {
+        pointerId: event.pointerId,
+        x: event.clientX,
+        y: event.clientY,
+        bounds: {
+          bottom: bounds.bottom,
+          left: bounds.left,
+          right: bounds.right,
+          top: bounds.top,
+        },
+      };
+      event.currentTarget.setPointerCapture(event.pointerId);
+      setPressed(true);
+    }
+  };
+  const handlePointerUp = (event: PointerEvent<HTMLAnchorElement>) => {
+    const pointerStart = pointerStartRef.current;
+    pointerStartRef.current = null;
+    setPressed(false);
+
+    if (pointerStart?.pointerId !== event.pointerId) {
+      return;
+    }
+    const movedByUser = Math.hypot(
+      event.clientX - pointerStart.x,
+      event.clientY - pointerStart.y
     );
-  }
+    if (movedByUser > 8) {
+      suppressPointerClickUntilRef.current =
+        Date.now() + POINTER_CLICK_SUPPRESSION_MS;
+      return;
+    }
+
+    const link = event.currentTarget;
+    const bounds = link.getBoundingClientRect();
+    const targetMoved =
+      Math.max(
+        Math.abs(bounds.bottom - pointerStart.bounds.bottom),
+        Math.abs(bounds.left - pointerStart.bounds.left),
+        Math.abs(bounds.right - pointerStart.bounds.right),
+        Math.abs(bounds.top - pointerStart.bounds.top)
+      ) > 0.5;
+    if (!targetMoved) return;
+
+    // Complete a stationary tap when the dock moved underneath it. The
+    // programmatic click is marked so the browser's pointer-generated
+    // follow-up click can be ignored without racing a timer.
+    event.preventDefault();
+    suppressPointerClickUntilRef.current =
+      Date.now() + POINTER_CLICK_SUPPRESSION_MS;
+    recoveryClickInProgressRef.current = true;
+    try {
+      link.click();
+    } finally {
+      recoveryClickInProgressRef.current = false;
+    }
+  };
+  const handlePointerCancel = () => {
+    pointerStartRef.current = null;
+    recoveryClickInProgressRef.current = false;
+    setPressed(false);
+  };
+  const clearPressed = () => setPressed(false);
+  const clearPointerClickSuppression = () => {
+    suppressPointerClickUntilRef.current = 0;
+  };
 
   return (
     <Link
       href={href}
       aria-label={name}
       aria-current={isActive ? "page" : undefined}
+      data-pressed={pressed ? "true" : undefined}
       onClick={handleClick}
+      onPointerDown={handlePointerDown}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerCancel}
+      onLostPointerCapture={clearPressed}
+      onKeyDown={clearPointerClickSuppression}
+      onBlur={clearPressed}
+      {...(fullPrefetch ? { prefetch: true } : {})}
       className={linkClassName}
     >
       {linkContent}
