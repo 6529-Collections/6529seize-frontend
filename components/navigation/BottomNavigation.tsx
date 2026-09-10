@@ -17,7 +17,7 @@ import {
   getNotificationsRoute,
   usesReverseMobileBottomNavigationScroll,
 } from "@/helpers/navigation.helpers";
-import useDeviceInfo from "@/hooks/useDeviceInfo";
+import useCapacitor from "@/hooks/useCapacitor";
 import { useWave } from "@/hooks/useWave";
 import { useWaveData } from "@/hooks/useWaveData";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
@@ -321,11 +321,22 @@ const useCompactDock = ({
   return hidden ? false : compact;
 };
 
-const getNavClassName = ({ hidden }: { readonly hidden: boolean }) =>
-  `${getHiddenStyle(hidden)} tw-pointer-events-none tw-fixed tw-inset-x-0 tw-bottom-0 tw-z-50 tw-flex tw-justify-center tw-px-4 tw-pb-[max(calc(env(safe-area-inset-bottom,0px)-0.875rem),var(--safe-area-inset-bottom,0px),0px)] tw-transition-[opacity,transform] tw-duration-200 tw-ease-out motion-reduce:tw-transition-none`;
+const getNavClassName = ({
+  hidden,
+  isAndroid,
+}: {
+  readonly hidden: boolean;
+  readonly isAndroid: boolean;
+}) => {
+  const bottomPadding = isAndroid
+    ? "tw-pb-[max(env(safe-area-inset-bottom,0px),var(--safe-area-inset-bottom,0px),0px)]"
+    : "tw-pb-[max(calc(env(safe-area-inset-bottom,0px)-0.875rem),var(--safe-area-inset-bottom,0px),0px)]";
+
+  return `${getHiddenStyle(hidden)} tw-pointer-events-none tw-fixed tw-inset-x-0 tw-bottom-0 tw-z-50 tw-flex tw-justify-center tw-px-4 tw-transition-[opacity,transform] tw-duration-200 tw-ease-out motion-reduce:tw-transition-none ${bottomPadding}`;
+};
 
 const getDockClassName = (compact: boolean) =>
-  `tw-pointer-events-auto tw-relative tw-overflow-hidden tw-border tw-border-white/[0.13] tw-bg-black/[0.76] tw-shadow-[0_18px_45px_rgba(0,0,0,0.48),0_0_0_1px_rgba(255,255,255,0.045),0_0_34px_rgba(255,255,255,0.075),inset_0_1px_0_rgba(255,255,255,0.105),inset_0_-1px_0_rgba(255,255,255,0.06)] tw-backdrop-blur-2xl tw-transition-[width,height,border-radius,background-color,box-shadow] tw-duration-300 tw-ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:tw-transition-none ${
+  `tw-pointer-events-auto tw-relative tw-border tw-border-white/[0.13] tw-bg-black/[0.76] tw-shadow-[0_18px_45px_rgba(0,0,0,0.48),0_0_0_1px_rgba(255,255,255,0.045),0_0_34px_rgba(255,255,255,0.075),inset_0_1px_0_rgba(255,255,255,0.105),inset_0_-1px_0_rgba(255,255,255,0.06)] tw-backdrop-blur-2xl tw-transition-[width,height,border-radius,background-color,box-shadow] tw-duration-300 tw-ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:tw-transition-none ${
     compact
       ? "tw-h-[54px] tw-w-[min(calc(100vw-5.5rem),25rem)] tw-rounded-[1.65rem] sm:tw-h-[58px] sm:tw-w-[min(calc(100vw-6.75rem),31rem)] md:tw-w-[min(calc(100vw-10rem),35rem)]"
       : "tw-h-[64px] tw-w-[min(calc(100vw-2.25rem),38rem)] tw-rounded-[2rem] sm:tw-h-[66px] sm:tw-w-[min(calc(100vw-4rem),40rem)]"
@@ -347,7 +358,7 @@ const getDockStyle = ({
       }
     : undefined;
 
-const floatingNavInnerClassName = "tw-relative tw-h-full";
+const floatingNavHitRowClassName = "tw-relative tw-h-full";
 
 const getFloatingNavListClassName = (compact: boolean) =>
   `tw-m-0 tw-flex tw-h-full tw-list-none tw-items-center ${
@@ -373,49 +384,67 @@ const getFloatingActivePillStyle = ({
   activeItemIndex,
   compact,
   itemCount,
+  isTabletViewport,
 }: {
   readonly activeItemIndex: number;
   readonly compact: boolean;
   readonly itemCount: number;
-}): React.CSSProperties => ({
-  left: getFloatingActivePillLeft({
-    activeItemIndex,
-    compact,
-    itemCount,
-  }),
-});
-
-const getFloatingActivePillLeft = ({
-  activeItemIndex,
-  compact,
-  itemCount,
-}: {
-  readonly activeItemIndex: number;
-  readonly compact: boolean;
-  readonly itemCount: number;
-}) => {
+  readonly isTabletViewport: boolean;
+}): React.CSSProperties => {
   const paddingX = compact ? "0.625rem" : "1rem";
   const gap = compact ? "0rem" : "0.125rem";
   const gapCount = Math.max(0, itemCount - 1);
 
-  return `calc(${paddingX} + ((100% - (${paddingX} * 2) - (${gap} * ${gapCount})) / ${itemCount} * ${
-    activeItemIndex + 0.5
-  }) + (${gap} * ${activeItemIndex}))`;
+  if (!isTabletViewport) {
+    // End buttons reserve 48px inside the dock's existing visual padding;
+    // the middle buttons share the remaining content width.
+    const innerWidth = `(100% - (${paddingX} * 2) - (${gap} * ${gapCount}))`;
+    const edgeWidth = `max(3rem, (${innerWidth}) / ${itemCount})`;
+    const edgeMaxWidth = `calc(${edgeWidth} + 0.25rem)`;
+    if (activeItemIndex === 0) {
+      return {
+        left: `calc(${paddingX} + (${edgeWidth} / 2))`,
+        maxWidth: edgeMaxWidth,
+      };
+    }
+    if (activeItemIndex === itemCount - 1) {
+      return {
+        left: `calc(100% - ${paddingX} - (${edgeWidth} / 2))`,
+        maxWidth: edgeMaxWidth,
+      };
+    }
+    const middleWidth = `((${innerWidth}) - (${edgeWidth} * 2)) / ${
+      itemCount - 2
+    }`;
+    return {
+      left: `calc(${paddingX} + ${edgeWidth} + (${middleWidth}) * ${
+        activeItemIndex - 0.5
+      } + (${gap} * ${activeItemIndex}))`,
+      maxWidth: `calc(${middleWidth} + 0.25rem)`,
+    };
+  }
+
+  return {
+    left: `calc(${paddingX} + ((100% - (${paddingX} * 2) - (${gap} * ${gapCount})) / ${itemCount} * ${
+      activeItemIndex + 0.5
+    }) + (${gap} * ${activeItemIndex}))`,
+  };
 };
 
 const BottomNavigationFallback: React.FC<BottomNavigationProps> = ({
   hidden = false,
 }) => {
   const isTabletViewport = useMediaQuery(TABLET_DOCK_QUERY);
+  const { isAndroid } = useCapacitor();
 
   return (
-    <nav aria-hidden="true" className={getNavClassName({ hidden })}>
+    <nav aria-hidden="true" className={getNavClassName({ hidden, isAndroid })}>
       <div
         {...{ [MOBILE_BOTTOM_NAV_DOCK_ATTRIBUTE]: "true" }}
         className={getDockClassName(false)}
         style={getDockStyle({ compact: false, isTabletViewport })}
       >
-        <div className={floatingNavInnerClassName}>
+        <div className={floatingNavHitRowClassName}>
           <ul className={getFloatingNavListClassName(false)} />
         </div>
       </div>
@@ -437,7 +466,7 @@ const BottomNavigationResolvedContent: React.FC<
   routeStateKey,
 }) => {
   const { registerRef } = useLayout();
-  const { isApp } = useDeviceInfo();
+  const { isCapacitor: isApp, isAndroid } = useCapacitor();
   const isTabletViewport = useMediaQuery(TABLET_DOCK_QUERY);
   const { connectedProfile } = useAuth();
   const { address } = useSeizeConnectContext();
@@ -516,7 +545,7 @@ const BottomNavigationResolvedContent: React.FC<
       ref={setMobileNavRef}
       aria-label={t(BOTTOM_NAVIGATION_LOCALE, "navigation.primary.ariaLabel")}
       aria-hidden={hidden ? "true" : undefined}
-      className={getNavClassName({ hidden })}
+      className={getNavClassName({ hidden, isAndroid })}
       inert={hidden}
     >
       <div
@@ -524,7 +553,7 @@ const BottomNavigationResolvedContent: React.FC<
         className={getDockClassName(compact)}
         style={getDockStyle({ compact, isTabletViewport })}
       >
-        <div className={floatingNavInnerClassName}>
+        <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-overflow-hidden tw-rounded-[inherit]">
           <div
             aria-hidden="true"
             data-testid="mobile-dock-active-pill"
@@ -536,13 +565,16 @@ const BottomNavigationResolvedContent: React.FC<
               activeItemIndex: hasActiveItem ? activeItemIndex : 0,
               compact,
               itemCount: navItems.length,
+              isTabletViewport,
             })}
           />
+        </div>
+        <div className={floatingNavHitRowClassName}>
           <ul className={getFloatingNavListClassName(compact)}>
             {navItems.map((item) => (
               <li
                 key={item.name}
-                className="tw-flex tw-h-full tw-min-w-0 tw-flex-1 tw-items-center tw-justify-center"
+                className={`tw-flex tw-h-full tw-min-w-0 tw-flex-1 tw-items-center tw-justify-center ${isTabletViewport ? "" : "first:tw-min-w-12 last:tw-min-w-12"}`}
               >
                 <NavItem
                   variant="floating"

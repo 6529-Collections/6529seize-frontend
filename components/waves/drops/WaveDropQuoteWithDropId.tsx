@@ -1,11 +1,7 @@
 "use client";
 
 import React, { useCallback, useSyncExternalStore } from "react";
-import {
-  keepPreviousData,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropModerationStatus } from "@/generated/models/ApiDropModerationStatus";
 import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
@@ -113,13 +109,9 @@ const WaveDropQuoteWithDropId: React.FC<WaveDropQuoteWithDropIdProps> = ({
   onLinkCardActionsActiveChange,
 }) => {
   const normalizedDropId = dropId.trim();
-  const queryClient = useQueryClient();
   const myStream = useMyStreamOptional();
   const targetWaveId = waveId ?? myStream?.activeWave.id ?? null;
   const waveMessages = useOptionalWaveMessages(myStream, targetWaveId);
-  const cachedDrop = queryClient.getQueryData<ApiDrop>(
-    getDropQueryKey(normalizedDropId)
-  );
   const waveMessagesDrop =
     (targetWaveId
       ? waveMessages?.drops.find(
@@ -139,18 +131,15 @@ const WaveDropQuoteWithDropId: React.FC<WaveDropQuoteWithDropIdProps> = ({
     authoritativeModeratedDrop = waveMessagesDrop;
   }
 
-  let initialDrop = currentPresentationDrop;
-  if (initialDrop === null && !isActiveWaveHydrating) {
-    initialDrop = cachedDrop ?? null;
-  }
-
   const { data: drop, error } = useQuery<ApiDrop | undefined>({
     queryKey: getDropQueryKey(normalizedDropId),
     queryFn: () => fetchDropByIdBatched(normalizedDropId),
     placeholderData: keepPreviousData,
-    enabled: normalizedDropId.length > 0 && initialDrop === null,
+    enabled:
+      normalizedDropId.length > 0 &&
+      currentPresentationDrop === null &&
+      !isActiveWaveHydrating,
     staleTime: DROP_DETAIL_STALE_TIME_MS,
-    ...(initialDrop === null ? {} : { initialData: initialDrop }),
   });
 
   const isNotFound =
