@@ -251,7 +251,7 @@ function DiscoverWaveControls({
             fill={false}
           />
         </div>
-        <div className="tw-no-scrollbar tw-flex tw-w-max tw-min-w-0 tw-max-w-full tw-items-center tw-gap-4 tw-overflow-x-auto tw-scroll-smooth tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/60">
+        <div className="tw-no-scrollbar tw-flex tw-w-max tw-min-w-0 tw-max-w-full tw-items-center tw-gap-4 tw-overflow-x-auto tw-scroll-smooth tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/60 sm:tw-w-full sm:tw-justify-between">
           <div
             role="radiogroup"
             className={`tw-flex tw-flex-shrink-0 tw-flex-nowrap tw-gap-1.5 tw-transition-opacity ${
