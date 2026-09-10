@@ -4,15 +4,11 @@ import type { Suggestion } from "../types";
 import { useVirtualizedWaves } from "@/hooks/useVirtualizedWaves";
 import { NftSuggestHiddenSelect } from "./NftSuggestHiddenSelect";
 import { NftSuggestVirtualList } from "./NftSuggestVirtualList";
-import { NftSuggestFooter } from "./NftSuggestFooter";
 
 interface NftSuggestListProps {
   readonly items: Suggestion[];
   readonly activeIndex: number;
   readonly isOpen: boolean;
-  readonly hiddenCount: number;
-  readonly hideSpam: boolean;
-  readonly onToggleSpam: () => void;
   readonly onHover: (index: number) => void;
   readonly onSelect: (item: Suggestion) => void;
 }
@@ -24,9 +20,6 @@ export function NftSuggestList({
   items,
   activeIndex,
   isOpen,
-  hiddenCount,
-  hideSpam,
-  onToggleSpam,
   onHover,
   onSelect,
 }: NftSuggestListProps) {
@@ -83,13 +76,6 @@ export function NftSuggestList({
         onHover={onHover}
         onSelect={onSelect}
       />
-
-      {hideSpam && (
-        <NftSuggestFooter
-          hiddenCount={hiddenCount}
-          onToggleSpam={onToggleSpam}
-        />
-      )}
     </div>
   );
 }
