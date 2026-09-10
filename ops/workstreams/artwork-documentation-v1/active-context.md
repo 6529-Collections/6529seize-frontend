@@ -54,7 +54,7 @@ The final staging [E2E 34427116872](https://github.com/6529-Collections/6529seiz
 
 The feature is enabled while general production self-service remains closed. The actual IAM production import created exactly 16 private workspaces for 15 artist identities in `6529NM-AP-01`, matching the pinned sources and dry run. An identical retry returned all the same source, work, context and owner IDs. An unassigned bot received the same generic 404 as unknown-context controls for all 16 artist contexts and 16 previews; its complete accessible-context list remained unchanged. Staging lacks those commission sources. Source receipts and proposals do not become artist-confirmed answers automatically.
 
-Artists and the assigned coordinator can use the authenticated [program queue](https://6529.io/artwork-documentation/programs/6529NM-AP-01). Individual workspace links were prepared for handoff; no invitations were sent. [The workstream specification](README.md) remains the implementation and onboarding reference.
+Artists can use their individual workspace links or the authenticated [artwork documentation workspace](https://6529.io/artwork-documentation). The assigned coordinator can use the [program queue](https://6529.io/artwork-documentation/programs/6529NM-AP-01). Individual workspace links were prepared for handoff; no invitations were sent. [The workstream specification](README.md) remains the implementation and onboarding reference.
 
 The production storage audit verified private/versioned/encrypted buckets, active malware protection, an exact one-bucket daily backup selection, 35-day backup retention and an isolated restore destination. The new production vault had no recovery point at audit time; the completed restore exercise was in staging.
 
