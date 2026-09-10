@@ -33,11 +33,20 @@ right sidebar, and what users see for loading and empty states.
 ### Single-decision waves
 
 - Podium shows first, second, and third place when available.
+- First place is raised in the center, with second place on the left and third
+  place on the right. Names, nomination details, vote totals, credit labels,
+  voter counts, and outcomes wrap within cards that grow to fit their content.
+- Select a podium card outside its controls, or focus its winner button and
+  press Enter or Space, to open the winning drop. Keyboard focus is visible.
+- Profile links, voter details, and `Outcome` keep their own actions without
+  opening the winning drop. Hover, keyboard-focus, or tap `Outcome` to read the
+  awards; press Escape or tap outside it to close the tooltip.
 - Winner rows render below the podium.
 - If no winners exist, empty state shows:
   - `No Winners to Display`
   - `This wave ended without any submissions`
-- Podium can render fewer than three winners.
+- Podium can render fewer than three winners. Unfilled places use placeholders
+  with the same card shape and stagger as the available winners.
 
 ### Multi-decision waves
 
@@ -93,6 +102,8 @@ right sidebar, and what users see for loading and empty states.
 ## Loading, Failure, and Recovery
 
 - While decisions load, winners surfaces show loading placeholders.
+- The main-thread podium loading state keeps the three-place layout and rank
+  stagger.
 - There is no dedicated winners error panel.
 - If decision data is unavailable, winners can resolve to empty-state messaging.
 - Refresh the current wave route and retry.
