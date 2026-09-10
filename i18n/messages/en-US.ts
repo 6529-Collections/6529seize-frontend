@@ -567,6 +567,8 @@ const MEMES_WAVE_FOOTER_MESSAGES = objectMessages("memes.waveFooter", {
 } as const);
 
 const DROP_REACTION_MESSAGES = objectMessages("drops.reactions", {
+  unconfirmed:
+    "Could not confirm your reaction. Refresh to check before trying again.",
   capabilityDisabled: "Reactions are disabled for this wave.",
   requestTimedOut:
     "The reaction request timed out. Refreshing the latest reaction state; wait before trying again.",
@@ -779,6 +781,9 @@ const WAVE_VOTE_INSIGHTS_MESSAGES = objectMessages("waves.voteInsights", {
   largestVote: "Largest vote",
   largestVotes: "Largest votes",
   currentVotes: "Current votes",
+  loadingCurrentVotes: "Loading current votes…",
+  loadError: "Current votes couldn’t be loaded.",
+  retry: "Retry",
   viewBreakdown: "View vote breakdown",
   largestPositive: "Largest supporting vote",
   largestNegative: "Largest opposing vote",
