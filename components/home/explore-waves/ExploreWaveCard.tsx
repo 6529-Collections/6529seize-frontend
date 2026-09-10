@@ -13,6 +13,7 @@ import { formatInteger, formatNumber } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import {
+  ClockIcon,
   FireIcon,
   ScaleIcon,
   ShieldCheckIcon,
@@ -46,13 +47,22 @@ const METRIC_SEPARATOR_CLASSES =
   "tw-text-[11px] tw-leading-none tw-text-iron-600";
 
 const getDropsCountMessageKey = (
-  count: number
+  count: number,
+  includeAgo: boolean
 ):
   | "waves.explore.card.dropsCount.one"
-  | "waves.explore.card.dropsCount.other" => {
+  | "waves.explore.card.dropsCount.other"
+  | "waves.explore.card.dropsCountAgo.one"
+  | "waves.explore.card.dropsCountAgo.other" => {
   const pluralCategory = new Intl.PluralRules(EXPLORE_WAVE_CARD_LOCALE).select(
     count
   );
+
+  if (includeAgo) {
+    return pluralCategory === "one"
+      ? "waves.explore.card.dropsCountAgo.one"
+      : "waves.explore.card.dropsCountAgo.other";
+  }
 
   return pluralCategory === "one"
     ? "waves.explore.card.dropsCount.one"
@@ -259,7 +269,7 @@ export function ExploreWaveCard({
   const dropsCountLabel = hasDrops
     ? t(
         EXPLORE_WAVE_CARD_LOCALE,
-        getDropsCountMessageKey(wave.totalDropsCount),
+        getDropsCountMessageKey(wave.totalDropsCount, isDiscover),
         {
           count: formattedDropsCount,
           timeAgo: getTimeAgoShort(lastMessageTime),
@@ -368,12 +378,15 @@ export function ExploreWaveCard({
                 : "tw-text-[11px] tw-text-iron-600"
             )}
           >
-            <span
-              className={clsx(
-                "tw-size-1.5 tw-flex-shrink-0 tw-rounded-full",
-                isDiscover ? "tw-bg-emerald-400" : "tw-bg-success/80"
-              )}
-            />
+            {isDiscover ? (
+              <ClockIcon
+                aria-hidden="true"
+                className="tw-size-3 tw-flex-shrink-0 tw-text-emerald-400"
+                strokeWidth={1.75}
+              />
+            ) : (
+              <span className="tw-size-1.5 tw-flex-shrink-0 tw-rounded-full tw-bg-success/80" />
+            )}
             <span>{dropsCountLabel}</span>
           </div>
         )}
