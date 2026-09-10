@@ -177,9 +177,18 @@ const NavItemContent = ({
     readonly pointerId: number;
     readonly x: number;
     readonly y: number;
+    readonly bounds: {
+      readonly bottom: number;
+      readonly left: number;
+      readonly right: number;
+      readonly top: number;
+    };
   } | null>(null);
-  const clickSeenRef = useRef(false);
-  const recoveryTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const recoveryClickInProgressRef = useRef(false);
+  const suppressedClickPointRef = useRef<{
+    readonly x: number;
+    readonly y: number;
+  } | null>(null);
   const pathname = usePathname();
   // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense
   const searchParams = useSearchParams();
@@ -242,15 +251,6 @@ const NavItemContent = ({
     setTitle,
   ]);
 
-  useEffect(
-    () => () => {
-      if (recoveryTimeoutRef.current !== null) {
-        clearTimeout(recoveryTimeoutRef.current);
-      }
-    },
-    []
-  );
-
   if (item.disabled) {
     return (
       <button
@@ -294,7 +294,23 @@ const NavItemContent = ({
   const href = getNavHref(resolvedItem);
 
   const handleClick = (event: MouseEvent<HTMLAnchorElement>) => {
-    clickSeenRef.current = true;
+    if (recoveryClickInProgressRef.current) {
+      recoveryClickInProgressRef.current = false;
+    } else {
+      const suppressedClickPoint = suppressedClickPointRef.current;
+      suppressedClickPointRef.current = null;
+      if (
+        suppressedClickPoint !== null &&
+        Math.hypot(
+          event.clientX - suppressedClickPoint.x,
+          event.clientY - suppressedClickPoint.y
+        ) <= 2
+      ) {
+        event.preventDefault();
+        return;
+      }
+    }
+
     if (item.kind === "route" && item.name === "Profile" && !address) {
       event.preventDefault();
       seizeConnect();
@@ -324,11 +340,19 @@ const NavItemContent = ({
 
   const handlePointerDown = (event: PointerEvent<HTMLAnchorElement>) => {
     if (variant === "floating" && event.isPrimary && event.button === 0) {
-      clickSeenRef.current = false;
+      suppressedClickPointRef.current = null;
+      recoveryClickInProgressRef.current = false;
+      const bounds = event.currentTarget.getBoundingClientRect();
       pointerStartRef.current = {
         pointerId: event.pointerId,
         x: event.clientX,
         y: event.clientY,
+        bounds: {
+          bottom: bounds.bottom,
+          left: bounds.left,
+          right: bounds.right,
+          top: bounds.top,
+        },
       };
       event.currentTarget.setPointerCapture(event.pointerId);
       setPressed(true);
@@ -339,35 +363,51 @@ const NavItemContent = ({
     pointerStartRef.current = null;
     setPressed(false);
 
-    if (pointerStart?.pointerId !== event.pointerId) return;
-    const link = event.currentTarget;
-    const bounds = link.getBoundingClientRect();
-    const releasedOutside =
-      event.clientX < bounds.left ||
-      event.clientX > bounds.right ||
-      event.clientY < bounds.top ||
-      event.clientY > bounds.bottom;
+    if (pointerStart?.pointerId !== event.pointerId) {
+      return;
+    }
     const movedByUser = Math.hypot(
       event.clientX - pointerStart.x,
       event.clientY - pointerStart.y
     );
-    if (!releasedOutside || movedByUser > 8) return;
-
-    if (recoveryTimeoutRef.current !== null) {
-      clearTimeout(recoveryTimeoutRef.current);
+    if (movedByUser > 8) {
+      suppressedClickPointRef.current = {
+        x: event.clientX,
+        y: event.clientY,
+      };
+      return;
     }
-    // A dock transition can move the link away between pointerdown and
-    // pointerup. Give the browser's native click a chance, then recover the
-    // stationary tap only if it did not dispatch one.
-    recoveryTimeoutRef.current = setTimeout(() => {
-      recoveryTimeoutRef.current = null;
-      if (!clickSeenRef.current && link.isConnected) {
-        link.click();
-      }
-    }, 0);
+
+    const link = event.currentTarget;
+    const bounds = link.getBoundingClientRect();
+    const targetMoved =
+      Math.max(
+        Math.abs(bounds.bottom - pointerStart.bounds.bottom),
+        Math.abs(bounds.left - pointerStart.bounds.left),
+        Math.abs(bounds.right - pointerStart.bounds.right),
+        Math.abs(bounds.top - pointerStart.bounds.top)
+      ) > 0.5;
+    if (!targetMoved) return;
+
+    // Complete a stationary tap when the dock moved underneath it. The
+    // programmatic click is marked so the browser's follow-up native click at
+    // the same coordinates can be ignored without racing a timer.
+    event.preventDefault();
+    suppressedClickPointRef.current = {
+      x: event.clientX,
+      y: event.clientY,
+    };
+    recoveryClickInProgressRef.current = true;
+    try {
+      link.click();
+    } finally {
+      recoveryClickInProgressRef.current = false;
+    }
   };
   const handlePointerCancel = () => {
     pointerStartRef.current = null;
+    recoveryClickInProgressRef.current = false;
+    suppressedClickPointRef.current = null;
     setPressed(false);
   };
   const clearPressed = () => setPressed(false);

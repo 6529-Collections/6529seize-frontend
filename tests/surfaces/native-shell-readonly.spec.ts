@@ -117,9 +117,7 @@ async function expectUsableNotificationTarget(dock: Locator) {
       throw new Error("Expected a visible notification bell icon.");
     }
     const iconBox = icon.getBoundingClientRect();
-    const dockElement = link.closest(
-      '[data-mobile-bottom-nav-dock="true"]'
-    );
+    const dockElement = link.closest('[data-mobile-bottom-nav-dock="true"]');
     if (!dockElement) {
       throw new Error("Expected the notification link inside the mobile dock.");
     }
@@ -198,6 +196,44 @@ async function scrollAboutToCompact(page: Page) {
     return element.scrollTop;
   });
   expect(position).toBeGreaterThan(100);
+}
+
+async function resetNotificationHistoryPushCount(page: Page) {
+  await page.evaluate(() => {
+    const runtime = globalThis as typeof globalThis & {
+      __notificationHistoryPushCount?: number;
+      __notificationHistoryPushWrapped?: boolean;
+    };
+    runtime.__notificationHistoryPushCount = 0;
+    if (runtime.__notificationHistoryPushWrapped) return;
+
+    const originalPushState = globalThis.history.pushState.bind(
+      globalThis.history
+    );
+    globalThis.history.pushState = (data, unused, url) => {
+      if (
+        url !== undefined &&
+        new URL(String(url), globalThis.location.href).pathname ===
+          "/notifications"
+      ) {
+        runtime.__notificationHistoryPushCount =
+          (runtime.__notificationHistoryPushCount ?? 0) + 1;
+      }
+      originalPushState(data, unused, url);
+    };
+    runtime.__notificationHistoryPushWrapped = true;
+  });
+}
+
+async function readNotificationHistoryPushCount(page: Page) {
+  return page.evaluate(
+    () =>
+      (
+        globalThis as typeof globalThis & {
+          __notificationHistoryPushCount?: number;
+        }
+      ).__notificationHistoryPushCount ?? 0
+  );
 }
 
 test.describe("Native and Electron simulated shell read-only coverage @surface @medium @readonly", () => {
@@ -350,6 +386,7 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
           // Use trusted touchscreen input at the outer corner, where the
           // original capsule-shaped link silently dropped the first tap.
           const point = { x: center.x + 23, y: center.y + 23 };
+          await resetNotificationHistoryPushCount(page);
           if (width === 360 && !compact) {
             const touch = await page.context().newCDPSession(page);
             try {
@@ -363,14 +400,15 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
                 "0.5"
               );
               await scrollAboutToCompact(page);
-              // Release at the original position during the 300ms animation,
-              // without Playwright relocating the input to the moving link.
-              await page.waitForTimeout(200);
-              expect(
-                await dock.evaluate(
-                  (element) => element.getBoundingClientRect().height
+              // Release as soon as the transition moves the target, without
+              // Playwright relocating the input to the moving link.
+              await expect
+                .poll(() =>
+                  dock.evaluate(
+                    (element) => element.getBoundingClientRect().height
+                  )
                 )
-              ).toBeLessThan(64);
+                .toBeLessThan(64);
               await touch.send("Input.dispatchTouchEvent", {
                 type: "touchEnd",
                 touchPoints: [],
@@ -388,6 +426,9 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
             await page.touchscreen.tap(point.x, point.y);
           }
           await expect(page).toHaveURL(/\/notifications$/);
+          await expect
+            .poll(() => readNotificationHistoryPushCount(page))
+            .toBe(1);
           await expect(
             dock.getByRole("link", { name: "Notifications", exact: true })
           ).toHaveAttribute("aria-current", "page");
@@ -403,9 +444,7 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
             }
             const iconBox = activeIcon.getBoundingClientRect();
             return Math.abs(
-              pillBox.x +
-                pillBox.width / 2 -
-                (iconBox.x + iconBox.width / 2)
+              pillBox.x + pillBox.width / 2 - (iconBox.x + iconBox.width / 2)
             );
           });
           expect(activePillOffset).toBeLessThanOrEqual(0.5);
@@ -423,6 +462,108 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
         });
       }
     }
+  });
+
+  test("Android notification bell distinguishes dock movement from a drag", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      testInfo.project.name !== "capacitor-android-sim",
+      "Notification transition gestures are covered on the Android Capacitor simulation"
+    );
+
+    await mockCountryCheck(page, "FR");
+    await page.setViewportSize({ width: 360, height: 780 });
+    await gotoReady(page, "/about");
+    const dock = page.locator('[data-mobile-bottom-nav-dock="true"]');
+    const bell = dock.getByRole("link", {
+      name: "Notifications",
+      exact: true,
+    });
+    await expect
+      .poll(() =>
+        dock.evaluate((element) => element.getBoundingClientRect().height)
+      )
+      .toBe(64);
+    const center = await expectUsableNotificationTarget(dock);
+    const point = { x: center.x - 23, y: center.y };
+    await resetNotificationHistoryPushCount(page);
+    const touch = await page.context().newCDPSession(page);
+    try {
+      await touch.send("Input.dispatchTouchEvent", {
+        type: "touchStart",
+        touchPoints: [point],
+      });
+      await scrollAboutToCompact(page);
+      await expect
+        .poll(() =>
+          dock.evaluate((element) => element.getBoundingClientRect().height)
+        )
+        .toBeLessThan(64);
+      expect(
+        await bell.evaluate((link, releasePoint) => {
+          const bounds = link.getBoundingClientRect();
+          return (
+            releasePoint.x >= bounds.left &&
+            releasePoint.x <= bounds.right &&
+            releasePoint.y >= bounds.top &&
+            releasePoint.y <= bounds.bottom
+          );
+        }, point)
+      ).toBe(true);
+      await touch.send("Input.dispatchTouchEvent", {
+        type: "touchEnd",
+        touchPoints: [],
+      });
+    } finally {
+      await touch
+        .send("Input.dispatchTouchEvent", {
+          type: "touchCancel",
+          touchPoints: [],
+        })
+        .catch(() => undefined);
+      await touch.detach();
+    }
+
+    await expect(page).toHaveURL(/\/notifications$/);
+    await expect.poll(() => readNotificationHistoryPushCount(page)).toBe(1);
+    await page.goBack();
+    await expect(page).toHaveURL(/\/about$/);
+    await expect
+      .poll(() =>
+        dock.evaluate((element) => element.getBoundingClientRect().height)
+      )
+      .toBe(54);
+
+    const dragCenter = await expectUsableNotificationTarget(dock);
+    await resetNotificationHistoryPushCount(page);
+    const dragTouch = await page.context().newCDPSession(page);
+    try {
+      await dragTouch.send("Input.dispatchTouchEvent", {
+        type: "touchStart",
+        touchPoints: [dragCenter],
+      });
+      await dragTouch.send("Input.dispatchTouchEvent", {
+        type: "touchMove",
+        touchPoints: [{ x: dragCenter.x - 20, y: dragCenter.y }],
+      });
+      await dragTouch.send("Input.dispatchTouchEvent", {
+        type: "touchEnd",
+        touchPoints: [],
+      });
+    } finally {
+      await dragTouch
+        .send("Input.dispatchTouchEvent", {
+          type: "touchCancel",
+          touchPoints: [],
+        })
+        .catch(() => undefined);
+      await dragTouch.detach();
+    }
+
+    await expect(page).toHaveURL(/\/about$/);
+    expect(await readNotificationHistoryPushCount(page)).toBe(0);
+    await expect(bell).not.toHaveAttribute("data-pressed");
   });
 
   test("Capacitor app-wallet shell renders the simulated empty wallet state", async ({
