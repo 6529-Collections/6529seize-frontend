@@ -5,6 +5,7 @@ import {
 } from "ethers";
 import { sha256 } from "js-sha256";
 import { z } from "zod";
+import { CmsRecoveryError } from "./errors";
 
 import {
   canonicalizeJson,
@@ -143,7 +144,7 @@ export async function recoverCmsPublication(
   );
   const coreRecord = z.record(z.unknown()).parse(core);
   if ("signatures" in coreRecord || "storage" in coreRecord) {
-    throw new Error(
+    throw new CmsRecoveryError(
       "CMS publication content must be the canonical unsigned content core"
     );
   }
@@ -157,7 +158,7 @@ export async function recoverCmsPublication(
     enforceHashes: true,
   });
   if (!validation.valid) {
-    throw new Error(
+    throw new CmsRecoveryError(
       `Invalid recovered CMS package: ${validation.issues
         .filter((issue) => issue.severity === "error")
         .map((issue) => issue.code)
@@ -287,7 +288,7 @@ async function assertSignature(
 ): Promise<void> {
   if (publication.signature_kind === "eip1271") {
     if (!verifier) {
-      throw new Error(
+      throw new CmsRecoveryError(
         "Contract-wallet verification requires an explicit chain RPC; offline verification is unavailable"
       );
     }
@@ -298,7 +299,9 @@ async function assertSignature(
       signature: publication.signature,
     });
     if (!valid)
-      throw new Error("Invalid contract-wallet CMS publication signature");
+      throw new CmsRecoveryError(
+        "Invalid contract-wallet CMS publication signature"
+      );
     return;
   }
   const signer = verifyTypedData(
@@ -315,7 +318,8 @@ async function assertSignature(
 }
 
 function assertEqual(actual: unknown, expected: unknown, field: string): void {
-  if (actual !== expected) throw new Error(`CMS publication ${field} mismatch`);
+  if (actual !== expected)
+    throw new CmsRecoveryError(`CMS publication ${field} mismatch`);
 }
 
 function toEthersDomain(

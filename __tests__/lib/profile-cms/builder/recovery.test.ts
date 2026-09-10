@@ -39,6 +39,20 @@ describe("CMS draft recovery", () => {
     expect(otherProfile.getSnapshot().recovery).toBeNull();
   });
 
+  it("resumes saving current work after a corrupt stored entry fails to load", () => {
+    const key = "corrupt-draft";
+    localStorage.setItem(key, "{ unfinished stored JSON");
+    const recovery = new CmsDraftRecoveryController(key, "punk6529");
+    recovery.load();
+    expect(recovery.getSnapshot()).toEqual({ recovery: null, failed: true });
+
+    const current = { cmsPackage, jsonDraft: "{ current unsaved work" };
+    recovery.save(current);
+
+    expect(localStorage.getItem(key)).toBe(JSON.stringify(current));
+    expect(recovery.getSnapshot()).toEqual({ recovery: null, failed: false });
+  });
+
   it("reports unavailable storage without breaking editing", () => {
     const read = jest
       .spyOn(Storage.prototype, "getItem")

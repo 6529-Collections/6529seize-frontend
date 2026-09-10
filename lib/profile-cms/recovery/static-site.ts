@@ -1,5 +1,6 @@
 import { posix } from "node:path";
 import { sha256 } from "js-sha256";
+import { CmsRecoveryError } from "./errors";
 
 import type {
   CmsAssetV1,
@@ -36,7 +37,7 @@ export function renderRecoveredCmsSite(
     const context = { cmsPackage, pagePath: outputPath, assets, pages, routes };
     const destination = resolveRoute(route.path, context);
     if (files.has(outputPath))
-      throw new Error("Recovered route output collision");
+      throw new CmsRecoveryError("Recovered route output collision");
     files.set(
       outputPath,
       typeof destination === "string"
@@ -45,7 +46,9 @@ export function renderRecoveredCmsSite(
     );
   }
   if (!files.has(cmsRecoveryFilePath(cmsPackage.site.base_path))) {
-    throw new Error("Recovered publication has no renderable primary page");
+    throw new CmsRecoveryError(
+      "Recovered publication has no renderable primary page"
+    );
   }
   return files;
 }
@@ -57,7 +60,7 @@ export function cmsRecoveryFilePath(routePath: string): string {
     segments.at(-1) !== "index.html" ||
     segments.some((part) => !part || part === "." || part === "..")
   ) {
-    throw new Error("Unsafe recovered CMS route path");
+    throw new CmsRecoveryError("Unsafe recovered CMS route path");
   }
   const path = [
     ...segments.slice(0, -1).map(portableSegment),
@@ -147,7 +150,9 @@ function resolveRoute(
     if (!route.target) break;
     target = route.target;
   }
-  throw new Error("CMS recovery encountered an unresolved or cyclic route");
+  throw new CmsRecoveryError(
+    "CMS recovery encountered an unresolved or cyclic route"
+  );
 }
 
 function renderDocument(page: CmsPageV1, context: RenderContext): string {

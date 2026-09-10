@@ -4,6 +4,10 @@ import { dirname, isAbsolute, relative, resolve } from "node:path";
 import { parseArgs } from "node:util";
 import { Contract, JsonRpcProvider } from "ethers";
 import { sha256 } from "js-sha256";
+import {
+  CmsRecoveryError,
+  formatCmsRecoveryError,
+} from "../../lib/profile-cms/recovery/errors";
 
 import {
   cmsPublicationSchema,
@@ -43,7 +47,7 @@ async function main(): Promise<void> {
     !values.out ||
     Boolean(values.manifest) === Boolean(values["manifest-file"])
   ) {
-    throw new Error(
+    throw new CmsRecoveryError(
       "Provide --out and exactly one of --manifest or --manifest-file"
     );
   }
@@ -52,7 +56,7 @@ async function main(): Promise<void> {
     : await readDecentralized(values.manifest ?? "");
   const expectedHash = values["manifest-hash"];
   if (expectedHash && expectedHash !== `sha256:${sha256(manifestBytes)}`) {
-    throw new Error("Publication manifest hash mismatch");
+    throw new CmsRecoveryError("Publication manifest hash mismatch");
   }
   const manifest = cmsPublicationSchema.parse(
     JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(manifestBytes))
@@ -62,7 +66,9 @@ async function main(): Promise<void> {
     expectedSigner &&
     expectedSigner.toLowerCase() !== manifest.signer_address.toLowerCase()
   ) {
-    throw new Error("Publication signer differs from the expected wallet");
+    throw new CmsRecoveryError(
+      "Publication signer differs from the expected wallet"
+    );
   }
   const contentBytes = values["content-file"]
     ? await readBoundedFile(values["content-file"])
@@ -93,7 +99,7 @@ async function main(): Promise<void> {
       const target = resolve(output, file);
       const within = relative(output, target);
       if (isAbsolute(within) || within.startsWith(".."))
-        throw new Error("Unsafe recovery output path");
+        throw new CmsRecoveryError("Unsafe recovery output path");
       await mkdir(dirname(target), { recursive: true });
       await writeFile(target, html, { flag: "wx" });
     }
@@ -127,24 +133,26 @@ async function readBoundedFile(path: string): Promise<Uint8Array> {
   // remote request or recovered manifest. This command promises no input root.
   const bytes = await readFile(path); // NOSONAR S8707: intentional operator-selected local input, not an agent filesystem sandbox.
   if (bytes.length > MAX_DOCUMENT_BYTES)
-    throw new Error("CMS recovery document exceeds 8 MiB");
+    throw new CmsRecoveryError("CMS recovery document exceeds 8 MiB");
   return bytes;
 }
 
 async function readDecentralized(uri: string): Promise<Uint8Array> {
   if (!/^(ar|arweave|ipfs):\/\//.test(uri)) {
-    throw new Error(
+    throw new CmsRecoveryError(
       "CMS recovery requires an ar:// or ipfs:// content address"
     );
   }
   const url = independentCmsUri(uri);
-  if (!url) throw new Error("Invalid decentralized content address");
+  if (!url) throw new CmsRecoveryError("Invalid decentralized content address");
   const response = await fetch(url, {
     signal: AbortSignal.timeout(30_000),
     redirect: "error",
   });
   if (!response.ok || !response.body)
-    throw new Error(`CMS artifact retrieval failed (HTTP ${response.status})`);
+    throw new CmsRecoveryError(
+      `CMS artifact retrieval failed (HTTP ${response.status})`
+    );
   const reader = response.body.getReader();
   const chunks: Uint8Array[] = [];
   let size = 0;
@@ -154,7 +162,7 @@ async function readDecentralized(uri: string): Promise<Uint8Array> {
       const { value } = chunk;
       size += value.length;
       if (size > MAX_DOCUMENT_BYTES)
-        throw new Error("CMS recovery document exceeds 8 MiB");
+        throw new CmsRecoveryError("CMS recovery document exceeds 8 MiB");
       chunks.push(value);
       chunk = await reader.read();
     }
@@ -176,7 +184,7 @@ function contractVerifier(
   return async ({ chainId, signer, digest, signature }) => {
     const network = await provider.getNetwork();
     if (network.chainId !== BigInt(chainId))
-      throw new Error("RPC chain does not match publication chain");
+      throw new CmsRecoveryError("RPC chain does not match publication chain");
     if ((await provider.getCode(signer)) === "0x") return false;
     const contract = new Contract(
       signer,
@@ -198,11 +206,7 @@ async function run(): Promise<void> {
     await main();
   } catch (error: unknown) {
     // Do not print transport errors, which may contain credential-bearing RPC URLs.
-    process.stderr.write(
-      error instanceof Error && error.message.startsWith("CMS")
-        ? `${error.message}\n`
-        : "CMS recovery failed. Check the manifest, expected signer, content hash, output directory and RPC configuration.\n"
-    );
+    process.stderr.write(`${formatCmsRecoveryError(error)}\n`);
     process.exitCode = 1;
   }
 }

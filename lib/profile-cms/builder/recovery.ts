@@ -45,6 +45,7 @@ export class CmsDraftRecoveryController {
       });
       this.loaded = true;
     } catch {
+      this.loaded = true;
       this.update({ recovery: null, failed: true });
     }
   }
