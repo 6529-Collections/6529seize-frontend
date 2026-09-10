@@ -11,6 +11,23 @@ import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
 import { useQuery } from "@tanstack/react-query";
 import { useCallback } from "react";
 
+export type DropVoteSummaryState =
+  | { readonly status: "disabled" }
+  | { readonly status: "loading" }
+  | {
+      readonly status: "unavailable";
+      readonly retry: () => void;
+    }
+  | {
+      readonly status: "ready";
+      readonly voteDistribution: ApiDropVoteDistribution;
+      readonly retry: () => void;
+    };
+
+export const DISABLED_DROP_VOTE_SUMMARY_STATE = {
+  status: "disabled",
+} as const satisfies DropVoteSummaryState;
+
 export function useDropVoteSummary({
   dropId,
   waveId,
@@ -19,8 +36,8 @@ export function useDropVoteSummary({
   readonly dropId: string;
   readonly waveId: string;
   readonly enabled: boolean;
-}): ApiDropVoteDistribution | undefined {
-  const { data, isError, isFetching, refetch } = useQuery({
+}): DropVoteSummaryState {
+  const { data, isFetching, refetch } = useQuery({
     queryKey: [QueryKey.DROP, { drop_id: dropId, view: "vote-summary" }],
     queryFn: ({ signal }) => fetchDropVoteSummaryByIdV2(dropId, signal),
     enabled,
@@ -65,5 +82,22 @@ export function useDropVoteSummary({
     )
   );
 
-  return enabled && !isError ? data?.vote_distribution : undefined;
+  const retry = useCallback(() => {
+    void refetch();
+  }, [refetch]);
+
+  if (!enabled) {
+    return DISABLED_DROP_VOTE_SUMMARY_STATE;
+  }
+  if (data?.vote_distribution) {
+    return {
+      status: "ready",
+      voteDistribution: data.vote_distribution,
+      retry,
+    };
+  }
+  if (isFetching) {
+    return { status: "loading" };
+  }
+  return { status: "unavailable", retry };
 }

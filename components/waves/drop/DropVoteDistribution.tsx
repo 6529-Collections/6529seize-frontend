@@ -1,5 +1,6 @@
 "use client";
 
+import Button from "@/components/utils/button/Button";
 import type { ApiDropVoteDistribution } from "@/generated/models/ApiDropVoteDistribution";
 import type { ApiDropVoter } from "@/generated/models/ApiDropVoter";
 import { ApiDropType } from "@/generated/models/ApiDropType";
@@ -10,10 +11,12 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatNumber } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Tooltip } from "react-tooltip";
 import type { TooltipRefProps } from "react-tooltip";
+import type { DropVoteSummaryState } from "./useDropVoteSummary";
 
 interface VoteSide {
   readonly positive: boolean;
@@ -62,8 +65,7 @@ function getVoteSide(
     !Number.isSafeInteger(total) ||
     total * direction < 0 ||
     !Array.isArray(voters) ||
-    voters.length > 3 ||
-    (total !== 0 && voters.length === 0)
+    voters.length > 3
   ) {
     return null;
   }
@@ -474,24 +476,95 @@ function VoteSideDescription({
   );
 }
 
+function VoteDistributionLoading({
+  locale,
+}: {
+  readonly locale: SupportedLocale;
+}) {
+  return (
+    <div
+      data-vote-summary
+      role="status"
+      aria-live="polite"
+      aria-busy="true"
+      className="tw-min-h-[4.75rem] tw-w-full tw-px-4 tw-pb-4 tw-pt-2"
+    >
+      <span className="tw-sr-only">
+        {t(locale, "waves.voteInsights.loadingCurrentVotes")}
+      </span>
+      <div aria-hidden="true" className="tw-space-y-3">
+        <div className="tw-h-4 tw-w-full tw-animate-pulse tw-rounded-md tw-bg-iron-800 motion-reduce:tw-animate-none" />
+        <div className="tw-h-3 tw-w-2/5 tw-animate-pulse tw-rounded tw-bg-iron-800/70 motion-reduce:tw-animate-none" />
+      </div>
+    </div>
+  );
+}
+
+function VoteDistributionUnavailable({
+  locale,
+  onRetry,
+}: {
+  readonly locale: SupportedLocale;
+  readonly onRetry: () => void;
+}) {
+  return (
+    <div
+      data-vote-summary
+      role="status"
+      aria-live="polite"
+      className="tw-flex tw-min-h-[4.75rem] tw-w-full tw-items-center tw-gap-3 tw-px-4 tw-py-3"
+    >
+      <ExclamationTriangleIcon
+        aria-hidden="true"
+        className="tw-size-4 tw-flex-shrink-0 tw-text-error"
+      />
+      <p className="tw-m-0 tw-min-w-0 tw-flex-1 tw-text-xs tw-text-iron-300">
+        {t(locale, "waves.voteInsights.loadError")}
+      </p>
+      <Button variant="tertiary" size="xs" onClick={onRetry}>
+        {t(locale, "waves.voteInsights.retry")}
+      </Button>
+    </div>
+  );
+}
+
 export default function DropVoteDistribution({
   drop,
-  voteDistribution,
+  voteSummary,
 }: {
   readonly drop: ExtendedDrop;
-  readonly voteDistribution?: ApiDropVoteDistribution | undefined;
+  readonly voteSummary: DropVoteSummaryState;
 }) {
   const locale = useBrowserLocale();
   const explanationId = useId();
-  const sides = getVoteSides(voteDistribution);
   const unit = WAVE_VOTING_LABELS[drop.wave.voting_credit_type];
-  if (drop.drop_type !== ApiDropType.Participatory || !sides || !unit) {
+  if (
+    drop.drop_type !== ApiDropType.Participatory ||
+    voteSummary.status === "disabled" ||
+    !unit
+  ) {
     return null;
+  }
+  if (voteSummary.status === "loading") {
+    return <VoteDistributionLoading locale={locale} />;
+  }
+  const sides =
+    voteSummary.status === "ready"
+      ? getVoteSides(voteSummary.voteDistribution)
+      : null;
+  if (!sides) {
+    return (
+      <VoteDistributionUnavailable
+        locale={locale}
+        onRetry={voteSummary.retry}
+      />
+    );
   }
   const hasBothVoteSides = sides.every((side) => side.voters.length > 0);
 
   return (
     <figure
+      data-vote-summary
       aria-labelledby={explanationId}
       className="tw-m-0 tw-w-full tw-px-4 tw-pb-4 tw-pt-2"
     >
