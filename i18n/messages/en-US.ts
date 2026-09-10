@@ -567,6 +567,8 @@ const MEMES_WAVE_FOOTER_MESSAGES = objectMessages("memes.waveFooter", {
 } as const);
 
 const DROP_REACTION_MESSAGES = objectMessages("drops.reactions", {
+  unconfirmed:
+    "Could not confirm your reaction. Refresh to check before trying again.",
   capabilityDisabled: "Reactions are disabled for this wave.",
   requestTimedOut:
     "The reaction request timed out. Refreshing the latest reaction state; wait before trying again.",
@@ -797,6 +799,9 @@ const WAVE_VOTE_INSIGHTS_MESSAGES = objectMessages("waves.voteInsights", {
   largestVote: "Largest vote",
   largestVotes: "Largest votes",
   currentVotes: "Current votes",
+  loadingCurrentVotes: "Loading current votes…",
+  loadError: "Current votes couldn’t be loaded.",
+  retry: "Retry",
   viewBreakdown: "View vote breakdown",
   largestPositive: "Largest supporting vote",
   largestNegative: "Largest opposing vote",
@@ -2747,6 +2752,20 @@ const MEME_DATA_TABLE_MESSAGES = objectMessages("memeData", {
 } as const);
 
 export const EN_US_MESSAGES = {
+  "nftPicker.address.label": "Select collection",
+  "nftPicker.address.placeholder": "Paste an Ethereum contract address…",
+  "nftPicker.address.help":
+    "Paste the collection's Ethereum contract address (0x…). Collection-name search is unavailable.",
+  "nftPicker.address.invalid":
+    "Enter a valid Ethereum contract address: 0x followed by 40 hexadecimal characters.",
+  "nftPicker.address.loading": "Looking up collection…",
+  "nftPicker.address.error": "Could not load this collection. Try again.",
+  "nftPicker.address.notFound":
+    "No collection metadata found for this address. Check the address and try another.",
+  "nftPicker.address.unsupported":
+    "Only ERC-721 collections can be selected here.",
+  "nftPicker.address.found": "Select the collection below to continue.",
+  "nftPicker.address.retry": "Try again",
   "profilePreferences.title": "Profile Preferences",
   "profilePreferences.button": "Preferences",
   "profilePreferences.loading": "Loading profile preferences",
