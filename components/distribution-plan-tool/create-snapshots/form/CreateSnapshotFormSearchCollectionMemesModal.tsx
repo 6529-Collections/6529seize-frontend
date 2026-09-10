@@ -5,6 +5,7 @@ import { t } from "@/i18n/messages";
 import { MEMES_CONTRACT } from "@/constants/constants";
 import { distributionPlanApiFetch } from "@/services/distribution-plan-api";
 import { useEffect, useState } from "react";
+import { MEMES_SNAPSHOT_COLLECTION_NAME } from "./snapshot-collections";
 
 type MemesSeason = `SZN${number}`;
 
@@ -58,10 +59,11 @@ export default function CreateSnapshotFormSearchCollectionMemesModal({
   };
 
   const onDone = () => {
+    // All or no seasons intentionally means the full Memes collection.
     if (selected.length === options.length || !selected.length) {
       onMemesCollection({
         address: MEMES_CONTRACT.toLowerCase(),
-        name: "The Memes by 6529",
+        name: MEMES_SNAPSHOT_COLLECTION_NAME,
         tokenIds: null,
       });
       return;

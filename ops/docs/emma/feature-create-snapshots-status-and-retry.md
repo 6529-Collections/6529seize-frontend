@@ -113,9 +113,11 @@ This step covers:
 
 - The five shortcuts stay available when metadata lookup is unavailable.
 - If address metadata lookup cannot fill a name, enter the name yourself.
-- Intern JPG token IDs load before the form is filled. If that lookup fails,
-  review and enter the subcollection token IDs manually before adding a snapshot;
-  leaving token IDs empty uses all tokens in the shared contract.
+- Intern JPG token IDs load before the form is filled. If that lookup fails or
+  returns no token IDs, an error explains that your current collection details
+  have not changed. Select the shortcut again to retry, or enter its name,
+  contract address, and subcollection token IDs manually. Leaving token IDs
+  empty uses all tokens in the shared contract.
 
 - When one or more snapshot rows fail, EMMA shows `Snapshot attention required`
   above the step.

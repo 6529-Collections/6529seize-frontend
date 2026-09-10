@@ -11,6 +11,10 @@ export interface SnapshotCollectionSelection {
   readonly tokenIds: string | null;
 }
 
+// Collection names are canonical proper names and snapshot data, not translated
+// interface copy. Keep them identical across locales and backend submissions.
+export const MEMES_SNAPSHOT_COLLECTION_NAME = "The Memes by 6529";
+
 export const INTERN_JPGS_COLLECTION_ID =
   "0x495f947276749ce646f68ac8c248420045cb7b5e:opensea-6529internjpg";
 
@@ -20,7 +24,7 @@ export const SNAPSHOT_COLLECTIONS = [
   {
     id: MEMES_CONTRACT.toLowerCase(),
     address: MEMES_CONTRACT.toLowerCase(),
-    name: "The Memes by 6529",
+    name: MEMES_SNAPSHOT_COLLECTION_NAME,
     tokenType: "ERC1155",
     imageUrl: "https://6529.io/memes-preview.png",
   },

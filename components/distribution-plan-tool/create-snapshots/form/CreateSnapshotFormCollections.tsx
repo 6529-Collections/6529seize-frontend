@@ -8,6 +8,7 @@ import Image from "next/image";
 import { useId, useRef, useState } from "react";
 import CreateSnapshotFormSearchCollectionMemesModal from "./CreateSnapshotFormSearchCollectionMemesModal";
 import {
+  MEMES_SNAPSHOT_COLLECTION_NAME,
   SNAPSHOT_COLLECTIONS,
   type SnapshotCollectionSelection,
 } from "./snapshot-collections";
@@ -15,11 +16,13 @@ import {
 export default function CreateSnapshotFormCollections({
   selectedCollectionId,
   loadingCollectionId,
+  hasCollectionError,
   setCollection,
   onSelectionStart,
 }: {
   readonly selectedCollectionId: string | null;
   readonly loadingCollectionId: string | null;
+  readonly hasCollectionError: boolean;
   readonly setCollection: (collection: SnapshotCollectionSelection) => void;
   readonly onSelectionStart: () => void;
 }) {
@@ -81,18 +84,25 @@ export default function CreateSnapshotFormCollections({
           {t(locale, "emma.snapshots.loadingTokens")}
         </output>
       )}
+      {hasCollectionError && (
+        <p role="alert" className="tw-mb-0 tw-mt-2 tw-text-sm tw-text-error">
+          {t(locale, "emma.snapshots.tokenIdsError")}
+        </p>
+      )}
       <MobileWrapperDialog
         isOpen={isOnMemesCollection}
         onClose={() => setIsOnMemesCollection(false)}
         onAfterLeave={() => memesButtonRef.current?.focus()}
-        title={t(locale, "emma.snapshots.seasonsTitle")}
+        title={t(locale, "emma.snapshots.seasonsTitle", {
+          collectionName: MEMES_SNAPSHOT_COLLECTION_NAME,
+        })}
         tabletModal
         maxWidthClass="md:tw-max-w-2xl"
         noPadding
       >
         {isOnMemesCollection && (
           <CreateSnapshotFormSearchCollectionMemesModal
-            collectionName="The Memes by 6529"
+            collectionName={MEMES_SNAPSHOT_COLLECTION_NAME}
             onMemesCollection={(collection) => {
               setCollection({
                 ...collection,

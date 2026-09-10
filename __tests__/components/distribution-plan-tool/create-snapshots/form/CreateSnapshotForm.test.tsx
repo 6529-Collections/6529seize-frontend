@@ -304,13 +304,10 @@ describe("fixed snapshot collection shortcuts", () => {
     ).toBeVisible();
   });
 
-  it.each([
-    "115792089237316195423570985008687907853269984665640564039457584007913129639935,2-4",
-    "",
-    null,
-  ])("preserves Intern JPG token IDs: %s", async (tokenIds) => {
+  it("preserves Intern JPG token IDs without numeric conversion", async () => {
+    const tokenIds = `${(BigInt(2) ** BigInt(256) - BigInt(1)).toString()},2-4`;
     fetchMock.mockImplementation(async (endpoint: string) => ({
-      success: tokenIds !== null,
+      success: true,
       data: endpoint.includes("contract-token-ids-as-string")
         ? { tokenIds }
         : 100,
@@ -328,8 +325,45 @@ describe("fixed snapshot collection shortcuts", () => {
     expect(screen.getByLabelText("Contract address")).toHaveValue(
       shortcuts[4][2]
     );
-    expect(screen.getByLabelText("Token ID(s)")).toHaveValue(tokenIds ?? "");
+    expect(screen.getByLabelText("Token ID(s)")).toHaveValue(tokenIds);
   });
+
+  it.each(["failure", "empty", "reject"])(
+    "keeps the current form and supports retry after an Intern lookup %s",
+    async (failure) => {
+      fetchMock.mockImplementation(async (endpoint: string) => {
+        if (!endpoint.includes("contract-token-ids-as-string"))
+          return { success: true, data: 100 };
+        if (failure === "reject") throw new Error("Unavailable");
+        return { success: failure === "empty", data: { tokenIds: "" } };
+      });
+      renderForm();
+      await userEvent.click(
+        screen.getByRole("button", { name: "Meme Lab ERC1155" })
+      );
+      const intern = screen.getByRole("button", {
+        name: "6529 Intern JPGs ERC1155",
+      });
+      await userEvent.click(intern);
+      expect(await screen.findByRole("alert")).toHaveTextContent(
+        "Your collection details have not changed"
+      );
+      expect(screen.getByLabelText("Name")).toHaveValue("Meme Lab");
+      expect(screen.getByLabelText("Contract address")).toHaveValue(
+        shortcuts[1][2]
+      );
+      expect(intern).toHaveAttribute("aria-busy", "false");
+      expect(intern).toHaveAttribute("aria-pressed", "false");
+      expect(
+        screen.getByRole("button", { name: "Add snapshot" })
+      ).toBeEnabled();
+      fetchMock.mockResolvedValue({ success: true, data: { tokenIds: "5-9" } });
+      await userEvent.click(intern);
+      expect(screen.getByLabelText("Name")).toHaveValue("6529 Intern JPGs");
+      expect(screen.getByLabelText("Token ID(s)")).toHaveValue("5-9");
+      expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    }
+  );
 
   it("does not let a pending Intern selection overwrite a newer shortcut", async () => {
     let resolve!: (value: {

@@ -32,13 +32,17 @@ interface CreateSnapshotFormValues {
 
 export default function CreateSnapshotForm() {
   const locale = useBrowserLocale();
+  // Every collection edit or selection invalidates older autofill and token-ID
+  // requests synchronously, before a new request captures this shared version.
   const collectionRequest = useRef(0);
+  const [hasCollectionError, setHasCollectionError] = useState(false);
   const [loadingCollectionId, setLoadingCollectionId] = useState<string | null>(
     null
   );
   const cancelCollectionRequest = () => {
     collectionRequest.current += 1;
     setLoadingCollectionId(null);
+    setHasCollectionError(false);
   };
   const { distributionPlan, fetchOperations } = useContext(
     DistributionPlanToolContext
@@ -182,11 +186,22 @@ export default function CreateSnapshotForm() {
     let tokenIds = param.tokenIds;
     if (param.id === INTERN_JPGS_COLLECTION_ID) {
       setLoadingCollectionId(param.id);
-      const { data } = await distributionPlanApiFetch<{ tokenIds: string }>(
-        `/other/contract-token-ids-as-string/${param.id}`
-      );
-      const fetchedTokenIds = data?.tokenIds ?? "";
-      tokenIds = fetchedTokenIds.length > 0 ? fetchedTokenIds : null;
+      try {
+        const { success, data } = await distributionPlanApiFetch<{
+          tokenIds: string;
+        }>(`/other/contract-token-ids-as-string/${param.id}`);
+        if (request !== collectionRequest.current) return;
+        if (!success || !data?.tokenIds) {
+          setHasCollectionError(true);
+          return;
+        }
+        tokenIds = data.tokenIds;
+      } catch {
+        if (request === collectionRequest.current) setHasCollectionError(true);
+        return;
+      } finally {
+        if (request === collectionRequest.current) setLoadingCollectionId(null);
+      }
     }
     if (request !== collectionRequest.current) return;
     setLoadingCollectionId(null);
@@ -208,6 +223,7 @@ export default function CreateSnapshotForm() {
       <CreateSnapshotFormCollections
         selectedCollectionId={formValues.collectionId}
         loadingCollectionId={loadingCollectionId}
+        hasCollectionError={hasCollectionError}
         setCollection={setCollection}
         onSelectionStart={cancelCollectionRequest}
       />
@@ -226,7 +242,7 @@ export default function CreateSnapshotForm() {
               htmlFor="snapshot-name"
               className="tw-flex tw-min-h-8 tw-items-center tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-100"
             >
-              Name
+              {t(locale, "emma.snapshots.name")}
             </label>
             <div className="tw-mt-2">
               <input
@@ -237,7 +253,7 @@ export default function CreateSnapshotForm() {
                 onChange={handleChange}
                 required
                 autoComplete="off"
-                placeholder="Snapshot name"
+                placeholder={t(locale, "emma.snapshots.namePlaceholder")}
                 className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-700/40 tw-px-3 tw-py-3 tw-text-base tw-font-light tw-text-white tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700/40 tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-500 hover:tw-ring-iron-700 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 sm:tw-leading-6"
               />
             </div>
@@ -265,10 +281,12 @@ export default function CreateSnapshotForm() {
           </div>
           <div className="tw-min-w-0">
             <div className="tw-flex tw-items-center tw-gap-1 tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-100">
-              <label htmlFor="snapshot-block-number">Block number</label>
+              <label htmlFor="snapshot-block-number">
+                {t(locale, "emma.snapshots.blockNumber")}
+              </label>
               <button
                 type="button"
-                aria-label="Open Etherscan block explorer in a new tab"
+                aria-label={t(locale, "emma.snapshots.blockExplorerLabel")}
                 onClick={goToEtherScan}
                 data-tooltip-id="block-number-tooltip"
                 className="tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-500 hover:tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
@@ -294,7 +312,7 @@ export default function CreateSnapshotForm() {
                 place="top"
                 style={TOOLTIP_STYLES}
               >
-                Use etherscan.io to find previous block numbers
+                {t(locale, "emma.snapshots.blockHelp")}
               </Tooltip>
             </div>
             <div className="tw-mt-2">
@@ -306,7 +324,7 @@ export default function CreateSnapshotForm() {
                 onChange={handleChange}
                 required
                 autoComplete="off"
-                placeholder="Block number"
+                placeholder={t(locale, "emma.snapshots.blockNumber")}
                 className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-700/40 tw-px-3 tw-py-3 tw-text-base tw-font-light tw-text-white tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700/40 tw-transition tw-duration-300 tw-ease-out [appearance:textfield] placeholder:tw-text-iron-500 hover:tw-ring-iron-700 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 sm:tw-leading-6 [&::-webkit-inner-spin-button]:tw-m-0 [&::-webkit-inner-spin-button]:tw-appearance-none [&::-webkit-outer-spin-button]:tw-m-0 [&::-webkit-outer-spin-button]:tw-appearance-none"
               />
             </div>
@@ -315,10 +333,12 @@ export default function CreateSnapshotForm() {
         <div className="tw-grid tw-w-full tw-grid-cols-1 tw-gap-4 md:tw-grid-cols-2 md:tw-items-end lg:tw-grid-cols-3">
           <div className="tw-min-w-0">
             <div className="tw-flex tw-items-center tw-gap-1 tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-100">
-              <label htmlFor="snapshot-token-ids">Token ID(s)</label>
+              <label htmlFor="snapshot-token-ids">
+                {t(locale, "emma.snapshots.tokenIds")}
+              </label>
               <button
                 type="button"
-                aria-label="Show token ID format example"
+                aria-label={t(locale, "emma.snapshots.tokenIdsExampleLabel")}
                 data-tooltip-id="token-ids-tooltip"
                 className="tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-500 hover:tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
               >
@@ -343,7 +363,7 @@ export default function CreateSnapshotForm() {
                 place="top"
                 style={TOOLTIP_STYLES}
               >
-                Example: 1,3,54-78
+                {t(locale, "emma.snapshots.tokenIdsExample")}
               </Tooltip>
             </div>
             <div className="tw-mt-2">
@@ -354,7 +374,7 @@ export default function CreateSnapshotForm() {
                 value={formValues.tokenIds}
                 onChange={handleChange}
                 autoComplete="off"
-                placeholder="Empty for All tokens"
+                placeholder={t(locale, "emma.snapshots.allTokensPlaceholder")}
                 className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-700/40 tw-px-3 tw-py-3 tw-text-base tw-font-light tw-text-white tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700/40 tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-500 hover:tw-ring-iron-700 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 sm:tw-leading-6"
               />
             </div>
@@ -366,13 +386,13 @@ export default function CreateSnapshotForm() {
                 className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-100"
               >
                 <span className="tw-font-medium tw-text-iron-100">
-                  Consolidation block number
+                  {t(locale, "emma.snapshots.consolidationBlock")}
                 </span>
                 <span
                   id="snapshot-consolidation-block-help"
                   className="tw-mt-0.5 tw-block tw-text-xs tw-text-iron-400"
                 >
-                  Leave empty if you don&apos;t want to consolidate.
+                  {t(locale, "emma.snapshots.consolidationHelp")}
                 </span>
               </label>
               <div className="tw-mt-2">
@@ -381,7 +401,10 @@ export default function CreateSnapshotForm() {
                   aria-describedby="snapshot-consolidation-block-help"
                   type="text"
                   autoComplete="off"
-                  placeholder="Consolidate block number"
+                  placeholder={t(
+                    locale,
+                    "emma.snapshots.consolidationPlaceholder"
+                  )}
                   className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-700/40 tw-px-3 tw-py-3 tw-text-base tw-font-light tw-text-white tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700/40 tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-500 hover:tw-ring-iron-700 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 sm:tw-leading-6"
                   value={consolidateBlockNo}
                   onChange={handleConsolidationBlockNoChange}
@@ -394,7 +417,7 @@ export default function CreateSnapshotForm() {
               <DistributionPlanAddOperationBtn
                 loading={isLoading || !!loadingCollectionId}
               >
-                Add snapshot
+                {t(locale, "emma.snapshots.addSnapshot")}
               </DistributionPlanAddOperationBtn>
             </div>
           </div>
