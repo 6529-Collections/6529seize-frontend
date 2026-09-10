@@ -237,7 +237,7 @@ function DiscoverWaveControls({
   const scoreFiltersEnabled = isScoreSort(activeSort);
 
   return (
-    <fieldset className="tw-m-0 tw-w-full tw-min-w-0 tw-rounded-lg tw-border-0 tw-bg-black/20 tw-p-1.5 tw-ring-1 tw-ring-inset tw-ring-white/5">
+    <fieldset className="tw-m-0 tw-w-full tw-min-w-0 tw-rounded-lg tw-border-0 tw-bg-black/20 tw-p-1.5">
       <legend className="tw-sr-only">Discovery controls</legend>
       <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-3">
         <div className="tw-w-max tw-min-w-0 tw-max-w-full">

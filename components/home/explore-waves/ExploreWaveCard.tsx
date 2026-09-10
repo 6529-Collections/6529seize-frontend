@@ -266,13 +266,15 @@ export function ExploreWaveCard({
     EXPLORE_WAVE_CARD_LOCALE,
     wave.totalDropsCount
   );
+  const timeAgoLabel = hasDrops ? getTimeAgoShort(lastMessageTime) : "";
+  const shouldAppendAgo = isDiscover && /^\d+[hm]$/.test(timeAgoLabel);
   const dropsCountLabel = hasDrops
     ? t(
         EXPLORE_WAVE_CARD_LOCALE,
-        getDropsCountMessageKey(wave.totalDropsCount, isDiscover),
+        getDropsCountMessageKey(wave.totalDropsCount, shouldAppendAgo),
         {
           count: formattedDropsCount,
-          timeAgo: getTimeAgoShort(lastMessageTime),
+          timeAgo: timeAgoLabel,
         }
       )
     : null;
