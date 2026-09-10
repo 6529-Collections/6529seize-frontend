@@ -3,7 +3,7 @@ export const ARTWORK_DOCUMENTATION_GUIDANCE_MESSAGES = {
   "artworkDocumentation.publication.previewNotice":
     "This previews the artwork information intended for publication. It is still a draft; nothing is published or minted here. Drafting questions and team discussion are not part of the artwork record.",
   "artworkDocumentation.publication.interviewHelp":
-    "A short written reflection or a recorded conversation can preserve details a caption leaves out. This section is optional. Include only words and recordings you want published with the artwork, with permission from the participants.",
+    "A short written reflection or a recorded conversation can preserve details a caption leaves out. The artist interview is optional. Include only words and recordings you want published with the artwork, with permission from the participants.",
   "artworkDocumentation.publication.newContextHelp":
     "The same work can have a separate record for another program. Your existing answers, files, discussions and access grants are not copied automatically.",
   "artworkDocumentation.examples.yourRecord": "Your artwork record",

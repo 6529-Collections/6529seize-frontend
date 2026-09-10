@@ -56,7 +56,9 @@ export const ARTWORK_DOCUMENTATION_EXAMPLE_MESSAGES = {
   "artworkDocumentation.examples.context.making_context.starter":
     "Before making the image, [circumstances]. During the work, [what happened]. Afterward, [relevant changes or what survives].",
   "artworkDocumentation.examples.context.theme_connection.answer":
-    "“The gate offers an opening but no view of what comes after it. For Keys and Gates, I was interested in access as a promise: a boundary can appear simple while leaving the terms of entry uncertain.” Or select “My caption covers this” when it genuinely does.",
+    "The gate offers an opening but no view of what comes after it. For Keys and Gates, I was interested in access as a promise: a boundary can appear simple while leaving the terms of entry uncertain.",
+  "artworkDocumentation.examples.context.theme_connection.why":
+    "Choose My caption covers this when your caption already explains the connection.",
   "artworkDocumentation.examples.context.misunderstandings.answer":
     "“This is a constructed tabletop scene, not a photograph of a real checkpoint. The opening is made from two exposures of the same set. I am not documenting a particular border or a person's experience of crossing it.”",
   "artworkDocumentation.examples.context.misunderstandings.starter":
