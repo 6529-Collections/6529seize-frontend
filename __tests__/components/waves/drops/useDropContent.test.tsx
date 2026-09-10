@@ -5,7 +5,7 @@ import React from "react";
 import { useDropContent } from "@/components/waves/drops/useDropContent";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropModerationStatus } from "@/generated/models/ApiDropModerationStatus";
-import { fetchDropByIdBatched } from "@/services/api/drop-api";
+import { fetchDropByIdBatched, getDropQueryKey } from "@/services/api/drop-api";
 
 // Mock dependencies
 jest.mock("@/services/api/drop-api", () => {
@@ -53,8 +53,8 @@ const mockFetchDropByIdBatched = fetchDropByIdBatched as jest.MockedFunction<
 >;
 
 // Test wrapper with QueryClient
-const createWrapper = () => {
-  const queryClient = new QueryClient({
+const createQueryClient = () =>
+  new QueryClient({
     defaultOptions: {
       queries: {
         retry: false,
@@ -63,6 +63,7 @@ const createWrapper = () => {
     },
   });
 
+const createWrapper = (queryClient = createQueryClient()) => {
   const Wrapper = ({ children }: { children: ReactNode }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
@@ -418,10 +419,44 @@ describe("useDropContent", () => {
 
   describe("Query behavior", () => {
     it("disables query when maybeDrop is provided", () => {
-      renderHook(() => useDropContent("drop-123", 1, mockDrop), {
-        wrapper: createWrapper(),
-      });
+      const queryClient = createQueryClient();
+      const { result } = renderHook(
+        () => useDropContent("drop-123", 1, mockDrop),
+        { wrapper: createWrapper(queryClient) }
+      );
 
+      expect(result.current.drop).toBe(mockDrop);
+      expect(
+        queryClient.getQueryData(getDropQueryKey("drop-123"))
+      ).toBeUndefined();
+      expect(mockFetchDropByIdBatched).not.toHaveBeenCalled();
+    });
+
+    it("does not let a reply preview replace cached full drop details", () => {
+      const queryClient = createQueryClient();
+      queryClient.setQueryData(getDropQueryKey("drop-123"), mockDrop);
+      const replyPreview = {
+        ...mockDrop,
+        created_at: 0,
+        parts: [
+          {
+            part_id: 1,
+            content: "Test content",
+            quoted_drop: null,
+            media: [],
+          },
+        ],
+      } as unknown as ApiDrop;
+
+      const { result } = renderHook(
+        () => useDropContent("drop-123", 1, replyPreview),
+        { wrapper: createWrapper(queryClient) }
+      );
+
+      expect(result.current.drop).toBe(mockDrop);
+      expect(queryClient.getQueryData(getDropQueryKey("drop-123"))).toBe(
+        mockDrop
+      );
       expect(mockFetchDropByIdBatched).not.toHaveBeenCalled();
     });
 
