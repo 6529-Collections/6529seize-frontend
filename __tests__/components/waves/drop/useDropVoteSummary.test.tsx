@@ -73,7 +73,18 @@ describe("useDropVoteSummary", () => {
     });
   });
 
-  it("preserves valid data when a refresh returns a malformed distribution", () => {
+  it.each([
+    [
+      "a malformed distribution",
+      {
+        vote_distribution: {
+          ...distribution,
+          positive_votes: [{ vote: -100, voter: { id: "opponent" } }],
+        },
+      },
+    ],
+    ["no distribution", {}],
+  ])("preserves valid data when a refresh returns %s", (_label, next) => {
     useQueryMock.mockReturnValue({
       data: { vote_distribution: distribution },
       isFetching: false,
@@ -85,13 +96,9 @@ describe("useDropVoteSummary", () => {
     if (typeof structuralSharing !== "function") {
       throw new Error("Expected vote summary structural sharing");
     }
-    const malformed = {
-      ...distribution,
-      positive_votes: [{ vote: -100, voter: { id: "opponent" } }],
-    };
     const preserved = structuralSharing(
       { vote_distribution: distribution },
-      { vote_distribution: malformed }
+      next
     );
     useQueryMock.mockReturnValue({
       data: preserved,

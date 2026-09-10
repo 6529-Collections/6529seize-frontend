@@ -41,10 +41,9 @@ function preserveValidVoteSummary(previous: unknown, next: unknown): unknown {
       : undefined;
   const nextDistribution = nextSummary.vote_distribution;
   if (
-    nextDistribution &&
-    !getVoteSides(nextDistribution) &&
     previousSummary &&
-    getVoteSides(previousSummary.vote_distribution)
+    getVoteSides(previousSummary.vote_distribution) &&
+    !getVoteSides(nextDistribution)
   ) {
     return previousSummary;
   }
