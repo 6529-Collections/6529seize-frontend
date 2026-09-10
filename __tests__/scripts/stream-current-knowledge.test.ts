@@ -16,7 +16,22 @@ interface KnowledgeRecord {
   text?: string;
   summary?: string;
   canonicalPath: string;
-  structured?: { summary: string; beforeLaunch: { text: string }[] };
+  kind: string;
+  title: string;
+  provenance: { sourceCommit: string };
+  structured?: {
+    summary: string;
+    headline: string;
+    checkedAt: string;
+    state: string;
+    evidenceSummary: {
+      openReleaseBlockers: number;
+      requirements: { complete: number; pending: number; missing: number };
+    };
+    beforeLaunch: { id: string; text: string }[];
+    recentlyCompleted: { id: string; text: string }[];
+    workingOn: { id: string; text: string }[];
+  };
 }
 
 interface KnowledgePack {
@@ -206,8 +221,71 @@ it("changes the cache identity and gives the bot the current launch card", () =>
   expect(status?.structured?.summary).toBe(
     development["publicReview.development.summary"]
   );
-  expect(status?.structured?.beforeLaunch).toHaveLength(4);
+  expect(status?.structured?.beforeLaunch).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({
+        text: development["publicReview.development.beforeLaunch.connections"],
+      }),
+    ])
+  );
   expect(status?.summary).toContain("complete system is unfinished");
+});
+
+it("keeps counts and detailed launch work retrievable within the backend evidence budget", () => {
+  const saved = source.records.find(
+    (record) => record.id === "status:latest-development"
+  )?.structured;
+  const record = current.records.find(
+    (entry) => entry.id === "status:latest-development"
+  );
+  const search = current.searchIndex.records.find(
+    (entry) => entry.id === "status:latest-development"
+  );
+  if (!saved || !record?.structured || !search)
+    throw new Error("Missing status fixture.");
+  const details = [
+    saved.checkedAt,
+    `${saved.evidenceSummary.requirements.missing} missing requirements`,
+    `${saved.evidenceSummary.openReleaseBlockers} open release blockers in the saved risk register`,
+    ...saved.recentlyCompleted.map((item) => item.text),
+    ...saved.workingOn.map((item) => item.text),
+    ...saved.beforeLaunch.map((item) => item.text),
+  ];
+  for (const fact of details) {
+    expect(search.searchText).toContain(fact);
+    expect(record.summary).toContain(fact);
+  }
+  expect(record.structured.beforeLaunch).toEqual(
+    expect.arrayContaining(saved.beforeLaunch)
+  );
+  expect(search.searchText.length).toBeLessThanOrEqual(1_600);
+
+  // The consumer selects these facts and falls back to a headline-only answer
+  // above 2,300 characters. Keep the detailed status usable after adding copy.
+  const status = record.structured;
+  const evidence = {
+    evidence: 0,
+    id: record.id,
+    category: record.category,
+    kind: record.kind,
+    title: record.title,
+    canonicalPath: record.canonicalPath,
+    sourceCommit: record.provenance.sourceCommit,
+    structured: {
+      checkedAt: status.checkedAt,
+      state: status.state,
+      headline: status.headline,
+      summary: status.summary,
+      evidenceSummary: status.evidenceSummary,
+      recentlyCompleted: status.recentlyCompleted.map(({ id, text }) => ({
+        id,
+        text,
+      })),
+      workingOn: status.workingOn.map(({ id, text }) => ({ id, text })),
+      beforeLaunch: status.beforeLaunch.map(({ id, text }) => ({ id, text })),
+    },
+  };
+  expect(JSON.stringify(evidence).length).toBeLessThanOrEqual(2_300);
 });
 
 it("does not apply current corrections to a retained or unrelated version", () => {

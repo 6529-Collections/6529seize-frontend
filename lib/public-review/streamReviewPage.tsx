@@ -101,6 +101,7 @@ function getStreamReviewMetadata({
   };
 }
 
+/** Loads the selected published editorial version and its validated source context. */
 async function loadAvailableStreamEditorialContent({
   contentVersion,
   route,
@@ -157,6 +158,7 @@ type StreamReviewSource = {
   readonly tree: string;
 };
 
+/** Identifies current-route reading features without enabling them on saved versions. */
 function getCurrentStreamReviewPages(
   route: StreamReviewRouteModel
 ): CurrentStreamReviewPages {
@@ -344,6 +346,7 @@ function getDisplayedPageTitle(
   return page;
 }
 
+/** Derives feedback anchors from visible editorial or the current roles guide. */
 function getDisplayedSections({
   currentPages,
   editorialMarkdown,
@@ -357,6 +360,7 @@ function getDisplayedSections({
   return extractPublicReviewSections(editorialMarkdown);
 }
 
+/** Aligns feedback targets with visible sections and retains historical targets when needed. */
 function getDisplayedFeedbackConfig({
   feedbackConfig,
   pageId,

@@ -238,6 +238,9 @@ and manifest checksums invalidate the backend's previous evidence cache.
 Packaging rejects any bytes outside that exact projection. The launch-status
 record also uses the same readiness summary and before-launch items as the
 current page, while retaining the dated source evidence.
+The checked date, requirement and blocker counts, completed work, work in
+progress, and detailed launch steps remain in searchable text so the bot can
+retrieve them before it loads the full status record.
 
 ## Lifecycle Capabilities
 

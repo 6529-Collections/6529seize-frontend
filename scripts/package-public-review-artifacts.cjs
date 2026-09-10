@@ -105,6 +105,7 @@ function sha256File(filePath) {
   return sha256Urn(fs.readFileSync(filePath));
 }
 
+/** Inventories files deterministically, rejecting unsupported entries and unapproved symlinks. */
 function walkDirectory(root, options = {}) {
   const entries = [];
   if (!fs.existsSync(root)) {
@@ -157,6 +158,7 @@ function walkDirectory(root, options = {}) {
   return entries;
 }
 
+/** Hashes a deterministic file inventory to detect changed artifact or source bytes. */
 function directoryIdentity(root, options) {
   return crypto
     .createHash("sha256")
@@ -178,6 +180,7 @@ function assertPackagedKnowledge(sourceRoot, bundleRoot, corrections, label) {
   );
 }
 
+/** Records source-tree identities so packaging can prove it did not rewrite evidence. */
 function captureSourceIdentity(repoRoot) {
   const roots = [
     "public",
@@ -744,6 +747,7 @@ function assertSourceFiles(bundle, versionRoot) {
   assertExactFileSet(sourceRoot, expectedPaths, "Packaged source");
 }
 
+/** Checks definition shard contents and inventory against the pinned reference manifest. */
 function assertDefinitionShards(bundle, versionRoot) {
   invariant(
     Array.isArray(bundle.definitionIndex),
@@ -804,6 +808,7 @@ function assertDefinitionShards(bundle, versionRoot) {
   );
 }
 
+/** Verifies published reference identities, source shards, and exact Help Bot projections. */
 function assertCanonicalReviewEvidence({
   repoRoot,
   bundlePublicRoot,
@@ -1214,6 +1219,7 @@ function assertProductionRuntimeConfig(bundleRoot) {
   );
 }
 
+/** Verifies a complete staging or production bundle against its publication policy. */
 function assertProfileBundle({
   repoRoot,
   bundleRoot,
@@ -1248,6 +1254,7 @@ function assertProfileBundle({
   );
 }
 
+/** Removes an optional bundle directory while refusing symlinks and non-directory paths. */
 function removeDirectoryIfPresent(directory) {
   if (!fs.existsSync(directory)) {
     return;

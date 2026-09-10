@@ -106,20 +106,24 @@ function correctedEditorialRecords(repoRoot, sourceRecords) {
 /** Uses the launch card's current wording without claiming new source evidence. */
 function correctedDevelopmentRecord(source) {
   invariant(source?.structured, "Missing active development status.");
+  const saved = source.structured;
+  const requirements = saved.evidenceSummary.requirements;
   const headline = `${development["publicReview.development.heading"]} ${development["publicReview.development.answer"]}`;
   const summary = development["publicReview.development.summary"];
-  const beforeLaunch = [
-    "connections",
-    "audit",
-    "liveTesting",
-    "launchSetup",
-  ].map((id) => ({
-    id,
-    text: development[`publicReview.development.beforeLaunch.${id}`],
-  }));
+  const beforeLaunch = ["connections", "audit", "liveTesting", "launchSetup"]
+    .map((id) => ({
+      id,
+      text: development[`publicReview.development.beforeLaunch.${id}`],
+    }))
+    .concat(saved.beforeLaunch);
   const text = [
     headline,
     summary,
+    `Checked ${saved.checkedAt}.`,
+    `Evidence checklist: ${requirements.complete} complete, ${requirements.pending} pending, ${requirements.missing} missing requirements.`,
+    `${saved.evidenceSummary.openReleaseBlockers} open release blockers in the saved risk register.`,
+    ...saved.recentlyCompleted.map((item) => item.text),
+    ...saved.workingOn.map((item) => item.text),
     ...beforeLaunch.map((item) => item.text),
   ].join(" ");
   return {
