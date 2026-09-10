@@ -9,9 +9,12 @@ import stormComposerFrMessages from "@/i18n/messages/stormComposer.fr-FR.json";
 import type { MessageKey } from "@/i18n/messages/en-US";
 
 export const FR_FR_MESSAGES = {
-  "profileCms.builder.gallery.snapshot.required": "Demandez et vérifiez un instantané des portefeuilles avant d’enregistrer ou de publier cette galerie.",
-  "profileCms.builder.publish.savedNotCurrent": "Cette publication signée est enregistrée, mais ce n’est pas le site actif. Consultez l’historique des versions avant de modifier le site.",
-  "profileCms.builder.gallery.snapshot.warning.unmeasuredImages": "Les dimensions de certaines images n’ont pas pu être vérifiées. Ces œuvres conservent leurs informations NFT sans image dans la publication. Actualisez l’instantané pour réessayer.",
+  "profileCms.builder.gallery.snapshot.required":
+    "Demandez et vérifiez un instantané des portefeuilles avant d’enregistrer ou de publier cette galerie.",
+  "profileCms.builder.publish.savedNotCurrent":
+    "Cette publication signée est enregistrée, mais ce n’est pas le site actif. Consultez l’historique des versions avant de modifier le site.",
+  "profileCms.builder.gallery.snapshot.warning.unmeasuredImages":
+    "Les dimensions de certaines images n’ont pas pu être vérifiées. Ces œuvres conservent leurs informations NFT sans image dans la publication. Actualisez l’instantané pour réessayer.",
   "profileCms.builder.json.pending":
     "Appliquez ou abandonnez vos modifications JSON avant d’enregistrer ou de publier.",
   "profileCms.builder.json.reviewPending": "Examiner les modifications JSON",
@@ -26,7 +29,7 @@ export const FR_FR_MESSAGES = {
     "La validation du serveur a détecté des problèmes bloquants dans ce paquet.",
   "profileCms.builder.drafts.title": "Brouillons enregistrés",
   "profileCms.builder.drafts.refresh": "Actualiser les brouillons",
-  "profileCms.builder.drafts.loading": "Chargement…",
+  "profileCms.builder.drafts.loading": "Chargement des brouillons…",
   "profileCms.builder.drafts.failed":
     "Impossible de charger les brouillons enregistrés.",
   "profileCms.builder.drafts.empty": "Aucun brouillon enregistré.",

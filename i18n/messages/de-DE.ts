@@ -11,9 +11,12 @@ import type { MessageKey } from "@/i18n/messages/en-US";
 const RETRY_LABEL = "Erneut versuchen";
 
 export const DE_DE_MESSAGES = {
-  "profileCms.builder.gallery.snapshot.required": "Fordere eine Wallet-Momentaufnahme an und prüfe sie, bevor du diese Galerie speicherst oder veröffentlichst.",
-  "profileCms.builder.publish.savedNotCurrent": "Diese signierte Veröffentlichung ist gespeichert, aber nicht die aktive Website. Prüfe den Versionsverlauf, bevor du die Website änderst.",
-  "profileCms.builder.gallery.snapshot.warning.unmeasuredImages": "Einige Bildgrößen konnten nicht geprüft werden. Diese Werke behalten ihre NFT-Details ohne Bild in der Veröffentlichung. Aktualisiere die Momentaufnahme, um es erneut zu versuchen.",
+  "profileCms.builder.gallery.snapshot.required":
+    "Fordere eine Wallet-Momentaufnahme an und prüfe sie, bevor du diese Galerie speicherst oder veröffentlichst.",
+  "profileCms.builder.publish.savedNotCurrent":
+    "Diese signierte Veröffentlichung ist gespeichert, aber nicht die aktive Website. Prüfe den Versionsverlauf, bevor du die Website änderst.",
+  "profileCms.builder.gallery.snapshot.warning.unmeasuredImages":
+    "Einige Bildgrößen konnten nicht geprüft werden. Diese Werke behalten ihre NFT-Details ohne Bild in der Veröffentlichung. Aktualisiere die Momentaufnahme, um es erneut zu versuchen.",
   "profileCms.builder.json.pending":
     "Übernimm oder verwirf deine JSON-Änderungen vor dem Speichern oder Veröffentlichen.",
   "profileCms.builder.json.reviewPending": "JSON-Änderungen prüfen",

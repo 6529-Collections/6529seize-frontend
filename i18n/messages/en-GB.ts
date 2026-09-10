@@ -6,9 +6,12 @@ import { TRANSFER_MESSAGES } from "@/i18n/messages/transfer";
 import type { MessageKey } from "@/i18n/messages/en-US";
 
 export const EN_GB_MESSAGES = {
-  "profileCms.builder.gallery.snapshot.required": "Request and review a wallet snapshot before saving or publishing this gallery.",
-  "profileCms.builder.publish.savedNotCurrent": "This signed publication is saved but is not the active website. Review version history before changing the website.",
-  "profileCms.builder.gallery.snapshot.warning.unmeasuredImages": "Some image sizes could not be verified. Those works keep their NFT details without an image in the publication. Refresh the snapshot to try again.",
+  "profileCms.builder.gallery.snapshot.required":
+    "Request and review a wallet snapshot before saving or publishing this gallery.",
+  "profileCms.builder.publish.savedNotCurrent":
+    "This signed publication is saved but is not the active website. Review version history before changing the website.",
+  "profileCms.builder.gallery.snapshot.warning.unmeasuredImages":
+    "Some image sizes could not be verified. Those works keep their NFT details without an image in the publication. Refresh the snapshot to try again.",
   "profileCms.builder.json.pending":
     "Apply or discard your JSON changes before saving or publishing.",
   "profileCms.builder.json.reviewPending": "Review JSON changes",

@@ -9,9 +9,12 @@ import stormComposerEsMessages from "@/i18n/messages/stormComposer.es-ES.json";
 import type { MessageKey } from "@/i18n/messages/en-US";
 
 export const ES_ES_MESSAGES = {
-  "profileCms.builder.gallery.snapshot.required": "Solicita y revisa una captura de las carteras antes de guardar o publicar esta galería.",
-  "profileCms.builder.publish.savedNotCurrent": "Esta publicación firmada está guardada, pero no es el sitio activo. Revisa el historial de versiones antes de cambiar el sitio.",
-  "profileCms.builder.gallery.snapshot.warning.unmeasuredImages": "No se han podido verificar las dimensiones de algunas imágenes. Esas obras conservan sus datos NFT sin imagen en la publicación. Actualiza la captura para reintentarlo.",
+  "profileCms.builder.gallery.snapshot.required":
+    "Solicita y revisa una captura de las carteras antes de guardar o publicar esta galería.",
+  "profileCms.builder.publish.savedNotCurrent":
+    "Esta publicación firmada está guardada, pero no es el sitio activo. Revisa el historial de versiones antes de cambiar el sitio.",
+  "profileCms.builder.gallery.snapshot.warning.unmeasuredImages":
+    "No se han podido verificar las dimensiones de algunas imágenes. Esas obras conservan sus datos NFT sin imagen en la publicación. Actualiza la captura para reintentarlo.",
   "profileCms.builder.json.pending":
     "Aplica o descarta tus cambios JSON antes de guardar o publicar.",
   "profileCms.builder.json.reviewPending": "Revisar cambios JSON",
