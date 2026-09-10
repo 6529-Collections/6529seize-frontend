@@ -324,7 +324,7 @@ export function ExploreWaveCard({
       {isDiscover && (
         <div
           aria-hidden="true"
-          className="tw-pointer-events-none tw-absolute tw-inset-0 tw-bg-gradient-to-t tw-from-[#0a0a0b] tw-from-[20%] tw-via-[#0a0a0b]/95 tw-via-[68%] tw-to-transparent"
+          className="tw-pointer-events-none tw-absolute tw-inset-0 tw-bg-gradient-to-t tw-from-[#0a0a0b] tw-via-[#0a0a0b]/95 tw-via-[52%] tw-to-transparent"
         />
       )}
 
