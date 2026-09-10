@@ -13,6 +13,7 @@ import { formatInteger, formatNumber } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import {
+  ArrowUpRightIcon,
   ClockIcon,
   FireIcon,
   ScaleIcon,
@@ -348,16 +349,23 @@ export function ExploreWaveCard({
             : "tw-px-3 tw-pb-3 tw-pt-4 sm:tw-px-4 sm:tw-pb-4"
         )}
       >
-        <span
-          className={clsx(
-            "tw-m-0 tw-line-clamp-1 tw-break-words tw-font-semibold tw-leading-tight tw-transition-colors tw-duration-300 desktop-hover:group-hover:tw-text-white",
-            isDiscover
-              ? "tw-text-xl tw-tracking-tight tw-text-iron-50"
-              : "tw-text-base tw-text-iron-100 sm:tw-text-lg"
-          )}
-        >
-          {wave.name}
-        </span>
+        {isDiscover ? (
+          <div className="tw-flex tw-items-end tw-justify-between tw-gap-4">
+            <span className="tw-m-0 tw-line-clamp-1 tw-min-w-0 tw-break-words tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 tw-transition-colors tw-duration-300 desktop-hover:group-hover:tw-text-white">
+              {wave.name}
+            </span>
+            <span
+              aria-hidden="true"
+              className="-tw-translate-x-1 tw-flex tw-size-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-800/80 tw-text-iron-100 tw-opacity-0 tw-transition-[transform,opacity,background-color,border-color] tw-duration-300 tw-ease-out group-focus-visible:tw-translate-x-0 group-focus-visible:tw-border-white/15 group-focus-visible:tw-bg-iron-700/80 group-focus-visible:tw-opacity-100 desktop-hover:group-hover:tw-translate-x-0 desktop-hover:group-hover:tw-border-white/15 desktop-hover:group-hover:tw-bg-iron-700/80 desktop-hover:group-hover:tw-opacity-100 motion-reduce:tw-transform-none motion-reduce:tw-transition-none touch-only:tw-translate-x-0 touch-only:tw-opacity-100"
+            >
+              <ArrowUpRightIcon className="tw-size-4" strokeWidth={2} />
+            </span>
+          </div>
+        ) : (
+          <span className="tw-m-0 tw-line-clamp-1 tw-break-words tw-text-base tw-font-semibold tw-leading-tight tw-text-iron-100 tw-transition-colors tw-duration-300 desktop-hover:group-hover:tw-text-white sm:tw-text-lg">
+            {wave.name}
+          </span>
+        )}
         {!isDiscover && (
           <ExploreWaveCompactMetrics metrics={metrics} variant={variant} />
         )}
