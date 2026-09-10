@@ -345,7 +345,7 @@ export function ExploreWaveCard({
         className={clsx(
           "tw-relative tw-z-10 tw-flex tw-flex-1 tw-flex-col",
           isDiscover
-            ? "tw-px-5 tw-pb-5 tw-pt-40"
+            ? "tw-justify-end tw-px-5 tw-pb-5 tw-pt-40"
             : "tw-px-3 tw-pb-3 tw-pt-4 sm:tw-px-4 sm:tw-pb-4"
         )}
       >
@@ -384,7 +384,7 @@ export function ExploreWaveCard({
             className={clsx(
               "tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1",
               isDiscover
-                ? "tw-mt-4 tw-text-xs tw-text-iron-400"
+                ? "tw-mt-3 tw-text-xs tw-text-iron-400"
                 : "tw-mt-auto tw-pt-4 tw-text-[11px] tw-text-iron-600"
             )}
           >
@@ -403,12 +403,11 @@ export function ExploreWaveCard({
 
         {!hasDrops && (
           <div
-            className={clsx(
-              "tw-mt-auto tw-pt-4",
+            className={
               isDiscover
-                ? "tw-text-xs tw-text-iron-400"
-                : "tw-text-[11px] tw-text-iron-600"
-            )}
+                ? "tw-mt-3 tw-text-xs tw-text-iron-400"
+                : "tw-mt-auto tw-pt-4 tw-text-[11px] tw-text-iron-600"
+            }
           >
             {t(EXPLORE_WAVE_CARD_LOCALE, "waves.explore.card.noDropsYet")}
           </div>
@@ -435,7 +434,7 @@ function ExploreWaveCompactMetrics({
       className={clsx(
         "explore-wave-card-metrics tw-flex tw-items-center",
         isDiscover
-          ? "tw-mt-3 tw-min-h-6 tw-flex-wrap tw-gap-x-3 tw-gap-y-2"
+          ? "tw-mt-4 tw-min-h-6 tw-flex-wrap tw-gap-x-3 tw-gap-y-2"
           : "tw-mt-2.5 tw-flex-nowrap tw-gap-2 tw-overflow-hidden"
       )}
     >
@@ -483,7 +482,7 @@ function MessagePreviewContent({
   const isDiscover = variant === "discover";
   if (!previewContent) {
     return isDiscover ? (
-      <div aria-hidden="true" className="tw-mt-3 tw-min-h-10" />
+      <div aria-hidden="true" className="tw-mt-2 tw-min-h-10" />
     ) : null;
   }
 
@@ -492,8 +491,10 @@ function MessagePreviewContent({
       content={previewContent}
       shouldClamp={false}
       className={clsx(
-        "tw-mt-3 tw-flex tw-min-w-0 tw-items-start tw-gap-1 tw-overflow-hidden",
-        isDiscover ? "tw-min-h-10" : "tw-text-iron-500"
+        "tw-flex tw-min-w-0 tw-items-start tw-gap-1 tw-overflow-hidden",
+        isDiscover
+          ? "tw-mt-2 tw-min-h-10"
+          : "tw-mt-3 tw-text-iron-500"
       )}
       textClassName={clsx(
         "tw-line-clamp-2 tw-break-words tw-font-normal",
