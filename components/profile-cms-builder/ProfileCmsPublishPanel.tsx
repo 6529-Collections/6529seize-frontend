@@ -12,6 +12,7 @@ import {
   type ProfileCmsPublishContext,
   type ProfileCmsPublishResult,
   type ProfileCmsPublishStep,
+  type ProfileCmsUploadContext,
 } from "@/lib/profile-cms/builder/publish";
 import type { CmsPackageV1 } from "@/lib/profile-cms/protocol/v1";
 import type { ProfileCmsPackageRecord } from "@/lib/profile-cms/builder/api";
@@ -60,7 +61,7 @@ export default function ProfileCmsPublishPanel({
   const signer = useProfileCmsPublishSign();
   return (
     <ProfileCmsPublishWorkspace
-      key={`${signer.signerAddress ?? "disconnected"}:${signer.chainId}`}
+      key={`${props.profileId}:${props.cmsPackage.integrity.package_hash}:${props.primaryWallet}:${signer.signerAddress ?? "disconnected"}:${signer.chainId}:${signer.isSafe}`}
       {...props}
       signer={signer}
     />
@@ -107,7 +108,7 @@ function ProfileCmsPublishWorkspace({
     }));
   };
 
-  const runFullPublish = async () => {
+  const runFullPublish = async (uploadContext?: ProfileCmsUploadContext) => {
     if (disabled || !profileId || !signerAddress) {
       return;
     }
@@ -117,6 +118,7 @@ function ProfileCmsPublishWorkspace({
     const isCurrent = () => attempt === attemptRef.current;
 
     const prepared = await prepareProfileCmsPublish({
+      uploadContext,
       primaryWallet,
       onStep: (step) => updateProgress(step, attempt),
       cmsPackage,
@@ -232,7 +234,7 @@ function ProfileCmsPublishWorkspace({
       <div className="tw-mt-4 tw-flex tw-flex-wrap tw-gap-2">
         <button
           className="tw-min-h-10 tw-border tw-border-solid tw-border-primary-400 tw-bg-primary-500 tw-px-3 tw-text-sm tw-font-semibold tw-text-white disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
-          disabled={disabled || canRetrySignTail(state)}
+          disabled={disabled || canRetryPublish(state)}
           onClick={() => void runFullPublish()}
           type="button"
         >
@@ -240,11 +242,19 @@ function ProfileCmsPublishWorkspace({
             ? t(locale, "profileCms.builder.publish.publishing")
             : t(locale, "profileCms.builder.publish.publish")}
         </button>
-        {canRetrySignTail(state) ? (
+        {canRetryPublish(state) ? (
           <button
             className="tw-min-h-10 tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-text-sm tw-font-semibold tw-text-iron-100 hover:tw-border-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
             disabled={disabled}
-            onClick={() => void retrySignAndPublish()}
+            onClick={() => {
+              if (
+                state.result &&
+                !state.result.ok &&
+                state.result.uploadContext
+              )
+                void runFullPublish(state.result.uploadContext);
+              else void retrySignAndPublish();
+            }}
             type="button"
           >
             {isDeadlineExpired(state)
@@ -378,12 +388,12 @@ function getReachedStepFromFailure(
   return failedIndex - 1;
 }
 
-function canRetrySignTail(state: PublishState): boolean {
+function canRetryPublish(state: PublishState): boolean {
   return (
     !state.running &&
-    state.context !== null &&
     state.result !== null &&
-    !state.result.ok
+    !state.result.ok &&
+    (state.context !== null || state.result.uploadContext !== undefined)
   );
 }
 

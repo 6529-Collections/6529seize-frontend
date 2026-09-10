@@ -115,6 +115,16 @@ export type ProfileCmsPublishContext = {
   readonly expectedCurrentPackageHash?: string | undefined;
 };
 
+export type ProfileCmsUploadContext = Omit<
+  ProfileCmsPublishContext,
+  "receipt"
+> & {
+  readonly sourcePackageHash: string;
+  readonly signerAddress: string;
+  readonly primaryWallet: string;
+  readonly chainId: number;
+};
+
 export type ProfileCmsPublishSuccess = {
   readonly ok: true;
   readonly isCurrent: boolean;
@@ -130,6 +140,8 @@ export type ProfileCmsPublishFailure = {
   // Present once save+validate+upload have succeeded, so the caller can retry
   // just the sign/publish tail (e.g. after a deadline_expired rejection).
   readonly context?: ProfileCmsPublishContext | undefined;
+  // A core upload may already be paid for even when its response is lost.
+  readonly uploadContext?: ProfileCmsUploadContext | undefined;
   // Retain the exact authorization while storage propagates or a request fails.
   readonly signedRequest?: ProfileCmsPublishRequest | undefined;
 };
@@ -147,6 +159,7 @@ export type ProfileCmsSignTypedData = (
 ) => Promise<ProfileCmsSignTypedDataResult>;
 
 type RunProfileCmsPublishInput = {
+  readonly uploadContext?: ProfileCmsUploadContext | undefined;
   readonly primaryWallet?: string | undefined;
   readonly onStep?: ((step: ProfileCmsPublishStep) => void) | undefined;
   readonly isCurrent?: (() => boolean) | undefined;
@@ -224,12 +237,15 @@ export async function prepareProfileCmsPublish(
 > {
   try {
     return await preparePersistedProfileCmsPublish(input);
-  } catch {
+  } catch (error) {
     return {
       ok: false,
       step: "validate",
       code: "validate_failed",
       message: "",
+      ...(input.uploadContext && isRetryableUploadError(error)
+        ? { uploadContext: input.uploadContext }
+        : {}),
     };
   }
 }
@@ -239,6 +255,19 @@ async function preparePersistedProfileCmsPublish(
 ): Promise<
   | ProfileCmsPublishFailure
   | { readonly ok: true; readonly context: ProfileCmsPublishContext }
+> {
+  const prepared = input.uploadContext
+    ? await restoreUploadContext(input, input.uploadContext)
+    : await saveAndValidateProfileCmsPublish(input);
+  if (!prepared.ok) return prepared;
+  return uploadPreparedProfileCms(input, prepared.uploadContext);
+}
+
+async function saveAndValidateProfileCmsPublish(
+  input: RunProfileCmsPublishInput
+): Promise<
+  | ProfileCmsPublishFailure
+  | { readonly ok: true; readonly uploadContext: ProfileCmsUploadContext }
 > {
   const { cmsPackage, profileId } = input;
   input.onStep?.("validate");
@@ -292,6 +321,74 @@ async function preparePersistedProfileCmsPublish(
     };
   }
 
+  return {
+    ok: true,
+    uploadContext: {
+      draftId,
+      profileId: canonical.profileId,
+      handle: canonical.profileHandle,
+      packageId: canonical.packageId,
+      version: canonical.version,
+      payloadHash: canonical.payloadHash,
+      packageHash: canonical.packageHash,
+      primaryPath: `/${canonical.profileHandle}/index.html`,
+      expectedCurrentPackageId: primary?.id ?? null,
+      expectedCurrentPackageHash: primary?.packageHash,
+      sourcePackageHash: cmsPackage.integrity.package_hash,
+      signerAddress: input.signerAddress.toLowerCase(),
+      primaryWallet: (input.primaryWallet ?? input.signerAddress).toLowerCase(),
+      chainId: input.chainId,
+    },
+  };
+}
+
+async function restoreUploadContext(
+  input: RunProfileCmsPublishInput,
+  uploadContext: ProfileCmsUploadContext
+): Promise<
+  | ProfileCmsPublishFailure
+  | { readonly ok: true; readonly uploadContext: ProfileCmsUploadContext }
+> {
+  if (
+    input.profileId !== uploadContext.profileId ||
+    input.cmsPackage.integrity.package_hash !==
+      uploadContext.sourcePackageHash ||
+    input.signerAddress.toLowerCase() !== uploadContext.signerAddress ||
+    (input.primaryWallet ?? input.signerAddress).toLowerCase() !==
+      uploadContext.primaryWallet ||
+    input.chainId !== uploadContext.chainId
+  )
+    return { ok: false, step: "upload", code: "publish_conflict", message: "" };
+  const canonical = await getProfileCmsPackageById(uploadContext.draftId);
+  if (!matchesUploadContext(canonical, uploadContext))
+    return { ok: false, step: "upload", code: "publish_conflict", message: "" };
+  return { ok: true, uploadContext };
+}
+
+function matchesUploadContext(
+  record: ProfileCmsPackageRecord,
+  context: ProfileCmsUploadContext
+): boolean {
+  return (
+    record.id === context.draftId &&
+    record.profileId === context.profileId &&
+    record.profileHandle === context.handle &&
+    record.packageId === context.packageId &&
+    record.version === context.version &&
+    record.packageHash === context.packageHash &&
+    record.payloadHash === context.payloadHash
+  );
+}
+
+async function uploadPreparedProfileCms(
+  input: RunProfileCmsPublishInput,
+  uploadContext: ProfileCmsUploadContext
+): Promise<
+  | ProfileCmsPublishFailure
+  | { readonly ok: true; readonly context: ProfileCmsPublishContext }
+> {
+  const { draftId } = uploadContext;
+
   let receipt: ProfileCmsStorageReceipt;
   input.onStep?.("upload");
   try {
@@ -303,18 +400,27 @@ async function preparePersistedProfileCmsPublish(
       step: "upload",
       code: "upload_failed",
       message: getErrorMessage(error, "Storage upload failed."),
+      ...(isRetryableUploadError(error) ? { uploadContext } : {}),
     };
   }
 
-  const uploaded = await getProfileCmsPackageById(draftId);
+  let uploaded;
+  try {
+    uploaded = await getProfileCmsPackageById(draftId);
+  } catch (error) {
+    return {
+      ok: false,
+      step: "upload",
+      code: "upload_failed",
+      message: "",
+      ...(isRetryableUploadError(error) ? { uploadContext } : {}),
+    };
+  }
   const storedReceipt = uploaded.cmsPackage.storage.find(
     (item) => item.canonical
   );
   if (
-    uploaded.profileId !== profileId ||
-    uploaded.id !== draftId ||
-    uploaded.packageHash !== canonical.packageHash ||
-    uploaded.payloadHash !== canonical.payloadHash ||
+    !matchesUploadContext(uploaded, uploadContext) ||
     !receipt.canonical ||
     receipt.provider === "fixture" ||
     storedReceipt?.uri !== receipt.uri ||
@@ -324,20 +430,29 @@ async function preparePersistedProfileCmsPublish(
     return { ok: false, step: "upload", code: "upload_failed", message: "" };
   }
   const context: ProfileCmsPublishContext = {
-    draftId,
-    profileId: uploaded.profileId,
-    handle: uploaded.profileHandle,
-    packageId: uploaded.packageId,
-    version: uploaded.version,
-    payloadHash: uploaded.payloadHash,
-    packageHash: uploaded.packageHash,
-    primaryPath: `/${uploaded.profileHandle}/index.html`,
+    ...uploadContext,
     receipt,
-    expectedCurrentPackageId: primary?.id ?? null,
-    expectedCurrentPackageHash: primary?.packageHash,
   };
 
   return { ok: true, context };
+}
+
+function isRetryableUploadError(error: unknown): boolean {
+  if (
+    [
+      "invalid_profile_cms_package",
+      "profile_cms_package_record_mismatch",
+      "stale_publish",
+    ].includes(getRawErrorMessage(error))
+  )
+    return false;
+  const status = getErrorStatus(error);
+  return (
+    status === undefined ||
+    status === 429 ||
+    status >= 500 ||
+    isStoragePendingError(error, status)
+  );
 }
 
 /**
@@ -452,6 +567,7 @@ async function submitProfileCmsPublish(
     };
   } catch (error) {
     const status = getErrorStatus(error);
+    const storagePending = isStoragePendingError(error, status);
     if (isDeadlineError(error, status)) {
       return {
         ok: false,
@@ -462,7 +578,7 @@ async function submitProfileCmsPublish(
         context,
       };
     }
-    if (status === 409) {
+    if (status === 409 && !storagePending) {
       return {
         ok: false,
         step: "publish",
@@ -474,16 +590,23 @@ async function submitProfileCmsPublish(
     return {
       ok: false,
       step: "publish",
-      code:
-        status === 503 &&
-        getRawErrorMessage(error).includes("cms_storage_pending")
-          ? "storage_pending"
-          : "publish_failed",
+      code: storagePending ? "storage_pending" : "publish_failed",
       message: getErrorMessage(error, "Publishing failed."),
       context,
       signedRequest: request,
     };
   }
+}
+
+function isStoragePendingError(
+  error: unknown,
+  status: number | undefined
+): boolean {
+  const message = getRawErrorMessage(error);
+  return (
+    (status === 503 && message.includes("cms_storage_pending")) ||
+    (status === 409 && message.includes("cms_upload_in_progress"))
+  );
 }
 
 /**

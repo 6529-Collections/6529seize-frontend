@@ -268,6 +268,130 @@ describe("profile CMS publish orchestration", () => {
   });
 
   describe("failure branches", () => {
+    it.each([
+      [undefined, "response lost"],
+      [502, "cms_storage_upload_failed"],
+      [503, "cms_storage_pending"],
+      [409, "cms_upload_in_progress"],
+    ])(
+      "resumes the same saved draft after core upload fails with %s %s",
+      async (status, message) => {
+        mockSaveOk();
+        (listProfileCmsPackagesForProfile as jest.Mock).mockResolvedValue([
+          { ...publishedRecord, id: "previous-db-id", isPrimary: true },
+        ]);
+        uploadMock
+          .mockRejectedValueOnce(Object.assign(new Error(message), { status }))
+          .mockResolvedValueOnce(RECEIPT);
+        publishMock.mockResolvedValueOnce(publishedRecord);
+        const input = {
+          cmsPackage: buildPackage(),
+          profileId: "profile-1",
+          chainId: 1,
+          signerAddress: "0xabc",
+          signTypedData: jest.fn(okSign()),
+        };
+        const first = await runProfileCmsPublish(input);
+        expect(first.ok).toBe(false);
+        if (first.ok || !first.uploadContext)
+          throw new Error("expected resumable upload");
+        expect(input.signTypedData).not.toHaveBeenCalled();
+        const second = await runProfileCmsPublish({
+          ...input,
+          uploadContext: first.uploadContext,
+        });
+        expect(second.ok).toBe(true);
+        expect(
+          runActionMock.mock.calls.filter(
+            ([request]) => request.action === "save_draft"
+          )
+        ).toHaveLength(1);
+        expect(uploadMock.mock.calls).toEqual([["draft-1"], ["draft-1"]]);
+        expect(input.signTypedData).toHaveBeenCalledTimes(1);
+        expect(publishMock.mock.calls[0][1]).toEqual(
+          expect.objectContaining({
+            expected_current_package_id: "previous-db-id",
+          })
+        );
+      }
+    );
+
+    it.each(["package", "profile", "wallet", "chain", "server_hash"])(
+      "discards upload retry context when %s changes",
+      async (change) => {
+        mockSaveOk();
+        uploadMock.mockRejectedValueOnce(
+          Object.assign(new Error("cms_storage_upload_failed"), { status: 502 })
+        );
+        const input = {
+          cmsPackage: buildPackage(),
+          profileId: "profile-1",
+          chainId: 1,
+          signerAddress: "0xabc",
+          signTypedData: jest.fn(okSign()),
+        };
+        const first = await runProfileCmsPublish(input);
+        if (first.ok || !first.uploadContext)
+          throw new Error("expected resumable upload");
+        if (change === "server_hash")
+          (getProfileCmsPackageById as jest.Mock).mockResolvedValueOnce({
+            ...publishedRecord,
+            packageHash: "different",
+            cmsPackage: input.cmsPackage,
+          });
+        const second = await runProfileCmsPublish({
+          ...input,
+          ...(change === "package"
+            ? {
+                cmsPackage: {
+                  ...input.cmsPackage,
+                  integrity: {
+                    ...input.cmsPackage.integrity,
+                    package_hash: "sha256:changed",
+                  },
+                },
+              }
+            : {}),
+          ...(change === "profile" ? { profileId: "profile-2" } : {}),
+          ...(change === "wallet" ? { signerAddress: "0xdef" } : {}),
+          ...(change === "chain" ? { chainId: 2 } : {}),
+          uploadContext: first.uploadContext,
+        });
+        expect(second).toEqual(
+          expect.objectContaining({ ok: false, code: "publish_conflict" })
+        );
+        expect(second).not.toHaveProperty("uploadContext");
+        expect(second).not.toHaveProperty("context");
+        expect(uploadMock).toHaveBeenCalledTimes(1);
+        expect(input.signTypedData).not.toHaveBeenCalled();
+      }
+    );
+
+    it.each([
+      [400, "cms_package_hash_mismatch"],
+      [403, "cms_profile_changed"],
+      [409, "cms_primary_changed"],
+    ])(
+      "discards core-upload retry context after nonretryable %s %s",
+      async (status, message) => {
+        mockSaveOk();
+        uploadMock.mockRejectedValueOnce(
+          Object.assign(new Error(message), { status })
+        );
+        const result = await runProfileCmsPublish({
+          cmsPackage: buildPackage(),
+          profileId: "profile-1",
+          chainId: 1,
+          signerAddress: "0xabc",
+          signTypedData: okSign(),
+        });
+        expect(result).toEqual(
+          expect.objectContaining({ ok: false, code: "upload_failed" })
+        );
+        expect(result).not.toHaveProperty("uploadContext");
+      }
+    );
+
     it("aborts before upload when server validation is invalid", async () => {
       runActionMock.mockImplementation(async ({ action }) => {
         if (action === "save_draft") {
@@ -453,52 +577,82 @@ describe("profile CMS publish orchestration", () => {
     });
   });
 
-  it("retains the exact signature and current-primary guard while permanent storage propagates", async () => {
-    mockSaveOk();
-    (listProfileCmsPackagesForProfile as jest.Mock).mockResolvedValue([
-      { ...publishedRecord, id: "previous-db-id", isPrimary: true },
-    ]);
-    uploadMock.mockResolvedValue(RECEIPT);
-    publishMock.mockRejectedValueOnce(
-      Object.assign(new Error("cms_storage_pending"), { status: 503 })
-    );
-    const sign = jest.fn(okSign());
-    const first = await runProfileCmsPublish({
-      cmsPackage: buildPackage(),
-      profileId: "profile-1",
-      chainId: 1,
-      signerAddress: "0xabc",
-      signTypedData: sign,
-      now: () => 1_000,
-    });
-    expect(first.ok).toBe(false);
-    if (first.ok || !first.context) throw new Error("expected retry context");
-    expect(first.code).toBe("storage_pending");
-    expect(first.signedRequest).toEqual(
-      expect.objectContaining({
-        expected_current_package_id: "previous-db-id",
-        expected_current_package_hash: publishedRecord.packageHash,
-      })
-    );
-    publishMock.mockResolvedValueOnce(publishedRecord);
-    const second = await signAndPublishProfileCms({
-      context: first.context,
-      signedRequest: first.signedRequest,
-      chainId: 1,
-      signerAddress: "0xabc",
-      signTypedData: sign,
-      now: () => 2_000,
-    });
-    expect(second.ok).toBe(true);
-    expect(sign).toHaveBeenCalledTimes(1);
-    expect(uploadMock).toHaveBeenCalledTimes(1);
-    expect(
-      runActionMock.mock.calls.filter(
-        ([input]) => input.action === "save_draft"
-      )
-    ).toHaveLength(1);
-    expect(publishMock.mock.calls[1][1]).toBe(publishMock.mock.calls[0][1]);
-  });
+  it.each([
+    [503, "cms_storage_pending", "storage_pending"],
+    [409, "cms_upload_in_progress", "storage_pending"],
+    [502, "cms_storage_upload_failed", "publish_failed"],
+  ])(
+    "retains the exact signature and current-primary guard after %s %s",
+    async (status, message, code) => {
+      mockSaveOk();
+      (listProfileCmsPackagesForProfile as jest.Mock).mockResolvedValue([
+        { ...publishedRecord, id: "previous-db-id", isPrimary: true },
+      ]);
+      uploadMock.mockResolvedValue(RECEIPT);
+      publishMock.mockRejectedValueOnce(
+        Object.assign(new Error(message), { status })
+      );
+      const sign = jest.fn(okSign());
+      const first = await runProfileCmsPublish({
+        cmsPackage: buildPackage(),
+        profileId: "profile-1",
+        chainId: 1,
+        signerAddress: "0xabc",
+        signTypedData: sign,
+        now: () => 1_000,
+      });
+      expect(first.ok).toBe(false);
+      if (first.ok || !first.context) throw new Error("expected retry context");
+      expect(first.code).toBe(code);
+      expect(first.signedRequest).toEqual(
+        expect.objectContaining({
+          expected_current_package_id: "previous-db-id",
+          expected_current_package_hash: publishedRecord.packageHash,
+        })
+      );
+      publishMock.mockResolvedValueOnce(publishedRecord);
+      const second = await signAndPublishProfileCms({
+        context: first.context,
+        signedRequest: first.signedRequest,
+        chainId: 1,
+        signerAddress: "0xabc",
+        signTypedData: sign,
+        now: () => 2_000,
+      });
+      expect(second.ok).toBe(true);
+      expect(sign).toHaveBeenCalledTimes(1);
+      expect(uploadMock).toHaveBeenCalledTimes(1);
+      expect(
+        runActionMock.mock.calls.filter(
+          ([input]) => input.action === "save_draft"
+        )
+      ).toHaveLength(1);
+      expect(publishMock.mock.calls[1][1]).toBe(publishMock.mock.calls[0][1]);
+    }
+  );
+
+  it.each(["cms_primary_changed", "cms_profile_changed"])(
+    "requires fresh preparation after a genuine 409 %s",
+    async (message) => {
+      mockSaveOk();
+      uploadMock.mockResolvedValue(RECEIPT);
+      publishMock.mockRejectedValueOnce(
+        Object.assign(new Error(message), { status: 409 })
+      );
+      const result = await runProfileCmsPublish({
+        cmsPackage: buildPackage(),
+        profileId: "profile-1",
+        chainId: 1,
+        signerAddress: "0xabc",
+        signTypedData: okSign(),
+      });
+      expect(result.ok).toBe(false);
+      if (result.ok) throw new Error("expected a publication conflict");
+      expect(result.code).toBe("publish_conflict");
+      expect(result.context).toBeUndefined();
+      expect(result.signedRequest).toBeUndefined();
+    }
+  );
 
   it("stops before publishing if the wallet context changes while signing", async () => {
     mockSaveOk();

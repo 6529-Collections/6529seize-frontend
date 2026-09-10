@@ -176,6 +176,95 @@ describe("ProfileCmsPublishPanel", () => {
     ).toBeDisabled();
   });
 
+  it("retries the retained core upload instead of preparing another saved version", async () => {
+    const user = userEvent.setup();
+    const uploadContext = {
+      ...context,
+      sourcePackageHash: cmsPackage.integrity.package_hash,
+      signerAddress: "0xowner",
+      primaryWallet: "0xowner",
+      chainId: 1,
+    };
+    prepareMock
+      .mockResolvedValueOnce({
+        ok: false,
+        step: "upload",
+        code: "upload_failed",
+        message: "",
+        uploadContext,
+      })
+      .mockResolvedValueOnce({ ok: true, context });
+    signPublishMock.mockResolvedValueOnce({
+      ok: true,
+      published: { profileHandle: "punk6529" },
+      publishedUrl: "https://6529.io/punk6529/index.html",
+    });
+    renderPanel();
+    await user.click(screen.getByRole("button", { name: "Publish website" }));
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Retry" })).toBeEnabled()
+    );
+    expect(
+      screen.getByRole("button", { name: "Publish website" })
+    ).toBeDisabled();
+    await user.click(screen.getByRole("button", { name: "Retry" }));
+    await waitFor(() => expect(signPublishMock).toHaveBeenCalledTimes(1));
+    expect(prepareMock.mock.calls[1][0].uploadContext).toBe(uploadContext);
+  });
+
+  it.each(["package", "profile", "wallet"])(
+    "clears retained upload state when the %s changes",
+    async (change) => {
+      const user = userEvent.setup();
+      prepareMock.mockResolvedValueOnce({
+        ok: false,
+        step: "upload",
+        code: "upload_failed",
+        message: "",
+        uploadContext: { draftId: "saved-draft" },
+      });
+      const { rerender } = renderPanel();
+      await user.click(screen.getByRole("button", { name: "Publish website" }));
+      await waitFor(() =>
+        expect(
+          screen.getByRole("button", { name: "Retry" })
+        ).toBeInTheDocument()
+      );
+      if (change === "wallet")
+        useSignMock.mockReturnValue({
+          signTypedData: jest.fn(),
+          chainId: 1,
+          signerAddress: "0xother",
+          isConnected: true,
+          isSafe: false,
+        });
+      rerender(
+        <ProfileCmsPublishPanel
+          canPublish
+          canUseBuilderApi
+          cmsPackage={
+            change === "package"
+              ? {
+                  ...cmsPackage,
+                  integrity: {
+                    ...cmsPackage.integrity,
+                    package_hash: "sha256:changed",
+                  },
+                }
+              : cmsPackage
+          }
+          profileId={change === "profile" ? "profile-2" : "profile-1"}
+        />
+      );
+      expect(
+        screen.queryByRole("button", { name: "Retry" })
+      ).not.toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "Publish website" })
+      ).toBeEnabled();
+    }
+  );
+
   it("shows a Safe notice for smart-contract wallets", () => {
     useSignMock.mockReturnValue({
       signTypedData: jest.fn(),
