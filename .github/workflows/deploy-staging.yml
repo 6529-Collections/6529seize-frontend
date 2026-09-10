@@ -355,6 +355,7 @@ jobs:
           STAGING_SSR_CLIENT_ID: ${{ secrets.STAGING_SSR_CLIENT_ID }}
           STAGING_SSR_CLIENT_SECRET: ${{ secrets.STAGING_SSR_CLIENT_SECRET }}
           STAGING_ETHEREUM_RPC_URL: ${{ secrets.STAGING_ETHEREUM_RPC_URL }}
+          STAGING_ALCHEMY_API_KEY: ${{ secrets.STAGING_ALCHEMY_API_KEY }}
           GITHUB_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
@@ -362,6 +363,7 @@ jobs:
           test -n "$STAGING_SSR_CLIENT_ID"
           test -n "$STAGING_SSR_CLIENT_SECRET"
           test -n "$STAGING_ETHEREUM_RPC_URL"
+          test -n "$STAGING_ALCHEMY_API_KEY"
 
           jq -e '
             type == "object" and
@@ -390,6 +392,9 @@ jobs:
           ethereum_rpc_url_b64_q="$(
             printf '%q' "$(printf '%s' "$STAGING_ETHEREUM_RPC_URL" | base64 -w0)"
           )"
+          alchemy_api_key_b64_q="$(
+            printf '%q' "$(printf '%s' "$STAGING_ALCHEMY_API_KEY" | base64 -w0)"
+          )"
 
           remote_script="$(
             cat <<REMOTE_SCRIPT_VARS
@@ -404,6 +409,7 @@ jobs:
           SSR_CLIENT_ID_B64=$ssr_client_id_b64_q
           SSR_CLIENT_SECRET_B64=$ssr_client_secret_b64_q
           ETHEREUM_RPC_URL_B64=$ethereum_rpc_url_b64_q
+          ALCHEMY_API_KEY_B64=$alchemy_api_key_b64_q
           REMOTE_SCRIPT_VARS
             cat <<'REMOTE_SCRIPT_BODY'
 
@@ -459,6 +465,7 @@ jobs:
           SSR_CLIENT_ID_B64="$SSR_CLIENT_ID_B64" \
           SSR_CLIENT_SECRET_B64="$SSR_CLIENT_SECRET_B64" \
           ETHEREUM_RPC_URL_B64="$ETHEREUM_RPC_URL_B64" \
+          ALCHEMY_API_KEY_B64="$ALCHEMY_API_KEY_B64" \
             bash ops/scripts/deploy-staging-artifact.sh
           REMOTE_SCRIPT_BODY
           )"

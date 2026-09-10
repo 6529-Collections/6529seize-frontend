@@ -57,6 +57,12 @@ remain explicitly Alchemy-backed until separately replaced.
 - Both values should initially be Alchemy Ethereum mainnet HTTPS JSON-RPC URLs.
   A later ordinary-RPC provider change requires updating only the corresponding
   secret and redeploying.
+- NFT REST APIs and metadata fallbacks separately require `ALCHEMY_API_KEY` at
+  runtime. Production continues using the `ALCHEMY_API_KEY` GitHub Actions
+  secret; staging requires `STAGING_ALCHEMY_API_KEY`, passed into the private
+  PM2 runtime store as `ALCHEMY_API_KEY`. Staging deployment fails early if this
+  secret is missing or empty. The old EC2 repo-root `.env` is not loaded by the
+  standalone release; add the staging secret before deploying this change.
 
 ## Out of scope
 
