@@ -6,6 +6,11 @@ import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
+jest.mock(
+  "@/components/waves/drops/WaveDropDocumentationAction",
+  () => () => null
+);
+
 jest.mock("@/hooks/drops/useDropInteractionRules", () => ({
   useDropInteractionRules: jest.fn(),
 }));

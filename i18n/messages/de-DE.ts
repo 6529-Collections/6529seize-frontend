@@ -11,6 +11,9 @@ import type { MessageKey } from "@/i18n/messages/en-US";
 const RETRY_LABEL = "Erneut versuchen";
 
 export const DE_DE_MESSAGES = {
+  "headerSearch.wave.byAuthor": "von {author}",
+  "headerSearch.wave.serial": "Wave Nr. {serial}",
+  "headerSearch.wave.label": "Wave",
   "waves.subwaves.accessWarning.title":
     "Die Einschränkungen der übergeordneten Wave gelten",
   "waves.subwaves.accessWarning.message":

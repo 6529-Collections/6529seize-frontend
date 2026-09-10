@@ -6,7 +6,7 @@ import DropListItemRateGiveSubmit from "./DropListItemRateGiveSubmit";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { Time } from "@/helpers/time";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
-import { Tooltip } from "react-tooltip";
+import DropActionTooltip from "@/components/waves/drops/DropActionTooltip";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 
 export enum RateChangeType {
@@ -225,14 +225,25 @@ export default function DropListItemRateGive({
     return "tw-text-iron-500";
   };
 
-  const tooltipId = `rate-give-tooltip-${drop.id}`;
-
   return (
-    <>
-      <div
-        className="tw-relative tw-flex tw-flex-col tw-items-center tw-gap-y-1"
-        {...(getShowRate() ? { "data-tooltip-id": tooltipId } : {})}
-      >
+    <DropActionTooltip
+      disabled={isMobile || !getShowRate()}
+      style={{
+        backgroundColor: "#1F2937",
+        color: "white",
+        padding: "4px 8px",
+      }}
+      content={
+        <div className="tw-text-center">
+          <span
+            className={`${getRateClasses()} tw-w-full tw-text-center tw-text-xs tw-font-normal tw-transition tw-duration-300 tw-ease-out`}
+          >
+            {getRateText()}
+          </span>
+        </div>
+      }
+    >
+      <div className="tw-relative tw-flex tw-flex-col tw-items-center tw-gap-y-1">
         <div
           className={`${
             isMobile ? "tw-gap-x-4" : ""
@@ -261,25 +272,6 @@ export default function DropListItemRateGive({
           />
         </div>
       </div>
-      {getShowRate() && (
-        <Tooltip
-          id={tooltipId}
-          place="top"
-          style={{
-            backgroundColor: "#1F2937",
-            color: "white",
-            padding: "4px 8px",
-          }}
-        >
-          <div className="tw-text-center">
-            <span
-              className={`${getRateClasses()} tw-w-full tw-text-center tw-text-xs tw-font-normal tw-transition tw-duration-300 tw-ease-out`}
-            >
-              {getRateText()}
-            </span>
-          </div>
-        </Tooltip>
-      )}
-    </>
+    </DropActionTooltip>
   );
 }

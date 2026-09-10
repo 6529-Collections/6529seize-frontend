@@ -1,6 +1,7 @@
 "use client";
 
 import type { ApiWave } from "@/generated/models/ApiWave";
+import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import { MyStreamWaveTab } from "@/types/waves.types";
 import {
   ArrowUpTrayIcon,
@@ -617,6 +618,7 @@ const FAQ_SECTIONS: readonly WaveFaqSection<FaqSectionId>[] = [
 ];
 
 const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave: _wave }) => {
+  const { hideNftPurchasing } = useNftPurchasingVisibility();
   const { setActiveContentTab } = useContentTab();
   const { faqViewStyle } = useLayout();
   const shouldReduceMotion = useReducedMotion() ?? false;
@@ -639,22 +641,25 @@ const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave: _wave }) => {
       return;
     }
 
-    const timeoutId = globalThis.setTimeout(() => {
-      const scrollContainer = scrollContainerRef.current;
-      const targetSection = sectionRefs.current[pendingScrollSectionId];
+    const timeoutId = globalThis.setTimeout(
+      () => {
+        const scrollContainer = scrollContainerRef.current;
+        const targetSection = sectionRefs.current[pendingScrollSectionId];
 
-      if (scrollContainer && targetSection) {
-        const containerTop = scrollContainer.getBoundingClientRect().top;
-        const sectionTop = targetSection.getBoundingClientRect().top;
+        if (scrollContainer && targetSection) {
+          const containerTop = scrollContainer.getBoundingClientRect().top;
+          const sectionTop = targetSection.getBoundingClientRect().top;
 
-        scrollContainer.scrollTo({
-          top: scrollContainer.scrollTop + sectionTop - containerTop,
-          behavior: shouldReduceMotion ? "auto" : "smooth",
-        });
-      }
+          scrollContainer.scrollTo({
+            top: scrollContainer.scrollTop + sectionTop - containerTop,
+            behavior: shouldReduceMotion ? "auto" : "smooth",
+          });
+        }
 
-      setPendingScrollSectionId(null);
-    }, shouldReduceMotion ? 0 : FAQ_SCROLL_ALIGNMENT_DELAY_MS);
+        setPendingScrollSectionId(null);
+      },
+      shouldReduceMotion ? 0 : FAQ_SCROLL_ALIGNMENT_DELAY_MS
+    );
 
     return () => globalThis.clearTimeout(timeoutId);
   }, [openSectionId, pendingScrollSectionId, shouldReduceMotion]);
@@ -674,7 +679,9 @@ const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave: _wave }) => {
     >
       <div className="tw-w-full tw-px-[8px] tw-pb-[13px] sm:tw-px-[13px]">
         <div className="tw-flex tw-flex-col tw-gap-[13px]">
-          {FAQ_SECTIONS.map((section) => (
+          {FAQ_SECTIONS.filter(
+            (section) => !hideNftPurchasing || section.id !== "minting"
+          ).map((section) => (
             <MyStreamWaveFAQAccordionItem
               key={section.id}
               section={section}

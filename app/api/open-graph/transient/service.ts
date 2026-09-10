@@ -48,6 +48,7 @@ type FetchHtmlResult = {
 interface CreateTransientPlanDeps {
   readonly fetchHtml: (url: URL) => Promise<FetchHtmlResult>;
   readonly assertPublicUrl: (url: URL) => Promise<void>;
+  readonly fetchTokenMetadata: (url: URL) => Promise<unknown>;
 }
 
 type TransientContext = {
@@ -286,32 +287,11 @@ const fetchTokenUriMetadataCandidate = async (
   deps: CreateTransientPlanDeps
 ): Promise<TokenUriMetadata | null> => {
   try {
-    await deps.assertPublicUrl(candidateUrl);
+    const payload = await deps.fetchTokenMetadata(candidateUrl);
+    return extractTokenUriMetadata(payload).metadata;
   } catch {
     return null;
   }
-
-  let response: Response;
-  try {
-    response = await fetch(candidateUrl.toString(), {
-      headers: { Accept: "application/json" },
-    });
-  } catch {
-    return null;
-  }
-
-  if (!response.ok) {
-    return null;
-  }
-
-  let payload: unknown;
-  try {
-    payload = (await response.json()) as unknown;
-  } catch {
-    return null;
-  }
-
-  return extractTokenUriMetadata(payload).metadata;
 };
 
 async function resolveTokenUriFallbackImage(

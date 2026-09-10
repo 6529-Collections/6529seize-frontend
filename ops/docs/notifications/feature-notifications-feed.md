@@ -47,6 +47,12 @@ with a multi-select cause filter, grouped reactions, and inline drop previews.
 
 ## Feed Filters
 
+- On native iOS when the detected country is not `US` or is unknown, subscription
+  coverage alerts, the Subscriptions filter, and the device's Subscription
+  Coverage settings entry are hidden. Social follow notifications remain
+  available. This concerns the app feed and controls, not previously delivered
+  system push notifications.
+
 - The app header supplies the visible `Notifications` title. Desktop and mobile
   web show the title beside the filter; the app keeps that page heading
   available to screen readers without repeating it visually.
@@ -86,8 +92,8 @@ with a multi-select cause filter, grouped reactions, and inline drop previews.
   within the row. Keyboard focus visibly identifies profile and wave links and
   the `Show full drop` action.
 - Drop-linked rows show inline drop context with reply/quote actions.
-- Drop previews use the standard dark post backgrounds. Wave names appear below
-  the author.
+- Drop previews use the same solid dark card surface as My Stream and profile
+  streams. Wave names appear below the author.
 - Long drop previews can collapse and show `Show full drop`.
 - Repeated `DROP_REACTED` notifications on one drop are grouped into one
   `New reactions` row with grouped avatars and reaction badges.

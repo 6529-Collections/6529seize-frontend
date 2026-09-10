@@ -58,7 +58,11 @@ export function resolveCmsRoute(
   cmsPackage: CmsPackageV1,
   path: string
 ): CmsRouteResolution {
-  return resolveCmsRouteInternal(cmsPackage, path, new Set<string>());
+  return resolveCmsRouteInternal(
+    cmsPackage,
+    normalizeCmsHandleSegment(path),
+    new Set<string>()
+  );
 }
 
 export function getCmsPagePath(
@@ -69,23 +73,50 @@ export function getCmsPagePath(
     (candidate) => candidate.page_id === pageId && candidate.kind === "page"
   );
   if (route) {
-    return route.path;
+    return normalizeCmsHandleSegment(route.path);
   }
 
-  return (
-    cmsPackage.payload.pages.find((candidate) => candidate.id === pageId)
-      ?.path ?? null
+  const page = cmsPackage.payload.pages.find(
+    (candidate) => candidate.id === pageId
   );
+  return page ? normalizeCmsHandleSegment(page.path) : null;
 }
 
 export function getCmsNavigationItems(
   cmsPackage: CmsPackageV1
 ): CmsNavigationItemV1[] {
-  return (
+  const items =
     cmsPackage.payload.navigation.find(
       (navigation) => navigation.id === cmsPackage.site.navigation_id
-    )?.items ?? []
-  );
+    )?.items ?? [];
+  return items.map((item) => normalizeCmsNavigationItem(item));
+}
+
+/**
+ * Published packages may retain display-case handles, while runtime requests
+ * use canonical lowercase handles. Preserve page slugs, queries, and fragments.
+ */
+function normalizeCmsHandleSegment(path: string): string {
+  if (!isSafeCmsRelativeUri(path)) {
+    return path;
+  }
+  return path.replace(/^\/[^/?#]+/, (handle) => handle.toLowerCase());
+}
+
+function normalizeCmsNavigationItem(
+  item: CmsNavigationItemV1
+): CmsNavigationItemV1 {
+  return {
+    ...item,
+    ...(item.url ? { url: normalizeCmsHandleSegment(item.url) } : {}),
+    ...(item.children
+      ? {
+          children: item.children.map((child) =>
+            normalizeCmsNavigationItem(child)
+          ),
+        }
+      : {}),
+  };
 }
 
 function resolveCmsRouteInternal(
@@ -98,9 +129,11 @@ function resolveCmsRouteInternal(
   }
   seenPaths.add(path);
 
-  const route = cmsPackage.payload.routes.find(
-    (candidate) => candidate.path === path
+  const matchingRoutes = cmsPackage.payload.routes.filter(
+    (candidate) => normalizeCmsHandleSegment(candidate.path) === path
   );
+  // Never let manifest ordering choose between conflicting canonical routes.
+  const route = matchingRoutes.length === 1 ? matchingRoutes[0] : undefined;
   if (!route) {
     return { kind: "not_found", reason: "route_missing" };
   }
@@ -109,7 +142,11 @@ function resolveCmsRouteInternal(
     if (!route.target || !isSafeCmsRelativeUri(route.target)) {
       return { kind: "not_found", reason: "unsafe_redirect" };
     }
-    return { kind: "redirect", route, target: route.target };
+    return {
+      kind: "redirect",
+      route,
+      target: normalizeCmsHandleSegment(route.target),
+    };
   }
 
   if (route.kind === "alias") {
@@ -117,7 +154,11 @@ function resolveCmsRouteInternal(
       return { kind: "not_found", reason: "route_missing" };
     }
     if (route.target.startsWith("/")) {
-      return resolveCmsRouteInternal(cmsPackage, route.target, seenPaths);
+      return resolveCmsRouteInternal(
+        cmsPackage,
+        normalizeCmsHandleSegment(route.target),
+        seenPaths
+      );
     }
     const page = cmsPackage.payload.pages.find(
       (candidate) => candidate.id === route.target

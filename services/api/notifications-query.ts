@@ -15,6 +15,7 @@ type NotificationsQueryOptionsParams = {
   readonly identity: string | null | undefined;
   readonly limit?: string | undefined;
   readonly cause?: NotificationCause[] | null | undefined;
+  readonly causeExclude?: NotificationCause[] | null | undefined;
   readonly headers?: Record<string, string> | undefined;
 };
 
@@ -22,18 +23,26 @@ type NotificationsQueryKeyParams = {
   readonly identity: string | null | undefined;
   readonly limit?: string | undefined;
   readonly cause?: readonly string[] | null | undefined;
+  readonly causeExclude?: readonly string[] | null | undefined;
 };
 
 export const getIdentityNotificationsQueryKey = ({
   identity,
   limit = NOTIFICATIONS_PAGE_LIMIT,
   cause = null,
+  causeExclude = null,
 }: NotificationsQueryKeyParams) => {
   const normalizedIdentity =
     typeof identity === "string" ? identity.trim().toLowerCase() : identity;
   const normalizedCause =
     cause !== null && cause.length > 0
       ? [...cause].sort((left, right) => left.localeCompare(right)).join(",")
+      : null;
+  const normalizedExclude =
+    causeExclude !== null && causeExclude.length > 0
+      ? [...causeExclude]
+          .sort((left, right) => left.localeCompare(right))
+          .join(",")
       : null;
 
   return [
@@ -42,6 +51,9 @@ export const getIdentityNotificationsQueryKey = ({
       identity: normalizedIdentity,
       limit,
       cause: normalizedCause,
+      ...(normalizedExclude === null
+        ? {}
+        : { causeExclude: normalizedExclude }),
       version: NOTIFICATIONS_QUERY_VERSION,
     },
   ] as const;
@@ -51,12 +63,14 @@ export const getIdentityNotificationsInfiniteQueryOptions = ({
   identity,
   limit = NOTIFICATIONS_PAGE_LIMIT,
   cause = null,
+  causeExclude = null,
   headers,
 }: NotificationsQueryOptionsParams) => {
   const queryKey = getIdentityNotificationsQueryKey({
     identity,
     limit,
     cause,
+    causeExclude,
   });
 
   return {
@@ -68,6 +82,7 @@ export const getIdentityNotificationsInfiniteQueryOptions = ({
       await fetchNotificationsV2({
         limit,
         cause,
+        ...(causeExclude === null ? {} : { causeExclude }),
         pageParam,
         signal,
         ...(headers === undefined ? {} : { headers }),

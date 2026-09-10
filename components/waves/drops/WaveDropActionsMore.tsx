@@ -21,7 +21,7 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { useRef, useState } from "react";
-import { Tooltip } from "react-tooltip";
+import DropActionTooltip from "./DropActionTooltip";
 import WaveDropActionsCopyLink from "./WaveDropActionsCopyLink";
 import WaveDropActionsCopyText from "./WaveDropActionsCopyText";
 import WaveDropCurationsActionIcon from "./WaveDropCurationsActionIcon";
@@ -33,6 +33,7 @@ import WaveDropActionsRestoreLinkPreviews from "./WaveDropActionsRestoreLinkPrev
 import WaveDropActionsSetPinnedDrop from "./WaveDropActionsSetPinnedDrop";
 import ContentModerationDropActions from "@/components/content-moderation/ContentModerationDropActions";
 import ReportDropModal from "@/components/content-moderation/ReportDropModal";
+import WaveDropDocumentationAction from "./WaveDropDocumentationAction";
 
 interface WaveDropActionsMoreProps {
   readonly drop: ExtendedDrop;
@@ -136,41 +137,24 @@ export default function WaveDropActionsMore({
 
   return (
     <>
-      <button
-        ref={buttonRef}
-        className="tw-flex tw-size-8 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-400 tw-transition-colors tw-duration-200 tw-ease-out desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-200"
-        onClick={(event) => {
-          event.stopPropagation();
-          handleOpenChange(!isOpen);
-        }}
-        aria-label="More actions"
-        aria-haspopup="true"
-        aria-expanded={isOpen}
-        data-tooltip-id={`more-actions-${drop.id}`}
+      <DropActionTooltip
+        content={<span className="tw-text-xs">More</span>}
+        disabled={isOpen}
       >
-        <EllipsisVerticalIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-transition tw-duration-300 tw-ease-out" />
-      </button>
-      {!isOpen && (
-        <Tooltip
-          id={`more-actions-${drop.id}`}
-          place="top"
-          offset={8}
-          opacity={1}
-          style={{
-            padding: "4px 8px",
-            background: "#37373E",
-            color: "white",
-            fontSize: "13px",
-            fontWeight: 500,
-            borderRadius: "6px",
-            boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
-            zIndex: 99999,
-            pointerEvents: "none",
+        <button
+          ref={buttonRef}
+          className="tw-flex tw-size-8 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-400 tw-transition-colors tw-duration-200 tw-ease-out desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-200"
+          onClick={(event) => {
+            event.stopPropagation();
+            handleOpenChange(!isOpen);
           }}
+          aria-label="More actions"
+          aria-haspopup="true"
+          aria-expanded={isOpen}
         >
-          <span className="tw-text-xs">More</span>
-        </Tooltip>
-      )}
+          <EllipsisVerticalIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-transition tw-duration-300 tw-ease-out" />
+        </button>
+      </DropActionTooltip>
       <CommonDropdownItemsDefaultWrapper
         isOpen={isOpen}
         setOpen={handleOpenChange}
@@ -260,6 +244,12 @@ export default function WaveDropActionsMore({
                   isDropdownItem={true}
                   onOpen={closeDropdown}
                 />
+                {isOpen && (
+                  <WaveDropDocumentationAction
+                    drop={drop}
+                    onSelected={closeDropdown}
+                  />
+                )}
                 {canSetPinnedDrop && (
                   <WaveDropActionsSetPinnedDrop
                     drop={drop}

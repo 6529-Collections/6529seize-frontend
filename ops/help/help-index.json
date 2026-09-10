@@ -5,6 +5,49 @@
   "base_url": "https://6529.io",
   "records": [
     {
+      "id": "artwork-documentation.overview",
+      "kind": "workflow",
+      "title": "Private artwork documentation",
+      "aliases": [
+        "my artwork documentation",
+        "artist dossier",
+        "Keys and Gates documentation",
+        "artwork provenance"
+      ],
+      "keywords": [
+        "artwork",
+        "documentation",
+        "artist",
+        "provenance",
+        "original files",
+        "rights",
+        "consent",
+        "preservation",
+        "Keys and Gates"
+      ],
+      "facts": [
+        "When the server enables artwork documentation for a profile, My artwork documentation appears in the account menu and opens /artwork-documentation. Eligible owned artwork menus also offer Artwork documentation on desktop and mobile.",
+        "The private workspace collects artwork identity, story and process, artist credits and contributors, files, rights and people, preservation and display guidance, and an optional artist interview. Each section explains why the information matters.",
+        "Documentation can begin independently or in a supported submission form and can continue afterward. It is optional during submission. A successful artwork post is not retried when its documentation source link needs recovery.",
+        "Drafts save to the database. Unsaved text is not persisted in browser local storage. Keep the window open when saving fails or authentication expires, and resolve a version conflict before continuing.",
+        "All documentation remains private in this phase. Intended for a future public record means future publication intent, not current publication. Private contacts and sensitive rights evidence remain restricted, and original archival files require explicit access.",
+        "File transfer, checksum verification, inspection and malware screening have separate statuses. Upload limits are 4 GiB per file, 20 GiB of stored and reserved files per context, 100 files and five simultaneous upload sessions per context.",
+        "Only the artist can confirm a documentation revision through a direct authenticated session. Confirmation preserves a dated immutable version in the database; it is not a wallet signature, mint instruction, or automatic effect of a proposed license. Curatorial, technical and rights reviews are separate.",
+        "New edits preserve earlier confirmed versions. Shared artist information is versioned and pinned per work. Keys and Gates uses a photography documentation profile; selection does not establish minting, purchase or Museum accession.",
+        "Mint preparation and on-chain, IPFS or Arweave publication are deferred. The documentation form does not perform them."
+      ],
+      "canonical_path": "/artwork-documentation",
+      "link_label": "My artwork documentation",
+      "related_paths": ["/waves"],
+      "tags": ["artwork", "artists", "documentation", "privacy", "museum"],
+      "source_refs": [
+        "ops/docs/artwork-documentation.md",
+        "app/artwork-documentation/page.tsx",
+        "components/header/user/HeaderArtworkDocumentationLink.tsx",
+        "components/waves/drops/WaveDropDocumentationAction.tsx"
+      ]
+    },
+    {
       "id": "waves.memes.submission-identity",
       "kind": "workflow",
       "title": "Memes submission profile and wallet confirmation",
@@ -498,17 +541,17 @@
         "The active review is 2026-09-09.1, pinned to Stream source 92ea123380917032f01aae09691141a2a72df935 and checked September 9, 2026. Earlier snapshots keep their source and editorial content with feedback closed.",
         "The overview explains 1/1, 1/1/x, and editions outside The Memes. These are contract capabilities; launch formats and publishing tools still need confirmation.",
         "All Stream NFTs share one permanent Core address. Marketplaces may display different Stream collections together unless they support the collection information.",
-        "Guides label built code, agreed but unfinished requirements, and still-proposed designs. Code existence does not establish integration, independent audit, deployment, or live-service behavior.",
-        "The new permanent Core uses its registered mint manager. The older signed-sale rehearsal imports a test-only legacy Core and is not proof of a complete permanent-Core sale connection.",
+        "Guides define Core as the main contract and minting as creating a token, and label built code, agreed but unfinished requirements, and still-proposed designs. The specification inventory still lists Draft documents: accepted design decisions do not make a specification Final. The policy requires governing specifications to reach Final before deployment. Code existence does not establish integration, independent audit, deployment, or live-service behavior.",
+        "The permanent Core accepts mint requests only from its registered manager, but the real mint manager and ledger currently fail Core's installation checks. Their code is implemented separately; the connection needs fixing and testing together. The older signed-sale rehearsal imports a test-only legacy Core and does not prove that connection.",
         "Artist acceptance, mint consent, collaborator acceptance, scoped delegation, key rotation, estate arrangements, and consent for relevant economic changes are accepted requirements. Complete artist-authority implementation is unfinished; ADR 0023 remains proposed.",
         "Full artist details opens the active snapshot artist chapter below the short guide. The fictional artwork preview describes an intended workflow and explicitly says complete artist approval enforcement is unfinished.",
         "Six current pages use static diagrams: artwork formats on the overview, artist approvals in For artists, role permissions in Who Can Do What, mint paths in Review the code, sale credits and withdrawals in Revenue, Splits, and Royalties, and Core freeze order in Freezing, Preservation, and Artwork Finality. They stack vertically in narrow layouts. Full role and component tables open below their diagrams; saved versions retain their original text and tables.",
-        "The permanent Core supports fixed-size, capped-open, and uncapped-open collections. A closed collection cannot reopen, including with no minted tokens. Burn blocking, Core freeze, and wider artwork finality are separate steps.",
-        "The mint manager and ledger implement ADR 0018 batch operation roots, per-token identities, and replay accounting. This does not complete typed payment settlement or the required sale and artist connections.",
-        "The older ETH sale contracts keep local credits for the named poster, protocol, and curator reserve. The poster is not automatically the artist or transaction submitter. Separate split wallets and settlement code do not prove those sales use them.",
-        "The permanent Core reads royalties through a configured resolver and has restricted metadata refresh helpers. Royalties are marketplace information, not forced payment. Full router and reveal integrations require their own implementation and evidence.",
+        "The permanent Core supports fixed-size, capped-open, and uncapped-open collections. A closed collection cannot reopen, including with no minted tokens. Burn blocking must precede Core freeze, but the two actions can execute in the same transaction once governance conditions are met; no extra block delay is required. Wider artwork finality has separate conditions and a registry whose Core installation is also blocked.",
+        "The mint manager and ledger implement ADR 0018 batch operation roots, per-token identities, and replay accounting. This does not establish installability into Core or complete typed payment settlement, shared/global counters, successor continuity, or required artist connections. ADR 0021 accepts a revenue architecture; ADRs 0022 and 0023 remain proposed. Historical implementation notes must not be mistaken for current behavior.",
+        "The older ETH sale contracts keep local credits for the named poster, protocol, and curator reserve. The poster is not automatically the artist or transaction submitter. A winning contract unable to receive an NFT has no alternate-recipient recovery, curator rotation can strand old reserve credits, and auction payment splits can change after a funded bid. Separate split wallets and settlement code do not prove those sales use them; deprecated payment tokens currently block split-wallet withdrawals that the specification requires to remain eligible.",
+        "The permanent Core has royalty lookup code but cannot install its royalty resolver; ordinary configuration therefore reports no receiver and zero royalty. Core's artist-registry connection is disabled too. These connections must be completed before deploying permanent Core. Even a working royalty lookup cannot force marketplace payment. Metadata refresh helpers exist; full router and reveal integrations require separate implementation and evidence. Core stores the coordinator selected at mint and passes the mint commitment to it; Core does not store that commitment itself.",
         "Emergency controls pause specific checked operations. Admin pause domains, manager phases, and Core collection status are separate controls; there is no universal pause-everything promise.",
-        "Where Development Stands reports the same source as the active review, retained Core runtime size of 18,997 bytes with 5,579 bytes of margin, and incomplete audit and deployment evidence. Public beta and production remain blocked.",
+        "Where Development Stands reports the same source as the active review, retained Core runtime size of 18,997 bytes with 5,579 bytes of margin, and incomplete audit and deployment evidence. Its introduction names unfinished connections and the need for Final specifications. The displayed count is ten open blockers in the saved risk register, not a complete count of all current findings. Public beta and production remain blocked.",
         "The current Community Review page gives questions for artists, collectors, and code reviewers, explains the status labels, and discloses AI-assisted drafting and the need for human and specialist review.",
         "Each immutable version has its own lifecycle, deployment status, and audit status: superseded versions can remain readable as REVIEW_CLOSED, stop accepting submissions, link back to the current review, and avoid inheriting newer deployment or audit claims.",
         "The generated technical reference exposes the exact versioned Solidity source, definitions, functions, events, errors, and other declarations.",
@@ -542,6 +585,7 @@
       "tags": ["stream", "contract", "review", "security"],
       "source_refs": [
         "app/reviews/[review]/page.tsx",
+        "lib/public-review/streamReviewEditorialCorrections.ts",
         "components/public-review/PublicReviewShell.tsx",
         "components/public-review/StreamArtworkConceptPreview.tsx",
         "components/public-review/StreamReviewDiagram.tsx",
@@ -645,6 +689,7 @@
       ],
       "facts": [
         "The Join 6529 page lives at /join-6529.",
+        "On native iOS when the detected country is not US or is unknown, the Collect step, subscription promotions/actions, and purchasing FAQs are absent; progress counts four visible steps and there is no unavailable banner.",
         "/join redirects to /join-6529 for compatibility.",
         "It is a state-aware onboarding hub that adapts to wallet connection, wallet auth, and profile setup.",
         "The journey covers connecting a wallet, setting up a profile, joining a Wave, participating, and collecting.",
@@ -1020,6 +1065,7 @@
       ],
       "facts": [
         "The Minting The Memes guide lives at /about/minting.",
+        "On native iOS when the detected country is not US or is unknown, About Minting and Subscriptions links are hidden and direct visits return to /about without rendering the guides.",
         "The guide links to the current in-app mint at /the-memes/mint and the official standalone mint page at https://thememes.6529.io/.",
         "Users can choose regular minting or subscription minting; a subscription does not create eligibility and can mint only in a phase the destination wallet already qualifies for.",
         "The current mint flow can move through Phase 0, Phase 1, Phase 2, and a public phase for a card.",
@@ -1496,6 +1542,7 @@
       ],
       "facts": [
         "A user's Meme Card subscription controls and history live under /{user}/subscriptions.",
+        "On native iOS when the detected country is not US or is unknown, subscription controls stay hidden and direct or deep-linked visits return to the profile Identity tab without showing subscription content.",
         "The tab leads with subscription coverage: status, consecutive intended drops funded, funded-through and next-unfunded Meme context, and an authoritative top-up deadline only when one is available.",
         "The tab also shows exact ETH balance, raw mint capacity, airdrop address, manual or automatic mode, edition preference, upcoming drops, and history when subscriptions are available.",
         "Owners can update settings, including airdrop address and mode, and top up; read-only viewers can inspect visible subscription information.",
@@ -1660,17 +1707,25 @@
         "TDH is 6529's time-weighted holding metric for eligible NFTs.",
         "Conceptually, TDH measures long-term participation and skin in the 6529 ecosystem.",
         "Each eligible NFT contributes value based on how long it has been held; that base holding time is then adjusted by edition-size weighting and by collection boosters.",
+        "FirstGM (Meme #8) was designed to establish the one-TDH reference: one copy held for one complete day earns one base TDH before boosts. Its open-mint design is central to its role as the original reference card, explained near the start of the TDH page at #tdh-reference.",
+        "Ordinary burns do not reduce the minted count used for TDH edition weighting. FirstGM (Meme #8) has a fixed exception that subtracts 2,588 from its 6,529 minted copies, giving 3,941 before the edition-size floor is applied.",
         "The calculation has three layers: unweighted days, edition weighting, and boosts.",
         "Unweighted days means each NFT contributes 1 unit per day it is held.",
-        "Edition weighting means days held are multiplied by a HODL or edition-size rate; on the frontend TDH page, FirstGM with edition size 3,941 is the 1.0 baseline.",
+        "Edition weighting means days held are multiplied by a HODL or edition-size rate. The calculator derives rates from the largest eligible effective Meme edition.",
+        "An edition-size floor is a minimum count used for TDH: when fewer copies were minted, the calculation uses the floor instead. The exact calculation section explains how floors are set and gives a worked example.",
         "Boosts multiply weighted TDH by active boosters based on what the holder owns.",
-        "The backend stores the distinctions separately: tdh__raw is raw full days held, tdh is raw days multiplied by HODL or edition weighting, and boosted_tdh is weighted TDH multiplied by the active boost.",
-        "Current TDH 1.4 rules use the higher of Category A or Category B boosters, plus Category C.",
-        "Category A is the complete Meme Card set boost, with diminishing additional-set boosts.",
-        "Category B covers season, genesis, and nakamoto set boosts.",
-        "Category C is the Gradient boost, up to 5 Gradients.",
-        "The current TDH guide presents the Category A or Category B comparison before Category C, then groups formulas, examples, season boosts, limits, and related destinations for quick reference.",
-        "TDH is calculated daily at 00:00 UTC and is used throughout the network: profiles, leaderboards, Levels, groups, Network views, Waves voting and eligibility, and public data."
+        "The TDH page has anchors for FirstGM's reference role, a fixed worked example, profile lookup, current boosts, and exact calculation details.",
+        "The worked example compares Today and +30 days and can remove Nakamoto #4 before the snapshot; it demonstrates that a sale removes both the card contribution and any boost component it supplied.",
+        "Profile lookup accepts a public handle or wallet-like identity without requiring wallet authentication, and shows loading, empty, not-found, retryable error, snapshot, holdings, boost breakdown, and paginated collection states.",
+        "The daily snapshot uses the Ethereum block at or immediately before 00:00 UTC; holding age uses that block timestamp, while a displayed API date can reflect later processing time.",
+        "The current boost is deterministic for a particular snapshot once eligible cards, ownership history, rates, and season configuration are known; future inputs can still change the result.",
+        "The Current boosts section at /network/tdh#tdh-1-4 loads configured bonus amounts, boosted-season limits, additional-set decay and Gradient limits from GET /tdh/rules. Consult that section for current values and the future schedule.",
+        "The highest eligible season is excluded from season boosts; later seasons do not automatically extend the configured boosted-season limit.",
+        "A full eligible Meme collection uses the configured season sum plus geometrically diminishing bonuses for additional full sets, with no hard set-count cap.",
+        "Distinct Gradients add the configured per-token bonus up to the configured count limit. The page derives the eventual rounded multiplier ceiling from the full season schedule, additional-set series and Gradient limit.",
+        "The displayed future ceiling is conditional: future cards must become eligible and can make a previously complete collection incomplete.",
+        "Rates are rounded before wallet and token-level TDH rounding; consolidated wallets preserve qualifying internal-transfer ages, recompute the boost, and sum per-token rounded final contributions.",
+        "TDH is used throughout the network, including profiles, leaderboards, Levels, groups, Network views, Waves voting and eligibility, and public data."
       ],
       "canonical_path": "/network/tdh",
       "related_paths": [
@@ -1966,7 +2021,7 @@
       ],
       "facts": [
         "TDH (unboosted) is TDH weighted by edition size before boosters are applied.",
-        "FirstGM with edition size 3,941 is the 1.0 baseline for edition weighting on the TDH page."
+        "FirstGM (Meme #8) was designed as the original one-TDH reference: one copy held for one complete day earns one base TDH before boosts. The calculator derives edition rates from the largest eligible effective Meme edition."
       ],
       "canonical_path": "/network/definitions",
       "related_paths": ["/network/tdh", "/network/health/network-tdh"],
@@ -2000,7 +2055,7 @@
       "facts": [
         "Nakamoto Set is a SZN1 Category B TDH boost term.",
         "Under current TDH 1.4 rules, SZN1 can use a complete set boost or the Genesis Set and Nakamoto Set boosts.",
-        "The current Nakamoto Set boost shown on the TDH page is 1.01x."
+        "Holding Nakamoto (Meme #4) adds the configured Nakamoto partial-set bonus when SZN1 is boostable and incomplete. The complete SZN1 boost replaces its partial-set bonuses. See Current boosts at /network/tdh#tdh-1-4 for the current API-derived amount."
       ],
       "canonical_path": "/network/tdh",
       "related_paths": [
@@ -2076,6 +2131,8 @@
         "Daily xTDH rate is xtdh_rate = produced_today - granted_out_today + received_today.",
         "Total xTDH accumulates as xtdh_total = xtdh_total_previous + xtdh_rate.",
         "The key idea is grants: a profile that produces xTDH can grant future xTDH flow to all tokens in an external ERC-721 collection or to a selected subset of tokens.",
+        "To select a collection in Create New Grant, paste its Ethereum contract address (0x followed by 40 hexadecimal characters), select the ERC-721 result, then choose all tokens, individual IDs, or ranges. Collection-name search, ENS names, and marketplace URLs are not supported for this lookup.",
+        "If collection metadata fails to load, use Try again. A missing or non-ERC-721 result cannot be selected. Contract metadata lookup is not a spam or authenticity check.",
         "If you own a token with an active grant, you receive your share of that grant while you own the token.",
         "Per-token grant flow is grant_amount_per_token = rate / denominator, where the denominator is either the collection total supply for full-collection grants or the number of selected tokens for partial grants.",
         "Transfers inside the same consolidation group do not reset the ownership window; sales or transfers across groups do reset it.",
@@ -2931,11 +2988,12 @@
       ],
       "facts": [
         "Drop actions include reactions, ratings, voting, boosting, curation, replies, link copy, and pinning where allowed.",
+        "On desktop, hover or keyboard-focus a drop action to read its label beside the control. Moving the pointer away, scrolling, resizing, pressing Escape, clicking elsewhere, or activating the control with a pointer or keyboard dismisses action tooltips. Touch uses the drop action menu.",
         "Posted full drops can support emoji reactions and clap rating with optimistic UI and rollback on failure.",
         "Reaction controls are disabled while a proxy profile is active.",
         "Reaction controls are disabled only when chatting and reacting are disabled for the entire wave. A viewer who can see the wave may still react when the wave's chat group does not permit them to post.",
         "If the API rejects the current session, the app starts one authentication recovery attempt for that session and temporarily disables reaction actions. The failed reaction is not automatically replayed.",
-        "If a reaction request times out, the app rolls back the optimistic state, refreshes the canonical drop state, and does not automatically retry the write.",
+        "If a reaction request times out, the app briefly checks the saved state. If it matches the latest choice, the reaction stays without an error or rollback. If the choice cannot be confirmed, refresh and check before trying again: the request may have changed the reaction, and repeating the same choice can undo that change. The app never automatically retries the write.",
         "Rating controls clamp values to the drop's allowed min/max range and can be disabled when the viewer has no available credit.",
         "Rank/Approve waves expose voting controls such as vote sliders and vote summaries when the user is eligible.",
         "The normal vote dialog can optionally post a standard drop reply with a generated vote rationale prefix; Vote with reply starts off and can be enabled directly or by editing the prefilled text.",
@@ -4516,7 +4574,10 @@
       "facts": [
         "Mobile layouts use bottom navigation for Discovery, Waves, Messages, Home, Network, Collections, and Notifications.",
         "The mobile bottom navigation surface is separate from the desktop and app sidebar IA.",
-        "Tablet-sized app viewports use a wider dock while phone sizing stays unchanged.",
+        "Tablet-sized app viewports use a wider dock.",
+        "Tap the bell at the right end of the app bottom bar to open Notifications. Its tap area includes the space around the icon in both expanded and compact states.",
+        "Bottom navigation icons dim while pressed to acknowledge the touch.",
+        "In the Android app, bottom spacing respects the space the device reports for system navigation.",
         "Rotating a phone or tablet keeps bottom navigation visible unless a route, edit state, open drop, or real software keyboard hides it.",
         "In the native app, the new-version refresh prompt stays centered directly above the dock and follows its expanded or compact position."
       ],
@@ -4566,6 +4627,7 @@
       "facts": [
         "The open-mobile route handles mobile app handoff and landing behavior.",
         "Use /open-mobile when users ask how to open the 6529 app from the web.",
+        "A valid internal path is used for the app handoff and Back to 6529.io, including query and fragment. A missing or invalid path skips app handoff and Back to 6529.io returns home.",
         "Mobile navigation and push notification behavior are documented separately."
       ],
       "canonical_path": "/open-mobile",
@@ -4778,6 +4840,7 @@
         "Standard wave-created rows can offer Join wave and Follow creator controls; direct-message wave-created rows offer Open DM instead of joining the wave.",
         "The Reactions filter includes voted, reacted, and boosted drop notifications; the Identity filter includes new follows and REP/NIC updates.",
         "The Subscriptions filter includes transition-based coverage alerts with runway, Meme context, authoritative deadline when available, and exact minimum top-up action.",
+        "On native iOS when the detected country is not US or is unknown, subscription coverage feed items, their filter and the device settings entry are hidden; social follow notifications remain available.",
         "Notification rows may be missing or stale if loading, permissions, or realtime connectivity are disrupted."
       ],
       "canonical_path": "/notifications",
@@ -6175,11 +6238,12 @@
         "Leaderboard List view items for participatory rank-wave drops can show Largest vote with a profile link and signed amount without opening Top voters. Grid cards do not show this highlight and keep their existing voter-count and voting controls. It is the largest current individual allocation by absolute size, so a negative vote can be selected.",
         "A signed allocation belongs to one voter on this drop: plus is positive and minus is negative. It is not the voter's latest adjustment or their total across the wave.",
         "In single-drop detail, an optional current-vote ribbon with Largest supporting vote (positive) and Largest opposing vote (negative) stays visible inside Top voters, beneath its header. Select the Top voters header row, apart from its separate download control, to toggle the voter rows below the summary; its indicator reads View voters when closed and Hide voters when open. Row ordering, absolute totals, and pagination are unchanged. Download All stays visible in the header, including when collapsed, and uses an icon-only button on narrow screens. It downloads all voters as CSV without toggling the list. The graph does not toggle the list, and collapsing the rows does not hide the summary.",
-        "Ribbon widths represent complete positive and negative allocation amounts before they offset each other. Each side highlights up to three individual allocations; the striped Others segment combines the remaining amount on that side, not a voter count.",
+        "Ribbon widths represent complete positive and negative allocation amounts before they offset each other. Each side highlights up to three individual allocations; the striped Others segment combines the remaining amount on that side, not a voter count. If voter-profile details are only partly available, the authoritative side total still renders and the unenriched amount is included in Others.",
         "Hover a ribbon segment to see its voter and exact signed amount; Others shows a combined amount. Tap or click anywhere on the ribbon, or keyboard-focus it, to see the complete breakdown, including very small segments. Largest supporting vote and Largest opposing vote are static summaries and do not open tooltips. Narrow screens show one Largest votes label above a single row of signed highlights; names shorten as needed while amounts remain visible. Escape or tapping outside dismisses the tooltip.",
         "When one direction has no allocations, its sign and largest-voter highlight are hidden. A positive-only ribbon shows no minus sign, and a negative-only ribbon shows no plus sign.",
+        "The current-vote summary shows a compact placeholder during its first request. If it cannot load or the response is unusable, it shows a Retry action without hiding the rest of Top voters. A failed background refresh keeps the last valid summary visible.",
         "Current allocation totals are separate from the calculated and projected score in the existing TDH Total strip. Time weighting can make those scores differ from the raw positive-plus-negative net; voting rules and leaderboard ranking are unchanged.",
-        "Largest-vote and distribution summaries are optional and limited to participatory RANK drops. They are omitted for winners, CHAT and APPROVE waves, or unavailable data. Missing summaries do not prove there are no votes or no negative votes.",
+        "Largest-vote card highlights and single-drop distributions are limited to participatory RANK drops. They are omitted for winners, CHAT and APPROVE waves. An unavailable card highlight or a single-drop retry state does not prove there are no votes or no negative votes.",
         "An open drop's distribution refreshes after the user edits or resets a vote and when relevant real-time drop or vote updates arrive; closely spaced updates are grouped. Reopening detail can reuse a result for up to 60 seconds unless a vote update requests fresh data. There is no periodic polling, and the summary is not a live activity log.",
         "Reactions and content updates preserve the latest available card highlight. The user's own or incoming real-time vote changes clear it until the leaderboard's next normal refresh. Voting does not force the leaderboard to reload or reorder.",
         "Top voters are distinct from winners, which are about submitted drops or outcomes."
@@ -6811,6 +6875,7 @@
       "keywords": ["nextgen", "mint", "distribution", "plan", "collection"],
       "facts": [
         "NextGen mint and distribution-plan behavior is documented under NextGen docs.",
+        "On native iOS when the detected country is not US or is unknown, mint and burn-to-mint buttons are absent and direct mint routes return to the collection without displaying mint controls; countdown information and distribution data remain available.",
         "Mint routes live under /nextgen/collection/{collection}/mint.",
         "Distribution plan routes live under /nextgen/collection/{collection}/distribution-plan.",
         "The distribution-plan allowlist shows a loading state while entries are fetched and a no-match state when active filters return no entries."
@@ -7051,12 +7116,22 @@
         "EMMA is the Editor for Managing Multiphase Allowlists and the first reference implementation of Janus.",
         "The EMMA landing route lives at /emma and the plans route lives at /emma/plans.",
         "The distribution plan tool helps build mint plans with airdrops, allowlists, and public minting in one or more phases.",
-        "EMMA uses TDH as a lightweight anti-spam/rate-limit measure for allowlist creation."
+        "EMMA uses TDH as a lightweight anti-spam/rate-limit measure for allowlist creation.",
+        "In Create Snapshots at /emma/plans/{planId}, Use a 6529 collection presents five image rows: The Memes by 6529 (ERC1155), Meme Lab (ERC1155), 6529 Gradient (ERC721), 6529 RAW (ERC721), and 6529 Intern JPGs (ERC1155). Tab reaches each shortcut; Enter or Space selects it.",
+        "The Memes shortcut opens a season picker; choosing all or no seasons uses the full collection. Intern JPGs loads its subcollection token IDs. The other shortcuts fill name and contract address and clear old token IDs. Switching shortcuts preserves block numbers.",
+        "Or enter another collection keeps manual name and full contract address entry available, together with block number, optional token IDs, and optional consolidation block number. A full address can autofill an empty name. If metadata lookup fails, enter the name yourself. Collection-name search is unavailable.",
+        "The five shortcuts remain available without metadata lookup. If Intern JPG token IDs fail to load or are empty, the form stays unchanged and shows an error. Select the shortcut to retry, or enter its name, contract address, and token IDs manually; leaving token IDs empty selects all tokens in the shared contract."
       ],
       "canonical_path": "/emma",
       "related_paths": ["/emma/plans"],
       "tags": ["tools", "emma", "allowlist", "glossary"],
-      "source_refs": ["app/emma/page.tsx", "app/emma/plans/page.tsx"]
+      "source_refs": [
+        "app/emma/page.tsx",
+        "app/emma/plans/page.tsx",
+        "components/distribution-plan-tool/create-snapshots/form/CreateSnapshotForm.tsx",
+        "components/distribution-plan-tool/create-snapshots/form/CreateSnapshotFormCollections.tsx",
+        "ops/docs/emma/feature-create-snapshots-status-and-retry.md"
+      ]
     },
     {
       "id": "tools.api-authentication",
@@ -7470,6 +7545,37 @@
       "related_paths": ["/restricted"],
       "tags": ["access", "navigation"],
       "source_refs": ["app/access/page.tsx", "app/access/page.client.tsx"]
+    },
+    {
+      "id": "profiles.cms-pages",
+      "kind": "business_rule",
+      "title": "Published custom profile pages",
+      "aliases": [
+        "custom profile page",
+        "profile website",
+        "published CMS page"
+      ],
+      "keywords": [
+        "profile",
+        "cms",
+        "published",
+        "page",
+        "route",
+        "capitalization"
+      ],
+      "facts": [
+        "Published custom profile pages use paths ending in /index.html under the profile handle.",
+        "Profile handles in custom page links are case-insensitive; page names after the handle remain case-sensitive.",
+        "If a custom page is not found, use a link from the published site and preserve its page-name capitalization."
+      ],
+      "canonical_path": "/{user}",
+      "related_paths": ["/{user}/cms/builder"],
+      "tags": ["profiles", "cms"],
+      "source_refs": [
+        "app/[user]/[...cmsPath]/page.tsx",
+        "lib/profile-cms/runtime/routes.ts",
+        "ops/docs/profiles/troubleshooting/troubleshooting-routes-and-tabs.md"
+      ]
     }
   ]
 }

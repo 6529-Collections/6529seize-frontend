@@ -89,7 +89,9 @@ Actions:
 
 Flow:
 
-1. Select collection and token scope (`all`, explicit tokens, or ranges).
+1. Paste the collection's Ethereum contract address, select its ERC-721 result,
+   then choose token scope (`all`, explicit tokens, or ranges). Collection names,
+   ENS names, and marketplace URLs cannot be used for collection lookup.
 2. Enter total xTDH/day amount.
 3. Set validity (`Never expires` or future date/time).
 4. Submit.
@@ -103,6 +105,10 @@ Submit stays disabled when:
 - expiration is not in the future.
 
 Submit requires wallet authentication.
+Invalid addresses show guidance without starting a lookup. If metadata cannot
+be loaded, use `Try again`. A not-found result or a non-ERC-721 collection
+cannot be selected. Metadata lookup is not a spam or authenticity check; verify
+the contract address independently.
 Success message:
 `Grant submitted. You will see it once processed.`
 

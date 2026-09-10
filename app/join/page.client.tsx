@@ -2,6 +2,7 @@
 
 import { useSetTitle } from "@/contexts/TitleContext";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 
 import { FaqSection } from "./FaqSection";
 import { FocusSections } from "./FocusSections";
@@ -12,6 +13,7 @@ import { useJoin6529Journey } from "./useJoin6529Journey";
 
 export default function Join6529PageClient() {
   const locale = useBrowserLocale();
+  const { hideNftPurchasing } = useNftPurchasingVisibility();
   useSetTitle(m(locale, "join6529.metadata.title"));
 
   const {
@@ -21,7 +23,7 @@ export default function Join6529PageClient() {
     secondaryAction,
     subscriptionsHref,
     timelineProgress,
-  } = useJoin6529Journey(locale);
+  } = useJoin6529Journey(locale, hideNftPurchasing);
   const links = { profileHref, subscriptionsHref };
 
   return (
@@ -35,13 +37,22 @@ export default function Join6529PageClient() {
       />
       <div className="tw-relative tw-z-10 tw-flex tw-w-full tw-flex-col">
         <JourneyTimelineSection
+          hideNftPurchasing={hideNftPurchasing}
           links={links}
           locale={locale}
           pageState={pageState}
           timelineProgress={timelineProgress}
         />
-        <FocusSections links={links} locale={locale} />
-        <FaqSection links={links} locale={locale} />
+        <FocusSections
+          links={links}
+          locale={locale}
+          hideNftPurchasing={hideNftPurchasing}
+        />
+        <FaqSection
+          links={links}
+          locale={locale}
+          hideNftPurchasing={hideNftPurchasing}
+        />
       </div>
     </main>
   );

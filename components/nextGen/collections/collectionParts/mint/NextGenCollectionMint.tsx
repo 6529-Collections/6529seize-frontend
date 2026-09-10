@@ -1,6 +1,8 @@
 "use client";
 
 import NextGenMint from "./NextGenMint";
+import NftPurchasingGate from "@/components/common/NftPurchasingGate";
+import { formatNameForUrl } from "@/components/nextGen/nextgen_helpers";
 import { useReadContract } from "wagmi";
 import {
   NEXTGEN_CORE,
@@ -22,6 +24,16 @@ function getReadNumber(value: unknown) {
 }
 
 export default function NextGenCollectionMint(props: Readonly<Props>) {
+  return (
+    <NftPurchasingGate
+      redirectTo={`/nextgen/collection/${formatNameForUrl(props.collection.name)}`}
+    >
+      <NextGenCollectionMintContent {...props} />
+    </NftPurchasingGate>
+  );
+}
+
+function NextGenCollectionMintContent(props: Readonly<Props>) {
   const burnAmountRead = useReadContract({
     address: NEXTGEN_CORE[NEXTGEN_CHAIN_ID] as `0x${string}`,
     abi: NEXTGEN_CORE.abi,

@@ -5,9 +5,11 @@ import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrappe
 import CommonDropdownItemsDefaultWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsDefaultWrapper";
 import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 import { usePrefetchNotifications } from "@/hooks/useNotificationsQuery";
+import { getExcludedNotificationCauses } from "./utils/notificationVisibility";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import {
@@ -195,6 +197,14 @@ export default function NotificationsCauseFilter({
   const [openPresentation, setOpenPresentation] =
     useState<FilterPresentation | null>(null);
   const locale = useBrowserLocale();
+  const { hideNftPurchasing } = useNftPurchasingVisibility();
+  const visibleFilters = useMemo(
+    () =>
+      NOTIFICATION_FILTERS.filter(
+        (filter) => !hideNftPurchasing || filter.id !== "subscriptions"
+      ),
+    [hideNftPurchasing]
+  );
   const { isApp } = useDeviceInfo();
   const isMobileLayoutViewport = useIsMobileLayoutViewport();
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -210,10 +220,8 @@ export default function NotificationsCauseFilter({
   );
   const selectedFilters = useMemo(
     () =>
-      NOTIFICATION_FILTERS.filter((filter) =>
-        isFilterSelected(filter, activeCauses)
-      ),
-    [activeCauses]
+      visibleFilters.filter((filter) => isFilterSelected(filter, activeCauses)),
+    [activeCauses, visibleFilters]
   );
   const triggerLabel = getTriggerLabel(selectedFilters, locale);
   const filterSheetTitle = t(locale, "notifications.filter.sheetTitle");
@@ -256,6 +264,7 @@ export default function NotificationsCauseFilter({
     prefetchNotifications({
       identity: connectedProfile.handle,
       cause: filter.cause,
+      causeExclude: getExcludedNotificationCauses(hideNftPurchasing),
       pages: 1,
     });
   };
@@ -318,7 +327,7 @@ export default function NotificationsCauseFilter({
             onSelect={() => updateSelectedFilters([])}
             onDismiss={dismissDesktopMenu}
           />
-          {NOTIFICATION_FILTERS.map((filter) => (
+          {visibleFilters.map((filter) => (
             <FilterMenuItem
               key={filter.id}
               title={t(locale, filter.labelKey)}
@@ -350,7 +359,7 @@ export default function NotificationsCauseFilter({
                   selected={selectedFilters.length === 0}
                   onSelect={() => updateSelectedFilters([])}
                 />
-                {NOTIFICATION_FILTERS.map((filter) => (
+                {visibleFilters.map((filter) => (
                   <FilterSheetItem
                     key={filter.id}
                     title={t(locale, filter.labelKey)}
