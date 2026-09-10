@@ -35,7 +35,7 @@ describe("useDropVoteSummary", () => {
       data: undefined,
       isFetching: true,
       refetch,
-    } as ReturnType<typeof useQuery>);
+    } as unknown as ReturnType<typeof useQuery>);
 
     expect(renderSummary().result.current).toEqual({ status: "loading" });
   });
@@ -46,7 +46,7 @@ describe("useDropVoteSummary", () => {
       isError: true,
       isFetching: false,
       refetch,
-    } as ReturnType<typeof useQuery>);
+    } as unknown as ReturnType<typeof useQuery>);
 
     const { result } = renderSummary();
     expect(result.current.status).toBe("unavailable");
@@ -64,7 +64,7 @@ describe("useDropVoteSummary", () => {
       isError: true,
       isFetching: false,
       refetch,
-    } as ReturnType<typeof useQuery>);
+    } as unknown as ReturnType<typeof useQuery>);
 
     expect(renderSummary().result.current).toEqual({
       status: "ready",
@@ -78,7 +78,7 @@ describe("useDropVoteSummary", () => {
       data: { vote_distribution: distribution },
       isFetching: false,
       refetch,
-    } as ReturnType<typeof useQuery>);
+    } as unknown as ReturnType<typeof useQuery>);
 
     const { result, rerender } = renderSummary();
     const structuralSharing = useQueryMock.mock.calls[0]?.[0].structuralSharing;
@@ -97,7 +97,7 @@ describe("useDropVoteSummary", () => {
       data: preserved,
       isFetching: false,
       refetch,
-    } as ReturnType<typeof useQuery>);
+    } as unknown as ReturnType<typeof useQuery>);
     rerender();
 
     expect(result.current).toEqual({
@@ -112,7 +112,7 @@ describe("useDropVoteSummary", () => {
       data: { vote_distribution: distribution },
       isFetching: false,
       refetch,
-    } as ReturnType<typeof useQuery>);
+    } as unknown as ReturnType<typeof useQuery>);
 
     expect(renderSummary(false).result.current).toEqual({
       status: "disabled",
