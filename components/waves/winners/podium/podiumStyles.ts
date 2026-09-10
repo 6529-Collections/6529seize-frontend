@@ -9,7 +9,6 @@ export const podiumPositionStyles = {
     surface: "tw-from-amber-400/[0.08]",
     hoverTextColor: "desktop-hover:hover:tw-text-amber-400",
     authorFontSize: "tw-text-sm sm:tw-text-base md:tw-text-xl",
-    positionText: "1st",
   },
   second: {
     offset: "tw-pt-8",
@@ -20,7 +19,6 @@ export const podiumPositionStyles = {
     surface: "tw-from-slate-400/[0.06]",
     hoverTextColor: "desktop-hover:hover:tw-text-slate-400",
     authorFontSize: "tw-text-sm sm:tw-text-base",
-    positionText: "2nd",
   },
   third: {
     offset: "tw-pt-12",
@@ -31,7 +29,6 @@ export const podiumPositionStyles = {
     surface: "tw-from-[#CD7F32]/[0.06]",
     hoverTextColor: "desktop-hover:hover:tw-text-[#CD7F32]",
     authorFontSize: "tw-text-sm sm:tw-text-base",
-    positionText: "3rd",
   },
 } as const;
 

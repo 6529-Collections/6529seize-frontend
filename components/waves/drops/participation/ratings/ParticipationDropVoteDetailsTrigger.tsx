@@ -4,9 +4,11 @@ import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import { trapTabFocus } from "@/components/utils/modal/focusTrap";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
-import { formatNumberWithCommas } from "@/helpers/Helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
+import { formatInteger } from "@/i18n/format";
+import { t, tRich } from "@/i18n/messages";
 import {
   type MouseEvent as ReactMouseEvent,
   Fragment,
@@ -43,7 +45,7 @@ const DENSITY_CLASS_NAMES: Record<VoteDetailsTriggerDensity, string> = {
   gallery: "tw-box-border tw-h-8 tw-gap-1 tw-px-2.5 tw-py-0 tw-leading-4",
   tight: "tw-gap-1 tw-px-2 tw-py-1 tw-leading-5",
   podium:
-    "tw-min-h-11 tw-min-w-0 tw-max-w-full tw-flex-wrap tw-justify-center tw-gap-1 tw-px-1.5 tw-py-1.5 tw-leading-4",
+    "tw-min-h-8 tw-min-w-0 tw-max-w-full tw-flex-wrap tw-justify-center tw-gap-1 tw-px-1.5 tw-py-1 tw-leading-4",
 };
 
 const isSmallDensity = (density: VoteDetailsTriggerDensity): boolean =>
@@ -106,9 +108,6 @@ const getTriggerClassNames = (
   };
 };
 
-const getVoterLabel = (voterCount: number): string =>
-  voterCount === 1 ? "voter" : "voters";
-
 const isInsideElement = (
   element: HTMLElement | null,
   target: EventTarget | null
@@ -125,6 +124,7 @@ export default function ParticipationDropVoteDetailsTrigger({
   density = "default",
   visualVariant = "default",
 }: ParticipationDropVoteDetailsTriggerProps) {
+  const locale = useBrowserLocale();
   const isMobileScreen = useIsMobileScreen();
   const isTouchDevice = useIsTouchDevice();
   const useSheet = isMobileScreen || isTouchDevice;
@@ -328,7 +328,7 @@ export default function ParticipationDropVoteDetailsTrigger({
     isOpen && useSheet && typeof globalThis.document !== "undefined"
       ? createPortal(
           <MobileWrapperDialog
-            title="Votes"
+            title={t(locale, "waves.voteDetails.title")}
             isOpen={isOpen}
             onClose={closeDetails}
             noPadding
@@ -362,7 +362,7 @@ export default function ParticipationDropVoteDetailsTrigger({
             <div
               ref={surfaceRef}
               role="dialog"
-              aria-label="Votes"
+              aria-label={t(locale, "waves.voteDetails.title")}
               tabIndex={-1}
               className="tw-flex tw-max-h-[26rem] tw-w-[22.5rem] tw-max-w-[calc(100vw-2rem)] tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.08] tw-bg-[#0E1012] tw-shadow-[0_16px_48px_rgba(0,0,0,0.48)]"
             >
@@ -379,8 +379,21 @@ export default function ParticipationDropVoteDetailsTrigger({
     triggerClassName,
     chevronClassName,
   } = getTriggerClassNames(density, visualVariant, isOpen);
-  const voterLabel = getVoterLabel(drop.raters_count);
-  const formattedVoterCount = formatNumberWithCommas(drop.raters_count);
+  const voterPluralCategory = new Intl.PluralRules(locale).select(
+    drop.raters_count
+  );
+  const voterMessageKey =
+    voterPluralCategory === "one"
+      ? "waves.leaderboard.grid.voters.one"
+      : "waves.leaderboard.grid.voters.other";
+  const triggerLabelMessageKey =
+    voterPluralCategory === "one"
+      ? "waves.voteDetails.trigger.one"
+      : "waves.voteDetails.trigger.other";
+  const formattedVoterCount = formatInteger(locale, drop.raters_count);
+  const softWrappedVoterCountParts = formattedVoterCount.split(
+    /(?<=[,.\u00a0\u202f])/u
+  );
 
   return (
     <>
@@ -389,30 +402,35 @@ export default function ParticipationDropVoteDetailsTrigger({
         type="button"
         aria-haspopup="dialog"
         aria-expanded={isOpen}
-        aria-label={`View voters and vote log for ${formatNumberWithCommas(
-          drop.raters_count
-        )} ${voterLabel}`}
+        aria-label={t(locale, triggerLabelMessageKey, {
+          count: formattedVoterCount,
+        })}
         onClick={toggleDetails}
         className={triggerClassName}
       >
         <span
-          className={`${triggerTextClassName} ${countTextColorClassName} ${
+          className={`${triggerTextClassName} ${labelTextColorClassName} ${
             density === "podium"
               ? "tw-min-w-0 tw-max-w-full [overflow-wrap:anywhere]"
               : ""
           }`}
         >
-          {density === "podium"
-            ? Array.from(formattedVoterCount.matchAll(/[^,]+,?/g), (group) => (
-                <Fragment key={group.index}>
-                  {group[0]}
-                  <wbr />
-                </Fragment>
-              ))
-            : formattedVoterCount}
-        </span>
-        <span className={`${triggerTextClassName} ${labelTextColorClassName}`}>
-          {voterLabel}
+          {tRich(locale, voterMessageKey, {
+            count: (
+              <span key="count" className={countTextColorClassName}>
+                {density === "podium"
+                  ? softWrappedVoterCountParts.map((part, partIndex) => (
+                      <Fragment key={`${part}-${partIndex}`}>
+                        {part}
+                        {partIndex < softWrappedVoterCountParts.length - 1 && (
+                          <wbr />
+                        )}
+                      </Fragment>
+                    ))
+                  : formattedVoterCount}
+              </span>
+            ),
+          })}
         </span>
         <ChevronDownIcon aria-hidden="true" className={chevronClassName} />
       </button>

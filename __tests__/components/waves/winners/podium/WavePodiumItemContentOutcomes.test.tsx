@@ -39,10 +39,18 @@ test("renders icons for all outcome types", () => {
 
   render(<WavePodiumItemContentOutcomes winner={winner} />);
 
-  expect(screen.getByRole("button")).toHaveTextContent("Outcome");
-  expect(screen.getByTestId("tooltip-outcome-1-test-drop-id")).toHaveTextContent(
-    "NIC10Rep5Amanual"
+  const outcomeButton = screen.getByRole("button");
+  expect(outcomeButton).toHaveTextContent("Outcome");
+  expect(outcomeButton).toHaveAttribute(
+    "aria-describedby",
+    "outcome-1-test-drop-id-description"
   );
+  expect(screen.getByText("NIC 10, Rep 5 · A, and manual")).toHaveClass(
+    "tw-sr-only"
+  );
+  expect(
+    screen.getByTestId("tooltip-outcome-1-test-drop-id")
+  ).toHaveTextContent("NIC10Rep5Amanual");
 });
 
 test("uses tap-only events on touch-first devices", () => {

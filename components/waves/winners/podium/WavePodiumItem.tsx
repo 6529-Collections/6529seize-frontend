@@ -7,13 +7,13 @@ import {
 } from "@/components/waves/drops/identityDisplay.helpers";
 import { areSameProfileIdentity } from "@/helpers/ProfileHelpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { ImageScale, getScaledImageUri } from "@/helpers/image.helpers";
 import { WavePodiumItemContentOutcomes } from "./WavePodiumItemContentOutcomes";
 import type { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
 import { motion, useReducedMotion } from "framer-motion";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { t } from "@/i18n/messages";
+import { formatInteger } from "@/i18n/format";
+import { t, tRich } from "@/i18n/messages";
 import { podiumPositionStyles, podiumSurfaceClassName } from "./podiumStyles";
 import { WaveWinnersPodiumPlaceholder } from "./WaveWinnersPodiumPlaceholder";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
@@ -66,6 +66,18 @@ const animationIndexMap: Record<WavePodiumItemProps["position"], number> = {
   second: 1,
   third: 2,
 };
+
+const podiumPlaceMessageKeys = {
+  first: "waves.leaderboard.podium.place.first",
+  second: "waves.leaderboard.podium.place.second",
+  third: "waves.leaderboard.podium.place.third",
+} as const;
+
+const podiumOpenMessageKeys = {
+  first: "waves.leaderboard.podium.open.first",
+  second: "waves.leaderboard.podium.open.second",
+  third: "waves.leaderboard.podium.open.third",
+} as const;
 
 const getAuthorProfileLabel = (drop: ExtendedDrop): string =>
   drop.author.handle ?? drop.author.primary_address;
@@ -165,10 +177,15 @@ export const WavePodiumItem: React.FC<WavePodiumItemProps> = ({
   const animationIndex = customAnimationIndex ?? animationIndexMap[position];
   const authorProfileLabel = getAuthorProfileLabel(drop);
   const authorTooltipUser = getAuthorTooltipUser(drop);
-  const authorProfileHref = `/${authorProfileLabel}`;
+  const authorProfileHref = getIdentityHref(authorProfileLabel);
   const identityDisplay = getPodiumIdentityDisplay(drop);
   const primaryLabel = identityDisplay?.label ?? authorProfileLabel;
   const primaryPfp = identityDisplay ? identityDisplay.pfp : drop.author.pfp;
+  const positionLabel = t(locale, podiumPlaceMessageKeys[position]);
+  const voterMessageKey =
+    new Intl.PluralRules(locale).select(drop.raters_count) === "one"
+      ? "waves.leaderboard.grid.voters.one"
+      : "waves.leaderboard.grid.voters.other";
   const isSelfNominated = identityDisplay
     ? areSameProfileIdentity({
         left: drop.author,
@@ -188,11 +205,12 @@ export const WavePodiumItem: React.FC<WavePodiumItemProps> = ({
         <button
           type="button"
           onClick={() => onDropClick(drop)}
-          aria-label={t(locale, "waves.leaderboard.grid.openNamed", {
-            title: `${styles.positionText} ${primaryLabel}`,
+          aria-label={t(locale, podiumOpenMessageKeys[position], {
+            name: primaryLabel,
           })}
           className="tw-absolute tw-inset-0 tw-z-0 tw-cursor-pointer tw-rounded-xl tw-border-0 tw-bg-transparent tw-p-0 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
         />
+        {/* Plain content passes pointer input to the sibling open button. */}
         <div className="tw-pointer-events-none tw-relative tw-z-10 tw-flex tw-h-full tw-min-w-0 tw-flex-col tw-items-center [&_a]:tw-pointer-events-auto [&_button]:tw-pointer-events-auto">
           <div className="tw-relative tw-z-10 -tw-mb-4 tw-flex tw-flex-shrink-0 tw-flex-col tw-items-center">
             {identityDisplay ? (
@@ -200,7 +218,9 @@ export const WavePodiumItem: React.FC<WavePodiumItemProps> = ({
                 <PodiumAvatar
                   label={primaryLabel}
                   pfp={primaryPfp}
-                  alt={`${primaryLabel} avatar`}
+                  alt={t(locale, "waves.leaderboard.podium.avatar", {
+                    name: primaryLabel,
+                  })}
                   width={56}
                   height={56}
                   className={`${styles.pfpSize} tw-rounded-xl`}
@@ -217,7 +237,9 @@ export const WavePodiumItem: React.FC<WavePodiumItemProps> = ({
                 <PodiumAvatar
                   label={authorProfileLabel}
                   pfp={drop.author.pfp}
-                  alt={`${authorProfileLabel} avatar`}
+                  alt={t(locale, "waves.leaderboard.podium.avatar", {
+                    name: authorProfileLabel,
+                  })}
                   width={56}
                   height={56}
                   className={`${styles.pfpSize} tw-rounded-xl`}
@@ -242,7 +264,7 @@ export const WavePodiumItem: React.FC<WavePodiumItemProps> = ({
                 <span
                   className={`${styles.textColor} tw-text-xs tw-font-medium lg:tw-text-sm`}
                 >
-                  {styles.positionText}
+                  {positionLabel}
                 </span>
               </div>
             </div>
@@ -303,29 +325,30 @@ export const WavePodiumItem: React.FC<WavePodiumItemProps> = ({
                   <div className="tw-flex tw-max-w-full tw-flex-wrap tw-items-center tw-justify-center tw-gap-x-1 tw-gap-y-1 tw-text-xs tw-text-iron-500">
                     {isSelfNominated ? (
                       <span className="tw-font-normal tw-text-iron-400 [overflow-wrap:anywhere]">
-                        self-nominated
+                        {t(locale, "waves.leaderboard.podium.selfNominated")}
                       </span>
                     ) : (
-                      <>
-                        <span className="tw-font-normal tw-text-iron-400 [overflow-wrap:anywhere]">
-                          nominated by
-                        </span>
-
-                        <UserProfileTooltipWrapper user={authorTooltipUser}>
-                          <Link
-                            href={authorProfileHref}
-                            onClick={(e) => e.stopPropagation()}
-                            className="tw-inline-flex tw-min-h-8 tw-min-w-0 tw-max-w-full tw-items-center tw-rounded-md tw-text-center tw-text-iron-300 tw-no-underline tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-iron-200"
+                      tRich(locale, "waves.leaderboard.podium.nominatedBy", {
+                        nominator: (
+                          <UserProfileTooltipWrapper
+                            key="nominator"
+                            user={authorTooltipUser}
                           >
-                            <span
-                              title={authorProfileLabel}
-                              className="tw-block tw-max-w-full tw-whitespace-normal tw-text-xs tw-font-medium tw-text-iron-400 tw-transition-colors [overflow-wrap:anywhere] desktop-hover:hover:tw-text-iron-200"
+                            <Link
+                              href={authorProfileHref}
+                              onClick={(e) => e.stopPropagation()}
+                              className="tw-inline-flex tw-min-h-8 tw-min-w-0 tw-max-w-full tw-items-center tw-rounded-md tw-text-center tw-text-iron-300 tw-no-underline tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-iron-200"
                             >
-                              {authorProfileLabel}
-                            </span>
-                          </Link>
-                        </UserProfileTooltipWrapper>
-                      </>
+                              <span
+                                title={authorProfileLabel}
+                                className="tw-block tw-max-w-full tw-whitespace-normal tw-text-xs tw-font-medium tw-text-iron-400 tw-transition-colors [overflow-wrap:anywhere] desktop-hover:hover:tw-text-iron-200"
+                              >
+                                {authorProfileLabel}
+                              </span>
+                            </Link>
+                          </UserProfileTooltipWrapper>
+                        ),
+                      })
                     )}
                   </div>
                 </div>
@@ -367,7 +390,7 @@ export const WavePodiumItem: React.FC<WavePodiumItemProps> = ({
                       drop.rating >= 0 ? styles.textColor : "tw-text-error"
                     } tw-min-w-0 tw-max-w-full tw-text-sm tw-font-semibold tw-tabular-nums [overflow-wrap:anywhere] sm:tw-text-base`}
                   >
-                    {formatNumberWithCommas(drop.rating)}
+                    {formatInteger(locale, drop.rating)}
                   </span>
                   <span className="tw-text-xs tw-text-iron-400 sm:tw-text-sm">
                     {WAVE_VOTING_LABELS[drop.wave.voting_credit_type]}
@@ -381,13 +404,14 @@ export const WavePodiumItem: React.FC<WavePodiumItemProps> = ({
                       density="podium"
                     />
                   ) : (
-                    <div className="tw-flex tw-max-w-full tw-flex-wrap tw-items-center tw-justify-center tw-gap-x-1 tw-text-center [overflow-wrap:anywhere]">
-                      <span className="tw-text-xs tw-text-iron-200 sm:tw-text-sm">
-                        {formatNumberWithCommas(drop.raters_count)}
-                      </span>
-                      <span className="tw-text-xs tw-text-iron-400 sm:tw-text-sm">
-                        {drop.raters_count === 1 ? "voter" : "voters"}
-                      </span>
+                    <div className="tw-max-w-full tw-text-center tw-text-xs tw-text-iron-400 [overflow-wrap:anywhere] sm:tw-text-sm">
+                      {tRich(locale, voterMessageKey, {
+                        count: (
+                          <span key="count" className="tw-text-iron-200">
+                            {formatInteger(locale, drop.raters_count)}
+                          </span>
+                        ),
+                      })}
                     </div>
                   )}
 

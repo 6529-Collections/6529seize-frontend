@@ -191,7 +191,7 @@ it("renders a wrapping vote details trigger with a comfortable target", () => {
     screen.getByRole("button", {
       name: "View voters and vote log for 1 voter",
     })
-  ).toHaveClass("tw-flex-wrap", "tw-min-h-11");
+  ).toHaveClass("tw-flex-wrap", "tw-min-h-8");
 });
 
 it("opens vote details without triggering the podium click", () => {
@@ -255,4 +255,16 @@ it("keeps avatar and name profile links independent when the avatar is missing",
     expect(link).toHaveAttribute("href", "/alice");
   }
   expect(onDropClick).not.toHaveBeenCalled();
+});
+
+it("normalizes and encodes an address fallback in author profile links", () => {
+  renderWinner({
+    author: { handle: null, primary_address: "0xAbC DEF", pfp: null },
+  });
+
+  const links = screen.getAllByRole("link", { name: "0xAbC DEF" });
+  expect(links).toHaveLength(2);
+  for (const link of links) {
+    expect(link).toHaveAttribute("href", "/0xabc%20def");
+  }
 });
