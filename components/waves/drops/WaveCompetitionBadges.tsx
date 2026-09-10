@@ -111,10 +111,15 @@ const WaveCompetitionBadge = ({
           positionStrategy="fixed"
           offset={8}
           opacity={1}
-          style={TOOLTIP_STYLES}
+          style={{
+            ...TOOLTIP_STYLES,
+            maxWidth: "min(20rem, calc(100vw - 2rem))",
+          }}
           isOpen={isTooltipOpen}
         >
-          <span className="tw-text-xs">{label}</span>
+          <span className="tw-block tw-text-center tw-text-xs tw-leading-snug [overflow-wrap:anywhere]">
+            {label}
+          </span>
         </Tooltip>
       )}
     </span>

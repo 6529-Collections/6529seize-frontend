@@ -1,10 +1,11 @@
-import React from 'react';
-import { render } from '@testing-library/react';
-import { WaveWinnersPodiumPlaceholder } from '@/components/waves/winners/podium/WaveWinnersPodiumPlaceholder';
+import React from "react";
+import { render, screen } from "@testing-library/react";
+import { WaveWinnersPodiumPlaceholder } from "@/components/waves/winners/podium/WaveWinnersPodiumPlaceholder";
 
-describe('WaveWinnersPodiumPlaceholder', () => {
-  it('applies color based on position', () => {
-    const { container } = render(<WaveWinnersPodiumPlaceholder height="h-4" position="second" />);
-    expect(container.firstChild?.querySelector('div.tw-border-iron-700\\/20')).toBeTruthy();
-  });
+it("keeps an unfilled place decorative and non-interactive", () => {
+  const { container } = render(
+    <WaveWinnersPodiumPlaceholder position="second" />
+  );
+  expect(container.firstChild).toHaveAttribute("aria-hidden", "true");
+  expect(screen.queryByRole("button")).not.toBeInTheDocument();
 });
