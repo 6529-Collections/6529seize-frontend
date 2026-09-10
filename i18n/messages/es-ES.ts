@@ -433,6 +433,10 @@ export const ES_ES_MESSAGES = {
   "profileCms.builder.gallery.review.title": "Revisión de instantánea",
   "profileCms.builder.gallery.settings": "Configuración de la galería",
   "profileCms.builder.gallery.snapshot.api": "Instantánea del servidor",
+  "profileCms.builder.gallery.snapshot.signInRequired":
+    "Inicia sesión para solicitar una instantánea de la cartera.",
+  "profileCms.builder.gallery.snapshot.sessionExpired":
+    "No se pudo verificar tu sesión. Vuelve a iniciar sesión para solicitar una instantánea de la cartera.",
   "profileCms.builder.gallery.snapshot.failed":
     "No se pudo crear la instantánea de la galería.",
   "profileCms.builder.gallery.snapshot.fixture": "Instantánea fija",
