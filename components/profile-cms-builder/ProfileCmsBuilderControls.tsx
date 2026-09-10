@@ -154,11 +154,13 @@ export function TabButton({
 }
 
 export function BuilderActionButton({
+  describedBy,
   disabled,
   label,
   onClick,
   variant = "secondary",
 }: {
+  readonly describedBy?: string | undefined;
   readonly disabled: boolean;
   readonly label: string;
   readonly onClick: () => void;
@@ -166,6 +168,7 @@ export function BuilderActionButton({
 }) {
   return (
     <button
+      aria-describedby={describedBy}
       className={`tw-min-h-10 tw-border tw-border-solid tw-px-3 tw-text-sm tw-font-semibold disabled:tw-cursor-not-allowed disabled:tw-opacity-50 ${
         variant === "primary"
           ? "tw-border-primary-400 tw-bg-primary-500 tw-text-white"
