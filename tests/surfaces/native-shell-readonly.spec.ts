@@ -236,6 +236,17 @@ async function readNotificationHistoryPushCount(page: Page) {
   );
 }
 
+async function expectLatestPrimaryNavigationFeedback(link: Locator) {
+  await expect
+    .poll(async () => {
+      const isCurrent = (await link.getAttribute("aria-current")) === "page";
+      const showsPending =
+        (await link.getByTestId("nav-item-pending-indicator").count()) > 0;
+      return isCurrent || showsPending;
+    })
+    .toBe(true);
+}
+
 test.describe("Native and Electron simulated shell read-only coverage @surface @medium @readonly", () => {
   test("Capacitor simulations expose native runtime signals", async ({
     page,
@@ -569,6 +580,100 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
     await page.keyboard.press("Enter");
     await expect(page).toHaveURL(/\/notifications$/);
     await expect.poll(() => readNotificationHistoryPushCount(page)).toBe(1);
+  });
+
+  test("Capacitor primary tabs stay usable across phone and tablet orientations", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      !isCapacitorSimulationProject(testInfo.project.name),
+      "Primary-tab responsive behavior is covered on Capacitor simulations"
+    );
+
+    const viewports = [
+      { name: "phone portrait", width: 390, height: 844 },
+      { name: "phone landscape", width: 844, height: 390 },
+      { name: "tablet portrait", width: 834, height: 1194 },
+      { name: "tablet landscape", width: 1194, height: 834 },
+    ] as const;
+
+    await page.setViewportSize(viewports[0]);
+    await gotoReady(page, "/about");
+
+    for (const viewport of viewports) {
+      await test.step(viewport.name, async () => {
+        await page.setViewportSize(viewport);
+
+        const dock = page.locator('[data-mobile-bottom-nav-dock="true"]');
+        await expect(dock).toBeVisible();
+        await expectUsableNotificationTarget(dock);
+      });
+    }
+  });
+
+  test("Capacitor primary tabs keep feedback on the latest delayed destination", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      !isCapacitorSimulationProject(testInfo.project.name),
+      "Primary-tab transition feedback is covered on Capacitor simulations"
+    );
+
+    let requestedPath: "/notifications" | "/the-memes" | null = null;
+    let releaseNotifications!: () => void;
+    let releaseCollections!: () => void;
+    const notificationsReleased = new Promise<void>((resolve) => {
+      releaseNotifications = resolve;
+    });
+    const collectionsReleased = new Promise<void>((resolve) => {
+      releaseCollections = resolve;
+    });
+
+    await page.route("**/*", async (route) => {
+      const url = new URL(route.request().url());
+      if (!url.searchParams.has("_rsc") || url.pathname !== requestedPath) {
+        await route.continue();
+        return;
+      }
+
+      await (requestedPath === "/notifications"
+        ? notificationsReleased
+        : collectionsReleased);
+      await route.continue();
+    });
+
+    await gotoReady(page, "/about");
+    const dock = page.locator('[data-mobile-bottom-nav-dock="true"]');
+    const notifications = dock.getByRole("link", {
+      name: "Notifications",
+      exact: true,
+    });
+    const collections = dock.getByRole("link", {
+      name: "Collections",
+      exact: true,
+    });
+
+    try {
+      requestedPath = "/notifications";
+      await notifications.tap({ noWaitAfter: true });
+      await expectLatestPrimaryNavigationFeedback(notifications);
+
+      requestedPath = "/the-memes";
+      await collections.tap({ noWaitAfter: true });
+      await expectLatestPrimaryNavigationFeedback(collections);
+      await expect(
+        notifications.getByTestId("nav-item-pending-indicator")
+      ).toHaveCount(0);
+
+      releaseCollections();
+      await expect(page).toHaveURL(/\/the-memes$/, { timeout: 20_000 });
+      await expect(collections).toHaveAttribute("aria-current", "page", {
+        timeout: 20_000,
+      });
+    } finally {
+      releaseCollections();
+      releaseNotifications();
+    }
   });
 
   test("Capacitor app-wallet shell renders the simulated empty wallet state", async ({

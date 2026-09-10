@@ -2890,6 +2890,11 @@ export const EN_US_MESSAGES = {
   "acceptConnection.toast.acceptFailed":
     "Couldn't accept this connection. Please try again.",
   "navigation.primary.ariaLabel": "Primary navigation",
+  "navigation.primary.loading.home": "Loading home",
+  "navigation.primary.loading.discovery": "Loading discovery",
+  "navigation.primary.loading.network": "Loading network",
+  "navigation.primary.loading.collections": "Loading collections",
+  "navigation.primary.loading.notifications": "Loading notifications",
   "appWallet.validation.name.alphanumericSpaces":
     "Name can only contain alphanumeric characters and spaces",
   "appWallet.validation.password.minLength":
