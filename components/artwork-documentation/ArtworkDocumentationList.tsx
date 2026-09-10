@@ -18,6 +18,7 @@ import {
 } from "@/services/api/artwork-documentation-api";
 import { documentationOptionLabel } from "@/i18n/messages/artwork-documentation-fields";
 import { formatDate } from "@/i18n/format";
+import { isPublicationOnly } from "@/lib/artwork-documentation/intake";
 import DocumentationAuthGate, {
   useDocumentationActor,
 } from "./DocumentationAuthGate";
@@ -139,7 +140,13 @@ function DocumentationListContent({
           {msg("stages")}
         </p>
       </header>
-      <DocumentationNotice>{msg("privacy")}</DocumentationNotice>
+      <DocumentationNotice>
+        {msg(
+          selected && isPublicationOnly(selected)
+            ? "publication.help"
+            : "privacy"
+        )}
+      </DocumentationNotice>
       {sourceDropId && (
         <DocumentationNotice>{msg("sourceHelp")}</DocumentationNotice>
       )}

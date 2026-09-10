@@ -15814,6 +15814,9 @@ components:
           type: boolean
         read_contact:
           type: boolean
+        read_restricted_fields:
+          type: boolean
+          description: Read restricted answers beyond individually permissioned contact and locked rights evidence. Defaults to false when absent; does not grant originals, source receipts, editing or artist confirmation.
         confirm_as_artist:
           type: boolean
         manage_assignments:
@@ -16423,6 +16426,11 @@ components:
     ApiArtworkDocumentationProfile:
       type: object
       properties:
+        intake_mode:
+          type: string
+          enum:
+            - publication_only
+          description: All artwork answers and selected files are intended for public publication. Absent on legacy private-intake profiles. Team questions are separate drafting discussion and never part of the confirmed artwork record.
         profile_id:
           type: string
         version:

@@ -5,6 +5,8 @@ import {
   type ApiArtworkDocumentationOperation,
 } from "@/generated/models/ApiArtworkDocumentationOperation";
 import { ApiArtworkDocumentationAnswerStatusEnum } from "@/generated/models/ApiArtworkDocumentationAnswer";
+import type { ApiArtworkDocumentationAnswer } from "@/generated/models/ApiArtworkDocumentationAnswer";
+import type { ApiArtworkDocumentationProfile } from "@/generated/models/ApiArtworkDocumentationProfile";
 
 /** Client guidance uses the server's registered schema; server validation remains authoritative. */
 function matchesDocumentationSchema(
@@ -109,11 +111,32 @@ export function validDocumentationOperation(
     )
       return false;
   }
-  const definition = context.profile.modules
+  return (
+    !!operation.answer &&
+    validDocumentationAnswer(
+      context.profile,
+      moduleId,
+      operation.field,
+      operation.answer
+    )
+  );
+}
+
+export function validDocumentationAnswer(
+  profile: ApiArtworkDocumentationProfile,
+  moduleId: string,
+  fieldId: string,
+  answer: ApiArtworkDocumentationAnswer
+): boolean {
+  const definition = profile.modules
     .find((module) => String(module.id) === moduleId)
-    ?.fields.find((field) => field.id === operation.field);
-  const answer = operation.answer;
-  if (!definition || !answer) return false;
+    ?.fields.find((field) => field.id === fieldId);
+  if (
+    !definition?.allowed_statuses.some(
+      (status) => String(status) === String(answer.status)
+    )
+  )
+    return false;
   if (answer.status !== ApiArtworkDocumentationAnswerStatusEnum.Provided)
     return !answer.explanation || Array.from(answer.explanation).length <= 1000;
   return matchesDocumentationSchema(answer.value, definition.value_schema);
