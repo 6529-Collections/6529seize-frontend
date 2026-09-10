@@ -715,6 +715,8 @@ describe("github-preview API route", () => {
       jsonResponse({
         data: {
           repository: {
+            visibility: "PUBLIC",
+            isPrivate: false,
             discussion: {
               title: "Preview all GitHub resources",
               url: "https://github.com/o/r/discussions/12",

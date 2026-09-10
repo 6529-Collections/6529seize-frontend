@@ -6,6 +6,9 @@ import { TRANSFER_MESSAGES } from "@/i18n/messages/transfer";
 import type { MessageKey } from "@/i18n/messages/en-US";
 
 export const EN_GB_MESSAGES = {
+  "headerSearch.wave.byAuthor": "by {author}",
+  "headerSearch.wave.serial": "Wave #{serial}",
+  "headerSearch.wave.label": "Wave",
   "waves.subwaves.accessWarning.title": "Parent wave restrictions apply",
   "waves.subwaves.accessWarning.message":
     "Some members of this group cannot access the parent wave, so they will not be able to open this subwave. You can still use this group.",

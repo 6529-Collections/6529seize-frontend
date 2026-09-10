@@ -9,7 +9,8 @@ import NetworkWaveScorePage, {
 } from "@/app/network/wave-score/page";
 import { AuthContext } from "@/components/auth/Auth";
 import { publicEnv } from "@/config/env";
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
+import { renderWithQueryClient } from "../utils/reactQuery";
 import React from "react";
 
 // ✅ Mock next/navigation
@@ -35,10 +36,11 @@ const mockAuthContext = {
 } as any;
 
 function renderWithAuth(component: React.ReactElement) {
-  return render(
+  return renderWithQueryClient(
     <AuthContext.Provider value={mockAuthContext}>
       {component}
-    </AuthContext.Provider>
+    </AuthContext.Provider>,
+    { clientConfig: { defaultOptions: { queries: { enabled: false } } } }
   );
 }
 
@@ -69,16 +71,22 @@ describe("network pages render", () => {
   it("renders TDH page", () => {
     renderWithAuth(<TDHPage />);
     expect(
-      screen.getByRole("heading", { level: 1, name: /^TDH$/ })
+      screen.getByRole("heading", { level: 1, name: "How TDH is calculated" })
     ).toBeInTheDocument();
-    expect(screen.getByText(/How TDH is computed/i)).toBeInTheDocument();
-    expect(screen.getByText(/TDH 1.4/i)).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Explain my TDH" })
+    ).toHaveAttribute("href", "#tdh-profile");
+    expect(
+      screen.getByRole("link", { name: "Current boosts" })
+    ).toHaveAttribute("href", "#tdh-1-4");
   });
 
   it("displays TDH calculation details", () => {
     renderWithAuth(<TDHPage />);
     expect(screen.getByText(/Total Days Held/i)).toBeInTheDocument();
-    expect(screen.getByText(/Additional Set Boost/i)).toBeInTheDocument();
+    expect(
+      screen.getByText("Additional complete sets and boost precision")
+    ).toBeInTheDocument();
   });
 
   it("renders Definitions page", () => {
@@ -122,8 +130,10 @@ describe("network pages render", () => {
 
   it("generates metadata for TDH page", async () => {
     const metadata = await generateTDHMetadata();
-    expect(metadata.title).toEqual("TDH | Network");
-    expect(metadata.description).toEqual(`Network | ${domain}`);
+    expect(metadata.title).toEqual("How TDH is calculated | Network");
+    expect(metadata.description).toEqual(
+      `Understand Total Days Held: holding days, edition weights, current boosts and an exact breakdown of your profile’s TDH. | ${domain}`
+    );
   });
 
   it("generates metadata for Definitions page", async () => {

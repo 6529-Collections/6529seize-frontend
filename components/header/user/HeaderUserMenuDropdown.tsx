@@ -23,6 +23,7 @@ import { t } from "@/i18n/messages";
 import DevicesIcon from "@/components/common/icons/DevicesIcon";
 import HeaderUserConnectedAccounts from "./connected/HeaderUserConnectedAccounts";
 import HeaderUserProxyDropdownItem from "./HeaderUserProxyDropdownItem";
+import HeaderArtworkDocumentationLink from "./HeaderArtworkDocumentationLink";
 
 const HEADER_USER_MENU_LOCALE = DEFAULT_LOCALE;
 
@@ -437,6 +438,7 @@ export default function HeaderUserMenuDropdown({
                         />
                       </Link>
                     </div>
+                    <HeaderArtworkDocumentationLink onClose={onClose} />
                     <button
                       onClick={() => {
                         void runMenuAction({

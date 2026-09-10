@@ -9,6 +9,9 @@ import stormComposerFrMessages from "@/i18n/messages/stormComposer.fr-FR.json";
 import type { MessageKey } from "@/i18n/messages/en-US";
 
 export const FR_FR_MESSAGES = {
+  "headerSearch.wave.byAuthor": "par {author}",
+  "headerSearch.wave.serial": "Wave nº {serial}",
+  "headerSearch.wave.label": "Wave",
   "waves.subwaves.accessWarning.title":
     "Les restrictions de la wave parente s’appliquent",
   "waves.subwaves.accessWarning.message":
