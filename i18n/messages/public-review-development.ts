@@ -1,19 +1,7 @@
+import currentDevelopment from "./public-review-development-current.json";
+
 export const PUBLIC_REVIEW_DEVELOPMENT_MESSAGES = {
-  "publicReview.development.heading": "Is Stream ready to launch?",
-  "publicReview.development.answer": "Not yet.",
-  "publicReview.development.summary":
-    "Stream has working contracts and many tests. But important safety checks are still missing.",
-  "publicReview.development.beforeLaunch": "Before launch, Stream still needs:",
-  "publicReview.development.beforeLaunch.audit":
-    "An independent security audit.",
-  "publicReview.development.beforeLaunch.liveTesting":
-    "Testing with real services and marketplaces.",
-  "publicReview.development.beforeLaunch.launchSetup":
-    "A final, verified launch setup.",
-  "publicReview.development.pagePurpose":
-    "This page explains what works, what is still uncertain, and what must happen before Stream can launch.",
-  "publicReview.development.lastChecked": "Last checked",
-  "publicReview.development.openBlockers": "Open release blockers",
+  ...currentDevelopment,
   "publicReview.development.editorial.scopeHeading": "What this review covers",
   "publicReview.development.editorial.scopeSummary":
     "Stream was not live when this review was created, and no Stream contracts held funds.",

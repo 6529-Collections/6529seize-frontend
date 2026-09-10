@@ -1,3 +1,5 @@
+import corrections from "./public-review-corrections.json";
+
 export const PUBLIC_REVIEW_ENTRY_GUIDE_MESSAGES = {
   "publicReview.legacyEntryFeedback.artworkFormats":
     "What kinds of art can it support?",
@@ -70,13 +72,13 @@ export const PUBLIC_REVIEW_ENTRY_GUIDE_MESSAGES = {
 
 Editions are not restricted to The Memes. Work may use images, animation, video, audio, code, or a combination. **The formats and publishing tools offered at launch still need confirmation.**
 
-All Stream NFTs share one permanent Core contract. Some marketplaces may display different Stream collections together unless they support its collection information.
+All Stream NFTs share one main contract, called **Core**, which records token identity and ownership. Some marketplaces may display different Stream collections together unless they support its collection information.
 
 ## How would a release work?
 
-The intended journey is to prepare the artwork and sale terms, obtain the required artist consent, release tokens, reveal any generated output, and preserve the finished work.
+The intended journey is to prepare the artwork and sale terms, obtain the artist's required approvals, create and sell NFT tokens, reveal any generated output, and preserve the finished work. Creating a token is called **minting**.
 
-The permanent Core and its manager mint path are built. Full artist authority and the complete launch sale and payment connections remain unfinished. The older signed-sale rehearsal uses a test-only legacy Core; it does not prove the whole release journey works with the permanent Core.
+The main pieces of code exist, but the minting pieces cannot yet connect to Core. Artist approval, sales, and payments still need work before the full journey can function. Successful tests of older contracts do not prove that this new system works from start to finish.
 
 ## What do the status labels mean?
 
@@ -84,11 +86,11 @@ The permanent Core and its manager mint path are built. Full artist authority an
 - **Agreed but unfinished:** an accepted requirement still needs implementation or evidence.
 - **Still proposed:** the design awaits acceptance.
 
-This review was updated on September 9, 2026 and describes one pinned code version. [See the exact candidate and review priorities.](/reviews/6529-stream/review-the-code)
+This review describes the code snapshot checked on September 9, 2026. [See the exact candidate and review priorities.](/reviews/6529-stream/review-the-code)
 
 ## What lasts?
 
-Core records token identities and ownership. Closing a collection stops minting permanently; burn blocking, Core freeze, and wider artwork finality are separate steps. A stored file fingerprint helps verify a recovered copy, but cannot keep the file online.
+Core is designed to remain unchanged after deployment. Closing a collection stops new tokens forever. Preventing token destruction and making the artwork's records permanent are separate decisions. Preserving the files takes ongoing work: a digital fingerprint can verify a recovered copy, but cannot keep it online.
 
 ## Choose your path
 
@@ -100,7 +102,7 @@ Core records token identities and ownership. Closing a collection stops minting 
   "publicReview.pages.artistEntry.title": "Stream for artists",
   "publicReview.pages.artistEntry.summary":
     "Stream's goal is to give your artwork a lasting identity and a clear record of how it is released, paid for, and preserved.",
-  "publicReview.pages.artistEntry.markdown": `**This is a proposal under community review, not a live publishing service.** The permanent Core can represent unique works, series, and editions outside The Memes. Launch publishing tools and artist selection still need confirmation.
+  "publicReview.pages.artistEntry.markdown": `**Stream is being developed and is open for community review. It is not a live publishing service.** Its main contract, called Core, can represent unique works, series, and editions outside The Memes. Launch publishing tools and artist selection still need confirmation.
 
 ## Review one clear release plan
 
@@ -110,21 +112,23 @@ You should see the artwork and required files, license, token supply, sale terms
 
 **Agreed but unfinished:** artist acceptance, consent for minting, approval of relevant payment changes, and final artwork approval must have clear, enforced meanings. A signature screen should show the exact decision you are making.
 
-The full artist-authority system is not implemented yet. The new Core does not have the older collection-signature function. The retained legacy signature covers selected facts and does not itself require minting to wait for artist approval. Do not treat it as approval of the whole release plan.
+These protections are not fully implemented. The older code lets an artist sign selected collection details, but does not require that signature before creating tokens. It does not prove that the artist approved the whole release plan.
 
-Artist key rotation, collaborator acceptance, scoped delegation, and estate arrangements are agreed requirements. Their detailed implementation and user experience remain unfinished. ADR 0023 proposes how the artist contracts would divide those responsibilities.
+The agreed plan also lets artists change signing wallets, requires collaborators to accept their roles, and provides for limited delegates and estates. The contracts and screens needed to support all of this remain unfinished. Full artist details below explains the design decisions.
 
 ## Understand who gets paid
 
-The older ETH sale contracts credit a named poster, protocol, and curator reserve. The poster is not automatically the artist or the wallet submitting the transaction. The release plan must explain how your share and collaborators' shares reach the right people.
+The older sale contracts set aside shares for a named seller account (the **poster**), the platform, and curators. The poster is not automatically the artist or the wallet submitting the transaction. The release plan must explain how your share and collaborators' shares reach the right people.
 
-Separate split wallets and payment contracts exist, but the complete sale connection to the permanent Core remains work to finish. Core now reads royalty information from a resolver. Outside marketplaces decide whether to pay it.
+Code for dividing payments between recipients exists, but it is not yet connected into a complete sale through the permanent Core.
+
+Stream is designed to tell marketplaces who should receive resale royalties and how much. This candidate cannot yet activate that connection, so its royalty lookup currently returns zero. Even with that connection working, outside marketplaces decide whether to pay royalties.
 
 [Explore payments and royalties.](/reviews/6529-stream/revenue-splits-and-royalties)
 
 ## Decide what becomes permanent
 
-Closing a collection in the permanent Core cannot be undone, including when no tokens were minted. Burn blocking, Core freeze, and wider artwork finality are separate steps. Review the exact files, software, dependencies, and permissions covered by each step.
+Closing a collection permanently stops new tokens, even if none have been created. Preventing token destruction (burning), locking Core's collection rules, and making the wider artwork permanent are separate steps. Review the exact files, software, supporting files, and permissions covered by each step.
 
 A matching fingerprint proves a recovered file is correct; it cannot retrieve a missing file. A useful preservation package needs copies and instructions another person can use.
 
@@ -146,29 +150,29 @@ Open **Full artist details** below for the accepted requirements, implementation
 
 Stream can represent one unique work, a series of distinct works, or an edition. Editions are not limited to The Memes. Each token has its own identity and a recorded collection link.
 
-All Stream NFTs share one Core contract. Some marketplaces may group different Stream collections together unless they support the collection information. A collection ID does not guarantee a separate marketplace page.
+All Stream NFTs share one main contract, called **Core**. Some marketplaces may group different Stream collections together unless they support the collection information. A collection ID does not guarantee a separate marketplace page.
 
 ## Check supply and changeable rules
 
-The permanent Core supports fixed-size, capped-open, and uncapped-open collections. A capped-open maximum can change under governance before closure. A closed collection cannot reopen, even if it has no minted tokens. Burning a token does not erase its identity or undo its minted history.
+Core supports three supply rules: a fixed maximum, a maximum that authorized governance can change, or no numeric maximum. Any collection can be closed to stop new tokens forever, even if none have been created. Burning destroys a token but does not erase its identity or its place in the number ever created.
 
-Ending minting, blocking burns, freezing Core state, and finalizing the wider artwork are different steps. Before buying, you should be able to see which are complete and who still has relevant powers.
+Stopping new tokens, preventing burns, locking Core's collection rules, and making the wider artwork permanent are different steps. Before buying, you should be able to see which are complete and who can still make changes.
 
 [Explore collection and minting rules.](/reviews/6529-stream/tokens-collections-and-minting)
 
 ## Understand the sale
 
-The older contracts demonstrate fixed-price ETH sales and auctions, with withdrawable credits for refunds and proceeds. Their retained rehearsal uses a test-only legacy Core. The complete sale connection to the new permanent Core is still unfinished.
+The older contracts demonstrate fixed-price ETH sales and auctions. Refunds and sale proceeds are recorded as balances that recipients must withdraw. Some recovery and withdrawal paths have known problems. Tests of those older contracts do not prove a working sale through the new permanent Core: its minting pieces cannot yet be installed, and the complete sale connection remains unfinished.
 
-The seller is the poster named in the sale permission, who may differ from the transaction submitter. Sale screens should identify the artwork, total cost, recipient, deadline, refund rules, and reveal status.
+The **poster** is the seller account named in the sale permission. Someone else may submit the transaction. Sale screens should identify the artwork, total cost, recipient, deadline, refund rules, and whether the final artwork is ready to view.
 
 [Explore sales and auctions.](/reviews/6529-stream/fixed-price-sales-and-auctions)
 
 ## Check consent and reveal status
 
-Minting does not by itself prove that the artist approved the full release. Artist consent is an agreed requirement whose complete implementation still needs work.
+Creating a token (minting) does not by itself prove that the artist approved the full release. Artist consent is an agreed requirement whose complete implementation still needs work.
 
-Some artwork needs a random result after minting. Core records the coordinator selected at mint, but the complete reveal and recovery service needs separate implementation and evidence. A token's existence does not prove that the final artwork is already available.
+Some artwork needs a random result after minting. Core records which contract is responsible for coordinating that result. The complete reveal and recovery service still needs building and testing. Owning a token does not prove that its final artwork is already available.
 
 ## Consider long-term access
 
@@ -177,7 +181,7 @@ Look for the required files, usable copies, and instructions for opening or recr
 [Explore artwork storage](/reviews/6529-stream/metadata-scripts-and-dependencies) · [Give feedback](/reviews/6529-stream/community-review)`,
   "publicReview.pages.codeEntry.title": "Review the Stream code",
   "publicReview.pages.codeEntry.summary":
-    "Start with the exact candidate, the paths it actually connects, and the claims those paths are meant to support.",
+    "Start with the exact candidate, its implemented parts, the missing connections, and the claims each part is meant to support.",
   "publicReview.pages.codeEntry.markdown": `This review covers **2026-09-09.1**, pinned to **92ea123380917032f01aae09691141a2a72df935** and checked on September 9, 2026. The candidate remains not deployed and pre-audit. Later changes are outside this snapshot.
 
 [Open the pinned source](https://github.com/6529-Collections/6529Stream/tree/92ea123380917032f01aae09691141a2a72df935) · [Open the technical reference](/reviews/6529-stream/reference)
@@ -187,10 +191,10 @@ Look for the required files, usable copies, and instructions for opening or recr
 | Area | Built code and its boundary |
 | --- | --- |
 | Permanent Core | ERC-721 ownership, collection identity, terminal closure, burn blocking, manager-only minting, and governed module references. |
-| Manager and ledger | Direct and prepared mint execution, batch roots, token operation IDs, counters, and one-use claims. ADR 0018 is accepted and implemented. |
+| Manager and ledger | ADR 0018's mint execution and replay accounting are implemented. The real manager and ledger fail permanent-Core installation checks; their existence does not establish a working connection. |
 | Older signed sales | Drops and Auctions retain local ETH credits and use the old minter. The rehearsal imports a test-only legacy Core. This does not prove a permanent-Core sale integration. |
-| Royalties and metadata | Core has resolver-backed royalty reads, router hooks, fallback metadata, and restricted refresh helpers. Complete serving and payment integrations need separate evidence. |
-| Artist authority | An evidence archive and contract directory exist. Full artist consent is unfinished; ADR 0023's architecture remains proposed. |
+| Royalties and metadata | Core has a royalty lookup function, but its resolver cannot be installed and the lookup returns zero. Router hooks, fallback metadata, and restricted refresh helpers exist; serving integrations need separate evidence. |
+| Artist authority | An evidence archive and contract directory exist, but Core's artist-registry connection is disabled. Full artist consent is unfinished; ADR 0023's architecture remains proposed. |
 
 The source has moved into domain folders. Follow this version's generated declarations and pinned links rather than old flat-file line numbers.
 
@@ -200,13 +204,19 @@ The source has moved into domain folders. Follow this version's generated declar
 
 **Supply and replay:** test terminal closure, including zero minted tokens, cap changes, failed batches, burns, used nullifiers, and manager replacement. The old empty-collection reopening caveat belongs to the legacy Core.
 
-**Paid minting:** join sale, settlement, ledger, and token operation records. Separate the working mint path from unfinished typed payment and sale connections. ADR 0019 remains proposed.
+**Paid minting:** first prove real registry registration and governed installation of the real manager and ledger into permanent Core. Then join sale, settlement, ledger, and token operation records. Passing tests with stand-ins does not prove those connections. ADR 0019 remains proposed.
 
 **Finality and replacement:** check the exact authority, component set, waiting period, veto, writer coverage, and preserved obligations. ADR 0020 recovery remains proposed.
 
 ## Follow claims to evidence
 
 Use three labels: **built in this code**, **agreed but unfinished**, and **still proposed**. Code existence, integration, deployment, marketplace behavior, and independent audit need different evidence.
+
+ADRs are design decision records. An accepted decision does not make its specification final: the specification inventory still lists Draft documents. The policy requires the governing specifications to reach Final before deployment, with permanent interfaces and rules fully defined.
+
+Use the [specification policy](https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/docs/spec-policy.md) to find the owning requirement, then compare it with pinned Solidity. State any difference. Historical implementation notes and old contradiction lists are not current-code evidence. AUTHORIZER counters, gates, and one-use claims exist; shared counters across phases and successor continuity remain unfinished.
+
+[ADR 0021](https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/docs/adr/0021-immutable-revenue-resolver-validation-adapter.md) accepts a revenue architecture, not a production implementation. [ADR 0022](https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/docs/adr/0022-immutable-artist-registry-validation-adapter.md) and [ADR 0023](https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/docs/adr/0023-modular-artist-authority-domain-ownership.md) remain proposed. Tests and supporting documents do not change those decision statuses.
 
 The committed Core size proof reports 18,997 runtime bytes and 5,579 bytes of headroom. This is retained build evidence. Public beta and production remain blocked by missing audit and deployment evidence and incomplete launch bindings.
 
@@ -217,4 +227,5 @@ The committed Core size proof reports 18,997 runtime bytes and 5,579 bytes of he
 Name the claimed rule, exact source, conditions, and call sequence. Explain who is affected. Distinguish a demonstrated result from an assumption, and an older rehearsal from the permanent-Core path.
 
 [How to report a finding](/reviews/6529-stream/community-review) · [Public feedback](/reviews/6529-stream/feedback)`,
+  ...corrections,
 } as const;
