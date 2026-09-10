@@ -6,6 +6,17 @@ interface DropReactionRequestOptions {
 
 const DROP_REACTION_REQUEST_TIMEOUT_MS = 15_000;
 
+export class DropReactionRequestTimeoutError extends DOMException {
+  constructor() {
+    super("Reaction request timed out", "TimeoutError");
+  }
+}
+
+export const isDropReactionRequestTimeout = (
+  error: unknown
+): error is DropReactionRequestTimeoutError =>
+  error instanceof DropReactionRequestTimeoutError;
+
 const requestTailByDrop = new Map<string, Promise<void>>();
 
 const invokeRequest = async (
@@ -23,7 +34,7 @@ const runRequestWithTimeout = (
   let timeoutId: ReturnType<typeof globalThis.setTimeout> | undefined;
   const timeoutPromise = new Promise<never>((_resolve, reject) => {
     timeoutId = globalThis.setTimeout(() => {
-      reject(new DOMException("Reaction request timed out", "TimeoutError"));
+      reject(new DropReactionRequestTimeoutError());
       controller.abort();
     }, timeoutMs);
   });

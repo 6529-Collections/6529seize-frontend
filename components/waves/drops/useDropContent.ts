@@ -51,12 +51,9 @@ export const useDropContent = (
     placeholderData: (previousDrop) => maybeDrop ?? previousDrop,
     enabled: shouldFetchDrop,
     staleTime: DROP_DETAIL_STALE_TIME_MS,
-    ...(!shouldFetchDrop && maybeDrop !== null
-      ? { initialData: maybeDrop }
-      : {}),
   });
   const resolvedDrop: ApiDrop | null =
-    authoritativeModeratedDrop ?? drop ?? null;
+    authoritativeModeratedDrop ?? drop ?? maybeDrop ?? null;
 
   const content = useMemo<ProcessedContent>(() => {
     if (isFetching && resolvedDrop === null) {

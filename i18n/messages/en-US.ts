@@ -568,6 +568,8 @@ const MEMES_WAVE_FOOTER_MESSAGES = objectMessages("memes.waveFooter", {
 } as const);
 
 const DROP_REACTION_MESSAGES = objectMessages("drops.reactions", {
+  unconfirmed:
+    "Could not confirm your reaction. Refresh to check before trying again.",
   capabilityDisabled: "Reactions are disabled for this wave.",
   requestTimedOut:
     "The reaction request timed out. Refreshing the latest reaction state; wait before trying again.",
