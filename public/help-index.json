@@ -5,6 +5,51 @@
   "base_url": "https://6529.io",
   "records": [
     {
+      "id": "nft.market-depth",
+      "kind": "workflow",
+      "title": "Card market depth",
+      "aliases": [
+        "order book",
+        "market depth",
+        "asks and bids",
+        "buying pressure",
+        "sell orders"
+      ],
+      "keywords": [
+        "market",
+        "depth",
+        "OpenSea",
+        "orders",
+        "asks",
+        "bids",
+        "liquidity",
+        "price",
+        "quantity"
+      ],
+      "facts": [
+        "The Memes, Meme Lab, Gradients and NextGen card pages show captured OpenSea market depth with best quoted asks and bids, price levels, remaining quantities, cumulative quoted quantities and snapshot freshness.",
+        "Currencies are shown separately, including ETH and WETH. A unit price applies to one edition; partially filled orders contribute only their remaining quantity.",
+        "Quoted quantities are not guaranteed executable liquidity. Several listings may share seller inventory, several offers may share bidder funding, and a collection offer has one shared budget across eligible cards.",
+        "Private, inactive and expired orders do not contribute to current public depth. Trait offers whose eligibility is unverified appear separately from the price levels.",
+        "Unavailable capture differs from a completed empty snapshot. Stale data shows an older snapshot time. Retry failed requests and reload order pagination if the book changes.",
+        "Recorded marketplace actions appear alongside on-chain transactions in NFT Activity and supported card activity sections. Off-chain actions may have no Ethereum transaction hash."
+      ],
+      "canonical_path": "/the-memes/{id}",
+      "link_label": "Open the card's market depth",
+      "related_paths": [
+        "/meme-lab/{id}",
+        "/6529-gradient/{id}",
+        "/nextgen/token/{token}",
+        "/nft-activity"
+      ],
+      "tags": ["nft", "market", "memes", "gradients", "nextgen"],
+      "source_refs": [
+        "components/nft-market-depth/MarketDepthPanel.tsx",
+        "components/nft-market-activity/NftMarketActivity.tsx",
+        "ops/docs/media/feature-card-market-depth.md"
+      ]
+    },
+    {
       "id": "artwork-documentation.overview",
       "kind": "workflow",
       "title": "Private artwork documentation",
@@ -5019,7 +5064,9 @@
       ],
       "facts": [
         "The NFT activity feed lives at /nft-activity.",
-        "It is a realtime-oriented feed for NFT activity browsing and pagination.",
+        "The feed combines indexed sales, mints, airdrops, transfers and burns with recorded OpenSea listings, offers, cancellations, expirations and order validity changes for The Memes, Meme Lab, Gradients and NextGen.",
+        "Choose collection and action filters and use Load more to see older activity. Changing filters starts a new result list. Empty and failed requests have clear states and a retry control.",
+        "Off-chain market actions may have no transaction hash. Market history begins with captured provider events and status observations; best-effort delivery does not guarantee every historical off-chain action.",
         "Use Network Activity for network-level activity context and /nft-activity for the dedicated NFT activity route."
       ],
       "canonical_path": "/nft-activity",
@@ -5027,6 +5074,7 @@
       "tags": ["realtime", "nft", "activity"],
       "source_refs": [
         "app/nft-activity/page.tsx",
+        "components/nft-market-activity/NftMarketActivity.tsx",
         "ops/docs/realtime/feature-nft-activity-feed.md",
         "ops/docs/realtime/flow-nft-activity-browsing.md"
       ]

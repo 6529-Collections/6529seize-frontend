@@ -136,6 +136,26 @@ jest.mock("@/components/latest-activity/LatestActivityRow", () => ({
   default: () => <tr data-testid="activity-row" />,
 }));
 
+const mockNftMarketActivity = jest.fn(
+  ({ contract, tokenId }: { contract: string; tokenId: string }) => (
+    <div
+      data-testid="nft-market-activity"
+      data-contract={contract}
+      data-token-id={tokenId}
+    />
+  )
+);
+
+jest.mock("@/components/nft-market-activity/NftMarketActivity", () => ({
+  __esModule: true,
+  default: (props: { contract: string; tokenId: string }) =>
+    mockNftMarketActivity(props),
+}));
+jest.mock("@/components/nft-market-depth/MarketDepthPanel", () => ({
+  __esModule: true,
+  default: () => <div data-testid="market-depth" />,
+}));
+
 jest.mock("@/components/pagination/Pagination", () => ({
   __esModule: true,
   default: () => <div data-testid="pagination" />,
@@ -543,19 +563,16 @@ describe("MemeLabPageComponent", () => {
 
   it("fetches activity data for activity tab", async () => {
     setupMockApiCalls();
+    mockSearchParamsWithFocus(MEME_FOCUS.ACTIVITY);
 
     await act(async () => {
       renderWithQueryClient(<MemeLabPageComponent nftId="1" />);
     });
 
-    await waitFor(() => {
-      expect(mockFetchUrl).toHaveBeenCalledWith(
-        expect.stringMatching(
-          /transactions_memelab.*id=1.*page_size=25.*page=1/
-        ),
-        expectAbortSignalOptions
-      );
-    });
+    expect(await screen.findByTestId("nft-market-activity")).toHaveAttribute(
+      "data-token-id",
+      "1"
+    );
   });
 
   it("fetches NFT history data", async () => {
