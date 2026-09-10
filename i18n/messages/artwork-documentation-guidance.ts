@@ -1,6 +1,8 @@
 export const ARTWORK_DOCUMENTATION_GUIDANCE_MESSAGES = {
   "artworkDocumentation.publicationAssetUnavailable":
     "This file cannot be included in this publication record. Add material intended for publication, or use Questions for the team to resolve this before finalizing.",
+  "artworkDocumentation.uploadBlockedRecovery":
+    "This upload is still pending. Resolve the file requirements or interview permissions before retrying, or choose Cancel upload to release it.",
   "artworkDocumentation.publication.reviewAll": "Return to the artwork review",
   "artworkDocumentation.publication.previewNotice":
     "This previews the artwork information intended for publication. It is still a draft; nothing is published or minted here. Drafting questions and team discussion are not part of the artwork record.",

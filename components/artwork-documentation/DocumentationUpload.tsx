@@ -105,6 +105,8 @@ export default function DocumentationUpload({ context, controller }: Props) {
   const transferPermitted = session
     ? canUseUpload(context, session.asset)
     : rolePermitted;
+  const failureMessage =
+    session && !transferPermitted ? "uploadBlockedRecovery" : "uploadFailed";
   const chosenVisibility = publicationOnly ? "public_record" : visibility;
   const uploadVisibility =
     !publicationOnly && restrictedRoles.has(role)
@@ -469,7 +471,7 @@ export default function DocumentationUpload({ context, controller }: Props) {
       )}
       {(status === "failed" || status === "changed") && (
         <DocumentationNotice error>
-          {msg(status === "changed" ? "uploadMismatch" : "uploadFailed")}
+          {msg(status === "changed" ? "uploadMismatch" : failureMessage)}
         </DocumentationNotice>
       )}
       {actionError && (

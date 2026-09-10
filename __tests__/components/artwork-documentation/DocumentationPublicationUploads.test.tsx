@@ -371,6 +371,9 @@ describe("publication-only artwork uploads", () => {
       ).toBeEnabled()
     );
     expect(screen.getByRole("button", { name: "Try again" })).toBeDisabled();
+    expect(
+      screen.getByText(/This upload is still pending/)
+    ).toHaveTextContent("Cancel upload to release it");
     fireEvent.click(screen.getByRole("button", { name: "Cancel upload" }));
     await waitFor(() =>
       expect(cancelDocumentationUpload).toHaveBeenCalledTimes(2)
