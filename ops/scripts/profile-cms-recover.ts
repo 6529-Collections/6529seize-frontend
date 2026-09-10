@@ -123,7 +123,9 @@ async function main(): Promise<void> {
 }
 
 async function readBoundedFile(path: string): Promise<Uint8Array> {
-  const bytes = await readFile(path);
+  // Local input paths are explicitly selected by the CLI operator, not by a
+  // remote request or recovered manifest. This command promises no input root.
+  const bytes = await readFile(path); // NOSONAR S8707: intentional operator-selected local input, not an agent filesystem sandbox.
   if (bytes.length > MAX_DOCUMENT_BYTES)
     throw new Error("CMS recovery document exceeds 8 MiB");
   return bytes;

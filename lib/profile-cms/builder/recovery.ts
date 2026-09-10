@@ -7,12 +7,12 @@ import {
   type CmsPackageV1,
 } from "@/lib/profile-cms/protocol/v1";
 
-export type CmsDraftRecovery = {
+type CmsDraftRecovery = {
   readonly cmsPackage: CmsPackageV1;
   readonly draftId?: string | undefined;
   readonly jsonDraft?: string | undefined;
 };
-export type CmsRecoverySnapshot = {
+type CmsRecoverySnapshot = {
   readonly recovery: CmsDraftRecovery | null;
   readonly failed: boolean;
 };

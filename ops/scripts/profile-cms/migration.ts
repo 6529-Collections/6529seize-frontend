@@ -32,7 +32,7 @@ export type MigrationSource = {
   readonly content: StaticContent;
   readonly hash: string;
 };
-export type MigrationDiagnostic = {
+type MigrationDiagnostic = {
   readonly file: string;
   readonly block: number;
   readonly code: string;

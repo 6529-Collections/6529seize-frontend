@@ -5,7 +5,7 @@ type HtmlNode = Exclude<
   string | Buffer | unknown[]
 >;
 
-export type HtmlPart =
+type HtmlPart =
   | { readonly type: "text"; readonly text: string; readonly level?: number }
   | { readonly type: "link"; readonly href: string; readonly label: string }
   | {

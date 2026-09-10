@@ -61,7 +61,7 @@ export default function ProfileCmsPublishPanel({
   const signer = useProfileCmsPublishSign();
   return (
     <ProfileCmsPublishWorkspace
-      key={`${props.profileId}:${props.cmsPackage.integrity.package_hash}:${props.primaryWallet}:${signer.signerAddress ?? "disconnected"}:${signer.chainId}:${signer.isSafe}`}
+      key={`${props.profileId ?? "missing-profile"}:${props.cmsPackage.integrity.package_hash}:${props.primaryWallet ?? "missing-wallet"}:${signer.signerAddress ?? "disconnected"}:${signer.chainId}:${signer.isSafe}`}
       {...props}
       signer={signer}
     />

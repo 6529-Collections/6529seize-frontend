@@ -159,6 +159,13 @@ export async function runProfileCmsBuilderAction({
     endpoint,
     profileId,
   });
+  const targetAndIssues = {
+    ...(response.draftId ? { draftId: response.draftId } : {}),
+    ...(response.packageHash ? { packageHash: response.packageHash } : {}),
+    ...((response.issues?.length ?? 0) > 0
+      ? { serverIssues: response.issues }
+      : {}),
+  };
 
   if (response.serverValid === false) {
     return {
@@ -166,11 +173,7 @@ export async function runProfileCmsBuilderAction({
       action,
       code: "server_validation_invalid",
       expectedEndpoint: endpoint,
-      ...(response.draftId ? { draftId: response.draftId } : {}),
-      ...(response.packageHash ? { packageHash: response.packageHash } : {}),
-      ...((response.issues?.length ?? 0) > 0
-        ? { serverIssues: response.issues }
-        : {}),
+      ...targetAndIssues,
     };
   }
 
@@ -178,13 +181,9 @@ export async function runProfileCmsBuilderAction({
     ok: true,
     action,
     code: getSuccessCode(action),
-    ...(response.draftId ? { draftId: response.draftId } : {}),
-    ...(response.packageHash ? { packageHash: response.packageHash } : {}),
+    ...targetAndIssues,
     ...(response.payloadHash ? { payloadHash: response.payloadHash } : {}),
     ...(response.version === undefined ? {} : { version: response.version }),
-    ...((response.issues?.length ?? 0) > 0
-      ? { serverIssues: response.issues }
-      : {}),
   };
 }
 

@@ -24,7 +24,7 @@ type WalletGalleryInputResult =
       readonly errors: readonly string[];
     };
 
-export type WalletGallerySnapshotAssetFlags = {
+type WalletGallerySnapshotAssetFlags = {
   readonly spam: boolean;
   readonly excluded: boolean;
   readonly reason?: string | undefined;
@@ -82,7 +82,7 @@ export type WalletGallerySnapshotTotals = {
   readonly truncated: boolean;
 };
 
-export type WalletGallerySnapshotSource = "backend" | "fixture";
+type WalletGallerySnapshotSource = "backend" | "fixture";
 
 export type WalletGallerySnapshot = {
   readonly snapshotId: string;

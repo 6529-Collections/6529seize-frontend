@@ -92,7 +92,7 @@ function mergeIdentifiedArrays(
 }
 
 /** Three-way projection merge: unchanged generated fields retain author data. */
-export function mergeEditorChanges(
+function mergeEditorChanges(
   source: unknown,
   before: unknown,
   after: unknown

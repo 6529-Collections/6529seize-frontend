@@ -44,7 +44,7 @@ export function parseMigrationArgs(args: readonly string[]) {
   return { target: target as MigrationTarget, outDir, now, reportOnly };
 }
 
-export function runMigrationCli(
+function runMigrationCli(
   args: readonly string[],
   repoRoot: string
 ): boolean {

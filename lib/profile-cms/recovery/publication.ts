@@ -113,7 +113,7 @@ export type CmsContractSignatureVerifier = (input: {
   signature: string;
 }) => Promise<boolean>;
 
-export type RecoveredCmsPublication = {
+type RecoveredCmsPublication = {
   cmsPackage: CmsPackageV1;
   publication: CmsPublication;
   signer: string;
