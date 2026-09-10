@@ -17,6 +17,9 @@ const {
   loadDevelopmentStatusForVersion,
   validateKnowledgePack,
 } = require("./public-reviews/stream-knowledge.cjs");
+const {
+  getStreamCurrentKnowledgeFiles,
+} = require("./public-reviews/stream-current-knowledge.cjs");
 
 const PROFILES = new Set(["production", "staging"]);
 const PUBLIC_REVIEW_CONFIG_DIRECTORY = "config/public-reviews";
@@ -102,6 +105,7 @@ function sha256File(filePath) {
   return sha256Urn(fs.readFileSync(filePath));
 }
 
+/** Inventories files deterministically, rejecting unsupported entries and unapproved symlinks. */
 function walkDirectory(root, options = {}) {
   const entries = [];
   if (!fs.existsSync(root)) {
@@ -154,6 +158,7 @@ function walkDirectory(root, options = {}) {
   return entries;
 }
 
+/** Hashes a deterministic file inventory to detect changed artifact or source bytes. */
 function directoryIdentity(root, options) {
   return crypto
     .createHash("sha256")
@@ -161,6 +166,21 @@ function directoryIdentity(root, options) {
     .digest("hex");
 }
 
+/** Rejects missing, extra, or changed evidence outside the exact current projection. */
+function assertPackagedKnowledge(sourceRoot, bundleRoot, corrections, label) {
+  const expected = walkDirectory(sourceRoot).map((file) => ({
+    ...file,
+    sha256: corrections.has(file.path)
+      ? sha256Urn(corrections.get(file.path))
+      : file.sha256,
+  }));
+  invariant(
+    JSON.stringify(expected) === JSON.stringify(walkDirectory(bundleRoot)),
+    `${label} packaged knowledge does not exactly match the canonical source pack and active corrections.`
+  );
+}
+
+/** Records source-tree identities so packaging can prove it did not rewrite evidence. */
 function captureSourceIdentity(repoRoot) {
   const roots = [
     "public",
@@ -727,6 +747,7 @@ function assertSourceFiles(bundle, versionRoot) {
   assertExactFileSet(sourceRoot, expectedPaths, "Packaged source");
 }
 
+/** Checks definition shard contents and inventory against the pinned reference manifest. */
 function assertDefinitionShards(bundle, versionRoot) {
   invariant(
     Array.isArray(bundle.definitionIndex),
@@ -787,6 +808,7 @@ function assertDefinitionShards(bundle, versionRoot) {
   );
 }
 
+/** Verifies published reference identities, source shards, and exact Help Bot projections. */
 function assertCanonicalReviewEvidence({
   repoRoot,
   bundlePublicRoot,
@@ -922,8 +944,7 @@ function assertCanonicalReviewEvidence({
         "knowledge"
       );
       const bundleKnowledgeRoot = path.join(versionRoot, "knowledge");
-      // Validate bytes from the packaged tree while comparing them with the
-      // canonical source pack rooted in the checkout.
+      // Validate the packaged bytes, including the active reading corrections.
       validateKnowledgePack({
         repoRoot: path.dirname(bundlePublicRoot),
         reviewId: config.reviewId,
@@ -941,10 +962,17 @@ function assertCanonicalReviewEvidence({
         }),
         knowledgeRootOverride: bundleKnowledgeRoot,
       });
-      invariant(
-        directoryIdentity(sourceKnowledgeRoot) ===
-          directoryIdentity(bundleKnowledgeRoot),
-        `${config.reviewId}@${entry.version} packaged knowledge does not exactly match the canonical source pack.`
+      const corrections = getStreamCurrentKnowledgeFiles({
+        repoRoot,
+        reviewId: config.reviewId,
+        reviewVersion: entry.version,
+        activeVersion: publicationPlan.indexActiveVersion,
+      });
+      assertPackagedKnowledge(
+        sourceKnowledgeRoot,
+        bundleKnowledgeRoot,
+        corrections,
+        `${config.reviewId}@${entry.version}`
       );
 
       return {
@@ -1191,6 +1219,7 @@ function assertProductionRuntimeConfig(bundleRoot) {
   );
 }
 
+/** Verifies a complete staging or production bundle against its publication policy. */
 function assertProfileBundle({
   repoRoot,
   bundleRoot,
@@ -1225,6 +1254,7 @@ function assertProfileBundle({
   );
 }
 
+/** Removes an optional bundle directory while refusing symlinks and non-directory paths. */
 function removeDirectoryIfPresent(directory) {
   if (!fs.existsSync(directory)) {
     return;
@@ -1237,6 +1267,7 @@ function removeDirectoryIfPresent(directory) {
   fs.rmSync(directory, { recursive: true });
 }
 
+/** Copies saved evidence, then applies current reading corrections only in the bundle. */
 function copyPublishedKnowledgePacks(repoRoot, bundleRoot, publicationPlans) {
   for (const [reviewId, plan] of publicationPlans) {
     for (const reviewVersion of plan.publishedVersions) {
@@ -1261,6 +1292,18 @@ function copyPublishedKnowledgePacks(repoRoot, bundleRoot, publicationPlans) {
         "knowledge"
       );
       copyDirectory(source, destination);
+      const corrections = getStreamCurrentKnowledgeFiles({
+        repoRoot,
+        reviewId,
+        reviewVersion,
+        activeVersion: plan.indexActiveVersion,
+      });
+      for (const [relativePath, buffer] of corrections) {
+        fs.writeFileSync(
+          resolveContainedPath(destination, relativePath, "Current knowledge file"),
+          buffer
+        );
+      }
     }
   }
 }
@@ -1489,6 +1532,7 @@ if (require.main === module) {
 }
 
 module.exports = {
+  assertPackagedKnowledge,
   assertCanonicalReviewEvidence,
   assertExtractedArchive,
   assertListingMatchesBundle,
