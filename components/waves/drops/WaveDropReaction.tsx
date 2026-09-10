@@ -612,6 +612,7 @@ function WaveDropReaction({
     const handleFailure = async (error: unknown) => {
       const result = recordReactionRequestFailed(mutation, error);
       if (!result.isLatestMutation || !isCurrent()) {
+        clearRollbackForMutation(rollbackRef, mutation.mutationId);
         return;
       }
 

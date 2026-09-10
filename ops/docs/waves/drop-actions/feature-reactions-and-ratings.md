@@ -87,7 +87,7 @@ rolls back if the request fails.
   write.
 - If the app cannot confirm your choice, it shows the latest state it could read
   and asks you to refresh and check before trying again. The original request may
-  still have saved your reaction; choosing the same emoji again removes it.
+  still have changed your reaction; repeating the same choice can undo that change.
 - If rating submit fails, optimistic rating state rolls back and users can retry.
 - Failures surface as toast errors; an unconfirmed timeout shows a warning.
   Users stay in the same thread.

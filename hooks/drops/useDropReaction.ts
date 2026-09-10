@@ -548,7 +548,10 @@ export function useDropReaction(
         clearRollbackForMutation(rollbackRef, mutation.mutationId);
         if (reconciliation.outcome === "confirmed") {
           if (owner.isMounted()) runReactionSuccessCallback(onSuccess);
-        } else if (owner.isVisible()) {
+        } else if (
+          reconciliation.outcome === "unconfirmed" &&
+          owner.isVisible()
+        ) {
           setToast({
             title: t(locale, "drops.reactions.unconfirmed"),
             type: "warning",
@@ -560,6 +563,7 @@ export function useDropReaction(
       const handleFailure = async (error: unknown) => {
         const result = recordReactionRequestFailed(mutation, error);
         if (!result.isLatestMutation || !isCurrent()) {
+          clearRollbackForMutation(rollbackRef, mutation.mutationId);
           return;
         }
 
