@@ -233,7 +233,7 @@ function ProfileCmsPublishWorkspace({
 
       <div className="tw-mt-4 tw-flex tw-flex-wrap tw-gap-2">
         <button
-          className="tw-min-h-10 tw-border tw-border-solid tw-border-primary-400 tw-bg-primary-500 tw-px-3 tw-text-sm tw-font-semibold tw-text-white disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
+          className="tw-min-h-10 tw-border tw-border-solid tw-border-primary-400 tw-bg-primary-600 tw-px-3 tw-text-sm tw-font-semibold tw-text-white disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
           disabled={disabled || canRetryPublish(state)}
           onClick={() => void runFullPublish()}
           type="button"
