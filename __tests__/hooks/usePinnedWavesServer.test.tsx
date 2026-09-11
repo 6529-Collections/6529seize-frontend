@@ -74,14 +74,14 @@ const queryClientMock = {
 };
 
 const requestAuth = jest.fn();
-const createAuthJwt = (role: string | null) =>
+const createAuthJwt = (role: string | null | undefined) =>
   `e30.${btoa(JSON.stringify({ role, sub: "0xabc", exp: Date.now() / 1000 + 3600 }))}.signature`;
 
 const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <AuthContext.Provider
     value={
       {
-        connectedProfile: { handle: "me" },
+        connectedProfile: { id: "profile-me", handle: "me" },
         activeProfileProxy: null,
         requestAuth,
       } as any
@@ -136,8 +136,8 @@ beforeEach(() => {
   unpinMutateAsync = jest.fn().mockResolvedValue(undefined);
   requestAuth.mockReset().mockResolvedValue({ success: true });
   jest.mocked(getWalletAddress).mockReturnValue("0xabc");
-  jest.mocked(getAuthJwt).mockReturnValue(createAuthJwt(null));
-  jest.mocked(getWalletRole).mockReturnValue(null);
+  jest.mocked(getAuthJwt).mockReturnValue(createAuthJwt("profile-me"));
+  jest.mocked(getWalletRole).mockReturnValue("profile-me");
 
   let mutationCallCount = 0;
   useMutationMock.mockImplementation(() => {
@@ -337,6 +337,20 @@ test.each(["pinWave", "unpinWave"] as const)(
     expect(
       action === "pinWave" ? pinnedWavesApi.pinWave : pinnedWavesApi.unpinWave
     ).toHaveBeenCalledWith("wave");
+  }
+);
+
+test.each([null, undefined])(
+  "accepts a legacy token without a primary profile role (%s)",
+  async (role) => {
+    jest.mocked(getAuthJwt).mockReturnValue(createAuthJwt(role));
+    const { result } = renderHook(() => usePinnedWavesServer(), { wrapper });
+
+    await result.current.pinWave("wave");
+    await result.current.unpinWave("wave");
+
+    expect(pinMutateAsync).toHaveBeenCalledWith("wave");
+    expect(unpinMutateAsync).toHaveBeenCalledWith("wave");
   }
 );
 
@@ -545,9 +559,14 @@ test.each(["pinWave", "unpinWave"] as const)(
   }
 );
 
-test.each([0, 1])(
-  "pin mutation %s rejects a viewer switch while cancelling queries before optimistic writes",
-  async (index) => {
+test.each([
+  [0, "wallet"],
+  [1, "wallet"],
+  [0, "proxy"],
+  [1, "proxy"],
+] as const)(
+  "pin mutation %s rejects a %s switch while cancelling queries before optimistic writes",
+  async (index, switchType) => {
     let finishCancellation!: () => void;
     queryClientMock.cancelQueries.mockReturnValueOnce(
       new Promise<void>((resolve) => {
@@ -557,7 +576,11 @@ test.each([0, 1])(
     renderHook(() => usePinnedWavesServer(), { wrapper });
     const { onMutate } = useMutationMock.mock.calls[index][0];
     const operation = onMutate("wave");
-    jest.mocked(getWalletAddress).mockReturnValue("0xdef");
+    if (switchType === "wallet") {
+      jest.mocked(getWalletAddress).mockReturnValue("0xdef");
+    } else {
+      jest.mocked(getAuthJwt).mockReturnValue(createAuthJwt("other-profile"));
+    }
     finishCancellation();
     await expect(operation).rejects.toThrow("The active profile changed");
     expect(queryClientMock.setQueryData).not.toHaveBeenCalled();
