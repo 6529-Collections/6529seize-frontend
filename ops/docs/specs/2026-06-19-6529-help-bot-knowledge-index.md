@@ -429,15 +429,23 @@ so users can ask how to get started before installing the application.
 
 Core-only navigation is expressed as native menu labels. Canonical paths remain
 valid public Apps destinations with source-link suppression; never publish a
-website `/core` URL. Each record contains a complete bounded procedure, including
-its local-data effects and warnings, with pinned Core GitHub source references.
+website `/core` URL. Procedure facts retain full details, including
+local-data effects and warnings, with pinned Core GitHub source references.
 The [maintenance contract](../../help/desktop-core-sources.md) tracks the source
 baseline and the [Desktop guides](../desktop/README.md) explain the workflows.
 
-The companion backend change scopes retrieval to local Desktop support, preserves
-the full primary record, and permits longer procedural answers. It does not add
+The companion backend scopes retrieval to local Desktop support, keeps replies
+short by default, and permits longer procedures on explicit request. It does not add
 remote control of workers or access to local wallets, logs, or database contents.
 
 Deploy the companion backend routing/renderer change before publishing these
 records. Its older-corpus fallback is safe; the older backend does not isolate
 Core records from generic questions and has insufficient procedural reply space.
+
+Desktop conversational replies use optional `brief_answer` and `answer_links`
+metadata. Short answers preserve action-specific warnings. Links appear once at
+the end, never inline; source provenance remains separate. The corpus separates
+“What is Core?” from setup, initial node mismatch triage, and follow-ups after
+recalculation or history reconciliation. Full facts remain available for explicit
+requests for detail. A plain RPC-provider question without local-app context asks
+which application the user means.

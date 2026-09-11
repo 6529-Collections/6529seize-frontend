@@ -7890,14 +7890,7 @@
         "getting started with core",
         "how to get started with 6529 desktop app",
         "set up 6529 desktop",
-        "set up core",
-        "what is 6529 core",
-        "what is core",
-        "what is 6529 desktop",
-        "how does 6529 desktop work",
-        "explain core",
-        "about core",
-        "6529 desktop overview"
+        "set up core"
       ],
       "keywords": [
         "desktop",
@@ -7916,7 +7909,7 @@
       ],
       "facts": [
         "6529 Desktop, also called Core, is the Windows, macOS, and Linux app with local Core wallets, Ethereum indexing workers, independent TDH calculation, and a bundled IPFS node. These Core tools are separate from the mobile app and desktop-browser website.",
-        "Get the official installer from [6529 Apps](https://6529.io/about/6529-apps), choose your operating system, install, and open the app.",
+        "Get the official installer from 6529 Apps, choose your operating system, install, and open the app.",
         "Open the dedicated 6529 Desktop sidebar menu (monitor icon). Its entries are Wallets, ETH Transactions, TDH Calculation, My IPFS when available, and About.",
         "First open 6529 Desktop > ETH Transactions > RPC Providers > Providers List. Choose Set Active on a provider, or Add RPC Provider, enter an Ethereum mainnet RPC URL, Test it, give it a Provider Name, Add, then Set Active. Saving a provider alone does not enable it.",
         "With an active RPC provider and the app running, Transactions and NFTDelegation sync automatically, and NFTs discovers and refreshes local NFT data. Initial history sync may take time; inspect worker progress and Logs instead of repeatedly resetting.",
@@ -7935,6 +7928,10 @@
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/scheduled-tasks/scheduler.ts",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/eth-scanner/Workers.tsx",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/eth-scanner/RpcProviders.tsx"
+      ],
+      "brief_answer": "Install 6529 Desktop from the Apps page, then open **6529 Desktop > ETH Transactions > RPC Providers > Providers List** and **Set Active** on a provider. Keep the app open while its workers sync; TDH calculates automatically once prerequisites are ready. You do not need to import a wallet to run your node. Have you installed the app already?",
+      "answer_links": [
+        { "label": "6529 Apps", "url": "https://6529.io/about/6529-apps" }
       ]
     },
     {
@@ -7986,7 +7983,8 @@
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/eth-scanner/RpcProviders.tsx",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/db/db.ts",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/index.ts"
-      ]
+      ],
+      "brief_answer": "Open **6529 Desktop > ETH Transactions > RPC Providers > Providers List** and click **Set Active** on your provider. If none is saved, use **Add RPC Provider**, enter an Ethereum mainnet RPC URL, **Test** it, enter a Provider Name, then **Add** and **Set Active**. Saving alone does not activate it; never share a URL containing API credentials."
     },
     {
       "id": "desktop.workers",
@@ -8035,7 +8033,8 @@
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/scheduled-tasks/scheduler.ts",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/scheduled-tasks/scheduled-worker.ts",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/eth-scanner/Workers.tsx"
-      ]
+      ],
+      "brief_answer": "With an active RPC provider and the app open, Core workers sync automatically. Check their progress and Logs under **6529 Desktop > ETH Transactions**. Transactions and NFTDelegation must catch up before TDH calculation can finish. Which worker is stalled, and what status or redacted error does it show?"
     },
     {
       "id": "desktop.tdh-calculation",
@@ -8087,7 +8086,8 @@
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/scheduled-tasks/workers/tdh-worker/index.ts",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/scheduled-tasks/workers/tdh-worker/tdh-worker.helpers.ts",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/tdh-calculation/TDHValidation.tsx"
-      ]
+      ],
+      "brief_answer": "Core calculates TDH automatically at **00:15 UTC** while the app is open and its prerequisites are synced. View it under **6529 Desktop > TDH Calculation**. For a manual run, use the TDH worker’s **Advanced Options > Recalculate TDH Now**; it replaces the local TDH result and does not repair transaction history."
     },
     {
       "id": "desktop.tdh-out-of-sync",
@@ -8144,7 +8144,7 @@
       "link_label": "6529 Apps",
       "suppress_source_links": true,
       "related_paths": ["/about/6529-apps"],
-      "tags": ["desktop-core"],
+      "tags": ["desktop-core", "desktop-dialogue"],
       "source_refs": [
         "ops/docs/desktop/troubleshooting-sync-and-recovery.md",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/eth-scanner/Workers.tsx",
@@ -8153,7 +8153,8 @@
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/scheduled-tasks/workers/transactions-worker/transaction-reconciliation.ts",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/scheduled-tasks/scheduled-worker.ts",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/index.ts"
-      ]
+      ],
+      "brief_answer": "In **6529 Desktop > TDH Calculation**, are the two **Last Block** values identical? Which row does not match: **TDH**, **Last Block**, or **Merkle Root**? Different blocks can explain different results; an unavailable reference root is not evidence of corruption."
     },
     {
       "id": "desktop.transaction-reconciliation",
@@ -8200,7 +8201,8 @@
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/eth-scanner/Workers.tsx",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/scheduled-tasks/workers/transactions-worker/transaction-reconciliation.ts",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/scheduled-tasks/scheduler.ts"
-      ]
+      ],
+      "brief_answer": "In **6529 Desktop > ETH Transactions > Transactions > Advanced Options > Reconcile**, choose a starting block if known, or **Reconcile full history**. This repairs missing, inconsistent, or orphaned local transfer records through the captured checkpoint and rebuilds affected ownership; a full scan can take time. Let it finish, allow prerequisites to sync, then recalculate TDH. It does not change on-chain holdings."
     },
     {
       "id": "desktop.transaction-reset",
@@ -8249,7 +8251,8 @@
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/scheduled-tasks/workers/transactions-worker/index.ts",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/scheduled-tasks/scheduled-worker.ts",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/index.ts"
-      ]
+      ],
+      "brief_answer": "For a full transaction resync, open **6529 Desktop > ETH Transactions > Transactions > Advanced Options > Reset to Block > Min Block**. This deletes local transactions after the selected block and rebuilds ownership before resyncing; it does not change on-chain holdings. Prefer Reconcile first for suspect history. Read the confirmation, wait for syncing to finish, then recalculate TDH. Transactions has no standalone Reset button."
     },
     {
       "id": "desktop.nft-recovery",
@@ -8297,7 +8300,8 @@
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/eth-scanner/Workers.tsx",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/scheduled-tasks/workers/nft-worker/nft-discovery.ts",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/eth-scanner/NftLocalData.tsx"
-      ]
+      ],
+      "brief_answer": "Under **6529 Desktop > ETH Transactions > NFTs > Advanced Options**, try **Full Refresh** first for missing or inconsistent NFT metadata. **Reset > Reset All NFTs** deletes local NFT records and rediscovers them; use it only if rediscovery is needed. There is no button named Full Recovery. These actions do not change on-chain holdings. After repair and syncing finish, recalculate TDH."
     },
     {
       "id": "desktop.wallets",
@@ -8344,7 +8348,8 @@
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/core-wallet/SeedWalletImport.tsx",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/core-wallet/SeedWallet.tsx",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/db/db.ts"
-      ]
+      ],
+      "brief_answer": "Open **6529 Desktop > Wallets** to create or import a Core wallet for signing. You do not need a wallet to run indexing or TDH calculation. What would you like to do: create, import, or connect one? Never share your recovery phrase or private key here."
     },
     {
       "id": "desktop.wallet-backup",
@@ -8393,7 +8398,8 @@
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/core-wallet/SeedWallet.tsx",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/core-wallet/SeedWalletModal.tsx",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/db/db.ts"
-      ]
+      ],
+      "brief_answer": "A Core **Download Recovery File** export contains a plaintext mnemonic/private key. Keep it offline and private; never send it here. The bot cannot recover a forgotten password or missing secrets. Do you still have your recovery phrase or an existing backup? Do not delete the wallet or local data while checking."
     },
     {
       "id": "desktop.ipfs",
@@ -8442,7 +8448,8 @@
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/ipfs/IPFSContext.tsx",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/ipfs/IPFSService.ts",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/app-info/AppInfo.tsx"
-      ]
+      ],
+      "brief_answer": "**6529 Desktop > My IPFS** opens the bundled IPFS node’s WebUI when available. Its local ports are shown under **About**. Keeping content available requires pinning and a running node; this is not an automatic backup of every NFT. Are you trying to add a file, find a pin, or troubleshoot the connection?"
     },
     {
       "id": "desktop.about-and-logs",
@@ -8489,7 +8496,8 @@
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/app-info/AppInfo.tsx",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/logs-viewer/LogsViewer.tsx",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/README.md"
-      ]
+      ],
+      "brief_answer": "Open **6529 Desktop > About** for the app version, local ports, updates, and **App Logs**. For a particular stalled worker, check its own **Logs** tab under ETH Transactions. Share only a redacted error and your version/OS; never include wallet secrets or credential-bearing RPC URLs."
     },
     {
       "id": "desktop.local-data",
@@ -8532,7 +8540,244 @@
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/eth-scanner/TransactionsLocalData.tsx",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/eth-scanner/TransactionSearchModal.tsx",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/eth-scanner/NftLocalData.tsx"
+      ],
+      "brief_answer": "Use the local transaction and NFT views in **6529 Desktop > ETH Transactions** to inspect indexed data. Missing results may mean your workers have not synced yet. Are you looking for a transaction hash, an NFT, or a wallet’s local history?"
+    },
+    {
+      "id": "desktop.overview",
+      "kind": "workflow",
+      "title": "What is 6529 Desktop (Core)?",
+      "aliases": [
+        "what is core",
+        "what is 6529 core",
+        "what is 6529 desktop",
+        "explain core",
+        "about core",
+        "6529 desktop overview",
+        "how does 6529 desktop work"
+      ],
+      "keywords": ["core"],
+      "facts": [
+        "6529 Desktop, also called Core, is the Windows, macOS, and Linux app with local Core wallets, Ethereum indexing workers, independent TDH calculation, and a bundled IPFS node. These Core tools are separate from the mobile app and desktop-browser website."
+      ],
+      "canonical_path": "/about/6529-apps",
+      "link_label": "6529 Apps",
+      "suppress_source_links": true,
+      "related_paths": ["/about/6529-apps"],
+      "tags": ["desktop-core"],
+      "source_refs": [
+        "ops/docs/desktop/flow-getting-started.md",
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/hooks/useSidebarSections.ts",
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/scheduled-tasks/scheduler.ts",
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/eth-scanner/Workers.tsx",
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/eth-scanner/RpcProviders.tsx"
+      ],
+      "brief_answer": "**6529 Desktop (Core)** is the Windows, macOS, and Linux app that runs your own 6529 node: it indexes Ethereum data and calculates TDH locally. It also includes Core wallets and an IPFS node. Would you like help getting started?",
+      "answer_links": [
+        { "label": "6529 Apps", "url": "https://6529.io/about/6529-apps" }
       ]
+    },
+    {
+      "id": "desktop.clarify-context",
+      "kind": "workflow",
+      "title": "Clarify the app for RPC or transaction support",
+      "aliases": ["desktop support context clarification"],
+      "keywords": ["core"],
+      "facts": ["Do you mean **6529 Desktop (Core)**, or another app?"],
+      "canonical_path": "/about/6529-apps",
+      "link_label": "6529 Apps",
+      "suppress_source_links": true,
+      "related_paths": ["/about/6529-apps"],
+      "tags": ["desktop-core", "desktop-dialogue"],
+      "source_refs": [
+        "ops/docs/desktop/troubleshooting-sync-and-recovery.md",
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/eth-scanner/Workers.tsx",
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/i18n/messages/en-US.ts",
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/tdh-calculation/TDHValidation.tsx",
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/scheduled-tasks/workers/transactions-worker/transaction-reconciliation.ts",
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/scheduled-tasks/scheduled-worker.ts",
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/index.ts"
+      ],
+      "brief_answer": "Do you mean **6529 Desktop (Core)**, or another app?"
+    },
+    {
+      "id": "desktop.tdh-after-recalculation",
+      "kind": "workflow",
+      "title": "Desktop node still mismatches after recalculation",
+      "aliases": ["desktop mismatch after recalculation"],
+      "keywords": ["core"],
+      "facts": [
+        "You have already recalculated and it still does not match. In **6529 Desktop > TDH Calculation**, are the two **Last Block** values identical, and is the mismatch in **TDH**, **Merkle Root**, or both?"
+      ],
+      "canonical_path": "/about/6529-apps",
+      "link_label": "6529 Apps",
+      "suppress_source_links": true,
+      "related_paths": ["/about/6529-apps"],
+      "tags": ["desktop-core", "desktop-dialogue"],
+      "source_refs": [
+        "ops/docs/desktop/troubleshooting-sync-and-recovery.md",
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/eth-scanner/Workers.tsx",
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/i18n/messages/en-US.ts",
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/tdh-calculation/TDHValidation.tsx",
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/scheduled-tasks/workers/transactions-worker/transaction-reconciliation.ts",
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/scheduled-tasks/scheduled-worker.ts",
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/index.ts"
+      ],
+      "brief_answer": "You have already recalculated and it still does not match. In **6529 Desktop > TDH Calculation**, are the two **Last Block** values identical, and is the mismatch in **TDH**, **Merkle Root**, or both?"
+    },
+    {
+      "id": "desktop.tdh-same-block-mismatch",
+      "kind": "workflow",
+      "title": "Desktop mismatch persists at the same block after recalculation",
+      "aliases": ["desktop confirmed same block mismatch"],
+      "keywords": ["core"],
+      "facts": [
+        "Since recalculation did not resolve the mismatch at the same block, the next history check is **6529 Desktop > ETH Transactions > Transactions > Advanced Options > Reconcile**. Choose **Reconcile full history** if you do not know a starting block. It repairs missing/inconsistent/orphaned local transfer records and rebuilds ownership without changing on-chain holdings; it may take time. Let it finish and prerequisites sync before recalculating TDH again."
+      ],
+      "canonical_path": "/about/6529-apps",
+      "link_label": "6529 Apps",
+      "suppress_source_links": true,
+      "related_paths": ["/about/6529-apps"],
+      "tags": ["desktop-core", "desktop-dialogue"],
+      "source_refs": [
+        "ops/docs/desktop/troubleshooting-sync-and-recovery.md",
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/eth-scanner/Workers.tsx",
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/i18n/messages/en-US.ts",
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/tdh-calculation/TDHValidation.tsx",
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/scheduled-tasks/workers/transactions-worker/transaction-reconciliation.ts",
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/scheduled-tasks/scheduled-worker.ts",
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/index.ts"
+      ],
+      "brief_answer": "Since recalculation did not resolve the mismatch at the same block, the next history check is **6529 Desktop > ETH Transactions > Transactions > Advanced Options > Reconcile**. Choose **Reconcile full history** if you do not know a starting block. It repairs missing/inconsistent/orphaned local transfer records and rebuilds ownership without changing on-chain holdings; it may take time. Let it finish and prerequisites sync before recalculating TDH again."
+    },
+    {
+      "id": "desktop.tdh-after-reconciliation",
+      "kind": "workflow",
+      "title": "Desktop mismatch persists after history reconciliation",
+      "aliases": ["desktop mismatch after reconciliation"],
+      "keywords": ["core"],
+      "facts": [
+        "If reconciliation has finished, allow the prerequisite workers to catch up, then recalculate TDH once because the history repair can make the old result stale. If you have already done that and the same-block mismatch persists, share your **About** version/OS, both Last Block values, which row differs, and any redacted worker error. Do not reset wallets or the app database; never share wallet secrets or credential-bearing RPC URLs."
+      ],
+      "canonical_path": "/about/6529-apps",
+      "link_label": "6529 Apps",
+      "suppress_source_links": true,
+      "related_paths": ["/about/6529-apps"],
+      "tags": ["desktop-core", "desktop-dialogue"],
+      "source_refs": [
+        "ops/docs/desktop/troubleshooting-sync-and-recovery.md",
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/eth-scanner/Workers.tsx",
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/i18n/messages/en-US.ts",
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/tdh-calculation/TDHValidation.tsx",
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/scheduled-tasks/workers/transactions-worker/transaction-reconciliation.ts",
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/scheduled-tasks/scheduled-worker.ts",
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/index.ts"
+      ],
+      "brief_answer": "If reconciliation has finished, allow the prerequisite workers to catch up, then recalculate TDH once because the history repair can make the old result stale. If you have already done that and the same-block mismatch persists, share your **About** version/OS, both Last Block values, which row differs, and any redacted worker error. Do not reset wallets or the app database; never share wallet secrets or credential-bearing RPC URLs."
+    },
+    {
+      "id": "desktop.tdh-repair-diagnostics",
+      "kind": "workflow",
+      "title": "Desktop node still mismatches after reconciliation and recalculation",
+      "aliases": ["desktop mismatch repair diagnostics"],
+      "keywords": ["core"],
+      "facts": [
+        "You have reconciled and recalculated, but the mismatch persists. Please share your **6529 Desktop > About** version/OS, both **Last Block** values, whether **TDH**, **Merkle Root**, or both differ, and any redacted worker error. Do not reset wallets or the app database; never share wallet secrets or credential-bearing RPC URLs."
+      ],
+      "canonical_path": "/about/6529-apps",
+      "link_label": "6529 Apps",
+      "suppress_source_links": true,
+      "related_paths": ["/about/6529-apps"],
+      "tags": ["desktop-core", "desktop-dialogue"],
+      "source_refs": [
+        "ops/docs/desktop/troubleshooting-sync-and-recovery.md",
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/eth-scanner/Workers.tsx",
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/i18n/messages/en-US.ts",
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/tdh-calculation/TDHValidation.tsx",
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/scheduled-tasks/workers/transactions-worker/transaction-reconciliation.ts",
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/scheduled-tasks/scheduled-worker.ts",
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/index.ts"
+      ],
+      "brief_answer": "You have reconciled and recalculated, but the mismatch persists. Please share your **6529 Desktop > About** version/OS, both **Last Block** values, whether **TDH**, **Merkle Root**, or both differ, and any redacted worker error. Do not reset wallets or the app database; never share wallet secrets or credential-bearing RPC URLs."
+    },
+    {
+      "id": "desktop.tdh-block-mismatch",
+      "kind": "workflow",
+      "title": "Desktop Last Block values differ",
+      "aliases": ["desktop last block values differ"],
+      "keywords": ["core"],
+      "facts": [
+        "Different **Last Block** values mean you are comparing different snapshots. In **6529 Desktop > ETH Transactions**, check Transactions and NFTDelegation progress and Logs. Let them catch up before recalculating TDH and comparing the same block. Do either of those workers show an error or appear stalled?"
+      ],
+      "canonical_path": "/about/6529-apps",
+      "link_label": "6529 Apps",
+      "suppress_source_links": true,
+      "related_paths": ["/about/6529-apps"],
+      "tags": ["desktop-core", "desktop-dialogue"],
+      "source_refs": [
+        "ops/docs/desktop/troubleshooting-sync-and-recovery.md",
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/eth-scanner/Workers.tsx",
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/i18n/messages/en-US.ts",
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/tdh-calculation/TDHValidation.tsx",
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/scheduled-tasks/workers/transactions-worker/transaction-reconciliation.ts",
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/scheduled-tasks/scheduled-worker.ts",
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/index.ts"
+      ],
+      "brief_answer": "Different **Last Block** values mean you are comparing different snapshots. In **6529 Desktop > ETH Transactions**, check Transactions and NFTDelegation progress and Logs. Let them catch up before recalculating TDH and comparing the same block. Do either of those workers show an error or appear stalled?"
+    },
+    {
+      "id": "desktop.tdh-check-workers",
+      "kind": "workflow",
+      "title": "Check workers before recalculating a same-block Desktop mismatch",
+      "aliases": [
+        "check workers before recalculating a same-block desktop mismatch"
+      ],
+      "keywords": ["core"],
+      "facts": [
+        "Your node still does not match 6529.io at the same Last Block. In **6529 Desktop > ETH Transactions**, have **Transactions** and **NFTDelegation** both reached that block? If either is behind or stalled, share its status or a redacted error."
+      ],
+      "canonical_path": "/about/6529-apps",
+      "link_label": "6529 Apps",
+      "suppress_source_links": true,
+      "related_paths": ["/about/6529-apps"],
+      "tags": ["desktop-core", "desktop-dialogue"],
+      "source_refs": [
+        "ops/docs/desktop/troubleshooting-sync-and-recovery.md",
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/eth-scanner/Workers.tsx",
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/i18n/messages/en-US.ts",
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/tdh-calculation/TDHValidation.tsx",
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/scheduled-tasks/workers/transactions-worker/transaction-reconciliation.ts",
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/scheduled-tasks/scheduled-worker.ts",
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/index.ts"
+      ],
+      "brief_answer": "Your node still does not match 6529.io at the same Last Block. In **6529 Desktop > ETH Transactions**, have **Transactions** and **NFTDelegation** both reached that block? If either is behind or stalled, share its status or a redacted error."
+    },
+    {
+      "id": "desktop.tdh-recalculate",
+      "kind": "workflow",
+      "title": "Recalculate after confirming matching blocks and synced workers",
+      "aliases": [
+        "recalculate after confirming matching blocks and synced workers"
+      ],
+      "keywords": ["core"],
+      "facts": [
+        "The Last Block values match and both workers are caught up. In **6529 Desktop > TDH Calculation**, use the TDH worker’s **Advanced Options > Recalculate TDH Now** and confirm. This replaces the local TDH result; it does not repair transaction history. Once it finishes, does **TDH**, **Merkle Root**, or both still differ?"
+      ],
+      "canonical_path": "/about/6529-apps",
+      "link_label": "6529 Apps",
+      "suppress_source_links": true,
+      "related_paths": ["/about/6529-apps"],
+      "tags": ["desktop-core", "desktop-dialogue"],
+      "source_refs": [
+        "ops/docs/desktop/troubleshooting-sync-and-recovery.md",
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/eth-scanner/Workers.tsx",
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/i18n/messages/en-US.ts",
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/tdh-calculation/TDHValidation.tsx",
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/scheduled-tasks/workers/transactions-worker/transaction-reconciliation.ts",
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/scheduled-tasks/scheduled-worker.ts",
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/index.ts"
+      ],
+      "brief_answer": "The Last Block values match and both workers are caught up. In **6529 Desktop > TDH Calculation**, use the TDH worker’s **Advanced Options > Recalculate TDH Now** and confirm. This replaces the local TDH result; it does not repair transaction history. Once it finishes, does **TDH**, **Merkle Root**, or both still differ?"
     }
   ]
 }
