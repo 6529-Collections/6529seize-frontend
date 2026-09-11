@@ -820,7 +820,8 @@
         "Every Worth Checking Out recommendation also appears in All at its recent-activity position; Joined normally includes only waves the user has joined.",
         "A Wave opened from a direct link remains visible and highlighted in the left sidebar even when it is not followed, pinned, or present in the loaded overview; this temporary route context does not join or pin it.",
         "When a direct link opens a subwave, the sidebar surfaces its visible parent, loads and expands the subwave list, reveals the selected child row, and keeps that parent tree ahead of paginated activity rows so every sibling remains reachable.",
-        "An active subwave header shows an up-left arrow and a linked parent wave name; selecting that name opens the parent wave."
+        "An active subwave header shows an up-left arrow and a linked parent wave name; selecting that name opens the parent wave.",
+        "Pin and unpin check the selected profile session before changing the list. If the session cannot renew, reconnect that wallet and retry; a failed session check leaves the pin state unchanged. Public waves can remain readable after session expiry but are not added to saved pins. Failed server pin changes roll back and show an error."
       ],
       "canonical_path": "/waves",
       "related_paths": [

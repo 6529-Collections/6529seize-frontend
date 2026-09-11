@@ -77,6 +77,10 @@ is blocked.
 
 ## Posting and Submission Checks
 
+- Pin or unpin asks you to reconnect, or your saved pins are unavailable:
+  reconnect the wallet for the selected profile, then retry. Public waves can
+  remain readable while your session is expired; this does not pin them. See
+  [Pinned Wave Controls](sidebars/feature-pinned-wave-controls.md#failure-and-recovery).
 - Post waits for a session check, then shows a connection or timeout error:
   the draft stays in the composer. Wait for the loading state to finish, check
   your connection, complete sign-in if prompted, then retry Post. A stalled
