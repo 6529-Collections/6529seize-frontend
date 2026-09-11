@@ -11,6 +11,7 @@ export const COLLECT_MESSAGES = {
   "collect.navigation.tdh": "TDH",
   "collect.navigation.lowest": "Lowest listings",
   "collect.browseArtwork": "Browse artwork",
+  "collect.viewCollection": "View {collection}",
   "collect.listings.empty.title": "No listings found",
   "collect.listings.empty.description":
     "No observed listings are available for this collection. Browse the artwork or check again later.",
@@ -26,7 +27,7 @@ export const COLLECT_MESSAGES = {
   "collect.art.unavailable": "Artwork preview unavailable",
   "collect.error.catalog": "The catalog could not be loaded. Please try again.",
   "collect.error.analysis":
-    "Your collection could not be checked. Refresh and try again.",
+    "Your collection could not be checked. Try building the plan again.",
   "collect.error.orders": "Orders could not be loaded. Please try again.",
   "collect.error.prepare":
     "This trade could not be prepared. Refresh the available orders and try again.",
@@ -97,9 +98,9 @@ export const COLLECT_MESSAGES = {
     "The transaction was sent. Its receipt is still being checked; do not create another trade.",
   "collect.trade.orderLive": "Order is live",
   "collect.trade.cancelled": "Order cancelled",
-  "collect.title": "Collecting tools",
+  "collect.title": "Build your collection",
   "collect.description":
-    "Plan your next acquisition. Complete a set, compare listings or explore TDH across your profile.",
+    "Complete a set, discover listings or find the most TDH for your ETH.",
   "collect.navigation": "Collect navigation",
   "collect.explore": "Explore",
   "collect.goals": "Goals",
@@ -116,7 +117,8 @@ export const COLLECT_MESSAGES = {
   "collect.intent.full_set": "Complete a full set",
   "collect.intent.artist": "Collect an artist",
   "collect.intent.pebbles_set": "Complete a Pebbles set",
-  "collect.intent.tdh": "Explore TDH for your budget",
+  "collect.intent.tdh": "Project your profile’s TDH",
+  "collect.tdh.backToListings": "Back to TDH listings",
   "collect.chooseGoal": "What are you collecting?",
   "collect.search": "Search artwork",
   "collect.searchPlaceholder": "Title, artist or token number",

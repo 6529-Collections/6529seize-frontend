@@ -14,7 +14,7 @@ import { useState } from "react";
 import { formatEther, isAddress, parseEther, zeroAddress } from "viem";
 import type { CollectCollection, CollectGoalDraft } from "./collect.types";
 import CollectGoalForm from "./CollectGoalForm";
-import CollectRecipientPicker from "./CollectRecipientPicker";
+import CollectDeliveryControl from "./CollectDeliveryControl";
 import CollectAssetReference from "./CollectAssetReference";
 import { marketAmount } from "./market.adapters";
 import { MARKET_ZERO } from "./market-validation";
@@ -228,13 +228,11 @@ export default function CollectTdhController({
         onSubmit={submit}
         onConnect={onConnect}
       />
-      <fieldset
-        disabled={compare.isPending}
-        className="tw-m-0 tw-min-w-0 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-p-4"
-      >
-        <CollectRecipientPicker
+      <div>
+        <CollectDeliveryControl
           profile={profile}
           value={recipient}
+          disabled={compare.isPending}
           invalid={recipientError}
           errorId="collect-tdh-recipient-error"
           onChange={(value) => {
@@ -252,7 +250,7 @@ export default function CollectTdhController({
             {t(locale, "collect.trade.invalid.recipient")}
           </p>
         )}
-      </fieldset>
+      </div>
       {compare.data &&
         compare.data.ranking.account.profile_id === profile?.id && (
           <TdhResults

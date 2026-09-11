@@ -18,7 +18,7 @@ import { collectAnalysisRequest, collectGoalOptions } from "./collect.adapters";
 import type { CollectGoalDraft } from "./collect.types";
 import CollectGoalForm from "./CollectGoalForm";
 import type { CollectCompletionSelection } from "./CollectCompletionControls";
-import CollectRecipientPicker from "./CollectRecipientPicker";
+import CollectDeliveryControl from "./CollectDeliveryControl";
 import { isPositiveEthAmount } from "./collect-form.validation";
 
 const MAX_STALLED_SCAN_ATTEMPTS = 8;
@@ -145,13 +145,11 @@ export default function CollectGoalsController({
         onSubmit={submit}
         onConnect={onConnect}
       />
-      <fieldset
-        disabled={create.isPending}
-        className="tw-m-0 tw-min-w-0 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-p-4"
-      >
-        <CollectRecipientPicker
+      <div>
+        <CollectDeliveryControl
           profile={profile}
           value={recipient}
+          disabled={create.isPending}
           invalid={recipientError}
           errorId="collect-goal-recipient-error"
           onChange={(address) => {
@@ -170,7 +168,7 @@ export default function CollectGoalsController({
             {t(locale, "collect.trade.invalid.recipient")}
           </p>
         )}
-      </fieldset>
+      </div>
       {scanning && (
         <p role="status" className="tw-text-sm tw-text-iron-300">
           {t(locale, "collect.plan.scanning", {

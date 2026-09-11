@@ -5,8 +5,9 @@ import Button from "@/components/utils/button/Button";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import type { SupportedLocale } from "@/i18n/locales";
+import { ArrowUpRightIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
-import { useId, useState, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import CollectArtworkCard from "./CollectArtworkCard";
 import CollectGoalNavigation from "./CollectGoalNavigation";
 import CollectPlanPanel from "./CollectPlanPanel";
@@ -130,34 +131,33 @@ function Listings({
 
 export default function CollectPageView(props: CollectPageViewProps) {
   const locale = useBrowserLocale();
-  const browseLabelId = useId();
+  const collectionLink = COLLECTIONS.find(({ id }) => id === props.collection);
   const [planOpen, setPlanOpen] = useState(false);
   return (
     <div className="tailwind-scope tw-mx-auto tw-w-full tw-max-w-[1440px] tw-px-4 tw-pb-28 tw-pt-6 tw-text-iron-100 md:tw-px-6 lg:tw-px-8">
       <header className="tw-mb-7 tw-space-y-3">
-        <h1 className="tw-m-0 tw-text-3xl tw-font-semibold tw-tracking-tight">
-          {t(locale, "collect.title")}
-        </h1>
+        <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-6 tw-gap-y-2">
+          <h1 className="tw-m-0 tw-text-3xl tw-font-semibold tw-tracking-tight">
+            {t(locale, "collect.title")}
+          </h1>
+          {collectionLink && (
+            <Link
+              href={collectionLink.href}
+              className="tw-inline-flex tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-lg tw-py-2 tw-text-xs tw-text-iron-300 tw-no-underline hover:tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+            >
+              {t(locale, "collect.viewCollection", {
+                collection: t(
+                  locale,
+                  `collect.collection.${collectionLink.id}`
+                ),
+              })}
+              <ArrowUpRightIcon className="tw-size-4" aria-hidden="true" />
+            </Link>
+          )}
+        </div>
         <p className="tw-m-0 tw-max-w-2xl tw-text-sm tw-leading-6 tw-text-iron-400">
           {t(locale, "collect.description")}
         </p>
-        <nav
-          aria-labelledby={browseLabelId}
-          className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-1 tw-text-xs"
-        >
-          <span id={browseLabelId} className="tw-text-iron-500">
-            {t(locale, "collect.browseArtwork")}
-          </span>
-          {COLLECTIONS.map(({ id, href }) => (
-            <Link
-              key={id}
-              href={href}
-              className="tw-py-2 tw-text-iron-300 tw-underline tw-decoration-iron-600 tw-underline-offset-4 hover:tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
-            >
-              {t(locale, `collect.collection.${id}`)}
-            </Link>
-          ))}
-        </nav>
         {props.profile ? (
           <div>
             <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-primary-300">
