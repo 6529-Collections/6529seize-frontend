@@ -1,6 +1,22 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  canEditDocumentationAsset,
+  canWriteDocumentationAssetRole,
+  mutationCapabilities,
+} from "@/lib/artwork-documentation/capabilities";
+
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
+import { useQuery } from "@tanstack/react-query";
+import { documentationQueryKey } from "@/hooks/artwork-documentation/useArtworkDocumentationAccess";
+import { useDocumentationActor } from "./DocumentationAuthGate";
+import type { ApiArtworkDocumentationAsset } from "@/generated/models/ApiArtworkDocumentationAsset";
 import {
   ApiArtworkDocumentationContextLifecycleEnum,
   type ApiArtworkDocumentationContext,
@@ -64,6 +80,7 @@ function canUseUpload(
 ): boolean {
   return (
     canPublishDocumentationAsset(context, asset.role) &&
+    canWriteDocumentationAssetRole(context, asset.role) &&
     (!isPublicationOnly(context.profile) ||
       asset.intended_visibility === "public_record")
   );
@@ -101,9 +118,11 @@ export default function DocumentationUpload({ context, controller }: Props) {
   const roles = publicationOnly
     ? PUBLICATION_DOCUMENTATION_ASSET_ROLES
     : DOCUMENTATION_ASSET_ROLES;
-  const rolePermitted = canPublishDocumentationAsset(context, role);
+  const rolePermitted =
+    canPublishDocumentationAsset(context, role) &&
+    canWriteDocumentationAssetRole(context, role);
   const transferPermitted = session
-    ? canUseUpload(context, session.asset)
+    ? session.can_mutate === true && canUseUpload(context, session.asset)
     : rolePermitted;
   const failureMessage =
     session && !transferPermitted ? "uploadBlockedRecovery" : "uploadFailed";
@@ -128,7 +147,7 @@ export default function DocumentationUpload({ context, controller }: Props) {
     return documentationOptionLabel(value);
   };
   const canUpload =
-    context.capabilities.edit_modules.includes(
+    mutationCapabilities(context).edit_modules.includes(
       ApiArtworkDocumentationCapabilitiesEditModulesEnum.Files
     ) &&
     context.lifecycle === ApiArtworkDocumentationContextLifecycleEnum.Active;
@@ -200,6 +219,8 @@ export default function DocumentationUpload({ context, controller }: Props) {
           );
       if (!canContinueUpload(controllerAbort.signal, mounted)) return;
       setSession(upload);
+      if (upload.can_mutate !== true)
+        throw new Error("UPLOAD_MUTATION_NOT_ALLOWED");
       if (!canUseUpload(controller.snapshot().context, upload.asset)) {
         // Keep a resumed session intact: its permission may only need correcting.
         // A newly rejected reservation is forgotten only after cancellation succeeds.
@@ -232,6 +253,7 @@ export default function DocumentationUpload({ context, controller }: Props) {
     }
   };
   const cancel = async () => {
+    if (session && (session.can_mutate !== true || !canUpload)) return;
     abort.current?.abort();
     const controllerAbort = new AbortController();
     abort.current = controllerAbort;
@@ -267,6 +289,8 @@ export default function DocumentationUpload({ context, controller }: Props) {
           signal
         );
         if (signal.aborted) return false;
+        if (result.can_mutate !== true)
+          throw new Error("UPLOAD_MUTATION_NOT_ALLOWED");
         if (result.asset.state === "ready") {
           const attached = await attach(
             result.asset.id,
@@ -362,7 +386,11 @@ export default function DocumentationUpload({ context, controller }: Props) {
               }}
             >
               {roles.map((value) => (
-                <option key={value} value={value}>
+                <option
+                  key={value}
+                  value={value}
+                  disabled={!canWriteDocumentationAssetRole(context, value)}
+                >
                   {roleLabel(value)}
                 </option>
               ))}
@@ -479,87 +507,96 @@ export default function DocumentationUpload({ context, controller }: Props) {
       )}
       <ul className="tw-m-0 tw-list-none tw-space-y-3 tw-p-0">
         {visibleAssets.map((asset) => (
-          <li
+          <DocumentationAssetMutationAccess
             key={asset.id}
-            className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-p-4"
+            context={context}
+            asset={asset}
+            session={session}
           >
-            <p className="tw-m-0 tw-break-all tw-text-sm tw-font-medium">
-              {asset.filename}
-            </p>
-            <p className="tw-my-2 tw-text-xs tw-text-iron-400">
-              {roleLabel(asset.role)} · {sizeLabel(asset.size_bytes)} ·{" "}
-              {documentationOptionLabel(asset.state)}
-            </p>
-            {asset.state === "ready" && (
-              <>
-                <div className="tw-flex tw-flex-wrap tw-gap-3">
-                  <DocumentationButton
-                    secondary
-                    onClick={() => {
-                      void download(asset.id);
-                    }}
-                  >
-                    {msg("download")}
-                  </DocumentationButton>
-                  {!context.asset_links.some(
-                    (link) => link.asset_id === asset.id
-                  ) &&
-                    canUpload &&
-                    canPublishDocumentationAsset(context, asset.role) && (
+            {(canMutateAsset) => (
+              <li className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-p-4">
+                <p className="tw-m-0 tw-break-all tw-text-sm tw-font-medium">
+                  {asset.filename}
+                </p>
+                <p className="tw-my-2 tw-text-xs tw-text-iron-400">
+                  {roleLabel(asset.role)} · {sizeLabel(asset.size_bytes)} ·{" "}
+                  {documentationOptionLabel(asset.state)}
+                </p>
+                {asset.state === "ready" && (
+                  <>
+                    <div className="tw-flex tw-flex-wrap tw-gap-3">
                       <DocumentationButton
                         secondary
                         onClick={() => {
-                          void attach(
-                            asset.id,
-                            asset.role,
-                            asset.intended_visibility,
-                            asset.filename
-                          );
+                          void download(asset.id);
                         }}
                       >
-                        {msg("add")}
+                        {msg("download")}
                       </DocumentationButton>
-                    )}
-                </div>
-                <details className="tw-mt-3 tw-text-xs tw-text-iron-400">
-                  <summary className="tw-cursor-pointer tw-py-2">
-                    {msg("fileDetails")}
-                  </summary>
-                  <p className="tw-break-all">
-                    {msg("fileHash")}: {asset.sha256}
-                  </p>
-                </details>
-              </>
+                      {!context.asset_links.some(
+                        (link) => link.asset_id === asset.id
+                      ) &&
+                        canMutateAsset &&
+                        canPublishDocumentationAsset(context, asset.role) && (
+                          <DocumentationButton
+                            secondary
+                            onClick={() => {
+                              void attach(
+                                asset.id,
+                                asset.role,
+                                asset.intended_visibility,
+                                asset.filename
+                              );
+                            }}
+                          >
+                            {msg("add")}
+                          </DocumentationButton>
+                        )}
+                    </div>
+                    <details className="tw-mt-3 tw-text-xs tw-text-iron-400">
+                      <summary className="tw-cursor-pointer tw-py-2">
+                        {msg("fileDetails")}
+                      </summary>
+                      <p className="tw-break-all">
+                        {msg("fileHash")}: {asset.sha256}
+                      </p>
+                    </details>
+                  </>
+                )}
+                {asset.state === "ready" &&
+                  canEditDocumentationAsset(context, asset.id) && (
+                    <DocumentationAssetDetails
+                      context={context}
+                      assetId={asset.id}
+                      controller={controller}
+                    />
+                  )}
+                {["created", "uploading"].includes(asset.state) &&
+                  canMutateAsset && (
+                    <>
+                      <p className="tw-text-xs tw-text-iron-400">
+                        {msg("uploadReselect")}
+                      </p>
+                      <DocumentationButton
+                        secondary
+                        disabled={
+                          !file ||
+                          busy ||
+                          (session !== null &&
+                            session.upload_id !== asset.id) ||
+                          !canPublishDocumentationAsset(context, asset.role)
+                        }
+                        onClick={() => {
+                          void run(asset.id);
+                        }}
+                      >
+                        {msg("retry")}
+                      </DocumentationButton>
+                    </>
+                  )}
+              </li>
             )}
-            {asset.state === "ready" && canUpload && (
-              <DocumentationAssetDetails
-                context={context}
-                assetId={asset.id}
-                controller={controller}
-              />
-            )}
-            {["created", "uploading"].includes(asset.state) && canUpload && (
-              <>
-                <p className="tw-text-xs tw-text-iron-400">
-                  {msg("uploadReselect")}
-                </p>
-                <DocumentationButton
-                  secondary
-                  disabled={
-                    !file ||
-                    busy ||
-                    (session !== null && session.upload_id !== asset.id) ||
-                    !canPublishDocumentationAsset(context, asset.role)
-                  }
-                  onClick={() => {
-                    void run(asset.id);
-                  }}
-                >
-                  {msg("retry")}
-                </DocumentationButton>
-              </>
-            )}
-          </li>
+          </DocumentationAssetMutationAccess>
         ))}
       </ul>
       {visibleAssets.length === 0 && (
@@ -568,5 +605,50 @@ export default function DocumentationUpload({ context, controller }: Props) {
         </p>
       )}
     </section>
+  );
+}
+
+function DocumentationAssetMutationAccess({
+  context,
+  asset,
+  session,
+  children,
+}: {
+  readonly context: ApiArtworkDocumentationContext;
+  readonly asset: ApiArtworkDocumentationAsset;
+  readonly session: ApiArtworkDocumentationUploadSession | null;
+  readonly children: (allowed: boolean) => ReactNode;
+}) {
+  const { connectedProfile, actorKey } = useDocumentationActor();
+  const linked = context.asset_links.some((link) => link.asset_id === asset.id);
+  const directlyAllowed =
+    linked && canEditDocumentationAsset(context, asset.id);
+  const mayRecover =
+    canWriteDocumentationAssetRole(context, asset.role) && !linked;
+  const knownUpload =
+    session?.asset.id === asset.id && session.can_mutate === true;
+  const recovery = useQuery({
+    queryKey: documentationQueryKey(
+      connectedProfile?.id,
+      context.id,
+      "upload-mutation-access",
+      asset.id,
+      actorKey,
+      String(context.draft_version),
+      JSON.stringify(mutationCapabilities(context))
+    ),
+    queryFn: ({ signal }) =>
+      getDocumentationUpload(context.id, asset.id, signal),
+    enabled: mayRecover && !knownUpload,
+    retry: false,
+    gcTime: 0,
+    meta: { persist: false },
+  });
+  // The upload endpoint checks the stored uploader and reference state using original grants.
+  return children(
+    directlyAllowed ||
+      (mayRecover &&
+        (knownUpload ||
+          (recovery.data?.can_mutate === true && !recovery.isFetching)))
   );
 }

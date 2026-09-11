@@ -92,7 +92,7 @@ it("keeps reviewer notes separate for each lane and clears only the submitted la
   const context = documentationFixture();
   context.latest_revision_id = "revision";
   context.confirmation_status = "current" as never;
-  context.capabilities.review_lanes = ["technical", "rights"] as never;
+  context.mutation_capabilities.review_lanes = ["technical", "rights"] as never;
   const controller = new DocumentationDraftController(
     context,
     { read: jest.fn(), save: jest.fn() },

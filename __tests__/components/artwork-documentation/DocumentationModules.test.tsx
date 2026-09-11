@@ -8,6 +8,44 @@ jest.mock("@/hooks/useBrowserLocale", () => ({
 }));
 
 describe("artwork documentation modules", () => {
+  it("shows a viewer/editor's restricted answer but keeps its controls disabled while ordinary fields remain editable", () => {
+    const context = documentationFixture();
+    Object.assign(context.mutation_capabilities, {
+      confirm_as_artist: false,
+      read_restricted_fields: false,
+      read_archival_files: false,
+    });
+    context.mutation_restricted_paths = ["artwork.location"];
+    context.modules["artwork"]!.answers["location"] = {
+      status: "provided",
+      value: "Published location with restricted history",
+      intended_visibility: "public_record",
+    } as never;
+    const onChange = jest.fn();
+    render(
+      <DocumentationModules
+        context={context}
+        edits={[]}
+        section="artwork"
+        onChange={onChange}
+      />
+    );
+    expect(screen.getByRole("textbox", { name: "Location" })).toHaveValue(
+      "Published location with restricted history"
+    );
+    expect(screen.getByRole("textbox", { name: "Location" })).toBeDisabled();
+    fireEvent.change(screen.getByRole("textbox", { name: "Location" }), {
+      target: { value: "Changed" },
+    });
+    expect(onChange).not.toHaveBeenCalled();
+    const title = screen.getByDisplayValue("মুক্তিযুদ্ধ — A long title");
+    expect(title).toBeEnabled();
+    fireEvent.change(title, { target: { value: "Ordinary title change" } });
+    expect(onChange).toHaveBeenCalledWith(
+      "artwork",
+      expect.objectContaining({ field: "title" })
+    );
+  });
   it("uses publication intent without exposing per-field privacy choices in the new intake", () => {
     const context = documentationFixture();
     context.profile.version = 2;
