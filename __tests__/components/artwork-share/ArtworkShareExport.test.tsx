@@ -274,6 +274,46 @@ it("keeps a share pending across format changes and does not attach its failure 
   expect(webShare).toHaveBeenLastCalledWith({ files: [story] });
 });
 
+it("does not revive an old share error when preparing the same format again", async () => {
+  webShare.mockRejectedValueOnce(new Error("Share unavailable"));
+  const view = renderExport();
+  await userEvent.click(screen.getByRole("button", { name: "Share image" }));
+  expect(await screen.findByRole("alert")).toHaveTextContent(
+    "Image sharing is unavailable."
+  );
+
+  jest.mocked(useArtworkExport).mockReturnValue({
+    state: { status: "loading" },
+    retry,
+  });
+  view.rerender(
+    <ArtworkShareExport artwork={artwork} format="story" locale="en-US" />
+  );
+  expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  view.rerender(
+    <ArtworkShareExport artwork={artwork} format="portrait" locale="en-US" />
+  );
+  expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+
+  const newPortrait = new File(["new portrait"], file.name, {
+    type: "image/png",
+  });
+  jest.mocked(useArtworkExport).mockReturnValue({
+    state: {
+      status: "ready",
+      file: newPortrait,
+      previewUrl: "blob:new-portrait-preview",
+    },
+    retry,
+  });
+  view.rerender(
+    <ArtworkShareExport artwork={artwork} format="portrait" locale="en-US" />
+  );
+  expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  await userEvent.click(screen.getByRole("button", { name: "Share image" }));
+  expect(webShare).toHaveBeenLastCalledWith({ files: [newPortrait] });
+});
+
 it.each([false, true])(
   "reports real share failures and allows retry (native: %s)",
   async (native) => {

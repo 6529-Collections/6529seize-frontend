@@ -9,7 +9,7 @@ import {
 jest.mock("@/config/env", () => ({
   publicEnv: {
     API_ENDPOINT: "https://api.6529.test",
-    STAGING_API_KEY: undefined,
+    STAGING_API_KEY: void 0,
   },
 }));
 
@@ -128,11 +128,17 @@ describe("NFT preview metadata fallback", () => {
       "API_ENDPOINT",
       "https://api.staging.6529.io"
     );
+    jest.replaceProperty(publicEnv, "STAGING_API_KEY", "test-staging-key");
     mockFetch.mockResolvedValue({ ok: false, status: 401, body: null });
     await expect(
       fetchNftCardMetadata(MEMES_CONTRACT, "542")
     ).resolves.toBeNull();
     expect(mockFetch).toHaveBeenCalledTimes(2);
+    expect(mockFetch).toHaveBeenNthCalledWith(
+      2,
+      expect.stringMatching(/^https:\/\/api\.6529\.io\/api\/nfts\?/),
+      expect.objectContaining({ headers: { Accept: "application/json" } })
+    );
   });
 
   it("keeps subsequent NextGen collection metadata on the public API after fallback", async () => {
@@ -244,42 +250,53 @@ describe("NFT preview metadata fallback", () => {
     }
   );
 
-  it.each(["10000000001", "1"])(
-    "loads NextGen token %s and its artist without traits requests",
-    async (id) => {
-      mockFetch
-        .mockResolvedValueOnce(
-          jsonResponse({
-            id: 10000000001,
-            normalised_id: 1,
-            collection_id: 1,
-            name: "Pebbles #1",
-            collection_name: "Pebbles",
-            image_url: imageUrl,
-            pending: false,
-          })
-        )
-        .mockResolvedValueOnce(
-          jsonResponse({ id: 1, name: "Pebbles", artist: "artist" })
-        );
-      await expect(fetchNftCardMetadata(NEXTGEN_CONTRACT, id)).resolves.toEqual(
-        {
-          title: "Pebbles #1",
-          artist: "artist",
-          collection: "Pebbles",
-          badge: "NextGen",
-          displayId: "1",
-          imageUrl,
-        }
+  it("loads a full NextGen token ID and its artist without traits requests", async () => {
+    const id = "10000000001";
+    mockFetch
+      .mockResolvedValueOnce(
+        jsonResponse({
+          id: 10000000001,
+          normalised_id: 1,
+          collection_id: 1,
+          name: "Pebbles #1",
+          collection_name: "Pebbles",
+          image_url: imageUrl,
+          pending: false,
+        })
+      )
+      .mockResolvedValueOnce(
+        jsonResponse({ id: 1, name: "Pebbles", artist: "artist" })
       );
-      expect(mockFetch).toHaveBeenCalledTimes(2);
-      expect(mockFetch).toHaveBeenNthCalledWith(
-        2,
-        "https://api.6529.test/api/nextgen/collections/1",
-        expect.any(Object)
-      );
-    }
-  );
+    await expect(fetchNftCardMetadata(NEXTGEN_CONTRACT, id)).resolves.toEqual({
+      title: "Pebbles #1",
+      artist: "artist",
+      collection: "Pebbles",
+      badge: "NextGen",
+      displayId: "1",
+      imageUrl,
+    });
+    expect(mockFetch).toHaveBeenCalledTimes(2);
+    expect(mockFetch).toHaveBeenNthCalledWith(
+      2,
+      "https://api.6529.test/api/nextgen/collections/1",
+      expect.any(Object)
+    );
+  });
+
+  it("does not accept a normalized display ID as the full token identity", async () => {
+    mockFetch.mockResolvedValue(
+      jsonResponse({
+        id: 10000000001,
+        normalised_id: 1,
+        collection_id: 1,
+        image_url: imageUrl,
+      })
+    );
+    await expect(
+      fetchNftCardMetadata(NEXTGEN_CONTRACT, "1")
+    ).resolves.toBeNull();
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+  });
 
   it.each([
     ["https://untrusted.test", "542"],

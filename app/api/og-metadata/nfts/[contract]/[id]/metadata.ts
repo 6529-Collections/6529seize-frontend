@@ -56,7 +56,7 @@ async function fetchNextgenMetadata(
     token === null ||
     token["pending"] === true ||
     !isTokenNumber(token["id"]) ||
-    (token["id"] !== id && token["normalised_id"] !== id) ||
+    token["id"] !== id ||
     !isTokenNumber(token["collection_id"])
   ) {
     return null;

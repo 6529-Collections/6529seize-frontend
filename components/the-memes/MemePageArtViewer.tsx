@@ -255,7 +255,7 @@ export function MemePageArtViewer({
   }
 
   function printMediaActions() {
-    if (!activeMediaUrl && !actions) {
+    if (!activeMediaUrl && !Boolean(actions)) {
       return null;
     }
 
@@ -338,7 +338,7 @@ export function MemePageArtViewer({
   return (
     <div className="tw-flex tw-h-full tw-w-full tw-flex-col tw-p-0">
       <div className="tw-flex tw-flex-1 tw-flex-col">
-        {!hasAnimation && !hasImage && actions && (
+        {!hasAnimation && !hasImage && Boolean(actions) && (
           <div className="tw-relative tw-min-h-9">{printMediaActions()}</div>
         )}
         {hasAnimation ? (

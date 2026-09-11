@@ -45,11 +45,11 @@ export default function ArtworkShareExport({
     filename
   );
   const [isSharing, setIsSharing] = useState(false);
-  const [failedFilename, setFailedFilename] = useState<string>();
-  const shareError = failedFilename === filename;
+  const [failedFile, setFailedFile] = useState<File>();
   const isNative = Capacitor.isNativePlatform();
   const [width, height] = DIMENSIONS[format];
   const file = state.status === "ready" ? state.file : null;
+  const shareError = file !== null && failedFile === file;
   const canShareFile =
     file !== null &&
     (isNative ||
@@ -59,7 +59,7 @@ export default function ArtworkShareExport({
   const shareImage = async () => {
     if (!file || isSharing) return;
     setIsSharing(true);
-    setFailedFilename(undefined);
+    setFailedFile(undefined);
     try {
       if (isNative) {
         await shareFetchedBlobInNativeApp(file, filename, {
@@ -70,7 +70,7 @@ export default function ArtworkShareExport({
         await navigator.share({ files: [file] });
       }
     } catch (error) {
-      if (!isShareCancelError(error)) setFailedFilename(filename);
+      if (!isShareCancelError(error)) setFailedFile(file);
     } finally {
       setIsSharing(false);
     }
