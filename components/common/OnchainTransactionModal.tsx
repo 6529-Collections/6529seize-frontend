@@ -1,6 +1,6 @@
 "use client";
 
-import { XMarkIcon } from "@heroicons/react/24/outline";
+import { WalletIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import Image from "next/image";
 import type { ReactNode } from "react";
@@ -29,6 +29,7 @@ interface OnchainTransactionModalProps {
   readonly transactionLink?: string | undefined;
   readonly chain?: Pick<Chain, "id"> | undefined;
   readonly successContent?: ReactNode | undefined;
+  readonly pendingContent?: ReactNode | undefined;
   readonly closeLabel?: string | undefined;
   readonly onClose: () => void;
 }
@@ -197,15 +198,54 @@ function ModalStatusContent({
   );
 }
 
-function hasCustomSuccessContent(
+function getCustomStatusContent(
   status: OnchainTransactionModalStatus,
-  content: ReactNode
-): boolean {
-  return (
-    status === "success" &&
-    content !== undefined &&
-    content !== null &&
-    typeof content !== "boolean"
+  successContent: ReactNode,
+  pendingContent: ReactNode
+): ReactNode {
+  if (status === "error") {
+    return null;
+  }
+  const content = status === "success" ? successContent : pendingContent;
+  return content === undefined ||
+    content === null ||
+    typeof content === "boolean"
+    ? null
+    : content;
+}
+
+function CustomStatusIcon({
+  status,
+}: Readonly<{ status: OnchainTransactionModalStatus }>) {
+  if (status === "confirm_wallet") {
+    return (
+      <WalletIcon
+        className="tw-size-6 tw-flex-none tw-text-iron-200"
+        aria-hidden="true"
+      />
+    );
+  }
+  if (status === "submitted") {
+    return (
+      <span
+        aria-hidden="true"
+        className="tw-size-6 tw-flex-none tw-rounded-full tw-border-2 tw-border-solid tw-border-iron-600 tw-border-t-primary-400 motion-safe:tw-animate-spin"
+      />
+    );
+  }
+  return <StatusEmoji status={status} />;
+}
+
+function getTitleClasses(
+  hasCustomContent: boolean,
+  status: OnchainTransactionModalStatus
+) {
+  if (!hasCustomContent) {
+    return "tw-text-xl tw-text-white";
+  }
+  return clsx(
+    "tw-flex tw-items-center tw-gap-3 tw-text-2xl",
+    status === "success" ? "tw-text-green" : "tw-text-white"
   );
 }
 
@@ -218,6 +258,7 @@ export default function OnchainTransactionModal({
   transactionLink,
   chain,
   successContent,
+  pendingContent,
   closeLabel,
   onClose,
 }: OnchainTransactionModalProps) {
@@ -226,7 +267,12 @@ export default function OnchainTransactionModal({
   const dialogRef = useRef<HTMLDialogElement>(null);
   const closable = status === "success" || status === "error";
   const hasSubtitle = subtitle !== undefined && subtitle !== null;
-  const hasSuccessContent = hasCustomSuccessContent(status, successContent);
+  const customContent = getCustomStatusContent(
+    status,
+    successContent,
+    pendingContent
+  );
+  const hasCustomContent = customContent !== null;
 
   useEffect(() => {
     if (typeof document === "undefined") {
@@ -251,6 +297,13 @@ export default function OnchainTransactionModal({
   useEffect(() => {
     dialogRef.current?.focus();
   }, []);
+
+  useEffect(() => {
+    // A stage change can remove the focused help control or transaction link.
+    if (document.activeElement === document.body) {
+      dialogRef.current?.focus();
+    }
+  }, [status]);
 
   useEffect(() => {
     if (typeof document === "undefined") {
@@ -330,7 +383,7 @@ export default function OnchainTransactionModal({
         <div
           className={clsx(
             "tw-flex tw-items-start tw-justify-between tw-gap-4",
-            !hasSuccessContent && "tw-border-b tw-border-iron-800 tw-pb-3"
+            !hasCustomContent && "tw-border-b tw-border-iron-800 tw-pb-3"
           )}
         >
           <div className="tw-min-w-0">
@@ -338,12 +391,10 @@ export default function OnchainTransactionModal({
               id={titleId}
               className={clsx(
                 "tw-m-0 tw-whitespace-pre-line tw-break-words tw-font-semibold",
-                hasSuccessContent
-                  ? "tw-flex tw-items-center tw-gap-3 tw-text-2xl tw-text-green"
-                  : "tw-text-xl tw-text-white"
+                getTitleClasses(hasCustomContent, status)
               )}
             >
-              {hasSuccessContent && <StatusEmoji status="success" />}
+              {hasCustomContent && <CustomStatusIcon status={status} />}
               {title}
             </h2>
             {hasSubtitle ? (
@@ -367,7 +418,7 @@ export default function OnchainTransactionModal({
           ) : null}
         </div>
 
-        {hasSuccessContent && <div className="tw-mt-6">{successContent}</div>}
+        {hasCustomContent && <div className="tw-mt-6">{customContent}</div>}
         {status === "error" ? (
           <div
             className="tw-mt-4 tw-flex tw-min-h-[120px] tw-items-center tw-justify-center tw-rounded-xl tw-bg-iron-800 tw-p-3"
@@ -383,13 +434,13 @@ export default function OnchainTransactionModal({
         ) : (
           <output
             className={clsx(
-              hasSuccessContent
+              hasCustomContent
                 ? "tw-sr-only"
                 : "tw-mt-4 tw-flex tw-min-h-[120px] tw-items-center tw-justify-center tw-rounded-xl tw-bg-iron-800 tw-p-3"
             )}
             aria-live="polite"
           >
-            {hasSuccessContent ? (
+            {hasCustomContent ? (
               <>
                 {title} {subtitle}
               </>
