@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import type { NFT } from "@/entities/INFT";
 import type { ApiMemesExtendedData } from "@/generated/models/ApiMemesExtendedData";
 import MarketDepthPanel from "@/components/nft-market-depth/MarketDepthPanel";
+import CollectDetailActions from "@/components/collect/CollectDetailActions";
 import { MEMES_CONTRACT } from "@/constants/constants";
 import { parseNftDescriptionToHtml } from "@/helpers/Helpers";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
@@ -72,6 +73,14 @@ export function MemePageLiveSubMenu(props: {
               contract={MEMES_CONTRACT}
               tokenId={props.nft.id}
               locale={locale}
+              actions={
+                <CollectDetailActions
+                  collection="memes"
+                  tokenId={String(props.nft.id)}
+                  title={props.nft.name}
+                  locale={locale}
+                />
+              }
             />
           </>
         )}

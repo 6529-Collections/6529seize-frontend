@@ -1,4 +1,22 @@
 export const COLLECT_MESSAGES = {
+  "collect.acquire": "Collect",
+  "collect.acquireFor": "Collect {title}",
+  "collect.menu.offer": "Make an offer",
+  "collect.menu.list": "List for sale",
+  "collect.menu.accept": "Review offers",
+  "collect.disabledAction": "{action}. {reason}",
+  "collect.moreActions": "More trading actions for {title}",
+  "collect.navigation.label": "Collecting tools",
+  "collect.navigation.completeSet": "Complete a set",
+  "collect.navigation.tdh": "TDH",
+  "collect.navigation.lowest": "Lowest listings",
+  "collect.browseArtwork": "Browse artwork",
+  "collect.listings.empty.title": "No listings found",
+  "collect.listings.empty.description":
+    "No observed listings are available for this collection. Browse the artwork or check again later.",
+  "collect.detail.loading": "Loading this artwork…",
+  "collect.detail.unavailable":
+    "This artwork could not be loaded for trading. Try again.",
   "collect.sets.profileScope":
     "Set coverage includes all confirmed wallets in each profile.",
   "collect.sets.custody": "{artwork}, held by {wallet}",
@@ -77,9 +95,9 @@ export const COLLECT_MESSAGES = {
     "The transaction was sent. Its receipt is still being checked; do not create another trade.",
   "collect.trade.orderLive": "Order is live",
   "collect.trade.cancelled": "Order cancelled",
-  "collect.title": "Collect",
+  "collect.title": "Collecting tools",
   "collect.description":
-    "Find the art you love. Complete the collection you are building.",
+    "Plan your next acquisition. Complete a set, compare listings or explore TDH across your profile.",
   "collect.navigation": "Collect navigation",
   "collect.explore": "Explore",
   "collect.goals": "Goals",
@@ -93,7 +111,7 @@ export const COLLECT_MESSAGES = {
   "collect.intent.lowest": "Find the lowest price",
   "collect.intent.specific": "Find something specific",
   "collect.intent.season": "Complete a season",
-  "collect.intent.full_set": "Complete a Memes set",
+  "collect.intent.full_set": "Complete a full set",
   "collect.intent.artist": "Collect an artist",
   "collect.intent.pebbles_set": "Complete a Pebbles set",
   "collect.intent.tdh": "Explore TDH for your budget",

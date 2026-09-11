@@ -5,8 +5,12 @@ import Button from "@/components/utils/button/Button";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import type { SupportedLocale } from "@/i18n/locales";
-import { useId, useState, type ReactNode } from "react";
+import Link from "next/link";
+import { useState, type ReactNode } from "react";
 import CollectArtworkCard from "./CollectArtworkCard";
+import CollectGoalNavigation, {
+  getCollectIntentOptions,
+} from "./CollectGoalNavigation";
 import CollectPlanPanel from "./CollectPlanPanel";
 import type {
   CollectCatalogView,
@@ -17,16 +21,13 @@ import type {
   CollectTradeAction,
 } from "./collect.types";
 
-const COLLECTIONS: readonly CollectCollection[] = [
-  "all",
-  "memes",
-  "gradients",
-  "pebbles",
-];
+const COLLECTIONS = [
+  { id: "memes", href: "/the-memes" },
+  { id: "gradients", href: "/6529-gradient" },
+  { id: "pebbles", href: "/nextgen/collection/pebbles" },
+] as const;
 export const COLLECT_INTENTS: readonly CollectIntent[] = [
-  "explore",
   "lowest",
-  "specific",
   "season",
   "full_set",
   "artist",
@@ -40,12 +41,9 @@ interface CollectPageViewProps {
   readonly intent: CollectIntent;
   readonly profile: CollectProfileView | null;
   readonly plan: CollectPlanView | null;
-  readonly search: string;
   readonly goalContent?: ReactNode;
   readonly onCollectionChange: (collection: CollectCollection) => void;
   readonly onIntentChange: (intent: CollectIntent) => void;
-  readonly onSearchChange: (search: string) => void;
-  readonly onSearch: () => void;
   readonly onConnect: () => void;
   readonly onRetry: () => void;
   readonly onLoadMore: () => void;
@@ -53,7 +51,7 @@ interface CollectPageViewProps {
   readonly onReviewPlan: (planId: string, revision: string) => void;
 }
 
-function Catalog({
+function Listings({
   catalog,
   locale,
   onRetry,
@@ -97,10 +95,10 @@ function Catalog({
     return (
       <div className="tw-rounded-xl tw-border tw-border-dashed tw-border-iron-700 tw-px-6 tw-py-16 tw-text-center">
         <h2 className="tw-text-lg tw-font-semibold tw-text-iron-100">
-          {t(locale, "collect.empty.title")}
+          {t(locale, "collect.listings.empty.title")}
         </h2>
         <p className="tw-mb-0 tw-text-sm tw-leading-6 tw-text-iron-400">
-          {t(locale, "collect.empty.description")}
+          {t(locale, "collect.listings.empty.description")}
         </p>
       </div>
     );
@@ -134,8 +132,8 @@ function Catalog({
 
 export default function CollectPageView(props: CollectPageViewProps) {
   const locale = useBrowserLocale();
-  const searchId = useId();
   const [planOpen, setPlanOpen] = useState(false);
+  const intentOptions = getCollectIntentOptions(props.intent);
   return (
     <div className="tailwind-scope tw-mx-auto tw-w-full tw-max-w-[1440px] tw-px-4 tw-pb-28 tw-pt-6 tw-text-iron-100 md:tw-px-6 lg:tw-px-8">
       <header className="tw-mb-7 tw-space-y-3">
@@ -145,6 +143,23 @@ export default function CollectPageView(props: CollectPageViewProps) {
         <p className="tw-m-0 tw-max-w-2xl tw-text-sm tw-leading-6 tw-text-iron-400">
           {t(locale, "collect.description")}
         </p>
+        <nav
+          aria-label={t(locale, "collect.browseArtwork")}
+          className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-1 tw-text-xs"
+        >
+          <span className="tw-text-iron-500">
+            {t(locale, "collect.browseArtwork")}
+          </span>
+          {COLLECTIONS.map(({ id, href }) => (
+            <Link
+              key={id}
+              href={href}
+              className="tw-py-2 tw-text-iron-300 tw-underline tw-decoration-iron-600 tw-underline-offset-4 hover:tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+            >
+              {t(locale, `collect.collection.${id}`)}
+            </Link>
+          ))}
+        </nav>
         {props.profile ? (
           <div>
             <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-primary-300">
@@ -167,75 +182,77 @@ export default function CollectPageView(props: CollectPageViewProps) {
           </div>
         )}
       </header>
-      <div className="tw-mb-6 tw-grid tw-gap-4 sm:tw-grid-cols-2">
-        <label className="tw-space-y-2 tw-text-xs tw-font-semibold tw-text-iron-300">
-          <span>{t(locale, "collect.chooseGoal")}</span>
-          <select
-            value={props.intent}
-            onChange={(event) => {
-              const intent = COLLECT_INTENTS.find(
-                (value) => value === event.target.value
-              );
-              if (intent) props.onIntentChange(intent);
-            }}
-            className="tw-block tw-min-h-11 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-text-sm tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
-          >
-            {COLLECT_INTENTS.map((intent) => (
-              <option key={intent} value={intent}>
-                {t(locale, `collect.intent.${intent}`)}
-              </option>
-            ))}
-          </select>
-        </label>
-        <form
-          onSubmit={(event) => {
-            event.preventDefault();
-            props.onSearch();
-          }}
-          className="tw-space-y-2"
+      <CollectGoalNavigation
+        intent={props.intent}
+        collection={props.collection}
+        locale={locale}
+        onIntentChange={props.onIntentChange}
+      />
+      {(intentOptions.length > 0 || props.intent === "tdh") && (
+        <div className="tw-mb-6 tw-max-w-sm">
+          {intentOptions.length > 0 && (
+            <label className="tw-space-y-2 tw-text-xs tw-font-semibold tw-text-iron-300">
+              <span>{t(locale, "collect.chooseGoal")}</span>
+              <select
+                value={props.intent}
+                onChange={(event) => {
+                  const intent = intentOptions.find(
+                    (value) => value === event.target.value
+                  );
+                  if (intent) props.onIntentChange(intent);
+                }}
+                className="tw-block tw-min-h-11 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-text-sm tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+              >
+                {intentOptions.map((intent) => (
+                  <option key={intent} value={intent}>
+                    {t(locale, `collect.intent.${intent}`)}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+          {props.intent === "tdh" && (
+            <label className="tw-space-y-2 tw-text-xs tw-font-semibold tw-text-iron-300">
+              <span>{t(locale, "collect.collections")}</span>
+              <select
+                value={props.collection}
+                onChange={(event) => {
+                  const collection = COLLECTIONS.find(
+                    ({ id }) => id === event.target.value
+                  );
+                  if (collection) props.onCollectionChange(collection.id);
+                }}
+                className="tw-block tw-min-h-11 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-text-sm tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+              >
+                {COLLECTIONS.map(({ id }) => (
+                  <option key={id} value={id}>
+                    {t(locale, `collect.collection.${id}`)}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+        </div>
+      )}
+      {props.intent === "lowest" && (
+        <div
+          role="group"
+          aria-label={t(locale, "collect.collections")}
+          className="tw-mb-6 tw-flex tw-flex-wrap tw-gap-2"
         >
-          <label
-            htmlFor={searchId}
-            className="tw-text-xs tw-font-semibold tw-text-iron-300"
-          >
-            {t(locale, "collect.search")}
-          </label>
-          <div className="tw-flex tw-gap-2">
-            <input
-              id={searchId}
-              type="search"
-              maxLength={150}
-              value={props.search}
-              onChange={(event) => props.onSearchChange(event.target.value)}
-              placeholder={t(locale, "collect.searchPlaceholder")}
-              className="tw-min-h-11 tw-min-w-0 tw-flex-1 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-text-sm tw-text-iron-100 placeholder:tw-text-iron-500 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
-            />
-            <Button type="submit" variant="secondary" size="lg">
-              {t(locale, "collect.searchSubmit")}
+          {COLLECTIONS.map(({ id }) => (
+            <Button
+              key={id}
+              variant={props.collection === id ? "primary" : "tertiary"}
+              size="sm"
+              aria-pressed={props.collection === id}
+              onClick={() => props.onCollectionChange(id)}
+              className="tw-min-h-11"
+            >
+              {t(locale, `collect.collection.${id}`)}
             </Button>
-          </div>
-        </form>
-      </div>
-      <div
-        role="group"
-        aria-label={t(locale, "collect.collections")}
-        className="tw-mb-6 tw-flex tw-flex-wrap tw-gap-2"
-      >
-        {COLLECTIONS.map((collection) => (
-          <Button
-            key={collection}
-            variant={props.collection === collection ? "primary" : "tertiary"}
-            size="sm"
-            aria-pressed={props.collection === collection}
-            onClick={() => props.onCollectionChange(collection)}
-            className="tw-min-h-11"
-          >
-            {t(locale, `collect.collection.${collection}`)}
-          </Button>
-        ))}
-      </div>
-      {props.goalContent !== undefined && props.goalContent !== null && (
-        <div className="tw-mb-6">{props.goalContent}</div>
+          ))}
+        </div>
       )}
       <div
         className={
@@ -244,18 +261,22 @@ export default function CollectPageView(props: CollectPageViewProps) {
             : "tw-max-w-[1080px]"
         }
       >
-        <section
-          aria-label={t(locale, "collect.explore")}
-          className="tw-min-w-0"
-        >
-          <Catalog
-            catalog={props.catalog}
-            locale={locale}
-            onRetry={props.onRetry}
-            onLoadMore={props.onLoadMore}
-            onTrade={props.onTrade}
-          />
-        </section>
+        <div className="tw-min-w-0">
+          {props.goalContent !== undefined && props.goalContent !== null && (
+            <div className="tw-mb-6">{props.goalContent}</div>
+          )}
+          {props.intent === "lowest" && (
+            <section aria-label={t(locale, "collect.navigation.lowest")}>
+              <Listings
+                catalog={props.catalog}
+                locale={locale}
+                onRetry={props.onRetry}
+                onLoadMore={props.onLoadMore}
+                onTrade={props.onTrade}
+              />
+            </section>
+          )}
+        </div>
         {props.plan && (
           <aside className="tw-sticky tw-top-5 tw-hidden xl:tw-block">
             <CollectPlanPanel

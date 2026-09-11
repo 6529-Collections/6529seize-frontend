@@ -1,6 +1,7 @@
 import CollectArtworkCard from "@/components/collect/CollectArtworkCard";
 import type { CollectArtworkView } from "@/components/collect/collect.types";
 import { fireEvent, render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 
 const artwork: CollectArtworkView = {
   id: "1:memes:7",
@@ -14,18 +15,25 @@ const artwork: CollectArtworkView = {
   actions: [{ action: "offer" }],
 };
 
-it("keeps artwork navigation separate from transaction actions", () => {
+it("keeps artwork navigation separate from compact transaction actions", async () => {
+  const user = userEvent.setup();
   const onTrade = jest.fn();
   render(
     <CollectArtworkCard artwork={artwork} locale="en-US" onTrade={onTrade} />
   );
   const link = screen.getByRole("link", { name: "View Test artwork" });
   expect(within(link).queryByRole("button")).not.toBeInTheDocument();
-  fireEvent.click(
-    screen.getByRole("button", { name: "Make offer: Test artwork" })
+  expect(screen.queryByText("Make an offer")).not.toBeInTheDocument();
+  await user.click(
+    screen.getByRole("button", {
+      name: "More trading actions for Test artwork",
+    })
+  );
+  await user.click(
+    await screen.findByRole("menuitem", { name: "Make an offer: Test artwork" })
   );
   expect(onTrade).toHaveBeenCalledWith("1:memes:7", "offer");
-  expect(screen.getByText("Check current orders")).toBeVisible();
+  expect(screen.queryByText("Check current orders")).not.toBeInTheDocument();
 });
 
 it("never enables a purchase with an unavailable action", () => {
@@ -42,7 +50,69 @@ it("never enables a purchase with an unavailable action", () => {
     />
   );
   expect(
-    screen.getByRole("button", { name: "Buy: Test artwork" })
+    screen.getByRole("button", { name: "Collect Test artwork" })
   ).toBeDisabled();
   expect(screen.getByText("Listing is no longer available")).toBeVisible();
+});
+
+it("retains the quoted price and keeps Buy directly reachable", () => {
+  const onTrade = jest.fn();
+  render(
+    <CollectArtworkCard
+      artwork={{
+        ...artwork,
+        priceLabel: "0.01 ETH",
+        actions: [{ action: "buy" }, { action: "list" }],
+      }}
+      locale="en-US"
+      onTrade={onTrade}
+    />
+  );
+  expect(screen.getByText("0.01 ETH")).toBeVisible();
+  fireEvent.click(screen.getByRole("button", { name: "Collect Test artwork" }));
+  expect(onTrade).toHaveBeenCalledWith(artwork.id, "buy");
+  expect(screen.queryByRole("menuitem")).not.toBeInTheDocument();
+});
+
+it("opens the action menu by keyboard and restores focus on Escape", async () => {
+  const user = userEvent.setup();
+  render(
+    <CollectArtworkCard artwork={artwork} locale="en-US" onTrade={jest.fn()} />
+  );
+  const trigger = screen.getByRole("button", {
+    name: "More trading actions for Test artwork",
+  });
+  trigger.focus();
+  await user.keyboard("{Enter}");
+  expect(
+    await screen.findByRole("menuitem", { name: "Make an offer: Test artwork" })
+  ).toBeVisible();
+  await user.keyboard("{Escape}");
+  expect(trigger).toHaveFocus();
+});
+
+it("keeps disabled secondary actions unavailable and explains why", async () => {
+  const user = userEvent.setup();
+  const onTrade = jest.fn();
+  render(
+    <CollectArtworkCard
+      artwork={{
+        ...artwork,
+        actions: [{ action: "list", disabledReason: "Trading unavailable" }],
+      }}
+      locale="en-US"
+      onTrade={onTrade}
+    />
+  );
+  await user.click(
+    screen.getByRole("button", {
+      name: "More trading actions for Test artwork",
+    })
+  );
+  const action = await screen.findByRole("menuitem", {
+    name: "List for sale: Test artwork. Trading unavailable",
+  });
+  expect(action).toBeDisabled();
+  await user.click(action);
+  expect(onTrade).not.toHaveBeenCalled();
 });

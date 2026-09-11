@@ -59,23 +59,20 @@ function CollectCatalogController({
   const collection: CollectCollection =
     Object.values(ApiCollectFamily).find(
       (item) => item.toString() === params.get("collection")
-    ) ?? "all";
+    ) ?? "memes";
   const intent: CollectIntent =
-    COLLECT_INTENTS.find((item) => item === params.get("intent")) ?? "explore";
-  const initialSearch = (params.get("token") ?? params.get("q") ?? "").slice(
-    0,
-    100
-  );
-  const [search, setSearch] = useState(initialSearch);
-  const [goalDraft, setGoalDraft] = useState<CollectGoalDraft>({
+    COLLECT_INTENTS.find((item) => item === params.get("intent")) ?? "full_set";
+  const fullSetDefinition = collection === "gradients" ? "gradients" : "memes";
+  const [goalDraft, setGoalDraft] = useState<CollectGoalDraft>(() => ({
     intent,
     definitionId:
-      params.get("definition") ?? (intent === "full_set" ? "memes" : ""),
+      params.get("definition") ??
+      (intent === "full_set" ? fullSetDefinition : ""),
     targetCount: "1",
     budgetEth: "",
     horizonDays: "30",
     includeCollaborations: true,
-  });
+  }));
   const [costPlan, setCostPlan] = useState<ApiCollectPlan | null>(null);
   const [basketOpen, setBasketOpen] = useState(false);
   const [trade, setTrade] = useState<{
@@ -101,13 +98,15 @@ function CollectCatalogController({
     queryKey: [QueryKey.COLLECT_CATALOG],
     queryFn: ({ signal }) => fetchCollectCatalog(signal),
     staleTime: 60_000,
+    enabled: intent !== "tdh",
   });
   const capabilities = useQuery({
     queryKey: [QueryKey.COLLECT_CAPABILITIES],
     queryFn: ({ signal }) => fetchCollectCapabilities(signal),
     staleTime: 15_000,
+    enabled: intent === "lowest",
   });
-  const discovery = useCollectCatalog(collection, initialSearch, intent);
+  const discovery = useCollectCatalog(collection, intent);
   const plan =
     costPlan && profile
       ? collectCostPlanView(
@@ -164,12 +163,7 @@ function CollectCatalogController({
   else if (intent === "lowest")
     goalContent = (
       <p className="tw-text-sm tw-leading-6 tw-text-iron-300">
-        {t(
-          locale,
-          collection === "all"
-            ? "collect.lowest.selectCollection"
-            : "collect.lowest.scope"
-        )}
+        {t(locale, "collect.lowest.scope")}
       </p>
     );
   return (
@@ -180,28 +174,38 @@ function CollectCatalogController({
         intent={intent}
         profile={profile}
         plan={plan}
-        search={search}
         goalContent={goalContent}
         onCollectionChange={(value) =>
-          updateQuery({ collection: value, token: "" })
+          updateQuery({ collection: value, token: "", q: "" })
         }
-        onIntentChange={(value) =>
-          updateQuery({
+        onIntentChange={(value) => {
+          const patch: Record<string, string> = {
             intent: value,
             definition: "",
-            ...((value === "lowest" || value === "tdh") && collection === "all"
-              ? { collection: "memes" }
-              : {}),
-          })
-        }
-        onSearchChange={setSearch}
-        onSearch={() =>
-          updateQuery({
-            q: search.trim().slice(0, 100),
-            token: "",
-            ...(intent === "lowest" ? { intent: "specific" } : {}),
-          })
-        }
+          };
+          if (["season", "full_set", "artist", "pebbles_set"].includes(value)) {
+            patch["token"] = "";
+            patch["q"] = "";
+          }
+          switch (value) {
+            case "season":
+            case "artist":
+              patch["collection"] = "memes";
+              break;
+            case "full_set":
+              patch["collection"] = fullSetDefinition;
+              break;
+            case "pebbles_set":
+              patch["collection"] = "pebbles";
+              break;
+            case "lowest":
+            case "tdh":
+            case "explore":
+            case "specific":
+              break;
+          }
+          updateQuery(patch);
+        }}
         onConnect={connect}
         onRetry={discovery.retry}
         onLoadMore={discovery.loadMore}

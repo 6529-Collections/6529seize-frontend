@@ -46,6 +46,27 @@ import NextGenTokenPage from "@/components/nextGen/collections/nextgenToken/Next
 import { NextgenCollectionView } from "@/types/enums";
 import { render, screen } from "@testing-library/react";
 
+jest.mock("@/components/nft-market-depth/MarketDepthPanel", () => ({
+  __esModule: true,
+  default: ({ actions }: { actions?: React.ReactNode }) => (
+    <div data-testid="market-depth">{actions}</div>
+  ),
+}));
+jest.mock("@/components/collect/CollectDetailActions", () => ({
+  __esModule: true,
+  default: ({
+    collection,
+    tokenId,
+  }: {
+    collection: string;
+    tokenId: string;
+  }) => (
+    <button data-family={collection} data-token={tokenId}>
+      Collect artwork
+    </button>
+  ),
+}));
+
 jest.mock(
   "@/components/nextGen/collections/nextgenToken/NextGenTokenProvenance",
   () => () => <div data-testid="provenance" />
@@ -139,6 +160,23 @@ describe("NextGenTokenPage", () => {
   });
 
   describe("rendering", () => {
+    it("places Pebbles trading in the existing market section", () => {
+      renderComponent();
+      const collecting = screen.getByRole("button", {
+        name: "Collect artwork",
+      });
+      expect(collecting).toHaveAttribute("data-family", "pebbles");
+      expect(collecting).toHaveAttribute("data-token", "1");
+      expect(screen.getByTestId("market-depth")).toContainElement(collecting);
+    });
+
+    it("does not map another NextGen project to Pebbles trading", () => {
+      renderComponent({ collection: { ...baseProps.collection, id: 2 } });
+      expect(
+        screen.queryByRole("button", { name: "Collect artwork" })
+      ).not.toBeInTheDocument();
+    });
+
     it("renders token name", () => {
       renderComponent();
       expect(screen.getByText("Token")).toBeInTheDocument();

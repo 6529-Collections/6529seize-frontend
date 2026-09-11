@@ -23,6 +23,8 @@ import { Tooltip } from "react-tooltip";
 import { printViewButton } from "../collectionParts/NextGenCollection";
 import NextGenTokenAbout from "./NextGenTokenAbout";
 import MarketDepthPanel from "@/components/nft-market-depth/MarketDepthPanel";
+import CollectDetailActions from "@/components/collect/CollectDetailActions";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import NextGenTokenArt from "./NextGenTokenArt";
 import NextGenTokenCollectionLinks from "./NextGenTokenCollectionLinks";
 import NextgenTokenRarity, {
@@ -42,6 +44,7 @@ interface Props {
 }
 
 export default function NextGenTokenPage(props: Readonly<Props>) {
+  const locale = useBrowserLocale();
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -141,6 +144,17 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
               <MarketDepthPanel
                 contract={NEXTGEN_CONTRACT}
                 tokenId={props.token.id}
+                locale={locale}
+                actions={
+                  props.collection.id === 1 ? (
+                    <CollectDetailActions
+                      collection="pebbles"
+                      tokenId={String(props.token.id)}
+                      title={props.token.name}
+                      locale={locale}
+                    />
+                  ) : undefined
+                }
               />
             </section>
           )}

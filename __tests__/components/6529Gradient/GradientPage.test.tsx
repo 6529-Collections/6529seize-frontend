@@ -56,7 +56,23 @@ jest.mock("@/components/nft-market-activity/NftMarketActivity", () => ({
 }));
 jest.mock("@/components/nft-market-depth/MarketDepthPanel", () => ({
   __esModule: true,
-  default: () => <div data-testid="market-depth" />,
+  default: ({ actions }: { actions?: React.ReactNode }) => (
+    <div data-testid="market-depth">{actions}</div>
+  ),
+}));
+jest.mock("@/components/collect/CollectDetailActions", () => ({
+  __esModule: true,
+  default: ({
+    collection,
+    tokenId,
+  }: {
+    collection: string;
+    tokenId: string;
+  }) => (
+    <button data-family={collection} data-token={tokenId}>
+      Collect artwork
+    </button>
+  ),
 }));
 jest.mock("@/components/nft-transfer/TransferSingle", () => ({
   __esModule: true,
@@ -155,6 +171,10 @@ describe("GradientPage", () => {
       expect(screen.getByTestId("owner-badge")).toBeInTheDocument()
     );
     expect(screen.getByTestId("transfer-action")).toBeInTheDocument();
+    const collecting = screen.getByRole("button", { name: "Collect artwork" });
+    expect(collecting).toHaveAttribute("data-family", "gradients");
+    expect(collecting).toHaveAttribute("data-token", "1");
+    expect(screen.getByTestId("market-depth")).toContainElement(collecting);
   });
 
   it("returns to the originating profile collected card", async () => {
