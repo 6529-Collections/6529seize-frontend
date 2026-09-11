@@ -11,7 +11,11 @@ import { useSeizeSettingsOptional } from "@/contexts/SeizeSettingsContext";
 import { fetchWavesV2Page } from "@/services/api/waves-v2-api";
 import { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
 import { ApiWavesPinFilter } from "@/generated/models/ApiWavesPinFilter";
-import { getWalletAddress, getWalletRole } from "@/services/auth/auth.utils";
+import {
+  getAuthJwt,
+  getWalletAddress,
+  getWalletRole,
+} from "@/services/auth/auth.utils";
 import { pinnedWavesApi } from "@/services/api/pinned-waves-api";
 
 jest.mock("@/services/api/pinned-waves-api", () => ({
@@ -20,6 +24,7 @@ jest.mock("@/services/api/pinned-waves-api", () => ({
 
 jest.mock("@/services/auth/auth.utils", () => ({
   ...jest.requireActual("@/services/auth/auth.utils"),
+  getAuthJwt: jest.fn(),
   getWalletAddress: jest.fn(),
   getWalletRole: jest.fn(),
 }));
@@ -69,6 +74,8 @@ const queryClientMock = {
 };
 
 const requestAuth = jest.fn();
+const createAuthJwt = (role: string | null) =>
+  `e30.${btoa(JSON.stringify({ role, sub: "0xabc", exp: Date.now() / 1000 + 3600 }))}.signature`;
 
 const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <AuthContext.Provider
@@ -129,6 +136,7 @@ beforeEach(() => {
   unpinMutateAsync = jest.fn().mockResolvedValue(undefined);
   requestAuth.mockReset().mockResolvedValue({ success: true });
   jest.mocked(getWalletAddress).mockReturnValue("0xabc");
+  jest.mocked(getAuthJwt).mockReturnValue(createAuthJwt(null));
   jest.mocked(getWalletRole).mockReturnValue(null);
 
   let mutationCallCount = 0;
@@ -299,7 +307,7 @@ test.each(["pinWave", "unpinWave"] as const)(
   "%s cancels when a proxy becomes active during authentication",
   async (action) => {
     requestAuth.mockImplementation(async () => {
-      jest.mocked(getWalletRole).mockReturnValue("proxy-1");
+      jest.mocked(getAuthJwt).mockReturnValue(createAuthJwt("proxy-1"));
       return { success: true };
     });
     const { result } = renderHook(() => usePinnedWavesServer(), { wrapper });
@@ -310,6 +318,50 @@ test.each(["pinWave", "unpinWave"] as const)(
     expect(unpinMutateAsync).not.toHaveBeenCalled();
     expect(queryClientMock.setQueryData).not.toHaveBeenCalled();
     expect(result.current.isOperationInProgress("wave")).toBe(false);
+  }
+);
+
+test.each(["pinWave", "unpinWave"] as const)(
+  "%s accepts a primary JWT when saved proxy metadata is stale",
+  async (action) => {
+    jest.mocked(getWalletRole).mockReturnValue("stale-proxy");
+    const { result } = renderHook(() => usePinnedWavesServer(), { wrapper });
+
+    await result.current[action]("wave");
+
+    expect(
+      action === "pinWave" ? pinMutateAsync : unpinMutateAsync
+    ).toHaveBeenCalledWith("wave");
+    const index = action === "pinWave" ? 0 : 1;
+    await useMutationMock.mock.calls[index][0].mutationFn("wave");
+    expect(
+      action === "pinWave" ? pinnedWavesApi.pinWave : pinnedWavesApi.unpinWave
+    ).toHaveBeenCalledWith("wave");
+  }
+);
+
+test.each([null, "invalid-jwt", createAuthJwt("proxy-1")])(
+  "rejects an absent, malformed, or proxy JWT before changing pin state (%s)",
+  async (jwt) => {
+    const { result } = renderHook(() => usePinnedWavesServer(), { wrapper });
+    jest.mocked(getAuthJwt).mockReturnValue(jwt);
+
+    for (const action of ["pinWave", "unpinWave"] as const) {
+      await expect(result.current[action]("wave")).rejects.toThrow(
+        "The active profile changed"
+      );
+      expect(result.current.isOperationInProgress("wave")).toBe(false);
+    }
+    expect(pinMutateAsync).not.toHaveBeenCalled();
+    expect(unpinMutateAsync).not.toHaveBeenCalled();
+    expect(queryClientMock.setQueryData).not.toHaveBeenCalled();
+    for (const [options] of useMutationMock.mock.calls) {
+      expect(() => options.mutationFn("wave")).toThrow(
+        "The active profile changed"
+      );
+    }
+    expect(pinnedWavesApi.pinWave).not.toHaveBeenCalled();
+    expect(pinnedWavesApi.unpinWave).not.toHaveBeenCalled();
   }
 );
 
