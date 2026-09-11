@@ -21,6 +21,10 @@ import {
   PUBLICATION_DOCUMENTATION_ASSET_ROLES,
 } from "@/lib/artwork-documentation/asset-roles";
 import { isPublicationOnly } from "@/lib/artwork-documentation/intake";
+import {
+  canEditDocumentationAsset,
+  canWriteDocumentationAssetRole,
+} from "@/lib/artwork-documentation/capabilities";
 import DocumentationValueEditor from "./DocumentationValueEditor";
 import {
   DocumentationButton,
@@ -65,6 +69,7 @@ function canEditAssetDetails(
   context: ApiArtworkDocumentationContext,
   assetId: string
 ): boolean {
+  if (!canEditDocumentationAsset(context, assetId)) return false;
   if (!isPublicationOnly(context.profile)) return true;
   const allowed = (asset: {
     readonly role: string;
@@ -103,13 +108,16 @@ export default function DocumentationAssetDetails({
   const roles = publicationOnly
     ? PUBLICATION_DOCUMENTATION_ASSET_ROLES
     : DOCUMENTATION_ASSET_ROLES;
-  const rolePermitted = canPublishDocumentationAsset(context, role);
+  const rolePermitted =
+    canPublishDocumentationAsset(context, role) &&
+    canWriteDocumentationAssetRole(context, role);
   const links = context.asset_links.filter((link) => link.asset_id === assetId);
   const addRole = () =>
     controller.mutate((current, signal) => {
       if (
         !canEditAssetDetails(current, assetId) ||
-        !canPublishDocumentationAsset(current, role)
+        !canPublishDocumentationAsset(current, role) ||
+        !canWriteDocumentationAssetRole(current, role)
       )
         throw new Error("PUBLICATION_ASSET_ROLE_REQUIRED");
       const asset = current.assets.find((item) => item.id === assetId);
@@ -164,7 +172,11 @@ export default function DocumentationAssetDetails({
             onChange={(event) => setRole(event.target.value)}
           >
             {roles.map((option) => (
-              <option key={option} value={option}>
+              <option
+                key={option}
+                value={option}
+                disabled={!canWriteDocumentationAssetRole(context, option)}
+              >
                 {roleLabel(option)}
               </option>
             ))}
