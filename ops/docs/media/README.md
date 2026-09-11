@@ -10,6 +10,8 @@
 
 ## Features
 
+- [Card Market Depth](feature-card-market-depth.md): quoted asks, bids, quantities
+  and snapshot freshness on supported card pages.
 - [Memes](memes/README.md): `/the-memes`, `/the-memes/{id}`,
   `/the-memes/{id}/distribution`, `/the-memes/mint`, and `/meme-calendar`.
 - [Collections](collections/README.md): `/meme-lab`, `/meme-lab/{id}`,

@@ -15607,6 +15607,153 @@ paths:
         "409":
           description: Current primary no longer matches the expected version
 
+  /market-depth/{contract}/{token_id}:
+    get:
+      tags:
+        - NFT Markets
+      summary: Read timestamped OpenSea order depth for a token
+      description: >-
+        Full quoted price levels and paginated individual orders from completed
+        collection snapshots. Currencies remain separate. Quantities are
+        advertised, may share inventory or funding, and are not a guarantee of
+        execution. Collection bids are scoped to their OpenSea collection;
+        uncertain criteria are exposed separately from price levels. An
+        interrupted refresh never replaces the completed book.
+      operationId: getNftMarketDepth
+      security: []
+      x-6529-router:
+        enabled: true
+        auth: none
+        handler:
+          import: "@/api/market-depth/market-depth.handlers"
+          name: handleGetNftMarketDepth
+      parameters:
+        - name: contract
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: ^0x[0-9a-fA-F]{40}$
+        - name: token_id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: ^[0-9]{1,78}$
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+        - name: cursor
+          in: query
+          required: false
+          schema:
+            type: string
+            maxLength: 2048
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMarketDepth"
+        "400":
+          description: Invalid query or expired snapshot cursor
+        "404":
+          description: Unsupported collection or unknown token
+  /nft-activity:
+    get:
+      tags:
+        - NFT Markets
+      summary: Read on-chain transactions and recorded marketplace actions
+      description: >-
+        Chronological merged feed. Canonical on-chain transfers provide sales,
+        mints and burns; matching marketplace sales are deduplicated.
+        Marketplace activity begins when capture starts and combines provider
+        event history, best-effort live streaming and explicitly labelled
+        observed status changes. It is not a guarantee of every historical
+        off-chain action.
+      operationId: getNftMarketActivity
+      security: []
+      x-6529-router:
+        enabled: true
+        auth: none
+        handler:
+          import: "@/api/market-depth/market-depth.handlers"
+          name: handleGetNftMarketActivity
+      parameters:
+        - name: contract
+          in: query
+          required: false
+          description: Comma-separated supported contract addresses.
+          schema:
+            type: string
+            maxLength: 1500
+        - name: token_id
+          in: query
+          required: false
+          description: >-
+            Filter by exact token ID. Requires one contract; includes collection
+            actions scoped to that token's collection.
+          schema:
+            type: string
+            pattern: ^[0-9]{1,78}$
+        - name: wallet
+          in: query
+          required: false
+          description: Comma-separated wallet addresses or ENS names.
+          schema:
+            type: string
+            maxLength: 2000
+        - name: filter
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - all
+              - sales
+              - purchases
+              - mints
+              - airdrops
+              - transfers
+              - burns
+              - listings
+              - offers
+              - cancellations
+              - expirations
+              - invalidations
+              - revalidations
+            default: all
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+        - name: cursor
+          in: query
+          required: false
+          schema:
+            type: string
+            maxLength: 2048
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiNftActivityPage"
+        "400":
+          description: Invalid query or expired snapshot cursor
+        "404":
+          description: Unsupported collection or unknown token
   /profile-cms/packages/{id}/agent-grants:
     post:
       tags:
@@ -31483,5 +31630,362 @@ components:
           format: int64
         subscribed:
           type: boolean
+    ApiMarketCurrency:
+      type: object
+      required:
+        - address
+        - symbol
+        - decimals
+      properties:
+        address:
+          type: string
+          description: Currency contract; zero address denotes native ETH.
+        symbol:
+          type: string
+        decimals:
+          type: integer
+          minimum: 0
+          maximum: 255
+    ApiMarketCurrencyBook:
+      type: object
+      required:
+        - currency
+        - asks
+        - bids
+        - best_ask
+        - best_bid
+        - ask_order_count
+        - bid_order_count
+      properties:
+        currency:
+          $ref: "#/components/schemas/ApiMarketCurrency"
+        asks:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiMarketDepthLevel"
+        bids:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiMarketDepthLevel"
+        best_ask:
+          type: string
+          nullable: true
+        best_bid:
+          type: string
+          nullable: true
+        ask_order_count:
+          type: integer
+          minimum: 0
+        bid_order_count:
+          type: integer
+          minimum: 0
+    ApiMarketDepth:
+      type: object
+      required:
+        - contract
+        - token_id
+        - status
+        - as_of
+        - snapshots
+        - books
+        - orders
+        - order_count
+        - next
+        - criteria_order_count
+        - notes
+      properties:
+        contract:
+          type: string
+        token_id:
+          type: string
+        status:
+          type: string
+          enum:
+            - unavailable
+            - fresh
+            - stale
+        as_of:
+          type: string
+          format: date-time
+          nullable: true
+        snapshots:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiMarketSnapshot"
+        books:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiMarketCurrencyBook"
+        orders:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiMarketOrder"
+        order_count:
+          type: integer
+          minimum: 0
+        next:
+          type: string
+          description: Opaque cursor to further orders at the same snapshot.
+          nullable: true
+        criteria_order_count:
+          type: integer
+          minimum: 0
+        notes:
+          type: array
+          items:
+            type: string
+    ApiMarketDepthLevel:
+      type: object
+      required:
+        - unit_price
+        - quantity
+        - cumulative_quantity
+        - order_count
+      properties:
+        unit_price:
+          type: string
+        quantity:
+          type: string
+          description: >-
+            Quoted order quantity, which may overlap with other orders. Not
+            verified executable liquidity.
+        cumulative_quantity:
+          type: string
+        order_count:
+          type: integer
+          minimum: 0
+    ApiMarketOrder:
+      type: object
+      required:
+        - order_key
+        - order_id
+        - source
+        - protocol
+        - collection_slug
+        - side
+        - scope
+        - maker
+        - token_id
+        - original_quantity
+        - remaining_quantity
+        - currency
+        - total_price_raw
+        - unit_price
+        - starts_at
+        - expires_at
+        - observed_at
+        - applicability
+        - liquidity_group
+        - caveats
+      properties:
+        order_key:
+          type: string
+        order_id:
+          type: string
+        source:
+          type: string
+        protocol:
+          type: string
+        collection_slug:
+          type: string
+        side:
+          type: string
+          enum:
+            - ask
+            - bid
+        scope:
+          type: string
+          enum:
+            - token
+            - collection
+            - trait
+            - unknown
+        maker:
+          type: string
+        token_id:
+          type: string
+          description: Exact token ID; null for criteria orders.
+          nullable: true
+        original_quantity:
+          type: string
+          description: Original NFT quantity as an exact integer.
+          nullable: true
+        remaining_quantity:
+          type: string
+          description: Provider-reported remaining quantity as an exact integer.
+          nullable: true
+        currency:
+          $ref: "#/components/schemas/ApiMarketCurrency"
+        total_price_raw:
+          type: string
+          description: Advertised amount in base units.
+          nullable: true
+        unit_price:
+          type: string
+          description: Decimal amount per copy for supported simple orders.
+          nullable: true
+        starts_at:
+          type: string
+          format: date-time
+          nullable: true
+        expires_at:
+          type: string
+          format: date-time
+          nullable: true
+        observed_at:
+          type: string
+          format: date-time
+        applicability:
+          type: string
+          enum:
+            - token
+            - collection
+            - criteria_unverified
+        liquidity_group:
+          type: string
+          description: >-
+            Orders with a common maker and asset/currency can compete for the
+            same inventory or funding.
+        caveats:
+          type: array
+          items:
+            type: string
+    ApiMarketSnapshot:
+      type: object
+      required:
+        - id
+        - source
+        - collection_slug
+        - started_at
+        - completed_at
+        - order_count
+        - unsupported_count
+        - schema_version
+        - normalizer_version
+      properties:
+        id:
+          type: string
+        source:
+          type: string
+        collection_slug:
+          type: string
+        started_at:
+          type: string
+          format: date-time
+        completed_at:
+          type: string
+          format: date-time
+        order_count:
+          type: integer
+          minimum: 0
+        unsupported_count:
+          type: integer
+          minimum: 0
+        schema_version:
+          type: integer
+          minimum: 0
+        normalizer_version:
+          type: string
+    ApiNftActivityEvent:
+      type: object
+      required:
+        - event_id
+        - kind
+        - action
+        - occurred_at
+        - observed_at
+        - source
+        - evidence
+        - contract
+        - token_id
+        - collection_slug
+        - quantity
+        - maker
+        - taker
+        - price
+        - order_id
+        - transaction_hash
+      properties:
+        event_id:
+          type: string
+        kind:
+          type: string
+          enum:
+            - transaction
+            - market
+        action:
+          type: string
+          description: >-
+            Explicit action, including sale, mint, transfer, burn, listing,
+            offer, cancellation, expiration, invalidation or revalidation.
+            Observed status changes are marked separately.
+        occurred_at:
+          type: string
+          format: date-time
+        observed_at:
+          type: string
+          format: date-time
+        source:
+          type: string
+        evidence:
+          type: string
+          description: >-
+            chain, provider_event, stream or observed_status; observed time does
+            not imply exact action time.
+        contract:
+          type: string
+        token_id:
+          type: string
+          nullable: true
+        collection_slug:
+          type: string
+          nullable: true
+        quantity:
+          type: string
+          nullable: true
+        maker:
+          type: string
+          nullable: true
+        taker:
+          type: string
+          nullable: true
+        price:
+          type: string
+          description: Decimal total amount in the recorded currency.
+          nullable: true
+        currency:
+          $ref: "#/components/schemas/ApiMarketCurrency"
+        order_id:
+          type: string
+          nullable: true
+        transaction_hash:
+          type: string
+          nullable: true
+        transaction_details:
+          $ref: "#/components/schemas/ApiTransaction"
+    ApiNftActivityPage:
+      type: object
+      required:
+        - data
+        - next
+        - market_history_started_at
+        - notes
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiNftActivityEvent"
+        next:
+          type: string
+          description: Opaque cursor. Null when this query has no further events.
+          nullable: true
+        market_history_started_at:
+          type: string
+          format: date-time
+          nullable: true
+        notes:
+          type: array
+          items:
+            type: string
 security:
   - bearerAuth: []

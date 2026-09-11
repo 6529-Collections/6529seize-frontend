@@ -357,6 +357,12 @@ export * from '../models/ApiLoginResponse';
 export * from '../models/ApiMarkDropUnreadResponse';
 export * from '../models/ApiMarkWaveReadRequest';
 export * from '../models/ApiMarkWaveReadResponse';
+export * from '../models/ApiMarketCurrency';
+export * from '../models/ApiMarketCurrencyBook';
+export * from '../models/ApiMarketDepth';
+export * from '../models/ApiMarketDepthLevel';
+export * from '../models/ApiMarketOrder';
+export * from '../models/ApiMarketSnapshot';
 export * from '../models/ApiMediaResolveRequest';
 export * from '../models/ApiMediaResolveResponse';
 export * from '../models/ApiMediaUploadMimeType';
@@ -381,6 +387,8 @@ export * from '../models/ApiMintingClaimActionsResponse';
 export * from '../models/ApiMintingClaimsPhaseTotalItem';
 export * from '../models/ApiModeratedProfileStatus';
 export * from '../models/ApiNft';
+export * from '../models/ApiNftActivityEvent';
+export * from '../models/ApiNftActivityPage';
 export * from '../models/ApiNftLinkData';
 export * from '../models/ApiNftLinkMediaPreview';
 export * from '../models/ApiNftLinkResponse';
@@ -1075,6 +1083,12 @@ import { ApiLoginResponse } from '../models/ApiLoginResponse';
 import { ApiMarkDropUnreadResponse } from '../models/ApiMarkDropUnreadResponse';
 import { ApiMarkWaveReadRequest } from '../models/ApiMarkWaveReadRequest';
 import { ApiMarkWaveReadResponse } from '../models/ApiMarkWaveReadResponse';
+import { ApiMarketCurrency } from '../models/ApiMarketCurrency';
+import { ApiMarketCurrencyBook } from '../models/ApiMarketCurrencyBook';
+import { ApiMarketDepth  , ApiMarketDepthStatusEnum           } from '../models/ApiMarketDepth';
+import { ApiMarketDepthLevel } from '../models/ApiMarketDepthLevel';
+import { ApiMarketOrder     , ApiMarketOrderSideEnum  , ApiMarketOrderScopeEnum            , ApiMarketOrderApplicabilityEnum     } from '../models/ApiMarketOrder';
+import { ApiMarketSnapshot } from '../models/ApiMarketSnapshot';
 import { ApiMediaResolveRequest } from '../models/ApiMediaResolveRequest';
 import { ApiMediaResolveResponse } from '../models/ApiMediaResolveResponse';
 import { ApiMediaUploadMimeType } from '../models/ApiMediaUploadMimeType';
@@ -1099,6 +1113,8 @@ import { ApiMintingClaimActionsResponse } from '../models/ApiMintingClaimActions
 import { ApiMintingClaimsPhaseTotalItem } from '../models/ApiMintingClaimsPhaseTotalItem';
 import { ApiModeratedProfileStatus } from '../models/ApiModeratedProfileStatus';
 import { ApiNft      , ApiNftTokenTypeEnum                               } from '../models/ApiNft';
+import { ApiNftActivityEvent , ApiNftActivityEventKindEnum                   } from '../models/ApiNftActivityEvent';
+import { ApiNftActivityPage } from '../models/ApiNftActivityPage';
 import { ApiNftLinkData } from '../models/ApiNftLinkData';
 import { ApiNftLinkMediaPreview, ApiNftLinkMediaPreviewStatusEnum          } from '../models/ApiNftLinkMediaPreview';
 import { ApiNftLinkResponse } from '../models/ApiNftLinkResponse';
@@ -1521,10 +1537,15 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiGroupTdhInclusionStrategy",
     "ApiIdentitySubscriptionTargetAction",
     "ApiIdentitySubscriptionTargetType",
+    "ApiMarketDepthStatusEnum",
+    "ApiMarketOrderSideEnum",
+    "ApiMarketOrderScopeEnum",
+    "ApiMarketOrderApplicabilityEnum",
     "ApiMediaUploadMimeType",
     "ApiMemesExtendedDataTokenTypeEnum",
     "ApiModeratedProfileStatus",
     "ApiNftTokenTypeEnum",
+    "ApiNftActivityEventKindEnum",
     "ApiNftLinkMediaPreviewStatusEnum",
     "ApiNotificationCause",
     "ApiOgMetadataEntityType",
@@ -1938,6 +1959,12 @@ let typeMap: {[index: string]: any} = {
     "ApiMarkDropUnreadResponse": ApiMarkDropUnreadResponse,
     "ApiMarkWaveReadRequest": ApiMarkWaveReadRequest,
     "ApiMarkWaveReadResponse": ApiMarkWaveReadResponse,
+    "ApiMarketCurrency": ApiMarketCurrency,
+    "ApiMarketCurrencyBook": ApiMarketCurrencyBook,
+    "ApiMarketDepth": ApiMarketDepth,
+    "ApiMarketDepthLevel": ApiMarketDepthLevel,
+    "ApiMarketOrder": ApiMarketOrder,
+    "ApiMarketSnapshot": ApiMarketSnapshot,
     "ApiMediaResolveRequest": ApiMediaResolveRequest,
     "ApiMediaResolveResponse": ApiMediaResolveResponse,
     "ApiMemeCardDropMapping": ApiMemeCardDropMapping,
@@ -1960,6 +1987,8 @@ let typeMap: {[index: string]: any} = {
     "ApiMintingClaimActionsResponse": ApiMintingClaimActionsResponse,
     "ApiMintingClaimsPhaseTotalItem": ApiMintingClaimsPhaseTotalItem,
     "ApiNft": ApiNft,
+    "ApiNftActivityEvent": ApiNftActivityEvent,
+    "ApiNftActivityPage": ApiNftActivityPage,
     "ApiNftLinkData": ApiNftLinkData,
     "ApiNftLinkMediaPreview": ApiNftLinkMediaPreview,
     "ApiNftLinkResponse": ApiNftLinkResponse,

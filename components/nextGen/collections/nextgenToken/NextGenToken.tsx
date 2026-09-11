@@ -22,6 +22,7 @@ import { useMemo } from "react";
 import { Tooltip } from "react-tooltip";
 import { printViewButton } from "../collectionParts/NextGenCollection";
 import NextGenTokenAbout from "./NextGenTokenAbout";
+import MarketDepthPanel from "@/components/nft-market-depth/MarketDepthPanel";
 import NextGenTokenArt from "./NextGenTokenArt";
 import NextGenTokenCollectionLinks from "./NextGenTokenCollectionLinks";
 import NextgenTokenRarity, {
@@ -137,6 +138,10 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
                   </div>
                 </div>
               </div>
+              <MarketDepthPanel
+                contract={NEXTGEN_CONTRACT}
+                tokenId={props.token.id}
+              />
             </section>
           )}
           {props.view === NextgenCollectionView.PROVENANCE && (
