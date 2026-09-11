@@ -11,27 +11,26 @@
  * Do not edit the class manually.
  */
 
+import { ApiPushLogoutSession } from '../models/ApiPushLogoutSession';
 import { HttpFile } from '../http/http';
 
-export class ApiRegisterPushNotificationTokenRequest {
+export class ApiRevokePushInstallationRequest {
+    /**
+    * True removes every profile on this installation. False removes only profile_id, or only sessions if no profile is provided.
+    */
+    'all_profiles': boolean;
     'device_id': string;
-    'token': string;
+    'installation_secret': string;
+    'revision': number;
     /**
-    * Private installation credential stored in native secure storage.
+    * Legacy installation ownership proof; never exposed by device-list APIs.
     */
-    'installation_secret'?: string;
+    'token'?: string;
     /**
-    * Current installation revision; stale registration requests are rejected.
-    */
-    'installation_revision'?: number;
-    /**
-    * Optional profile_id
+    * When all_profiles is false, removes only this profile. Omit to revoke only supplied sessions without deleting profile registrations. Ignored when all_profiles is true, which removes every profile.
     */
     'profile_id'?: string;
-    /**
-    * Optional platform (ios, android, web)
-    */
-    'platform'?: string;
+    'sessions': Array<ApiPushLogoutSession>;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -39,14 +38,14 @@ export class ApiRegisterPushNotificationTokenRequest {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "device_id",
-            "baseName": "device_id",
-            "type": "string",
+            "name": "all_profiles",
+            "baseName": "all_profiles",
+            "type": "boolean",
             "format": ""
         },
         {
-            "name": "token",
-            "baseName": "token",
+            "name": "device_id",
+            "baseName": "device_id",
             "type": "string",
             "format": ""
         },
@@ -57,10 +56,16 @@ export class ApiRegisterPushNotificationTokenRequest {
             "format": ""
         },
         {
-            "name": "installation_revision",
-            "baseName": "installation_revision",
+            "name": "revision",
+            "baseName": "revision",
             "type": "number",
             "format": "int64"
+        },
+        {
+            "name": "token",
+            "baseName": "token",
+            "type": "string",
+            "format": ""
         },
         {
             "name": "profile_id",
@@ -69,14 +74,14 @@ export class ApiRegisterPushNotificationTokenRequest {
             "format": ""
         },
         {
-            "name": "platform",
-            "baseName": "platform",
-            "type": "string",
+            "name": "sessions",
+            "baseName": "sessions",
+            "type": "Array<ApiPushLogoutSession>",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiRegisterPushNotificationTokenRequest.attributeTypeMap;
+        return ApiRevokePushInstallationRequest.attributeTypeMap;
     }
 
     public constructor() {

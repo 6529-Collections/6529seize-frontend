@@ -195,7 +195,7 @@ jest.mock("@/components/waves/gallery", () => ({
 jest.mock("@/components/notifications/NotificationsContext", () => ({
   useNotificationsContext: () => ({
     removeWaveDeliveredNotifications: mockRemoveWaveDeliveredNotifications,
-    removeAllDeliveredNotifications: mockRemoveAllDeliveredNotifications,
+    reconcileProfileDeliveredNotifications: mockRemoveAllDeliveredNotifications,
   }),
 }));
 

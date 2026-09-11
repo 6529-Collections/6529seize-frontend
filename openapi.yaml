@@ -9544,6 +9544,46 @@ paths:
           description: Unauthorized
         "403":
           description: Forbidden - profile required
+  /push-notifications/installations/revoke:
+    post:
+      tags:
+        - Push Notifications
+      summary: Revoke this installation's profile registrations and native sessions
+      description: >-
+        Authenticated by the private installation credential, not a wallet JWT.
+        Set all_profiles to remove all profiles on this installation. Persist
+        and retry the same revision after a network failure. A legacy
+        installation can be claimed only with a token matching every existing
+        registration on that device.
+      operationId: revokePushInstallation
+      security: []
+      x-6529-router:
+        enabled: true
+        auth: none
+        handler:
+          import: "@/api/push-notifications/revoke-push-installation.handler"
+          name: handleRevokePushInstallation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiRevokePushInstallationRequest"
+      responses:
+        "200":
+          description: >-
+            Registrations and supplied native sessions revoked; badge refresh
+            queued when enabled.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiRevokePushInstallationResponse"
+        "403":
+          description: >-
+            Installation proof is invalid or legacy token ownership cannot be
+            established.
+        "409":
+          description: Installation revision is out of order.
   /push-notifications/settings/{device_id}:
     get:
       tags:
@@ -30130,6 +30170,63 @@ components:
           type: string
         token:
           type: string
+    ApiPushLogoutSession:
+      type: object
+      required:
+        - address
+        - native_refresh_token
+      properties:
+        address:
+          type: string
+        native_refresh_token:
+          type: string
+    ApiRevokePushInstallationRequest:
+      type: object
+      required:
+        - device_id
+        - installation_secret
+        - revision
+        - sessions
+        - all_profiles
+      properties:
+        all_profiles:
+          type: boolean
+          description: >-
+            True removes every profile on this installation. False removes only
+            profile_id, or only sessions if no profile is provided.
+        device_id:
+          type: string
+        installation_secret:
+          type: string
+        revision:
+          type: integer
+          format: int64
+          minimum: 1
+          maximum: 4294967295
+        token:
+          type: string
+          description: >-
+            Legacy installation ownership proof; never exposed by device-list
+            APIs.
+        profile_id:
+          type: string
+          description: >-
+            When all_profiles is false, removes only this profile. Omit to revoke
+            only supplied sessions without deleting profile registrations. Ignored
+            when all_profiles is true, which removes every profile.
+        sessions:
+          type: array
+          maxItems: 50
+          items:
+            $ref: "#/components/schemas/ApiPushLogoutSession"
+    ApiRevokePushInstallationResponse:
+      type: object
+      required:
+        - revision
+      properties:
+        revision:
+          type: integer
+          format: int64
     ApiRegisterPushNotificationTokenRequest:
       type: object
       required:
@@ -30140,6 +30237,16 @@ components:
           type: string
         token:
           type: string
+        installation_secret:
+          type: string
+          description: Private installation credential stored in native secure storage.
+        installation_revision:
+          type: integer
+          format: int64
+          minimum: 0
+          description: >-
+            Current installation revision; stale registration requests are
+            rejected.
         profile_id:
           type: string
           description: Optional profile_id
