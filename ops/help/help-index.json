@@ -5458,29 +5458,42 @@
     {
       "id": "profiles.cms-builder",
       "kind": "workflow",
-      "title": "Profile CMS builder",
+      "title": "Profile website studio",
       "aliases": [
         "profile builder",
         "cms builder",
+        "website studio",
         "edit profile site",
         "profile homepage builder"
       ],
-      "keywords": ["profile", "cms", "builder", "homepage", "edit", "agent"],
+      "keywords": [
+        "profile",
+        "cms",
+        "website",
+        "studio",
+        "builder",
+        "template",
+        "page",
+        "publish"
+      ],
       "facts": [
-        "Open /{user}/cms/builder directly to edit a profile-owned website; there is no public profile navigation link.",
-        "Saving, server validation, and publishing require the connected non-proxy owner profile. Publishing uploads content and asks the wallet to sign.",
-        "Request snapshot requires a signed-in session and can load another wallet's indexed holdings from an ETH address or ENS name. If the session cannot be verified, sign in again and retry.",
-        "The builder supports saved drafts, browser recovery, gallery snapshots, full-package JSON and Agent editing, and published version history.",
-        "Restore selects a previous publication. Unpublish removes the active website pointer but does not delete immutable content or version history.",
-        "Published CMS pages use /{user}/index.html and additional package paths. Keep the signed publication manifest for independent recovery."
+        "Open /{user}/cms/builder directly to build or edit a profile-owned website. A profile with an available published website shows Website in its header; that link opens the published site.",
+        "The studio has 39 complete visual templates: 23 original compositions and 16 inspired by credited CC0 cards from The Memes. Templates and point-and-click editing work without an AI agent.",
+        "Use Pages for page titles, addresses, menu labels, duplication, removal, and choosing the homepage. Use Content to edit sections and Design for site name, layout, palette, typography, spacing, and accent color.",
+        "Preview all pages in Desktop and Phone views. Review and replace sample names, writing, artwork, claims, and links before confirming the sample-content review for publication.",
+        "Saving, image upload, server validation, and publishing require the connected non-proxy owner profile. Publishing uploads content and asks the wallet to sign; saving alone does not publish.",
+        "Versions contains saved drafts and publications. Editing a publication creates a new draft when saved; the active site remains until a replacement is published. Browser recovery is local to the current browser and account context.",
+        "Restore selects a previous publication. Unpublish removes the active website pointer but does not delete immutable content, uploaded images, or version history.",
+        "More tools contains optional JSON and Agent file workflows. A connected MCP agent service is not available."
       ],
       "canonical_path": "/{user}/cms/builder",
       "related_paths": ["/{user}"],
       "tags": ["profiles", "cms"],
       "source_refs": [
         "app/[user]/cms/builder/page.tsx",
-        "ops/docs/profiles/feature-profile-cms-builder.md",
-        "ops/docs/profiles/feature-profile-cms-builder-ai-agent-affordances.md"
+        "components/profile-cms-builder/ProfileCmsBuilder.tsx",
+        "components/profile-cms-builder/studio/ProfileCmsStudioEditor.tsx",
+        "ops/docs/profiles/feature-profile-cms-builder.md"
       ]
     },
     {
@@ -7626,9 +7639,12 @@
         "capitalization"
       ],
       "facts": [
-        "Published custom profile pages use paths ending in /index.html under the profile handle.",
-        "Profile handles in custom page links are case-insensitive; page names after the handle remain case-sensitive.",
-        "If a custom page is not found, use a link from the published site and preserve its page-name capitalization."
+        "Published custom profile pages have readable addresses such as /{user}/studio and /{user}/about. The normal 6529 profile stays at /{user}.",
+        "Use the profile header Website link or the published website navigation. Existing package paths ending in /index.html remain readable, and archived HTML keeps its file paths.",
+        "The studio accepts unique lowercase page addresses made from letters, numbers, and hyphen-separated words, up to 80 characters. Existing profile routes such as brain, cms, collected, identity, and subscriptions are reserved.",
+        "Profile handles in custom page links are case-insensitive; existing imported page names after the handle remain case-sensitive. The page must exist in the active publication, not just a draft.",
+        "Show in site menu controls the menu link only. Hiding a page from navigation does not make its published address private.",
+        "Keep the signed publication manifest and recovery receipt for independent website verification and archival recovery. External media files still need their own backup."
       ],
       "canonical_path": "/{user}",
       "related_paths": ["/{user}/cms/builder"],
@@ -7636,7 +7652,180 @@
       "source_refs": [
         "app/[user]/[...cmsPath]/page.tsx",
         "lib/profile-cms/runtime/routes.ts",
-        "ops/docs/profiles/troubleshooting/troubleshooting-routes-and-tabs.md"
+        "components/user/user-page-header/UserPageHeaderClient.tsx",
+        "ops/docs/profiles/feature-profile-cms-builder.md"
+      ]
+    },
+    {
+      "id": "profiles.cms-page-sharing",
+      "kind": "ui_affordance",
+      "title": "Website page sharing images and search visibility",
+      "aliases": [
+        "website sharing image",
+        "website link preview",
+        "hide website page from search",
+        "website form changes"
+      ],
+      "keywords": [
+        "cms",
+        "page settings",
+        "sharing image",
+        "automatic image",
+        "social preview",
+        "search engines",
+        "noindex",
+        "public",
+        "apply changes",
+        "discard",
+        "autosave"
+      ],
+      "facts": [
+        "Open Page settings in /{user}/cms/builder. Sharing image selects an image from the package library for that page's link preview. Automatic image clears the explicit choice and uses an available image displayed on that page.",
+        "Choose Apply changes, then save and publish the revision to update the public page. Sharing services may keep a cached preview temporarily.",
+        "Clearing Allow search engines to index this page adds noindex after publication. The page and its media remain public and accessible by URL; search engines may take time to revisit it.",
+        "Apply changes or Discard form changes before saving, publishing, switching panels, or Undo. Unapplied page, section, and design fields are not autosaved; browser recovery keeps the applied document. Finish or cancel an image upload before leaving its panel."
+      ],
+      "canonical_path": "/{user}/cms/builder",
+      "related_paths": [
+        "/{user}"
+      ],
+      "tags": [
+        "profiles",
+        "cms",
+        "sharing",
+        "search"
+      ],
+      "source_refs": [
+        "components/profile-cms-builder/studio/StudioPageSettings.tsx",
+        "components/profile-cms-builder/studio/StudioForm.tsx",
+        "lib/profile-cms/runtime/social-image.ts",
+        "app/[user]/[...cmsPath]/page.tsx",
+        "ops/docs/profiles/feature-profile-cms-builder.md"
+      ]
+    },
+    {
+      "id": "profiles.cms-templates",
+      "kind": "workflow",
+      "title": "Website templates and visual page editing",
+      "aliases": [
+        "artist website template",
+        "collector website template",
+        "Memes website",
+        "company website",
+        "fund website",
+        "DAO website"
+      ],
+      "keywords": [
+        "templates",
+        "Memes",
+        "artist",
+        "portfolio",
+        "exhibition",
+        "collector",
+        "organization",
+        "fund",
+        "DAO",
+        "visual editor"
+      ],
+      "facts": [
+        "Browse 39 templates in People & ideas, Collections, Artists, Organizations, Funds & collecting groups, and The Memes. Open a full example, explore its pages, then choose Use this template.",
+        "Artist examples cover studios, portfolios, exhibitions, medium studies, process journals, editions, and retrospectives. Organization examples include professional practices, nonprofits, crypto protocols, NFT projects, funds, collecting DAOs, and institutional collections.",
+        "All templates use visually editable content. Click a section or select it in Content to edit supported text, images, captions, credits, links, widths, and treatments. Add, duplicate, remove, and reorder sections with the controls.",
+        "Pages supports adding and duplicating pages, page settings, choosing the home page, showing a page in the site menu, and changing menu order. A referenced page cannot be removed until its remaining links or homepage reference are changed.",
+        "Design restyles the current site. Start a new site replaces the draft with a new template after confirmation; save or download the current draft first. This is not automatic content-preserving template conversion.",
+        "The Memes examples preserve card titles, artist credits, and source links. Static previews avoid autoplaying animated originals. Template use does not claim token ownership, authorship, or artist endorsement."
+      ],
+      "canonical_path": "/{user}/cms/builder",
+      "related_paths": ["/{user}"],
+      "tags": ["profiles", "cms", "templates"],
+      "source_refs": [
+        "lib/profile-cms/studio/templates.ts",
+        "components/profile-cms-builder/studio/StudioTemplateLibrary.tsx",
+        "components/profile-cms-builder/studio/StudioPageActions.tsx",
+        "ops/docs/profiles/feature-profile-cms-builder.md"
+      ]
+    },
+    {
+      "id": "profiles.cms-media",
+      "kind": "workflow",
+      "title": "Add images and wallet galleries to a website",
+      "aliases": [
+        "CMS upload",
+        "add my art",
+        "NFT gallery website",
+        "ENS gallery",
+        "wallet sources"
+      ],
+      "keywords": [
+        "cms",
+        "upload",
+        "image",
+        "public",
+        "gallery",
+        "wallet",
+        "ENS",
+        "NFT",
+        "snapshot"
+      ],
+      "facts": [
+        "In Add your art, upload JPEG, PNG, WebP, or GIF images up to 20 MiB with an image description and optional credit. Uploading, processing, and verification finish before the image is added to the draft.",
+        "Uploaded images become publicly accessible before the website is published. A saved draft does not make its files private. Removing an image placement or unpublishing does not delete the uploaded file.",
+        "Request snapshot requires a signed-in session and accepts up to 25 Ethereum addresses or ENS names, including other wallets. If the session cannot be verified, sign in again and retry.",
+        "The snapshot request uses the service default of 200 indexed assets. Review source wallets and incomplete or unresolved warnings; choose and order up to 50 works for one import, then enter a gallery title.",
+        "Adding a wallet selection creates gallery pages and a menu entry while preserving existing pages, site identity, and design. Source-wallet addresses are included in the record and become public with publication.",
+        "Wallet snapshots cover collections indexed by 6529 and are not a complete cross-chain NFT inventory. They are dated selections, not live holdings. Refresh to review changed holdings; a holdings import does not identify every work an artist created.",
+        "If image dimensions or media cannot be verified, an NFT record may remain without an image. Review the partial-media warning. Offline example snapshots are for preview and cannot be published as real holdings."
+      ],
+      "canonical_path": "/{user}/cms/builder",
+      "related_paths": ["/{user}/collected"],
+      "tags": ["profiles", "cms", "media"],
+      "source_refs": [
+        "components/profile-cms-builder/studio/StudioImageUpload.tsx",
+        "lib/profile-cms/studio/image-upload.ts",
+        "components/profile-cms-builder/studio/StudioWalletImport.tsx",
+        "lib/profile-cms/studio/wallet-import.ts",
+        "ops/docs/profiles/feature-profile-cms-builder.md"
+      ]
+    },
+    {
+      "id": "profiles.cms-agent-files",
+      "kind": "workflow",
+      "title": "Use your own agent through website files",
+      "aliases": [
+        "bring your own agent",
+        "CMS AI",
+        "agent patch",
+        "website JSON export",
+        "CMS MCP"
+      ],
+      "keywords": [
+        "cms",
+        "agent",
+        "AI",
+        "MCP",
+        "JSON",
+        "patch",
+        "export",
+        "import",
+        "files"
+      ],
+      "facts": [
+        "The visual website studio works without an agent. More tools opens optional JSON and Agent workspaces for users who bring their own external agent or local tool.",
+        "Download Package JSON, Source packet JSON, and Schema bundle JSON. Review their draft content and wallet-source details before sharing them with an external tool; the source packet does not replace the complete package.",
+        "Paste or upload an agent-patch JSON file up to 2 MiB, choose Review patch, inspect the changes and validation findings, then choose Apply to draft. Applying a patch is local editing and cannot save, sign, or publish.",
+        "The current patch importer edits supported first-page metadata and block fields, block additions/removals/reordering, the first menu label, and the theme accent. It is not a general multipage API; use the visual editor or full-package JSON import for broader changes.",
+        "Stale draft IDs, versions, base hashes, unsupported operations, and invalid results are rejected. Re-review against the current draft after changes.",
+        "A complete replacement package can be pasted into JSON and imported for the current profile handle. Preserve a saved or downloaded copy before broad replacement.",
+        "There is no connected MCP service, automatic agent session, or built-in paid inference provider. File exchange does not require sharing website session tokens, wallet private keys, or recovery phrases. Publication remains a separate owner-reviewed wallet-signing step."
+      ],
+      "canonical_path": "/{user}/cms/builder",
+      "related_paths": ["/{user}"],
+      "tags": ["profiles", "cms", "agents"],
+      "source_refs": [
+        "components/profile-cms-builder/ProfileCmsAgentPanel.tsx",
+        "lib/profile-cms/builder/agent-patch-operations.ts",
+        "components/profile-cms-builder/ProfileCmsBuilderJsonPanel.tsx",
+        "ops/docs/profiles/feature-profile-cms-builder-ai-agent-affordances.md"
       ]
     }
   ]

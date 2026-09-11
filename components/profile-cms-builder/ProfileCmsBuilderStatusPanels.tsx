@@ -152,7 +152,7 @@ export function PublishStatePanel({
   );
 }
 
-function getActionResultMessage(
+export function getActionResultMessage(
   locale: SupportedLocale,
   code: ProfileCmsBuilderActionCode
 ): string {

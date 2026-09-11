@@ -52,6 +52,11 @@ The command writes `publication.json`, `content.json`, the reconstructed
 `package.json`, and static HTML pages. It prints the entry HTML path. Serve the
 output directory with a static file server or open that file directly.
 
+Published website links can use readable page addresses such as `/handle/studio`.
+The signed package retains archive file paths; recovered navigation points to
+those local HTML files. The archive preserves content and navigation rather than
+requiring the interactive studio or its exact visual presentation.
+
 Static recovery renders ordinary text/media, navigation, gallery works and 2D
 room placements. It does not execute author JavaScript or activate embedded HTML
 and 3D runtimes. More specialized blocks retain their structured source in an
@@ -92,6 +97,6 @@ manifest need a new signed publication to acquire this recovery format.
 
 ## Related areas
 
-- [Profile CMS builder](../profiles/feature-profile-cms-builder.md)
-- [Profile CMS agent workspace](../profiles/feature-profile-cms-builder-ai-agent-affordances.md)
+- [Profile Website Studio](../profiles/feature-profile-cms-builder.md)
+- [Use Your Own Agent with the Website Studio](../profiles/feature-profile-cms-builder-ai-agent-affordances.md)
 - [Developer documentation](README.md)

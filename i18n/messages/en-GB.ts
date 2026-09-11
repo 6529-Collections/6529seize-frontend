@@ -1,11 +1,19 @@
+import studioTemplateDescriptions from "@/i18n/messages/studioTemplateDescriptions.en-GB.json";
+import profileCmsStudioUploadMessages from "@/i18n/messages/profileCmsStudioUpload.en-GB.json";
+import studioWalletImportMessages from "@/i18n/messages/studioWalletImport.en-GB.json";
 import { EN_GB_NEW_VERSION_TOAST_MESSAGES } from "@/i18n/messages/new-version-toast";
 import { EN_GB_QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import { EN_GB_PAGINATION_MESSAGES } from "@/i18n/messages/pagination";
 import { EN_US_THE_MEMES_COLLECTORS_MESSAGES as EN_GB_THE_MEMES_COLLECTORS_MESSAGES } from "@/i18n/messages/the-memes-collectors";
 import { TRANSFER_MESSAGES } from "@/i18n/messages/transfer";
 import type { MessageKey } from "@/i18n/messages/en-US";
+import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.en-GB.json";
 
 export const EN_GB_MESSAGES = {
+  ...profileCmsStudioMessages,
+  ...studioTemplateDescriptions,
+  ...profileCmsStudioUploadMessages,
+  ...studioWalletImportMessages,
   "profileCms.builder.gallery.snapshot.required":
     "Request and review a wallet snapshot before saving or publishing this gallery.",
   "profileCms.builder.publish.savedNotCurrent":

@@ -1,0 +1,409 @@
+{
+  "schema": "6529.cms.template-display-assets.v1",
+  "encoder": {
+    "sharp": "0.35.3",
+    "vips": "8.18.3",
+    "webp": "1.6.0"
+  },
+  "transform": {
+    "revision": 1,
+    "frame": 0,
+    "auto_orient": true,
+    "fit": "inside",
+    "max_width": 1440,
+    "max_height": 1440,
+    "without_enlargement": true,
+    "kernel": "lanczos3",
+    "format": "webp",
+    "quality": 82,
+    "alpha_quality": 100,
+    "effort": 6,
+    "smart_subsample": true
+  },
+  "assets": [
+    {
+      "cardId": 1,
+      "originalUri": "https://arweave.net/eu-bNSvl6cRsi0DwZud2QRfOmaan-a6kI8OpWBkbyl0",
+      "originalHash": "sha256:fbc359a45841009abdfdfc984db2df75a790f9757010a3809337a700836badae",
+      "sourcePage": "https://6529.io/the-memes/1",
+      "localPath": "/profile-cms/templates/memes/1.webp",
+      "asset": {
+        "id": "meme-1-display",
+        "kind": "image",
+        "uri": "https://6529.io/profile-cms/templates/memes/1.webp",
+        "content_hash": "sha256:3109c3f70d22e1f73d591badbdd021c1a4875d0cefce33c809cb0d17a4b6500c",
+        "mime_type": "image/webp",
+        "width": 983,
+        "height": 1440,
+        "file_size_bytes": 9934,
+        "alt_text": "6529Seizing by 6529er, The Memes card #1.",
+        "rights": "CC0 artwork: 6529Seizing by 6529er. The Memes #1. Source: https://6529.io/the-memes/1. License: https://6529.io/about/license. Display does not claim NFT ownership, authorship or artist endorsement. Display derivative: frame 0, resized without cropping.",
+        "roles": [
+          "poster",
+          "grid",
+          "detail"
+        ]
+      }
+    },
+    {
+      "cardId": 2,
+      "originalUri": "https://arweave.net/-MkTbohLWHDR66ufDwGJiTaBG1jZFMpTaTwwtLCPoSg",
+      "originalHash": "sha256:340363892b0cc7678b2e4aa356be65532c9b65be759796ab765d1b4b3f43db16",
+      "sourcePage": "https://6529.io/the-memes/2",
+      "localPath": "/profile-cms/templates/memes/2.webp",
+      "asset": {
+        "id": "meme-2-display",
+        "kind": "image",
+        "uri": "https://6529.io/profile-cms/templates/memes/2.webp",
+        "content_hash": "sha256:8b1ec9b6911f91bf7ecf3ba275225d0940fae812a8eb1d78dd61cd3f3e85f1f7",
+        "mime_type": "image/webp",
+        "width": 983,
+        "height": 1440,
+        "file_size_bytes": 51464,
+        "alt_text": "SeizeJPGs by 6529er, The Memes card #2.",
+        "rights": "CC0 artwork: SeizeJPGs by 6529er. The Memes #2. Source: https://6529.io/the-memes/2. License: https://6529.io/about/license. Display does not claim NFT ownership, authorship or artist endorsement. Display derivative: frame 0, resized without cropping.",
+        "roles": [
+          "poster",
+          "grid",
+          "detail"
+        ]
+      }
+    },
+    {
+      "cardId": 4,
+      "originalUri": "https://arweave.net/lYUFW-vRUNYZC0Mlw45_uua_9KzCF4vwE3-aRU-5SVI",
+      "originalHash": "sha256:5ad18ab43460c8712c8b154e1d38c0e735d9ee0697135b940b875302e5b63fbe",
+      "sourcePage": "https://6529.io/the-memes/4",
+      "localPath": "/profile-cms/templates/memes/4.webp",
+      "asset": {
+        "id": "meme-4-display",
+        "kind": "image",
+        "uri": "https://6529.io/profile-cms/templates/memes/4.webp",
+        "content_hash": "sha256:91d8c8c56c0647d053272ebce5586582b5cd8ec2158ef94eb42372d12540304f",
+        "mime_type": "image/webp",
+        "width": 983,
+        "height": 1440,
+        "file_size_bytes": 80342,
+        "alt_text": "NakamotoFreedom by 6529er, The Memes card #4.",
+        "rights": "CC0 artwork: NakamotoFreedom by 6529er. The Memes #4. Source: https://6529.io/the-memes/4. License: https://6529.io/about/license. Display does not claim NFT ownership, authorship or artist endorsement. Display derivative: frame 0, resized without cropping.",
+        "roles": [
+          "poster",
+          "grid",
+          "detail"
+        ]
+      }
+    },
+    {
+      "cardId": 5,
+      "originalUri": "https://arweave.net/WjpA-XWxKYVg6OI2TcOXZJpPw5Oh3wg-XhRyv9ZV3_s",
+      "originalHash": "sha256:1b67ca14866a10e5ded6e819c9af25f61fb388903ea068613574798d7aad1935",
+      "sourcePage": "https://6529.io/the-memes/5",
+      "localPath": "/profile-cms/templates/memes/5.webp",
+      "asset": {
+        "id": "meme-5-display",
+        "kind": "image",
+        "uri": "https://6529.io/profile-cms/templates/memes/5.webp",
+        "content_hash": "sha256:a59cd607b72f21d32fac24cd6917cdfbad203f73265feb82636e4cc61471be2f",
+        "mime_type": "image/webp",
+        "width": 1079,
+        "height": 1440,
+        "file_size_bytes": 248866,
+        "alt_text": "rekt6529 by OSF, The Memes card #5.",
+        "rights": "CC0 artwork: rekt6529 by OSF. The Memes #5. Source: https://6529.io/the-memes/5. License: https://6529.io/about/license. Display does not claim NFT ownership, authorship or artist endorsement. Display derivative: frame 0, resized without cropping.",
+        "roles": [
+          "poster",
+          "grid",
+          "detail"
+        ]
+      }
+    },
+    {
+      "cardId": 8,
+      "originalUri": "https://arweave.net/4lazG3i2tb7esEYqdAEa1s_lJ4gY2vIP_wR8S_jLpL4",
+      "originalHash": "sha256:fa6490745eb9925a1487b8956bfdd19d36739ced8ba9ccb857defecd762b2cc9",
+      "sourcePage": "https://6529.io/the-memes/8",
+      "localPath": "/profile-cms/templates/memes/8.webp",
+      "asset": {
+        "id": "meme-8-display",
+        "kind": "image",
+        "uri": "https://6529.io/profile-cms/templates/memes/8.webp",
+        "content_hash": "sha256:4ab7213159d9594cae7d6f647acde6e11f200bf0b1eb5d635d9c5c321c6599eb",
+        "mime_type": "image/webp",
+        "width": 1170,
+        "height": 806,
+        "file_size_bytes": 20408,
+        "alt_text": "FirstGM by 6529, The Memes card #8.",
+        "rights": "CC0 artwork: FirstGM by 6529. The Memes #8. Source: https://6529.io/the-memes/8. License: https://6529.io/about/license. Display does not claim NFT ownership, authorship or artist endorsement. Display derivative: frame 0, resized without cropping.",
+        "roles": [
+          "poster",
+          "grid",
+          "detail"
+        ]
+      }
+    },
+    {
+      "cardId": 9,
+      "originalUri": "https://arweave.net/ddmoXl2XeFoqk3qtc9cYElirXkUdZCVKxUvl5rv6c-Y",
+      "originalHash": "sha256:ae700fb90363f91f4ffff06424fa08794758bac80037d690a27c827b0ea356ec",
+      "sourcePage": "https://6529.io/the-memes/9",
+      "localPath": "/profile-cms/templates/memes/9.webp",
+      "asset": {
+        "id": "meme-9-display",
+        "kind": "image",
+        "uri": "https://6529.io/profile-cms/templates/memes/9.webp",
+        "content_hash": "sha256:b67f65cef8ac9f643352f425dbab90d23250d180ebb831c74fbc282cdfac962e",
+        "mime_type": "image/webp",
+        "width": 1040,
+        "height": 1440,
+        "file_size_bytes": 159546,
+        "alt_text": "The Institutions Are Coming by 6529er, The Memes card #9.",
+        "rights": "CC0 artwork: The Institutions Are Coming by 6529er. The Memes #9. Source: https://6529.io/the-memes/9. License: https://6529.io/about/license. Display does not claim NFT ownership, authorship or artist endorsement. Display derivative: frame 0, resized without cropping.",
+        "roles": [
+          "poster",
+          "grid",
+          "detail"
+        ]
+      }
+    },
+    {
+      "cardId": 37,
+      "originalUri": "https://arweave.net/CLiT1eIwf-6ow_dVYBB61Nas0dow40cSUFjvSq_oyrs",
+      "originalHash": "sha256:e0e9664d89646a48d8afa3736c4e930c0f9387dc945b29804d9ced4b23a635ba",
+      "sourcePage": "https://6529.io/the-memes/37",
+      "localPath": "/profile-cms/templates/memes/37.webp",
+      "asset": {
+        "id": "meme-37-display",
+        "kind": "image",
+        "uri": "https://6529.io/profile-cms/templates/memes/37.webp",
+        "content_hash": "sha256:229a72bdc49a1e4461aea07dd3a85ef1c982ef28ddb46ecb9c6dc405db444263",
+        "mime_type": "image/webp",
+        "width": 1128,
+        "height": 1440,
+        "file_size_bytes": 88668,
+        "alt_text": "Sgt. Pepe by Arsonic, The Memes card #37.",
+        "rights": "CC0 artwork: Sgt. Pepe by Arsonic. The Memes #37. Source: https://6529.io/the-memes/37. License: https://6529.io/about/license. Display does not claim NFT ownership, authorship or artist endorsement. Display derivative: frame 0, resized without cropping.",
+        "roles": [
+          "poster",
+          "grid",
+          "detail"
+        ]
+      }
+    },
+    {
+      "cardId": 47,
+      "originalUri": "https://arweave.net/B_j9Z1NTIt5QUGx_TTnAh0F93BMQ1FRAnDEg-TrehaE",
+      "originalHash": "sha256:0d8a5c1d829c0625a0dc7885718eaabf99b792eea8ce0c1e4280b0463e873264",
+      "sourcePage": "https://6529.io/the-memes/47",
+      "localPath": "/profile-cms/templates/memes/47.webp",
+      "asset": {
+        "id": "meme-47-display",
+        "kind": "image",
+        "uri": "https://6529.io/profile-cms/templates/memes/47.webp",
+        "content_hash": "sha256:c44855dd3d7edcc44f7106f2cda71c7573b6228edb44059d3c81a492a3909c70",
+        "mime_type": "image/webp",
+        "width": 1004,
+        "height": 1440,
+        "file_size_bytes": 315976,
+        "alt_text": "EXIT STRATEGY by XCOPY, The Memes card #47.",
+        "rights": "CC0 artwork: EXIT STRATEGY by XCOPY. The Memes #47. Source: https://6529.io/the-memes/47. License: https://6529.io/about/license. Display does not claim NFT ownership, authorship or artist endorsement. Display derivative: frame 0, resized without cropping.",
+        "roles": [
+          "poster",
+          "grid",
+          "detail"
+        ]
+      }
+    },
+    {
+      "cardId": 48,
+      "originalUri": "https://arweave.net/Ud4ZqHkPHMAtVhLvIa-0hpa9c3FH5NvBXxRl_XC8yFQ",
+      "originalHash": "sha256:e8383e937a9bef06c13fbcca82a7d5d0952cf7cbae88b41e4ca8eb4dbdc27ae5",
+      "sourcePage": "https://6529.io/the-memes/48",
+      "localPath": "/profile-cms/templates/memes/48.webp",
+      "asset": {
+        "id": "meme-48-display",
+        "kind": "image",
+        "uri": "https://6529.io/profile-cms/templates/memes/48.webp",
+        "content_hash": "sha256:d028b53fec87a7dd61a6a202ea4a3371595df1b78337542ba20ea22ca43d572f",
+        "mime_type": "image/webp",
+        "width": 1152,
+        "height": 1440,
+        "file_size_bytes": 191644,
+        "alt_text": "Freedom to Explore by Cath Simard, The Memes card #48.",
+        "rights": "CC0 artwork: Freedom to Explore by Cath Simard. The Memes #48. Source: https://6529.io/the-memes/48. License: https://6529.io/about/license. Display does not claim NFT ownership, authorship or artist endorsement. Display derivative: frame 0, resized without cropping.",
+        "roles": [
+          "poster",
+          "grid",
+          "detail"
+        ]
+      }
+    },
+    {
+      "cardId": 52,
+      "originalUri": "https://arweave.net/80j_EJJG_w432PJGDoHpT9ktH1MtZzzwqU995_ciG8c",
+      "originalHash": "sha256:72e05de982018bf161b11014b0003fba391f1f615c86685f21d0265e53e4e2aa",
+      "sourcePage": "https://6529.io/the-memes/52",
+      "localPath": "/profile-cms/templates/memes/52.webp",
+      "asset": {
+        "id": "meme-52-display",
+        "kind": "image",
+        "uri": "https://6529.io/profile-cms/templates/memes/52.webp",
+        "content_hash": "sha256:c410da700a02cbbfb4a9c933d2947bb68b8baab376a26aeab7467106ebf4f45d",
+        "mime_type": "image/webp",
+        "width": 1080,
+        "height": 1440,
+        "file_size_bytes": 44534,
+        "alt_text": "MEME FACTORY by Grant Riven Yun, The Memes card #52.",
+        "rights": "CC0 artwork: MEME FACTORY by Grant Riven Yun. The Memes #52. Source: https://6529.io/the-memes/52. License: https://6529.io/about/license. Display does not claim NFT ownership, authorship or artist endorsement. Display derivative: frame 0, resized without cropping.",
+        "roles": [
+          "poster",
+          "grid",
+          "detail"
+        ]
+      }
+    },
+    {
+      "cardId": 59,
+      "originalUri": "https://arweave.net/IIxWtf3rHHhXtp4JiywwQtebUBw4qQQ0HiGhArmgIjM",
+      "originalHash": "sha256:1e2d0f431a5fc0578eb5b7ed994dbb146a11196ffe583a0e67fcad630c7c6e08",
+      "sourcePage": "https://6529.io/the-memes/59",
+      "localPath": "/profile-cms/templates/memes/59.webp",
+      "asset": {
+        "id": "meme-59-display",
+        "kind": "image",
+        "uri": "https://6529.io/profile-cms/templates/memes/59.webp",
+        "content_hash": "sha256:77cf27bd7acda54a1c2f6e866d2756f63d814bc2bb515dfb6de129da95ea4e38",
+        "mime_type": "image/webp",
+        "width": 1080,
+        "height": 1080,
+        "file_size_bytes": 185464,
+        "alt_text": "Greedy Morning by Tyronejkd, The Memes card #59.",
+        "rights": "CC0 artwork: Greedy Morning by Tyronejkd. The Memes #59. Source: https://6529.io/the-memes/59. License: https://6529.io/about/license. Display does not claim NFT ownership, authorship or artist endorsement. Display derivative: frame 0, resized without cropping.",
+        "roles": [
+          "poster",
+          "grid",
+          "detail"
+        ]
+      }
+    },
+    {
+      "cardId": 103,
+      "originalUri": "https://arweave.net/Z-6srTRuY8sCd6XZyWHwqmWtiW-LMgD6uVxZKvGOgqc",
+      "originalHash": "sha256:4eda22dd711d70563fcfe0f5a705023abb838b4752b2128009b9d00f1be3bb8d",
+      "sourcePage": "https://6529.io/the-memes/103",
+      "localPath": "/profile-cms/templates/memes/103.webp",
+      "asset": {
+        "id": "meme-103-display",
+        "kind": "image",
+        "uri": "https://6529.io/profile-cms/templates/memes/103.webp",
+        "content_hash": "sha256:66b3b1e00009b4643ad3a961fdea69b0b77329ce4a894fc80087c1c41982e09c",
+        "mime_type": "image/webp",
+        "width": 1440,
+        "height": 1440,
+        "file_size_bytes": 39636,
+        "alt_text": "Don't Trust, Check. by Jack Butcher, The Memes card #103.",
+        "rights": "CC0 artwork: Don't Trust, Check. by Jack Butcher. The Memes #103. Source: https://6529.io/the-memes/103. License: https://6529.io/about/license. Display does not claim NFT ownership, authorship or artist endorsement. Display derivative: frame 0, resized without cropping.",
+        "roles": [
+          "poster",
+          "grid",
+          "detail"
+        ]
+      }
+    },
+    {
+      "cardId": 118,
+      "originalUri": "https://arweave.net/puMJ1mrbD3lAv5QA9bT5Vzf-au45QMXQ16Y1CSHb1Gg",
+      "originalHash": "sha256:ee5c894c22d7a79c91d9e4dbbf2c52d9e1c312017b3ead1a6a92309fd9fd7e82",
+      "sourcePage": "https://6529.io/the-memes/118",
+      "localPath": "/profile-cms/templates/memes/118.webp",
+      "asset": {
+        "id": "meme-118-display",
+        "kind": "image",
+        "uri": "https://6529.io/profile-cms/templates/memes/118.webp",
+        "content_hash": "sha256:eb9de49200f4d6522cdf0d505f5dcd298df40324fda8015657845a95a63d7f21",
+        "mime_type": "image/webp",
+        "width": 1440,
+        "height": 1280,
+        "file_size_bytes": 194626,
+        "alt_text": "The Socially Umpired Animals by Botto, The Memes card #118.",
+        "rights": "CC0 artwork: The Socially Umpired Animals by Botto. The Memes #118. Source: https://6529.io/the-memes/118. License: https://6529.io/about/license. Display does not claim NFT ownership, authorship or artist endorsement. Display derivative: frame 0, resized without cropping.",
+        "roles": [
+          "poster",
+          "grid",
+          "detail"
+        ]
+      }
+    },
+    {
+      "cardId": 375,
+      "originalUri": "https://arweave.net/l8u02XnU5vLB2zvFoCKr4z2MUa5Dl4zeORP_OQWZ0fc",
+      "originalHash": "sha256:1e588dc5fa036fb2648f462ab5f74f517c855f29cd5e215bd3b33077fe4f0d50",
+      "sourcePage": "https://6529.io/the-memes/375",
+      "localPath": "/profile-cms/templates/memes/375.webp",
+      "asset": {
+        "id": "meme-375-display",
+        "kind": "image",
+        "uri": "https://6529.io/profile-cms/templates/memes/375.webp",
+        "content_hash": "sha256:e3cef14e41b48e5085a881116d324d70b52b025423c6c23168daf57179d801fd",
+        "mime_type": "image/webp",
+        "width": 1333,
+        "height": 1440,
+        "file_size_bytes": 58814,
+        "alt_text": "The Tree of Knowledge of Good and Evil by ACK, The Memes card #375.",
+        "rights": "CC0 artwork: The Tree of Knowledge of Good and Evil by ACK. The Memes #375. Source: https://6529.io/the-memes/375. License: https://6529.io/about/license. Display does not claim NFT ownership, authorship or artist endorsement. Display derivative: frame 0, resized without cropping.",
+        "roles": [
+          "poster",
+          "grid",
+          "detail"
+        ]
+      }
+    },
+    {
+      "cardId": 537,
+      "originalUri": "https://arweave.net/tqx3Gw4PZqYclMiyjtHydobRZi7IZYo989RQooU_6YA",
+      "originalHash": "sha256:50a2c76324526cbd1a373a847421c4aaa3e955ee028a82fe5d7294d8a8e99289",
+      "sourcePage": "https://6529.io/the-memes/537",
+      "localPath": "/profile-cms/templates/memes/537.webp",
+      "asset": {
+        "id": "meme-537-display",
+        "kind": "image",
+        "uri": "https://6529.io/profile-cms/templates/memes/537.webp",
+        "content_hash": "sha256:169b7fc0a2ebda033814c8943b8e2a6f209571961e31b1b133cbefdb400f07c6",
+        "mime_type": "image/webp",
+        "width": 1000,
+        "height": 1000,
+        "file_size_bytes": 300750,
+        "alt_text": "ＮＯ　ＨＵＭＡＮ　ＩＮＴＥＲＦＡＣＥ by MaNiC, The Memes card #537.",
+        "rights": "CC0 artwork: ＮＯ　ＨＵＭＡＮ　ＩＮＴＥＲＦＡＣＥ by MaNiC. The Memes #537. Source: https://6529.io/the-memes/537. License: https://6529.io/about/license. Display does not claim NFT ownership, authorship or artist endorsement. Display derivative: frame 0, resized without cropping.",
+        "roles": [
+          "poster",
+          "grid",
+          "detail"
+        ]
+      }
+    },
+    {
+      "cardId": 540,
+      "originalUri": "https://arweave.net/WILCqkT7L0Im3vGcTU7DalJ9cmnylnoC2n4w5b2T9rY",
+      "originalHash": "sha256:b9fc2eb47b25e0cb97d4f6e8d3a5a57a9b18603799036c4f9ed07f9ba325a4b2",
+      "sourcePage": "https://6529.io/the-memes/540",
+      "localPath": "/profile-cms/templates/memes/540.webp",
+      "asset": {
+        "id": "meme-540-display",
+        "kind": "image",
+        "uri": "https://6529.io/profile-cms/templates/memes/540.webp",
+        "content_hash": "sha256:d6dcbafb5c6179925f115522a18be5e1155bc9639d31b2c513bc04a1ed8ec6ce",
+        "mime_type": "image/webp",
+        "width": 1081,
+        "height": 1440,
+        "file_size_bytes": 228776,
+        "alt_text": "Tears of the Desert by Ebrahim_Elmi, The Memes card #540.",
+        "rights": "CC0 artwork: Tears of the Desert by Ebrahim_Elmi. The Memes #540. Source: https://6529.io/the-memes/540. License: https://6529.io/about/license. Display does not claim NFT ownership, authorship or artist endorsement. Display derivative: frame 0, resized without cropping.",
+        "roles": [
+          "poster",
+          "grid",
+          "detail"
+        ]
+      }
+    }
+  ]
+}
