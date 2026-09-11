@@ -24,7 +24,11 @@ export function validateCollectGoal(
 ): "definition" | "quantity" | "budget" | null {
   if (!draft.definitionId && draft.intent !== "tdh") return "definition";
   if (!isPositiveWholeQuantity(draft.targetCount)) return "quantity";
-  if (requireBudget && !isPositiveEthAmount(draft.budgetEth)) return "budget";
+  if (
+    (requireBudget || draft.budgetEth !== "") &&
+    !isPositiveEthAmount(draft.budgetEth)
+  )
+    return "budget";
   return null;
 }
 

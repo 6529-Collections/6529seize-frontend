@@ -100,7 +100,7 @@ beforeEach(() => {
   mockCreate.mockResolvedValue(scanning);
   mockAdvance.mockResolvedValue(ready);
 });
-it.each(["", "not-a-number", "1e3", "0", "-1", "1.0000000000000000001"])(
+it.each([" ", "not-a-number", "1e3", "0", "-1", "1.0000000000000000001"])(
   "rejects invalid controller budget %s before parsing or requesting a plan",
   (budgetEth) => {
     const onPlan = jest.fn();
@@ -111,6 +111,13 @@ it.each(["", "not-a-number", "1e3", "0", "-1", "1.0000000000000000001"])(
     expect(onPlan).not.toHaveBeenCalled();
   }
 );
+it("omits a blank analysis cap instead of converting it to a spending limit", async () => {
+  mockCreate.mockResolvedValue(ready);
+  mount(jest.fn(), "");
+  fireEvent.click(screen.getByRole("button", { name: "Preview plan" }));
+  await waitFor(() => expect(mockCreate).toHaveBeenCalled());
+  expect(mockCreate.mock.calls[0][0].options).toEqual({ recipient: address });
+});
 it("sends a profile goal and separate recipient, then advances the catalog scan to a ready plan", async () => {
   const onPlan = jest.fn();
   mount(onPlan);

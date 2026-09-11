@@ -5,6 +5,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t, type MessageKey } from "@/i18n/messages";
 import { useId, useState } from "react";
 import { validateCollectGoal } from "./collect-form.validation";
+import CollectGoalDefinitionPicker from "./CollectGoalDefinitionPicker";
 import CollectCompletionControls, {
   type CollectCompletionSelection,
 } from "./CollectCompletionControls";
@@ -28,6 +29,7 @@ interface CollectGoalFormProps {
   readonly onSubmit: (draft: CollectGoalDraft) => void;
   readonly onConnect: () => void;
   readonly showBudget?: boolean;
+  readonly budgetOptional?: boolean;
   readonly completion?: CollectCompletionSelection;
 }
 
@@ -74,7 +76,10 @@ export default function CollectGoalForm(props: CollectGoalFormProps) {
       aria-label={t(locale, `collect.intent.${draft.intent}`)}
       onSubmit={(event) => {
         event.preventDefault();
-        const invalid = validateCollectGoal(draft, props.showBudget !== false);
+        const invalid = validateCollectGoal(
+          draft,
+          props.showBudget !== false && !props.budgetOptional
+        );
         setInvalidField(invalid);
         if (!invalid && props.profile && !props.loading) props.onSubmit(draft);
       }}
@@ -94,37 +99,27 @@ export default function CollectGoalForm(props: CollectGoalFormProps) {
       )}
       <div className={`tw-grid tw-gap-4 ${gridClass}`}>
         {showDefinition && (
-          <label className="tw-space-y-2 tw-text-xs tw-font-semibold tw-text-iron-300">
-            <span>
-              {t(
-                locale,
-                definitionLabels[draft.intent] ?? "collect.goal.definition"
-              )}
-            </span>
-            <select
-              value={draft.definitionId}
-              disabled={props.loading || props.definitions.length === 0}
-              onChange={(event) => change({ definitionId: event.target.value })}
-              aria-invalid={invalidField === "definition"}
-              aria-describedby={
-                invalidField === "definition" ? `${id}-error` : undefined
-              }
-              className={COLLECT_INPUT_CLASS}
-            >
-              <option value="">
-                {t(
-                  locale,
-                  definitionPlaceholders[draft.intent] ??
-                    "collect.goal.selectDefinition"
-                )}
-              </option>
-              {props.definitions.map((definition) => (
-                <option key={definition.id} value={definition.id}>
-                  {definition.label}
-                </option>
-              ))}
-            </select>
-          </label>
+          <CollectGoalDefinitionPicker
+            key={draft.intent}
+            label={t(
+              locale,
+              definitionLabels[draft.intent] ?? "collect.goal.definition"
+            )}
+            placeholder={t(
+              locale,
+              definitionPlaceholders[draft.intent] ??
+                "collect.goal.selectDefinition"
+            )}
+            locale={locale}
+            value={draft.definitionId}
+            definitions={props.definitions}
+            disabled={props.loading}
+            invalid={invalidField === "definition"}
+            {...(invalidField === "definition"
+              ? { errorId: `${id}-error` }
+              : {})}
+            onChange={(definitionId) => change({ definitionId })}
+          />
         )}
         {showQuantity && (
           <label className="tw-max-w-28 tw-space-y-2 tw-text-xs tw-font-semibold tw-text-iron-300">
@@ -146,7 +141,14 @@ export default function CollectGoalForm(props: CollectGoalFormProps) {
         )}
         {props.showBudget !== false && (
           <label className="tw-space-y-2 tw-text-xs tw-font-semibold tw-text-iron-300">
-            <span>{t(locale, "collect.goal.budget")}</span>
+            <span>
+              {t(
+                locale,
+                props.budgetOptional
+                  ? "collect.goal.optionalBudget"
+                  : "collect.goal.budget"
+              )}
+            </span>
             <input
               disabled={props.loading}
               inputMode="decimal"
@@ -185,7 +187,12 @@ export default function CollectGoalForm(props: CollectGoalFormProps) {
           id={`${id}-budget-hint`}
           className="tw-mb-0 tw-mt-3 tw-text-xs tw-leading-5 tw-text-iron-400"
         >
-          {t(locale, "collect.goal.budgetHint")}
+          {t(
+            locale,
+            props.budgetOptional
+              ? "collect.goal.optionalBudgetHint"
+              : "collect.goal.budgetHint"
+          )}
         </p>
       )}
       {draft.intent === "artist" && (
