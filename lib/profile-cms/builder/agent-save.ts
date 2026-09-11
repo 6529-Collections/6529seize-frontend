@@ -1,5 +1,6 @@
 import { getStructuredApiErrorStatus } from "@/services/api/common-api";
 import { reviewCmsAgentCandidate } from "@/lib/profile-cms/agent-review";
+import { bindCmsDraftIdentity } from "./identity";
 import {
   getProfileCmsPackageById,
   listProfileCmsPackagesForProfile,
@@ -222,6 +223,14 @@ async function postDraftOnce(
   checkpoint: CmsAgentSaveCheckpoint
 ) {
   const { profileId, primaryWallet, signal } = scope;
+  // The ordinary save adapter binds the current owner again. A historical
+  // base can belong to another wallet in the same consolidated profile; do
+  // not save a different document from the one the owner just reviewed.
+  if (
+    bindCmsDraftIdentity(cmsPackage, profileId, primaryWallet).integrity
+      .package_hash !== checkpoint.candidateHash
+  )
+    throw new Error("cms_agent_proposal_changed");
   // Persist before the first write. Storage failure must fail before POST.
   writeCmsAgentSaveCheckpoint(checkpoint);
   if (signal.aborted) {

@@ -161,7 +161,7 @@ export function createAgentApi(configuration, fetchRequest = globalThis.fetch) {
         Accept: "application/json",
         Authorization: `Bearer ${token}`,
       };
-      if (stagingKey) headers["x-api-key"] = stagingKey;
+      if (stagingKey) headers["x-6529-auth"] = stagingKey;
       const json = body === undefined ? undefined : assertBoundedJson(body);
       if (json !== undefined) headers["Content-Type"] = "application/json";
       const signal = AbortSignal.any([

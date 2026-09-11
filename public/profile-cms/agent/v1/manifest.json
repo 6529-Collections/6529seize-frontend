@@ -13,8 +13,8 @@
     },
     {
       "name": "api.mjs",
-      "bytes": 7104,
-      "hash": "sha256:34be24d9fb48043b7afb1d7cecfdbf0dbdca9fd14c755a2fa51736393ed0ff05"
+      "bytes": 7106,
+      "hash": "sha256:a1b72cb4d28615d3ca963a02dd4344c73f10ed9e6c8d722866da697770f451b1"
     },
     {
       "name": "tools.mjs",
@@ -39,7 +39,7 @@
   ],
   "archive": {
     "name": "6529-cms-agent.zip",
-    "bytes": 55682,
-    "hash": "sha256:7dd86851ed578fa36f351d2b2b0873fae44e41e18630cf903dae4606491fb2c8"
+    "bytes": 55684,
+    "hash": "sha256:e0fbb6420a4cce0f264ce5391a9ce82a32fafa15d1cd24b5df88851a85f3ea54"
   }
 }

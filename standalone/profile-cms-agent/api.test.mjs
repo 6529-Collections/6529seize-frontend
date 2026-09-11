@@ -7,6 +7,8 @@ import {
 } from "./api.mjs";
 import { createToolHandler } from "./tools.mjs";
 
+const OTHER_ORIGIN = "https://attacker.example";
+const JSON_MEDIA_TYPE = "application/json";
 const token = `cms_agent_11111111-1111-4111-8111-111111111111.${"a".repeat(64)}`;
 const hash = `sha256:${"b".repeat(64)}`;
 const key = "22222222-2222-4222-8222-222222222222";
@@ -22,7 +24,7 @@ const candidate = {
 const response = (data, status = 200) =>
   new Response(JSON.stringify(data), {
     status,
-    headers: { "content-type": "application/json" },
+    headers: { "content-type": JSON_MEDIA_TYPE },
   });
 
 test("credentials only reach fixed environment origins; production excludes staging key", async () => {
@@ -47,13 +49,19 @@ test("credentials only reach fixed environment origins; production excludes stag
     calls[1].url,
     "https://api.staging.6529.io/api/profile-cms/agent-session/draft"
   );
-  assert.equal(calls[0].init.headers["x-api-key"], undefined);
-  assert.equal(calls[1].init.headers["x-api-key"], "staging-only");
-  assert.equal(calls[0].init.headers.Authorization, `Bearer ${token}`);
+  assert.deepEqual(calls[0].init.headers, {
+    Accept: JSON_MEDIA_TYPE,
+    Authorization: `Bearer ${token}`,
+  });
+  assert.deepEqual(calls[1].init.headers, {
+    Accept: JSON_MEDIA_TYPE,
+    Authorization: `Bearer ${token}`,
+    "x-6529-auth": "staging-only",
+  });
   assert.equal(calls[0].init.redirect, "error");
   assert.equal(calls[0].init.credentials, "omit");
   assert.throws(
-    () => createAgentApi({ environment: "https://attacker.example", token }),
+    () => createAgentApi({ environment: OTHER_ORIGIN, token }),
     /production or staging/
   );
 });
@@ -65,7 +73,7 @@ test("arbitrary routes, broad wallet JWTs and proposal traversal never fetch", a
     return response({});
   });
   await assert.rejects(api.request("../../packages/upload"));
-  await assert.rejects(api.request("https://attacker.example"));
+  await assert.rejects(api.request(OTHER_ORIGIN));
   await assert.rejects(
     createAgentApi({ token: "eyJwebsite-jwt" }, async () => {
       calls++;
@@ -74,7 +82,7 @@ test("arbitrary routes, broad wallet JWTs and proposal traversal never fetch", a
   const tool = createToolHandler(api, {});
   await assert.rejects(tool("cms_get_proposal", { proposal_id: `${key}\n` }));
   await assert.rejects(
-    tool("cms_read_draft", { token, url: "https://attacker.example" })
+    tool("cms_read_draft", { token, url: OTHER_ORIGIN })
   );
   assert.equal(calls, 0);
 });
@@ -152,7 +160,7 @@ test("response redirects, oversized streams, malformed JSON and credential echoe
     () =>
       new Response("", {
         status: 302,
-        headers: { location: "https://attacker.example" },
+        headers: { location: OTHER_ORIGIN },
       }),
     () => new Response("x".repeat(MAX_RESPONSE_BYTES + 1)),
     () => new Response("<html>gateway error</html>"),

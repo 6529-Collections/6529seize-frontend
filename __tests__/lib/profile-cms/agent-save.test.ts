@@ -169,6 +169,23 @@ it("saves an exact reviewed candidate and records the verified new draft without
   });
 });
 
+it("rejects owner-wallet rebinding before saving or retaining a checkpoint", async () => {
+  const { input } = setup();
+  await expect(
+    saveCmsAgentProposalDraft({
+      ...input,
+      primaryWallet: "0x0000000000000000000000000000000000000002",
+    })
+  ).rejects.toThrow("cms_agent_proposal_changed");
+  expect(save).not.toHaveBeenCalled();
+  expect(recordReview).not.toHaveBeenCalled();
+  expect(localStorage.length).toBe(0);
+  await expect(saveCmsAgentProposalDraft(input)).resolves.toMatchObject({
+    reviewRecorded: true,
+  });
+  expect(save).toHaveBeenCalledTimes(1);
+});
+
 it("returns the saved receipt when only the review-status write fails", async () => {
   const { input, result } = setup();
   recordReview.mockRejectedValue(new Error("status unavailable"));
