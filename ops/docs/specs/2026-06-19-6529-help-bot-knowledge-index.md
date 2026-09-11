@@ -33,11 +33,15 @@ current pages; those guides are not invented as historical snapshot routes.
 The EMMA record covers the five fixed collection shortcuts, Memes season
 selection, Intern JPG token IDs, and the manual contract path in Create Snapshots.
 
-The Memes mint-route record covers the receipt-confirmed **SEIZED!** state,
-artwork details, **Quantity**, and **Minted to** destination. It distinguishes
-**Done**, which closes the confirmation, from the optional **View transaction**
-link, which opens a new tab. An unavailable artwork preview does not imply a
-failed mint.
+The Memes mint-route record covers **Confirm in your wallet**, the expandable
+**Wallet not showing?** instructions, **Mint submitted**, and the
+receipt-confirmed **SEIZED!** state. Artwork details, **Quantity**, and the full
+destination stay visible throughout; the destination label changes from
+**Recipient** to **Minted to** after confirmation. Pending states cannot be
+dismissed; a wallet request can be rejected in the wallet before submission.
+The record distinguishes **Done**, available after confirmation, from the
+optional **View transaction** link, which opens a new tab. An unavailable
+artwork preview does not imply a failed mint.
 
 The artwork documentation record owns the six-chapter writing flow, named next
 chapter controls, **Answer options**, deliberate examples, file preparation,
