@@ -699,6 +699,8 @@ export async function logoutSessionV2({
     if (!address) {
       return;
     }
+    // Native logout is local to this profile/device; device-wide logout uses
+    // clearAllAuthenticatedProfiles. allSessions retains its web-only meaning.
     await queueNativePushLogout(address, false);
     await removeNativeRefreshToken(address);
     return;

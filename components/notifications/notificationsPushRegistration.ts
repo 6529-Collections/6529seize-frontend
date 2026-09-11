@@ -541,14 +541,19 @@ const registerWithRetry = async (
   }
 };
 
+const getUsablePushAuthJwt = (): string | null => {
+  const jwt = getAuthJwt();
+  return isAuthJwtUsable(jwt) ? jwt : null;
+};
+
 export const registerPushNotificationWithRetry = async (
   deviceId: string,
   deviceInfo: DeviceInfo,
   token: string,
   profileId: string
 ): Promise<boolean> => {
-  const registrationJwt = getAuthJwt();
-  if (!isAuthJwtUsable(registrationJwt) || !registrationJwt) {
+  const registrationJwt = getUsablePushAuthJwt();
+  if (!registrationJwt) {
     Sentry.addBreadcrumb({
       category: "notifications",
       level: "warning",
@@ -749,5 +754,4 @@ export {
   registerWithRetry,
   requestPushNotificationPermissions,
   toCaptureExceptionInput,
-  toRecord,
 };
