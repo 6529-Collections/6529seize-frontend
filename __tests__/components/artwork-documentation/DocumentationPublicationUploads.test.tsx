@@ -220,6 +220,7 @@ describe("publication-only artwork uploads", () => {
       state: "uploading",
     };
     jest.mocked(startDocumentationUpload).mockResolvedValue({
+      can_mutate: true,
       asset,
       upload_id: asset.id,
       expires_at: Date.now() + 60_000,

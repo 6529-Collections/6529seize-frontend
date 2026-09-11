@@ -51,6 +51,14 @@ it("fails closed for an unknown writer module", () => {
   expect(canWriteDocumentation(mutationCapabilities(context))).toBe(false);
 });
 
+it("does not borrow program viewer context-read permission to activate an otherwise unsupported write grant", () => {
+  const context = limitedEditor();
+  context.mutation_capabilities.read_context = false;
+  expect(context.capabilities.read_context).toBe(true);
+  expect(canWriteDocumentation(mutationCapabilities(context))).toBe(false);
+  expect(canEditDocumentationField(context, "artwork.title")).toBe(false);
+});
+
 it("keeps ordinary fields editable while viewer reads do not authorize contact or rights fields", () => {
   const context = limitedEditor();
   expect(canEditDocumentationField(context, "artwork.title")).toBe(true);

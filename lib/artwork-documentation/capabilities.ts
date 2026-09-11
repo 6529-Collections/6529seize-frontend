@@ -38,7 +38,7 @@ export function mutationCapabilities(
     .mutation_capabilities;
   // Read grants must never be used as a fallback when write policy is absent.
   if (
-    !capabilities ||
+    capabilities?.read_context !== true ||
     !Array.isArray(capabilities.edit_modules) ||
     !Array.isArray(capabilities.review_lanes) ||
     capabilities.edit_modules.some(
