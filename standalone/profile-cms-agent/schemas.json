@@ -3,7 +3,7 @@
   "proposal_schema": "6529.cms.agent_candidate.v1",
   "package_schema": {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://6529.io/schemas/cms-package-v1.schema.json",
+    "$id": "https://6529.io/profile-cms/agent/v1/cms-package-v1.schema.json",
     "title": "6529 CMS Package v1",
     "type": "object",
     "additionalProperties": false,
@@ -1134,7 +1134,7 @@
         "pattern": "^sha256:[a-f0-9]{64}$"
       },
       "candidate_package": {
-        "$ref": "https://6529.io/schemas/cms-package-v1.schema.json"
+        "$ref": "https://6529.io/profile-cms/agent/v1/cms-package-v1.schema.json"
       },
       "summary": {
         "type": "string",
