@@ -84,6 +84,12 @@ your meaning. Open **Language and translations** to set the primary language,
 record authorship and artist review, or **Add a translation**. Each translation
 keeps its own text and review information. Selecting a primary language that
 already has a version switches to that version without replacing its text.
+Use **Change language** to choose one version's language by name, then
+**Apply language**. **Other language** reveals a **Language tag** field for
+languages outside the suggestions. The correction stays in its dialog until applied or cancelled;
+invalid or duplicate tags stay visible for correction. This action changes the
+language tag, not the version's text, credit or artist review. Choose **Primary
+language** to switch between existing versions instead.
 
 ## Start with a worked example
 

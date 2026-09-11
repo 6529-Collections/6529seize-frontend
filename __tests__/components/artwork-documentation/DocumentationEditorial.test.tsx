@@ -1,5 +1,9 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
+import { useState } from "react";
+import userEvent from "@testing-library/user-event";
+import type { FieldValue } from "@/lib/artwork-documentation/registry";
 import DocumentationValueEditor from "@/components/artwork-documentation/DocumentationValueEditor";
+import LanguageTagCorrection from "@/components/artwork-documentation/DocumentationLanguageTagCorrection";
 import DocumentationSummary from "@/components/artwork-documentation/DocumentationSummary";
 import DocumentationRecordValue from "@/components/artwork-documentation/DocumentationRecordValue";
 import { documentationFixture } from "@/__tests__/fixtures/artwork-documentation";
@@ -27,6 +31,174 @@ const narrative = {
 };
 
 describe("editorial artwork documentation", () => {
+  beforeAll(() => {
+    HTMLDialogElement.prototype.showModal = function () {
+      this.setAttribute("open", "");
+    };
+    HTMLDialogElement.prototype.close = function () {
+      this.removeAttribute("open");
+    };
+  });
+
+  function NarrativeEditor({
+    onChange,
+  }: {
+    readonly onChange: (value: FieldValue) => void;
+  }) {
+    const [value, setValue] = useState<FieldValue>(narrative);
+    return (
+      <DocumentationValueEditor
+        id="caption"
+        label="Caption"
+        editor={{ kind: "localized", max: 3000 }}
+        value={value}
+        onChange={(next) => {
+          setValue(next);
+          onChange(next);
+        }}
+        hideLabel
+      />
+    );
+  }
+
+  it("keeps nested object and list labels visible when the outer answer label is supplied", () => {
+    const { rerender } = render(
+      <DocumentationValueEditor
+        id="dimensions"
+        label="Dimensions"
+        editor={{
+          kind: "object",
+          fields: { width: { kind: "number" }, height: { kind: "number" } },
+        }}
+        value={{ width: 6000, height: 4000 }}
+        onChange={jest.fn()}
+        hideLabel
+      />
+    );
+    for (const label of ["Width in pixels", "Height in pixels"]) {
+      expect(screen.getByText(label, { selector: "label" })).not.toHaveClass(
+        "tw-sr-only"
+      );
+    }
+    rerender(
+      <DocumentationValueEditor
+        id="names"
+        label="Name"
+        editor={{ kind: "list", item: { kind: "text" }, max: 10 }}
+        value={["Ari"]}
+        onChange={jest.fn()}
+        hideLabel
+      />
+    );
+    expect(screen.getByText("Name", { selector: "label" })).not.toHaveClass(
+      "tw-sr-only"
+    );
+  });
+
+  it("applies a typed language correction once and preserves sibling text and review metadata", async () => {
+    const user = userEvent.setup();
+    const onChange = jest.fn();
+    render(<NarrativeEditor onChange={onChange} />);
+    await user.click(screen.getByText("Language and translations"));
+    await user.selectOptions(screen.getByLabelText("Primary language"), "fr");
+    expect(onChange).toHaveBeenLastCalledWith({
+      ...narrative,
+      primary_language: "fr",
+    });
+    onChange.mockClear();
+    await user.click(
+      screen.getAllByRole("button", { name: "Change language" })[0]!
+    );
+    const modal = screen.getByRole("dialog", { name: "Change language" });
+    await user.selectOptions(
+      within(modal).getByRole("combobox", { name: "Language" }),
+      "__other__"
+    );
+    const input = within(modal).getByRole("textbox", { name: "Language tag" });
+    await user.clear(input);
+    await user.type(input, "fr-CA");
+    await user.tab();
+    expect(onChange).not.toHaveBeenCalled();
+    expect(modal).toBeInTheDocument();
+    await user.click(
+      within(modal).getByRole("button", { name: "Apply language" })
+    );
+    expect(onChange).toHaveBeenCalledTimes(1);
+    expect(onChange).toHaveBeenLastCalledWith({
+      ...narrative,
+      primary_language: "fr-CA",
+      versions: [
+        narrative.versions[0],
+        { ...narrative.versions[1], language: "fr-CA" },
+      ],
+    });
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it("lets artists choose a language by name and keeps an uncommon current language", async () => {
+    const user = userEvent.setup();
+    const onApply = jest.fn();
+    render(
+      <LanguageTagCorrection
+        language="fr-CA"
+        otherLanguages={["en"]}
+        onApply={onApply}
+        onClose={jest.fn()}
+      />
+    );
+    const language = screen.getByRole("combobox", { name: "Language" });
+    expect(language).toHaveValue("fr-CA");
+    expect(
+      screen.getByRole("option", { name: "Canadian French" })
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("textbox", { name: "Language tag" })
+    ).not.toBeInTheDocument();
+    await user.selectOptions(
+      language,
+      screen.getByRole("option", { name: "Japanese" })
+    );
+    expect(onApply).not.toHaveBeenCalled();
+    await user.click(screen.getByRole("button", { name: "Apply language" }));
+    expect(onApply).toHaveBeenCalledTimes(1);
+    expect(onApply).toHaveBeenLastCalledWith("ja");
+  });
+
+  it("keeps invalid and duplicate corrections visible until fixed or cancelled", async () => {
+    const user = userEvent.setup();
+    const onChange = jest.fn();
+    render(<NarrativeEditor onChange={onChange} />);
+    await user.click(screen.getByText("Language and translations"));
+    await user.click(
+      screen.getAllByRole("button", { name: "Change language" })[0]!
+    );
+    const modal = screen.getByRole("dialog");
+    await user.selectOptions(
+      within(modal).getByRole("combobox", { name: "Language" }),
+      "__other__"
+    );
+    const input = within(modal).getByRole("textbox", { name: "Language tag" });
+    for (const tag of ["f", "fr"]) {
+      await user.clear(input);
+      await user.type(input, tag);
+      await user.click(
+        within(modal).getByRole("button", { name: "Apply language" })
+      );
+      expect(input).toHaveValue(tag);
+      expect(input).toHaveAttribute("aria-invalid", "true");
+      expect(within(modal).getByRole("alert")).toHaveTextContent(
+        "has not been applied"
+      );
+      expect(onChange).not.toHaveBeenCalled();
+    }
+    const leave = new Event("beforeunload", { cancelable: true });
+    globalThis.dispatchEvent(leave);
+    expect(leave.defaultPrevented).toBe(true);
+    await user.click(within(modal).getByRole("button", { name: "Cancel" }));
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
   it("reads dimensions and an explicit empty contributor list without structural labels", () => {
     const { rerender, container } = render(
       <DocumentationRecordValue value={{ width: 6000, height: 4000 }} />
@@ -112,9 +284,12 @@ describe("editorial artwork documentation", () => {
       />
     );
     fireEvent.click(screen.getByText("Language and translations"));
-    fireEvent.change(screen.getByLabelText("Primary language"), {
-      target: { value: "fr" },
-    });
+    fireEvent.change(
+      screen.getByRole("combobox", { name: "Primary language" }),
+      {
+        target: { value: "fr" },
+      }
+    );
     expect(onChange).toHaveBeenLastCalledWith({
       ...narrative,
       primary_language: "fr",

@@ -1,5 +1,8 @@
 "use client";
 
+import { useState } from "react";
+import LanguageTagCorrection from "./DocumentationLanguageTagCorrection";
+import { documentationLanguageName } from "./DocumentationRecordValue";
 import {
   documentationFieldLabel,
   documentationOptionLabel,
@@ -35,7 +38,6 @@ interface Props {
 const languageEntry: ValueEditor = {
   kind: "object",
   fields: {
-    language: { kind: "text", max: 64 },
     text: { kind: "text", multiline: true },
     authorship: {
       kind: "choice",
@@ -62,7 +64,7 @@ export default function DocumentationValueEditor(props: Props) {
         <input
           id={id}
           type="checkbox"
-          className="tw-h-5 tw-w-5 tw-accent-primary-400"
+          className="tw-h-5 tw-w-5 tw-shrink-0 tw-accent-primary-400"
           checked={value === true}
           disabled={disabled}
           onChange={(event) => onChange(event.target.checked)}
@@ -103,13 +105,18 @@ export default function DocumentationValueEditor(props: Props) {
   return <ScalarEditor {...props} editor={editor} />;
 }
 
+function languageTag(value: FieldValue | undefined): string {
+  return typeof value === "string" ? value : "";
+}
+
 function LocalizedEditor(
   props: Props & {
     readonly editor: Extract<ValueEditor, { kind: "localized" }>;
   }
 ) {
   const { id, label, editor, value, onChange, disabled, describedBy } = props;
-  const { msg } = useDocumentationMessages();
+  const { msg, locale } = useDocumentationMessages();
+  const [correctingIndex, setCorrectingIndex] = useState<number | null>(null);
   const current = recordValue(value ?? initialValue(editor));
   const versions = Array.isArray(current["versions"])
     ? current["versions"]
@@ -164,33 +171,42 @@ function LocalizedEditor(
         </summary>
         <div className="tw-space-y-5 tw-py-3">
           <p className="tw-m-0 tw-max-w-prose tw-leading-7">
-            {msg("editorial.languageHelp")}
+            {msg("chapters.languageHelp")}
           </p>
-          <DocumentationValueEditor
-            id={id + "-primary"}
-            label={msg("primaryLanguage")}
-            hideLabel={false}
-            editor={{ kind: "text", max: 64 }}
-            value={current["primary_language"]}
-            disabled={disabled}
-            onChange={(language) => {
-              const existing = versions.some(
-                (version) => recordValue(version)["language"] === language
-              );
-              const updated = existing
-                ? versions
-                : versions.map((version, index) =>
-                    index === primaryIndex
-                      ? { ...recordValue(version), language }
-                      : version
-                  );
-              onChange({
-                ...current,
-                primary_language: language,
-                versions: updated,
-              });
-            }}
-          />
+          <label className="tw-block tw-text-sm tw-text-iron-300">
+            {msg("primaryLanguage")}
+            <select
+              id={id + "-primary"}
+              className={`${inputClass} tw-mt-2`}
+              value={languageTag(current["primary_language"])}
+              disabled={disabled}
+              onChange={(event) =>
+                onChange({ ...current, primary_language: event.target.value })
+              }
+            >
+              {versions.map((version, index) => {
+                const language = recordValue(version)["language"];
+                return (
+                  <option
+                    key={index}
+                    value={languageTag(language)}
+                    disabled={!languageTag(language)}
+                  >
+                    {documentationLanguageName(language, locale) ||
+                      msg("chapters.languageNotSet")}
+                  </option>
+                );
+              })}
+            </select>
+          </label>
+          {!disabled && (
+            <DocumentationButton
+              secondary
+              onClick={() => setCorrectingIndex(primaryIndex)}
+            >
+              {msg("chapters.changeLanguage")}
+            </DocumentationButton>
+          )}
           <DocumentationValueEditor
             id={id + "-authorship"}
             label={documentationFieldLabel("authorship")}
@@ -223,7 +239,21 @@ function LocalizedEditor(
             >
               <legend className="tw-pr-3 tw-text-sm tw-text-iron-300">
                 {msg("editorial.translation", { number: index + 1 })}
+                {" · "}
+                {documentationLanguageName(
+                  recordValue(version)["language"],
+                  locale
+                ) || msg("chapters.languageNotSet")}
               </legend>
+              {!disabled && (
+                <DocumentationButton
+                  secondary
+                  className="tw-mb-4"
+                  onClick={() => setCorrectingIndex(index)}
+                >
+                  {msg("chapters.changeLanguage")}
+                </DocumentationButton>
+              )}
               <DocumentationValueEditor
                 {...props}
                 hideLabel={false}
@@ -281,6 +311,33 @@ function LocalizedEditor(
           )}
         </div>
       </details>
+      {correctingIndex !== null && !disabled && (
+        <LanguageTagCorrection
+          language={languageTag(
+            recordValue(versions[correctingIndex])["language"]
+          )}
+          otherLanguages={versions.flatMap((version, index) =>
+            index === correctingIndex
+              ? []
+              : [languageTag(recordValue(version)["language"])]
+          )}
+          onClose={() => setCorrectingIndex(null)}
+          onApply={(language) => {
+            onChange({
+              ...current,
+              ...(correctingIndex === primaryIndex
+                ? { primary_language: language }
+                : {}),
+              versions: versions.map((version, index) =>
+                index === correctingIndex
+                  ? { ...recordValue(version), language }
+                  : version
+              ),
+            });
+            setCorrectingIndex(null);
+          }}
+        />
+      )}
     </div>
   );
 }
@@ -419,6 +476,7 @@ function ObjectEditor(
           <DocumentationValueEditor
             key={key}
             {...props}
+            hideLabel={false}
             id={`${props.id}-${key}`}
             label={documentationFieldLabel(key)}
             editor={editor}
@@ -455,6 +513,7 @@ function ListEditor(
           </legend>
           <DocumentationValueEditor
             {...props}
+            hideLabel={false}
             id={`${props.id}-${index}`}
             editor={props.editor.item}
             value={entry}

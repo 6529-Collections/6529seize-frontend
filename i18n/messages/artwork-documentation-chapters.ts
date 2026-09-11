@@ -1,4 +1,20 @@
 export const ARTWORK_DOCUMENTATION_CHAPTER_MESSAGES = {
+  "artworkDocumentation.chapters.languageHelp":
+    "Choose the version readers should see first. Each translation keeps its own text, credit and review status. Use Change language to identify or correct the language of a version.",
+  "artworkDocumentation.chapters.changeLanguage": "Change language",
+  "artworkDocumentation.chapters.otherLanguage": "Other language",
+  "artworkDocumentation.chapters.languageTagHelp":
+    "Enter a language tag, for example fr-CA or zh-Hant. The full supported range remains available here.",
+  "artworkDocumentation.chapters.languageTag": "Language tag",
+  "artworkDocumentation.chapters.languageNotSet": "Language not set",
+  "artworkDocumentation.chapters.applyLanguage": "Apply language",
+  "artworkDocumentation.chapters.cancelLanguage": "Cancel",
+  "artworkDocumentation.chapters.languageCorrectionHelp":
+    "Choose the language of this version. To read a different existing version first, use Primary language instead.",
+  "artworkDocumentation.chapters.languageCorrectionError":
+    "Choose a language not already used by another version, or enter a valid language tag. Your correction has not been applied.",
+  "artworkDocumentation.chapters.languageCorrectionPending":
+    "This correction stays here until you apply it or cancel. It does not change the text, its credit or artist review.",
   "artworkDocumentation.chapters.answerOptions": "Answer options",
   "artworkDocumentation.chapters.questionsHelp":
     "A separate conversation with the team. Questions and replies stay outside the artwork record and its publication content.",
