@@ -194,6 +194,29 @@ export default function DocumentationRecordValue({
   return <StructuredRecordValue record={record} />;
 }
 
+function DateValue({
+  start,
+  end,
+  approximate,
+}: {
+  readonly start: string;
+  readonly end: unknown;
+  readonly approximate: boolean;
+}) {
+  const { msg, locale } = useDocumentationMessages();
+  const formattedStart = recordedDate(start, locale);
+  const date =
+    typeof end === "string" && end
+      ? msg("catalogue.dateRange", {
+          start: formattedStart,
+          end: recordedDate(end, locale),
+        })
+      : formattedStart;
+  return (
+    <span>{approximate ? msg("catalogue.approximate", { date }) : date}</span>
+  );
+}
+
 function StructuredRecordValue({
   record,
 }: {
@@ -242,23 +265,14 @@ function StructuredRecordValue({
   if (
     typeof record["precision"] === "string" &&
     typeof record["start"] === "string"
-  ) {
-    const start = recordedDate(record["start"], locale);
-    const date =
-      typeof record["end"] === "string" && record["end"]
-        ? msg("catalogue.dateRange", {
-            start,
-            end: recordedDate(record["end"], locale),
-          })
-        : start;
+  )
     return (
-      <span>
-        {record["approximate"] === true
-          ? msg("catalogue.approximate", { date })
-          : date}
-      </span>
+      <DateValue
+        start={record["start"]}
+        end={record["end"]}
+        approximate={record["approximate"] === true}
+      />
     );
-  }
   if (
     typeof record["kind"] === "string" &&
     Object.keys(record).every((key) =>
