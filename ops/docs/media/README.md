@@ -12,8 +12,8 @@
 
 - [Collect](collecting.md): `/collect` and `/collect/orders`, profile set
   completion, marketplace trades and TDH comparisons.
-- [Card Market Depth](feature-card-market-depth.md): quoted asks, bids, quantities
-  and snapshot freshness on supported card pages.
+- [Listings and Offers](feature-card-market-depth.md): quoted prices, quantities
+  and update times on supported card pages.
 - [Memes](memes/README.md): `/the-memes`, `/the-memes/{id}`,
   `/the-memes/{id}/distribution`, `/the-memes/mint`, and `/meme-calendar`.
 - [Collections](collections/README.md): `/meme-lab`, `/meme-lab/{id}`,
