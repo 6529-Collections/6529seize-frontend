@@ -8103,7 +8103,14 @@
         "tdh not matching",
         "my node is behind",
         "tdh not synced",
-        "tdh out of date"
+        "tdh out of date",
+        "tdh different",
+        "tdh is different",
+        "tdh differs",
+        "merkle differ",
+        "merkle differs",
+        "merkle different",
+        "merkle mismatch"
       ],
       "keywords": [
         "desktop",
