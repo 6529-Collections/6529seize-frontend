@@ -56,13 +56,23 @@
    continues after the same wallet reconnects. Selecting another authenticated
    wallet switches the active profile, refreshes mint details, and cancels the
    pending mint so the user can review and select `SEIZE xN` again.
-9. The on-chain transaction modal shows `Confirm in your wallet`, then
-   `Transaction Submitted - SEIZING` with a `View Tx` link.
-10. After receipt confirmation, the modal headline becomes `SEIZED!`, followed
+9. The transaction modal shows `Confirm in your wallet` and
+   `Review the mint details and network fee before confirming.` It displays
+   the artwork, collection and card number when available, `Quantity`, and the full
+   destination address under `Recipient`. Review and confirm the request in
+   the wallet. If the request is not visible, expand `Wallet not showing?` for
+   help finding it in the wallet app or browser extension. Reject the request
+   in the wallet to stop before submission.
+10. Once submitted, the modal shows `Mint submitted` and
+    `Waiting for network confirmation.` The artwork, quantity, and recipient
+    remain visible. `This window updates automatically.` explains that no
+    further action is needed here. `View transaction` opens the transaction in
+    a new browser tab when its link is available.
+11. After receipt confirmation, the modal headline becomes `SEIZED!`, followed
     by `Your mint is confirmed.` It shows the artwork, collection and card
     number when available, minted quantity, and the full destination wallet
     address under `Minted to`.
-11. Select `Done` to close the confirmation and return to the mint page, or
+12. Select `Done` to close the confirmation and return to the mint page, or
     `View transaction` to open the transaction in a new browser tab. The close
     control and Escape also dismiss the confirmation.
 
@@ -94,6 +104,8 @@
 - Minting for another wallet:
   - `Mint for fren` enables recipient search by handle, ENS, or wallet.
   - Mint executes for the selected destination wallet.
+  - Before confirmation, the full destination address appears under
+    `Recipient` in both the wallet-request and submitted states.
   - The success confirmation shows the destination wallet under `Minted to`,
     so users can verify where the artwork was minted.
 - Minting to your own profile wallet:
@@ -141,11 +153,20 @@
   `No allowlist spots in current phase for this address`.
 - If the minted asset description is short enough to fit in the preview, the
   expand/collapse button is not shown.
-- If the success confirmation cannot display the artwork image, it shows
-  a placeholder labelled `Artwork preview unavailable`. The mint remains confirmed and its quantity,
-  destination, and transaction link remain available.
-- The confirmation retains the artwork, quantity, and destination from the
-  submitted mint, even if the page's current mint details later change.
+- If a wallet-request, submitted, or success modal cannot display the artwork
+  image, it shows a placeholder labelled `Artwork preview unavailable`.
+  Quantity and destination remain visible. The unavailable preview does not
+  change the transaction status or prevent access to an available transaction
+  link.
+- The wallet-request, submitted, and success states retain the same artwork,
+  quantity, and destination selected for that mint, even if the page's current
+  mint details later change.
+- Wallet confirmation and submitted states have no close or `Done` control,
+  and Escape or clicking outside does not dismiss them. Before submission,
+  stop by rejecting the request in the wallet. After submission, the modal
+  waits for confirmation or an error.
+- A submitted mint stays in `Mint submitted` while its receipt status updates;
+  the modal does not ask for wallet confirmation again.
 - Once claim status is ended/finalized, mint-connect and mint-action controls
   no longer render for the finished phase window.
 - Mint action buttons become active at the exact phase start timestamp and stop
@@ -164,6 +185,9 @@
 - If claim/instance data cannot be resolved after loading, the page shows
   `No mint information found`.
 - If allowlist lookup fails, the panel shows `Error fetching allowlist data`.
+- If the wallet request is not visible, expand `Wallet not showing?`, then
+  open the wallet app or browser extension to find it. The help control
+  reveals instructions; it does not open the wallet itself.
 - If wallet signature/transaction submission fails, the on-chain transaction
   modal shows the mint error and can be closed before retrying.
 - If receipt polling fails after submission, the modal shows the receipt error
@@ -186,13 +210,13 @@
   wall-clock windows remain fixed.
 - Transaction success is shown after receipt confirmation, not immediately after
   wallet submission.
-- Before confirmation and for transaction errors, the modal identifies the card as
+- For transaction errors, the modal identifies the card as
   `Mint: The Memes #{id}` when the on-chain claim provides a valid token ID;
   otherwise it keeps the generic `Mint The Memes` title.
-- The success confirmation uses `SEIZED!` as its title and places the card
-  identifier with the artwork details. If the artwork title is unavailable,
-  it uses `Minted artwork`; without a valid card number, the collection label
-  remains `The Memes`.
+- Wallet confirmation, submitted, and success states use the status as the
+  title and place the card identifier with the artwork details. If the artwork
+  title is unavailable, it uses `Artwork`; without a valid card number, the
+  collection label remains `The Memes`.
 - Debug diagnostics are only exposed when the `mintdebug=1` query parameter is
   set, and are intended for debugging support.
 
@@ -202,16 +226,16 @@
   `components/manifold-minting/ManifoldMintingWidget.tsx`, and the shared
   `components/common/OnchainTransactionModal.tsx` status surface.
 - Untranslated surface: the remaining mint controls, phase/eligibility copy,
-  inline validation, and the shared modal's pending and error controls and
-  accessible names.
-- Current fallback behavior: success confirmation labels, actions, artwork
-  fallbacks, and close control support `en-US`, `en-GB`, `fr-FR`, `es-ES`, and
-  `de-DE`. `SEIZED!` and `The Memes` retain their brand wording in every locale.
-  Other mint transaction titles and status messages fall back to `en-US`; the
-  remaining widget and pending/error shared modal copy is still English-only.
-- User impact: every supported locale has a localized success confirmation and
-  a functional mint and recovery flow, but untranslated controls and pending
-  or error details remain in English.
+  inline validation, and the shared modal's error controls and accessible names.
+- Current fallback behavior: wallet confirmation, wallet-request help,
+  submitted status, and success confirmation support `en-US`, `en-GB`, `fr-FR`,
+  `es-ES`, and `de-DE`, including artwork fallbacks and actions. `SEIZED!` and
+  `The Memes` retain their brand wording in every locale. Mint error titles
+  and status messages fall back to `en-US`; the remaining widget and shared
+  error modal copy is still English-only.
+- User impact: every supported locale has localized wallet-request, submitted,
+  and success states, but untranslated mint controls and error details remain
+  in English.
 - Owner or follow-up issue: frontend minting localization backlog.
 - Expected remediation path: extract the remaining mint widget and shared
   on-chain modal copy into complete message families, add reviewed translations,
