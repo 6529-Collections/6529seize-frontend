@@ -8,6 +8,43 @@ jest.mock("@/hooks/useBrowserLocale", () => ({
 }));
 
 describe("artwork documentation modules", () => {
+  it("uses publication intent without exposing per-field privacy choices in the new intake", () => {
+    const context = documentationFixture();
+    context.profile.version = 2;
+    context.profile.intake_mode = "publication_only" as never;
+    context.profile.modules[1]!.fields[1]!.allowed_statuses = [
+      "provided",
+      "unknown",
+    ] as never;
+    const onChange = jest.fn();
+    render(
+      <DocumentationModules
+        context={context}
+        edits={[]}
+        section="artwork"
+        onChange={onChange}
+      />
+    );
+    expect(
+      screen.queryByRole("option", { name: "Restricted" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("option", { name: "Withheld" })
+    ).not.toBeInTheDocument();
+    fireEvent.change(screen.getByRole("textbox", { name: "Location" }), {
+      target: { value: "A studio" },
+    });
+    expect(onChange).toHaveBeenLastCalledWith(
+      "artwork",
+      expect.objectContaining({
+        answer: {
+          status: "provided",
+          value: "A studio",
+          intended_visibility: "public_record",
+        },
+      })
+    );
+  });
   it("renders the original script without rewriting the artist title", () => {
     render(
       <DocumentationModules
