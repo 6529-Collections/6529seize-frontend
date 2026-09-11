@@ -2,6 +2,36 @@
 
 Parent: [index](README.md). This is ready-to-implement English source copy, version `artwork-documentation-copy-v1`. Implement with translation keys and adapt layout without changing the claims. This package does not send an invitation or publish marketing.
 
+## Publication-only intake and worked examples
+
+Version 2 of each documentation profile prepares one artwork record intended
+for publication with the work. Its artwork answers and selected files have no
+per-field privacy choice. Legacy version 1 retains its existing choices; no
+restricted material is silently republished or copied into a new record.
+Draft storage is temporary preparation, not publication or minting.
+
+Every visible section offers a coherent, clearly fictional worked example:
+*The Space Between*, by Ari Example, is a composite of two photographs of a
+handmade cardboard gate. Its complete answers cover all eight modules. Empty
+sections open the example; completed sections keep it available. Examples
+follow supported profile fields and the pinned interview instrument. They
+never become artist data merely by opening or reviewing them.
+
+Selected empty narrative fields offer a `[[prompt]]` writing structure in a
+local, unsaved editor. The artist replaces the prompts and explicitly applies
+their own schema-valid answer through ordinary draft saving. Facts, identities,
+rights, permissions, dates and asset references have no one-click insertion.
+Applying a structure cannot overwrite an answer already present in the form.
+
+**Questions for the team** is a separate drafting conversation at the end of
+review. It uses context-wide comments outside artwork modules, snapshots and
+publication previews. Resolve uncertainties before finalizing and move only
+the relevant public answer into the artwork form. It is not an evidence
+deposit or a private appendix to the eventual decentralized record.
+
+The earlier private-evidence and visibility copy below applies only to legacy
+version 1. Publication-only helpers supersede those invitations for version 2.
+
 ## 1. The story we are telling
 
 Lead with the artist's work and voice. A title and an image can travel widely while the circumstances, choices and history behind them disappear. This feature helps artists keep those things together. Photography particularly benefits from distinguishing the finished image from source files, remembering how an image was constructed and recording the conditions under which it should be seen.

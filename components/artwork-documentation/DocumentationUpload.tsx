@@ -32,7 +32,12 @@ import {
   useDocumentationMessages,
 } from "./DocumentationControls";
 import DocumentationAssetDetails from "./DocumentationAssetDetails";
-import { DOCUMENTATION_ASSET_ROLES } from "@/lib/artwork-documentation/asset-roles";
+import {
+  canPublishDocumentationAsset,
+  DOCUMENTATION_ASSET_ROLES,
+  PUBLICATION_DOCUMENTATION_ASSET_ROLES,
+} from "@/lib/artwork-documentation/asset-roles";
+import { isPublicationOnly } from "@/lib/artwork-documentation/intake";
 
 const restrictedRoles = new Set([
   "consent_instrument",
@@ -53,8 +58,20 @@ function canContinueUpload(
   return mounted.current && !signal.aborted;
 }
 
+function canUseUpload(
+  context: ApiArtworkDocumentationContext,
+  asset: { readonly role: string; readonly intended_visibility: string }
+): boolean {
+  return (
+    canPublishDocumentationAsset(context, asset.role) &&
+    (!isPublicationOnly(context.profile) ||
+      asset.intended_visibility === "public_record")
+  );
+}
+
 export default function DocumentationUpload({ context, controller }: Props) {
   const { msg, locale } = useDocumentationMessages();
+  const publicationOnly = isPublicationOnly(context.profile);
   const [file, setFile] = useState<File | null>(null);
   const [role, setRole] = useState<string>("artwork_final");
   const [visibility, setVisibility] = useState("restricted");
@@ -62,7 +79,7 @@ export default function DocumentationUpload({ context, controller }: Props) {
     useState<ApiArtworkDocumentationUploadSession | null>(null);
   const [sent, setSent] = useState(0);
   const [status, setStatus] = useState<
-    "idle" | "uploading" | "processing" | "failed" | "changed"
+    "idle" | "uploading" | "processing" | "cancelling" | "failed" | "changed"
   >("idle");
   const abort = useRef<AbortController | null>(null);
   const startKey = useRef(crypto.randomUUID());
@@ -77,7 +94,39 @@ export default function DocumentationUpload({ context, controller }: Props) {
   }, []);
   const sizeLabel = (size: number) =>
     `${formatNumber(locale, size / (1024 * 1024), { maximumFractionDigits: 1 })} MiB`;
-  const busy = status === "uploading" || status === "processing";
+  const busy =
+    status === "uploading" ||
+    status === "processing" ||
+    status === "cancelling";
+  const roles = publicationOnly
+    ? PUBLICATION_DOCUMENTATION_ASSET_ROLES
+    : DOCUMENTATION_ASSET_ROLES;
+  const rolePermitted = canPublishDocumentationAsset(context, role);
+  const transferPermitted = session
+    ? canUseUpload(context, session.asset)
+    : rolePermitted;
+  const failureMessage =
+    session && !transferPermitted ? "uploadBlockedRecovery" : "uploadFailed";
+  const chosenVisibility = publicationOnly ? "public_record" : visibility;
+  const uploadVisibility =
+    !publicationOnly && restrictedRoles.has(role)
+      ? "restricted"
+      : chosenVisibility;
+  const visibleAssets = context.assets.filter(
+    (asset) =>
+      !publicationOnly ||
+      (asset.intended_visibility === "public_record" &&
+        PUBLICATION_DOCUMENTATION_ASSET_ROLES.some(
+          (allowedRole) => allowedRole === asset.role
+        ))
+  );
+  const roleLabel = (value: string) => {
+    if (publicationOnly && value === "preservation_master")
+      return msg("publicationMasterRole");
+    if (publicationOnly && value === "process_evidence")
+      return msg("publicationProcessRole");
+    return documentationOptionLabel(value);
+  };
   const canUpload =
     context.capabilities.edit_modules.includes(
       ApiArtworkDocumentationCapabilitiesEditModulesEnum.Files
@@ -91,8 +140,15 @@ export default function DocumentationUpload({ context, controller }: Props) {
       assetVisibility: string,
       filename: string
     ) =>
-      controller.mutate((current, signal) =>
-        linkDocumentationAsset(
+      controller.mutate((current, signal) => {
+        if (
+          !canUseUpload(current, {
+            role: assetRole,
+            intended_visibility: assetVisibility,
+          })
+        )
+          throw new Error("PUBLICATION_ASSET_ROLE_REQUIRED");
+        return linkDocumentationAsset(
           current,
           {
             asset_id: assetId,
@@ -100,19 +156,25 @@ export default function DocumentationUpload({ context, controller }: Props) {
             label: filename,
             description: "",
             intended_visibility: assetVisibility,
-            source_of_asset: "self",
+            source_of_asset: isPublicationOnly(current.profile)
+              ? "unknown"
+              : "self",
             source_credit: "",
             derived_from_asset_ids: [],
             deposit_note: "",
-            intended_terms: { kind: "private_deposit" },
+            intended_terms: {
+              kind: isPublicationOnly(current.profile)
+                ? "unspecified"
+                : "private_deposit",
+            },
           } as ApiArtworkDocumentationAssetLinkRequest,
           signal
-        )
-      ),
+        );
+      }),
     [controller]
   );
   const run = async (resumeId?: string) => {
-    if (!file) return;
+    if (!file || (!resumeId && !rolePermitted)) return;
     const controllerAbort = new AbortController();
     abort.current = controllerAbort;
     setStatus("uploading");
@@ -131,15 +193,28 @@ export default function DocumentationUpload({ context, controller }: Props) {
               size_bytes: file.size,
               declared_mime: file.type || "application/octet-stream",
               role,
-              intended_visibility: restrictedRoles.has(role)
-                ? "restricted"
-                : visibility,
+              intended_visibility: uploadVisibility,
             },
             startKey.current,
             controllerAbort.signal
           );
       if (!canContinueUpload(controllerAbort.signal, mounted)) return;
       setSession(upload);
+      if (!canUseUpload(controller.snapshot().context, upload.asset)) {
+        // Keep a resumed session intact: its permission may only need correcting.
+        // A newly rejected reservation is forgotten only after cancellation succeeds.
+        if (!resumeId) {
+          await cancelDocumentationUpload(
+            context.id,
+            upload.upload_id,
+            controllerAbort.signal
+          );
+          if (!canContinueUpload(controllerAbort.signal, mounted)) return;
+          setSession(null);
+          startKey.current = crypto.randomUUID();
+        }
+        throw new Error("PUBLICATION_ASSET_ROLE_REQUIRED");
+      }
       await transferDocumentationFile({
         contextId: context.id,
         session: upload,
@@ -154,6 +229,30 @@ export default function DocumentationUpload({ context, controller }: Props) {
         setStatus(
           error instanceof DocumentationFileChangedError ? "changed" : "failed"
         );
+    }
+  };
+  const cancel = async () => {
+    abort.current?.abort();
+    const controllerAbort = new AbortController();
+    abort.current = controllerAbort;
+    setStatus("cancelling");
+    setActionError(false);
+    try {
+      if (session)
+        await cancelDocumentationUpload(
+          context.id,
+          session.upload_id,
+          controllerAbort.signal
+        );
+      if (!canContinueUpload(controllerAbort.signal, mounted)) return;
+      setStatus("idle");
+      setSession(null);
+      startKey.current = crypto.randomUUID();
+    } catch {
+      if (canContinueUpload(controllerAbort.signal, mounted)) {
+        setStatus("failed");
+        setActionError(true);
+      }
     }
   };
   useEffect(() => {
@@ -241,13 +340,13 @@ export default function DocumentationUpload({ context, controller }: Props) {
         id="documentation-upload-title"
         className="tw-m-0 tw-text-lg tw-font-semibold"
       >
-        {msg("upload")}
+        {msg(publicationOnly ? "publicationUpload" : "upload")}
       </h3>
       <p className="tw-m-0 tw-text-sm tw-leading-relaxed tw-text-iron-300">
-        {msg("uploadHelp")}
+        {msg(publicationOnly ? "publicationUploadHelp" : "uploadHelp")}
       </p>
       <p className="tw-m-0 tw-text-xs tw-leading-relaxed tw-text-iron-400">
-        {msg("uploadPrivacy")}
+        {msg(publicationOnly ? "publicationUploadStorage" : "uploadPrivacy")}
       </p>
       {canUpload && (
         <div className="tw-space-y-4">
@@ -262,25 +361,32 @@ export default function DocumentationUpload({ context, controller }: Props) {
                 startKey.current = crypto.randomUUID();
               }}
             >
-              {DOCUMENTATION_ASSET_ROLES.map((value) => (
+              {roles.map((value) => (
                 <option key={value} value={value}>
-                  {documentationOptionLabel(value)}
+                  {roleLabel(value)}
                 </option>
               ))}
             </select>
           </label>
-          <label className="tw-block tw-text-sm tw-text-iron-300">
-            {msg("visibility")}
-            <select
-              className={`${inputClass} tw-mt-2`}
-              disabled={busy || restrictedRoles.has(role)}
-              value={restrictedRoles.has(role) ? "restricted" : visibility}
-              onChange={(event) => setVisibility(event.target.value)}
-            >
-              <option value="restricted">{msg("restricted")}</option>
-              <option value="public_record">{msg("publicIntent")}</option>
-            </select>
-          </label>
+          {!publicationOnly && (
+            <label className="tw-block tw-text-sm tw-text-iron-300">
+              {msg("visibility")}
+              <select
+                className={`${inputClass} tw-mt-2`}
+                disabled={busy || restrictedRoles.has(role)}
+                value={restrictedRoles.has(role) ? "restricted" : visibility}
+                onChange={(event) => setVisibility(event.target.value)}
+              >
+                <option value="restricted">{msg("restricted")}</option>
+                <option value="public_record">{msg("publicIntent")}</option>
+              </select>
+            </label>
+          )}
+          {!rolePermitted && (
+            <DocumentationNotice>
+              {msg("publicationInterviewPermission")}
+            </DocumentationNotice>
+          )}
           <label className="tw-block tw-text-sm tw-text-iron-300">
             {msg("uploadSelect")}
             <input
@@ -317,6 +423,7 @@ export default function DocumentationUpload({ context, controller }: Props) {
               disabled={
                 !file ||
                 busy ||
+                !transferPermitted ||
                 file.size >
                   (context.profile.limits["asset_bytes"] ?? 4294967296)
               }
@@ -326,19 +433,12 @@ export default function DocumentationUpload({ context, controller }: Props) {
             >
               {session ? msg("retry") : msg("uploadStart")}
             </DocumentationButton>
-            {busy && (
+            {(busy || session !== null) && (
               <DocumentationButton
                 secondary
+                disabled={status === "cancelling"}
                 onClick={() => {
-                  abort.current?.abort();
-                  if (session)
-                    void cancelDocumentationUpload(
-                      context.id,
-                      session.upload_id
-                    ).catch(() => setActionError(true));
-                  setStatus("idle");
-                  setSession(null);
-                  startKey.current = crypto.randomUUID();
+                  void cancel();
                 }}
               >
                 {msg("uploadCancel")}
@@ -371,14 +471,14 @@ export default function DocumentationUpload({ context, controller }: Props) {
       )}
       {(status === "failed" || status === "changed") && (
         <DocumentationNotice error>
-          {msg(status === "changed" ? "uploadMismatch" : "uploadFailed")}
+          {msg(status === "changed" ? "uploadMismatch" : failureMessage)}
         </DocumentationNotice>
       )}
       {actionError && (
         <DocumentationNotice error>{msg("error")}</DocumentationNotice>
       )}
       <ul className="tw-m-0 tw-list-none tw-space-y-3 tw-p-0">
-        {context.assets.map((asset) => (
+        {visibleAssets.map((asset) => (
           <li
             key={asset.id}
             className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-p-4"
@@ -387,8 +487,7 @@ export default function DocumentationUpload({ context, controller }: Props) {
               {asset.filename}
             </p>
             <p className="tw-my-2 tw-text-xs tw-text-iron-400">
-              {documentationOptionLabel(asset.role)} ·{" "}
-              {sizeLabel(asset.size_bytes)} ·{" "}
+              {roleLabel(asset.role)} · {sizeLabel(asset.size_bytes)} ·{" "}
               {documentationOptionLabel(asset.state)}
             </p>
             {asset.state === "ready" && (
@@ -404,7 +503,8 @@ export default function DocumentationUpload({ context, controller }: Props) {
                 {!context.asset_links.some(
                   (link) => link.asset_id === asset.id
                 ) &&
-                  canUpload && (
+                  canUpload &&
+                  canPublishDocumentationAsset(context, asset.role) && (
                     <DocumentationButton
                       secondary
                       onClick={() => {
@@ -443,7 +543,12 @@ export default function DocumentationUpload({ context, controller }: Props) {
                 </p>
                 <DocumentationButton
                   secondary
-                  disabled={!file || busy}
+                  disabled={
+                    !file ||
+                    busy ||
+                    (session !== null && session.upload_id !== asset.id) ||
+                    !canPublishDocumentationAsset(context, asset.role)
+                  }
                   onClick={() => {
                     void run(asset.id);
                   }}
@@ -455,8 +560,10 @@ export default function DocumentationUpload({ context, controller }: Props) {
           </li>
         ))}
       </ul>
-      {context.assets.length === 0 && (
-        <p className="tw-text-sm tw-text-iron-400">{msg("noFiles")}</p>
+      {visibleAssets.length === 0 && (
+        <p className="tw-text-sm tw-text-iron-400">
+          {msg(publicationOnly ? "publicationNoFiles" : "noFiles")}
+        </p>
       )}
     </section>
   );
