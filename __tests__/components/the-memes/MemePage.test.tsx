@@ -317,7 +317,14 @@ function renderPage(initialData?: {
     ) =>
       page.rerender(
         <AuthContext.Provider value={mockAuthContext as any}>
-          <MemePage nftId={nextNftId} initialData={nextInitialData} />
+          <MemePage
+            nftId={nextNftId}
+            initialData={
+              nextInitialData as React.ComponentProps<
+                typeof MemePage
+              >["initialData"]
+            }
+          />
         </AuthContext.Provider>
       ),
   };
