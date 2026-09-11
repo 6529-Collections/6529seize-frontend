@@ -117,7 +117,7 @@ export const useNotificationsController =
         try {
           invalidateNotifications();
         } catch (error) {
-          console.error("Failed to clear delivered notifications:", error);
+          console.error("Failed to invalidate notifications:", error);
         }
       },
       onError: (error) => {
@@ -211,7 +211,7 @@ export const useNotificationsController =
         try {
           invalidateNotifications();
         } catch (error) {
-          console.error("Failed to clear delivered notifications:", error);
+          console.error("Failed to invalidate notifications:", error);
         }
       },
       onError: (error) => {

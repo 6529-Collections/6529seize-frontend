@@ -3,7 +3,10 @@ import {
   type PushNotificationSchema,
 } from "@capacitor/push-notifications";
 import { commonApiFetch } from "@/services/api/common-api";
-import { reconcileDeliveredNotifications } from "@/components/notifications/delivered-notifications";
+import {
+  createDeliveredNotificationsReconciler,
+  reconcileDeliveredNotifications,
+} from "@/components/notifications/delivered-notifications";
 
 jest.mock("@capacitor/push-notifications", () => ({
   PushNotifications: {
@@ -192,4 +195,106 @@ it("preserves Android legacy tags and malformed tag encodings", async () => {
   });
   await reconcileDeliveredNotifications(scope());
   expect(remove).not.toHaveBeenCalled();
+});
+
+it("coalesces overlapping requests and refreshes reads completed during a pass", async () => {
+  const a = push("A", 1);
+  const b = push("B", 2);
+  let finishFirst!: (value: ReturnType<typeof response>) => void;
+  const firstResponse = new Promise<ReturnType<typeof response>>((resolve) => {
+    finishFirst = resolve;
+  });
+  getDelivered.mockResolvedValue({ notifications: [a, b] });
+  fetchMock
+    .mockReturnValueOnce(firstResponse)
+    .mockResolvedValue(response(1, 100));
+  const onError = jest.fn();
+  const reconcile = createDeliveredNotificationsReconciler(onError);
+  const first = reconcile(scope());
+  await Promise.resolve();
+  expect(fetchMock).toHaveBeenCalledTimes(1);
+  const overlaps = Array.from({ length: 10 }, () => reconcile(scope()));
+  expect(getDelivered).toHaveBeenCalledTimes(1);
+  finishFirst(response(1, null));
+  await Promise.all([first, ...overlaps]);
+  expect(getDelivered).toHaveBeenCalledTimes(2);
+  expect(fetchMock).toHaveBeenCalledTimes(2);
+  expect(remove).toHaveBeenCalledTimes(1);
+  expect(remove).toHaveBeenCalledWith({ notifications: [a] });
+  expect(onError).not.toHaveBeenCalled();
+});
+
+it("coalesces pending wave reads without losing either wave", async () => {
+  let finishSnapshot!: (value: {
+    notifications: PushNotificationSchema[];
+  }) => void;
+  const firstSnapshot = new Promise<{
+    notifications: PushNotificationSchema[];
+  }>((resolve) => {
+    finishSnapshot = resolve;
+  });
+  const a = push("A", 1, "one");
+  const b = push("A", 2, "two");
+  getDelivered
+    .mockReturnValueOnce(firstSnapshot)
+    .mockResolvedValue({ notifications: [a, b] });
+  fetchMock.mockImplementation(async ({ params }) =>
+    response(Number(params?.id_less_than) - 1, 100)
+  );
+  const reconcile = createDeliveredNotificationsReconciler(jest.fn());
+  const first = reconcile(scope());
+  const one = reconcile({ ...scope(), waveId: "one" });
+  const two = reconcile({ ...scope(), waveId: "two" });
+  finishSnapshot({ notifications: [] });
+  await Promise.all([first, one, two]);
+  expect(remove).toHaveBeenCalledWith({ notifications: [a, b] });
+});
+
+it("preserves failed snapshots and allows a subsequent refresh", async () => {
+  getDelivered.mockResolvedValue({ notifications: [push("A", 1)] });
+  const error = new Error("offline");
+  fetchMock.mockRejectedValueOnce(error).mockResolvedValue(response(1, 100));
+  const onError = jest.fn();
+  const reconcile = createDeliveredNotificationsReconciler(onError);
+  await reconcile(scope());
+  expect(remove).not.toHaveBeenCalled();
+  expect(onError).toHaveBeenCalledWith(error);
+  await reconcile(scope());
+  expect(remove).toHaveBeenCalledTimes(1);
+});
+
+it("replaces stale pending sessions and never removes their notifications", async () => {
+  let currentProfile = "A";
+  let finishSnapshot!: (value: {
+    notifications: PushNotificationSchema[];
+  }) => void;
+  const firstSnapshot = new Promise<{
+    notifications: PushNotificationSchema[];
+  }>((resolve) => {
+    finishSnapshot = resolve;
+  });
+  const a = push("A", 1),
+    b = push("B", 2);
+  getDelivered
+    .mockReturnValueOnce(firstSnapshot)
+    .mockResolvedValue({ notifications: [a, b] });
+  fetchMock.mockResolvedValue(response(2, 100));
+  const reconcile = createDeliveredNotificationsReconciler(jest.fn());
+  const aScope = { ...scope(), isCurrent: () => currentProfile === "A" };
+  const first = reconcile(aScope);
+  const pendingA = reconcile(aScope);
+  currentProfile = "B";
+  const pendingB = reconcile({
+    profileId: "B",
+    authJwt: "jwt-B",
+    isCurrent: () => currentProfile === "B",
+  });
+  await reconcile(aScope);
+  finishSnapshot({ notifications: [a, b] });
+  await Promise.all([first, pendingA, pendingB]);
+  expect(fetchMock).toHaveBeenCalledTimes(1);
+  expect(fetchMock).toHaveBeenCalledWith(
+    expect.objectContaining({ headers: { Authorization: "Bearer jwt-B" } })
+  );
+  expect(remove).toHaveBeenCalledWith({ notifications: [b] });
 });

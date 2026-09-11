@@ -42,6 +42,7 @@ const getNotificationId = (
   const raw = getNotificationData(notification)?.["notification_id"];
   if (typeof raw !== "string" || !/^[1-9]\d*$/.test(raw)) return null;
   const id = Number(raw);
+  // The exclusive id_less_than cursor below must also remain a safe integer.
   return Number.isSafeInteger(id) && Number.isSafeInteger(id + 1) ? id : null;
 };
 
@@ -70,7 +71,7 @@ export async function reconcileDeliveredNotifications(
   // tray. Any refresh failure preserves the complete delivered snapshot.
   for (let offset = 0; offset < ids.length; offset += 4) {
     if (!scope.isCurrent()) return;
-    await Promise.all(
+    const results = await Promise.allSettled(
       ids.slice(offset, offset + 4).map(async (id) => {
         if (id === null) return;
         const response = await commonApiFetch<ApiNotificationsResponseV2>({
@@ -90,6 +91,9 @@ export async function reconcileDeliveredNotifications(
         }
       })
     );
+    // Drain the whole batch before releasing the queue after a failed lookup.
+    const failed = results.find((result) => result.status === "rejected");
+    if (failed) throw failed.reason;
   }
 
   if (!scope.isCurrent()) return;
@@ -103,4 +107,48 @@ export async function reconcileDeliveredNotifications(
       notifications: readNotifications,
     });
   }
+}
+
+/** Serialize native passes and retain a fresh pass for reads made in flight. */
+export function createDeliveredNotificationsReconciler(
+  onError: (error: unknown) => void
+): (scope: CleanupScope) => Promise<void> {
+  let pending: CleanupScope | undefined;
+  let running: Promise<void> | undefined;
+
+  const drain = async () => {
+    try {
+      while (pending) {
+        const scope = pending;
+        pending = undefined;
+        try {
+          await reconcileDeliveredNotifications(scope);
+        } catch (error) {
+          onError(error);
+        }
+      }
+    } finally {
+      running = undefined;
+    }
+  };
+
+  return (scope) => {
+    if (!scope.isCurrent()) return Promise.resolve();
+    // Only the current session can enqueue. Coalesce different wave requests
+    // into a profile pass so neither wave's completed read is lost.
+    const waveId =
+      pending?.profileId === scope.profileId &&
+      pending.authJwt === scope.authJwt &&
+      pending.waveId !== scope.waveId
+        ? undefined
+        : scope.waveId;
+    pending = {
+      profileId: scope.profileId,
+      authJwt: scope.authJwt,
+      isCurrent: scope.isCurrent,
+      ...(waveId === undefined ? {} : { waveId }),
+    };
+    running ??= drain();
+    return running;
+  };
 }

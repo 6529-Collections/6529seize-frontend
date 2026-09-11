@@ -323,7 +323,7 @@ describe("delivered notification read ordering", () => {
   });
 
   it("reconciles only after mark-all persistence succeeds", async () => {
-    render(<Notifications />);
+    render(<Notifications activeDrop={null} setActiveDrop={jest.fn()} />);
     let finishRead: (() => void) | undefined;
     mockPostRead.mockReturnValueOnce(
       new Promise<void>((resolve) => {
@@ -338,7 +338,7 @@ describe("delivered notification read ordering", () => {
   });
 
   it("does not remove delivered entries when a grouped read fails", async () => {
-    render(<Notifications />);
+    render(<Notifications activeDrop={null} setActiveDrop={jest.fn()} />);
     mockPostRead.mockRejectedValueOnce(new Error("offline"));
     await expect(mockMutationFunctions[1]!([1, 2])).rejects.toThrow("offline");
     expect(mockReconcileDelivered).not.toHaveBeenCalled();

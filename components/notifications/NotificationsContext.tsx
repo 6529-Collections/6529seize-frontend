@@ -28,7 +28,7 @@ import {
 } from "@/services/auth/auth.utils";
 import { useAuth } from "../auth/Auth";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
-import { reconcileDeliveredNotifications } from "./delivered-notifications";
+import { createDeliveredNotificationsReconciler } from "./delivered-notifications";
 import { getStableDeviceId } from "./stable-device-id";
 import type { DevicePushData } from "./device-push.types";
 import {
@@ -137,7 +137,10 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
     };
   }, [forceAuthTokenRefresh]);
 
-  const removeDeliveredNotifications = useCallback(
+  // Android dismisses tapped entries itself: its tap ID is an FCM message ID,
+  // not the tray ID/tag required by native removal. Reconciliation uses the
+  // native delivered snapshot on both platforms instead.
+  const removeTappedIosNotification = useCallback(
     async (notifications: PushNotificationSchema[]) => {
       if (isIos && isRegisteredRef.current && notifications.length > 0) {
         try {
@@ -267,7 +270,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
       const raw: unknown = notification.data ?? {};
       const notificationData = parseDevicePushData(raw);
       if (!notificationData) {
-        await removeDeliveredNotifications([notification]);
+        await removeTappedIosNotification([notification]);
         console.warn("Ignoring notification: invalid payload shape", { raw });
         return;
       }
@@ -275,7 +278,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
       const targetProfileHandle = notificationData.target_profile_handle.trim();
 
       if (targetProfileId.length === 0 || targetProfileHandle.length === 0) {
-        await removeDeliveredNotifications([notification]);
+        await removeTappedIosNotification([notification]);
         console.warn("Ignoring notification: missing target profile metadata", {
           targetProfileId,
           targetProfileHandle,
@@ -289,7 +292,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
       });
 
       if (!matchedAddress) {
-        await removeDeliveredNotifications([notification]);
+        await removeTappedIosNotification([notification]);
         console.warn(
           "Ignoring notification: target profile is not one of connected accounts",
           { targetProfileId, targetProfileHandle }
@@ -305,7 +308,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
         return;
       }
 
-      await removeDeliveredNotifications([notification]);
+      await removeTappedIosNotification([notification]);
 
       const { handle: rawHandle, ...notificationDataWithoutHandle } =
         notificationData;
@@ -324,7 +327,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
       }
     },
     [
-      removeDeliveredNotifications,
+      removeTappedIosNotification,
       resolveAddressForNotificationProfile,
       switchToMatchedAddress,
     ]
@@ -642,29 +645,9 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
     pushRegistrationAuthKey,
   ]);
 
-  const reconcileProfile = useCallback(
-    async (waveId?: string) => {
-      const profileId = connectedProfile?.id;
-      if (
-        !isCapacitor ||
-        !isRegisteredRef.current ||
-        activeProfileProxy ||
-        !profileId ||
-        !authJwt ||
-        !isAuthJwtUsable(authJwt)
-      )
-        return;
-      try {
-        await reconcileDeliveredNotifications({
-          profileId,
-          authJwt,
-          ...(waveId === undefined ? {} : { waveId }),
-          isCurrent: () =>
-            connectedProfileRef.current?.id === profileId &&
-            getAuthJwt() === authJwt &&
-            isAuthJwtUsable(authJwt),
-        });
-      } catch (error) {
+  const reconcileQueue = useMemo(
+    () =>
+      createDeliveredNotificationsReconciler((error) => {
         Sentry.captureException(
           toCaptureExceptionInput(
             error,
@@ -678,9 +661,39 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
             extra: createErrorTelemetryExtra(error),
           }
         );
-      }
+      }),
+    []
+  );
+
+  const reconcileProfile = useCallback(
+    async (waveId?: string) => {
+      const profileId = connectedProfile?.id;
+      if (
+        !isCapacitor ||
+        !isRegisteredRef.current ||
+        activeProfileProxy ||
+        !profileId ||
+        !authJwt ||
+        !isAuthJwtUsable(authJwt)
+      )
+        return;
+      await reconcileQueue({
+        profileId,
+        authJwt,
+        ...(waveId === undefined ? {} : { waveId }),
+        isCurrent: () =>
+          connectedProfileRef.current?.id === profileId &&
+          getAuthJwt() === authJwt &&
+          isAuthJwtUsable(authJwt),
+      });
     },
-    [isCapacitor, connectedProfile?.id, activeProfileProxy, authJwt]
+    [
+      isCapacitor,
+      connectedProfile?.id,
+      activeProfileProxy,
+      authJwt,
+      reconcileQueue,
+    ]
   );
 
   const removeWaveDeliveredNotifications = useCallback(
