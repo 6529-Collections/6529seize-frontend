@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import DocumentationValueEditor from "@/components/artwork-documentation/DocumentationValueEditor";
 import DocumentationModules from "@/components/artwork-documentation/DocumentationModules";
 import { documentationFixture } from "@/__tests__/fixtures/artwork-documentation";
@@ -69,6 +69,7 @@ describe("artwork documentation modules", () => {
     expect(
       screen.queryByRole("option", { name: "Withheld" })
     ).not.toBeInTheDocument();
+    fireEvent.click(screen.getByText(/More about the work/));
     fireEvent.change(screen.getByRole("textbox", { name: "Location" }), {
       target: { value: "A studio" },
     });
@@ -112,6 +113,7 @@ describe("artwork documentation modules", () => {
         onChange={onChange}
       />
     );
+    fireEvent.click(screen.getByText("Not known or not applicable?"));
     fireEvent.change(screen.getByLabelText("How would you like to answer?"), {
       target: { value: "withheld" },
     });
@@ -119,6 +121,66 @@ describe("artwork documentation modules", () => {
       status: "withheld",
       intended_visibility: "public_record",
     });
+  });
+  it("keeps an optional field mounted in its open disclosure after an autosave while essential fields remain visible", () => {
+    const context = documentationFixture();
+    const onChange = jest.fn();
+    const { rerender } = render(
+      <DocumentationModules
+        context={context}
+        edits={[]}
+        section="artwork"
+        onChange={onChange}
+      />
+    );
+    expect(screen.getByRole("textbox", { name: "Title" })).toBeVisible();
+    expect(screen.getByRole("textbox", { name: "Location" })).not.toBeVisible();
+    fireEvent.click(screen.getByText(/More about the work/));
+    const location = screen.getByRole("textbox", { name: "Location" });
+    const disclosure = location.closest("details");
+    fireEvent.change(location, { target: { value: "A studio" } });
+    context.modules["artwork"]!.answers["location"] = {
+      status: "provided",
+      value: "A studio",
+      intended_visibility: "public_record",
+    } as never;
+    rerender(
+      <DocumentationModules
+        context={context}
+        edits={[]}
+        section="artwork"
+        onChange={onChange}
+      />
+    );
+    expect(screen.getByRole("textbox", { name: "Location" })).toBe(location);
+    expect(location.closest("details")).toBe(disclosure);
+    expect(location).toBeVisible();
+  });
+
+  it("shows existing non-answer statuses and their explanation while keeping a direct answer's alternatives secondary", () => {
+    const context = documentationFixture();
+    context.modules["artwork"]!.answers["location"] = {
+      status: "unknown",
+      intended_visibility: "public_record",
+      explanation: "The original location was not recorded.",
+    } as never;
+    render(
+      <DocumentationModules
+        context={context}
+        edits={[]}
+        section="artwork"
+        onChange={jest.fn()}
+      />
+    );
+    const location = screen.getByRole("region", { name: "Location" });
+    expect(
+      within(location).getByRole("textbox", { name: "Explanation" })
+    ).toBeVisible();
+    expect(
+      within(location).getByRole("combobox", {
+        name: "How would you like to answer?",
+      })
+    ).toBeVisible();
   });
   it("renders no input or private value for server-redacted fields", () => {
     const context = documentationFixture();
