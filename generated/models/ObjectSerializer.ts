@@ -115,6 +115,55 @@ export * from '../models/ApiCmsPublishedSite';
 export * from '../models/ApiCmsSignatureEnvelope';
 export * from '../models/ApiCmsSite';
 export * from '../models/ApiCmsStorageLocation';
+export * from '../models/ApiCollectAccount';
+export * from '../models/ApiCollectAcquisitionPlan';
+export * from '../models/ApiCollectAnalysis';
+export * from '../models/ApiCollectAnalysisHoldingsSnapshot';
+export * from '../models/ApiCollectAnalysisRequest';
+export * from '../models/ApiCollectAnalysisRequestAssetsInner';
+export * from '../models/ApiCollectArtist';
+export * from '../models/ApiCollectAsset';
+export * from '../models/ApiCollectAssetsPage';
+export * from '../models/ApiCollectBoost';
+export * from '../models/ApiCollectCapabilities';
+export * from '../models/ApiCollectCapability';
+export * from '../models/ApiCollectCatalog';
+export * from '../models/ApiCollectCatalogTdhSnapshot';
+export * from '../models/ApiCollectFacet';
+export * from '../models/ApiCollectFamily';
+export * from '../models/ApiCollectHolding';
+export * from '../models/ApiCollectKind';
+export * from '../models/ApiCollectPlan';
+export * from '../models/ApiCollectPlanLeg';
+export * from '../models/ApiCollectPlanOptions';
+export * from '../models/ApiCollectPlanRemaining';
+export * from '../models/ApiCollectPlanRequest';
+export * from '../models/ApiCollectProjectedAccount';
+export * from '../models/ApiCollectProjectedToken';
+export * from '../models/ApiCollectPurchaseAllocation';
+export * from '../models/ApiCollectRecipientAllocation';
+export * from '../models/ApiCollectRequirement';
+export * from '../models/ApiCollectRule';
+export * from '../models/ApiCollectRuleAcquired';
+export * from '../models/ApiCollectRuleDefinition';
+export * from '../models/ApiCollectRulePause';
+export * from '../models/ApiCollectRulePendingReview';
+export * from '../models/ApiCollectRulePrepare';
+export * from '../models/ApiCollectRulePrepared';
+export * from '../models/ApiCollectRuleReview';
+export * from '../models/ApiCollectRuleReviewAsset';
+export * from '../models/ApiCollectRuleTarget';
+export * from '../models/ApiCollectRules';
+export * from '../models/ApiCollectSeason';
+export * from '../models/ApiCollectTdhExcludedCandidate';
+export * from '../models/ApiCollectTdhProjection';
+export * from '../models/ApiCollectTdhRankedCandidate';
+export * from '../models/ApiCollectTdhRankedCandidateCostPerAdditionalTdh';
+export * from '../models/ApiCollectTdhRanking';
+export * from '../models/ApiCollectTdhRankingRequest';
+export * from '../models/ApiCollectTdhRatio';
+export * from '../models/ApiCollectTdhRequest';
+export * from '../models/ApiCollectTrait';
 export * from '../models/ApiCollectedStats';
 export * from '../models/ApiCollectedStatsSeason';
 export * from '../models/ApiCommunityMemberMinimal';
@@ -224,12 +273,14 @@ export * from '../models/ApiCreateNewWaveVotingConfig';
 export * from '../models/ApiCreateNewWaveVotingConfigBase';
 export * from '../models/ApiCreateOrUpdateProfileRequest';
 export * from '../models/ApiCreateProfileCicStatement';
+export * from '../models/ApiCreateProfileCmsAgentGrantRequest';
 export * from '../models/ApiCreateProfileCmsWalletGallerySnapshotRequest';
 export * from '../models/ApiCreateWaveConfig';
 export * from '../models/ApiCreateWaveDropRequest';
 export * from '../models/ApiCreateWaveMetadataRequest';
 export * from '../models/ApiCreateWaveOutcome';
 export * from '../models/ApiCreateWaveOutcomeDistributionItem';
+export * from '../models/ApiCreatedProfileCmsAgentGrant';
 export * from '../models/ApiCuratedProfileWaveDropsPage';
 export * from '../models/ApiCurationDrop';
 export * from '../models/ApiCurationDropsPage';
@@ -355,12 +406,33 @@ export * from '../models/ApiLoginResponse';
 export * from '../models/ApiMarkDropUnreadResponse';
 export * from '../models/ApiMarkWaveReadRequest';
 export * from '../models/ApiMarkWaveReadResponse';
+export * from '../models/ApiMarketComponents';
+export * from '../models/ApiMarketConsiderationItem';
 export * from '../models/ApiMarketCurrency';
 export * from '../models/ApiMarketCurrencyBook';
 export * from '../models/ApiMarketDepth';
 export * from '../models/ApiMarketDepthLevel';
+export * from '../models/ApiMarketFee';
+export * from '../models/ApiMarketIdentity';
+export * from '../models/ApiMarketKind';
+export * from '../models/ApiMarketListingEntry';
+export * from '../models/ApiMarketListings';
+export * from '../models/ApiMarketMyOperations';
+export * from '../models/ApiMarketOfferItem';
+export * from '../models/ApiMarketOperation';
 export * from '../models/ApiMarketOrder';
+export * from '../models/ApiMarketOrderToSign';
+export * from '../models/ApiMarketOrders';
+export * from '../models/ApiMarketPrepareRequest';
+export * from '../models/ApiMarketSendAttempt';
+export * from '../models/ApiMarketSendAttemptRejection';
+export * from '../models/ApiMarketSendAttemptRequest';
+export * from '../models/ApiMarketSettlement';
+export * from '../models/ApiMarketSignature';
 export * from '../models/ApiMarketSnapshot';
+export * from '../models/ApiMarketSubmission';
+export * from '../models/ApiMarketTradeOrder';
+export * from '../models/ApiMarketTransaction';
 export * from '../models/ApiMediaResolveRequest';
 export * from '../models/ApiMediaResolveResponse';
 export * from '../models/ApiMediaUploadMimeType';
@@ -421,8 +493,14 @@ export * from '../models/ApiPageWithoutCount';
 export * from '../models/ApiPaymentDetails';
 export * from '../models/ApiProfileBlockState';
 export * from '../models/ApiProfileClassification';
+export * from '../models/ApiProfileCmsAgentCandidateValidation';
+export * from '../models/ApiProfileCmsAgentConstraints';
+export * from '../models/ApiProfileCmsAgentDraft';
+export * from '../models/ApiProfileCmsAgentGrant';
 export * from '../models/ApiProfileCmsAgentPatchValidationResult';
 export * from '../models/ApiProfileCmsAgentPatchValidationResultTarget';
+export * from '../models/ApiProfileCmsAgentProposal';
+export * from '../models/ApiProfileCmsAgentProposalSummary';
 export * from '../models/ApiProfileCmsAgentSchemaBundle';
 export * from '../models/ApiProfileCmsAgentSchemaBundleEndpointAuth';
 export * from '../models/ApiProfileCmsAgentSchemaBundleEndpoints';
@@ -487,6 +565,7 @@ export * from '../models/ApiReplyToDrop';
 export * from '../models/ApiReplyToDropAuthor';
 export * from '../models/ApiReplyToDropResponse';
 export * from '../models/ApiReplyToDropV2';
+export * from '../models/ApiReviewProfileCmsAgentProposalRequest';
 export * from '../models/ApiRollbackProfileCmsPackageRequest';
 export * from '../models/ApiSaveEulaConsentRequest';
 export * from '../models/ApiSaveEulaConsentResponse';
@@ -508,6 +587,7 @@ export * from '../models/ApiSubmissionDropContext';
 export * from '../models/ApiSubmissionDropStatus';
 export * from '../models/ApiSubmissionDropVoting';
 export * from '../models/ApiSubmissionDropVotingContextProfileContext';
+export * from '../models/ApiSubmitProfileCmsAgentProposalRequest';
 export * from '../models/ApiSubscriptionCoverage';
 export * from '../models/ApiSubscriptionCoverageDeadlineBasis';
 export * from '../models/ApiSubscriptionCoverageEligibilityBasis';
@@ -555,6 +635,7 @@ export * from '../models/ApiUploadItem';
 export * from '../models/ApiUploadPartOfMultipartUploadRequest';
 export * from '../models/ApiUploadPartOfMultipartUploadResponse';
 export * from '../models/ApiUploadsPage';
+export * from '../models/ApiValidateProfileCmsAgentCandidateRequest';
 export * from '../models/ApiValidateProfileCmsAgentPatchRequest';
 export * from '../models/ApiValidateProfileCmsPackageRequest';
 export * from '../models/ApiWallet';
@@ -830,6 +911,55 @@ import { ApiCmsPublishedSite } from '../models/ApiCmsPublishedSite';
 import { ApiCmsSignatureEnvelope } from '../models/ApiCmsSignatureEnvelope';
 import { ApiCmsSite } from '../models/ApiCmsSite';
 import { ApiCmsStorageLocation } from '../models/ApiCmsStorageLocation';
+import { ApiCollectAccount } from '../models/ApiCollectAccount';
+import { ApiCollectAcquisitionPlan  , ApiCollectAcquisitionPlanStatusEnum  , ApiCollectAcquisitionPlanOptimalityEnum             } from '../models/ApiCollectAcquisitionPlan';
+import { ApiCollectAnalysis               } from '../models/ApiCollectAnalysis';
+import { ApiCollectAnalysisHoldingsSnapshot } from '../models/ApiCollectAnalysisHoldingsSnapshot';
+import { ApiCollectAnalysisRequest      , ApiCollectAnalysisRequestTraitEnum     , ApiCollectAnalysisRequestUniverseEnum   } from '../models/ApiCollectAnalysisRequest';
+import { ApiCollectAnalysisRequestAssetsInner } from '../models/ApiCollectAnalysisRequestAssetsInner';
+import { ApiCollectArtist } from '../models/ApiCollectArtist';
+import { ApiCollectAsset             } from '../models/ApiCollectAsset';
+import { ApiCollectAssetsPage } from '../models/ApiCollectAssetsPage';
+import { ApiCollectBoost } from '../models/ApiCollectBoost';
+import { ApiCollectCapabilities  , ApiCollectCapabilitiesProfileScopeEnum     , ApiCollectCapabilitiesCreatorFeesEnum    } from '../models/ApiCollectCapabilities';
+import { ApiCollectCapability, ApiCollectCapabilityActionEnum     } from '../models/ApiCollectCapability';
+import { ApiCollectCatalog } from '../models/ApiCollectCatalog';
+import { ApiCollectCatalogTdhSnapshot } from '../models/ApiCollectCatalogTdhSnapshot';
+import { ApiCollectFacet, ApiCollectFacetTraitEnum    } from '../models/ApiCollectFacet';
+import { ApiCollectFamily } from '../models/ApiCollectFamily';
+import { ApiCollectHolding } from '../models/ApiCollectHolding';
+import { ApiCollectKind } from '../models/ApiCollectKind';
+import { ApiCollectPlan , ApiCollectPlanStateEnum                } from '../models/ApiCollectPlan';
+import { ApiCollectPlanLeg } from '../models/ApiCollectPlanLeg';
+import { ApiCollectPlanOptions } from '../models/ApiCollectPlanOptions';
+import { ApiCollectPlanRemaining } from '../models/ApiCollectPlanRemaining';
+import { ApiCollectPlanRequest } from '../models/ApiCollectPlanRequest';
+import { ApiCollectProjectedAccount } from '../models/ApiCollectProjectedAccount';
+import { ApiCollectProjectedToken        } from '../models/ApiCollectProjectedToken';
+import { ApiCollectPurchaseAllocation } from '../models/ApiCollectPurchaseAllocation';
+import { ApiCollectRecipientAllocation } from '../models/ApiCollectRecipientAllocation';
+import { ApiCollectRequirement } from '../models/ApiCollectRequirement';
+import { ApiCollectRule , ApiCollectRuleModeEnum    , ApiCollectRuleStateEnum            } from '../models/ApiCollectRule';
+import { ApiCollectRuleAcquired } from '../models/ApiCollectRuleAcquired';
+import { ApiCollectRuleDefinition } from '../models/ApiCollectRuleDefinition';
+import { ApiCollectRulePause } from '../models/ApiCollectRulePause';
+import { ApiCollectRulePendingReview } from '../models/ApiCollectRulePendingReview';
+import { ApiCollectRulePrepare } from '../models/ApiCollectRulePrepare';
+import { ApiCollectRulePrepared } from '../models/ApiCollectRulePrepared';
+import { ApiCollectRuleReview } from '../models/ApiCollectRuleReview';
+import { ApiCollectRuleReviewAsset } from '../models/ApiCollectRuleReviewAsset';
+import { ApiCollectRuleTarget } from '../models/ApiCollectRuleTarget';
+import { ApiCollectRules } from '../models/ApiCollectRules';
+import { ApiCollectSeason } from '../models/ApiCollectSeason';
+import { ApiCollectTdhExcludedCandidate } from '../models/ApiCollectTdhExcludedCandidate';
+import { ApiCollectTdhProjection } from '../models/ApiCollectTdhProjection';
+import { ApiCollectTdhRankedCandidate } from '../models/ApiCollectTdhRankedCandidate';
+import { ApiCollectTdhRankedCandidateCostPerAdditionalTdh } from '../models/ApiCollectTdhRankedCandidateCostPerAdditionalTdh';
+import { ApiCollectTdhRanking          , ApiCollectTdhRankingOptimalityEnum  , ApiCollectTdhRankingCandidateScopeEnum      } from '../models/ApiCollectTdhRanking';
+import { ApiCollectTdhRankingRequest    , ApiCollectTdhRankingRequestHorizonDaysEnum   } from '../models/ApiCollectTdhRankingRequest';
+import { ApiCollectTdhRatio } from '../models/ApiCollectTdhRatio';
+import { ApiCollectTdhRequest , ApiCollectTdhRequestHorizonDaysEnum    } from '../models/ApiCollectTdhRequest';
+import { ApiCollectTrait } from '../models/ApiCollectTrait';
 import { ApiCollectedStats } from '../models/ApiCollectedStats';
 import { ApiCollectedStatsSeason } from '../models/ApiCollectedStatsSeason';
 import { ApiCommunityMemberMinimal } from '../models/ApiCommunityMemberMinimal';
@@ -939,12 +1069,14 @@ import { ApiCreateNewWaveVotingConfigClass } from '../models/ApiCreateNewWaveVot
 import { ApiCreateNewWaveVotingConfigBase          } from '../models/ApiCreateNewWaveVotingConfigBase';
 import { ApiCreateOrUpdateProfileRequest        } from '../models/ApiCreateOrUpdateProfileRequest';
 import { ApiCreateProfileCicStatement     } from '../models/ApiCreateProfileCicStatement';
+import { ApiCreateProfileCmsAgentGrantRequest } from '../models/ApiCreateProfileCmsAgentGrantRequest';
 import { ApiCreateProfileCmsWalletGallerySnapshotRequest } from '../models/ApiCreateProfileCmsWalletGallerySnapshotRequest';
 import { ApiCreateWaveConfig          } from '../models/ApiCreateWaveConfig';
 import { ApiCreateWaveDropRequest } from '../models/ApiCreateWaveDropRequest';
 import { ApiCreateWaveMetadataRequest } from '../models/ApiCreateWaveMetadataRequest';
 import { ApiCreateWaveOutcome        } from '../models/ApiCreateWaveOutcome';
 import { ApiCreateWaveOutcomeDistributionItem } from '../models/ApiCreateWaveOutcomeDistributionItem';
+import { ApiCreatedProfileCmsAgentGrant } from '../models/ApiCreatedProfileCmsAgentGrant';
 import { ApiCuratedProfileWaveDropsPage } from '../models/ApiCuratedProfileWaveDropsPage';
 import { ApiCurationDrop                                   } from '../models/ApiCurationDrop';
 import { ApiCurationDropsPage } from '../models/ApiCurationDropsPage';
@@ -1070,12 +1202,33 @@ import { ApiLoginResponse } from '../models/ApiLoginResponse';
 import { ApiMarkDropUnreadResponse } from '../models/ApiMarkDropUnreadResponse';
 import { ApiMarkWaveReadRequest } from '../models/ApiMarkWaveReadRequest';
 import { ApiMarkWaveReadResponse } from '../models/ApiMarkWaveReadResponse';
+import { ApiMarketComponents } from '../models/ApiMarketComponents';
+import { ApiMarketConsiderationItem } from '../models/ApiMarketConsiderationItem';
 import { ApiMarketCurrency } from '../models/ApiMarketCurrency';
 import { ApiMarketCurrencyBook } from '../models/ApiMarketCurrencyBook';
 import { ApiMarketDepth  , ApiMarketDepthStatusEnum           } from '../models/ApiMarketDepth';
 import { ApiMarketDepthLevel } from '../models/ApiMarketDepthLevel';
+import { ApiMarketFee } from '../models/ApiMarketFee';
+import { ApiMarketIdentity } from '../models/ApiMarketIdentity';
+import { ApiMarketKind } from '../models/ApiMarketKind';
+import { ApiMarketListingEntry } from '../models/ApiMarketListingEntry';
+import { ApiMarketListings } from '../models/ApiMarketListings';
+import { ApiMarketMyOperations } from '../models/ApiMarketMyOperations';
+import { ApiMarketOfferItem } from '../models/ApiMarketOfferItem';
+import { ApiMarketOperation  , ApiMarketOperationStateEnum                            } from '../models/ApiMarketOperation';
 import { ApiMarketOrder     , ApiMarketOrderSideEnum  , ApiMarketOrderScopeEnum            , ApiMarketOrderApplicabilityEnum     } from '../models/ApiMarketOrder';
+import { ApiMarketOrderToSign } from '../models/ApiMarketOrderToSign';
+import { ApiMarketOrders } from '../models/ApiMarketOrders';
+import { ApiMarketPrepareRequest            } from '../models/ApiMarketPrepareRequest';
+import { ApiMarketSendAttempt , ApiMarketSendAttemptPurposeEnum    , ApiMarketSendAttemptStatusEnum     } from '../models/ApiMarketSendAttempt';
+import { ApiMarketSendAttemptRejection  , ApiMarketSendAttemptRejectionReasonEnum   } from '../models/ApiMarketSendAttemptRejection';
+import { ApiMarketSendAttemptRequest  , ApiMarketSendAttemptRequestPurposeEnum    } from '../models/ApiMarketSendAttemptRequest';
+import { ApiMarketSettlement } from '../models/ApiMarketSettlement';
+import { ApiMarketSignature } from '../models/ApiMarketSignature';
 import { ApiMarketSnapshot } from '../models/ApiMarketSnapshot';
+import { ApiMarketSubmission } from '../models/ApiMarketSubmission';
+import { ApiMarketTradeOrder   , ApiMarketTradeOrderSideEnum           } from '../models/ApiMarketTradeOrder';
+import { ApiMarketTransaction    , ApiMarketTransactionPurposeEnum  , ApiMarketTransactionApprovalScopeEnum       } from '../models/ApiMarketTransaction';
 import { ApiMediaResolveRequest } from '../models/ApiMediaResolveRequest';
 import { ApiMediaResolveResponse } from '../models/ApiMediaResolveResponse';
 import { ApiMediaUploadMimeType } from '../models/ApiMediaUploadMimeType';
@@ -1136,8 +1289,14 @@ import { ApiPageWithoutCount } from '../models/ApiPageWithoutCount';
 import { ApiPaymentDetails } from '../models/ApiPaymentDetails';
 import { ApiProfileBlockState } from '../models/ApiProfileBlockState';
 import { ApiProfileClassification } from '../models/ApiProfileClassification';
+import { ApiProfileCmsAgentCandidateValidation } from '../models/ApiProfileCmsAgentCandidateValidation';
+import { ApiProfileCmsAgentConstraints    , ApiProfileCmsAgentConstraintsHashNormalizationEnum    } from '../models/ApiProfileCmsAgentConstraints';
+import { ApiProfileCmsAgentDraft   , ApiProfileCmsAgentDraftProposalSchemaEnum   } from '../models/ApiProfileCmsAgentDraft';
+import { ApiProfileCmsAgentGrant } from '../models/ApiProfileCmsAgentGrant';
 import { ApiProfileCmsAgentPatchValidationResult, ApiProfileCmsAgentPatchValidationResultSchemaEnum          } from '../models/ApiProfileCmsAgentPatchValidationResult';
 import { ApiProfileCmsAgentPatchValidationResultTarget } from '../models/ApiProfileCmsAgentPatchValidationResultTarget';
+import { ApiProfileCmsAgentProposal, ApiProfileCmsAgentProposalStatusEnum                } from '../models/ApiProfileCmsAgentProposal';
+import { ApiProfileCmsAgentProposalSummary, ApiProfileCmsAgentProposalSummaryStatusEnum               } from '../models/ApiProfileCmsAgentProposalSummary';
 import { ApiProfileCmsAgentSchemaBundle, ApiProfileCmsAgentSchemaBundleSchemaEnum      , ApiProfileCmsAgentSchemaBundleDataClassesEnum       } from '../models/ApiProfileCmsAgentSchemaBundle';
 import { ApiProfileCmsAgentSchemaBundleEndpointAuth, ApiProfileCmsAgentSchemaBundleEndpointAuthSourcePacketEnum  , ApiProfileCmsAgentSchemaBundleEndpointAuthValidatePackageEnum  , ApiProfileCmsAgentSchemaBundleEndpointAuthValidatePatchEnum   } from '../models/ApiProfileCmsAgentSchemaBundleEndpointAuth';
 import { ApiProfileCmsAgentSchemaBundleEndpoints } from '../models/ApiProfileCmsAgentSchemaBundleEndpoints';
@@ -1202,6 +1361,7 @@ import { ApiReplyToDrop } from '../models/ApiReplyToDrop';
 import { ApiReplyToDropAuthor } from '../models/ApiReplyToDropAuthor';
 import { ApiReplyToDropResponse } from '../models/ApiReplyToDropResponse';
 import { ApiReplyToDropV2 } from '../models/ApiReplyToDropV2';
+import { ApiReviewProfileCmsAgentProposalRequest, ApiReviewProfileCmsAgentProposalRequestStatusEnum        } from '../models/ApiReviewProfileCmsAgentProposalRequest';
 import { ApiRollbackProfileCmsPackageRequest } from '../models/ApiRollbackProfileCmsPackageRequest';
 import { ApiSaveEulaConsentRequest    } from '../models/ApiSaveEulaConsentRequest';
 import { ApiSaveEulaConsentResponse   } from '../models/ApiSaveEulaConsentResponse';
@@ -1223,6 +1383,7 @@ import { ApiSubmissionDropContext        } from '../models/ApiSubmissionDropCont
 import { ApiSubmissionDropStatus } from '../models/ApiSubmissionDropStatus';
 import { ApiSubmissionDropVoting } from '../models/ApiSubmissionDropVoting';
 import { ApiSubmissionDropVotingContextProfileContext } from '../models/ApiSubmissionDropVotingContextProfileContext';
+import { ApiSubmitProfileCmsAgentProposalRequest } from '../models/ApiSubmitProfileCmsAgentProposalRequest';
 import { ApiSubscriptionCoverage                 } from '../models/ApiSubscriptionCoverage';
 import { ApiSubscriptionCoverageDeadlineBasis } from '../models/ApiSubscriptionCoverageDeadlineBasis';
 import { ApiSubscriptionCoverageEligibilityBasis } from '../models/ApiSubscriptionCoverageEligibilityBasis';
@@ -1270,6 +1431,7 @@ import { ApiUploadItem } from '../models/ApiUploadItem';
 import { ApiUploadPartOfMultipartUploadRequest } from '../models/ApiUploadPartOfMultipartUploadRequest';
 import { ApiUploadPartOfMultipartUploadResponse } from '../models/ApiUploadPartOfMultipartUploadResponse';
 import { ApiUploadsPage } from '../models/ApiUploadsPage';
+import { ApiValidateProfileCmsAgentCandidateRequest } from '../models/ApiValidateProfileCmsAgentCandidateRequest';
 import { ApiValidateProfileCmsAgentPatchRequest } from '../models/ApiValidateProfileCmsAgentPatchRequest';
 import { ApiValidateProfileCmsPackageRequest } from '../models/ApiValidateProfileCmsPackageRequest';
 import { ApiWallet } from '../models/ApiWallet';
@@ -1476,6 +1638,23 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiCmsAgentPatchSchemaEnum",
     "ApiCmsAgentPatchOperationOpEnum",
     "ApiCmsAgentPatchProvenanceAuthorTypeEnum",
+    "ApiCollectAcquisitionPlanStatusEnum",
+    "ApiCollectAcquisitionPlanOptimalityEnum",
+    "ApiCollectAnalysisRequestTraitEnum",
+    "ApiCollectAnalysisRequestUniverseEnum",
+    "ApiCollectCapabilitiesProfileScopeEnum",
+    "ApiCollectCapabilitiesCreatorFeesEnum",
+    "ApiCollectCapabilityActionEnum",
+    "ApiCollectFacetTraitEnum",
+    "ApiCollectFamily",
+    "ApiCollectKind",
+    "ApiCollectPlanStateEnum",
+    "ApiCollectRuleModeEnum",
+    "ApiCollectRuleStateEnum",
+    "ApiCollectTdhRankingOptimalityEnum",
+    "ApiCollectTdhRankingCandidateScopeEnum",
+    "ApiCollectTdhRankingRequestHorizonDaysEnum",
+    "ApiCollectTdhRequestHorizonDaysEnum",
     "ApiCommunityMembersSortOption",
     "ApiCompetitionCapability",
     "ApiCompetitionComputedPhase",
@@ -1516,9 +1695,18 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiIdentitySubscriptionTargetAction",
     "ApiIdentitySubscriptionTargetType",
     "ApiMarketDepthStatusEnum",
+    "ApiMarketKind",
+    "ApiMarketOperationStateEnum",
     "ApiMarketOrderSideEnum",
     "ApiMarketOrderScopeEnum",
     "ApiMarketOrderApplicabilityEnum",
+    "ApiMarketSendAttemptPurposeEnum",
+    "ApiMarketSendAttemptStatusEnum",
+    "ApiMarketSendAttemptRejectionReasonEnum",
+    "ApiMarketSendAttemptRequestPurposeEnum",
+    "ApiMarketTradeOrderSideEnum",
+    "ApiMarketTransactionPurposeEnum",
+    "ApiMarketTransactionApprovalScopeEnum",
     "ApiMediaUploadMimeType",
     "ApiMemesExtendedDataTokenTypeEnum",
     "ApiModeratedProfileStatus",
@@ -1529,7 +1717,11 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiOgMetadataEntityType",
     "ApiPageSortDirection",
     "ApiProfileClassification",
+    "ApiProfileCmsAgentConstraintsHashNormalizationEnum",
+    "ApiProfileCmsAgentDraftProposalSchemaEnum",
     "ApiProfileCmsAgentPatchValidationResultSchemaEnum",
+    "ApiProfileCmsAgentProposalStatusEnum",
+    "ApiProfileCmsAgentProposalSummaryStatusEnum",
     "ApiProfileCmsAgentSchemaBundleSchemaEnum",
     "ApiProfileCmsAgentSchemaBundleDataClassesEnum",
     "ApiProfileCmsAgentSchemaBundleEndpointAuthSourcePacketEnum",
@@ -1558,6 +1750,7 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiRedeemConnectionShareRequestTargetClientTypeEnum",
     "ApiRedeemConnectionShareResponseClientTypeEnum",
     "ApiRepDirection",
+    "ApiReviewProfileCmsAgentProposalRequestStatusEnum",
     "ApiSessionLoginRequestClientTypeEnum",
     "ApiSessionLoginRequestWalletKindHintEnum",
     "ApiSessionLoginRequestSignatureVersionEnum",
@@ -1721,6 +1914,53 @@ let typeMap: {[index: string]: any} = {
     "ApiCmsSignatureEnvelope": ApiCmsSignatureEnvelope,
     "ApiCmsSite": ApiCmsSite,
     "ApiCmsStorageLocation": ApiCmsStorageLocation,
+    "ApiCollectAccount": ApiCollectAccount,
+    "ApiCollectAcquisitionPlan": ApiCollectAcquisitionPlan,
+    "ApiCollectAnalysis": ApiCollectAnalysis,
+    "ApiCollectAnalysisHoldingsSnapshot": ApiCollectAnalysisHoldingsSnapshot,
+    "ApiCollectAnalysisRequest": ApiCollectAnalysisRequest,
+    "ApiCollectAnalysisRequestAssetsInner": ApiCollectAnalysisRequestAssetsInner,
+    "ApiCollectArtist": ApiCollectArtist,
+    "ApiCollectAsset": ApiCollectAsset,
+    "ApiCollectAssetsPage": ApiCollectAssetsPage,
+    "ApiCollectBoost": ApiCollectBoost,
+    "ApiCollectCapabilities": ApiCollectCapabilities,
+    "ApiCollectCapability": ApiCollectCapability,
+    "ApiCollectCatalog": ApiCollectCatalog,
+    "ApiCollectCatalogTdhSnapshot": ApiCollectCatalogTdhSnapshot,
+    "ApiCollectFacet": ApiCollectFacet,
+    "ApiCollectHolding": ApiCollectHolding,
+    "ApiCollectPlan": ApiCollectPlan,
+    "ApiCollectPlanLeg": ApiCollectPlanLeg,
+    "ApiCollectPlanOptions": ApiCollectPlanOptions,
+    "ApiCollectPlanRemaining": ApiCollectPlanRemaining,
+    "ApiCollectPlanRequest": ApiCollectPlanRequest,
+    "ApiCollectProjectedAccount": ApiCollectProjectedAccount,
+    "ApiCollectProjectedToken": ApiCollectProjectedToken,
+    "ApiCollectPurchaseAllocation": ApiCollectPurchaseAllocation,
+    "ApiCollectRecipientAllocation": ApiCollectRecipientAllocation,
+    "ApiCollectRequirement": ApiCollectRequirement,
+    "ApiCollectRule": ApiCollectRule,
+    "ApiCollectRuleAcquired": ApiCollectRuleAcquired,
+    "ApiCollectRuleDefinition": ApiCollectRuleDefinition,
+    "ApiCollectRulePause": ApiCollectRulePause,
+    "ApiCollectRulePendingReview": ApiCollectRulePendingReview,
+    "ApiCollectRulePrepare": ApiCollectRulePrepare,
+    "ApiCollectRulePrepared": ApiCollectRulePrepared,
+    "ApiCollectRuleReview": ApiCollectRuleReview,
+    "ApiCollectRuleReviewAsset": ApiCollectRuleReviewAsset,
+    "ApiCollectRuleTarget": ApiCollectRuleTarget,
+    "ApiCollectRules": ApiCollectRules,
+    "ApiCollectSeason": ApiCollectSeason,
+    "ApiCollectTdhExcludedCandidate": ApiCollectTdhExcludedCandidate,
+    "ApiCollectTdhProjection": ApiCollectTdhProjection,
+    "ApiCollectTdhRankedCandidate": ApiCollectTdhRankedCandidate,
+    "ApiCollectTdhRankedCandidateCostPerAdditionalTdh": ApiCollectTdhRankedCandidateCostPerAdditionalTdh,
+    "ApiCollectTdhRanking": ApiCollectTdhRanking,
+    "ApiCollectTdhRankingRequest": ApiCollectTdhRankingRequest,
+    "ApiCollectTdhRatio": ApiCollectTdhRatio,
+    "ApiCollectTdhRequest": ApiCollectTdhRequest,
+    "ApiCollectTrait": ApiCollectTrait,
     "ApiCollectedStats": ApiCollectedStats,
     "ApiCollectedStatsSeason": ApiCollectedStatsSeason,
     "ApiCommunityMemberMinimal": ApiCommunityMemberMinimal,
@@ -1815,12 +2055,14 @@ let typeMap: {[index: string]: any} = {
     "ApiCreateNewWaveVotingConfigBase": ApiCreateNewWaveVotingConfigBase,
     "ApiCreateOrUpdateProfileRequest": ApiCreateOrUpdateProfileRequest,
     "ApiCreateProfileCicStatement": ApiCreateProfileCicStatement,
+    "ApiCreateProfileCmsAgentGrantRequest": ApiCreateProfileCmsAgentGrantRequest,
     "ApiCreateProfileCmsWalletGallerySnapshotRequest": ApiCreateProfileCmsWalletGallerySnapshotRequest,
     "ApiCreateWaveConfig": ApiCreateWaveConfig,
     "ApiCreateWaveDropRequest": ApiCreateWaveDropRequest,
     "ApiCreateWaveMetadataRequest": ApiCreateWaveMetadataRequest,
     "ApiCreateWaveOutcome": ApiCreateWaveOutcome,
     "ApiCreateWaveOutcomeDistributionItem": ApiCreateWaveOutcomeDistributionItem,
+    "ApiCreatedProfileCmsAgentGrant": ApiCreatedProfileCmsAgentGrant,
     "ApiCuratedProfileWaveDropsPage": ApiCuratedProfileWaveDropsPage,
     "ApiCurationDrop": ApiCurationDrop,
     "ApiCurationDropsPage": ApiCurationDropsPage,
@@ -1930,12 +2172,32 @@ let typeMap: {[index: string]: any} = {
     "ApiMarkDropUnreadResponse": ApiMarkDropUnreadResponse,
     "ApiMarkWaveReadRequest": ApiMarkWaveReadRequest,
     "ApiMarkWaveReadResponse": ApiMarkWaveReadResponse,
+    "ApiMarketComponents": ApiMarketComponents,
+    "ApiMarketConsiderationItem": ApiMarketConsiderationItem,
     "ApiMarketCurrency": ApiMarketCurrency,
     "ApiMarketCurrencyBook": ApiMarketCurrencyBook,
     "ApiMarketDepth": ApiMarketDepth,
     "ApiMarketDepthLevel": ApiMarketDepthLevel,
+    "ApiMarketFee": ApiMarketFee,
+    "ApiMarketIdentity": ApiMarketIdentity,
+    "ApiMarketListingEntry": ApiMarketListingEntry,
+    "ApiMarketListings": ApiMarketListings,
+    "ApiMarketMyOperations": ApiMarketMyOperations,
+    "ApiMarketOfferItem": ApiMarketOfferItem,
+    "ApiMarketOperation": ApiMarketOperation,
     "ApiMarketOrder": ApiMarketOrder,
+    "ApiMarketOrderToSign": ApiMarketOrderToSign,
+    "ApiMarketOrders": ApiMarketOrders,
+    "ApiMarketPrepareRequest": ApiMarketPrepareRequest,
+    "ApiMarketSendAttempt": ApiMarketSendAttempt,
+    "ApiMarketSendAttemptRejection": ApiMarketSendAttemptRejection,
+    "ApiMarketSendAttemptRequest": ApiMarketSendAttemptRequest,
+    "ApiMarketSettlement": ApiMarketSettlement,
+    "ApiMarketSignature": ApiMarketSignature,
     "ApiMarketSnapshot": ApiMarketSnapshot,
+    "ApiMarketSubmission": ApiMarketSubmission,
+    "ApiMarketTradeOrder": ApiMarketTradeOrder,
+    "ApiMarketTransaction": ApiMarketTransaction,
     "ApiMediaResolveRequest": ApiMediaResolveRequest,
     "ApiMediaResolveResponse": ApiMediaResolveResponse,
     "ApiMemeCardDropMapping": ApiMemeCardDropMapping,
@@ -1990,8 +2252,14 @@ let typeMap: {[index: string]: any} = {
     "ApiPageWithoutCount": ApiPageWithoutCount,
     "ApiPaymentDetails": ApiPaymentDetails,
     "ApiProfileBlockState": ApiProfileBlockState,
+    "ApiProfileCmsAgentCandidateValidation": ApiProfileCmsAgentCandidateValidation,
+    "ApiProfileCmsAgentConstraints": ApiProfileCmsAgentConstraints,
+    "ApiProfileCmsAgentDraft": ApiProfileCmsAgentDraft,
+    "ApiProfileCmsAgentGrant": ApiProfileCmsAgentGrant,
     "ApiProfileCmsAgentPatchValidationResult": ApiProfileCmsAgentPatchValidationResult,
     "ApiProfileCmsAgentPatchValidationResultTarget": ApiProfileCmsAgentPatchValidationResultTarget,
+    "ApiProfileCmsAgentProposal": ApiProfileCmsAgentProposal,
+    "ApiProfileCmsAgentProposalSummary": ApiProfileCmsAgentProposalSummary,
     "ApiProfileCmsAgentSchemaBundle": ApiProfileCmsAgentSchemaBundle,
     "ApiProfileCmsAgentSchemaBundleEndpointAuth": ApiProfileCmsAgentSchemaBundleEndpointAuth,
     "ApiProfileCmsAgentSchemaBundleEndpoints": ApiProfileCmsAgentSchemaBundleEndpoints,
@@ -2051,6 +2319,7 @@ let typeMap: {[index: string]: any} = {
     "ApiReplyToDropAuthor": ApiReplyToDropAuthor,
     "ApiReplyToDropResponse": ApiReplyToDropResponse,
     "ApiReplyToDropV2": ApiReplyToDropV2,
+    "ApiReviewProfileCmsAgentProposalRequest": ApiReviewProfileCmsAgentProposalRequest,
     "ApiRollbackProfileCmsPackageRequest": ApiRollbackProfileCmsPackageRequest,
     "ApiSaveEulaConsentRequest": ApiSaveEulaConsentRequest,
     "ApiSaveEulaConsentResponse": ApiSaveEulaConsentResponse,
@@ -2071,6 +2340,7 @@ let typeMap: {[index: string]: any} = {
     "ApiSubmissionDropContext": ApiSubmissionDropContext,
     "ApiSubmissionDropVoting": ApiSubmissionDropVoting,
     "ApiSubmissionDropVotingContextProfileContext": ApiSubmissionDropVotingContextProfileContext,
+    "ApiSubmitProfileCmsAgentProposalRequest": ApiSubmitProfileCmsAgentProposalRequest,
     "ApiSubscriptionCoverage": ApiSubscriptionCoverage,
     "ApiSubscriptionCoverageForecast": ApiSubscriptionCoverageForecast,
     "ApiSubscriptionCoverageMinimumTopUp": ApiSubscriptionCoverageMinimumTopUp,
@@ -2109,6 +2379,7 @@ let typeMap: {[index: string]: any} = {
     "ApiUploadPartOfMultipartUploadRequest": ApiUploadPartOfMultipartUploadRequest,
     "ApiUploadPartOfMultipartUploadResponse": ApiUploadPartOfMultipartUploadResponse,
     "ApiUploadsPage": ApiUploadsPage,
+    "ApiValidateProfileCmsAgentCandidateRequest": ApiValidateProfileCmsAgentCandidateRequest,
     "ApiValidateProfileCmsAgentPatchRequest": ApiValidateProfileCmsAgentPatchRequest,
     "ApiValidateProfileCmsPackageRequest": ApiValidateProfileCmsPackageRequest,
     "ApiWallet": ApiWallet,

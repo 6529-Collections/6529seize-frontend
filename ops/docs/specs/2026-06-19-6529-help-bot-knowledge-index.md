@@ -82,6 +82,16 @@ also included.
 
 ## Source Ownership
 
+The Collect workflow record owns `/collect` and `/collect/orders`, profile-wide
+set scope, direct gift recipients, marketplace review and recovery, observed
+price/TDH coverage, and saved rules that prepare purchases for wallet approval.
+Its facts must distinguish profile collecting from wallet authority and quote
+freshness from signed-order expiry. It must never imply an unattended spending
+mandate or exhaustive marketplace coverage.
+For an uncertain wallet broadcast, the record also explains **Checking the
+outcome**, **Transaction hash from your wallet**, and **Check this transaction**.
+Recovery checks the original action and does not send a replacement transaction.
+
 The frontend should own source-of-truth records for frontend concepts and
 navigation because the frontend owns:
 
