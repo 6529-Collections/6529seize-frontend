@@ -575,6 +575,15 @@ describe("profile CMS publish orchestration", () => {
   });
 
   describe("published url", () => {
+    it.each([
+      "/punk6529/../identity/index.html",
+      "/punk6529/%2e%2e/identity/index.html",
+      "/punk6529/..\\identity/index.html",
+    ])("keeps a normalized visitor URL inside the profile for %s", (path) => {
+      expect(
+        getProfileCmsPublishedUrl("punk6529", "https://6529.io", path)
+      ).toBe("https://6529.io/punk6529/index.html");
+    });
     it("builds the canonical /{handle}/index.html url", () => {
       expect(getProfileCmsPublishedUrl("punk6529")).toBe(
         "https://6529.io/punk6529/index.html"

@@ -106,7 +106,7 @@ export type WalletGalleryBuilderState = {
   readonly orderedAssetIds: readonly string[];
 };
 
-export const WALLET_GALLERY_FIXTURE_WARNING_CODES = {
+const WALLET_GALLERY_FIXTURE_WARNING_CODES = {
   backendDisabled: "fixture_snapshot_backend_disabled",
   partialMedia: "fixture_snapshot_partial_media",
 } as const;
@@ -135,35 +135,6 @@ export function createDefaultWalletGalleryBuilderState(
     featuredAssetIds: [],
     featuredCollectionIds: [],
     orderedAssetIds: [],
-  };
-}
-
-export function refreshWalletGalleryState(
-  current: WalletGalleryBuilderState,
-  snapshot: WalletGallerySnapshot
-): WalletGalleryBuilderState {
-  const assets = new Set(snapshot.assets.map((asset) => asset.id));
-  const collections = new Set(
-    snapshot.collections.map((collection) => collection.id)
-  );
-  const retainedOrder = current.orderedAssetIds.filter((id) => assets.has(id));
-  const ordered = new Set(retainedOrder);
-  return {
-    ...current,
-    snapshot,
-    hiddenAssetIds: current.hiddenAssetIds.filter((id) => assets.has(id)),
-    featuredAssetIds: current.snapshot
-      ? current.featuredAssetIds.filter((id) => assets.has(id))
-      : snapshot.assets.slice(0, 1).map((asset) => asset.id),
-    featuredCollectionIds: current.snapshot
-      ? current.featuredCollectionIds.filter((id) => collections.has(id))
-      : snapshot.collections.slice(0, 1).map((collection) => collection.id),
-    orderedAssetIds: [
-      ...retainedOrder,
-      ...snapshot.assets
-        .map((asset) => asset.id)
-        .filter((id) => !ordered.has(id)),
-    ],
   };
 }
 

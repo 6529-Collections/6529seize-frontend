@@ -77,10 +77,12 @@ export default function StudioDesignPanel({
             setInvalid(true);
             return false;
           }
-          return onApply({
+          const applied = onApply({
             type: "update_site",
             patch: { title: title.trim(), description, theme: { accent } },
           });
+          if (applied) setInvalid(false);
+          return applied;
         }}
       >
         <StudioField

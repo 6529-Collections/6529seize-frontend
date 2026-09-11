@@ -147,5 +147,7 @@
   "profileCms.studio.automaticSharingImage": "Automatic image",
   "profileCms.studio.searchEngines": "Allow search engines to index this page",
   "profileCms.studio.searchPublic": "Pages hidden from search engines are still public.",
-  "profileCms.studio.pendingUpload": "Finish or cancel the image upload before saving, publishing or leaving this panel."
+  "profileCms.studio.pendingUpload": "Finish or cancel the image upload before saving, publishing or leaving this panel.",
+  "profileCms.studio.importedValueReadOnly": "This imported value cannot be edited here. It is preserved; use More tools → JSON to edit it.",
+  "profileCms.studio.viewImportedValue": "View imported value"
 }

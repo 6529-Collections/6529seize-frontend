@@ -11,6 +11,10 @@ import {
 describe("CMS Meme display assets", () => {
   it("binds all 16 original media assets to distinct, verified static WebP files", () => {
     expect(CMS_STUDIO_MEME_DISPLAY_ASSETS).toHaveLength(16);
+    expect(MEME_ART_ASSETS).toHaveLength(16);
+    expect(
+      new Set(CMS_STUDIO_MEME_DISPLAY_ASSETS.map((item) => item.localPath)).size
+    ).toBe(16);
     for (const original of MEME_ART_ASSETS) {
       const display = getCmsStudioMemeDisplayAsset(original);
       expect(display).not.toBeNull();

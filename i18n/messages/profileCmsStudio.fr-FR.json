@@ -5,7 +5,7 @@
   "profileCms.studio.chooseDescription": "Explorez un exemple complet. Vous pouvez modifier chaque page, chaque texte et chaque œuvre.",
   "profileCms.studio.all": "Tous les modèles",
   "profileCms.studio.personal": "Personnes et idées",
-  "profileCms.studio.collector": "Collections",
+  "profileCms.studio.collector": "Collectionneurs",
   "profileCms.studio.artist": "Artistes",
   "profileCms.studio.organization": "Organisations",
   "profileCms.studio.fund": "Fonds et groupes de collectionneurs",
@@ -147,5 +147,7 @@
   "profileCms.studio.automaticSharingImage": "Image automatique",
   "profileCms.studio.searchEngines": "Autoriser les moteurs de recherche à indexer cette page",
   "profileCms.studio.searchPublic": "Les pages masquées des moteurs de recherche restent publiques.",
-  "profileCms.studio.pendingUpload": "Terminez ou annulez l’importation de l’image avant d’enregistrer, de publier ou de quitter ce panneau."
+  "profileCms.studio.pendingUpload": "Terminez ou annulez l’importation de l’image avant d’enregistrer, de publier ou de quitter ce panneau.",
+  "profileCms.studio.importedValueReadOnly": "Cette valeur importée ne peut pas être modifiée ici. Elle est conservée ; utilisez Autres outils → JSON pour la modifier.",
+  "profileCms.studio.viewImportedValue": "Afficher la valeur importée"
 }

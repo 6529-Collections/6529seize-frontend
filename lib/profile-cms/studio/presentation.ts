@@ -32,9 +32,6 @@ export const cmsStudioThemeTokenPatchSchema = z
   })
   .strict();
 
-export type CmsStudioThemeTokenPatch = z.infer<
-  typeof cmsStudioThemeTokenPatchSchema
->;
 export interface CmsStudioPresentation {
   readonly studio_revision: 1;
   readonly studio_layout: (typeof CMS_STUDIO_LAYOUTS)[number];

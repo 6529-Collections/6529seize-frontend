@@ -228,7 +228,12 @@ export function getProfileCmsPublishedUrl(
   const path = publicPath?.startsWith(profileRoot)
     ? publicPath
     : `${profileRoot}index.html`;
-  return new URL(path, baseUrl).href;
+  const fallback = new URL(`${profileRoot}index.html`, baseUrl);
+  const candidate = new URL(path, baseUrl);
+  return candidate.origin === fallback.origin &&
+    candidate.pathname.startsWith(profileRoot)
+    ? candidate.href
+    : fallback.href;
 }
 
 /**

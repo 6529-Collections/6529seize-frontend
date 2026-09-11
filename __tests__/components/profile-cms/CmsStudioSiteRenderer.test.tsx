@@ -94,6 +94,7 @@ describe("CMS studio public rendering", () => {
       (item) => item.mime_type === "image/gif"
     )!;
     expect(asset).toBeDefined();
+    const originalHash = asset.content_hash;
     const original = createArtInspectionItem({
       asset,
       context: createRendererContext(document, "en-US"),
@@ -113,7 +114,7 @@ describe("CMS studio public rendering", () => {
     );
     expect(
       document.payload.assets.find((item) => item.id === asset.id)!.content_hash
-    ).toBe(asset.content_hash);
+    ).toBe(originalHash);
   });
 
   it("escapes authored markup and refuses executable link destinations", () => {

@@ -25,7 +25,7 @@ export interface RemovedReference {
   readonly paths: ReadonlySet<string>;
 }
 
-export function rewriteKnownUrl(
+function rewriteKnownUrl(
   value: string,
   replacements: ReadonlyMap<string, string>
 ): string {
@@ -68,7 +68,7 @@ function rewriteButtonUrls(
   }
 }
 
-export function rewriteNavigationUrls(
+function rewriteNavigationUrls(
   items: CmsNavigationItemV1[],
   replacements: ReadonlyMap<string, string>
 ): void {

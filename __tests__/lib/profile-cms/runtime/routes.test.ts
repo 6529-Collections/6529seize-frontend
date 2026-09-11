@@ -13,6 +13,20 @@ const minimalCmsPackage = minimalPackage as unknown as CmsPackageV1;
 const galleryCmsPackage = walletGalleryPackage as unknown as CmsPackageV1;
 
 describe("profile CMS runtime routes", () => {
+  it.each(["identity", "Identity", "%69dentity"])(
+    "rejects reserved archive namespace %s",
+    (segment) => {
+      expect(
+        buildProfileCmsPath({
+          handle: "punk6529",
+          segments: [segment, "index.html"],
+        })
+      ).toBeNull();
+      expect(
+        buildProfileCmsPath({ handle: "punk6529", segments: ["index.html"] })
+      ).toBe("/punk6529/index.html");
+    }
+  );
   const withRoutes = (
     routes: CmsPackageV1["payload"]["routes"]
   ): CmsPackageV1 => ({

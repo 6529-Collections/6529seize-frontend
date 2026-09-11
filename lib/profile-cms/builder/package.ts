@@ -24,7 +24,7 @@ import {
 
 export type CmsBuilderTemplate = "homepage" | "wallet_gallery";
 
-export type CmsBuilderBlockKind =
+type CmsBuilderBlockKind =
   | "heading"
   | "rich_text"
   | "button_link"
