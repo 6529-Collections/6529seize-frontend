@@ -7,11 +7,16 @@
     {
       "id": "nft.market-depth",
       "kind": "workflow",
-      "title": "Card market depth",
+      "title": "Listings and offers",
       "aliases": [
+        "listings and offers",
         "order book",
         "market depth",
         "asks and bids",
+        "lowest listing",
+        "highest offer",
+        "individual listings and offers",
+        "about these prices",
         "buying pressure",
         "sell orders"
       ],
@@ -20,6 +25,8 @@
         "depth",
         "OpenSea",
         "orders",
+        "listings",
+        "offers",
         "asks",
         "bids",
         "liquidity",
@@ -27,15 +34,15 @@
         "quantity"
       ],
       "facts": [
-        "The Memes, Meme Lab, Gradients and NextGen card pages show captured OpenSea market depth with best quoted asks and bids, price levels, remaining quantities, cumulative quoted quantities and snapshot freshness.",
-        "Currencies are shown separately, including ETH and WETH. A unit price applies to one edition; partially filled orders contribute only their remaining quantity.",
-        "Quoted quantities are not guaranteed executable liquidity. Several listings may share seller inventory, several offers may share bidder funding, and a collection offer has one shared budget across eligible cards.",
-        "Private, inactive and expired orders do not contribute to current public depth. Trait offers whose eligibility is unverified appear separately from the price levels.",
-        "Unavailable capture differs from a completed empty snapshot. Stale data shows an older snapshot time. Retry failed requests and reload order pagination if the book changes.",
+        "The Memes, Meme Lab, Gradients and NextGen card pages show captured OpenSea quotes in a Listings and Offers section with Lowest listing and Highest offer summaries, price levels, remaining quantities, cumulative quoted quantities and an Updated time.",
+        "Each price list starts with up to five levels; Show all levels reveals the complete list and Show fewer levels restores the short view. The summaries show the lowest captured ETH listing and highest captured WETH offer. Currencies stay separate; a unit price applies to one edition and partially filled orders contribute only their remaining quantity.",
+        "Open Individual listings and offers for each captured order's side, scope, applicability, currency, price, remaining quantity and expiry. Trait offers whose eligibility is unverified appear separately from price levels.",
+        "These are captured OpenSea quotes, not guaranteed executable liquidity. Several listings may share seller inventory, several offers may share bidder funding, and a collection offer has one shared budget across eligible cards, so quoted quantities can overlap.",
+        "Private, inactive and expired orders do not contribute to current public depth. An unavailable capture differs from a completed update with no matching price levels; individual unpriced or unverified offers may still be available. Stale data is marked with its older Updated time. Retry failed requests and reload order pagination if the book changes.",
         "Recorded marketplace actions appear alongside on-chain transactions in NFT Activity and supported card activity sections. Off-chain actions may have no Ethereum transaction hash."
       ],
       "canonical_path": "/the-memes/{id}",
-      "link_label": "Open the card's market depth",
+      "link_label": "Open the card's listings and offers",
       "related_paths": [
         "/meme-lab/{id}",
         "/6529-gradient/{id}",
