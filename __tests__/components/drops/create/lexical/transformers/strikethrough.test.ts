@@ -11,8 +11,22 @@ import {
   $getSelection,
   $isRangeSelection,
   createEditor,
+  DELETE_CHARACTER_COMMAND,
+  UNDO_COMMAND,
+  REDO_COMMAND,
   type LexicalEditor,
 } from "lexical";
+import { registerInlineFormatEditing } from "@/components/drops/create/lexical/utils/inlineFormatEditing";
+import { mergeRegister } from "@lexical/utils";
+import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
+import { render } from "@testing-library/react";
+import { createElement } from "react";
+
+const mockUseLexicalComposerContext = jest.fn();
+jest.mock("@lexical/react/LexicalComposerContext", () => ({
+  useLexicalComposerContext: () => mockUseLexicalComposerContext(),
+}));
+import { registerRichText } from "@lexical/rich-text";
 import ExampleTheme from "@/components/drops/create/lexical/ExampleTheme";
 import {
   SAFE_MARKDOWN_TRANSFORMERS,
@@ -23,7 +37,7 @@ const textTransformers = SAFE_MARKDOWN_TRANSFORMERS.filter(
   (transformer) => transformer.type === "text-format"
 );
 
-describe("editor strikethrough", () => {
+describe("editor inline formatting", () => {
   let editor: LexicalEditor;
   let root: HTMLDivElement;
   let unregister: () => void;
@@ -45,7 +59,14 @@ describe("editor strikethrough", () => {
       },
       { discrete: true }
     );
-    unregister = registerMarkdownShortcuts(editor, textTransformers);
+    mockUseLexicalComposerContext.mockReturnValue([editor]);
+    const history = render(createElement(HistoryPlugin));
+    unregister = mergeRegister(
+      registerInlineFormatEditing(editor, textTransformers),
+      registerMarkdownShortcuts(editor, textTransformers),
+      registerRichText(editor),
+      history.unmount
+    );
   });
 
   afterEach(() => {
@@ -69,6 +90,157 @@ describe("editor strikethrough", () => {
       await Promise.resolve();
     }
   };
+
+  const update = async (callback: () => void) => {
+    editor.update(callback, { discrete: true });
+    await Promise.resolve();
+  };
+
+  const backspace = () =>
+    update(() => {
+      editor.dispatchCommand(DELETE_CHARACTER_COMMAND, true);
+    });
+
+  const selectStrike = async (start = 0, end?: number) =>
+    update(() => {
+      const node = $getRoot()
+        .getAllTextNodes()
+        .find((text) => text.hasFormat("strikethrough"));
+      if (!node) throw new Error("Expected struck text");
+      const selection = node.select(start, end ?? node.getTextContentSize());
+      selection.format = node.getFormat();
+    });
+
+  it.each(["~test~", "~~test~~"])(
+    "reverses %s with immediate Backspace",
+    async (markdown) => {
+      await typeText("prefix " + markdown);
+      await backspace();
+      expect(root.textContent).toBe("prefix " + markdown.slice(0, -1));
+      expect(root.querySelector(".editor-text-strikethrough")).toBeNull();
+      await typeText("~");
+      expect(
+        root.querySelector(".editor-text-strikethrough")
+      ).toHaveTextContent("test");
+    }
+  );
+
+  it.each(["", "no strikethrough, "])(
+    "clears strike after deleting the entire word following %j",
+    async (prefix) => {
+      await typeText(prefix + "~test~");
+      await selectStrike();
+      await backspace();
+      await typeText("normal");
+      expect(root.textContent).toBe(prefix + "normal");
+      expect(root.querySelector(".editor-text-strikethrough")).toBeNull();
+    }
+  );
+
+  it("preserves strike after a partial deletion", async () => {
+    await typeText("plain ~test~");
+    await selectStrike(3, 4);
+    await backspace();
+    await typeText("ting");
+    expect(root.querySelector(".editor-text-strikethrough")).toHaveTextContent(
+      "testing"
+    );
+  });
+
+  it.each(["*test*", "**test**", "***test***", "`test`", "==test=="])(
+    "reverses the inline shortcut %s",
+    async (markdown) => {
+      await typeText("plain " + markdown);
+      expect(root.textContent).toBe("plain test");
+      await backspace();
+      expect(root.textContent).toBe("plain " + markdown.slice(0, -1));
+      await typeText(markdown.slice(-1));
+      expect(root.textContent).toBe("plain test");
+    }
+  );
+
+  it.each([
+    "bold",
+    "italic",
+    "underline",
+    "strikethrough",
+    "code",
+    "highlight",
+    "subscript",
+    "superscript",
+  ] as const)(
+    "clears deleted %s formatting while retaining surrounding text",
+    async (format) => {
+      await typeText("plain word");
+      await update(() => {
+        const node = $getRoot().getAllTextNodes()[0];
+        if (!node) throw new Error("Expected text");
+        node.select(6, 10);
+        const selection = $getSelection();
+        if ($isRangeSelection(selection)) selection.formatText(format);
+      });
+      await backspace();
+      await typeText("normal");
+      expect(root.textContent).toBe("plain normal");
+      expect(
+        editor.getEditorState().read(() =>
+          $getRoot()
+            .getAllTextNodes()
+            .some((node) => node.hasFormat(format))
+        )
+      ).toBe(false);
+    }
+  );
+
+  it("retains an enclosing format after deleting a nested formatted word", async () => {
+    await typeText("plain ~word~");
+    await update(() => {
+      for (const node of $getRoot().getAllTextNodes())
+        node.toggleFormat("bold");
+    });
+    await selectStrike();
+    await backspace();
+    await typeText("normal");
+    expect(root.textContent).toBe("plain normal");
+    expect(root.querySelector(".editor-text-strikethrough")).toBeNull();
+    expect(root.querySelector(".editor-text-bold")).toHaveTextContent(
+      "plain normal"
+    );
+  });
+
+  it("reverses a nested shortcut without removing its existing bold text", async () => {
+    await typeText("~**test**~");
+    await backspace();
+    expect(root.textContent).toBe("~test");
+    expect(root.querySelector(".editor-text-bold")).toHaveTextContent("test");
+    expect(root.querySelector(".editor-text-strikethrough")).toBeNull();
+  });
+
+  it("preserves text after the cursor when reversing a shortcut", async () => {
+    await typeText("prefix suffix");
+    await update(() => {
+      $getRoot().getAllTextNodes()[0]?.select(7, 7);
+    });
+    await typeText("~test~");
+    await backspace();
+    expect(root.textContent).toBe("prefix ~testsuffix");
+  });
+
+  it("supports undo and redo of shortcut reversal", async () => {
+    await typeText("~test~");
+    await backspace();
+    await update(() => {
+      editor.dispatchCommand(UNDO_COMMAND, undefined);
+    });
+    expect(root.querySelector(".editor-text-strikethrough")).toHaveTextContent(
+      "test"
+    );
+    await update(() => {
+      editor.dispatchCommand(REDO_COMMAND, undefined);
+    });
+    expect(root.textContent).toBe("~test");
+    expect(root.querySelector(".editor-text-strikethrough")).toBeNull();
+  });
 
   it.each(["~hi~", "~~hi~~"])(
     "previews %s as it is typed and exports strikethrough",
