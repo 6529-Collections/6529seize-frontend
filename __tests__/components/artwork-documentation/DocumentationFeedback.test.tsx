@@ -131,6 +131,43 @@ const writerRoles: [string, Partial<ApiArtworkDocumentationCapabilities>][] = [
   ["assignment coordinator", { manage_assignments: true }],
 ];
 
+it("lets an authorized coordinator create a reviewers-only conversation", async () => {
+  jest.clearAllMocks();
+  const context = viewerContext();
+  delete context.profile.intake_mode;
+  context.mutation_capabilities.manage_context = true;
+  mockDiscussion();
+  const client = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  render(
+    <QueryClientProvider client={client}>
+      <DocumentationFeedback context={context} />
+    </QueryClientProvider>
+  );
+  await screen.findByText("Prior discussion");
+  fireEvent.change(
+    screen.getAllByRole("textbox", { name: "Your comment" }).at(-1)!,
+    {
+      target: { value: "A curatorial question" },
+    }
+  );
+  fireEvent.change(screen.getByRole("combobox"), {
+    target: { value: "reviewers_only" },
+  });
+  fireEvent.click(
+    screen.getAllByRole("button", { name: "Add comment" }).at(-1)!
+  );
+  await waitFor(() =>
+    expect(createDocumentationThread).toHaveBeenCalledWith(context.id, {
+      text: "A curatorial question",
+      audience: "reviewers_only",
+      restricted_class: "ordinary",
+    })
+  );
+  client.clear();
+});
+
 it.each(["rights", "archival", "contact"])(
   "lets a mixed viewer/editor read a %s thread without replying or resolving",
   async (restricted_class) => {

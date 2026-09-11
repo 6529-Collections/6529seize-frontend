@@ -157,7 +157,10 @@ export default function DocumentationFeedback({
                 <option value="artist_and_reviewers">
                   {msg("artistReviewers")}
                 </option>
-                {mutationCapabilities(context).review_lanes.length > 0 && (
+                {canParticipateInDocumentationThread(context, {
+                  audience: "reviewers_only",
+                  restricted_class: "ordinary",
+                }) && (
                   <option value="reviewers_only">{msg("reviewersOnly")}</option>
                 )}
               </select>

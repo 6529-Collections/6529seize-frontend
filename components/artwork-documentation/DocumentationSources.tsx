@@ -3,6 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import type { ApiArtworkDocumentationContext } from "@/generated/models/ApiArtworkDocumentationContext";
+import { ApiArtworkDocumentationAnswerIntendedVisibilityEnum } from "@/generated/models/ApiArtworkDocumentationAnswer";
 import type { DocumentationDraftController } from "@/lib/artwork-documentation/draft-controller";
 import {
   getDocumentationSourcePreview,
@@ -117,19 +118,36 @@ function SourceReceipt({
         setSelected([]);
         return;
       }
-      const success = await controller.mutate((current, signal) =>
-        importDocumentationSource(
+      const success = await controller.mutate(async (current, signal) => {
+        const selectedFields = fields.filter((field) =>
+          selected.includes(field.target_field)
+        );
+        if (
+          !mutationCapabilities(current).read_source_receipts ||
+          !selectedFields.length ||
+          selectedFields.some(
+            (field) =>
+              !canEditDocumentationField(
+                current,
+                field.target_field,
+                field.answer.intended_visibility ===
+                  ApiArtworkDocumentationAnswerIntendedVisibilityEnum.Restricted
+              )
+          )
+        )
+          throw Object.assign(new Error(msg("save.auth_expired")), {
+            status: 403,
+          });
+        return importDocumentationSource(
           current,
           receiptId,
-          fields
-            .filter((field) => selected.includes(field.target_field))
-            .map(({ source_path, target_field }) => ({
-              source_path,
-              target_field,
-            })),
+          selectedFields.map(({ source_path, target_field }) => ({
+            source_path,
+            target_field,
+          })),
           signal
-        )
-      );
+        );
+      });
       if (success) setSelected([]);
     } finally {
       setBusy(false);
@@ -157,7 +175,12 @@ function SourceReceipt({
               checked={selected.includes(field.target_field)}
               disabled={
                 !canImport ||
-                !canEditDocumentationField(context, field.target_field)
+                !canEditDocumentationField(
+                  context,
+                  field.target_field,
+                  field.answer.intended_visibility ===
+                    ApiArtworkDocumentationAnswerIntendedVisibilityEnum.Restricted
+                )
               }
               onChange={(event) =>
                 setSelected(
