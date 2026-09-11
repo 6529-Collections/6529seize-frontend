@@ -7,6 +7,7 @@ import {
   waitForRouteReady,
 } from "../testHelpers";
 import { gotoDocumentWithTransientRetry } from "../support/routeReadiness";
+import { MEMES_MINT_TITLE_PATTERN } from "../support/mintTitle";
 
 async function gotoReady(page: Page, path: string) {
   await gotoDocumentWithTransientRetry(page, path);
@@ -114,12 +115,7 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
   test("renders The Memes mint page read-only", async ({ page }) => {
     await gotoReady(page, "/the-memes/mint");
 
-    // The "Mint #N | <name>" prefix is client-side enrichment (TitleContext)
-    // that races the App Router's metadata commit on deployed builds; the
-    // server metadata title is "Mint | The Memes". Accept both so the pack
-    // asserts the page, not the race. Artwork names can contain pipes, so
-    // only the outer title format is fixed.
-    await expect(page).toHaveTitle(/^Mint( #\d+ \| .+)? \| The Memes$/);
+    await expect(page).toHaveTitle(MEMES_MINT_TITLE_PATTERN);
     await expect(page.getByText("Retrieving Mint information")).toBeHidden({
       timeout: 15000,
     });
