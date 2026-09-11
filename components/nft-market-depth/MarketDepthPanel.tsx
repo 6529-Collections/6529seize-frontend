@@ -11,6 +11,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import { commonApiFetch } from "@/services/api/common-api";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
+import type { ReactNode } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import MarketDepthOrderDetails from "./MarketDepthOrderDetails";
 import {
@@ -32,6 +33,7 @@ interface MarketDepthPanelProps {
   readonly contract: string;
   readonly tokenId: string | number;
   readonly locale?: SupportedLocale | undefined;
+  readonly actions?: ReactNode;
 }
 
 interface MarketDepthState {
@@ -234,6 +236,7 @@ export default function MarketDepthPanel({
   contract,
   tokenId,
   locale,
+  actions,
 }: MarketDepthPanelProps) {
   const browserLocale = useBrowserLocale();
   const resolvedLocale = locale ?? browserLocale;
@@ -418,6 +421,8 @@ export default function MarketDepthPanel({
           </div>
         )}
       </div>
+
+      {actions && <div className="tw-mt-5">{actions}</div>}
 
       {effectiveStatus === "loading" && (
         <div className="tw-mt-5">
