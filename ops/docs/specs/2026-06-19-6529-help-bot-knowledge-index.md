@@ -345,8 +345,11 @@ The same corpus also feeds two public artifacts for external AI agents, so
 term definitions never fork from the help bot's source of truth:
 
 - `public/llms.txt`: the agent entry point, rendered from
-  `ops/help/llms.txt.template` with record and term counts injected at sync
-  time. The template must keep referencing `/llms.txt`, `/glossary.json`,
+  `ops/help/llms.txt.template` with the published corpus's base URL. It explains
+  6529's mission and links the main site areas, detailed help index, API guides,
+  and website-agent integration. It does not advertise the corpus's manually
+  maintained timestamp as a current revision. The template must keep
+  referencing `/llms.txt`, `/glossary.json`,
   `/help-index.json`, and `/sitemap.xml`; the sync step fails otherwise.
 - `public/glossary.json`: a projection of glossary records. A record is
   included when its `kind` is `glossary` or its `tags` include `glossary`.
