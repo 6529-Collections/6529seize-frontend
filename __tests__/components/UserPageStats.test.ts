@@ -1,6 +1,7 @@
 import {
   getCollectedStatsIdentityKey,
   getStatsPath,
+  getProfileStatsPath,
 } from "@/components/user/stats/userPageStats.helpers";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 
@@ -30,18 +31,29 @@ describe("getStatsPath", () => {
 });
 
 describe("getCollectedStatsIdentityKey", () => {
+  it("deduplicates whitespace and case variants of a single custody wallet", () => {
+    expect(
+      getProfileStatsPath({
+        primary_wallet: " 0xABC ",
+        wallets: [{ wallet: "0xabc" }, { wallet: " 0xAbC " }, { wallet: " " }],
+      } as ApiIdentity)
+    ).toBe("wallet/0xabc");
+  });
+  it("does not silently substitute a wallet for an unresolved multi-wallet profile", () => {
+    expect(() =>
+      getProfileStatsPath({
+        wallets: [{ wallet: "0x111" }, { wallet: "0x222" }],
+      } as ApiIdentity)
+    ).toThrow("confirmed consolidation");
+  });
   const profile = {
     handle: "punk6529",
     primary_wallet: "0xabc",
     wallets: [{ wallet: "0xdef" }],
   } as unknown as ApiIdentity;
 
-  it("prefers active address when provided", () => {
-    expect(getCollectedStatsIdentityKey(profile, "0x123")).toBe("0x123");
-  });
-
-  it("falls back to handle before wallet", () => {
-    expect(getCollectedStatsIdentityKey(profile, null)).toBe("punk6529");
+  it("uses the profile handle before its individual custody wallets", () => {
+    expect(getCollectedStatsIdentityKey(profile)).toBe("punk6529");
   });
 
   it("falls back to wallet when handle is missing", () => {
@@ -49,6 +61,6 @@ describe("getCollectedStatsIdentityKey", () => {
       primary_wallet: "0x999",
       wallets: [{ wallet: "0x888" }],
     } as unknown as ApiIdentity;
-    expect(getCollectedStatsIdentityKey(walletOnlyProfile, null)).toBe("0x999");
+    expect(getCollectedStatsIdentityKey(walletOnlyProfile)).toBe("0x999");
   });
 });
