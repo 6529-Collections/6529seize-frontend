@@ -4,7 +4,10 @@ The frontend publishes `desktop.*` records through the existing help index.
 The backend recognizes the `desktop-core` tag for bounded detailed answers.
 Core controls are explained by their native menu labels, never linked as public
 `/core` routes. `canonical_path` remains the real Apps route; source links are
-suppressed for these procedural answers.
+suppressed for these procedural answers. The onboarding fact intentionally links
+to the public `https://6529.io/about/6529-apps` installer page in every environment.
+It is an official distribution destination, not navigation within the requesting
+site; do not replace it with a bare relative path in bot replies.
 
 ## Evidence baseline
 

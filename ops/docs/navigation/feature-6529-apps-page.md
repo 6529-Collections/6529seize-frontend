@@ -68,10 +68,9 @@ hidden behind tabs.
 
 ## Related Pages
 
-- [Get started with 6529 Desktop](../desktop/flow-getting-started.md)
-
 - [Navigation Index](README.md)
 - [Web Sidebar Navigation](feature-sidebar-navigation.md)
 - [Header Search Modal](feature-header-search-modal.md)
 - [Page Sharing and Device Connection](feature-share-modal.md)
 - [Mobile App Landing Page](feature-mobile-app-landing.md)
+- [Get started with 6529 Desktop](../desktop/flow-getting-started.md)
