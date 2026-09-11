@@ -23,7 +23,8 @@ import {
 } from "@/services/api/waves-v2-api";
 import type { SidebarWave, SidebarWavesPage } from "@/types/waves.types";
 import { useOfficialWaves } from "./useOfficialWaves";
-import { getWalletAddress, getWalletRole } from "@/services/auth/auth.utils";
+import { getAuthJwt, getWalletAddress } from "@/services/auth/auth.utils";
+import { getRole } from "@/services/auth/jwt-validation.utils";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 
@@ -360,11 +361,20 @@ function restorePinnedWaves(
 
 function isCurrentPinViewer(viewerIdentityKey: string | null): boolean {
   const address = getWalletAddress();
-  return Boolean(
-    address &&
-    !getWalletRole() &&
-    viewerIdentityKey === `${address.toLowerCase()}:primary`
-  );
+  const jwt = getAuthJwt();
+  if (
+    !address ||
+    !jwt ||
+    viewerIdentityKey !== `${address.toLowerCase()}:primary`
+  ) {
+    return false;
+  }
+  try {
+    // Match AuthProvider's effective role; saved role metadata can be stale.
+    return !getRole(jwt);
+  } catch {
+    return false;
+  }
 }
 
 function assertCurrentPinViewer(viewerIdentityKey: string | null): void {
