@@ -60,31 +60,7 @@ export function readPersistedMarketIntent(
     if (parsed === null || typeof parsed !== "object" || !("request" in parsed))
       return null;
     const request = parsed.request;
-    if (request === null || typeof request !== "object") return null;
-    const fields = request as Record<string, unknown>;
-    for (const name of [
-      "profile_id",
-      "wallet",
-      "recipient",
-      "asset_key",
-      "kind",
-      "quantity",
-      "currency",
-      "amount_wei",
-    ])
-      if (typeof fields[name] !== "string") return null;
-    if (
-      fields["profile_id"] !== profileId ||
-      !Object.values(ApiMarketKind).includes(fields["kind"] as ApiMarketKind) ||
-      typeof fields["acknowledge_external_recipient"] !== "boolean"
-    )
-      return null;
-    if (
-      !isAddress(fields["wallet"] as string) ||
-      !isAddress(fields["recipient"] as string) ||
-      !isAddress(fields["currency"] as string)
-    )
-      return null;
+    if (!isSavedMarketRequest(request, profileId)) return null;
     const hash =
       "transactionHash" in parsed ? parsed.transactionHash : undefined;
     const approvalHash =
@@ -95,7 +71,7 @@ export function readPersistedMarketIntent(
     if (sendAttempt !== undefined && !isMarketSendAttempt(sendAttempt))
       return null;
     return {
-      request: request as ApiMarketPrepareRequest,
+      request,
       ...(typeof hash === "string" ? { transactionHash: hash } : {}),
       ...(typeof approvalHash === "string" ? { approvalHash } : {}),
       ...(sendAttempt ? { sendAttempt } : {}),
@@ -103,4 +79,31 @@ export function readPersistedMarketIntent(
   } catch {
     return null;
   }
+}
+
+function isSavedMarketRequest(
+  request: unknown,
+  profileId: string
+): request is ApiMarketPrepareRequest {
+  if (request === null || typeof request !== "object") return false;
+  const fields = request as Record<string, unknown>;
+  for (const name of [
+    "profile_id",
+    "wallet",
+    "recipient",
+    "asset_key",
+    "kind",
+    "quantity",
+    "currency",
+    "amount_wei",
+  ])
+    if (typeof fields[name] !== "string") return false;
+  return (
+    fields["profile_id"] === profileId &&
+    Object.values(ApiMarketKind).includes(fields["kind"] as ApiMarketKind) &&
+    typeof fields["acknowledge_external_recipient"] === "boolean" &&
+    isAddress(fields["wallet"] as string) &&
+    isAddress(fields["recipient"] as string) &&
+    isAddress(fields["currency"] as string)
+  );
 }

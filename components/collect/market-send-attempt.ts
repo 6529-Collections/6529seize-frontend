@@ -13,7 +13,7 @@ export interface MarketSendAttempt {
 }
 
 export function marketTransactionDigest(transaction: {
-  readonly chainId: number;
+  readonly chainId: number | undefined;
   readonly from: string;
   readonly to: string;
   readonly value: bigint;
@@ -67,7 +67,7 @@ export function createMarketSendAttempt(
 export function isMarketSendAttempt(
   value: unknown
 ): value is MarketSendAttempt {
-  if (!value || typeof value !== "object") return false;
+  if (value === null || typeof value !== "object") return false;
   const fields = value as Record<string, unknown>;
   return (
     typeof fields["id"] === "string" &&
@@ -92,7 +92,7 @@ export function isMarketSendAttempt(
 export function isMarketSendRejected(error: unknown): boolean {
   let current = error;
   for (let depth = 0; depth < 8; depth++) {
-    if (!current || typeof current !== "object") return false;
+    if (current === null || typeof current !== "object") return false;
     if ("code" in current && current.code === 4001) return true;
     current = "cause" in current ? current.cause : undefined;
   }

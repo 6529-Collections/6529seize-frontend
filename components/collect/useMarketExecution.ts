@@ -155,6 +155,98 @@ async function executeReviewedMarketOperation(options: {
   }
 }
 
+function assertMarketExecutionConnection(
+  current: {
+    readonly auth: ReturnType<typeof useAuth>;
+    readonly connection: ReturnType<typeof useSeizeConnectContext>;
+    readonly wallet: WalletClient | undefined;
+  },
+  expected: ApiMarketPrepareRequest,
+  wallet: WalletClient
+) {
+  if (
+    Capacitor.isNativePlatform() ||
+    !current.auth.isAuthenticated ||
+    current.auth.activeProfileProxy ||
+    current.auth.connectedProfile?.id !== expected.profile_id ||
+    !current.connection.canSignActiveWallet ||
+    current.connection.isSafeWallet ||
+    current.connection.address?.toLowerCase() !==
+      expected.wallet.toLowerCase() ||
+    current.wallet !== wallet
+  )
+    throw new Error("MARKET_CONNECTION_CHANGED");
+}
+
+function assertMarketRecoveryActor(
+  current: {
+    readonly auth: ReturnType<typeof useAuth>;
+    readonly connection: ReturnType<typeof useSeizeConnectContext>;
+  },
+  operation: ApiMarketOperation
+) {
+  if (
+    !current.auth.isAuthenticated ||
+    current.auth.activeProfileProxy ||
+    current.connection.address?.toLowerCase() !== operation.wallet.toLowerCase()
+  )
+    throw new Error("MARKET_CONNECTION_CHANGED");
+}
+
+async function recoverRecordedMarketTransaction(options: {
+  readonly client: PublicClient;
+  readonly operation: ApiMarketOperation;
+  readonly hash: string;
+  readonly assertRecoveryActor: () => void;
+  readonly onOperation: (operation: ApiMarketOperation) => void;
+}) {
+  const { client, operation, hash, assertRecoveryActor, onOperation } = options;
+  assertRecoveryActor();
+  const current = await fetchMarketOperation(operation.id);
+  if (
+    current.id !== operation.id ||
+    current.wallet.toLowerCase() !== operation.wallet.toLowerCase()
+  )
+    throw new Error("MARKET_REVIEW_MISMATCH");
+  const attempt = marketOperationSendAttempt(current);
+  if (!attempt) {
+    onOperation(current);
+    return;
+  }
+  const verified = await verifyRecoveredMarketTransaction(
+    client,
+    current,
+    attempt,
+    hash
+  );
+  assertRecoveryActor();
+  const saved = readMarketIntent(current.profile_id, current.id);
+  if (saved)
+    saveMarketIntent(current.profile_id, current.id, {
+      request: saved.request,
+      sendAttempt: attempt,
+      ...(attempt.purpose === "APPROVAL"
+        ? { approvalHash: verified }
+        : { transactionHash: verified }),
+    });
+  const resolved = await submitMarketTransaction(current.id, {
+    transaction_hash: verified,
+  });
+  clearResolvedMarketSend(resolved);
+  onOperation(resolved);
+}
+
+async function assertMarketActionEnabled(expected: ApiMarketPrepareRequest) {
+  const capability = await fetchCollectCapabilities();
+  if (
+    !capability.actions.some(
+      (action) =>
+        action.action.toString() === expected.kind.toString() && action.enabled
+    )
+  )
+    throw new Error("MARKET_ACTION_DISABLED");
+}
+
 export function useMarketExecution(
   onOperation: (operation: ApiMarketOperation) => void
 ) {
@@ -179,31 +271,10 @@ export function useMarketExecution(
     setMessage(undefined);
     try {
       await withMarketOperationLock(operation.id, async () => {
-        const assertConnection = () => {
-          const current = live.current;
-          if (
-            Capacitor.isNativePlatform() ||
-            !current.auth.isAuthenticated ||
-            current.auth.activeProfileProxy ||
-            current.auth.connectedProfile?.id !== expected.profile_id ||
-            !current.connection.canSignActiveWallet ||
-            current.connection.isSafeWallet ||
-            current.connection.address?.toLowerCase() !==
-              expected.wallet.toLowerCase() ||
-            current.wallet !== wallet
-          )
-            throw new Error("MARKET_CONNECTION_CHANGED");
-        };
+        const assertConnection = () =>
+          assertMarketExecutionConnection(live.current, expected, wallet);
         assertConnection();
-        const capability = await fetchCollectCapabilities();
-        if (
-          !capability.actions.some(
-            (action) =>
-              action.action.toString() === expected.kind.toString() &&
-              action.enabled
-          )
-        )
-          throw new Error("MARKET_ACTION_DISABLED");
+        await assertMarketActionEnabled(expected);
         let current = await fetchMarketOperation(operation.id);
         clearResolvedMarketSend(current);
         if (marketOperationSendAttempt(current))
@@ -302,49 +373,15 @@ export function useMarketExecution(
     setStage("reconciling");
     try {
       await withMarketOperationLock(operation.id, async () => {
-        const assertRecoveryActor = () => {
-          const current = live.current;
-          if (
-            !current.auth.isAuthenticated ||
-            current.auth.activeProfileProxy ||
-            current.connection.address?.toLowerCase() !==
-              operation.wallet.toLowerCase()
-          )
-            throw new Error("MARKET_CONNECTION_CHANGED");
-        };
-        assertRecoveryActor();
-        const current = await fetchMarketOperation(operation.id);
-        if (
-          current.id !== operation.id ||
-          current.wallet.toLowerCase() !== operation.wallet.toLowerCase()
-        )
-          throw new Error("MARKET_REVIEW_MISMATCH");
-        const attempt = marketOperationSendAttempt(current);
-        if (!attempt) {
-          onOperation(current);
-          return;
-        }
-        const verified = await verifyRecoveredMarketTransaction(
+        const assertRecoveryActor = () =>
+          assertMarketRecoveryActor(live.current, operation);
+        await recoverRecordedMarketTransaction({
           client,
-          current,
-          attempt,
-          hash
-        );
-        assertRecoveryActor();
-        const saved = readMarketIntent(current.profile_id, current.id);
-        if (saved)
-          saveMarketIntent(current.profile_id, current.id, {
-            request: saved.request,
-            sendAttempt: attempt,
-            ...(attempt.purpose === "APPROVAL"
-              ? { approvalHash: verified }
-              : { transactionHash: verified }),
-          });
-        const resolved = await submitMarketTransaction(current.id, {
-          transaction_hash: verified,
+          operation,
+          hash,
+          assertRecoveryActor,
+          onOperation,
         });
-        clearResolvedMarketSend(resolved);
-        onOperation(resolved);
       });
     } catch (error) {
       setMessage(marketExecutionError(error, locale));

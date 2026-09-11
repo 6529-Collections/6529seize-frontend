@@ -3,6 +3,7 @@ import type { ApiMarketPrepareRequest } from "@/generated/models/ApiMarketPrepar
 import type { ApiMarketTransaction } from "@/generated/models/ApiMarketTransaction";
 import type { ApiMarketSendAttemptRequest } from "@/generated/models/ApiMarketSendAttemptRequest";
 import type { ApiMarketSendAttemptRejection } from "@/generated/models/ApiMarketSendAttemptRejection";
+import { ApiMarketSendAttemptStatusEnum } from "@/generated/models/ApiMarketSendAttempt";
 import {
   beginMarketTransactionAttempt,
   rejectMarketTransactionAttempt,
@@ -26,7 +27,7 @@ export function marketOperationSendAttempt(
     operation.id
   )?.sendAttempt;
   const server = operation.send_attempt;
-  if (server?.status === "ACTIVE")
+  if (server?.status === ApiMarketSendAttemptStatusEnum.Active)
     return {
       id: server.attempt_id,
       purpose: server.purpose,
@@ -49,7 +50,7 @@ export function clearResolvedMarketSend(operation: ApiMarketOperation): void {
   if (
     !saved?.sendAttempt ||
     !server ||
-    server.status === "ACTIVE" ||
+    server.status === ApiMarketSendAttemptStatusEnum.Active ||
     server.attempt_id !== saved.sendAttempt.id
   )
     return;
@@ -81,7 +82,7 @@ export async function rejectUnsentMarketAttempt(
   if (
     result.id !== operation.id ||
     result.send_attempt?.attempt_id !== attempt.id ||
-    result.send_attempt.status !== "REJECTED"
+    result.send_attempt.status !== ApiMarketSendAttemptStatusEnum.Rejected
   )
     throw new Error("MARKET_BROADCAST_UNKNOWN");
   saveMarketIntent(expected.profile_id, operation.id, { request: expected });
@@ -128,9 +129,9 @@ export async function sendReviewedMarketTransaction(options: {
     const server = armed.send_attempt;
     if (
       armed.id !== operation.id ||
-      server?.status !== "ACTIVE" ||
+      server?.status !== ApiMarketSendAttemptStatusEnum.Active ||
       server.attempt_id !== attempt.id ||
-      server.purpose !== attempt.purpose ||
+      server.purpose.toString() !== attempt.purpose ||
       server.transaction_digest !== attempt.digest ||
       server.snapshot_block !== attempt.snapshotBlock ||
       createMarketSendAttempt(server.transaction, server.snapshot_block)
@@ -195,10 +196,9 @@ export async function verifyRecoveredMarketTransaction(
     !transaction.to ||
     transaction.hash.toLowerCase() !== value.toLowerCase() ||
     transaction.from.toLowerCase() !== operation.wallet.toLowerCase() ||
-    (transaction.blockNumber !== null &&
-      transaction.blockNumber <= BigInt(attempt.snapshotBlock)) ||
+    isPriorMarketSnapshot(transaction.blockNumber, attempt.snapshotBlock) ||
     marketTransactionDigest({
-      chainId: transaction.chainId ?? 0,
+      chainId: transaction.chainId,
       from: transaction.from,
       to: transaction.to,
       value: transaction.value,
@@ -207,4 +207,13 @@ export async function verifyRecoveredMarketTransaction(
   )
     throw new Error("MARKET_REVIEW_MISMATCH");
   return value;
+}
+
+function isPriorMarketSnapshot(
+  blockNumber: bigint | null,
+  snapshotBlock: number
+): boolean {
+  // Pending RPC transactions can have a null block even when a client generic
+  // narrows its result to mined transactions.
+  return blockNumber !== null && blockNumber <= BigInt(snapshotBlock);
 }

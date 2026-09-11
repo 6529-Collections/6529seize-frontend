@@ -1,4 +1,6 @@
 import type { ApiMarketOperation } from "@/generated/models/ApiMarketOperation";
+import type { ApiMarketPrepareRequest } from "@/generated/models/ApiMarketPrepareRequest";
+import type { MarketSendAttempt } from "./market-send-attempt";
 import {
   fetchMarketOperation,
   submitMarketTransaction,
@@ -57,37 +59,23 @@ export async function fetchRecoverableMarketOperation(
     attempt?.rejectionReason ??
     (neverRequested ? "WALLET_NOT_REQUESTED" : undefined);
   if (attempt && rejectionReason && saved) {
-    try {
-      let recovered = operation;
-      await withMarketOperationLock(operationId, async () => {
-        // Re-read under the same lock held across begin + wallet send. Another
-        // tab may have advanced from false to true while this poll was queued.
-        const latest = readPersistedMarketIntent(
-          profileId,
-          operationId
-        )?.sendAttempt;
-        if (
-          !attempt.rejectionReason &&
-          (latest?.id !== attempt.id || latest.walletRequested)
-        )
-          return;
-        recovered = await rejectUnsentMarketAttempt(
-          operation,
-          saved.request,
-          attempt,
-          rejectionReason
-        );
-      });
-      return recovered;
-    } catch {
-      return operation;
-    }
+    return recoverNeverSentOperation({
+      operation,
+      operationId,
+      profileId,
+      request: saved.request,
+      attempt,
+      rejectionReason,
+    });
   }
   const attemptedHash =
-    attempt &&
-    saved?.sendAttempt?.id === attempt.id &&
-    (saved.transactionHash ?? saved.approvalHash);
-  if (attemptedHash && !operation.send_attempt?.transaction_hash) {
+    attempt !== undefined && saved?.sendAttempt?.id === attempt.id
+      ? (saved.transactionHash ?? saved.approvalHash)
+      : undefined;
+  if (
+    typeof attemptedHash === "string" &&
+    !operation.send_attempt?.transaction_hash
+  ) {
     try {
       const resolved = await submitMarketTransaction(operationId, {
         transaction_hash: attemptedHash,
@@ -112,4 +100,47 @@ export async function fetchRecoverableMarketOperation(
     }
   }
   return operation;
+}
+
+async function recoverNeverSentOperation(options: {
+  readonly operation: ApiMarketOperation;
+  readonly operationId: string;
+  readonly profileId: string;
+  readonly request: ApiMarketPrepareRequest;
+  readonly attempt: MarketSendAttempt;
+  readonly rejectionReason: NonNullable<MarketSendAttempt["rejectionReason"]>;
+}): Promise<ApiMarketOperation> {
+  const {
+    operation,
+    operationId,
+    profileId,
+    request,
+    attempt,
+    rejectionReason,
+  } = options;
+  try {
+    let recovered = operation;
+    await withMarketOperationLock(operationId, async () => {
+      // Re-read under the same lock held across begin + wallet send. Another
+      // tab may have advanced from false to true while this poll was queued.
+      const latest = readPersistedMarketIntent(
+        profileId,
+        operationId
+      )?.sendAttempt;
+      if (
+        !attempt.rejectionReason &&
+        (latest?.id !== attempt.id || latest.walletRequested)
+      )
+        return;
+      recovered = await rejectUnsentMarketAttempt(
+        operation,
+        request,
+        attempt,
+        rejectionReason
+      );
+    });
+    return recovered;
+  } catch {
+    return operation;
+  }
 }

@@ -279,7 +279,8 @@ function buyReview() {
         purpose: body.purpose,
         transaction_digest: body.transaction_digest,
         snapshot_block: buyOperation.block_number,
-      transaction: buyOperation.approval_transactions[0] ?? buyOperation.transaction,
+        transaction:
+          buyOperation.approval_transactions[0] ?? buyOperation.transaction,
         status: "ACTIVE",
         transaction_hash: null,
       },
@@ -546,12 +547,32 @@ it("recovers the exact transaction without a local request or active trading cap
   expect(mockCapabilities).not.toHaveBeenCalled();
 });
 
+it("journals an exact pending recovery hash while leaving settlement to the server", async () => {
+  const active = recoveryFixture();
+  mockClient.getTransaction.mockResolvedValue({
+    hash,
+    chainId: 1,
+    from: walletAddress,
+    to: walletAddress,
+    value: 1000n,
+    input: "0x",
+    blockNumber: null,
+  });
+  const { result } = renderHook(() => useMarketExecution(jest.fn()));
+  await act(() => result.current.recoverTransaction(active, hash));
+  expect(mockSubmission).toHaveBeenCalledWith(active.id, {
+    transaction_hash: hash,
+  });
+  expect(mockWallet.sendTransaction).not.toHaveBeenCalled();
+});
+
 it.each([
   { value: 1001n },
   { input: "0x1234" },
   { from: "0x2222222222222222222222222222222222222222" },
   { to: "0x2222222222222222222222222222222222222222" },
   { chainId: 8453 },
+  { chainId: undefined },
   { blockNumber: 100n },
 ])("rejects a substituted recovery transaction %s", async (change) => {
   const active = recoveryFixture();
