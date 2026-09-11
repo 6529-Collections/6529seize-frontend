@@ -18,9 +18,10 @@ async function expectNavigation(page: Page, name: string) {
   await expect(page.getByRole("navigation", { name })).toBeVisible();
 }
 
-async function expectTableHasRows(page: Page, tableName: string | RegExp) {
+async function expectTableHasRows(page: Page, regionName: string) {
+  const region = page.getByRole("region", { name: regionName });
   await expect(
-    page.getByRole("table", { name: tableName }).getByRole("row").first()
+    region.getByRole("table", { name: "NFT activity" }).getByRole("row").first()
   ).toBeVisible({ timeout: 20000 });
 }
 
@@ -100,7 +101,7 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
       page.getByRole("region", { name: "The Memes card activity" })
     ).toBeVisible();
     if (!isLocalBaseURL(baseURL)) {
-      await expectTableHasRows(page, "The Memes Card 1 activity");
+      await expectTableHasRows(page, "The Memes card activity");
     }
     await expect(
       page.getByRole("link", { name: "View SZN 1 cards" })
