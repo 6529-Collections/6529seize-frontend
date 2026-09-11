@@ -62,8 +62,8 @@ export default function CollectGoalForm(props: CollectGoalFormProps) {
   let gridClass = "sm:tw-grid-cols-2 lg:tw-grid-cols-3";
   if (showQuantity) {
     gridClass = showDefinition
-      ? "sm:tw-grid-cols-[minmax(0,1fr)_7rem] lg:tw-grid-cols-[minmax(0,1fr)_7rem_minmax(0,1fr)]"
-      : "sm:tw-grid-cols-[7rem_minmax(0,20rem)]";
+      ? "tw-grid-cols-[7rem_minmax(0,1fr)] lg:tw-grid-cols-[minmax(0,1fr)_7rem_minmax(0,1fr)]"
+      : "tw-grid-cols-[7rem_minmax(0,1fr)] sm:tw-grid-cols-[7rem_minmax(0,20rem)]";
   }
   const errors = {
     definition: "collect.goal.requiredDefinition",
@@ -103,29 +103,37 @@ export default function CollectGoalForm(props: CollectGoalFormProps) {
           {title}
         </h2>
       )}
-      <div className={`tw-grid tw-gap-4 ${gridClass}`}>
+      <div className={`tw-grid tw-items-end tw-gap-4 ${gridClass}`}>
         {showDefinition && (
-          <CollectGoalDefinitionPicker
-            key={draft.intent}
-            label={t(
-              locale,
-              definitionLabels[draft.intent] ?? "collect.goal.definition"
-            )}
-            placeholder={t(
-              locale,
-              definitionPlaceholders[draft.intent] ??
-                "collect.goal.selectDefinition"
-            )}
-            locale={locale}
-            value={draft.definitionId}
-            definitions={props.definitions}
-            disabled={props.loading}
-            invalid={invalidField === "definition"}
-            {...(invalidField === "definition"
-              ? { errorId: `${id}-error` }
-              : {})}
-            onChange={(definitionId) => change({ definitionId })}
-          />
+          <div
+            className={
+              showQuantity
+                ? "tw-col-span-2 tw-min-w-0 lg:tw-col-span-1"
+                : "tw-min-w-0"
+            }
+          >
+            <CollectGoalDefinitionPicker
+              key={draft.intent}
+              label={t(
+                locale,
+                definitionLabels[draft.intent] ?? "collect.goal.definition"
+              )}
+              placeholder={t(
+                locale,
+                definitionPlaceholders[draft.intent] ??
+                  "collect.goal.selectDefinition"
+              )}
+              locale={locale}
+              value={draft.definitionId}
+              definitions={props.definitions}
+              disabled={props.loading}
+              invalid={invalidField === "definition"}
+              {...(invalidField === "definition"
+                ? { errorId: `${id}-error` }
+                : {})}
+              onChange={(definitionId) => change({ definitionId })}
+            />
+          </div>
         )}
         {showQuantity && (
           <label className="tw-max-w-28 tw-space-y-2 tw-text-xs tw-font-semibold tw-text-iron-300">
@@ -240,13 +248,15 @@ export default function CollectGoalForm(props: CollectGoalFormProps) {
         </p>
       )}
       <div className="tw-mt-4 tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
-        <p className="tw-m-0 tw-text-xs tw-text-iron-400">
-          {props.profile
-            ? t(locale, "collect.profileScope", {
-                profile: props.profile.displayName,
-              })
-            : t(locale, "collect.goal.connect")}
-        </p>
+        {(!props.profile || !props.completion) && (
+          <p className="tw-m-0 tw-text-xs tw-text-iron-400">
+            {props.profile
+              ? t(locale, "collect.profileScope", {
+                  profile: props.profile.displayName,
+                })
+              : t(locale, "collect.goal.connect")}
+          </p>
+        )}
         {props.profile ? (
           <Button
             type="submit"

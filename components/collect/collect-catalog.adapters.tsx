@@ -8,6 +8,12 @@ import type { CollectArtworkView } from "./collect.types";
 import { marketAmount } from "./market.adapters";
 import { collectTdhValueLabel } from "./collect-tdh-browse.helpers";
 import {
+  collectBuyAmount,
+  collectOrderAvailableQuantity,
+  collectOrderPurchaseQuantity,
+} from "./collect-buy.helpers";
+import { formatDecimalString } from "@/i18n/format";
+import {
   collectCatalogEntryId,
   type CollectCatalogEntry,
 } from "./useCollectCatalog";
@@ -19,6 +25,25 @@ export function collectCatalogArtwork(
   locale: SupportedLocale
 ): CollectArtworkView {
   const { asset, order } = entry;
+  const quantity = order ? collectOrderPurchaseQuantity(order) : null;
+  const price = order && quantity ? collectBuyAmount(order, quantity) : null;
+  const availability =
+    entry.tdh?.available_quantity ??
+    (order ? collectOrderAvailableQuantity(order) : null);
+  let priceDescription: string | undefined;
+  if (quantity && BigInt(quantity) > 1n) {
+    priceDescription = t(locale, "collect.buy.lotPrice", {
+      quantity: formatDecimalString(locale, quantity),
+    });
+  } else if (
+    availability &&
+    /^(0|[1-9][0-9]{0,77})$/.test(availability) &&
+    BigInt(availability) > 1n
+  ) {
+    priceDescription = t(locale, "collect.trade.orderQuantity", {
+      quantity: formatDecimalString(locale, availability),
+    });
+  }
   return {
     id: collectCatalogEntryId(entry),
     title: asset.name,
@@ -36,10 +61,8 @@ export function collectCatalogArtwork(
       />
     ),
     ownedLabel: null,
-    priceLabel: order ? marketAmount(order.total_wei, order.currency) : null,
-    priceDescription: order
-      ? t(locale, "collect.trade.orderQuantity", { quantity: order.quantity })
-      : undefined,
+    priceLabel: order && price ? marketAmount(price, order.currency) : null,
+    priceDescription,
     sourceLabel: entry.tdh
       ? collectTdhValueLabel(entry.tdh, locale)
       : undefined,

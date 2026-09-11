@@ -6,6 +6,7 @@ export const COLLECT_MESSAGES = {
   "collect.buy.chooseDelivery": "Choose a wallet",
   "collect.buy.otherListings": "Other listings",
   "collect.buy.includedFees": "Fees included in price",
+  "collect.buy.lotPrice": "Price for {quantity} copies",
   "collect.buy.listingChanged":
     "This listing changed or is no longer available. Review the current price before buying.",
   "collect.buy.editPurchase": "Edit purchase",

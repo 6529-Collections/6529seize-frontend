@@ -15,7 +15,7 @@ import {
 } from "@/services/api/collect-api";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import type {
   CollectCatalogView,
   CollectCollection,
@@ -32,6 +32,7 @@ import CollectPlanBasket from "./CollectPlanBasket";
 import CollectPageView, { COLLECT_INTENTS } from "./CollectPageView";
 import CollectTradeController from "./CollectTradeController";
 import { collectProfileWallets } from "./collect-recipient.helpers";
+import { collectLowestArtworkEntries } from "./collect-catalog.helpers";
 
 export default function CollectPageClient() {
   const searchParams = useSearchParams();
@@ -54,6 +55,14 @@ function CollectCatalogController({
   readonly queryString: string;
 }) {
   const locale = useBrowserLocale();
+  const [listingTime, setListingTime] = useState(() => Date.now() / 1000);
+  useEffect(() => {
+    const timer = globalThis.setInterval(
+      () => setListingTime(Date.now() / 1000),
+      15_000
+    );
+    return () => globalThis.clearInterval(timer);
+  }, []);
   const router = useRouter();
   const params = new URLSearchParams(queryString);
   const collection: CollectCollection =
@@ -142,6 +151,16 @@ function CollectCatalogController({
     enabled: intent === "lowest" || intent === "tdh",
   });
   const discovery = useCollectCatalog(collection, intent);
+  const visibleEntries =
+    intent === "lowest"
+      ? collectLowestArtworkEntries(
+          discovery.entries,
+          collectProfileWallets(connectedProfile).map(
+            (wallet) => wallet.wallet
+          ),
+          listingTime
+        )
+      : discovery.entries;
   const plan =
     costPlan && profile
       ? collectCostPlanView(
@@ -163,7 +182,7 @@ function CollectCatalogController({
       status: "ready",
       hasMore: discovery.hasMore,
       loadingMore: discovery.loadingMore,
-      items: discovery.entries.map((entry) =>
+      items: visibleEntries.map((entry) =>
         collectCatalogArtwork(entry, catalog.data, capabilities.data, locale)
       ),
     };

@@ -18,7 +18,7 @@ export default function CollectTdhBrowseContext({
   return (
     <div className="tw-space-y-2 tw-text-xs tw-leading-5 tw-text-iron-400">
       <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-1">
-        <p className="tw-m-0">{t(locale, "collect.tdhBrowse.scope")}</p>
+        <p className="tw-sr-only">{t(locale, "collect.tdhBrowse.scope")}</p>
         {onOpenProjection && (
           <button
             type="button"

@@ -44,6 +44,27 @@ const catalog = {
   tdh_snapshot: null,
 };
 
+const listings = assets.slice(0, 2).map((asset, index) => ({
+  asset,
+  order: {
+    identity: {
+      protocol_address: "0x0000000000000068f116a894984e2db1123eb395",
+      order_hash: `0x${String(index + 1).repeat(64)}`,
+    },
+    asset_key: asset.asset_key,
+    maker: "0x0000000000000000000000000000000000000011",
+    recipient: ZERO,
+    side: "LISTING",
+    quantity: "1",
+    currency: ZERO,
+    total_wei: index ? "20000000000000000" : "10000000000000000",
+    net_wei: index ? "20000000000000000" : "10000000000000000",
+    fees: [],
+    start_time: "1",
+    end_time: "2000000000",
+  },
+}));
+
 async function mockCatalog(page: Page, state = { fail: false }) {
   const mutations: string[] = [];
   await page.route("**/*", async (route) => {
@@ -118,29 +139,33 @@ async function mockCatalog(page: Page, state = { fail: false }) {
       }
       await route.fulfill({
         json: {
-          entries: assets.slice(0, 2).map((asset, index) => ({
-            asset,
-            order: {
-              identity: {
-                protocol_address: "0x0000000000000068f116a894984e2db1123eb395",
-                order_hash: `0x${String(index + 1).repeat(64)}`,
-              },
-              asset_key: asset.asset_key,
-              maker: "0x0000000000000000000000000000000000000011",
-              recipient: ZERO,
-              side: "LISTING",
-              quantity: "1",
-              currency: ZERO,
-              total_wei: index ? "20000000000000000" : "10000000000000000",
-              net_wei: index ? "20000000000000000" : "10000000000000000",
-              fees: [],
-              start_time: "1",
-              end_time: "2000000000",
-            },
-          })),
+          entries: listings,
           next: null,
           checked_at: new Date().toISOString(),
           complete: true,
+        },
+      });
+      return;
+    }
+    if (url.pathname === "/api/collect/tdh-listings") {
+      await route.fulfill({
+        json: {
+          family: "memes",
+          snapshot_id: "tdh-fixture",
+          catalog_version: catalog.version,
+          status: "FRESH",
+          coverage_complete: true,
+          evaluated_ask_count: 2,
+          observed_at: new Date().toISOString(),
+          next: null,
+          entries: [...listings].reverse().map((item) => ({
+            ...item,
+            available_quantity: "1",
+            purchase_quantity: "1",
+            purchase_cost_wei: item.order.total_wei,
+            rate_hundredths: item.asset.token_id === "2" ? "400" : "100",
+            base_tdh_per_day_hundredths: item.asset.token_id === "2" ? "400" : "100",
+          })),
         },
       });
       return;
@@ -181,7 +206,7 @@ test("observed listings open a wallet-gated review through compact actions", asy
     waitUntil: "domcontentloaded",
   });
   await expect(
-    page.getByRole("heading", { name: "Collecting tools", exact: true })
+    page.getByRole("heading", { name: "Build your collection", exact: true })
   ).toBeVisible();
   await expect(
     page.getByRole("heading", { name: "Catalog artwork 1" })
@@ -312,7 +337,7 @@ test("set planning is the default and navigation opens observed listings", async
     waitUntil: "domcontentloaded",
   });
   await expect(
-    page.getByRole("heading", { name: "Complete a full set", exact: true })
+    page.getByRole("form", { name: "Complete a full set", exact: true })
   ).toBeVisible();
   await noHorizontalOverflow(page);
   await page.screenshot({
@@ -333,14 +358,21 @@ test("set planning is the default and navigation opens observed listings", async
     .getByRole("button", { name: "Complete a set", exact: true })
     .click();
   await expect(
-    page.getByRole("heading", { name: "Complete a full set", exact: true })
+    page.getByRole("form", { name: "Complete a full set", exact: true })
   ).toBeVisible();
-  await page
-    .getByRole("combobox", { name: "What are you collecting?" })
-    .selectOption("season");
+  const season = page.getByRole("radio", { name: "Season", exact: true });
+  await season.focus();
+  await season.press("Space");
   await expect(
-    page.getByRole("heading", { name: "Complete a season", exact: true })
+    page.getByRole("form", { name: "Complete a season", exact: true })
   ).toBeVisible();
+  await expect(season).toBeFocused();
+  const target = page.getByRole("combobox", { name: "Season", exact: true });
+  await target.fill("Season 1");
+  await target.press("ArrowDown");
+  await target.press("Enter");
+  await expect(target).toHaveValue("Season 1");
+  await expect(target).toBeFocused();
   await expect(
     page.getByRole("button", { name: "Connect wallet", exact: true }).last()
   ).toBeVisible();
@@ -375,6 +407,56 @@ test("listing errors remain distinct from empty results and support retry", asyn
   ).toBeVisible();
   await expect(alert).toHaveCount(0);
   await noHorizontalOverflow(page);
+  expect(mutations).toEqual([]);
+});
+
+test("TDH opens Memes listings immediately and keeps projection as a separate keyboard-accessible view", async ({
+  page,
+}, info) => {
+  const mutations = await mockCatalog(page);
+  await page.goto("/collect?intent=lowest&collection=pebbles", {
+    waitUntil: "domcontentloaded",
+  });
+  const tab = page.getByRole("button", { name: "TDH", exact: true });
+  await tab.focus();
+  await tab.press("Enter");
+  await expect(tab).toBeFocused();
+  await expect(
+    page.getByRole("button", { name: "The Memes", exact: true })
+  ).toHaveAttribute("aria-pressed", "true");
+  await expect(
+    page.getByRole("region", { name: "Lowest cost TDH", exact: true })
+  ).toBeVisible();
+  await expect(page.getByRole("article").first()).toContainText(
+    "Catalog artwork 2"
+  );
+  await expect(
+    page.getByLabel("Projection horizon", { exact: true })
+  ).toHaveCount(0);
+  const projection = page.getByRole("button", {
+    name: "Project profile TDH",
+    exact: true,
+  });
+  await projection.focus();
+  await projection.press("Enter");
+  const back = page.getByRole("button", {
+    name: "Back to TDH listings",
+    exact: true,
+  });
+  await expect(back).toBeFocused();
+  await expect(
+    page.getByRole("region", { name: "Lowest cost TDH", exact: true })
+  ).toHaveCount(0);
+  await back.press("Enter");
+  await expect(projection).toBeFocused();
+  await expect(page.getByRole("article").first()).toContainText(
+    "Catalog artwork 2"
+  );
+  await noHorizontalOverflow(page);
+  await page.screenshot({
+    path: info.outputPath("collect-tdh-listings.png"),
+    fullPage: true,
+  });
   expect(mutations).toEqual([]);
 });
 

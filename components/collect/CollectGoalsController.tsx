@@ -177,31 +177,33 @@ export default function CollectGoalsController({
         onSubmit={submit}
         onConnect={onConnect}
       />
-      <div>
-        <CollectDeliveryControl
-          profile={profile}
-          value={recipient}
-          disabled={creating}
-          invalid={recipientError}
-          errorId="collect-goal-recipient-error"
-          onChange={(address) => {
-            setRecipient(address);
-            setRecipientError(false);
-            requestEpoch.current += 1;
-            setStoredPlan(null);
-            onPlan(null);
-          }}
-        />
-        {recipientError && (
-          <p
-            id="collect-goal-recipient-error"
-            role="alert"
-            className="tw-text-sm tw-text-red"
-          >
-            {t(locale, "collect.trade.invalid.recipient")}
-          </p>
-        )}
-      </div>
+      {profile?.id && (
+        <div>
+          <CollectDeliveryControl
+            profile={profile}
+            value={recipient}
+            disabled={creating}
+            invalid={recipientError}
+            errorId="collect-goal-recipient-error"
+            onChange={(address) => {
+              setRecipient(address);
+              setRecipientError(false);
+              requestEpoch.current += 1;
+              setStoredPlan(null);
+              onPlan(null);
+            }}
+          />
+          {recipientError && (
+            <p
+              id="collect-goal-recipient-error"
+              role="alert"
+              className="tw-text-sm tw-text-red"
+            >
+              {t(locale, "collect.trade.invalid.recipient")}
+            </p>
+          )}
+        </div>
+      )}
       {scanning && (
         <p role="status" className="tw-text-sm tw-text-iron-300">
           {t(locale, "collect.plan.scanning", {

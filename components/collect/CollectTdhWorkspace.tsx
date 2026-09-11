@@ -26,8 +26,8 @@ export default function CollectTdhWorkspace({
 }) {
   const locale = useBrowserLocale();
   return (
-    <div className="tw-space-y-3">
-      <div className="tw-flex tw-justify-end">
+    <div className="tw-grid tw-grid-cols-[minmax(0,1fr)_auto] tw-items-start tw-gap-x-4 tw-gap-y-3">
+      <div className="tw-col-start-2 tw-row-start-1 tw-flex tw-justify-end">
         <button
           type="button"
           onClick={onToggleProjection}
@@ -48,14 +48,18 @@ export default function CollectTdhWorkspace({
         </button>
       </div>
       {projection ? (
-        <CollectTdhController
-          key={collection}
-          collection={collection}
-          profile={profile}
-          onConnect={onConnect}
-        />
+        <div className="tw-col-span-2">
+          <CollectTdhController
+            key={collection}
+            collection={collection}
+            profile={profile}
+            onConnect={onConnect}
+          />
+        </div>
       ) : (
-        <CollectTdhBrowseContext snapshot={snapshot} locale={locale} />
+        <div className="tw-col-start-1 tw-row-start-1 tw-min-w-0">
+          <CollectTdhBrowseContext snapshot={snapshot} locale={locale} />
+        </div>
       )}
     </div>
   );

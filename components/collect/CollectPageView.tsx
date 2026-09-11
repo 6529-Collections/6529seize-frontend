@@ -136,24 +136,30 @@ export default function CollectPageView(props: CollectPageViewProps) {
   const showListings =
     props.showListings ?? (props.intent === "lowest" || props.intent === "tdh");
   const [planOpen, setPlanOpen] = useState(false);
+  let contentClass = showListings ? "tw-max-w-[1080px]" : "tw-max-w-3xl";
+  if (props.plan)
+    contentClass =
+      "tw-grid tw-items-start tw-gap-6 xl:tw-grid-cols-[minmax(0,1fr)_360px]";
   return (
     <div className="tailwind-scope tw-mx-auto tw-w-full tw-max-w-[1440px] tw-px-4 tw-pb-28 tw-pt-6 tw-text-iron-100 md:tw-px-6 lg:tw-px-8">
       <header className="tw-mb-7 tw-space-y-3">
         <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-6 tw-gap-y-2">
-          <h1 className="tw-m-0 tw-text-3xl tw-font-semibold tw-tracking-tight">
+          <h1 className="tw-m-0 tw-min-w-0 tw-flex-1 tw-text-3xl tw-font-semibold tw-tracking-tight">
             {t(locale, "collect.title")}
           </h1>
           {collectionLink && (
             <Link
               href={collectionLink.href}
-              className="tw-inline-flex tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-lg tw-py-2 tw-text-xs tw-text-iron-300 tw-no-underline hover:tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+              className="tw-inline-flex tw-min-h-11 tw-min-w-11 tw-shrink-0 tw-items-center tw-justify-end tw-gap-2 tw-rounded-lg tw-py-2 tw-text-xs tw-text-iron-300 tw-no-underline hover:tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
             >
-              {t(locale, "collect.viewCollection", {
-                collection: t(
-                  locale,
-                  `collect.collection.${collectionLink.id}`
-                ),
-              })}
+              <span className="tw-sr-only sm:tw-not-sr-only">
+                {t(locale, "collect.viewCollection", {
+                  collection: t(
+                    locale,
+                    `collect.collection.${collectionLink.id}`
+                  ),
+                })}
+              </span>
               <ArrowUpRightIcon className="tw-size-4" aria-hidden="true" />
             </Link>
           )}
@@ -161,7 +167,7 @@ export default function CollectPageView(props: CollectPageViewProps) {
         <p className="tw-m-0 tw-max-w-2xl tw-text-sm tw-leading-6 tw-text-iron-400">
           {t(locale, "collect.description")}
         </p>
-        {props.profile ? (
+        {props.profile && (
           <div>
             <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-primary-300">
               {t(locale, "collect.profileScope", {
@@ -171,15 +177,6 @@ export default function CollectPageView(props: CollectPageViewProps) {
             <p className="tw-mb-0 tw-mt-1 tw-text-xs tw-leading-5 tw-text-iron-400">
               {t(locale, "collect.profileScopeDetail")}
             </p>
-          </div>
-        ) : (
-          <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
-            <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
-              {t(locale, "collect.connectDescription")}
-            </p>
-            <Button variant="secondary" size="sm" onClick={props.onConnect}>
-              {t(locale, "collect.connect")}
-            </Button>
           </div>
         )}
       </header>
@@ -209,13 +206,7 @@ export default function CollectPageView(props: CollectPageViewProps) {
           ))}
         </div>
       )}
-      <div
-        className={
-          props.plan
-            ? "tw-grid tw-items-start tw-gap-6 xl:tw-grid-cols-[minmax(0,1fr)_360px]"
-            : "tw-max-w-[1080px]"
-        }
-      >
+      <div className={contentClass}>
         <div className="tw-min-w-0">
           {props.goalContent !== undefined && props.goalContent !== null && (
             <div className="tw-mb-6">{props.goalContent}</div>
