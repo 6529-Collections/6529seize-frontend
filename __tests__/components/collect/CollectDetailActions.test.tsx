@@ -139,7 +139,7 @@ it("opens one modal immediately and keeps it through the canonical lookup", asyn
   expect(screen.queryByTestId("trade")).not.toBeInTheDocument();
   await waitFor(() => {
     expect(view.container.inert).toBe(true);
-    expect(dialog).toContainElement(document.activeElement);
+    expect(dialog.contains(document.activeElement)).toBe(true);
   });
   await act(async () => {
     finish?.({ data: [asset] });
