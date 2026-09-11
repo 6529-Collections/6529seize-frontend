@@ -10,6 +10,7 @@ import { FR_FR_CAPACITOR_CONNECT_MESSAGES } from "@/i18n/messages/capacitor-conn
 import { FR_FR_PAGINATION_MESSAGES } from "@/i18n/messages/pagination";
 import { FR_FR_THE_MEMES_COLLECTORS_MESSAGES } from "@/i18n/messages/the-memes-collectors";
 import { FR_FR_TRANSFER_MESSAGES } from "@/i18n/messages/transfer";
+import { FR_FR_THE_MEMES_MINT_SUCCESS_MESSAGES } from "@/i18n/messages/the-memes-mint-success";
 import stormComposerFrMessages from "@/i18n/messages/stormComposer.fr-FR.json";
 import type { MessageKey } from "@/i18n/messages/en-US";
 import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.fr-FR.json";
@@ -1235,4 +1236,5 @@ export const FR_FR_MESSAGES = {
   "notifications.filter.option.invites": "Invitations",
   "notifications.filter.option.subscriptions": "Abonnements",
   ...FR_FR_TRANSFER_MESSAGES,
+  ...FR_FR_THE_MEMES_MINT_SUCCESS_MESSAGES,
 } satisfies Partial<Record<MessageKey, string>>;

@@ -2,7 +2,7 @@ import ManifoldMintingWidget from "@/components/manifold-minting/ManifoldMinting
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { MEMES_CONTRACT } from "@/constants/constants";
 import { ManifoldClaimStatus, ManifoldPhase } from "@/hooks/useManifoldClaim";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { mainnet } from "viem/chains";
 import {
@@ -21,7 +21,10 @@ jest.mock("@/components/auth/SeizeConnectContext", () => ({
 jest.mock(
   "@/components/manifold-minting/ManifoldMintingConnect",
   () =>
-    function MockConnect(props: any) {
+    function MockConnect(
+      props: Readonly<{ onMintFor: (address: string) => void }>
+    ) {
+      mockOnMintFor = props.onMintFor;
       return (
         <button
           data-testid="connect"
@@ -39,6 +42,7 @@ const writeContract = jest.fn();
 const reset = jest.fn();
 const seizeConnect = jest.fn();
 const useSeizeConnectContextMock = jest.mocked(useSeizeConnectContext);
+let mockOnMintFor: (address: string) => void;
 
 interface MockMintWriteState {
   readonly writeContract: typeof writeContract;
@@ -239,14 +243,7 @@ describe("ManifoldMintingWidget", () => {
       chainId: 1,
       value: 1n,
       functionName: "mintProxy",
-      args: [
-        "0xC",
-        1,
-        1,
-        [],
-        [],
-        "0x0000000000000000000000000000000000000abc",
-      ],
+      args: ["0xC", 1, 1, [], [], "0x0000000000000000000000000000000000000abc"],
     });
     expect(await screen.findByRole("dialog")).toHaveTextContent(
       "Confirm in your wallet"
@@ -315,6 +312,12 @@ describe("ManifoldMintingWidget", () => {
     const dialog = await screen.findByRole("dialog");
     expect(dialog).toHaveTextContent("Transaction Submitted - SEIZING");
     expect(screen.getByRole("link", { name: "View Tx" })).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Done" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("Your mint is confirmed.")
+    ).not.toBeInTheDocument();
   });
 
   it("shows a successful transaction in the onchain modal", async () => {
@@ -335,8 +338,102 @@ describe("ManifoldMintingWidget", () => {
     };
     rerender(<ManifoldMintingWidget {...baseProps} />);
 
-    expect(await screen.findByRole("dialog")).toHaveTextContent("SEIZED!");
+    const dialog = await screen.findByRole("dialog", { name: "SEIZED!" });
+    expect(dialog).toHaveAccessibleDescription("Your mint is confirmed.");
+    expect(
+      within(dialog).getByRole("button", { name: "Done" })
+    ).toBeInTheDocument();
+    expect(
+      within(dialog).getByRole("link", { name: /View transaction/ })
+    ).toHaveAttribute("href", `https://etherscan.io/tx/${transactionHash}`);
   });
+
+  it("keeps the submitted quantity, recipient, and artwork when live mint details change", async () => {
+    const user = userEvent.setup();
+    const transactionHash: `0x${string}` = `0x${"7".repeat(64)}`;
+    const originalRecipient = "0x0000000000000000000000000000000000000abc";
+    const updatedRecipient = "0x0000000000000000000000000000000000000def";
+    const props = {
+      ...baseProps,
+      contract: MEMES_CONTRACT,
+      claim: { ...baseProps.claim, tokenId: 547 },
+      artwork: { name: "Original artwork", imageUrl: "/original-artwork.png" },
+    };
+    const { rerender } = render(<ManifoldMintingWidget {...props} />);
+
+    await user.click(screen.getByTestId("connect"));
+    const mintCount = screen.getByRole("spinbutton", { name: "Mint count" });
+    await user.clear(mintCount);
+    await user.type(mintCount, "3");
+    await user.click(screen.getByRole("button", { name: "SEIZE x3" }));
+    expect(writeContract).toHaveBeenCalledWith(
+      expect.objectContaining({
+        args: [MEMES_CONTRACT, 1, 3, [], [], originalRecipient],
+      })
+    );
+
+    mintWriteState = { ...mintWriteState, data: transactionHash };
+    waitMintWriteState = { error: null, isPending: true, isSuccess: false };
+    rerender(<ManifoldMintingWidget {...props} />);
+    expect(screen.getByRole("dialog")).toHaveTextContent(
+      "Transaction Submitted - SEIZING"
+    );
+
+    act(() => mockOnMintFor(updatedRecipient));
+    (useReadContracts as jest.Mock).mockReturnValue({
+      data: [{ result: false }],
+    });
+    const updatedProps = {
+      ...props,
+      claim: { ...props.claim, tokenId: 548 },
+      artwork: { name: "Next artwork", imageUrl: "/next-artwork.png" },
+    };
+    rerender(<ManifoldMintingWidget {...updatedProps} />);
+    expect(screen.getByRole("spinbutton", { name: "Mint count" })).toHaveValue(
+      1
+    );
+
+    waitMintWriteState = { error: null, isPending: false, isSuccess: true };
+    rerender(<ManifoldMintingWidget {...updatedProps} />);
+
+    const receipt = within(
+      await screen.findByRole("dialog", { name: "SEIZED!" })
+    );
+    expect(receipt.getByText("3")).toBeInTheDocument();
+    expect(receipt.getByText(originalRecipient)).toBeInTheDocument();
+    expect(receipt.queryByText(updatedRecipient)).not.toBeInTheDocument();
+    expect(receipt.getByText("Original artwork")).toBeInTheDocument();
+    expect(receipt.getByText("The Memes #547")).toBeInTheDocument();
+    expect(receipt.queryByText("Next artwork")).not.toBeInTheDocument();
+    expect(receipt.queryByText("The Memes #548")).not.toBeInTheDocument();
+  });
+
+  it.each(["Done", "Escape"] as const)(
+    "dismisses a confirmed mint with %s and restores focus to the mint button",
+    async (dismissAction) => {
+      const user = userEvent.setup();
+      const { rerender } = render(<ManifoldMintingWidget {...baseProps} />);
+
+      await user.click(screen.getByTestId("connect"));
+      const mintButton = screen.getByRole("button", { name: "SEIZE x1" });
+      await user.click(mintButton);
+      mintWriteState = { ...mintWriteState, data: `0x${"8".repeat(64)}` };
+      waitMintWriteState = { error: null, isPending: false, isSuccess: true };
+      rerender(<ManifoldMintingWidget {...baseProps} />);
+
+      await screen.findByRole("dialog", { name: "SEIZED!" });
+      if (dismissAction === "Done") {
+        await user.click(screen.getByRole("button", { name: "Done" }));
+      } else {
+        await user.keyboard("{Escape}");
+      }
+
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+      expect(mintButton).toHaveFocus();
+      rerender(<ManifoldMintingWidget {...baseProps} />);
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    }
+  );
 
   it("shows a transaction error in the onchain modal", async () => {
     const user = userEvent.setup();
@@ -441,7 +538,11 @@ describe("ManifoldMintingWidget", () => {
     rerender(<ManifoldMintingWidget {...baseProps} />);
 
     expect(await screen.findByRole("dialog")).toHaveTextContent("SEIZED!");
-    await user.click(screen.getByRole("button", { name: "Close modal" }));
+    await user.click(
+      within(screen.getByRole("dialog")).getByRole("button", {
+        name: "Close mint confirmation",
+      })
+    );
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: /SEIZE x1/i }));

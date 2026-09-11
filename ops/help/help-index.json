@@ -6759,16 +6759,32 @@
         "mint page",
         "the memes mint",
         "mint route",
-        "mint current card"
+        "mint current card",
+        "mint confirmation",
+        "seized",
+        "minted to"
       ],
-      "keywords": ["memes", "mint", "minting", "route", "current"],
+      "keywords": [
+        "memes",
+        "mint",
+        "minting",
+        "route",
+        "current",
+        "confirmation",
+        "quantity",
+        "recipient",
+        "transaction"
+      ],
       "facts": [
         "The Memes mint route lives at /the-memes/mint.",
         "Mint flow docs explain entry points, common scenarios, and recovery.",
         "If a remembered profile's authorized wallet is disconnected, the mint page hides the duplicate Connect control; selecting SEIZE opens wallet connection and continues when the same wallet reconnects and transaction details are unchanged.",
         "Selecting a different already-authenticated wallet switches the active profile and cancels the old pending mint so refreshed recipient, eligibility, price, and transaction details can be reviewed before selecting SEIZE again; an unauthenticated wallet must complete normal authentication first.",
         "Wallet confirmation, submitted, successful, and on-chain error states appear in the shared transaction modal; local recipient and mint-count validation stays inline.",
-        "The shared transaction modal identifies the current card as Mint: The Memes #{id} when a valid token ID is available, and otherwise keeps the generic Mint The Memes title.",
+        "Before confirmation and for transaction errors, the modal identifies the card as Mint: The Memes #{id} when a valid token ID is available, and otherwise keeps the generic Mint The Memes title.",
+        "After receipt confirmation, the modal headline is SEIZED! with the message Your mint is confirmed. It shows artwork details, Quantity, and the full destination wallet address under Minted to. These details describe the submitted mint, including when minting for another wallet.",
+        "Done closes the success confirmation and returns to the mint page. View transaction opens the transaction in a new browser tab; checking it is optional. The close control and Escape also dismiss the success confirmation.",
+        "Artwork preview unavailable means only the image could not be displayed; the successful mint, quantity, destination, and transaction link remain available.",
         "Mint eligibility is separate from subscription mode and allowlist rules."
       ],
       "canonical_path": "/the-memes/mint",

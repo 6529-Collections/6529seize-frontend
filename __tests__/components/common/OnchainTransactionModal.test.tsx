@@ -60,6 +60,128 @@ describe("OnchainTransactionModal", () => {
     ).toHaveAccessibleDescription("2 Cards - 0.13 ETH");
   });
 
+  it.each(["confirm_wallet", "submitted", "success", "error"] as const)(
+    "only shows custom success content after confirmation (%s)",
+    (status) => {
+      render(
+        <OnchainTransactionModal
+          status={status}
+          title="Onchain action"
+          successContent={<div>Your mint receipt</div>}
+          transactionLink="https://explorer.example/tx/0xabc"
+          onClose={jest.fn()}
+        />
+      );
+
+      if (status === "success") {
+        expect(screen.getByText("Your mint receipt")).toBeInTheDocument();
+        expect(
+          screen.queryByText(DEFAULT_MESSAGES.success)
+        ).not.toBeInTheDocument();
+        expect(
+          screen.queryByRole("link", { name: "View Tx" })
+        ).not.toBeInTheDocument();
+      } else {
+        expect(screen.queryByText("Your mint receipt")).not.toBeInTheDocument();
+        if (status === "error") {
+          expect(
+            screen.getByRole("textbox", { name: "Transaction error details" })
+          ).toHaveValue(DEFAULT_MESSAGES.error);
+        } else {
+          expect(
+            screen.getByText(DEFAULT_MESSAGES[status])
+          ).toBeInTheDocument();
+        }
+      }
+    }
+  );
+
+  it("includes custom success actions in the focus trap after confirmation", async () => {
+    const user = userEvent.setup();
+    const onClose = jest.fn();
+    const successContent = (
+      <div>
+        <button type="button" onClick={onClose}>
+          Done
+        </button>
+        <a href="https://explorer.example/tx/0xabc">View transaction</a>
+      </div>
+    );
+    const { rerender } = render(
+      <OnchainTransactionModal
+        status="submitted"
+        title="Onchain action"
+        successContent={successContent}
+        onClose={onClose}
+      />
+    );
+
+    rerender(
+      <OnchainTransactionModal
+        status="success"
+        title="Onchain action"
+        successContent={successContent}
+        onClose={onClose}
+      />
+    );
+
+    const closeButton = screen.getByRole("button", { name: "Close modal" });
+    const doneButton = screen.getByRole("button", { name: "Done" });
+    const transactionLink = screen.getByRole("link", {
+      name: "View transaction",
+    });
+    await user.tab();
+    expect(closeButton).toHaveFocus();
+    await user.tab();
+    expect(doneButton).toHaveFocus();
+    await user.tab();
+    expect(transactionLink).toHaveFocus();
+    await user.tab();
+    expect(closeButton).toHaveFocus();
+    await user.tab({ shift: true });
+    expect(transactionLink).toHaveFocus();
+  });
+
+  it.each([false, true])(
+    "preserves the default success message and transaction link for boolean content (%s)",
+    (successContent) => {
+      render(
+        <OnchainTransactionModal
+          status="success"
+          title="Onchain action"
+          successContent={successContent}
+          transactionLink="https://explorer.example/tx/0xabc"
+          onClose={jest.fn()}
+        />
+      );
+
+      expect(screen.getByText(DEFAULT_MESSAGES.success)).toBeInTheDocument();
+      expect(screen.getByRole("link", { name: "View Tx" })).toHaveAttribute(
+        "href",
+        "https://explorer.example/tx/0xabc"
+      );
+    }
+  );
+
+  it.each(["Custom receipt", 0])(
+    "preserves renderable primitive custom success content (%s)",
+    (successContent) => {
+      render(
+        <OnchainTransactionModal
+          status="success"
+          title="Onchain action"
+          successContent={successContent}
+          onClose={jest.fn()}
+        />
+      );
+
+      expect(screen.getByText(String(successContent))).toBeInTheDocument();
+      expect(
+        screen.queryByText(DEFAULT_MESSAGES.success)
+      ).not.toBeInTheDocument();
+    }
+  );
+
   it("preserves deliberate line breaks in the title", () => {
     render(
       <OnchainTransactionModal
