@@ -29,6 +29,7 @@ interface Props {
   readonly disabled?: boolean | undefined;
   readonly assets?: readonly AssetChoice[] | undefined;
   readonly describedBy?: string | undefined;
+  readonly hideLabel?: boolean | undefined;
 }
 
 const languageEntry: ValueEditor = {
@@ -74,7 +75,11 @@ export default function DocumentationValueEditor(props: Props) {
       <div>
         <label
           htmlFor={id}
-          className="tw-mb-2 tw-block tw-text-sm tw-text-iron-300"
+          className={
+            props.hideLabel
+              ? "tw-sr-only"
+              : "tw-mb-2 tw-block tw-text-sm tw-text-iron-300"
+          }
         >
           {label}
         </label>
@@ -103,27 +108,179 @@ function LocalizedEditor(
     readonly editor: Extract<ValueEditor, { kind: "localized" }>;
   }
 ) {
-  const { id, editor, value, onChange, disabled } = props;
+  const { id, label, editor, value, onChange, disabled, describedBy } = props;
   const { msg } = useDocumentationMessages();
   const current = recordValue(value ?? initialValue(editor));
+  const versions = Array.isArray(current["versions"])
+    ? current["versions"]
+    : [];
+  const found = versions.findIndex(
+    (version) =>
+      recordValue(version)["language"] === current["primary_language"]
+  );
+  const primaryIndex = found >= 0 ? found : 0;
+  const primary = recordValue(versions[primaryIndex]);
+  const updatePrimary = (changes: Record<string, FieldValue>) => {
+    const next = { ...primary, ...changes };
+    const updated = versions.length
+      ? versions.map((version, index) =>
+          index === primaryIndex ? next : version
+        )
+      : [next];
+    onChange({ ...current, versions: updated });
+  };
+  const secondary = versions
+    .map((version, index) => ({ version, index }))
+    .filter(({ index }) => index !== primaryIndex);
   return (
-    <div className="tw-space-y-4">
-      <DocumentationValueEditor
-        id={`${id}-primary`}
-        label={msg("primaryLanguage")}
-        editor={{ kind: "text", max: 64 }}
-        value={current["primary_language"]}
-        disabled={disabled}
-        onChange={(language) =>
-          onChange({ ...current, primary_language: language })
+    <div>
+      <label
+        htmlFor={id}
+        className={
+          props.hideLabel
+            ? "tw-sr-only"
+            : "tw-mb-2 tw-block tw-text-sm tw-text-iron-300"
         }
+      >
+        {label}
+      </label>
+      <textarea
+        id={id}
+        className={inputClass}
+        rows={7}
+        value={typeof primary["text"] === "string" ? primary["text"] : ""}
+        lang={
+          typeof primary["language"] === "string"
+            ? primary["language"]
+            : undefined
+        }
+        disabled={disabled}
+        aria-describedby={describedBy}
+        onChange={(event) => updatePrimary({ text: event.target.value })}
       />
-      <ListEditor
-        {...props}
-        editor={{ kind: "list", max: 10, item: languageEntry }}
-        value={current["versions"]}
-        onChange={(versions) => onChange({ ...current, versions })}
-      />
+      <details className="tw-mt-3 tw-text-sm tw-text-iron-400">
+        <summary className="tw-min-h-11 tw-cursor-pointer tw-py-3 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400">
+          {msg("catalogue.languages")}
+        </summary>
+        <div className="tw-space-y-5 tw-py-3">
+          <p className="tw-m-0 tw-max-w-prose tw-leading-7">
+            {msg("editorial.languageHelp")}
+          </p>
+          <DocumentationValueEditor
+            id={id + "-primary"}
+            label={msg("primaryLanguage")}
+            hideLabel={false}
+            editor={{ kind: "text", max: 64 }}
+            value={current["primary_language"]}
+            disabled={disabled}
+            onChange={(language) => {
+              const existing = versions.some(
+                (version) => recordValue(version)["language"] === language
+              );
+              const updated = existing
+                ? versions
+                : versions.map((version, index) =>
+                    index === primaryIndex
+                      ? { ...recordValue(version), language }
+                      : version
+                  );
+              onChange({
+                ...current,
+                primary_language: language,
+                versions: updated,
+              });
+            }}
+          />
+          <DocumentationValueEditor
+            id={id + "-authorship"}
+            label={documentationFieldLabel("authorship")}
+            editor={{
+              kind: "choice",
+              options: [
+                "original",
+                "artist_translation",
+                "third_party_translation",
+              ],
+            }}
+            value={primary["authorship"]}
+            disabled={disabled}
+            onChange={(authorship) => updatePrimary({ authorship })}
+          />
+          <DocumentationValueEditor
+            id={id + "-approved"}
+            label={documentationFieldLabel("approved_by_artist")}
+            editor={{ kind: "boolean" }}
+            value={primary["approved_by_artist"]}
+            disabled={disabled}
+            onChange={(approved_by_artist) =>
+              updatePrimary({ approved_by_artist })
+            }
+          />
+          {secondary.map(({ version, index }) => (
+            <fieldset
+              key={id + "-" + index}
+              className="tw-min-w-0 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-p-0 tw-pt-5"
+            >
+              <legend className="tw-pr-3 tw-text-sm tw-text-iron-300">
+                {msg("editorial.translation", { number: index + 1 })}
+              </legend>
+              <DocumentationValueEditor
+                {...props}
+                hideLabel={false}
+                id={id + "-version-" + index}
+                editor={languageEntry}
+                value={version}
+                onChange={(next) =>
+                  onChange({
+                    ...current,
+                    versions: versions.map((item, itemIndex) =>
+                      itemIndex === index ? next : item
+                    ),
+                  })
+                }
+              />
+              {!disabled && (
+                <DocumentationButton
+                  secondary
+                  className="tw-mt-4"
+                  onClick={() =>
+                    onChange({
+                      ...current,
+                      versions: versions.filter(
+                        (_, itemIndex) => itemIndex !== index
+                      ),
+                    })
+                  }
+                >
+                  {msg("remove", { number: index + 1 })}
+                </DocumentationButton>
+              )}
+            </fieldset>
+          ))}
+          {!disabled && (
+            <DocumentationButton
+              secondary
+              disabled={versions.length >= 10}
+              onClick={() =>
+                onChange({
+                  ...current,
+                  versions: [
+                    ...versions,
+                    {
+                      language: "",
+                      text: "",
+                      authorship: "artist_translation",
+                      approved_by_artist: false,
+                    },
+                  ],
+                })
+              }
+            >
+              {msg("editorial.addTranslation")}
+            </DocumentationButton>
+          )}
+        </div>
+      </details>
     </div>
   );
 }
@@ -195,7 +352,11 @@ function ScalarEditor(
     <div>
       <label
         htmlFor={id}
-        className="tw-mb-2 tw-block tw-text-sm tw-text-iron-300"
+        className={
+          props.hideLabel
+            ? "tw-sr-only"
+            : "tw-mb-2 tw-block tw-text-sm tw-text-iron-300"
+        }
       >
         {label}
       </label>

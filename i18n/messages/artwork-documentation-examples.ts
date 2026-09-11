@@ -190,7 +190,7 @@ export const ARTWORK_DOCUMENTATION_EXAMPLE_MESSAGES = {
   "artworkDocumentation.examples.module.artwork":
     "Identify the exact work and the final image you intend for publication.",
   "artworkDocumentation.examples.module.files":
-    "Supply the finished artwork and any supporting files you intend to publish. Keep private originals and evidence out of this form.",
+    "Supply the finished artwork and any supporting files you intend to publish with it.",
   "artworkDocumentation.examples.module.context":
     "Give viewers a way into the image, then share the fuller account if you wish.",
   "artworkDocumentation.examples.module.process":
