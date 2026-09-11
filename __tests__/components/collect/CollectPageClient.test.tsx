@@ -1,5 +1,6 @@
 import CollectPageClient from "@/components/collect/CollectPageClient";
 import type CollectGoalsController from "@/components/collect/CollectGoalsController";
+import CollectCompletionControls from "@/components/collect/CollectCompletionControls";
 import type { ComponentProps } from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 
@@ -46,8 +47,17 @@ jest.mock("@/components/collect/CollectGoalsController", () => ({
   default: ({
     draft,
     onChange,
+    completion,
   }: ComponentProps<typeof CollectGoalsController>) => (
     <div>
+      {completion && (
+        <CollectCompletionControls
+          {...completion}
+          intent={draft.intent}
+          disabled={false}
+          locale="en-US"
+        />
+      )}
       <output aria-label="Goal definition">{draft.definitionId}</output>
       <label>
         Goal budget
@@ -128,25 +138,62 @@ it("honors an explicit full-set definition and retains edited drafts on rerender
   expect(mockReplace).not.toHaveBeenCalled();
 });
 
-it.each([
-  ["season", "memes"],
-  ["artist", "memes"],
-  ["pebbles_set", "pebbles"],
-])(
-  "aligns an explicit %s goal with %s and clears artwork filters",
-  (intent, collection) => {
+it.each(["Season", "Artist"])(
+  "opens the Memes %s goal and clears artwork filters",
+  (goal) => {
     mockSearchParams = new URLSearchParams(
-      "collection=gradients&intent=full_set&definition=gradients&token=8&q=old"
+      "collection=memes&intent=full_set&definition=memes&token=8&q=old"
     );
     render(<CollectPageClient />);
-    fireEvent.change(
-      screen.getByRole("combobox", { name: "What are you collecting?" }),
-      { target: { value: intent } }
-    );
+    fireEvent.click(screen.getByRole("radio", { name: goal }));
     expect(mockReplace).toHaveBeenCalledWith(
-      `/collect?collection=${collection}&intent=${intent}`,
+      `/collect?collection=memes&intent=${goal.toLowerCase()}`,
       { scroll: false }
     );
+  }
+);
+
+it.each([
+  ["memes", "artist", "gradients", "full_set"],
+  ["memes", "season", "pebbles", "pebbles_set"],
+  ["pebbles", "pebbles_set", "memes", "full_set"],
+  ["gradients", "full_set", "memes", "full_set"],
+])(
+  "switches %s %s to a valid %s %s goal",
+  (before, intent, after, nextIntent) => {
+    mockSearchParams = new URLSearchParams(
+      `collection=${before}&intent=${intent}&definition=old&token=8&q=old`
+    );
+    render(<CollectPageClient />);
+    fireEvent.keyDown(screen.getByRole("button", { name: /^Collection\b/ }), {
+      key: "Enter",
+    });
+    const labels: Readonly<Record<string, string>> = {
+      memes: "The Memes",
+      gradients: "Gradients",
+      pebbles: "Pebbles",
+    };
+    fireEvent.click(
+      screen.getByRole("option", { name: labels[after] ?? after, exact: true })
+    );
+    expect(mockReplace).toHaveBeenCalledWith(
+      `/collect?collection=${after}&intent=${nextIntent}`,
+      { scroll: false }
+    );
+  }
+);
+
+it.each(["gradients", "pebbles"])(
+  "does not show Memes-only goal choices for %s",
+  (collection) => {
+    mockSearchParams = new URLSearchParams(
+      `collection=${collection}&intent=${collection === "pebbles" ? "pebbles_set" : "full_set"}`
+    );
+    render(<CollectPageClient />);
+    expect(screen.queryByRole("radio")).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /^Collection\b/ })
+    ).toHaveTextContent(collection === "gradients" ? "Gradients" : "Pebbles");
   }
 );
 
@@ -200,13 +247,37 @@ it("shows collection choice and recoverable listing errors only in lowest mode",
   expect(screen.queryByLabelText("Goal definition")).not.toBeInTheDocument();
 });
 
-it("keeps TDH collection scope available without a browsing catalogue", () => {
-  mockSearchParams = new URLSearchParams("intent=tdh&collection=gradients");
+it("starts a fresh TDH visit with The Memes", () => {
+  mockSearchParams = new URLSearchParams("intent=tdh");
   render(<CollectPageClient />);
+  expect(screen.getByRole("combobox", { name: "Collections" })).toHaveValue(
+    "memes"
+  );
+  expect(mockReplace).not.toHaveBeenCalled();
+});
+
+it("starts TDH with The Memes when switching from Pebbles listings", () => {
+  mockSearchParams = new URLSearchParams(
+    "collection=pebbles&intent=lowest&token=8&q=old&definition=old"
+  );
+  render(<CollectPageClient />);
+  fireEvent.click(screen.getByRole("button", { name: "TDH" }));
+  expect(mockReplace).toHaveBeenCalledWith(
+    "/collect?collection=memes&intent=tdh",
+    { scroll: false }
+  );
+});
+
+it("preserves explicit TDH collection links and subsequent user selections", () => {
+  mockSearchParams = new URLSearchParams("intent=tdh&collection=gradients");
+  const { rerender } = render(<CollectPageClient />);
   expect(
     screen.queryByRole("region", { name: "Lowest listings" })
   ).not.toBeInTheDocument();
   expect(screen.queryByRole("searchbox")).not.toBeInTheDocument();
+  expect(screen.getByRole("combobox", { name: "Collections" })).toHaveValue(
+    "gradients"
+  );
   fireEvent.change(screen.getByRole("combobox", { name: "Collections" }), {
     target: { value: "pebbles" },
   });
@@ -214,4 +285,12 @@ it("keeps TDH collection scope available without a browsing catalogue", () => {
     "/collect?intent=tdh&collection=pebbles",
     { scroll: false }
   );
+
+  mockReplace.mockClear();
+  mockSearchParams = new URLSearchParams("intent=tdh&collection=pebbles");
+  rerender(<CollectPageClient />);
+  expect(screen.getByRole("combobox", { name: "Collections" })).toHaveValue(
+    "pebbles"
+  );
+  expect(mockReplace).not.toHaveBeenCalled();
 });
