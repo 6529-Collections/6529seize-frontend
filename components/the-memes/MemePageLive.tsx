@@ -62,22 +62,23 @@ export function MemePageLiveSubMenu(props: {
 }) {
   if (props.show) {
     const locale = props.locale ?? DEFAULT_LOCALE;
+    const nft = props.nft;
 
     return (
       <>
-        {props.nft && (
+        {nft && (
           <>
-            <MemePageCardDescription nft={props.nft} />
-            <MemeCardFileType nft={props.nft} />
+            <MemePageCardDescription nft={nft} />
+            <MemeCardFileType nft={nft} />
             <MarketDepthPanel
               contract={MEMES_CONTRACT}
-              tokenId={props.nft.id}
+              tokenId={nft.id}
               locale={locale}
               actions={(refresh) => (
                 <CollectDetailActions
                   collection="memes"
-                  tokenId={String(props.nft.id)}
-                  title={props.nft.name}
+                  tokenId={String(nft.id)}
+                  title={nft.name}
                   locale={locale}
                   onMarketChange={refresh}
                 />

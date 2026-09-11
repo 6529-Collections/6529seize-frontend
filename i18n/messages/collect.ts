@@ -73,6 +73,7 @@ export const COLLECT_MESSAGES = {
   "collect.trade.fees": "Signed order fees",
   "collect.trade.payer": "Wallet paying or selling",
   "collect.trade.payingWallet": "Paying wallet",
+  "collect.trade.payingWalletLine": "Paying wallet: {wallet}",
   "collect.trade.destination": "NFT recipient",
   "collect.trade.asset": "Artwork",
   "collect.trade.network": "Network",

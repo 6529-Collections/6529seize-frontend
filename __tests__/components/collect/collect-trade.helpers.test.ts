@@ -88,7 +88,7 @@ it.each([undefined, []])(
   (wallets) => {
     expect(
       buildMarketRequest({
-        profile: { ...profile, primary_wallet: wallet, wallets },
+        profile: { ...profile, primary_wallet: wallet, wallets } as ApiIdentity,
         wallet,
         action: "buy",
         assetKey: operation.asset_key,
@@ -136,8 +136,8 @@ it("retains authentication gates when the connected payer uses the primary fallb
   const fallbackProfile = {
     ...profile,
     primary_wallet: wallet,
-    wallets: undefined,
   };
+  delete fallbackProfile.wallets;
   expect(
     marketConnectionReason({ ...connection, profile: fallbackProfile })
   ).toBeUndefined();

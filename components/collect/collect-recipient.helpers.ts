@@ -4,9 +4,10 @@ import { getAddress, isAddress, zeroAddress } from "viem";
 
 export function collectProfileWallets(profile: ApiIdentity | null) {
   if (!profile) return [];
-  const wallets = profile.wallets?.length
-    ? profile.wallets
-    : [{ wallet: profile.primary_wallet, display: profile.display, tdh: 0 }];
+  const wallets =
+    profile.wallets && profile.wallets.length > 0
+      ? profile.wallets
+      : [{ wallet: profile.primary_wallet, display: profile.display, tdh: 0 }];
   return wallets
     .filter(
       (wallet, index) =>

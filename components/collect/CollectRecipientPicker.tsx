@@ -68,7 +68,7 @@ export default function CollectRecipientPicker({
     () => (ownIdentity ? asRecipientProfile(ownIdentity) : null),
     [ownIdentity]
   );
-  const isOwnWallet = ownIdentity?.wallets?.some((wallet) =>
+  const isOwnWallet = ownIdentity?.wallets.some((wallet) =>
     areEqualAddresses(wallet.wallet, value)
   );
   const defaultMode = profile && (isOwnWallet || !value) ? "profile" : "other";

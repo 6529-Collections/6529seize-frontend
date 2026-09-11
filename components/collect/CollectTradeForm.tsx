@@ -71,7 +71,9 @@ export default function CollectTradeForm(props: CollectTradeFormProps) {
     >
       <p className="tw-m-0 tw-break-all tw-text-xs tw-leading-5 tw-text-iron-300">
         {props.action === "buy"
-          ? `${t(locale, "collect.trade.payingWallet")}: ${props.makerLabel}`
+          ? t(locale, "collect.trade.payingWalletLine", {
+              wallet: props.makerLabel,
+            })
           : t(locale, "collect.orders.maker", { wallet: props.makerLabel })}
       </p>
       {props.action === "offer" && (

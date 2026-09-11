@@ -188,7 +188,12 @@ it("clears the external destination and restores the primary wallet when returni
 it.each([null, { ...profile, wallets: undefined, primary_wallet: "invalid" }])(
   "does not invent confirmed wallets when the profile wallet list is unavailable: %j",
   (recipientProfile) => {
-    withQuery(<Picker initialValue="" recipientProfile={recipientProfile} />);
+    withQuery(
+      <Picker
+        initialValue=""
+        recipientProfile={recipientProfile as ApiIdentity | null}
+      />
+    );
     expect(
       screen.queryByRole("button", { name: /collector.eth/ })
     ).not.toBeInTheDocument();
@@ -231,7 +236,9 @@ it("restores the confirmed paying wallet when returning from Send to a fren", as
 it.each([undefined, []])(
   "uses the confirmed primary wallet when the optional wallet array is unavailable: %j",
   (wallets) => {
-    withQuery(<Picker recipientProfile={{ ...profile, wallets }} />);
+    withQuery(
+      <Picker recipientProfile={{ ...profile, wallets } as ApiIdentity} />
+    );
     expect(screen.getByLabelText("Selected recipient")).toHaveTextContent(
       primary
     );
