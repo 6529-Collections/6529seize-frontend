@@ -9,15 +9,15 @@ export function documentationDraftRecord(
 ): ApiArtworkDocumentationContext {
   const modules = { ...context.modules };
   for (const { moduleId, operation } of edits) {
-    const module = modules[moduleId];
-    if (!module) continue;
-    const answers = { ...module.answers };
+    const contextModule = modules[moduleId];
+    if (!contextModule) continue;
+    const answers = { ...contextModule.answers };
     if (operation.op === ApiArtworkDocumentationOperationOpEnum.Unset) {
       delete answers[operation.field];
     } else if (operation.answer) {
       answers[operation.field] = operation.answer;
     }
-    modules[moduleId] = { ...module, answers };
+    modules[moduleId] = { ...contextModule, answers };
   }
   return { ...context, modules };
 }

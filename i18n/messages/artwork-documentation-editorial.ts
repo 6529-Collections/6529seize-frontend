@@ -1,4 +1,34 @@
 export const ARTWORK_DOCUMENTATION_EDITORIAL_MESSAGES = {
+  "artworkDocumentation.editorial.datePrecision":
+    "How precisely can you date it?",
+  "artworkDocumentation.editorial.approximateDate": "This date is approximate",
+  "artworkDocumentation.editorial.date.year": "Year",
+  "artworkDocumentation.editorial.date.month": "Year and month",
+  "artworkDocumentation.editorial.date.day": "Date",
+  "artworkDocumentation.editorial.date.start": "From",
+  "artworkDocumentation.editorial.date.end": "To",
+  "artworkDocumentation.editorial.dateFormat.year": "YYYY",
+  "artworkDocumentation.editorial.dateFormat.month": "YYYY-MM",
+  "artworkDocumentation.editorial.dateFormat.day": "YYYY-MM-DD",
+  "artworkDocumentation.editorial.recordInPreparation":
+    "Artwork preview not available",
+  "artworkDocumentation.editorial.artistProfile": "Artist profile: @{handle}",
+  "artworkDocumentation.editorial.submittedAs": "Submitted as “{title}”",
+  "artworkDocumentation.editorial.reviewStatus": "Review status",
+  "artworkDocumentation.editorial.openRecord": "Open record",
+  "artworkDocumentation.editorial.programEyebrow":
+    "6529 Network Museum · Artist records",
+  "artworkDocumentation.editorial.programTitle": "Keys and Gates",
+  "artworkDocumentation.editorial.programIntro":
+    "The works, their histories and the artists’ intentions. Read each record as it takes shape, then review the version confirmed by the artist.",
+  "artworkDocumentation.editorial.personalTitle":
+    "A record worthy of the work.",
+  "artworkDocumentation.editorial.personalIntro":
+    "Every work has more to say than its title. Bring together the image, its story and the choices that should travel with it—for viewers today and custodians in the future.",
+  "artworkDocumentation.editorial.preparationNote":
+    "Start with what you know. Your draft is saved with 6529, and you can return to it. You will review and confirm a specific version before any later publication step.",
+  "artworkDocumentation.editorial.filterRecords": "Find a record",
+  "artworkDocumentation.editorial.records": "Artwork records",
   "artworkDocumentation.editorial.finalArtwork": "Selected artwork file",
   "artworkDocumentation.editorial.submissionImage":
     "Artwork from the original submission",

@@ -19,7 +19,7 @@ interface Props {
   readonly compact?: boolean;
 }
 
-function ArtworkImage({
+export function ArtworkImage({
   url,
   title,
   compact,

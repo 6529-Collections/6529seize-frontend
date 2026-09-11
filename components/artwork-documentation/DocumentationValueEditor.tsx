@@ -497,40 +497,99 @@ function ListEditor(
 }
 
 function DateEditor(props: Props) {
+  const { msg } = useDocumentationMessages();
   const current = recordValue(props.value ?? initialValue({ kind: "date" }));
-  const precision = current["precision"];
-  const shape: ValueEditor = {
-    kind: "object",
-    fields: {
-      precision: { kind: "choice", options: ["year", "month", "day", "range"] },
-      ...(precision === "range"
-        ? {
-            endpoint_precision: {
-              kind: "choice" as const,
-              options: ["year", "month", "day"],
-            },
-          }
-        : {}),
-      start: { kind: "text", max: 10 },
-      ...(precision === "range"
-        ? { end: { kind: "text" as const, max: 10 } }
-        : {}),
-      approximate: { kind: "boolean" },
-    },
+  const precision =
+    typeof current["precision"] === "string" ? current["precision"] : "year";
+  const endpointPrecision =
+    typeof current["endpoint_precision"] === "string"
+      ? current["endpoint_precision"]
+      : "day";
+  const format = precision === "range" ? endpointPrecision : precision;
+  const update = (field: string, value: FieldValue) => {
+    const changed = { ...current, [field]: value };
+    if (changed["precision"] !== "range") {
+      delete changed["end"];
+      delete changed["endpoint_precision"];
+    }
+    props.onChange(changed);
   };
   return (
-    <DocumentationValueEditor
-      {...props}
-      editor={shape}
-      value={current}
-      onChange={(value) => {
-        const changed = recordValue(value);
-        if (changed["precision"] !== "range") {
-          delete changed["end"];
-          delete changed["endpoint_precision"];
-        }
-        props.onChange(changed);
-      }}
-    />
+    <fieldset
+      className="tw-m-0 tw-min-w-0 tw-border-0 tw-p-0"
+      aria-describedby={props.describedBy}
+    >
+      <legend className="tw-sr-only">{props.label}</legend>
+      <div className="tw-grid tw-gap-4 sm:tw-grid-cols-2">
+        <label className="tw-block tw-text-sm tw-text-iron-300">
+          {msg("editorial.datePrecision")}
+          <select
+            className={inputClass + " tw-mt-2"}
+            value={precision}
+            disabled={props.disabled}
+            onChange={(event) => update("precision", event.target.value)}
+          >
+            {["year", "month", "day", "range"].map((option) => (
+              <option key={option} value={option}>
+                {documentationOptionLabel(option)}
+              </option>
+            ))}
+          </select>
+        </label>
+        {precision === "range" && (
+          <label className="tw-block tw-text-sm tw-text-iron-300">
+            {documentationFieldLabel("endpoint_precision")}
+            <select
+              className={inputClass + " tw-mt-2"}
+              value={
+                typeof current["endpoint_precision"] === "string"
+                  ? current["endpoint_precision"]
+                  : ""
+              }
+              disabled={props.disabled}
+              onChange={(event) =>
+                update("endpoint_precision", event.target.value)
+              }
+            >
+              <option value="">{msg("choose")}</option>
+              {["year", "month", "day"].map((option) => (
+                <option key={option} value={option}>
+                  {documentationOptionLabel(option)}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
+        {(precision === "range" ? ["start", "end"] : ["start"]).map((field) => (
+          <label key={field} className="tw-block tw-text-sm tw-text-iron-300">
+            {msg(
+              precision === "range"
+                ? "editorial.date." + field
+                : "editorial.date." + precision
+            )}
+            <input
+              id={field === "start" ? props.id : props.id + "-end"}
+              className={inputClass + " tw-mt-2"}
+              type="text"
+              placeholder={msg("editorial.dateFormat." + format)}
+              value={typeof current[field] === "string" ? current[field] : ""}
+              disabled={props.disabled}
+              aria-describedby={props.describedBy}
+              onChange={(event) => update(field, event.target.value)}
+            />
+          </label>
+        ))}
+      </div>
+      <label className="tw-mt-3 tw-flex tw-min-h-11 tw-items-center tw-gap-3 tw-text-sm tw-text-iron-300">
+        <input
+          type="checkbox"
+          className="tw-h-5 tw-w-5 tw-shrink-0 tw-accent-primary-400"
+          checked={current["approximate"] === true}
+          disabled={props.disabled}
+          onChange={(event) => update("approximate", event.target.checked)}
+        />
+        {msg("editorial.approximateDate")}
+      </label>
+    </fieldset>
   );
 }

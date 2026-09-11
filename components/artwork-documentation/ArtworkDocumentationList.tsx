@@ -1,8 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { ApiArtworkDocumentationCreateWorkStartModeEnum } from "@/generated/models/ApiArtworkDocumentationCreateWork";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import {
@@ -17,8 +16,11 @@ import {
   type DocumentationQueueFilters,
 } from "@/services/api/artwork-documentation-api";
 import { documentationOptionLabel } from "@/i18n/messages/artwork-documentation-fields";
-import { formatDate } from "@/i18n/format";
-import { isPublicationOnly } from "@/lib/artwork-documentation/intake";
+import { fetchDropsV2ByIds } from "@/services/api/wave-drops-v2-api";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
+import DocumentationListRecord, {
+  type DocumentationCatalogueItem,
+} from "./DocumentationListRecord";
 import DocumentationAuthGate, {
   useDocumentationActor,
 } from "./DocumentationAuthGate";
@@ -54,7 +56,7 @@ function DocumentationListContent({
   readonly programId?: string | undefined;
   readonly sourceDropId?: string | undefined;
 }) {
-  const { msg, locale } = useDocumentationMessages();
+  const { msg } = useDocumentationMessages();
   const queueOptionLabel = (key: string, option: string) => {
     if (key === "review_lane") return msg(`lane.${option}`);
     if (key === "outstanding_action") return msg(`action.${option}`);
@@ -88,7 +90,41 @@ function DocumentationListContent({
     gcTime: 0,
     meta: { persist: false },
   });
-  const records = query.data?.pages.flatMap((page) => page.data) ?? [];
+  const records: DocumentationCatalogueItem[] =
+    query.data?.pages.flatMap((page) => page.data) ?? [];
+  const sourceIds = [
+    ...new Set(
+      records.flatMap((record) =>
+        record.source_submission ? [record.source_submission.drop_id] : []
+      )
+    ),
+  ];
+  const sourceQuery = useQuery({
+    queryKey: documentationQueryKey(
+      connectedProfile?.id,
+      "catalogue-submissions",
+      programId ?? "mine",
+      actorKey,
+      sourceIds.join(",")
+    ),
+    queryFn: async ({ signal }) => {
+      const drops: ApiDrop[] = [];
+      for (let offset = 0; offset < sourceIds.length; offset += 100) {
+        drops.push(
+          ...(await fetchDropsV2ByIds({
+            dropIds: sourceIds.slice(offset, offset + 100),
+            signal,
+          }))
+        );
+      }
+      return drops;
+    },
+    enabled: access.enabled && sourceIds.length > 0,
+    retry: false,
+    gcTime: 0,
+    meta: { persist: false },
+  });
+  const sourceDrops = new Map(sourceQuery.data?.map((drop) => [drop.id, drop]));
   const programIds = [
     ...new Set(
       records
@@ -126,27 +162,34 @@ function DocumentationListContent({
   };
   return (
     <div className="tw-space-y-8">
-      <header>
-        <p className="tw-mb-3 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-widest tw-text-iron-400">
-          {msg("title")}
-        </p>
-        <h1 className="tw-max-w-3xl tw-text-3xl tw-font-semibold tw-tracking-tight tw-text-iron-50 sm:tw-text-4xl">
-          {programId ? msg("reviewQueue") : msg("intro")}
-        </h1>
-        <p className="tw-mt-4 tw-max-w-3xl tw-text-base tw-leading-relaxed tw-text-iron-300">
-          {msg("description")}
-        </p>
-        <p className="tw-max-w-3xl tw-text-sm tw-leading-relaxed tw-text-iron-400">
-          {msg("stages")}
-        </p>
+      <header className="tw-grid tw-gap-8 tw-pb-4 lg:tw-grid-cols-[minmax(0,1fr)_20rem] lg:tw-gap-16">
+        <div>
+          <p className="tw-mb-6 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.18em] tw-text-iron-400">
+            {programId === "6529NM-AP-01"
+              ? msg("editorial.programEyebrow")
+              : msg("title")}
+          </p>
+          <h1 className="tw-m-0 tw-max-w-3xl tw-font-serif tw-text-5xl tw-font-normal tw-leading-[1.05] tw-tracking-tight tw-text-iron-50 sm:tw-text-6xl">
+            {programId === "6529NM-AP-01"
+              ? msg("editorial.programTitle")
+              : programId
+                ? msg("editorial.records")
+                : msg("editorial.personalTitle")}
+          </h1>
+        </div>
+        <div className="lg:tw-pt-10">
+          <p className="tw-m-0 tw-max-w-prose tw-text-base tw-leading-8 tw-text-iron-300">
+            {msg(
+              programId ? "editorial.programIntro" : "editorial.personalIntro"
+            )}
+          </p>
+        </div>
       </header>
-      <DocumentationNotice>
-        {msg(
-          selected && isPublicationOnly(selected)
-            ? "publication.help"
-            : "privacy"
-        )}
-      </DocumentationNotice>
+      {!programId && (
+        <p className="tw-max-w-prose tw-text-sm tw-leading-7 tw-text-iron-400">
+          {msg("editorial.preparationNote")}
+        </p>
+      )}
       {sourceDropId && (
         <DocumentationNotice>{msg("sourceHelp")}</DocumentationNotice>
       )}
@@ -209,89 +252,97 @@ function DocumentationListContent({
             </div>
           )}
           {programId && (
-            <div className="tw-grid tw-gap-4 sm:tw-grid-cols-2 lg:tw-grid-cols-3">
-              {(
-                [
+            <details className="tw-border-0 tw-border-y tw-border-solid tw-border-iron-800 tw-py-2">
+              <summary className="tw-min-h-11 tw-cursor-pointer tw-py-3 tw-text-sm tw-font-medium tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400">
+                {msg("editorial.filterRecords")}
+              </summary>
+              <div className="tw-grid tw-gap-4 tw-pb-5 tw-pt-3 sm:tw-grid-cols-2 lg:tw-grid-cols-3">
+                {(
                   [
-                    "confirmation_status",
-                    ["unconfirmed", "current", "newer_draft"],
-                  ],
-                  ["review_lane", ["curatorial", "technical", "rights"]],
-                  [
-                    "outstanding_action",
-                    ["artist_confirmation", "review", "changes_requested"],
-                  ],
-                ] as const
-              ).map(([key, options]) => (
-                <label key={key} className="tw-text-sm tw-text-iron-300">
-                  {msg(`filter.${key}`)}
+                    [
+                      "confirmation_status",
+                      ["unconfirmed", "current", "newer_draft"],
+                    ],
+                    ["review_lane", ["curatorial", "technical", "rights"]],
+                    [
+                      "outstanding_action",
+                      ["artist_confirmation", "review", "changes_requested"],
+                    ],
+                  ] as const
+                ).map(([key, options]) => (
+                  <label key={key} className="tw-text-sm tw-text-iron-300">
+                    {msg(`filter.${key}`)}
+                    <select
+                      className={`${inputClass} tw-mt-2`}
+                      value={queueFilters[key] ?? ""}
+                      onChange={(event) =>
+                        setQueueFilters({
+                          ...queueFilters,
+                          [key]: event.target.value,
+                        })
+                      }
+                    >
+                      <option value="">{msg("all")}</option>
+                      {options.map((option) => (
+                        <option key={option} value={option}>
+                          {queueOptionLabel(key, option)}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                ))}
+                <label className="tw-text-sm tw-text-iron-300">
+                  {msg("profile")}
                   <select
                     className={`${inputClass} tw-mt-2`}
-                    value={queueFilters[key] ?? ""}
+                    value={queueFilters.profile_id ?? ""}
                     onChange={(event) =>
                       setQueueFilters({
                         ...queueFilters,
-                        [key]: event.target.value,
+                        profile_id: event.target.value,
                       })
                     }
                   >
                     <option value="">{msg("all")}</option>
-                    {options.map((option) => (
-                      <option key={option} value={option}>
-                        {queueOptionLabel(key, option)}
+                    {[
+                      ...new Map(
+                        access.profiles.map((profile) => [
+                          profile.profile_id,
+                          profile,
+                        ])
+                      ).values(),
+                    ].map((profile) => (
+                      <option
+                        key={profile.profile_id}
+                        value={profile.profile_id}
+                      >
+                        {documentationOptionLabel(profile.profile_id)}
+                        {profile.program_id
+                          ? ` · ${documentationOptionLabel(profile.program_id)}`
+                          : ""}{" "}
+                        · v{profile.version}
                       </option>
                     ))}
                   </select>
                 </label>
-              ))}
-              <label className="tw-text-sm tw-text-iron-300">
-                {msg("profile")}
-                <select
-                  className={`${inputClass} tw-mt-2`}
-                  value={queueFilters.profile_id ?? ""}
-                  onChange={(event) =>
-                    setQueueFilters({
-                      ...queueFilters,
-                      profile_id: event.target.value,
-                    })
-                  }
-                >
-                  <option value="">{msg("all")}</option>
-                  {[
-                    ...new Map(
-                      access.profiles.map((profile) => [
-                        profile.profile_id,
-                        profile,
-                      ])
-                    ).values(),
-                  ].map((profile) => (
-                    <option key={profile.profile_id} value={profile.profile_id}>
-                      {documentationOptionLabel(profile.profile_id)}
-                      {profile.program_id
-                        ? ` · ${documentationOptionLabel(profile.program_id)}`
-                        : ""}{" "}
-                      · v{profile.version}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label className="tw-text-sm tw-text-iron-300">
-                {msg("profileVersion")}
-                <input
-                  className={`${inputClass} tw-mt-2`}
-                  type="number"
-                  min={1}
-                  step={1}
-                  value={queueFilters.profile_version ?? ""}
-                  onChange={(event) =>
-                    setQueueFilters({
-                      ...queueFilters,
-                      profile_version: event.target.value,
-                    })
-                  }
-                />
-              </label>
-            </div>
+                <label className="tw-text-sm tw-text-iron-300">
+                  {msg("profileVersion")}
+                  <input
+                    className={`${inputClass} tw-mt-2`}
+                    type="number"
+                    min={1}
+                    step={1}
+                    value={queueFilters.profile_version ?? ""}
+                    onChange={(event) =>
+                      setQueueFilters({
+                        ...queueFilters,
+                        profile_version: event.target.value,
+                      })
+                    }
+                  />
+                </label>
+              </div>
+            </details>
           )}
           {programIds.length > 1 && (
             <label className="tw-block tw-text-sm tw-text-iron-300">
@@ -318,52 +369,19 @@ function DocumentationListContent({
               <p className="tw-m-0 tw-text-iron-300">{msg("empty")}</p>
             </div>
           )}
-          <div className="tw-grid tw-gap-4 md:tw-grid-cols-2">
+          <div className="tw-grid tw-gap-x-12 lg:tw-grid-cols-2">
             {records
               .filter((record) => !filter || record.program_id === filter)
               .map((record) => (
-                <article
+                <DocumentationListRecord
                   key={record.id}
-                  className={`${panelClass} tw-flex tw-flex-col tw-gap-3`}
-                >
-                  <p className="tw-m-0 tw-text-xs tw-text-iron-400">
-                    {documentationOptionLabel(
-                      record.program_id ?? record.profile_id
-                    )}
-                  </p>
-                  <h2 className="tw-m-0 tw-break-words tw-text-xl tw-font-semibold tw-text-iron-100">
-                    {record.title ?? msg("untitled")}
-                  </h2>
-                  <div className="tw-flex tw-flex-wrap tw-gap-3 tw-text-xs tw-text-iron-400">
-                    <span>
-                      {documentationOptionLabel(record.confirmation_status)}
-                    </span>
-                    {record.lifecycle === "archived" && (
-                      <span>{msg("archived")}</span>
-                    )}
-                    <span>
-                      {msg("savedAt", {
-                        date: formatDate(locale, record.updated_at),
-                      })}
-                    </span>
-                  </div>
-                  {programId && (
-                    <ul className="tw-m-0 tw-list-none tw-space-y-1 tw-p-0 tw-text-xs tw-text-iron-300">
-                      {record.reviews.map((review) => (
-                        <li key={review.lane}>
-                          {msg(`lane.${review.lane}`)}:{" "}
-                          {msg(`review.${review.status}`)}
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                  <Link
-                    href={documentationWorkspacePath(record.work_id, record.id)}
-                    className="hover:tw-text-primary-200 tw-mt-2 tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm tw-font-semibold tw-text-primary-300 focus-visible:tw-outline focus-visible:tw-outline-2"
-                  >
-                    {msg("continue")}
-                  </Link>
-                </article>
+                  record={record}
+                  sourceDrop={
+                    record.source_submission
+                      ? sourceDrops.get(record.source_submission.drop_id)
+                      : undefined
+                  }
+                />
               ))}
           </div>
           {query.hasNextPage && (
