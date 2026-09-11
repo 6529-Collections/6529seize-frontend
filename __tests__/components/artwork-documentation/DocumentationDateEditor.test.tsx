@@ -80,7 +80,7 @@ describe("date entry guidance", () => {
         ["Year", "YYYY", "1987"],
         ["Year and month", "YYYY-MM", "1987-09"],
         ["Date", "YYYY-MM-DD", "1987-09-11"],
-      ]) {
+      ] as const) {
         const input = screen.getByRole("textbox", { name: label });
         const hint = screen.getByText(`Use the format ${format}.`);
         expect(input).toHaveValue(value);
