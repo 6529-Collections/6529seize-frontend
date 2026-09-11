@@ -1,5 +1,7 @@
 "use client";
 
+import { mutationCapabilities } from "@/lib/artwork-documentation/capabilities";
+
 import { isPublicationOnly } from "@/lib/artwork-documentation/intake";
 
 import { useRef, useState } from "react";
@@ -44,7 +46,8 @@ export default function DocumentationNewContext({
   const profile =
     profiles.find((item) => documentationProfileKey(item) === profileId) ??
     profiles[0];
-  if (!context.capabilities.confirm_as_artist || !profiles.length) return null;
+  if (!mutationCapabilities(context).confirm_as_artist || !profiles.length)
+    return null;
   const create = async () => {
     if (!profile || !(await controller.flush())) return;
     setBusy(true);

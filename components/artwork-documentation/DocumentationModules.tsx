@@ -39,6 +39,10 @@ import {
   isPublicationOnly,
 } from "@/lib/artwork-documentation/intake";
 import DocumentationFieldExample from "./DocumentationFieldExample";
+import {
+  canEditDocumentationField,
+  canReferenceDocumentationAssetLink,
+} from "@/lib/artwork-documentation/capabilities";
 
 interface Props {
   readonly context: ApiArtworkDocumentationContext;
@@ -109,8 +113,11 @@ function DocumentationAnswerField(
   const redacted = isRedacted(context.modules[moduleId]?.answers[field.id]);
   const disabled =
     (props.readOnly ?? false) ||
-    !context.capabilities.edit_modules.some(
-      (module) => String(module) === moduleId
+    !canEditDocumentationField(
+      context,
+      `${moduleId}.${field.id}`,
+      (answer?.intended_visibility ?? definition?.default_visibility) ===
+        "restricted"
     ) ||
     redacted;
   const id = `documentation-${moduleId}-${field.id}`;
@@ -135,13 +142,18 @@ function DocumentationAnswerField(
       transcript_asset_id: "interview_transcript",
     } as Record<string, string>
   )[field.id];
-  const choices = assetRole
-    ? props.assets?.filter((asset) =>
-        context.asset_links.some(
-          (link) => link.asset_id === asset.id && link.role === assetRole
-        )
-      )
-    : props.assets;
+  const selectedAssetIds = Array.isArray(answer?.value)
+    ? answer.value
+    : [answer?.value];
+  const choices = props.assets?.filter((asset) =>
+    context.asset_links.some(
+      (link) =>
+        link.asset_id === asset.id &&
+        (!assetRole || link.role === assetRole) &&
+        (selectedAssetIds.includes(asset.id) ||
+          canReferenceDocumentationAssetLink(context, link))
+    )
+  );
   if (!definition) return null;
   const visibility =
     answer?.intended_visibility ?? definition.default_visibility;
@@ -149,6 +161,15 @@ function DocumentationAnswerField(
     answer?.status ?? ApiArtworkDocumentationAnswerStatusEnum.Provided;
   const publicationOnly = isPublicationOnly(context.profile);
   const update = (next: Partial<ApiArtworkDocumentationAnswer>) => {
+    if (
+      disabled ||
+      !canEditDocumentationField(
+        context,
+        `${moduleId}.${field.id}`,
+        (next.intended_visibility ?? visibility) === "restricted"
+      )
+    )
+      return;
     const merged = {
       status,
       intended_visibility: visibility,
@@ -303,6 +324,11 @@ function DocumentationAnswerField(
               publicationOnly={publicationOnly}
               lockedRestricted={definition.locked_restricted}
               disabled={disabled || !answer}
+              canRestrict={canEditDocumentationField(
+                context,
+                `${moduleId}.${field.id}`,
+                true
+              )}
               value={visibility}
               onChange={(intended_visibility) =>
                 update({ intended_visibility })
@@ -339,12 +365,14 @@ function AnswerVisibility({
   publicationOnly,
   lockedRestricted,
   disabled,
+  canRestrict,
   value,
   onChange,
 }: {
   readonly publicationOnly: boolean;
   readonly lockedRestricted: boolean;
   readonly disabled: boolean;
+  readonly canRestrict: boolean;
   readonly value: string;
   readonly onChange: (
     value: NonNullable<ApiArtworkDocumentationAnswer["intended_visibility"]>
@@ -382,7 +410,9 @@ function AnswerVisibility({
         }
       >
         <option value="public_record">{msg("publicIntent")}</option>
-        <option value="restricted">{msg("restricted")}</option>
+        <option value="restricted" disabled={!canRestrict}>
+          {msg("restricted")}
+        </option>
       </select>
     </label>
   );

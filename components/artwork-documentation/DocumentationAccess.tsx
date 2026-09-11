@@ -1,5 +1,7 @@
 "use client";
 
+import { mutationCapabilities } from "@/lib/artwork-documentation/capabilities";
+
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import Image from "next/image";
@@ -50,12 +52,12 @@ export default function DocumentationAccess({
       actorKey
     ),
     queryFn: ({ signal }) => getDocumentationGrants(context.id, signal),
-    enabled: context.capabilities.manage_assignments,
+    enabled: mutationCapabilities(context).manage_assignments,
     retry: false,
     gcTime: 0,
     meta: { persist: false },
   });
-  if (!context.capabilities.manage_assignments) return null;
+  if (!mutationCapabilities(context).manage_assignments) return null;
   const run = async (operation: () => Promise<unknown>) => {
     setBusy(true);
     setError(false);

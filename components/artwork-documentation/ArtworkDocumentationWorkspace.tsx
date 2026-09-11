@@ -18,7 +18,10 @@ import {
   getDocumentationRevision,
 } from "@/services/api/artwork-documentation-api";
 import { documentationTitle } from "@/lib/artwork-documentation/answers";
-import { canWriteDocumentation } from "@/lib/artwork-documentation/capabilities";
+import {
+  canWriteDocumentation,
+  mutationCapabilities,
+} from "@/lib/artwork-documentation/capabilities";
 import {
   parseSection,
   SECTIONS,
@@ -123,7 +126,7 @@ function WorkspaceEditor({
   const router = useRouter();
   const draft = useDocumentationDraft(initial);
   const { context, controller } = draft;
-  const canWrite = canWriteDocumentation(context.capabilities);
+  const canWrite = canWriteDocumentation(mutationCapabilities(context));
   const listPath =
     !canWrite && context.program_id
       ? `/artwork-documentation/programs/${encodeURIComponent(context.program_id)}`
@@ -384,7 +387,7 @@ function WorkspaceEditor({
               </DocumentationButton>
             )}
           </div>
-          {context.capabilities.manage_context && (
+          {mutationCapabilities(context).manage_context && (
             <DocumentationButton
               secondary
               onClick={() => {

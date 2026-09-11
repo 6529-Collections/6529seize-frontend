@@ -44,10 +44,18 @@ function viewerContext() {
     manage_context: false,
     manage_assignments: false,
   };
+  context.mutation_capabilities = {
+    ...context.capabilities,
+    read_archival_files: false,
+    read_rights_evidence: false,
+    read_source_receipts: false,
+    read_contact: false,
+    read_restricted_fields: false,
+  };
   return context;
 }
 
-function mockDiscussion(resolved = false) {
+function mockDiscussion(resolved = false, restrictedClass = "ordinary") {
   jest.mocked(getDocumentationThreads).mockResolvedValue({
     data: [
       {
@@ -56,7 +64,7 @@ function mockDiscussion(resolved = false) {
         thread_version: 1,
         resolved,
         audience: "artist_and_reviewers",
-        restricted_class: "ordinary",
+        restricted_class: restrictedClass,
         comments: [
           {
             id: "comment",
@@ -123,12 +131,44 @@ const writerRoles: [string, Partial<ApiArtworkDocumentationCapabilities>][] = [
   ["assignment coordinator", { manage_assignments: true }],
 ];
 
+it.each(["rights", "archival", "contact"])(
+  "lets a mixed viewer/editor read a %s thread without replying or resolving",
+  async (restricted_class) => {
+    const context = viewerContext();
+    delete context.profile.intake_mode;
+    context.mutation_capabilities.edit_modules = [
+      ApiArtworkDocumentationCapabilitiesEditModulesEnum.Artwork,
+    ];
+    mockDiscussion(false, restricted_class);
+    const client = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+    render(
+      <QueryClientProvider client={client}>
+        <DocumentationFeedback context={context} />
+      </QueryClientProvider>
+    );
+    await screen.findByText("Prior discussion");
+    expect(
+      screen.getAllByRole("textbox", { name: "Your comment" })
+    ).toHaveLength(1);
+    expect(
+      screen.queryByRole("button", { name: "Resolve conversation" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("combobox", { name: "Intended visibility" })
+    ).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Add comment" })).toBeDisabled();
+    client.clear();
+  }
+);
+
 it.each(writerRoles)(
   "preserves discussion participation for a %s",
   async (_, capabilities) => {
     jest.clearAllMocks();
     const context = viewerContext();
-    Object.assign(context.capabilities, capabilities);
+    Object.assign(context.mutation_capabilities, capabilities);
     mockDiscussion();
     const client = new QueryClient({
       defaultOptions: { queries: { retry: false } },
