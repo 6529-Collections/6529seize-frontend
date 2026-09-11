@@ -23,62 +23,62 @@ export const PERSONAL_TEMPLATES: readonly CmsStudioTemplate[] = [
     siteTitle: "Mira",
     family: "personal",
     description:
-      "A concise introduction, a few strong interests, and room for what comes next.",
+      "An introduction, a short biography and a page for current projects.",
     presentation: style("signature", "paper", "sans", "airy"),
     pages: [
       page(
         "studio",
-        "Mira, at the intersection.",
-        "Researcher, collector, and habitual walker. I pay attention to the spaces where culture and open networks meet.",
-        kicker("Independent notes · Small experiments · Open questions"),
+        "Hi, I'm Mira.",
+        "I design research tools, collect digital art and spend most weekends walking around the city.",
+        kicker("Product designer · Art collector · Weekend walker"),
         image(ART.signal, ART_CAPTIONS.signal, "two_thirds"),
         text(
-          "This is my small corner of the internet: a place for ideas that need more space than a post, projects worth explaining, and works I keep returning to.",
+          "I work on search and reading tools for small research teams. This site has a little about my background, the projects on my desk and the things I do outside work.",
           "third"
         ),
-        pageLink("A little about me", "about"),
-        pageLink("What I am doing now", "now")
+        pageLink("About me", "about"),
+        pageLink("Current projects", "now")
       ),
       page(
         "about",
-        "Attention is a practice.",
-        "I like to turn complicated questions into clear notes, useful tools, and conversations people want to continue.",
-        heading("Three things I return to"),
+        "About Mira",
+        "I'm a product designer with a background in library cataloguing. I like working on search, filters and the details that make a large collection easier to use.",
+        heading("Outside work"),
         card(
-          "Cities on foot",
-          "Walking is my way of thinking. I keep a notebook of ordinary details: a stair, a sign, a patch of afternoon light.",
+          "Walking routes",
+          "I keep a list of routes with good crossings, public toilets and somewhere to stop for coffee. My favourite is the long way home along the canal.",
           "third"
         ),
         card(
-          "Digital culture",
-          "I follow how people make meaning together, especially when the tools and rules are still being invented.",
+          "Digital art",
+          "I follow artists who work with grids, type and repeated lines. I save exhibition links and write down what caught my eye.",
           "third"
         ),
         card(
-          "Collecting slowly",
-          "A work stays with me when it changes after repeated looking. My notes matter as much as the selection.",
+          "My collection",
+          "I buy occasionally and keep a note for each work: where I first saw it, why I wanted it and where to find the artist's other work.",
           "third"
         ),
         quote(
-          "Make something small enough to finish and open enough to share.",
-          "A note to myself"
+          "This month's job: finish the route map before starting another one.",
+          "Mira's September task list"
         ),
-        pageLink("Read my current chapter", "now")
+        pageLink("See what I'm working on", "now")
       ),
       page(
         "now",
-        "A quieter kind of progress.",
-        "September notebook: fewer projects, more sustained attention.",
-        heading("On the desk"),
+        "September projects",
+        "A reading-list prototype, a canal route map and a new set of art notes.",
+        heading("At my desk"),
         text(
-          "I am sketching an illustrated guide to public digital spaces. The first draft is deliberately short: one question, one diagram, one invitation to respond."
+          "I'm building a shared reading list with a title, source link and short note for each entry. This week I'm checking whether the topic filters still make sense when someone else adds an article."
         ),
-        heading("Away from the desk"),
+        heading("At the weekend"),
         text(
-          "Long walks, a stack of essays, and learning to notice the same neighborhood in different weather."
+          "I'm walking the canal route in both directions to check the crossings and bench locations. I also need to return two library books before I borrow any more."
         ),
-        externalLink("Explore open digital culture", SOURCE_LINKS.about),
-        pageLink("Back to the introduction", "studio")
+        externalLink("Read about 6529", SOURCE_LINKS.about),
+        pageLink("Back to my introduction", "studio")
       ),
     ],
   }),
@@ -88,62 +88,62 @@ export const PERSONAL_TEMPLATES: readonly CmsStudioTemplate[] = [
     siteTitle: "Mira's Almanac",
     family: "personal",
     description:
-      "A personal story told through places, turning points, and a current chapter.",
+      "A personal biography with separate pages for early interests and life today.",
     presentation: style("editorial", "stone", "serif", "airy"),
     pages: [
       page(
         "studio",
-        "A life in maps and music.",
-        "Three chapters in an unfinished story about finding a way to work, make, and belong.",
-        kicker("01 · Learning to look"),
+        "Maps, music and the work in between",
+        "I started by drawing bus routes and playing in a rehearsal room above a shop. These days I design research tools and still make time for both.",
+        kicker("01 · Bus maps and band practice"),
         text(
-          "My first maps were drawings of places I knew by sound: the station, the rehearsal room, the street outside our window."
+          "At school I drew maps showing which bus to catch after rehearsal. The first version left out the last bus home. That was a fairly effective lesson in checking the details."
         ),
-        pageLink("Read the first chapter", "beginnings"),
-        kicker("02 · Making with others"),
+        pageLink("Early years", "beginnings"),
+        kicker("02 · Design and local projects"),
         text(
-          "The most useful things I have made began as conversations. A good collaborator changes the question, not just the answer."
+          "Now I work on catalogues and reading tools. Outside work, I help organise a small listening group and keep a map of walks that start near a bus stop."
         ),
-        pageLink("Read the current chapter", "current"),
+        pageLink("Life today", "current"),
         image(ART.afterimage, ART_CAPTIONS.afterimage)
       ),
       page(
         "beginnings",
-        "Learning to look.",
-        "Before I knew what I wanted to make, I learned to keep a record of what interested me.",
-        heading("A pocket-sized archive"),
+        "Bus maps and band practice",
+        "My first design projects were rehearsal flyers, handwritten set lists and a map of the routes between our homes.",
+        heading("The folder I kept"),
         text(
-          "Ticket stubs, hand-drawn routes, and half-remembered melodies became a small archive. None of it was important alone. Together, it showed me what I noticed."
+          "I still have a folder of flyers and route sketches. Some are hard to read, but they show the practical questions we were trying to answer: when to arrive, what to bring and how to get home."
         ),
         quote(
-          "A map can describe a route, or reveal a way of paying attention.",
-          "From the example notebook"
+          "Put the date and the address on the flyer. The band name can be smaller.",
+          "A reminder from our rehearsal notes"
         ),
-        heading("What stayed"),
+        heading("What I took into work"),
         text(
-          "I still begin projects with observations rather than answers. The notebook is less a record of certainty than permission to ask a better question."
+          "I moved from cataloguing books to designing digital catalogues. I still start by listing the information a reader needs before deciding how the page should look."
         ),
-        pageLink("Continue to the present", "current")
+        pageLink("Life today", "current")
       ),
       page(
         "current",
-        "Making room for the next chapter.",
-        "I am learning how to connect a private practice of noticing with a public practice of sharing.",
+        "Design, records and weekend routes",
+        "My week is split between product design, a listening group and walks around the city.",
         image(ART.grid, ART_CAPTIONS.grid, "half"),
         text(
-          "This chapter has no neat ending. I am building a small library of notes and diagrams, inviting collaborators into unfinished work, and leaving room to change direction.",
+          "At work I'm prototyping a shared reading list. At home I'm sorting records for our next listening evening. The route map is waiting for one more walk to check an awkward road crossing.",
           "half"
         ),
-        heading("Continuing threads"),
+        heading("Regular commitments"),
         card(
-          "Music",
-          "Listening closely remains a useful model for working with people."
+          "Listening group",
+          "Once a month, each person brings one record and gets ten minutes to explain their choice. We take turns hosting."
         ),
         card(
-          "Open networks",
-          "I am interested in communities that make participation understandable."
+          "Open-source tools",
+          "I use documentation and issue trackers to learn how the tools I rely on work. When a setup guide misses a step, I try to write it down."
         ),
-        pageLink("Return to the chapters", "studio")
+        pageLink("Back to the chapters", "studio")
       ),
     ],
   }),
@@ -153,74 +153,79 @@ export const PERSONAL_TEMPLATES: readonly CmsStudioTemplate[] = [
     siteTitle: "Northline",
     family: "personal",
     description:
-      "Selected work presented through the problem, contribution, and decisions behind it.",
+      "A design portfolio with a project brief, case study and working process.",
     presentation: style("editorial", "paper", "sans", "balanced"),
     pages: [
       page(
         "studio",
-        "Clear work for complex questions.",
-        "Northline is an independent design practice exploring useful tools, readable systems, and calmer digital spaces.",
+        "Design for research tools",
+        "Northline is an independent design practice working on catalogues, reading tools and small publishing sites.",
         image(
           ART.grid,
-          "A visual study for the fictional Common Index project."
+          "Night Grid — a dark grid with a bright diagonal strip."
         ),
-        heading("Selected work"),
+        heading("Selected projects"),
         card(
           "Common Index",
-          "A research-library concept that makes sources and editorial choices visible."
+          "A shared reading library with topic filters, source links and notes from the people who added them."
         ),
         card(
-          "A quieter interface",
-          "An interface study focused on clear next steps and fewer competing demands."
+          "Reading view",
+          "A companion screen that keeps the article title, original source and reading position easy to find."
         ),
-        pageLink("Explore the case study", "common-index"),
-        pageLink("How I work", "approach")
+        pageLink("View Common Index", "common-index"),
+        pageLink("Working process", "approach")
       ),
       page(
         "common-index",
-        "Common Index.",
-        "A fictional case study in making a shared research library easier to navigate and maintain.",
-        kicker("Concept project · Research and product design"),
-        heading("The question"),
-        text(
-          "How can a growing collection of links remain useful when its original organizer is no longer there to explain it?"
+        "Common Index",
+        "A self-directed design project for a team that collects articles across several shared documents.",
+        kicker(
+          "Concept project · Information architecture and interface design"
         ),
-        image(ART.signal, "Example visual study; not a client deliverable."),
-        heading("The contribution"),
+        heading("The brief"),
         text(
-          "The concept separates a source from the note explaining why it matters. A simple reading path helps new visitors, while a clear index supports returning readers."
+          "The same link was being saved under different titles, and new readers could not tell which articles to start with. The brief was to create one index without losing the notes beside each link."
         ),
-        heading("What the study taught me"),
+        image(
+          ART.signal,
+          "Quiet Signal — overlapping blue lines on a cream background."
+        ),
+        heading("The design"),
         text(
-          "A smaller vocabulary made the interface easier to explain. The next step would be testing the language with actual readers before making claims about its effectiveness."
+          "Each entry has a title, original URL, topic, contributor and short note. Readers can filter by topic or choose a five-article introduction. Duplicate URLs are flagged before an entry is added."
         ),
-        pageLink("See the working approach", "approach")
+        heading("Next round of testing"),
+        text(
+          "I want to ask three people to add an article and find a source they have not read before. The main questions are whether the topic names make sense and whether the duplicate warning is clear."
+        ),
+        pageLink("Working process", "approach")
       ),
       page(
         "approach",
-        "Find the useful shape.",
-        "I work through small, visible decisions rather than one large reveal.",
-        heading("A working sequence"),
+        "From brief to working prototype",
+        "I agree the task, make a small prototype and review it with the people who will use it.",
+        heading("Project stages"),
         card(
-          "Understand",
-          "Read the existing material and ask where people lose their way.",
+          "Inventory",
+          "Collect the existing screens, documents and recurring support questions. Identify the task that causes the most trouble.",
           "third"
         ),
         card(
-          "Make",
-          "Build a small working example that exposes the difficult decisions.",
+          "Prototype",
+          "Build the main task with realistic titles, long entries and empty states. Write down decisions that still need testing.",
           "third"
         ),
         card(
-          "Refine",
-          "Review with the people who will use and maintain the result.",
+          "Review",
+          "Watch people use the prototype, fix the main obstacles and hand over the designs with notes for the developer.",
           "third"
         ),
-        heading("Working together"),
+        heading("Starting a project"),
         text(
-          "A useful brief describes a real problem, who it affects, and what would make the work worth doing. It does not need to prescribe the solution."
+          "Send a description of the tool, who uses it and the task you want to improve. A few existing screens or documents are more useful than a long presentation."
         ),
-        pageLink("Return to selected work", "studio")
+        pageLink("Back to selected projects", "studio")
       ),
     ],
   }),
@@ -230,66 +235,63 @@ export const PERSONAL_TEMPLATES: readonly CmsStudioTemplate[] = [
     siteTitle: "Signals & Walks",
     family: "personal",
     description:
-      "An editorial home for essays, observations, and a deliberately small reading shelf.",
+      "An essay, a reading shelf and an index for a personal publication.",
     presentation: style("journal", "paper", "serif", "airy"),
     pages: [
       page(
         "studio",
-        "Signals & walks.",
-        "Notes on digital culture, ordinary places, and the habits that help us see both more clearly.",
-        kicker("Featured essay"),
-        heading("The value of a small public notebook"),
+        "Signals & Walks",
+        "Mira's notes on walking routes, maps and the digital tools used to record them.",
+        kicker("Latest article"),
+        heading("The missing crossing on my route map"),
         text(
-          "A notebook does not have to become a publication to be useful. Sharing a few considered observations can be enough to start a conversation."
+          "A route that looked straightforward on screen needed a long detour on foot. Here is what I changed after walking it."
         ),
-        pageLink("Read the essay", "public-notebook"),
-        heading("On the shelf"),
+        pageLink("Read the article", "public-notebook"),
+        heading("Reading topics"),
         card(
-          "Public spaces",
-          "How the shape of a place changes the conversations it permits."
+          "Streets and maps",
+          "Crossings, entrances and small details that decide whether a walking route is usable."
         ),
         card(
-          "Open tools",
-          "Resources that let people build on each other's work."
+          "Publishing resources",
+          "Sources for checking image permissions and learning about open digital culture."
         ),
         pageLink("Browse the reading shelf", "reading")
       ),
       page(
         "public-notebook",
-        "The value of a small public notebook.",
-        "An example essay about publishing observations before they become conclusions.",
-        kicker("Field note 01 · Culture and attention"),
+        "The missing crossing",
+        "I walked my canal route from the station and found that the map sent me to the wrong side of a busy road.",
+        kicker("Route note 01 · Canal walk"),
         text(
-          "The blank page becomes less intimidating when its job is to hold one useful observation. A sketch, a source, and a question can form a complete entry.\n\nA public notebook also makes the limits of a thought visible. Readers can see where an idea began and what might change it."
+          "The path looked continuous on the map, but the entrance was behind a barrier. The nearest signal-controlled crossing was two streets back. I had to retrace the route before I could reach the canal.\n\nI moved the start point to the crossing and added a short direction: stay on the station side until the lights. The route is longer now, but it describes a walk someone can actually follow."
         ),
         quote(
-          "Leave enough context for someone else to continue the thought.",
-          "Notebook principle"
+          "Check the entrance from the street, not just the line on the map.",
+          "Route checklist"
         ),
-        heading("A modest publishing rhythm"),
+        heading("Before I publish the next route"),
         text(
-          "Choose a question worth revisiting. Keep the sources close. Return to older notes when a new observation changes their meaning."
+          "Walk it in both directions. Check the entrances, note the steep sections and mark the last place to buy water. Put the date of the walk beside the map so readers know when it was checked."
         ),
-        pageLink("Visit the reading shelf", "reading")
+        pageLink("Reading shelf", "reading")
       ),
       page(
         "reading",
-        "A shelf with room to grow.",
-        "A few useful starting points, each with a reason to visit.",
-        heading("Culture and common resources"),
+        "Reading shelf",
+        "Two sources I use when preparing a page with images and links.",
+        heading("Image permissions"),
         text(
-          "Open licenses make it easier to understand how creative work may be shared and adapted. The details matter as much as the invitation."
+          "Before reusing an image, I check its license and attribution requirements. The Creative Commons guide explains the differences between its licenses."
         ),
-        externalLink(
-          "Read about Creative Commons licenses",
-          SOURCE_LINKS.licenses
-        ),
-        heading("Open digital worlds"),
+        externalLink("Creative Commons license guide", SOURCE_LINKS.licenses),
+        heading("Digital culture"),
         text(
-          "The 6529 introduction is a starting point for the ideas behind a decentralized digital culture. Read it as a source, then make your own notes."
+          "The 6529 introduction explains the project's interest in open digital spaces. I keep it here alongside my notes about publishing and sharing creative work."
         ),
-        externalLink("Read the 6529 introduction", SOURCE_LINKS.about),
-        pageLink("Return to the notebook", "studio")
+        externalLink("About 6529", SOURCE_LINKS.about),
+        pageLink("Back to Signals & Walks", "studio")
       ),
     ],
   }),
@@ -299,64 +301,64 @@ export const PERSONAL_TEMPLATES: readonly CmsStudioTemplate[] = [
     siteTitle: "Open Notebook",
     family: "personal",
     description:
-      "Community contribution explained through chosen conversations, notes, and resources.",
+      "A community profile with contribution notes and a newcomer resource page.",
     presentation: style("organization", "ink", "sans", "balanced"),
     pages: [
       page(
         "studio",
-        "A place to contribute.",
-        "A community notebook about making ideas understandable and helping useful conversations continue.",
-        heading("What I care about"),
+        "Community notes and guides",
+        "I help turn recurring questions into short guides and keep a list of sources for people new to 6529.",
+        heading("Current tasks"),
         card(
-          "Clear explanations",
-          "Turning a long thread into a useful starting point without losing its context."
+          "Newcomer questions",
+          "Collect the questions that come up repeatedly and link each answer to the relevant source."
         ),
         card(
-          "Shared memory",
-          "Keeping references, decisions, and open questions easy to find."
+          "Guide maintenance",
+          "Check page links, replace outdated screenshots and put a review date on each guide."
         ),
         image(ART.signal, ART_CAPTIONS.signal, "two_thirds"),
         text(
-          "This example shows how selected activity can become a coherent story. It contains no claims of actual participation or reputation.",
+          "My current draft covers where to read about 6529, where to browse The Memes and how to find the original information behind an answer.",
           "third"
         ),
-        pageLink("Read the contribution notebook", "contributions"),
-        pageLink("Find community starting points", "conversations")
+        pageLink("Guide draft", "contributions"),
+        pageLink("Newcomer links", "conversations")
       ),
       page(
         "contributions",
-        "Work that leaves a trail.",
-        "An example contribution record organized around context and useful outputs.",
-        heading("A welcome guide, in outline"),
+        "Newcomer guide draft",
+        "A short starting page for someone who has heard of 6529 but does not know where to begin.",
+        heading("What the guide includes"),
         text(
-          "The idea is simple: give a newcomer three places to begin, explain what each place is for, and keep the original sources within reach."
+          "Start with the 6529 introduction for the project background. Then browse The Memes to see the artwork. Keep the source links beside each explanation so readers can check details for themselves."
         ),
-        heading("Questions for a review"),
+        heading("Review checklist"),
         card(
-          "Is it understandable?",
-          "A new reader should know why a link is here before opening it."
+          "Clear link labels",
+          "Say what the reader will find: project introduction, collection page or license information. Avoid labels such as 'click here'."
         ),
         card(
-          "Can it stay current?",
-          "Every guide needs a clear owner and a way to identify outdated material."
+          "A maintenance note",
+          "Record when each link was checked and which section needs another review. Remove a screenshot when it no longer matches the page."
         ),
-        pageLink("Open the source shelf", "conversations")
+        pageLink("Open the newcomer links", "conversations")
       ),
       page(
         "conversations",
-        "Start with the source.",
-        "A short directory of real public destinations for learning about 6529 and its art.",
-        heading("The network"),
+        "Newcomer links",
+        "The project introduction and the collection page are useful first stops.",
+        heading("Project background"),
         text(
-          "Begin with the public introduction and follow the parts that connect with your interests."
+          "Read about 6529's aims and the ideas behind the network before following the more detailed links."
         ),
         externalLink("About 6529", SOURCE_LINKS.about),
-        heading("The art"),
+        heading("The Memes collection"),
         text(
-          "The Memes collection gives a concrete starting point for looking at the relationship between messages, images, and shared culture."
+          "Browse the collection's images, titles and artist credits. Pick one card and follow the artist's work from there."
         ),
-        externalLink("Explore The Memes", SOURCE_LINKS.memes),
-        pageLink("Back to the community notebook", "studio")
+        externalLink("Browse The Memes", SOURCE_LINKS.memes),
+        pageLink("Back to community notes", "studio")
       ),
     ],
   }),
@@ -366,65 +368,65 @@ export const PERSONAL_TEMPLATES: readonly CmsStudioTemplate[] = [
     siteTitle: "Mira / Onchain",
     family: "personal",
     description:
-      "Crypto interests and contributions presented with context instead of a balance dashboard.",
+      "A technical learning log with research topics and primary-source links.",
     presentation: style("journal", "night", "mono", "compact"),
     pages: [
       page(
         "studio",
-        "Open systems, practical experiments.",
-        "A research map for understanding how networks are built, governed, and used.",
-        heading("Three questions"),
+        "Learning how Ethereum and IPFS work",
+        "I'm working through accounts, transactions and content addressing. These pages collect the questions and sources for my next experiments.",
+        heading("Current questions"),
         card(
-          "Can I verify it?",
-          "Prefer primary documentation and explain which parts are directly observable.",
+          "Accounts",
+          "What is the difference between an account controlled by a key and one controlled by a contract?",
           "third"
         ),
         card(
-          "Can I participate?",
-          "Look for clear paths from reading to meaningful contribution.",
+          "Transactions",
+          "Which parts of a transaction can I inspect in a block explorer, and which depend on the application?",
           "third"
         ),
         card(
-          "Can I leave?",
-          "Understand portability, dependencies, and the cost of changing tools.",
+          "Files",
+          "What changes an IPFS content identifier, and what is still needed to keep the file available?",
           "third"
         ),
-        pageLink("Explore the research map", "research"),
-        pageLink("Read the working principles", "principles")
+        pageLink("Reading list", "research"),
+        pageLink("Experiment notes", "principles")
       ),
       page(
         "research",
-        "A map, not a recommendation list.",
-        "Primary sources for learning about open networks. Inclusion does not imply investment, ownership, or endorsement.",
-        heading("Ethereum"),
+        "Technical reading list",
+        "The documentation I use to check terms and plan small experiments.",
+        heading("Ethereum accounts and transactions"),
         text(
-          "Start with the documentation to understand the platform's accounts, transactions, and application model."
+          "I start with accounts, then follow a transaction from its signed fields to its receipt. I keep the relevant documentation beside my notes."
         ),
-        externalLink("Ethereum documentation", SOURCE_LINKS.ethereum),
-        heading("Content addressing"),
+        externalLink("Ethereum developer documentation", SOURCE_LINKS.ethereum),
+        heading("IPFS content identifiers"),
         text(
-          "IPFS documentation explains how content identifiers differ from conventional location-based links."
+          "My next test is to add a text file, change one line and compare the identifiers. I also want to check what happens when the machine holding the file goes offline."
         ),
         externalLink("IPFS documentation", SOURCE_LINKS.ipfs),
-        pageLink("Read the principles", "principles")
+        pageLink("Experiment notes", "principles")
       ),
       page(
         "principles",
-        "Keep the assumptions visible.",
-        "A useful project note explains what is known, what was observed, and what still depends on someone else.",
-        heading("Source and date"),
+        "How I record a test",
+        "Each note includes the question, setup, result and a link to the source I used.",
+        heading("Make it repeatable"),
         text(
-          "Record the source behind a technical claim and the time of observation. A snapshot is evidence of one moment, not a promise about the future."
+          "Record the network, tool version and input. Separate the output I observed from an explanation I still need to check. A failed test is useful if I can reproduce it."
         ),
-        heading("Chosen disclosure"),
+        heading("Keep private data out"),
         text(
-          "Public writing does not require public wallet balances. Keep personal addresses, valuations, and activity out of a page unless there is a clear reason to include them."
+          "Use test inputs in public notes. Never include seed phrases, signing keys or session tokens in a screenshot or example command."
         ),
         quote(
-          "Understanding a system starts with knowing where its claims come from.",
-          "Example research principle"
+          "Next test: change one byte in a file and compare the content identifiers.",
+          "Mira's test list"
         ),
-        pageLink("Return to the overview", "studio")
+        pageLink("Back to the overview", "studio")
       ),
     ],
   }),
@@ -434,57 +436,61 @@ export const PERSONAL_TEMPLATES: readonly CmsStudioTemplate[] = [
     siteTitle: "Mira's Atlas",
     family: "personal",
     description:
-      "A substantial personal home with separate destinations for work, art, notes, and community.",
+      "A personal website with dedicated pages for work, art, writing and useful links.",
     presentation: style("editorial", "stone", "sans", "balanced"),
     pages: [
       page(
         "studio",
-        "A corner of the internet, with room.",
-        "Mira's atlas brings together a working practice, a growing collection of notes, and an interest in open culture.",
+        "Mira's work, art and notes",
+        "I'm a product designer interested in digital collections, city maps and tools for shared reading.",
         image(ART.afterimage, ART_CAPTIONS.afterimage),
-        heading("Choose a direction"),
+        heading("Around this site"),
         card(
           "Work",
-          "Small projects with a clear question and a visible process.",
+          "A reading-library prototype and the decisions behind its search and topic filters.",
           "third"
         ),
         card(
           "Art",
-          "Selected images and notes about looking closely.",
+          "Three images selected for their use of lines, reflections and light.",
           "third"
         ),
         card(
           "Notes",
-          "Ideas about culture, community, and open tools.",
+          "Short entries about route maps, reading lists and arranging images.",
           "third"
         ),
-        pageLink("Explore the work", "work"),
-        pageLink("Visit the art room", "art"),
-        pageLink("Read the notes", "notes"),
-        pageLink("Community and open networks", "connections")
+        pageLink("View my work", "work"),
+        pageLink("View the art selection", "art"),
+        pageLink("Read my notes", "notes"),
+        pageLink("Useful links", "connections")
       ),
       page(
         "work",
-        "Useful, considered, unfinished.",
-        "A small portfolio of concept projects and the decisions behind them.",
-        heading("The shared index"),
+        "Design projects",
+        "Common Index is a self-directed prototype for organising a team's shared reading list.",
+        heading("Common Index"),
         text(
-          "A concept for a research shelf that separates original sources from the annotations explaining their relevance."
+          "Each saved article has an original URL, topic and contributor note. A short introduction gives new readers a place to start without hiding the full catalogue."
         ),
-        image(ART.grid, "Example visual study for the shared index.", "half"),
-        text(
-          "The design question is how to keep a collection understandable as it grows. The first experiment is an intentionally small vocabulary and a visible reading path.",
+        image(
+          ART.grid,
+          "Night Grid — dark cells crossed by a bright diagonal strip.",
           "half"
         ),
-        pageLink("Read related notes", "notes")
+        text(
+          "The first version has three topic filters and a duplicate-link check. The next step is to ask a few readers to add an entry and find an unfamiliar source without help.",
+          "half"
+        ),
+        pageLink("Project notes", "notes")
       ),
       page(
         "art",
-        "Look once. Return later.",
-        "An example selection with room for a personal response. These are template artworks, not a record of NFT ownership.",
+        "Art selection",
+        "Three digital images with different kinds of detail: curved lines, a reflective loop and a field of lights.",
         image(ART.signal, ART_CAPTIONS.signal, "two_thirds"),
         text(
-          "I am drawn to the tension between a repeated system and an unexpected interruption. A small change can make an entire field feel different.",
+          "Quiet Signal uses repeated blue lines with a red cluster at one edge. Afterimage puts a reflective loop against orange. Night Grid is mostly dark, with a diagonal line of small lights. I like seeing them at both thumbnail size and full size.",
           "third"
         ),
         image(ART.afterimage, ART_CAPTIONS.afterimage, "half"),
@@ -493,34 +499,34 @@ export const PERSONAL_TEMPLATES: readonly CmsStudioTemplate[] = [
       ),
       page(
         "notes",
-        "A notebook for connections.",
-        "Short observations about making, collecting, and participating.",
-        heading("Why keep a public note?"),
+        "Notes from my desk",
+        "Recent entries about making a useful index and choosing an image order.",
+        heading("A reading-list entry needs a reason"),
         text(
-          "Writing down a source and a question creates a useful object for someone else to respond to. It does not need to claim the final word."
+          "A title and URL tell me where an article is. A sentence from the person who saved it tells me why it belongs in the list. I keep those as separate fields."
         ),
-        heading("A collecting note"),
+        heading("Image order"),
         text(
-          "Sequence changes how an image is read. I like to compare a work alone with the same work placed between two others."
+          "I put the bright orange image between the blue line drawing and the dark grid. At thumbnail size it breaks up the grid; on its own page the reflection in the loop is easier to see."
         ),
-        pageLink("Explore community sources", "connections")
+        pageLink("Useful links", "connections")
       ),
       page(
         "connections",
-        "Follow the thread.",
-        "A few real destinations connecting digital culture, art, and open systems.",
-        heading("6529"),
+        "Sources and references",
+        "Public pages I use for digital art, open culture and technical documentation.",
+        heading("6529 and The Memes"),
         text(
-          "Start with the network's public introduction and the art of The Memes."
+          "The introduction covers the project; the collection page is where I browse cards and follow artist credits."
         ),
         externalLink("About 6529", SOURCE_LINKS.about),
-        externalLink("The Memes", SOURCE_LINKS.memes),
-        heading("Open systems"),
+        externalLink("Browse The Memes", SOURCE_LINKS.memes),
+        heading("Ethereum documentation"),
         text(
-          "Primary technical documentation is a useful companion to broader cultural writing."
+          "I use the developer documentation when a project note refers to accounts, transactions or contracts."
         ),
-        externalLink("Ethereum documentation", SOURCE_LINKS.ethereum),
-        pageLink("Return home", "studio")
+        externalLink("Ethereum developer documentation", SOURCE_LINKS.ethereum),
+        pageLink("Home", "studio")
       ),
     ],
   }),
