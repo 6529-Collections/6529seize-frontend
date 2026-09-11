@@ -35,6 +35,7 @@ import {
   shouldFilterBrowserExtensionWalletRejection,
   shouldFilterBraveWalletPageEvaluationError,
   shouldFilterChromeMobileIosInjectedGaError,
+  shouldFilterCoinbaseAnalyticsIndexedDbUpgradeError,
   shouldFilterPoperBlockerOrphanFetchRejection,
   shouldFilterExpectedWaveRequestReplacementAbort,
   shouldFilterCoinbaseWalletLinkWebSocket1006,
@@ -203,6 +204,10 @@ function shouldFilterEvent(
   }
 
   if (shouldFilterExpectedWaveRequestReplacementAbort(event)) {
+    return true;
+  }
+
+  if (shouldFilterCoinbaseAnalyticsIndexedDbUpgradeError(event)) {
     return true;
   }
 
