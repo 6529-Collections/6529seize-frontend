@@ -134,6 +134,8 @@ function DocumentationListContent({
     meta: { persist: false },
   });
   const sourceDrops = new Map(sourceQuery.data?.map((drop) => [drop.id, drop]));
+  const sourceError =
+    access.enabled && sourceIds.length > 0 && sourceQuery.isError;
   const programIds = [
     ...new Set(
       records
@@ -211,7 +213,7 @@ function DocumentationListContent({
       {!access.isLoading && !access.enabled && (
         <DocumentationNotice>{msg("unavailable")}</DocumentationNotice>
       )}
-      {(error || query.isError || access.isError) && (
+      {(error || query.isError || access.isError || sourceError) && (
         <DocumentationNotice error>
           <p>{msg("error")}</p>
           <DocumentationButton
@@ -219,6 +221,9 @@ function DocumentationListContent({
             onClick={() => {
               void access.refetch();
               void query.refetch();
+              if (access.enabled && sourceIds.length > 0) {
+                void sourceQuery.refetch();
+              }
             }}
           >
             {msg("retry")}
