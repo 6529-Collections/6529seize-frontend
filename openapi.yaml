@@ -30201,6 +30201,7 @@ components:
           type: integer
           format: int64
           minimum: 1
+          maximum: 4294967295
         token:
           type: string
           description: >-
@@ -30209,8 +30210,9 @@ components:
         profile_id:
           type: string
           description: >-
-            Omit to revoke every profile on this installation, including stale
-            registrations.
+            When all_profiles is false, removes only this profile. Omit to revoke
+            only supplied sessions without deleting profile registrations. Ignored
+            when all_profiles is true, which removes every profile.
         sessions:
           type: array
           maxItems: 50

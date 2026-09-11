@@ -1,5 +1,4 @@
 import { Capacitor } from "@capacitor/core";
-import { PushNotifications } from "@capacitor/push-notifications";
 import { SecureStoragePlugin } from "capacitor-secure-storage-plugin";
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
@@ -17,7 +16,7 @@ import type { ApiRevokePushInstallationRequest } from "@/generated/models/ApiRev
 
 const STORAGE_KEY = "push-installation-lifecycle-v1";
 const secretSchema = z.string().regex(/^[a-f0-9]{64}$/i);
-const revisionSchema = z.number().int().min(0).max(4294967294);
+const revisionSchema = z.number().int().min(0).max(4294967295);
 const installationSchema = z
   .object({
     deviceId: z.string().min(1).max(100),
@@ -169,6 +168,8 @@ export async function queueNativePushLogout(
   ).filter((session) => session !== null);
   await serialized(async () => {
     const state = await readState();
+    if (state.revision === 4294967295)
+      throw new Error("Push installation revision exhausted");
     state.revision += 1;
     state.blockedAuth = [
       ...new Set([
@@ -192,6 +193,7 @@ export async function queueNativePushLogout(
   // Native tray cleanup is local to the explicit sign-out action. Never replay
   // a global tray clear later, when the user may have connected new profiles.
   try {
+    const { PushNotifications } = await import("@capacitor/push-notifications");
     if (allProfiles) await PushNotifications.removeAllDeliveredNotifications();
     else if (profileId) {
       const delivered = await PushNotifications.getDeliveredNotifications();

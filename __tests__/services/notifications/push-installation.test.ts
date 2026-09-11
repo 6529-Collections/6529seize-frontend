@@ -207,3 +207,22 @@ it("preserves corrupt installation storage instead of replacing the deletion pro
   expect(post).not.toHaveBeenCalled();
   mockStore.clear();
 });
+
+it("persists the final unsigned revision and refuses overflow without losing cleanup", async () => {
+  const state = storage();
+  state.revision = 4294967294;
+  mockStore.set("push-installation-lifecycle-v1", JSON.stringify(state));
+  post.mockRejectedValue(new Error("offline"));
+  await queueNativePushLogout(mockAccounts[0]!.address, false);
+  await flushPendingPushLogouts();
+  expect(storage().revision).toBe(4294967295);
+  expect(storage().pending[0].revision).toBe(4294967295);
+  const saved = mockStore.get("push-installation-lifecycle-v1");
+  await expect(queueNativePushLogout(null, true)).rejects.toThrow(
+    "revision exhausted"
+  );
+  expect(mockStore.get("push-installation-lifecycle-v1")).toBe(saved);
+  expect(
+    PushNotifications.removeAllDeliveredNotifications
+  ).not.toHaveBeenCalled();
+});

@@ -27,7 +27,7 @@ export class ApiRevokePushInstallationRequest {
     */
     'token'?: string;
     /**
-    * Omit to revoke every profile on this installation, including stale registrations.
+    * When all_profiles is false, removes only this profile. Omit to revoke only supplied sessions without deleting profile registrations. Ignored when all_profiles is true, which removes every profile.
     */
     'profile_id'?: string;
     'sessions': Array<ApiPushLogoutSession>;

@@ -573,11 +573,7 @@ export const registerPushNotificationWithRetry = async (
     registrationJwt
   );
   for (let attempt = 0; attempt < PUSH_REGISTRATION_TOTAL_ATTEMPTS; attempt++) {
-    const currentAuthJwt = getAuthJwt();
-    if (
-      !isAuthJwtUsable(currentAuthJwt) ||
-      currentAuthJwt !== registrationJwt
-    ) {
+    if (getUsablePushAuthJwt() !== registrationJwt) {
       console.warn(
         "Skipping push registration: auth token is missing or expired",
         {
