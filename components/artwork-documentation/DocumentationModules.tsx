@@ -34,6 +34,11 @@ import DocumentationValueEditor, {
   type AssetChoice,
 } from "./DocumentationValueEditor";
 import { validDocumentationOperation } from "@/lib/artwork-documentation/validation";
+import {
+  documentationChoiceEditor,
+  isPublicationOnly,
+} from "@/lib/artwork-documentation/intake";
+import DocumentationFieldExample from "./DocumentationFieldExample";
 
 interface Props {
   readonly context: ApiArtworkDocumentationContext;
@@ -142,6 +147,7 @@ function DocumentationAnswerField(
     answer?.intended_visibility ?? definition.default_visibility;
   const status =
     answer?.status ?? ApiArtworkDocumentationAnswerStatusEnum.Provided;
+  const publicationOnly = isPublicationOnly(context.profile);
   const update = (next: Partial<ApiArtworkDocumentationAnswer>) => {
     const merged = {
       status,
@@ -179,13 +185,38 @@ function DocumentationAnswerField(
           id={`${id}-help`}
           className="tw-mb-4 tw-text-sm tw-leading-relaxed tw-text-iron-300"
         >
-          {msg(field.help)}
+          {msg(fieldHelpKey(field.help, publicationOnly))}
         </p>
       )}
       {redacted ? (
         <p className="tw-m-0 tw-text-sm tw-text-iron-400">{msg("redacted")}</p>
       ) : (
         <>
+          <DocumentationFieldExample
+            profile={context.profile}
+            moduleId={moduleId}
+            field={field}
+            label={label}
+            disabled={disabled}
+            hasAnswer={!!answer}
+            validate={(value) =>
+              validDocumentationOperation(context, moduleId, {
+                op: "set",
+                field: field.id,
+                answer: {
+                  status: ApiArtworkDocumentationAnswerStatusEnum.Provided,
+                  value,
+                  intended_visibility: visibility,
+                },
+              } as ApiArtworkDocumentationOperation)
+            }
+            onApply={(value) =>
+              update({
+                status: ApiArtworkDocumentationAnswerStatusEnum.Provided,
+                value,
+              })
+            }
+          />
           {field.id === "canonical_asset_id" &&
             context.latest_revision_id &&
             !disabled && (
@@ -234,7 +265,10 @@ function DocumentationAnswerField(
             <DocumentationValueEditor
               id={id}
               label={label}
-              editor={field.editor}
+              editor={documentationChoiceEditor(
+                field.editor,
+                definition.value_schema
+              )}
               value={
                 (answer?.value as FieldValue | undefined) ??
                 initialValue(field.editor)
@@ -265,33 +299,15 @@ function DocumentationAnswerField(
             </p>
           )}
           <div className="tw-mt-4 tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
-            {definition.locked_restricted ? (
-              <span
-                className="tw-text-xs tw-text-iron-400"
-                title={msg("restrictedHelp")}
-              >
-                {msg("restricted")}
-              </span>
-            ) : (
-              <label className="tw-flex tw-flex-wrap tw-items-center tw-gap-2 tw-text-xs tw-text-iron-400">
-                {msg("visibility")}
-                <select
-                  className={`${inputClass} !tw-w-auto !tw-max-w-full !tw-py-2 !tw-text-xs`}
-                  disabled={disabled || !answer}
-                  value={visibility}
-                  onChange={(event) =>
-                    update({
-                      intended_visibility: event.target.value as NonNullable<
-                        ApiArtworkDocumentationAnswer["intended_visibility"]
-                      >,
-                    })
-                  }
-                >
-                  <option value="public_record">{msg("publicIntent")}</option>
-                  <option value="restricted">{msg("restricted")}</option>
-                </select>
-              </label>
-            )}
+            <AnswerVisibility
+              publicationOnly={publicationOnly}
+              lockedRestricted={definition.locked_restricted}
+              disabled={disabled || !answer}
+              value={visibility}
+              onChange={(intended_visibility) =>
+                update({ intended_visibility })
+              }
+            />
             {answer && !disabled && (
               <DocumentationButton
                 secondary
@@ -309,5 +325,65 @@ function DocumentationAnswerField(
         </>
       )}
     </section>
+  );
+}
+
+function fieldHelpKey(help: string, publicationOnly: boolean): string {
+  return publicationOnly &&
+    ["locationHelp", "masterHelp", "interviewEvidenceHelp"].includes(help)
+    ? `publication.${help}`
+    : help;
+}
+
+function AnswerVisibility({
+  publicationOnly,
+  lockedRestricted,
+  disabled,
+  value,
+  onChange,
+}: {
+  readonly publicationOnly: boolean;
+  readonly lockedRestricted: boolean;
+  readonly disabled: boolean;
+  readonly value: string;
+  readonly onChange: (
+    value: NonNullable<ApiArtworkDocumentationAnswer["intended_visibility"]>
+  ) => void;
+}) {
+  const { msg } = useDocumentationMessages();
+  if (publicationOnly)
+    return (
+      <span className="tw-text-xs tw-text-iron-400">
+        {msg("publication.field")}
+      </span>
+    );
+  if (lockedRestricted)
+    return (
+      <span
+        className="tw-text-xs tw-text-iron-400"
+        title={msg("restrictedHelp")}
+      >
+        {msg("restricted")}
+      </span>
+    );
+  return (
+    <label className="tw-flex tw-flex-wrap tw-items-center tw-gap-2 tw-text-xs tw-text-iron-400">
+      {msg("visibility")}
+      <select
+        className={`${inputClass} !tw-w-auto !tw-max-w-full !tw-py-2 !tw-text-xs`}
+        disabled={disabled}
+        value={value}
+        onChange={(event) =>
+          onChange(
+            event.target.value as NonNullable<
+              ApiArtworkDocumentationAnswer["intended_visibility"]
+            >
+          )
+        }
+      >
+        <option value="public_record">{msg("publicIntent")}</option>
+        <option value="restricted">{msg("restricted")}</option>
+      </select>
+    </label>
   );
 }

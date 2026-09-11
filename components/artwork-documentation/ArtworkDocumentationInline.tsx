@@ -1,5 +1,7 @@
 "use client";
 
+import { isPublicationOnly } from "@/lib/artwork-documentation/intake";
+
 import Link from "next/link";
 import {
   forwardRef,
@@ -216,7 +218,13 @@ const InlineEditor = forwardRef<
   );
   return (
     <div className="tw-space-y-4">
-      <DocumentationNotice>{msg("privacy")}</DocumentationNotice>
+      <DocumentationNotice>
+        {msg(
+          isPublicationOnly(draft.context.profile)
+            ? "publication.help"
+            : "privacy"
+        )}
+      </DocumentationNotice>
       <p className="tw-text-xs tw-text-iron-400">{msg("sourceProposal")}</p>
       <DocumentationSaveStatus snapshot={draft} controller={controller} />
       <DocumentationModules

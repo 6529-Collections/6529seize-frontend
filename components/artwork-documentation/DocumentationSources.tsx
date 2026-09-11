@@ -14,6 +14,10 @@ import { useDocumentationActor } from "./DocumentationAuthGate";
 import { DocumentationValueSummary } from "./DocumentationSummary";
 import { readAnswer } from "@/lib/artwork-documentation/answers";
 import {
+  canImportDocumentationAnswer,
+  isPublicationOnly,
+} from "@/lib/artwork-documentation/intake";
+import {
   DocumentationButton,
   DocumentationNotice,
   panelClass,
@@ -39,7 +43,11 @@ export default function DocumentationSources({
         {msg("sourceTitle")}
       </summary>
       <p className="tw-text-sm tw-leading-relaxed tw-text-iron-300">
-        {msg("sourceHelp")}
+        {msg(
+          isPublicationOnly(context.profile)
+            ? "publication.sourceHelp"
+            : "sourceHelp"
+        )}
       </p>
       {context.source_links.map((source) => (
         <SourceReceipt
@@ -80,6 +88,14 @@ function SourceReceipt({
     gcTime: 0,
     meta: { persist: false },
   });
+  const fields =
+    query.data?.fields.filter((field) =>
+      canImportDocumentationAnswer(
+        context.profile,
+        field.target_field,
+        field.answer
+      )
+    ) ?? [];
   if (query.isError)
     return (
       <DocumentationNotice>{msg("sourceUnavailable")}</DocumentationNotice>
@@ -97,12 +113,12 @@ function SourceReceipt({
         importDocumentationSource(
           current,
           receiptId,
-          query.data?.fields
+          fields
             .filter((field) => selected.includes(field.target_field))
             .map(({ source_path, target_field }) => ({
               source_path,
               target_field,
-            })) ?? [],
+            })),
           signal
         )
       );
@@ -121,7 +137,7 @@ function SourceReceipt({
           {query.data?.receipt_text}
         </p>
       </details>
-      {query.data?.fields.map((field) => (
+      {fields.map((field) => (
         <div
           key={field.target_field}
           className="tw-space-y-2 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-3"

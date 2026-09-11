@@ -46,6 +46,8 @@ import DocumentationSources from "./DocumentationSources";
 import DocumentationArtistPin from "./DocumentationArtistPin";
 import DocumentationArtworkPreview from "./DocumentationArtworkPreview";
 import DocumentationNewContext from "./DocumentationNewContext";
+import DocumentationWorkedExample from "./DocumentationWorkedExample";
+import { isPublicationOnly } from "@/lib/artwork-documentation/intake";
 
 interface Props {
   readonly workId: string;
@@ -120,6 +122,7 @@ function WorkspaceEditor({
   const router = useRouter();
   const draft = useDocumentationDraft(initial);
   const { context, controller } = draft;
+  const publicationOnly = isPublicationOnly(context.profile);
   const [section, setSection] = useState(initialSection);
   const counts = Object.values(context.modules).reduce(
     (total, module) => ({
@@ -183,6 +186,17 @@ function WorkspaceEditor({
         </p>
       </header>
       <DocumentationSaveStatus snapshot={draft} controller={controller} />
+      <DocumentationNotice>
+        <p className="tw-m-0 tw-font-semibold">
+          {msg(publicationOnly ? "publication.intro" : "publication.legacy")}
+        </p>
+        {publicationOnly && (
+          <>
+            <p className="tw-mt-2">{msg("publication.help")}</p>
+            <p className="tw-m-0">{msg("publication.draft")}</p>
+          </>
+        )}
+      </DocumentationNotice>
       {context.confirmation_status ===
         ApiArtworkDocumentationContextConfirmationStatusEnum.NewerDraft && (
         <DocumentationNotice>{msg("newerDraft")}</DocumentationNotice>
@@ -199,7 +213,7 @@ function WorkspaceEditor({
             : msg("description")}
         </p>
         <p className="tw-m-0 tw-text-xs tw-leading-relaxed tw-text-iron-400">
-          {msg("privacy")}
+          {msg(publicationOnly ? "publication.draft" : "privacy")}
         </p>
       </details>
       <DocumentationSources context={context} controller={controller} />
@@ -254,10 +268,27 @@ function WorkspaceEditor({
                 {msg("why")}
               </summary>
               <p className="tw-mt-2 tw-leading-relaxed">
-                {msg(`why.${section}`)}
+                {msg(
+                  publicationOnly && section === "rights"
+                    ? "publication.whyRights"
+                    : `why.${section}`
+                )}
               </p>
             </details>
           </div>
+          <DocumentationWorkedExample
+            key={`${context.id}-${section}`}
+            context={context}
+            edits={draft.edits}
+            section={section}
+          />
+          <h3
+            id={`documentation-answers-${context.id}-${section}`}
+            tabIndex={-1}
+            className="tw-text-lg tw-font-semibold tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+          >
+            {msg("examples.yourRecord")}
+          </h3>
           {section === "artwork" && (
             <>
               <DocumentationArtworkPreview context={context} />
@@ -281,7 +312,11 @@ function WorkspaceEditor({
             </DocumentationNotice>
           )}
           {section === "preservation" && (
-            <DocumentationNotice>{msg("interviewHelp")}</DocumentationNotice>
+            <DocumentationNotice>
+              {msg(
+                publicationOnly ? "publication.interviewHelp" : "interviewHelp"
+              )}
+            </DocumentationNotice>
           )}
           {section === "review" ? (
             <>
@@ -290,12 +325,12 @@ function WorkspaceEditor({
                 controller={controller}
                 saveState={draft.state}
               />
-              <DocumentationFeedback context={context} />
               <DocumentationAccess context={context} />
               <DocumentationNewContext
                 context={context}
                 controller={controller}
               />
+              <DocumentationFeedback context={context} />
             </>
           ) : (
             <DocumentationModules

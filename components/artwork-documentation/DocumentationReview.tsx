@@ -13,6 +13,7 @@ import type {
   SaveState,
 } from "@/lib/artwork-documentation/draft-controller";
 import { confirmationCopyMatches } from "@/lib/artwork-documentation/confirmation";
+import { isPublicationOnly } from "@/lib/artwork-documentation/intake";
 import { documentationQueryKey } from "@/hooks/artwork-documentation/useArtworkDocumentationAccess";
 import {
   confirmDocumentation,
@@ -44,6 +45,8 @@ export default function DocumentationReview({
   readonly saveState: SaveState;
 }) {
   const { msg, locale } = useDocumentationMessages();
+  const publicationOnly = isPublicationOnly(context.profile);
+  const reviewAllKey = publicationOnly ? "publication.reviewAll" : "reviewAll";
   const { connectedProfile, actorKey } = useDocumentationActor();
   const [acknowledged, setAcknowledged] = useState(false);
   const [preview, setPreview] = useState(false);
@@ -107,10 +110,12 @@ export default function DocumentationReview({
   return (
     <div className="tw-space-y-5">
       <DocumentationButton secondary onClick={() => setPreview(!preview)}>
-        {preview ? msg("reviewAll") : msg("preview")}
+        {msg(preview ? reviewAllKey : "preview")}
       </DocumentationButton>
       {preview && (
-        <DocumentationNotice>{msg("previewNotice")}</DocumentationNotice>
+        <DocumentationNotice>
+          {msg(publicationOnly ? "publication.previewNotice" : "previewNotice")}
+        </DocumentationNotice>
       )}
       {preview ? (
         <>
@@ -159,7 +164,9 @@ export default function DocumentationReview({
               </p>
             )}
             <p className="tw-text-sm tw-leading-relaxed tw-text-iron-200">
-              {msg("confirmCopy")}
+              {confirmationCopyMatches(context.profile)
+                ? context.profile.confirmation_copy
+                : msg("upgrade")}
             </p>
             <p className="tw-text-sm tw-leading-relaxed tw-text-iron-400">
               {msg("confirmHelp")}
