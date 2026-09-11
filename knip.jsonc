@@ -93,6 +93,9 @@
       // adversarial Jest contract; Knip intentionally excludes test consumers.
       "scripts/museum-e2e-change-set.cjs": ["exports"],
       "scripts/museum-release-selection.cjs": ["exports"],
+      // The filesystem-contract CLI exposes pure selection and runner helpers
+      // to its focused Jest contract; Knip excludes test consumers.
+      "scripts/file-contract-tests.cjs": ["exports"],
       // The production artifact CLI exposes pure safety helpers to a focused
       // adversarial Jest contract, which Knip excludes from its usage graph.
       "ops/scripts/verify-production-artifact.cjs": ["exports"],

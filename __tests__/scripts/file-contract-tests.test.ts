@@ -101,7 +101,10 @@ describe("filesystem contract selection", () => {
         "--runTestsByPath",
         HOVER,
       ],
-      expect.objectContaining({ stdio: "inherit" })
+      expect.objectContaining({
+        stdio: "inherit",
+        env: expect.objectContaining({ NODE_ENV: "test" }),
+      })
     );
   });
 
@@ -146,6 +149,13 @@ describe("filesystem contract selection", () => {
     expect(step?.run).toBe(
       './bin/6529 exec node scripts/file-contract-tests.cjs --changed-from "$BASE_SHA"'
     );
+    expect(workflow.jobs["app-checks"].env.BASE_SHA).toBe(
+      "${{ needs.plan.outputs.base_sha }}"
+    );
+    const checkout = steps.find(({ name }) => name === "Checkout code") as
+      | { with?: Record<string, unknown> }
+      | undefined;
+    expect(checkout?.with?.["fetch-depth"]).toBe(0);
     expect(step).not.toHaveProperty("continue-on-error");
     if (!step) throw new Error("Missing filesystem contract step");
     expect(steps.indexOf(step)).toBeLessThan(
