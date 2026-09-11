@@ -419,3 +419,25 @@ compose a short answer.
 - Which controls should receive `data-help-*` metadata in the next pass?
 - How should unanswered production questions feed back into corpus updates and
   eval coverage?
+
+## Desktop Core knowledge
+
+The `desktop.*` records, tagged `desktop-core`, cover the native 6529 Desktop
+menu, setup and RPC activation, worker schedules, TDH comparisons and recovery,
+Core wallets, IPFS, and diagnostics. They remain available in the public corpus
+so users can ask how to get started before installing the application.
+
+Core-only navigation is expressed as native menu labels. Canonical paths remain
+valid public Apps destinations with source-link suppression; never publish a
+website `/core` URL. Each record contains a complete bounded procedure, including
+its local-data effects and warnings, with pinned Core GitHub source references.
+The [maintenance contract](../../help/desktop-core-sources.md) tracks the source
+baseline and the [Desktop guides](../desktop/README.md) explain the workflows.
+
+The companion backend change scopes retrieval to local Desktop support, preserves
+the full primary record, and permits longer procedural answers. It does not add
+remote control of workers or access to local wallets, logs, or database contents.
+
+Deploy the companion backend routing/renderer change before publishing these
+records. Its older-corpus fallback is safe; the older backend does not isolate
+Core records from generic questions and has insufficient procedural reply space.
