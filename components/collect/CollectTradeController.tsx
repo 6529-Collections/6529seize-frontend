@@ -35,11 +35,16 @@ import type {
   CollectTradeDraft,
   CollectTradeStage,
 } from "./collect.types";
-import { marketOperationReview, marketOperationStage } from "./market.adapters";
+import {
+  marketAmount,
+  marketOperationReview,
+  marketOperationStage,
+} from "./market.adapters";
 import { MARKET_ZERO, validateMarketOperation } from "./market-validation";
 import { readMarketIntent, saveMarketIntent } from "./market-operation-storage";
 import { CollectOrderBook } from "./CollectOrderPicker";
 import CollectTradeForm from "./CollectTradeForm";
+import CollectInlineBuyForm from "./CollectInlineBuyForm";
 import CollectTradeSheet, {
   type CollectTradePresentation,
 } from "./CollectTradeSheet";
@@ -48,7 +53,15 @@ import CollectAssetMedia from "./CollectAssetMedia";
 import { useMarketExecution } from "./useMarketExecution";
 import { useMarketSettlement } from "./useMarketSettlement";
 import type { SupportedLocale } from "@/i18n/locales";
-import { defaultCollectRecipient } from "./collect-recipient.helpers";
+import {
+  collectProfileWallets,
+  defaultCollectRecipient,
+} from "./collect-recipient.helpers";
+import {
+  collectBuyAmount,
+  collectBuyListings,
+  collectListingKey,
+} from "./collect-buy.helpers";
 
 function recoveredTransactionFacts(
   operation: ApiMarketOperation | null,
@@ -114,6 +127,7 @@ export default function CollectTradeController({
   onSettled,
   onMarketChange,
   presentation = "dialog",
+  layout = "standard",
 }: {
   readonly asset?: ApiCollectAsset;
   readonly action: CollectTradeAction;
@@ -126,14 +140,16 @@ export default function CollectTradeController({
   readonly onSettled?: () => void;
   readonly onMarketChange?: () => void;
   readonly presentation?: CollectTradePresentation;
+  readonly layout?: "standard" | "inline-buy";
 }) {
   const locale = useBrowserLocale();
   const { connectedProfile, activeProfileProxy, isAuthenticated } = useAuth();
   const connection = useSeizeConnectContext();
   const { isCapacitor } = useCapacitor();
   const client = useQueryClient();
-  const [selectedOrder, setSelectedOrder] =
-    useState<ApiMarketTradeOrder | null>(initialOrder ?? null);
+  const [chosenOrder, setSelectedOrder] = useState<ApiMarketTradeOrder | null>(
+    initialOrder ?? null
+  );
   const [operation, setOperation] = useState<ApiMarketOperation | null>(
     initialOperation ?? null
   );
@@ -165,6 +181,7 @@ export default function CollectTradeController({
     cancelTarget?.asset_key ??
     "";
   const needsOrder = action === "buy" || action === "accept";
+  const inlineBuy = layout === "inline-buy" && action === "buy";
   const orders = useQuery({
     queryKey: [QueryKey.MARKET_ORDERS, assetKey, action],
     queryFn: ({ signal }) =>
@@ -176,6 +193,19 @@ export default function CollectTradeController({
     enabled: needsOrder && !operation && Boolean(assetKey),
     staleTime: 0,
   });
+  const buyOrders = inlineBuy
+    ? collectBuyListings({
+        orders: orders.data?.orders ?? [],
+        assetKey,
+        quantity: draft.quantity,
+        profileWallets: collectProfileWallets(connectedProfile).map(
+          (item) => item.wallet
+        ),
+        nowSeconds: orders.dataUpdatedAt / 1000,
+      })
+    : [];
+  const selectedOrder =
+    chosenOrder ?? (inlineBuy ? (buyOrders[0] ?? null) : null);
   const capability = useQuery({
     queryKey: [QueryKey.COLLECT_CAPABILITIES],
     queryFn: ({ signal }) => fetchCollectCapabilities(signal),
@@ -242,13 +272,40 @@ export default function CollectTradeController({
     setPreparing(true);
     setError(undefined);
     try {
+      let orderForRequest = selectedOrder;
+      if (inlineBuy && selectedOrder) {
+        const refreshed = await orders.refetch();
+        if (refreshed.isError || !refreshed.data)
+          throw new Error("ORDER_REFRESH_FAILED");
+        const current = collectBuyListings({
+          orders: refreshed.data.orders,
+          assetKey,
+          quantity: value.quantity,
+          profileWallets: collectProfileWallets(connectedProfile).map(
+            (item) => item.wallet
+          ),
+          nowSeconds: Date.now() / 1000,
+        }).find(
+          (item) => collectListingKey(item) === collectListingKey(selectedOrder)
+        );
+        setSelectedOrder(current ?? null);
+        if (
+          !current ||
+          collectBuyAmount(current, value.quantity) !==
+            collectBuyAmount(selectedOrder, value.quantity)
+        ) {
+          setError(t(locale, "collect.buy.listingChanged"));
+          return;
+        }
+        orderForRequest = current;
+      }
       const request = buildMarketRequest({
         draft: value,
         action,
         profile: connectedProfile,
         wallet: connection.address,
         assetKey,
-        selectedOrder,
+        selectedOrder: orderForRequest,
         cancelTarget,
       });
       // Retry a lost prepare response with the same key and exact request body.
@@ -258,7 +315,8 @@ export default function CollectTradeController({
         action,
         assetKey,
         wallet: connection.address,
-        orderHash: selectedOrder?.identity.order_hash,
+        orderHash: orderForRequest?.identity.order_hash,
+        amount: request.amount_wei,
         cancelId: cancelTarget?.id,
       });
       const intent =
@@ -302,10 +360,47 @@ export default function CollectTradeController({
       ...review.technicalFacts,
       ...recoveredTransactionFacts(displayedOperation, locale),
     ];
+  if (review && displayedOperation && inlineBuy) {
+    review.technicalFacts = [...review.facts, ...review.technicalFacts];
+    const fees = displayedOperation.fees.reduce(
+      (total, fee) => total + BigInt(fee.amount_wei),
+      0n
+    );
+    const gas = displayedOperation.transaction?.gas_reserve_wei;
+    review.facts = [
+      {
+        label: t(locale, "collect.trade.quantity"),
+        value: displayedOperation.quantity,
+      },
+      {
+        label: t(locale, "collect.trade.destination"),
+        value: displayedOperation.nft_recipient ?? displayedOperation.recipient,
+      },
+      {
+        label: t(locale, "collect.buy.includedFees"),
+        value: marketAmount(fees.toString(), displayedOperation.currency),
+      },
+      ...(gas
+        ? [
+            {
+              label: t(locale, "collect.trade.gasCap"),
+              value: marketAmount(gas, MARKET_ZERO),
+            },
+          ]
+        : []),
+    ];
+  }
   const stage = reviewStage(displayedOperation, execution.stage, preparing);
+  const missingOrderLabel = orders.isPending
+    ? "collect.loading"
+    : "collect.trade.noOrders";
+  const orderStatusLabel = orders.isError
+    ? "collect.error.orders"
+    : missingOrderLabel;
+  const noInlineOrder = selectedOrder ? undefined : t(locale, orderStatusLabel);
   const form = (
     <>
-      {needsOrder && (
+      {needsOrder && !inlineBuy && (
         <div className="tw-mb-4">
           <CollectOrderBook
             loading={orders.isPending}
@@ -328,35 +423,91 @@ export default function CollectTradeController({
           </Button>
         </div>
       )}
-      <CollectTradeForm
-        action={action}
-        draft={draft}
-        maxQuantity={
-          selectedOrder?.quantity ??
-          (asset?.family.toString() === "memes" ? "100" : "1")
-        }
-        makerLabel={connection.address ?? "—"}
-        currencyLabel={
-          selectedOrder?.currency.toLowerCase() === MARKET_ZERO ||
-          (!selectedOrder && action !== "offer")
-            ? "ETH"
-            : "WETH"
-        }
-        recipientProfile={connectedProfile}
-        disabledReason={
-          disabledReason ??
-          (needsOrder && !selectedOrder
-            ? t(locale, "collect.trade.selectOrder")
-            : undefined)
-        }
-        loading={preparing}
-        error={error}
-        onChange={setDraft}
-        onPrepare={(value) => {
-          void prepare(value);
-        }}
-      />
-      {disabledReason && (
+      {inlineBuy ? (
+        <CollectInlineBuyForm
+          action="buy"
+          draft={draft}
+          maxQuantity={
+            selectedOrder?.quantity ??
+            (asset?.family.toString() === "memes" ? "100" : "1")
+          }
+          makerLabel={connection.address ?? "—"}
+          currencyLabel="ETH"
+          recipientProfile={connectedProfile}
+          amountWei={
+            selectedOrder
+              ? collectBuyAmount(selectedOrder, draft.quantity)
+              : null
+          }
+          disabledReason={disabledReason ?? noInlineOrder}
+          loading={preparing}
+          error={error}
+          onChange={setDraft}
+          onPrepare={(value) => {
+            void prepare(value);
+          }}
+          orderOptions={
+            buyOrders.length > 1 ? (
+              <details>
+                <summary className="tw-min-h-11 tw-cursor-pointer tw-py-3 tw-text-xs tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400">
+                  {t(locale, "collect.buy.otherListings")}
+                </summary>
+                <CollectOrderBook
+                  loading={orders.isPending}
+                  failed={orders.isError}
+                  orders={buyOrders}
+                  value={selectedOrder?.identity.order_hash ?? null}
+                  onChange={setSelectedOrder}
+                />
+              </details>
+            ) : undefined
+          }
+        />
+      ) : (
+        <CollectTradeForm
+          action={action}
+          draft={draft}
+          maxQuantity={
+            selectedOrder?.quantity ??
+            (asset?.family.toString() === "memes" ? "100" : "1")
+          }
+          makerLabel={connection.address ?? "—"}
+          currencyLabel={
+            selectedOrder?.currency.toLowerCase() === MARKET_ZERO ||
+            (!selectedOrder && action !== "offer")
+              ? "ETH"
+              : "WETH"
+          }
+          recipientProfile={connectedProfile}
+          disabledReason={
+            disabledReason ??
+            (needsOrder && !selectedOrder
+              ? t(locale, "collect.trade.selectOrder")
+              : undefined)
+          }
+          loading={preparing}
+          error={error}
+          onChange={setDraft}
+          onPrepare={(value) => {
+            void prepare(value);
+          }}
+        />
+      )}
+      {inlineBuy &&
+        !orders.isPending &&
+        (!selectedOrder || error !== undefined || orders.isError) && (
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => {
+              void orders.refetch();
+            }}
+          >
+            {t(locale, "collect.trade.refreshOrders")}
+          </Button>
+        )}
+      {(reasonKey === "collect.trade.connectSigner" ||
+        reasonKey === "collect.trade.reconnect") && (
         <Button variant="secondary" onClick={connection.seizeConnect}>
           {t(locale, "collect.connect")}
         </Button>
@@ -367,6 +518,7 @@ export default function CollectTradeController({
     <CollectTradeSheet
       open
       presentation={presentation}
+      compact={inlineBuy}
       review={review}
       title={asset?.name}
       stage={stage}
@@ -390,7 +542,7 @@ export default function CollectTradeController({
           />
         </>
       }
-      message={execution.message ?? error}
+      message={execution.message ?? (displayedOperation ? error : undefined)}
       onClose={onClose}
       onRefresh={() => {
         if (displayedOperation) {

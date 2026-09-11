@@ -1,4 +1,7 @@
 import type { ApiCollectAssetsPage } from "@/generated/models/ApiCollectAssetsPage";
+import type { ApiCollectAnalysis } from "@/generated/models/ApiCollectAnalysis";
+import type { ApiCollectAnalysisRequest } from "@/generated/models/ApiCollectAnalysisRequest";
+import { ApiCollectKind } from "@/generated/models/ApiCollectKind";
 import type { ApiCollectCapabilities } from "@/generated/models/ApiCollectCapabilities";
 import type { ApiCollectCatalog } from "@/generated/models/ApiCollectCatalog";
 import type { ApiCollectFamily } from "@/generated/models/ApiCollectFamily";
@@ -9,6 +12,22 @@ import type { ApiCollectTdhProjection } from "@/generated/models/ApiCollectTdhPr
 import type { ApiCollectTdhRankingRequest } from "@/generated/models/ApiCollectTdhRankingRequest";
 import type { ApiCollectTdhRanking } from "@/generated/models/ApiCollectTdhRanking";
 import { commonApiFetch, commonApiPost } from "./common-api";
+
+export const fetchCollectAssetOwnership = (
+  profileId: string,
+  assetKey: string,
+  signal?: AbortSignal
+) =>
+  commonApiPost<ApiCollectAnalysisRequest, ApiCollectAnalysis>({
+    endpoint: "collect/analyses",
+    body: {
+      profile_id: profileId,
+      kind: ApiCollectKind.Exact,
+      assets: [{ asset_key: assetKey, quantity: "1" }],
+    },
+    signal,
+    errorMode: "structured",
+  });
 
 export const fetchCollectCatalog = (signal?: AbortSignal) =>
   commonApiFetch<ApiCollectCatalog>({
