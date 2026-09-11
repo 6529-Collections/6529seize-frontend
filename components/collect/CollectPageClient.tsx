@@ -198,8 +198,12 @@ function CollectCatalogController({
             case "pebbles_set":
               patch["collection"] = "pebbles";
               break;
-            case "lowest":
             case "tdh":
+              patch["collection"] = "memes";
+              patch["token"] = "";
+              patch["q"] = "";
+              break;
+            case "lowest":
             case "explore":
             case "specific":
               break;

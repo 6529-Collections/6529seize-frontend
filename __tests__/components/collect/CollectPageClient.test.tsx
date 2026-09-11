@@ -200,13 +200,37 @@ it("shows collection choice and recoverable listing errors only in lowest mode",
   expect(screen.queryByLabelText("Goal definition")).not.toBeInTheDocument();
 });
 
-it("keeps TDH collection scope available without a browsing catalogue", () => {
-  mockSearchParams = new URLSearchParams("intent=tdh&collection=gradients");
+it("starts a fresh TDH visit with The Memes", () => {
+  mockSearchParams = new URLSearchParams("intent=tdh");
   render(<CollectPageClient />);
+  expect(screen.getByRole("combobox", { name: "Collections" })).toHaveValue(
+    "memes"
+  );
+  expect(mockReplace).not.toHaveBeenCalled();
+});
+
+it("starts TDH with The Memes when switching from Pebbles listings", () => {
+  mockSearchParams = new URLSearchParams(
+    "collection=pebbles&intent=lowest&token=8&q=old&definition=old"
+  );
+  render(<CollectPageClient />);
+  fireEvent.click(screen.getByRole("button", { name: "TDH" }));
+  expect(mockReplace).toHaveBeenCalledWith(
+    "/collect?collection=memes&intent=tdh",
+    { scroll: false }
+  );
+});
+
+it("preserves explicit TDH collection links and subsequent user selections", () => {
+  mockSearchParams = new URLSearchParams("intent=tdh&collection=gradients");
+  const { rerender } = render(<CollectPageClient />);
   expect(
     screen.queryByRole("region", { name: "Lowest listings" })
   ).not.toBeInTheDocument();
   expect(screen.queryByRole("searchbox")).not.toBeInTheDocument();
+  expect(screen.getByRole("combobox", { name: "Collections" })).toHaveValue(
+    "gradients"
+  );
   fireEvent.change(screen.getByRole("combobox", { name: "Collections" }), {
     target: { value: "pebbles" },
   });
@@ -214,4 +238,12 @@ it("keeps TDH collection scope available without a browsing catalogue", () => {
     "/collect?intent=tdh&collection=pebbles",
     { scroll: false }
   );
+
+  mockReplace.mockClear();
+  mockSearchParams = new URLSearchParams("intent=tdh&collection=pebbles");
+  rerender(<CollectPageClient />);
+  expect(screen.getByRole("combobox", { name: "Collections" })).toHaveValue(
+    "pebbles"
+  );
+  expect(mockReplace).not.toHaveBeenCalled();
 });

@@ -59,7 +59,13 @@ export default function CollectGoalForm(props: CollectGoalFormProps) {
       <h2 className="tw-mb-4 tw-mt-0 tw-text-lg tw-font-semibold tw-text-iron-100">
         {t(locale, `collect.intent.${draft.intent}`)}
       </h2>
-      <div className="tw-grid tw-gap-4 sm:tw-grid-cols-2 lg:tw-grid-cols-3">
+      <div
+        className={`tw-grid tw-gap-4 ${
+          showQuantity
+            ? "sm:tw-grid-cols-[minmax(0,1fr)_7rem] lg:tw-grid-cols-[minmax(0,1fr)_7rem_minmax(0,1fr)]"
+            : "sm:tw-grid-cols-2 lg:tw-grid-cols-3"
+        }`}
+      >
         {needsDefinition && (
           <label className="tw-space-y-2 tw-text-xs tw-font-semibold tw-text-iron-300">
             <span>{t(locale, "collect.goal.definition")}</span>
@@ -85,7 +91,7 @@ export default function CollectGoalForm(props: CollectGoalFormProps) {
           </label>
         )}
         {showQuantity && (
-          <label className="tw-space-y-2 tw-text-xs tw-font-semibold tw-text-iron-300">
+          <label className="tw-max-w-28 tw-space-y-2 tw-text-xs tw-font-semibold tw-text-iron-300">
             <span>{t(locale, "collect.goal.targetCount")}</span>
             <input
               disabled={props.loading}

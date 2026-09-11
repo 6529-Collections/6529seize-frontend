@@ -42,7 +42,9 @@ card page.
    or a Pebbles trait set.
 2. Connect your profile to inspect its holdings. Wallet controls describe where
    NFTs are held, which wallet pays or signs, and where a purchase is delivered.
-3. For a completion goal, choose its definition, number of copies and budget.
+3. For a completion goal, choose its definition, **Copies per NFT** and budget.
+   Copies per NFT is the total you want to hold of each required NFT, including
+   copies already in your profile.
    Review missing requirements, checked artworks, unavailable items and the
    proposed purchases. A partial plan leaves its unfilled requirements visible.
 4. Select an exact artwork and available order. Review quantity, currency,
@@ -101,7 +103,8 @@ and approval amounts before continuing with remaining offers.
 ### Compare TDH
 
 Choose **TDH**, a collection, a budget and a time horizon to compare additional
-TDH for the current profile.
+TDH for the current profile. Opening the TDH tool starts with The Memes. A direct
+link with a collection selected keeps that collection, and you can change it.
 Comparisons use a verified official snapshot and include changes to bonuses on
 existing holdings. Gift allocations outside the profile contribute no TDH to
 that profile. Cost comparisons include an estimated gas reserve and identify

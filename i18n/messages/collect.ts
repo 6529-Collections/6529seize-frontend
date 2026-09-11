@@ -157,7 +157,7 @@ export const COLLECT_MESSAGES = {
   "collect.plan.status.unavailable": "Unavailable",
   "collect.goal.definition": "Choose your target",
   "collect.goal.selectDefinition": "Select a target",
-  "collect.goal.targetCount": "Copies of each required card",
+  "collect.goal.targetCount": "Copies per NFT",
   "collect.goal.budget": "Maximum budget (ETH)",
   "collect.goal.budgetHint":
     "Includes purchases and a gas reserve. This creates a plan for review.",
@@ -266,7 +266,7 @@ export const COLLECT_MESSAGES = {
     "This plan has no valid receiving wallet. Refresh the plan and choose a destination before continuing.",
   "collect.plan.tdhPreview": "Preview this basket’s TDH",
   "collect.lowest.scope":
-    "Listings are ordered by price within the selected collection. This is the observed market, and availability can change.",
+    "Listings are ordered by price within the selected collection.",
   "collect.lowest.selectCollection":
     "Choose a collection to compare its available listings.",
   "collect.tdh.title": "TDH for your collection",
