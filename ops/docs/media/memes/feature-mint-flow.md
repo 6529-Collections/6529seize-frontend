@@ -7,6 +7,9 @@
   selection, phase-aware mint controls, and transaction status.
 - On desktop, artwork aligns with the top of the drop details. On mobile,
   artwork appears above the details and mint controls.
+- Video playback uses the drop's API-provided media URL when available, so
+  mirrored videos load through the CDN. If that URL is missing, the page uses
+  the animation URL from the artwork metadata.
 - The same mint data and widget are also reused by the standalone latest-mint
   shell documented in
   [Standalone The Memes Mint Page](feature-standalone-mint-page.md).
