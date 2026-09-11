@@ -538,7 +538,7 @@ export default function NftMarketActivity({
             role="region"
             aria-label={t(locale, "nftActivity.scrollRegion")}
             tabIndex={0}
-            className="tw-overflow-x-auto tw-rounded-lg tw-border tw-border-solid tw-border-white/10 before:tw-content-none after:tw-content-none focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 [&_*]:before:tw-content-none [&_*]:after:tw-content-none"
+            className="tw-relative tw-overflow-x-auto tw-rounded-lg tw-border tw-border-solid tw-border-white/10 before:tw-content-none after:tw-content-none focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 [&_*]:before:tw-content-none [&_*]:after:tw-content-none"
           >
             <table
               className="tw-w-full tw-min-w-[980px] tw-border-collapse"

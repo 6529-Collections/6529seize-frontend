@@ -21,11 +21,6 @@ interface Props {
   page: number;
   pageSize: number;
   showMore?: boolean | undefined;
-  // Optional props for SSR
-  initialActivity?: unknown[] | undefined;
-  initialTotalResults?: number | undefined;
-  initialNfts?: unknown[] | undefined;
-  initialNextgenCollections?: unknown[] | undefined;
 }
 
 export default function LatestActivity(props: Readonly<Props>) {
