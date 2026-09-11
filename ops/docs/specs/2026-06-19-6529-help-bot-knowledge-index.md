@@ -33,6 +33,12 @@ current pages; those guides are not invented as historical snapshot routes.
 The EMMA record covers the five fixed collection shortcuts, Memes season
 selection, Intern JPG token IDs, and the manual contract path in Create Snapshots.
 
+The Memes mint-route record covers the receipt-confirmed **SEIZED!** state,
+artwork details, **Quantity**, and **Minted to** destination. It distinguishes
+**Done**, which closes the confirmation, from the optional **View transaction**
+link, which opens a new tab. An unavailable artwork preview does not imply a
+failed mint.
+
 The artwork documentation record owns the six-chapter writing flow, named next
 chapter controls, **Answer options**, deliberate examples, file preparation,
 **Read the draft** and saved publication previews. It distinguishes program

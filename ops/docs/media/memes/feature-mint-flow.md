@@ -58,8 +58,13 @@
    pending mint so the user can review and select `SEIZE xN` again.
 9. The on-chain transaction modal shows `Confirm in your wallet`, then
    `Transaction Submitted - SEIZING` with a `View Tx` link.
-10. After confirmation, the modal updates to `SEIZED!` with the same
-    transaction link and can be closed.
+10. After receipt confirmation, the modal headline becomes `SEIZED!`, followed
+    by `Your mint is confirmed.` It shows the artwork, collection and card
+    number when available, minted quantity, and the full destination wallet
+    address under `Minted to`.
+11. Select `Done` to close the confirmation and return to the mint page, or
+    `View transaction` to open the transaction in a new browser tab. The close
+    control and Escape also dismiss the confirmation.
 
 ## Common Scenarios
 
@@ -89,6 +94,8 @@
 - Minting for another wallet:
   - `Mint for fren` enables recipient search by handle, ENS, or wallet.
   - Mint executes for the selected destination wallet.
+  - The success confirmation shows the destination wallet under `Minted to`,
+    so users can verify where the artwork was minted.
 - Minting to your own profile wallet:
   - `Mint for me` uses the connected profile as the recipient profile.
   - If the profile has multiple wallets, users can switch to a different
@@ -134,6 +141,11 @@
   `No allowlist spots in current phase for this address`.
 - If the minted asset description is short enough to fit in the preview, the
   expand/collapse button is not shown.
+- If the success confirmation cannot display the artwork image, it shows
+  a placeholder labelled `Artwork preview unavailable`. The mint remains confirmed and its quantity,
+  destination, and transaction link remain available.
+- The confirmation retains the artwork, quantity, and destination from the
+  submitted mint, even if the page's current mint details later change.
 - Once claim status is ended/finalized, mint-connect and mint-action controls
   no longer render for the finished phase window.
 - Mint action buttons become active at the exact phase start timestamp and stop
@@ -174,9 +186,13 @@
   wall-clock windows remain fixed.
 - Transaction success is shown after receipt confirmation, not immediately after
   wallet submission.
-- The transaction modal identifies the current card as
+- Before confirmation and for transaction errors, the modal identifies the card as
   `Mint: The Memes #{id}` when the on-chain claim provides a valid token ID;
   otherwise it keeps the generic `Mint The Memes` title.
+- The success confirmation uses `SEIZED!` as its title and places the card
+  identifier with the artwork details. If the artwork title is unavailable,
+  it uses `Minted artwork`; without a valid card number, the collection label
+  remains `The Memes`.
 - Debug diagnostics are only exposed when the `mintdebug=1` query parameter is
   set, and are intended for debugging support.
 
@@ -186,13 +202,16 @@
   `components/manifold-minting/ManifoldMintingWidget.tsx`, and the shared
   `components/common/OnchainTransactionModal.tsx` status surface.
 - Untranslated surface: the remaining mint controls, phase/eligibility copy,
-  inline validation, and shared modal controls and accessible names.
-- Current fallback behavior: mint transaction title and status messages resolve
-  through the canonical `en-US` message family. Supported non-source locales
-  fall back to `en-US`; the remaining widget and shared modal copy is still
-  English-only.
-- User impact: every supported locale retains a functional mint and recovery
-  flow, but untranslated controls and status details remain in English.
+  inline validation, and the shared modal's pending and error controls and
+  accessible names.
+- Current fallback behavior: success confirmation labels, actions, artwork
+  fallbacks, and close control support `en-US`, `en-GB`, `fr-FR`, `es-ES`, and
+  `de-DE`. `SEIZED!` and `The Memes` retain their brand wording in every locale.
+  Other mint transaction titles and status messages fall back to `en-US`; the
+  remaining widget and pending/error shared modal copy is still English-only.
+- User impact: every supported locale has a localized success confirmation and
+  a functional mint and recovery flow, but untranslated controls and pending
+  or error details remain in English.
 - Owner or follow-up issue: frontend minting localization backlog.
 - Expected remediation path: extract the remaining mint widget and shared
   on-chain modal copy into complete message families, add reviewed translations,

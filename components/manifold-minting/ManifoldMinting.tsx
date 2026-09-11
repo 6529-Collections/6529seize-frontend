@@ -385,6 +385,10 @@ export default function ManifoldMinting(props: Readonly<Props>) {
         claim={manifoldClaim}
         local_timezone={isLocalTimezone}
         hideConnect={props.standalone ?? false}
+        artwork={{
+          name: nftImage?.name ?? props.title,
+          imageUrl: nftImage?.image,
+        }}
         setFee={setFee}
         setMintForAddress={setMintForAddress}
       />
