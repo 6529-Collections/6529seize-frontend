@@ -140,7 +140,7 @@ function SourceReceipt({
       {fields.map((field) => (
         <div
           key={field.target_field}
-          className="tw-space-y-2 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-3"
+          className="tw-space-y-2 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-3"
         >
           <label className="tw-flex tw-items-center tw-gap-3 tw-text-sm">
             <input

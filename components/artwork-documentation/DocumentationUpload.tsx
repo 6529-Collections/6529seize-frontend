@@ -492,33 +492,35 @@ export default function DocumentationUpload({ context, controller }: Props) {
             </p>
             {asset.state === "ready" && (
               <>
-                <DocumentationButton
-                  secondary
-                  onClick={() => {
-                    void download(asset.id);
-                  }}
-                >
-                  {msg("download")}
-                </DocumentationButton>
-                {!context.asset_links.some(
-                  (link) => link.asset_id === asset.id
-                ) &&
-                  canUpload &&
-                  canPublishDocumentationAsset(context, asset.role) && (
-                    <DocumentationButton
-                      secondary
-                      onClick={() => {
-                        void attach(
-                          asset.id,
-                          asset.role,
-                          asset.intended_visibility,
-                          asset.filename
-                        );
-                      }}
-                    >
-                      {msg("add")}
-                    </DocumentationButton>
-                  )}
+                <div className="tw-flex tw-flex-wrap tw-gap-3">
+                  <DocumentationButton
+                    secondary
+                    onClick={() => {
+                      void download(asset.id);
+                    }}
+                  >
+                    {msg("download")}
+                  </DocumentationButton>
+                  {!context.asset_links.some(
+                    (link) => link.asset_id === asset.id
+                  ) &&
+                    canUpload &&
+                    canPublishDocumentationAsset(context, asset.role) && (
+                      <DocumentationButton
+                        secondary
+                        onClick={() => {
+                          void attach(
+                            asset.id,
+                            asset.role,
+                            asset.intended_visibility,
+                            asset.filename
+                          );
+                        }}
+                      >
+                        {msg("add")}
+                      </DocumentationButton>
+                    )}
+                </div>
                 <details className="tw-mt-3 tw-text-xs tw-text-iron-400">
                   <summary className="tw-cursor-pointer tw-py-2">
                     {msg("fileDetails")}
