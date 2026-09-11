@@ -33,6 +33,13 @@ current pages; those guides are not invented as historical snapshot routes.
 The EMMA record covers the five fixed collection shortcuts, Memes season
 selection, Intern JPG token IDs, and the manual contract path in Create Snapshots.
 
+The artwork-sharing record covers the `Share artwork` control on individual
+Meme, Gradient, and NextGen pages, canonical artwork links, copied captions,
+and feed, square, Story, and link-card PNG exports. It distinguishes link
+composers from file sharing, includes Instagram's save/share-and-paste flow,
+and explains preparation failures and device-dependent share destinations.
+It does not claim automatic posting or successful publication after a handoff.
+
 The profile website studio records cover 39 editable templates (23 original
 compositions and 16 credited Memes inspirations), page and menu editing, image
 uploads, indexed wallet galleries, and the profile header's published Website

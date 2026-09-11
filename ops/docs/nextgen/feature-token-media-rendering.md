@@ -33,7 +33,8 @@ Parent: [NextGen Index](README.md)
 3. Switch to high-res or `Live` when needed.
 4. In high-res mode, wait for the loading overlay, then zoom/drag.
 5. Use media actions: light viewer, dark viewer, `Download`, `Open in new tab`,
-   and `Fullscreen`.
+   and `Fullscreen`. Use `Share artwork` for link posts, copied captions, and
+   feed/Story image exports; see [Artwork Sharing](../media/nft/feature-artwork-sharing.md).
 6. Switch token views (`About`, `Provenance`, `Display Center`, `Rarity`).
 7. If your connected wallet owns the token, use transfer controls in `About`.
 8. Use previous/next token arrows when enabled.
@@ -59,6 +60,9 @@ Parent: [NextGen Index](README.md)
   treatment and explicit loading, error/retry, and no-entry states.
 - Download items show `Loading…` while checking source availability, then show
   a file size when available or `Coming Soon` when the output is missing.
+- Selecting an available resolution closes the menu and starts the download.
+  The toolbar download button shows a progress indicator and stays disabled
+  while the file downloads.
 - The on-chain fallback uses the same responsive token-page frame, artwork
   surface, and details styling as indexed tokens. It can progress from
   `Fetching token` to `Token not found`, or show available metadata while token
@@ -80,6 +84,8 @@ Parent: [NextGen Index](README.md)
 - High-res failures fall back to `/fallback-image.jpeg`.
 - Fullscreen failures stay in normal layout and show a browser alert.
 - If a resolution shows `Coming Soon`, pick another resolution.
+- If a selected download fails, an error appears below the artwork. Reopen the
+  download menu to try again or choose another available resolution.
 - There is no dedicated retry button for token-media fetches. Refresh or reopen
   the route to retry.
 
@@ -93,6 +99,7 @@ Parent: [NextGen Index](README.md)
 ## Related Pages
 
 - [NextGen Index](README.md)
+- [Artwork Sharing](../media/nft/feature-artwork-sharing.md)
 - [NextGen Collection Routes and Art Browser](feature-nextgen-collection-routes-and-art-browser.md)
 - [NextGen Collection Slideshow](feature-collection-slideshow.md)
 - [NextGen Collection and Token Media Flow](flow-nextgen-collection-and-token-media.md)

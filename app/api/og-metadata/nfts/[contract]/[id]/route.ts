@@ -7,12 +7,16 @@ import {
   getQueryImageUrl,
   getQueryText,
   OG_CACHE_CONTROL,
-  OG_IMAGE_SIZE,
 } from "@/app/api/og-metadata/_lib/routeUtils";
 import { getUsableText } from "@/app/api/og-metadata/_lib/imageUtils";
 import { loadMontserratFonts } from "@/app/api/og-metadata/profiles/[identity]/font";
+import {
+  NFT_SOCIAL_CARD_SIZES,
+  type NftSocialCardFormat,
+} from "@/components/providers/metadata";
 import { ImageResponse } from "next/og";
 import { NextResponse } from "next/server";
+import { prepareNftArtworkImage } from "./artwork";
 
 export const runtime = "edge";
 export const revalidate = 3600;
@@ -28,10 +32,12 @@ const getDefaultTitle = ({
 const getNftCardModel = ({
   contract,
   id,
+  format,
   request,
 }: {
   readonly contract: string;
   readonly id: string;
+  readonly format: NftSocialCardFormat;
   readonly request: Request;
 }): BrandedNftOgImageModel => {
   const searchParams = new URL(request.url).searchParams;
@@ -45,6 +51,7 @@ const getNftCardModel = ({
     collection,
     contract,
     displayId: getQueryText(searchParams, "displayId"),
+    format,
     id,
     imageUrl: getQueryImageUrl(searchParams, "image"),
     origin: getOgImageRequestOrigin(request),
@@ -75,18 +82,37 @@ export async function GET(
     );
   }
 
+  const requestedFormat = new URL(request.url).searchParams.get("format");
+  const format = requestedFormat ?? "landscape";
+  if (!Object.hasOwn(NFT_SOCIAL_CARD_SIZES, format)) {
+    return NextResponse.json(
+      {
+        error:
+          "Invalid artwork format. Use landscape, square, portrait, or story.",
+      },
+      { status: 400 }
+    );
+  }
+  const cardFormat = format as NftSocialCardFormat;
+
   try {
+    const model = getNftCardModel({
+      contract: normalizedContract,
+      id: normalizedId,
+      format: cardFormat,
+      request,
+    });
+    // Satori swallows remote image failures. Explicit downloads must have art
+    // ready before rendering; ordinary crawler previews retain their fallback.
+    const imageDataUrl =
+      requestedFormat === null
+        ? undefined
+        : await prepareNftArtworkImage(model, request.signal);
     const montserratFonts = await loadMontserratFonts();
     return new ImageResponse(
-      renderBrandedNftOgImage(
-        getNftCardModel({
-          contract: normalizedContract,
-          id: normalizedId,
-          request,
-        })
-      ),
+      renderBrandedNftOgImage({ ...model, imageDataUrl }),
       {
-        ...OG_IMAGE_SIZE,
+        ...NFT_SOCIAL_CARD_SIZES[cardFormat],
         fonts: montserratFonts,
         headers: {
           "Cache-Control": OG_CACHE_CONTROL,

@@ -9,6 +9,15 @@ export const DEFAULT_OG_IMAGE_PATH = "/6529io.png";
 export const DEFAULT_TWITTER_CARD = "summary" as const;
 export const LARGE_IMAGE_TWITTER_CARD = "summary_large_image" as const;
 
+export const NFT_SOCIAL_CARD_SIZES = {
+  landscape: { width: 1200, height: 630 },
+  square: { width: 1080, height: 1080 },
+  portrait: { width: 1080, height: 1350 },
+  story: { width: 1080, height: 1920 },
+} as const;
+
+export type NftSocialCardFormat = keyof typeof NFT_SOCIAL_CARD_SIZES;
+
 type OgImageDescriptor = {
   readonly url: string;
   readonly width: number;
@@ -95,6 +104,7 @@ export function getNftSocialCardImagePath({
   collection,
   contract,
   displayId,
+  format,
   id,
   image,
   subtitle,
@@ -105,6 +115,7 @@ export function getNftSocialCardImagePath({
   readonly collection?: SocialCardQueryValue;
   readonly contract: string;
   readonly displayId?: SocialCardQueryValue;
+  readonly format?: NftSocialCardFormat | undefined;
   readonly id: string | number;
   readonly image?: SocialCardQueryValue;
   readonly subtitle?: SocialCardQueryValue;
@@ -119,6 +130,7 @@ export function getNftSocialCardImagePath({
       badge,
       collection,
       displayId,
+      format,
       image,
       subtitle,
       title,
