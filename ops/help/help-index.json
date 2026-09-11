@@ -5711,6 +5711,7 @@
       "keywords": ["waves", "composer", "markdown", "code", "blank", "format"],
       "facts": [
         "Wave composer docs cover markdown code blocks and blank-line preservation.",
+        "Type ~hi~ or ~~hi~~ for strikethrough. Both forms show struck-through text in the composer and when editing, matching the posted message.",
         "Use markdown records when users ask how to format a drop.",
         "Markdown behavior belongs to composer content, not the wave creation form."
       ],
@@ -5718,6 +5719,7 @@
       "related_paths": ["/waves"],
       "tags": ["waves", "composer", "markdown"],
       "source_refs": [
+        "ops/docs/waves/composer/README.md",
         "ops/docs/waves/composer/feature-markdown-code-blocks.md",
         "ops/docs/waves/composer/feature-markdown-blank-line-preservation.md"
       ]

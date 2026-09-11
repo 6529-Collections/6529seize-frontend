@@ -38,6 +38,11 @@ Use this area when you need behavior for:
 
 ### Mentions and Markdown
 
+Type `~hi~` or `~~hi~~` for strikethrough. Completing the closing tilde or pair
+of tildes replaces the markers with visibly struck-through text in the composer,
+matching the posted message. Both forms also display as strikethrough when
+reopening a message for editing.
+
 - [Wave Mentions](feature-wave-mentions.md)
 - [Global Mentions](feature-global-mentions.md)
 - [Quick Tags](feature-personal-mention-shortcuts.md)
