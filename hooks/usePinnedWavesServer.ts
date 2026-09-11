@@ -308,10 +308,11 @@ async function optimisticallyPinWave(
   queryClient: QueryClient,
   queryKey: PinnedWavesQueryKey,
   waveId: string,
-  viewerIdentityKey: string | null
+  viewerIdentityKey: string | null,
+  primaryProfileId: string | null
 ): Promise<MutationContext> {
   await queryClient.cancelQueries({ queryKey });
-  assertCurrentPinViewer(viewerIdentityKey);
+  assertCurrentPinViewer(viewerIdentityKey, primaryProfileId);
 
   const previousPinnedWaves = queryClient.getQueryData<SidebarWave[]>(queryKey);
   const waveToPin = findWaveForOptimisticPin(queryClient, waveId);
@@ -332,10 +333,11 @@ async function optimisticallyUnpinWave(
   queryClient: QueryClient,
   queryKey: PinnedWavesQueryKey,
   waveId: string,
-  viewerIdentityKey: string | null
+  viewerIdentityKey: string | null,
+  primaryProfileId: string | null
 ): Promise<MutationContext> {
   await queryClient.cancelQueries({ queryKey });
-  assertCurrentPinViewer(viewerIdentityKey);
+  assertCurrentPinViewer(viewerIdentityKey, primaryProfileId);
 
   const previousPinnedWaves = queryClient.getQueryData<SidebarWave[]>(queryKey);
 
@@ -359,7 +361,10 @@ function restorePinnedWaves(
   }
 }
 
-function isCurrentPinViewer(viewerIdentityKey: string | null): boolean {
+function isCurrentPinViewer(
+  viewerIdentityKey: string | null,
+  primaryProfileId: string | null
+): boolean {
   const address = getWalletAddress();
   const jwt = getAuthJwt();
   if (
@@ -370,15 +375,20 @@ function isCurrentPinViewer(viewerIdentityKey: string | null): boolean {
     return false;
   }
   try {
-    // Match AuthProvider's effective role; saved role metadata can be stale.
-    return !getRole(jwt);
+    // Normal logins carry the owner's profile ID as role; other IDs are proxies.
+    // Older tokens may omit role. Saved role metadata can be stale.
+    const role = getRole(jwt);
+    return !role || role === primaryProfileId;
   } catch {
     return false;
   }
 }
 
-function assertCurrentPinViewer(viewerIdentityKey: string | null): void {
-  if (!isCurrentPinViewer(viewerIdentityKey)) {
+function assertCurrentPinViewer(
+  viewerIdentityKey: string | null,
+  primaryProfileId: string | null
+): void {
+  if (!isCurrentPinViewer(viewerIdentityKey, primaryProfileId)) {
     throw new Error(
       t(DEFAULT_LOCALE, "waves.sidebar.pinControl.viewerChanged")
     );
@@ -388,7 +398,8 @@ function assertCurrentPinViewer(viewerIdentityKey: string | null): void {
 function usePinnedWaveMutations(
   queryClient: QueryClient,
   pinnedWavesQueryKey: PinnedWavesQueryKey,
-  viewerIdentityKey: string | null
+  viewerIdentityKey: string | null,
+  primaryProfileId: string | null
 ) {
   const invalidateWavesQueries = useInvalidateWavesQueries(
     queryClient,
@@ -398,7 +409,7 @@ function usePinnedWaveMutations(
 
   const pinMutation = useMutation<void, Error, string, MutationContext>({
     mutationFn: (waveId) => {
-      assertCurrentPinViewer(viewerIdentityKey);
+      assertCurrentPinViewer(viewerIdentityKey, primaryProfileId);
       return pinnedWavesApi.pinWave(waveId);
     },
     onMutate: (waveId: string) =>
@@ -406,7 +417,8 @@ function usePinnedWaveMutations(
         queryClient,
         pinnedWavesQueryKey,
         waveId,
-        viewerIdentityKey
+        viewerIdentityKey,
+        primaryProfileId
       ),
     onError: (err, _, context) => {
       restorePinnedWaves(queryClient, pinnedWavesQueryKey, context);
@@ -417,7 +429,7 @@ function usePinnedWaveMutations(
 
   const unpinMutation = useMutation<void, Error, string, MutationContext>({
     mutationFn: (waveId) => {
-      assertCurrentPinViewer(viewerIdentityKey);
+      assertCurrentPinViewer(viewerIdentityKey, primaryProfileId);
       return pinnedWavesApi.unpinWave(waveId);
     },
     onMutate: (waveId: string) =>
@@ -425,7 +437,8 @@ function usePinnedWaveMutations(
         queryClient,
         pinnedWavesQueryKey,
         waveId,
-        viewerIdentityKey
+        viewerIdentityKey,
+        primaryProfileId
       ),
     onError: (err, _, context) => {
       restorePinnedWaves(queryClient, pinnedWavesQueryKey, context);
@@ -461,6 +474,7 @@ export function usePinnedWavesServer(
   const hasAuthenticatedProfile =
     !!connectedProfile?.handle && !activeProfileProxy && hasAuthContextProfile;
   const activeProfileProxyId = activeProfileProxy?.id ?? null;
+  const primaryProfileId = connectedProfile?.id ?? null;
   const isPendingAuthSwitch = Boolean(
     address && (!hasValidWalletAuthorization || fetchingProfile)
   );
@@ -509,7 +523,8 @@ export function usePinnedWavesServer(
   const { pinMutation, unpinMutation } = usePinnedWaveMutations(
     queryClient,
     pinnedWavesQueryKey,
-    viewerIdentityKey
+    viewerIdentityKey,
+    primaryProfileId
   );
 
   const pinWave = useCallback(
@@ -529,13 +544,13 @@ export function usePinnedWavesServer(
         if (!success) {
           return;
         }
-        assertCurrentPinViewer(viewerIdentityKey);
+        assertCurrentPinViewer(viewerIdentityKey, primaryProfileId);
         await pinMutation.mutateAsync(waveId);
       } finally {
         ongoingOperations.current.delete(waveId);
       }
     },
-    [canPinWave, pinMutation, requestAuth, viewerIdentityKey]
+    [canPinWave, pinMutation, requestAuth, viewerIdentityKey, primaryProfileId]
   );
 
   const unpinWave = useCallback(
@@ -551,13 +566,13 @@ export function usePinnedWavesServer(
         if (!success) {
           return;
         }
-        assertCurrentPinViewer(viewerIdentityKey);
+        assertCurrentPinViewer(viewerIdentityKey, primaryProfileId);
         await unpinMutation.mutateAsync(waveId);
       } finally {
         ongoingOperations.current.delete(waveId);
       }
     },
-    [unpinMutation, requestAuth, viewerIdentityKey]
+    [unpinMutation, requestAuth, viewerIdentityKey, primaryProfileId]
   );
 
   return {
