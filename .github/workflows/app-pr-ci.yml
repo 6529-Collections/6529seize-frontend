@@ -569,6 +569,12 @@ jobs:
         if: matrix.lane == 'quality' && needs.plan.outputs.test_typecheck_required == 'true'
         run: ./bin/6529 run typecheck:tests
 
+      # Filesystem reads are invisible to Jest's module dependency graph.
+      # Run path-selected contracts even for YAML/JSON-only or deleted inputs.
+      - name: Verify filesystem contracts
+        if: matrix.lane == 'quality'
+        run: ./bin/6529 exec node scripts/file-contract-tests.cjs --changed-from "$BASE_SHA"
+
       - name: Run related Jest tests
         if: matrix.lane == 'quality' && needs.plan.outputs.jest_changed_required == 'true'
         run: |
@@ -963,6 +969,7 @@ jobs:
                 "changed-typecheck",
                 "test-typecheck-or-plan-not-required",
                 "related-jest-selection",
+                "filesystem-contract-selection",
                 "production-build-or-plan-not-required",
                 "museum-release-selection"
               ] + (if $museum_browser_required then ["museum-browser-qualification"] else [] end))
