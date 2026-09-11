@@ -41,6 +41,7 @@ interface CollectPageViewProps {
   readonly profile: CollectProfileView | null;
   readonly plan: CollectPlanView | null;
   readonly goalContent?: ReactNode;
+  readonly showListings?: boolean;
   readonly onCollectionChange: (collection: CollectCollection) => void;
   readonly onIntentChange: (intent: CollectIntent) => void;
   readonly onConnect: () => void;
@@ -132,6 +133,8 @@ function Listings({
 export default function CollectPageView(props: CollectPageViewProps) {
   const locale = useBrowserLocale();
   const collectionLink = COLLECTIONS.find(({ id }) => id === props.collection);
+  const showListings =
+    props.showListings ?? (props.intent === "lowest" || props.intent === "tdh");
   const [planOpen, setPlanOpen] = useState(false);
   return (
     <div className="tailwind-scope tw-mx-auto tw-w-full tw-max-w-[1440px] tw-px-4 tw-pb-28 tw-pt-6 tw-text-iron-100 md:tw-px-6 lg:tw-px-8">
@@ -186,30 +189,7 @@ export default function CollectPageView(props: CollectPageViewProps) {
         locale={locale}
         onIntentChange={props.onIntentChange}
       />
-      {props.intent === "tdh" && (
-        <div className="tw-mb-6 tw-max-w-sm">
-          <label className="tw-space-y-2 tw-text-xs tw-font-semibold tw-text-iron-300">
-            <span>{t(locale, "collect.collections")}</span>
-            <select
-              value={props.collection}
-              onChange={(event) => {
-                const collection = COLLECTIONS.find(
-                  ({ id }) => id === event.target.value
-                );
-                if (collection) props.onCollectionChange(collection.id);
-              }}
-              className="tw-block tw-min-h-11 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-text-sm tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
-            >
-              {COLLECTIONS.map(({ id }) => (
-                <option key={id} value={id}>
-                  {t(locale, `collect.collection.${id}`)}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
-      )}
-      {props.intent === "lowest" && (
+      {(props.intent === "lowest" || props.intent === "tdh") && (
         <div
           role="group"
           aria-label={t(locale, "collect.collections")}
@@ -240,8 +220,15 @@ export default function CollectPageView(props: CollectPageViewProps) {
           {props.goalContent !== undefined && props.goalContent !== null && (
             <div className="tw-mb-6">{props.goalContent}</div>
           )}
-          {props.intent === "lowest" && (
-            <section aria-label={t(locale, "collect.navigation.lowest")}>
+          {showListings && (
+            <section
+              aria-label={t(
+                locale,
+                props.intent === "tdh"
+                  ? "collect.intent.tdh"
+                  : "collect.navigation.lowest"
+              )}
+            >
               <Listings
                 catalog={props.catalog}
                 locale={locale}

@@ -27,7 +27,7 @@ import { collectCatalogArtwork } from "./collect-catalog.adapters";
 import { collectCostPlanView } from "./collect-plan.adapters";
 import { collectCatalogEntryId, useCollectCatalog } from "./useCollectCatalog";
 import CollectGoalsController from "./CollectGoalsController";
-import CollectTdhController from "./CollectTdhController";
+import CollectTdhWorkspace from "./CollectTdhWorkspace";
 import CollectPlanBasket from "./CollectPlanBasket";
 import CollectPageView, { COLLECT_INTENTS } from "./CollectPageView";
 import CollectTradeController from "./CollectTradeController";
@@ -62,6 +62,7 @@ function CollectCatalogController({
     ) ?? "memes";
   const intent: CollectIntent =
     COLLECT_INTENTS.find((item) => item === params.get("intent")) ?? "full_set";
+  const tdhProjection = intent === "tdh" && params.get("view") === "projection";
   const explicitDefinition = params.get("definition");
   let fullSetDefinition = collection === "gradients" ? "gradients" : "memes";
   if (explicitDefinition === "memes" || explicitDefinition === "gradients")
@@ -100,13 +101,12 @@ function CollectCatalogController({
     queryKey: [QueryKey.COLLECT_CATALOG],
     queryFn: ({ signal }) => fetchCollectCatalog(signal),
     staleTime: 60_000,
-    enabled: intent !== "tdh",
   });
   const capabilities = useQuery({
     queryKey: [QueryKey.COLLECT_CAPABILITIES],
     queryFn: ({ signal }) => fetchCollectCapabilities(signal),
     staleTime: 15_000,
-    enabled: intent === "lowest",
+    enabled: intent === "lowest" || intent === "tdh",
   });
   const discovery = useCollectCatalog(collection, intent);
   const plan =
@@ -166,6 +166,7 @@ function CollectCatalogController({
     const patch: Record<string, string> = {
       intent: value,
       definition: "",
+      view: "",
     };
     if (
       ["season", "full_set", "artist", "pebbles_set", "tdh"].includes(value)
@@ -212,9 +213,14 @@ function CollectCatalogController({
     );
   else if (intent === "tdh")
     goalContent = (
-      <CollectTdhController
+      <CollectTdhWorkspace
         collection={collection}
         profile={connectedProfile}
+        snapshot={discovery.tdhSnapshot}
+        projection={tdhProjection}
+        onToggleProjection={() =>
+          updateQuery({ view: tdhProjection ? "" : "projection" })
+        }
         onConnect={connect}
       />
     );
@@ -233,6 +239,9 @@ function CollectCatalogController({
         profile={profile}
         plan={plan}
         goalContent={goalContent}
+        showListings={
+          intent === "lowest" || (intent === "tdh" && !tdhProjection)
+        }
         onCollectionChange={changeCollection}
         onIntentChange={changeIntent}
         onConnect={connect}

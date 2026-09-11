@@ -73,7 +73,7 @@ jest.mock("@/components/collect/CollectGoalsController", () => ({
 }));
 jest.mock("@/components/collect/CollectTdhController", () => ({
   __esModule: true,
-  default: () => null,
+  default: () => <div data-testid="profile-tdh-projection" />,
 }));
 jest.mock("@/components/collect/CollectPlanBasket", () => ({
   __esModule: true,
@@ -174,7 +174,7 @@ it.each([
       pebbles: "Pebbles",
     };
     fireEvent.click(
-      screen.getByRole("option", { name: labels[after] ?? after, exact: true })
+      screen.getByRole("option", { name: labels[after] ?? after })
     );
     expect(mockReplace).toHaveBeenCalledWith(
       `/collect?collection=${after}&intent=${nextIntent}`,
@@ -197,7 +197,7 @@ it.each(["gradients", "pebbles"])(
   }
 );
 
-it("defaults to a set planner and links to the native artwork collections", () => {
+it("defaults to a set planner and links to its native artwork collection", () => {
   render(<CollectPageClient />);
   expect(screen.getByLabelText("Goal definition")).toHaveTextContent("memes");
   expect(
@@ -213,17 +213,9 @@ it("defaults to a set planner and links to the native artwork collections", () =
   expect(
     screen.queryByRole("group", { name: "Collections" })
   ).not.toBeInTheDocument();
-  expect(screen.getByRole("link", { name: "The Memes" })).toHaveAttribute(
+  expect(screen.getByRole("link", { name: "View The Memes" })).toHaveAttribute(
     "href",
     "/the-memes"
-  );
-  expect(screen.getByRole("link", { name: "Gradients" })).toHaveAttribute(
-    "href",
-    "/6529-gradient"
-  );
-  expect(screen.getByRole("link", { name: "Pebbles" })).toHaveAttribute(
-    "href",
-    "/nextgen/collection/pebbles"
   );
 });
 
@@ -250,9 +242,13 @@ it("shows collection choice and recoverable listing errors only in lowest mode",
 it("starts a fresh TDH visit with The Memes", () => {
   mockSearchParams = new URLSearchParams("intent=tdh");
   render(<CollectPageClient />);
-  expect(screen.getByRole("combobox", { name: "Collections" })).toHaveValue(
-    "memes"
-  );
+  expect(
+    screen.getByRole("button", { name: "The Memes", pressed: true })
+  ).toBeVisible();
+  expect(screen.getByRole("region", { name: "Lowest cost TDH" })).toBeVisible();
+  expect(
+    screen.queryByTestId("profile-tdh-projection")
+  ).not.toBeInTheDocument();
   expect(mockReplace).not.toHaveBeenCalled();
 });
 
@@ -275,12 +271,10 @@ it("preserves explicit TDH collection links and subsequent user selections", () 
     screen.queryByRole("region", { name: "Lowest listings" })
   ).not.toBeInTheDocument();
   expect(screen.queryByRole("searchbox")).not.toBeInTheDocument();
-  expect(screen.getByRole("combobox", { name: "Collections" })).toHaveValue(
-    "gradients"
-  );
-  fireEvent.change(screen.getByRole("combobox", { name: "Collections" }), {
-    target: { value: "pebbles" },
-  });
+  expect(
+    screen.getByRole("button", { name: "Gradients", pressed: true })
+  ).toBeVisible();
+  fireEvent.click(screen.getByRole("button", { name: "Pebbles" }));
   expect(mockReplace).toHaveBeenCalledWith(
     "/collect?intent=tdh&collection=pebbles",
     { scroll: false }
@@ -289,8 +283,36 @@ it("preserves explicit TDH collection links and subsequent user selections", () 
   mockReplace.mockClear();
   mockSearchParams = new URLSearchParams("intent=tdh&collection=pebbles");
   rerender(<CollectPageClient />);
-  expect(screen.getByRole("combobox", { name: "Collections" })).toHaveValue(
-    "pebbles"
+  expect(
+    screen.getByRole("button", { name: "Pebbles", pressed: true })
+  ).toBeVisible();
+  expect(screen.getByRole("link", { name: "View Pebbles" })).toHaveAttribute(
+    "href",
+    "/nextgen/collection/pebbles"
   );
   expect(mockReplace).not.toHaveBeenCalled();
+});
+
+it("keeps time-based profile projection separate from the immediate TDH listings", () => {
+  mockSearchParams = new URLSearchParams("intent=tdh&collection=memes");
+  const { rerender } = render(<CollectPageClient />);
+  fireEvent.click(screen.getByRole("button", { name: "Project profile TDH" }));
+  expect(mockReplace).toHaveBeenLastCalledWith(
+    "/collect?intent=tdh&collection=memes&view=projection",
+    { scroll: false }
+  );
+
+  mockSearchParams = new URLSearchParams(
+    "intent=tdh&collection=memes&view=projection"
+  );
+  rerender(<CollectPageClient />);
+  expect(screen.getByTestId("profile-tdh-projection")).toBeVisible();
+  expect(
+    screen.queryByRole("region", { name: "Lowest cost TDH" })
+  ).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: "Back to TDH listings" }));
+  expect(mockReplace).toHaveBeenLastCalledWith(
+    "/collect?intent=tdh&collection=memes",
+    { scroll: false }
+  );
 });

@@ -145,6 +145,7 @@ it("cannot replace a changed destination with an earlier in-flight plan response
   mount(onPlan);
   fireEvent.click(screen.getByRole("button", { name: "Preview plan" }));
   await waitFor(() => expect(mockAdvance).toHaveBeenCalled());
+  fireEvent.click(screen.getByRole("button", { name: "Change" }));
   fireEvent.change(screen.getByLabelText("Delivery address"), {
     target: { value: "0x2222222222222222222222222222222222222222" },
   });

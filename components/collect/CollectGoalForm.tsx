@@ -37,6 +37,12 @@ export default function CollectGoalForm(props: CollectGoalFormProps) {
   const [invalidField, setInvalidField] =
     useState<ReturnType<typeof validateCollectGoal>>(null);
   const { draft } = props;
+  const title = t(
+    locale,
+    draft.intent === "tdh"
+      ? "collect.tdh.projectionTitle"
+      : `collect.intent.${draft.intent}`
+  );
   const showQuantity = ["season", "full_set", "artist"].includes(draft.intent);
   const needsDefinition = draft.intent !== "tdh";
   const showDefinition =
@@ -71,7 +77,7 @@ export default function CollectGoalForm(props: CollectGoalFormProps) {
   };
   return (
     <form
-      aria-label={t(locale, `collect.intent.${draft.intent}`)}
+      aria-label={title}
       onSubmit={(event) => {
         event.preventDefault();
         const invalid = validateCollectGoal(draft, props.showBudget !== false);
@@ -89,7 +95,7 @@ export default function CollectGoalForm(props: CollectGoalFormProps) {
         />
       ) : (
         <h2 className="tw-mb-4 tw-mt-0 tw-text-lg tw-font-semibold tw-text-iron-100">
-          {t(locale, `collect.intent.${draft.intent}`)}
+          {title}
         </h2>
       )}
       <div className={`tw-grid tw-gap-4 ${gridClass}`}>
