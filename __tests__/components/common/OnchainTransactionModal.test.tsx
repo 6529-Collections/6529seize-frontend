@@ -142,6 +142,46 @@ describe("OnchainTransactionModal", () => {
     expect(transactionLink).toHaveFocus();
   });
 
+  it.each([false, true])(
+    "preserves the default success message and transaction link for boolean content (%s)",
+    (successContent) => {
+      render(
+        <OnchainTransactionModal
+          status="success"
+          title="Onchain action"
+          successContent={successContent}
+          transactionLink="https://explorer.example/tx/0xabc"
+          onClose={jest.fn()}
+        />
+      );
+
+      expect(screen.getByText(DEFAULT_MESSAGES.success)).toBeInTheDocument();
+      expect(screen.getByRole("link", { name: "View Tx" })).toHaveAttribute(
+        "href",
+        "https://explorer.example/tx/0xabc"
+      );
+    }
+  );
+
+  it.each(["Custom receipt", 0])(
+    "preserves renderable primitive custom success content (%s)",
+    (successContent) => {
+      render(
+        <OnchainTransactionModal
+          status="success"
+          title="Onchain action"
+          successContent={successContent}
+          onClose={jest.fn()}
+        />
+      );
+
+      expect(screen.getByText(String(successContent))).toBeInTheDocument();
+      expect(
+        screen.queryByText(DEFAULT_MESSAGES.success)
+      ).not.toBeInTheDocument();
+    }
+  );
+
   it("preserves deliberate line breaks in the title", () => {
     render(
       <OnchainTransactionModal

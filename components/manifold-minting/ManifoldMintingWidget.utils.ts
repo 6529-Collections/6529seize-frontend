@@ -35,7 +35,8 @@ export function createMintReceipt({
           })
         : t(locale, "theMemes.mint.transaction.collection");
   }
-  const artworkName = artwork?.name.trim();
+  const artworkName =
+    typeof artwork?.name === "string" ? artwork.name.trim() : undefined;
   const hasArtworkName = artworkName !== undefined && artworkName.length > 0;
   return {
     quantity,
@@ -44,7 +45,10 @@ export function createMintReceipt({
       ? artworkName
       : (collectionLabel ??
         t(locale, "theMemes.mint.transaction.genericArtwork")),
-    imageUrl: artwork?.imageUrl,
+    imageUrl:
+      typeof artwork?.imageUrl === "string"
+        ? artwork.imageUrl.trim()
+        : undefined,
     collectionLabel: hasArtworkName ? collectionLabel : undefined,
   };
 }

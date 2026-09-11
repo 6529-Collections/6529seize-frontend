@@ -197,6 +197,18 @@ function ModalStatusContent({
   );
 }
 
+function hasCustomSuccessContent(
+  status: OnchainTransactionModalStatus,
+  content: ReactNode
+): boolean {
+  return (
+    status === "success" &&
+    content !== undefined &&
+    content !== null &&
+    typeof content !== "boolean"
+  );
+}
+
 export default function OnchainTransactionModal({
   status,
   title,
@@ -214,10 +226,7 @@ export default function OnchainTransactionModal({
   const dialogRef = useRef<HTMLDialogElement>(null);
   const closable = status === "success" || status === "error";
   const hasSubtitle = subtitle !== undefined && subtitle !== null;
-  const hasSuccessContent =
-    status === "success" &&
-    successContent !== undefined &&
-    successContent !== null;
+  const hasSuccessContent = hasCustomSuccessContent(status, successContent);
 
   useEffect(() => {
     if (typeof document === "undefined") {
