@@ -124,5 +124,4 @@ RPC URLs. Use the installed app's confirmation text before a recovery action.
 - [Desktop index](README.md)
 - [Get started](flow-getting-started.md)
 - [Workers and TDH](feature-workers-and-tdh.md)
-- [Sync and recovery](troubleshooting-sync-and-recovery.md)
 - [Wallets, IPFS, and About](feature-wallets-ipfs-and-about.md)
