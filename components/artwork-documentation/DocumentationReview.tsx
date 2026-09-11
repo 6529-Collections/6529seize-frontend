@@ -35,7 +35,6 @@ import {
   DocumentationButton,
   DocumentationNotice,
   inputClass,
-  panelClass,
   useDocumentationMessages,
 } from "./DocumentationControls";
 
@@ -201,7 +200,7 @@ export default function DocumentationReview({
             </p>
             {mutationCapabilities(context).confirm_as_artist && (
               <>
-                <label className="tw-flex tw-items-start tw-gap-3 tw-text-base tw-leading-7 tw-text-iron-200">
+                <label className="tw-flex tw-min-h-11 tw-cursor-pointer tw-items-start tw-gap-3 tw-text-base tw-leading-7 tw-text-iron-200">
                   <input
                     type="checkbox"
                     className="tw-mt-1 tw-h-5 tw-w-5 tw-shrink-0 tw-accent-primary-400"
@@ -292,7 +291,7 @@ function DocumentationLaneReviews({
     }
   };
   return (
-    <section className={`${panelClass} tw-space-y-4`}>
+    <section className="tw-space-y-6 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-py-10">
       <p className="tw-text-sm tw-text-iron-400">{msg("reviewScope")}</p>
       {error && <DocumentationNotice error>{msg("error")}</DocumentationNotice>}
       {context.profile.review_lanes.map((lane) => {
@@ -301,11 +300,8 @@ function DocumentationLaneReviews({
           (item) => String(item.lane) === String(lane)
         );
         return (
-          <div
-            key={lane}
-            className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-pb-4"
-          >
-            <h3 className="tw-text-base tw-font-semibold">
+          <div key={lane} className="tw-space-y-3 tw-pb-4">
+            <h3 className="tw-m-0 tw-text-base tw-font-medium">
               {msg(`lane.${lane}`)}
             </h3>
             <p className="tw-text-sm tw-text-iron-300">
