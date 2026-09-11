@@ -3,6 +3,7 @@ jest.mock("@/config/env", () => ({
 }));
 
 import { prepareNftArtworkImage } from "@/app/api/og-metadata/nfts/[contract]/[id]/artwork";
+import sharp from "sharp";
 
 const png = Uint8Array.from(
   Buffer.from(
@@ -67,6 +68,29 @@ describe("NFT export artwork preparation", () => {
     expect(new URL(mockFetch.mock.calls[0][0]).searchParams.get("url")).toBe(
       "https://6529.test/art.png"
     );
+  });
+
+  it("encodes a multi-megabyte PNG without losing any bytes", async () => {
+    const largePng = Uint8Array.from(
+      await sharp({
+        create: {
+          width: 1024,
+          height: 1024,
+          channels: 3,
+          background: "#123456",
+        },
+      })
+        .png({ compressionLevel: 0 })
+        .toBuffer()
+    );
+    expect(largePng.byteLength).toBeGreaterThan(2 * 1024 * 1024);
+    mockFetch.mockResolvedValue(imageResponse(largePng));
+    const dataUrl = await prepareNftArtworkImage(model);
+    const prefix = "data:image/png;base64,";
+    expect(dataUrl.startsWith(prefix)).toBe(true);
+    expect(
+      Buffer.from(dataUrl.slice(prefix.length), "base64").equals(largePng)
+    ).toBe(true);
   });
 
   it.each([
@@ -141,6 +165,18 @@ describe("NFT export artwork preparation", () => {
     expect(response.reader.cancel).toHaveBeenCalledTimes(1);
     expect(response.reader.releaseLock).toHaveBeenCalledTimes(1);
   });
+
+  it.each(["abc", "-1", "1.5", "", "Infinity"])(
+    "rejects malformed content length %s before reading its body",
+    async (contentLength) => {
+      const response = imageResponse(png, { "content-length": contentLength });
+      mockFetch.mockResolvedValue(response);
+      await expect(prepareNftArtworkImage(model)).rejects.toThrow(
+        "invalid content length"
+      );
+      expect(response.reader.read).not.toHaveBeenCalled();
+    }
+  );
 
   it("aborts pending fetches when the caller cancels", async () => {
     mockFetch.mockImplementation(

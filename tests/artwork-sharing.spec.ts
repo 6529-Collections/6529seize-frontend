@@ -84,6 +84,7 @@ test.describe("Individual artwork sharing @readonly @surface", () => {
       page,
     }, testInfo) => {
       test.setTimeout(180000);
+      // Native projects open a device share sheet; component tests cover that File handoff.
       test.skip(
         !testInfo.project.name.startsWith("web-"),
         "Browser downloads use the web flow; native sharesheets need device verification."

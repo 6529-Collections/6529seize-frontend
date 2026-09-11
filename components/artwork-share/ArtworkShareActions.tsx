@@ -61,13 +61,10 @@ function CopyButton({
           caption ? "artworkShare.copyCaption" : "artworkShare.copyLink"
         )}
       </Button>
-      <p
-        role="status"
-        className="tw-mb-0 tw-mt-1 tw-min-h-5 tw-text-xs tw-text-iron-300"
-      >
+      <output className="tw-mb-0 tw-mt-1 tw-block tw-min-h-5 tw-text-xs tw-text-iron-300">
         {status === "copied" && t(locale, "artworkShare.copied")}
         {status === "error" && t(locale, "artworkShare.copyError")}
-      </p>
+      </output>
     </div>
   );
 }

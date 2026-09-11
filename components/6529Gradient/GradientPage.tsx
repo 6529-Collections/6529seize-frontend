@@ -16,7 +16,7 @@ import { TransferSingleActions } from "@/components/nft-transfer/TransferSingle"
 import ProfileCollectedReturnLink from "@/components/user/collected/ProfileCollectedReturnLink";
 import ArtistProfileHandle from "@/components/the-memes/ArtistProfileHandle";
 import { MemePageArtViewer } from "@/components/the-memes/MemePageArtViewer";
-import ArtworkShareButton from "@/components/artwork-share/ArtworkShareButton";
+import NftArtworkShareButton from "@/components/artwork-share/NftArtworkShareButton";
 import {
   MemePageNavigationSkeleton,
   MemePageSkeleton,
@@ -595,16 +595,10 @@ export default function GradientPageComponent({
             <div className="tw-mb-6 tw-grid tw-grid-cols-1 tw-gap-x-10 lg:tw-grid-cols-[minmax(0,11fr)_minmax(0,9fr)] xl:tw-gap-x-16">
               <div className="tw-relative lg:tw-flex lg:tw-flex-col lg:tw-self-stretch">
                 <div className="tw-mb-3 tw-flex tw-justify-end">
-                  <ArtworkShareButton
+                  <NftArtworkShareButton
+                    nft={nft}
+                    kind="gradient"
                     locale={locale}
-                    artwork={{
-                      kind: "gradient",
-                      tokenId: nft.id,
-                      title: nft.name,
-                      artist: nft.artist,
-                      collection: "6529 Gradient",
-                      imageUrl: nft.scaled || nft.image || nft.thumbnail,
-                    }}
                   />
                 </div>
                 <div className="tw-relative tw-flex tw-min-w-0 tw-items-center tw-pb-5 tw-pt-2 lg:tw-flex-1">

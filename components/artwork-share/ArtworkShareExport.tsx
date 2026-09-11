@@ -120,12 +120,9 @@ export default function ArtworkShareExport({
           />
         )}
         {state.status === "loading" && (
-          <p
-            role="status"
-            className="tw-m-0 tw-p-5 tw-text-center tw-text-sm tw-text-iron-300"
-          >
+          <output className="tw-m-0 tw-block tw-p-5 tw-text-center tw-text-sm tw-text-iron-300">
             {t(locale, "artworkShare.preparing")}
-          </p>
+          </output>
         )}
         {state.status === "error" && (
           <div className="tw-flex tw-flex-col tw-items-center tw-gap-3 tw-p-5">

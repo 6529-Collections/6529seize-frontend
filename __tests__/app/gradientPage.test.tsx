@@ -124,6 +124,9 @@ describe("generateMetadata", () => {
       params: Promise.resolve({ id: "40" }),
     });
     const [image] = metadata.openGraph?.images as { url: string }[];
+    if (!image) {
+      throw new Error("Expected a social image.");
+    }
     expect(new URL(image.url).searchParams.get("image")).toBe(
       "https://example.com/scaled.png"
     );

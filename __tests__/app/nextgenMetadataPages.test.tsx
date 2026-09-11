@@ -138,6 +138,9 @@ const getSocialImage = (metadata: Metadata) => {
     url: string;
     width: number;
   }[];
+  if (!image) {
+    throw new Error("Expected a social image.");
+  }
   return image;
 };
 

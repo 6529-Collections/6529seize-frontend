@@ -9,7 +9,11 @@ const PNG_SIGNATURE = [137, 80, 78, 71, 13, 10, 26, 10];
 const PNG_END = [0, 0, 0, 0, 73, 69, 78, 68, 174, 66, 96, 130];
 
 const readBoundedBody = async (response: Response): Promise<Uint8Array> => {
-  const declaredLength = Number(response.headers.get("content-length"));
+  const lengthHeader = response.headers.get("content-length");
+  if (lengthHeader !== null && !/^\d+$/.test(lengthHeader)) {
+    throw new Error("Artwork image has an invalid content length.");
+  }
+  const declaredLength = lengthHeader === null ? 0 : Number(lengthHeader);
   if (declaredLength > MAX_BYTES || response.body === null) {
     throw new Error("Artwork image exceeds the export limit or is empty.");
   }
@@ -64,9 +68,9 @@ const validatePng = (bytes: Uint8Array): void => {
 
 const toDataUrl = (bytes: Uint8Array): string => {
   const chunks: string[] = [];
-  for (let offset = 0; offset < bytes.length; offset += 32_768) {
+  for (let offset = 0; offset < bytes.length; offset += 8_192) {
     chunks.push(
-      String.fromCharCode(...bytes.subarray(offset, offset + 32_768))
+      String.fromCodePoint(...bytes.subarray(offset, offset + 8_192))
     );
   }
   return `data:image/png;base64,${btoa(chunks.join(""))}`;

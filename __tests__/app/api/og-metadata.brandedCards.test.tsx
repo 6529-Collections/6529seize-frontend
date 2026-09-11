@@ -57,7 +57,7 @@ type ElementRecord = {
   readonly childCount: number;
   readonly props: {
     readonly children?: React.ReactNode;
-    readonly style?: Record<string, unknown>;
+    readonly style?: React.CSSProperties;
   };
 };
 
@@ -83,8 +83,8 @@ const collectElementRecords = (node: React.ReactNode): ElementRecord[] => {
 };
 
 const getStyleNumber = (
-  style: Record<string, unknown>,
-  key: string
+  style: React.CSSProperties,
+  key: keyof React.CSSProperties
 ): number => {
   const value = style[key];
   if (typeof value !== "number") {
