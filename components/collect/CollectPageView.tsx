@@ -8,9 +8,7 @@ import type { SupportedLocale } from "@/i18n/locales";
 import Link from "next/link";
 import { useId, useState, type ReactNode } from "react";
 import CollectArtworkCard from "./CollectArtworkCard";
-import CollectGoalNavigation, {
-  getCollectIntentOptions,
-} from "./CollectGoalNavigation";
+import CollectGoalNavigation from "./CollectGoalNavigation";
 import CollectPlanPanel from "./CollectPlanPanel";
 import type {
   CollectCatalogView,
@@ -134,7 +132,6 @@ export default function CollectPageView(props: CollectPageViewProps) {
   const locale = useBrowserLocale();
   const browseLabelId = useId();
   const [planOpen, setPlanOpen] = useState(false);
-  const intentOptions = getCollectIntentOptions(props.intent);
   return (
     <div className="tailwind-scope tw-mx-auto tw-w-full tw-max-w-[1440px] tw-px-4 tw-pb-28 tw-pt-6 tw-text-iron-100 md:tw-px-6 lg:tw-px-8">
       <header className="tw-mb-7 tw-space-y-3">
@@ -189,50 +186,27 @@ export default function CollectPageView(props: CollectPageViewProps) {
         locale={locale}
         onIntentChange={props.onIntentChange}
       />
-      {(intentOptions.length > 0 || props.intent === "tdh") && (
+      {props.intent === "tdh" && (
         <div className="tw-mb-6 tw-max-w-sm">
-          {intentOptions.length > 0 && (
-            <label className="tw-space-y-2 tw-text-xs tw-font-semibold tw-text-iron-300">
-              <span>{t(locale, "collect.chooseGoal")}</span>
-              <select
-                value={props.intent}
-                onChange={(event) => {
-                  const intent = intentOptions.find(
-                    (value) => value === event.target.value
-                  );
-                  if (intent) props.onIntentChange(intent);
-                }}
-                className="tw-block tw-min-h-11 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-text-sm tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
-              >
-                {intentOptions.map((intent) => (
-                  <option key={intent} value={intent}>
-                    {t(locale, `collect.intent.${intent}`)}
-                  </option>
-                ))}
-              </select>
-            </label>
-          )}
-          {props.intent === "tdh" && (
-            <label className="tw-space-y-2 tw-text-xs tw-font-semibold tw-text-iron-300">
-              <span>{t(locale, "collect.collections")}</span>
-              <select
-                value={props.collection}
-                onChange={(event) => {
-                  const collection = COLLECTIONS.find(
-                    ({ id }) => id === event.target.value
-                  );
-                  if (collection) props.onCollectionChange(collection.id);
-                }}
-                className="tw-block tw-min-h-11 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-text-sm tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
-              >
-                {COLLECTIONS.map(({ id }) => (
-                  <option key={id} value={id}>
-                    {t(locale, `collect.collection.${id}`)}
-                  </option>
-                ))}
-              </select>
-            </label>
-          )}
+          <label className="tw-space-y-2 tw-text-xs tw-font-semibold tw-text-iron-300">
+            <span>{t(locale, "collect.collections")}</span>
+            <select
+              value={props.collection}
+              onChange={(event) => {
+                const collection = COLLECTIONS.find(
+                  ({ id }) => id === event.target.value
+                );
+                if (collection) props.onCollectionChange(collection.id);
+              }}
+              className="tw-block tw-min-h-11 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-text-sm tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+            >
+              {COLLECTIONS.map(({ id }) => (
+                <option key={id} value={id}>
+                  {t(locale, `collect.collection.${id}`)}
+                </option>
+              ))}
+            </select>
+          </label>
         </div>
       )}
       {props.intent === "lowest" && (

@@ -17,6 +17,7 @@ import { isAddress, parseEther, zeroAddress } from "viem";
 import { collectAnalysisRequest, collectGoalOptions } from "./collect.adapters";
 import type { CollectGoalDraft } from "./collect.types";
 import CollectGoalForm from "./CollectGoalForm";
+import type { CollectCompletionSelection } from "./CollectCompletionControls";
 import CollectRecipientPicker from "./CollectRecipientPicker";
 import { isPositiveEthAmount } from "./collect-form.validation";
 
@@ -32,6 +33,7 @@ export default function CollectGoalsController({
   onChange,
   onPlan,
   onConnect,
+  completion,
 }: {
   readonly draft: CollectGoalDraft;
   readonly catalog: ApiCollectCatalog | undefined;
@@ -39,6 +41,7 @@ export default function CollectGoalsController({
   readonly onChange: (draft: CollectGoalDraft) => void;
   readonly onPlan: (plan: ApiCollectPlan | null) => void;
   readonly onConnect: () => void;
+  readonly completion?: CollectCompletionSelection;
 }) {
   const locale = useBrowserLocale();
   const [recipient, setRecipient] = useState(profile?.primary_wallet ?? "");
@@ -122,6 +125,7 @@ export default function CollectGoalsController({
     <div className="tw-space-y-4">
       <CollectGoalForm
         draft={draft}
+        {...(completion ? { completion } : {})}
         definitions={collectGoalOptions(catalog, draft, locale)}
         profile={
           profile?.id
