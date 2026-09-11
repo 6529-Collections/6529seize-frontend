@@ -51,6 +51,12 @@ export function buildProfileCmsPath({
     (segment): segment is string => segment !== null
   );
   const isArchivePath = isProfileCmsIndexSegments(safeSegments);
+  if (
+    isArchivePath &&
+    safeSegments.length > 1 &&
+    isReservedCmsProfileSegment(safeSegments[0])
+  )
+    return null;
   if (!isArchivePath && !isReadableCmsSegments(safeSegments)) return null;
   const normalizedSegments = isArchivePath
     ? [...safeSegments.slice(0, -1), "index.html"]

@@ -314,6 +314,22 @@ describe("studio wallet gallery import", () => {
     ).toBe(true);
   });
 
+  it("returns an atomic failure for selected media with invalid dimensions", () => {
+    const base = document();
+    const before = JSON.stringify(base);
+    const asset = { ...SNAPSHOT.assets[0]!, width: 1200.5 };
+    const result = addCmsStudioWalletGallery(base, {
+      ...options(base),
+      snapshot: { ...SNAPSHOT, assets: [asset] },
+      selectedAssetIds: [asset.id],
+    });
+    expect(result).toEqual({
+      ok: false,
+      error: { code: "wallet.invalid_result" },
+    });
+    expect(JSON.stringify(base)).toBe(before);
+  });
+
   it("rejects empty, unavailable, duplicate, excluded and oversized selections atomically", () => {
     const base = document();
     const original = JSON.stringify(base);

@@ -58,6 +58,7 @@ export function addCmsStudioWalletGallery(
     ...(options.now ? { now: options.now } : {}),
   });
   const imported = remapFragment(fragment, current.profile.handle, namespace);
+  if (!imported) return failure("wallet.invalid_result");
   localizeFragment(
     imported,
     options,
@@ -233,7 +234,7 @@ function remapFragment(
   fragment: CmsPackageV1,
   handle: string,
   namespace: string
-): CmsPackageV1["payload"] {
+): CmsPackageV1["payload"] | null {
   const ids = new Set<string>();
   collectIds(fragment.payload.pages, ids);
   collectIds(fragment.payload.assets, ids);
@@ -259,7 +260,8 @@ function remapFragment(
     identifiers,
     paths
   );
-  return cmsPackageSchema.parse({ ...fragment, payload }).payload;
+  const parsed = cmsPackageSchema.safeParse({ ...fragment, payload });
+  return parsed.success ? parsed.data.payload : null;
 }
 
 function rewriteFragmentValue(

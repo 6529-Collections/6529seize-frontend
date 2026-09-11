@@ -227,6 +227,12 @@ async function checkPreviews(): Promise<void> {
     );
     assert.equal(hash(bytes), display.asset.content_hash);
     assert.equal(bytes.length, display.asset.file_size_bytes);
+    assert.equal(display.asset.alt_text, work.asset.alt_text);
+    assert.equal(
+      display.asset.rights,
+      `${work.asset.rights} Display derivative: frame 0, resized without cropping.`
+    );
+    assert.deepEqual(display.asset.roles, ["poster", "grid", "detail"]);
     assert.ok(bytes.length <= MAX_PREVIEW_BYTES);
     const metadata = await sharp(bytes).metadata();
     assert.equal(metadata.format, "webp");

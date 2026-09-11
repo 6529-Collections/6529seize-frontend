@@ -1,7 +1,7 @@
 import { assetSchema, type CmsAssetV1 } from "@/lib/profile-cms/protocol/v1";
 import manifest from "./meme-display-assets.json";
 
-export interface CmsStudioMemeDisplayAsset {
+interface CmsStudioMemeDisplayAsset {
   readonly cardId: number;
   readonly originalUri: string;
   readonly originalHash: string;

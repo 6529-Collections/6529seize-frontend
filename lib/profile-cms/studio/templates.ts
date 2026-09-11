@@ -19,12 +19,6 @@ import { ORGANIZATION_TEMPLATES } from "./templates-organizations";
 import { CMS_STUDIO_MEME_TEMPLATES } from "./templates-memes";
 import type { CmsStudioTemplate } from "./template-types";
 
-export type {
-  CmsStudioTemplate,
-  CmsStudioTemplateFamily,
-  CmsStudioTemplatePage,
-} from "./template-types";
-
 export const CMS_STUDIO_CORE_TEMPLATES: readonly CmsStudioTemplate[] = [
   ...PERSONAL_TEMPLATES,
   ...ART_TEMPLATES,

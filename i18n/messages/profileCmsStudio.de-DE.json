@@ -147,5 +147,7 @@
   "profileCms.studio.automaticSharingImage": "Automatisches Bild",
   "profileCms.studio.searchEngines": "Suchmaschinen dürfen diese Seite indexieren",
   "profileCms.studio.searchPublic": "Für Suchmaschinen ausgeblendete Seiten bleiben öffentlich.",
-  "profileCms.studio.pendingUpload": "Schließe den Bild-Upload ab oder brich ihn ab, bevor du speicherst, veröffentlichst oder diesen Bereich verlässt."
+  "profileCms.studio.pendingUpload": "Schließe den Bild-Upload ab oder brich ihn ab, bevor du speicherst, veröffentlichst oder diesen Bereich verlässt.",
+  "profileCms.studio.importedValueReadOnly": "Dieser importierte Wert kann hier nicht bearbeitet werden. Er bleibt erhalten; verwende Weitere Werkzeuge → JSON, um ihn zu bearbeiten.",
+  "profileCms.studio.viewImportedValue": "Importierten Wert anzeigen"
 }
