@@ -195,7 +195,12 @@ test("observed listings open a wallet-gated review through compact actions", asy
       firstArtwork
         .locator("img")
         .evaluateAll((images) =>
-          images.some((image) => image.complete && image.naturalWidth > 0)
+          images.some(
+            (image) =>
+              image instanceof HTMLImageElement &&
+              image.complete &&
+              image.naturalWidth > 0
+          )
         )
     )
     .toBe(true);
