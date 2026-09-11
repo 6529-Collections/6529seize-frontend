@@ -47,6 +47,6 @@ is recorded separately as an on-chain transaction.
 ## Related pages
 
 - [NFT Activity Browsing Flow](flow-nft-activity-browsing.md)
-- [Card Market Depth](../media/feature-card-market-depth.md)
+- [Listings and Offers](../media/feature-card-market-depth.md)
 - [Network Activity Feed](../network/feature-network-activity-feed.md)
 - [Docs Home](../README.md)

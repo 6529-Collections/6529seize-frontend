@@ -161,6 +161,7 @@ function RecipientSelectedDisplay({
           <button
             key={w.wallet}
             type="button"
+            aria-pressed={isSel}
             onClick={() => onWalletSelect(w.wallet)}
             className={[classes, "hover:tw-bg-iron-800"].join(" ")}
           >
@@ -254,6 +255,7 @@ function RecipientSearchDisplay({
   resultsAtEnd,
   searchInputRef,
   placeholder,
+  autoFocus,
   locale,
 }: {
   readonly query: string;
@@ -266,13 +268,14 @@ function RecipientSearchDisplay({
   readonly resultsAtEnd: boolean;
   readonly searchInputRef: React.RefObject<HTMLInputElement | null>;
   readonly placeholder?: string;
+  readonly autoFocus: boolean;
   readonly locale: SupportedLocale;
 }) {
   return (
     <>
       <div className="tw-relative">
         <input
-          autoFocus
+          autoFocus={autoFocus}
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
@@ -330,6 +333,9 @@ function RecipientSearchDisplay({
 interface RecipientSelectorProps {
   readonly open: boolean;
   readonly selectedProfile: CommunityMemberMinimal | null;
+  /** Confirmed identity for the selected profile, supplied by its owning flow. */
+  readonly resolvedIdentity?: ApiIdentity;
+  readonly autoFocusSearch?: boolean;
   readonly selectedWallet: string | null;
   readonly onProfileSelect: (profile: CommunityMemberMinimal | null) => void;
   readonly onWalletSelect: (wallet: string | null) => void;
@@ -345,6 +351,8 @@ interface RecipientSelectorProps {
 export default function RecipientSelector({
   open,
   selectedProfile,
+  resolvedIdentity,
+  autoFocusSearch = true,
   selectedWallet,
   onProfileSelect,
   onWalletSelect,
@@ -366,10 +374,12 @@ export default function RecipientSelector({
 
   const handleOrWallet =
     selectedProfile?.handle ?? selectedProfile?.wallet ?? null;
-  const { profile, isLoading: isIdentityLoading } = useIdentity({
-    handleOrWallet: handleOrWallet ?? "",
+  const { profile: fetchedProfile, isLoading } = useIdentity({
+    handleOrWallet: resolvedIdentity ? "" : (handleOrWallet ?? ""),
     initialProfile: null,
   });
+  const profile = resolvedIdentity ?? fetchedProfile;
+  const isIdentityLoading = !resolvedIdentity && isLoading;
 
   const resultsListRef = useRef<HTMLDivElement | null>(null);
   const walletsListRef = useRef<HTMLDivElement | null>(null);
@@ -507,6 +517,7 @@ export default function RecipientSelector({
       !data ||
       data.length === 0 ||
       !debouncedQuery ||
+      debouncedQuery !== trimmedQuery ||
       !trimmedQuery
     ) {
       return;
@@ -631,6 +642,7 @@ export default function RecipientSelector({
         />
       ) : (
         <RecipientSearchDisplay
+          autoFocus={autoFocusSearch}
           query={query}
           setQuery={setQuery}
           searchStatusText={searchStatusText}

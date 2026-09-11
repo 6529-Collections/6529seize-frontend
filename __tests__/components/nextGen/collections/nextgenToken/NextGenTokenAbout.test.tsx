@@ -32,11 +32,9 @@ describe('NextGenTokenAbout', () => {
     expect(screen.getByText('5')).toBeInTheDocument();
   });
 
-  it("keeps the Pebbles collecting action outside the definition list", async () => {
+  it("keeps collecting actions in the parent market section", async () => {
     render(<NextgenTokenAbout token={token} collection={{ ...collection, id: 1 }} />);
-    const link = await screen.findByRole("link", { name: "Collect this artwork" });
-    expect(link).toHaveAttribute("href", "/collect?collection=pebbles&intent=specific&token=1");
-    expect(link.closest("dl")).toBeNull();
+    expect(screen.queryByRole("link", { name: "Collect this artwork" })).not.toBeInTheDocument();
     await waitFor(() => expect(screen.getByText("5")).toBeInTheDocument());
   });
 });

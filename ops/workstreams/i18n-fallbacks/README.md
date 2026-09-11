@@ -14,6 +14,7 @@ fallback dictionaries.
 | [Content moderation](content-moderation.md)                         | Moderation actions, tombstones, preferences, queue, and composer feedback currently fall back to the reviewed `en-US` messages |
 | [Public contract review](public-contract-review.md)                 | The shell, feedback composer, ledger, and immutable editorial snapshots currently use the source-locale fallback              |
 | [Network reference pages](network-reference-pages.md)               | Prenodes and xTDH remain English in source; Definitions and Historic Boosts messages fall back to `en-US` outside the source  |
+| [Listings and Offers](listings-and-offers.md)                       | Card price messages fall back to `en-US`; API explanatory notes currently have no localized identifiers                      |
 | [Museum Open Museum and source contribution](museum-open-source.md) | Museum source/contribution and transition interface messages currently resolve through the reviewed `en-US` fallback          |
 | [Museum data architecture](museum-data-architecture.md)             | The data-architecture reading room and profile interface currently resolve through the reviewed `en-US` fallback              |
 | [Share and connect controls](share-connect-controls.md)             | Page-sharing, social-action, device-connection, and account-menu messages currently fall back to `en-US` outside the source locale |

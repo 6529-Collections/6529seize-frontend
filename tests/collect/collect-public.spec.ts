@@ -109,6 +109,13 @@ async function mockCatalog(page: Page, state = { fail: false }) {
       return;
     }
     if (url.pathname === "/api/market/listings") {
+      if (state.fail) {
+        await route.fulfill({
+          status: 503,
+          json: { error: "Listings temporarily unavailable" },
+        });
+        return;
+      }
       await route.fulfill({
         json: {
           entries: assets.slice(0, 2).map((asset, index) => ({
@@ -166,40 +173,47 @@ test.beforeEach(async ({ baseURL, context }) => {
   ]);
 });
 
-test("public catalog supports search and a wallet-gated purchase", async ({
+test("observed listings open a wallet-gated review through compact actions", async ({
   page,
 }, info) => {
   const mutations = await mockCatalog(page);
-  await page.goto("/collect", { waitUntil: "domcontentloaded" });
+  await page.goto("/collect?collection=memes&intent=lowest", {
+    waitUntil: "domcontentloaded",
+  });
   await expect(
-    page.getByRole("heading", { name: "Collect", exact: true })
+    page.getByRole("heading", { name: "Collecting tools", exact: true })
   ).toBeVisible();
   await expect(
     page.getByRole("heading", { name: "Catalog artwork 1" })
   ).toBeVisible();
+  const firstArtwork = page.getByRole("article").filter({
+    has: page.getByRole("heading", { name: "Catalog artwork 1" }),
+  });
+  await firstArtwork.scrollIntoViewIfNeeded();
+  await expect
+    .poll(() =>
+      firstArtwork
+        .locator("img")
+        .evaluateAll((images) =>
+          images.some(
+            (image) =>
+              image instanceof HTMLImageElement &&
+              image.complete &&
+              image.naturalWidth > 0
+          )
+        )
+    )
+    .toBe(true);
   await noHorizontalOverflow(page);
   await page.screenshot({
     path: info.outputPath("collect-catalog.png"),
     fullPage: true,
   });
-  await page.getByRole("searchbox", { name: "Search artwork" }).fill("2");
-  const searchResponse = page.waitForResponse((response) => {
-    const url = new URL(response.url());
-    return (
-      url.pathname === "/api/collect/assets" &&
-      url.searchParams.get("query") === "2"
-    );
-  });
-  await page.getByRole("searchbox", { name: "Search artwork" }).press("Enter");
-  await searchResponse;
   await expect(
     page.getByRole("heading", { name: "Catalog artwork 2" })
   ).toBeVisible();
-  await expect(
-    page.getByRole("heading", { name: "Catalog artwork 1" })
-  ).toHaveCount(0);
   const buyButton = page.getByRole("button", {
-    name: "Buy: Catalog artwork 2",
+    name: "Collect Catalog artwork 2",
     exact: true,
   });
   await buyButton.focus();
@@ -229,7 +243,7 @@ test("public catalog supports search and a wallet-gated purchase", async ({
     .toBe(true);
   await expect(page.getByRole("dialog")).toHaveAttribute("aria-modal", "true");
   const backgroundBuyButton = page.getByRole("button", {
-    name: "Buy: Catalog artwork 2",
+    name: "Collect Catalog artwork 2",
     exact: true,
     includeHidden: true,
   });
@@ -264,16 +278,50 @@ test("public catalog supports search and a wallet-gated purchase", async ({
   await page.keyboard.press("Escape");
   await expect(page.getByRole("dialog")).toHaveCount(0);
   await expect(buyButton).toBeFocused();
+  const actions = page.getByRole("button", {
+    name: "More trading actions for Catalog artwork 2",
+  });
+  await actions.click();
+  await expect(
+    page.getByRole("menuitem", { name: "List for sale: Catalog artwork 2" })
+  ).toBeVisible();
+  await page.screenshot({
+    path: info.outputPath("collect-actions.png"),
+    fullPage: true,
+  });
+  await page
+    .getByRole("menuitem", { name: "Make an offer: Catalog artwork 2" })
+    .click();
+  await expect(page.getByRole("dialog")).toHaveCount(1);
+  await expect(
+    page
+      .getByRole("dialog")
+      .getByRole("button", { name: "Connect wallet", exact: true })
+  ).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await expect(actions).toBeFocused();
   expect(mutations).toEqual([]);
 });
 
-test("lowest price displays server listings and profile goals require connection", async ({
+test("set planning is the default and navigation opens observed listings", async ({
   page,
 }, info) => {
   const mutations = await mockCatalog(page);
-  await page.goto("/collect?collection=memes&intent=lowest", {
+  await page.goto("/collect", {
     waitUntil: "domcontentloaded",
   });
+  await expect(
+    page.getByRole("heading", { name: "Complete a full set", exact: true })
+  ).toBeVisible();
+  await noHorizontalOverflow(page);
+  await page.screenshot({
+    path: info.outputPath("collect-default-planner.png"),
+    fullPage: true,
+  });
+  await page
+    .getByRole("button", { name: "Lowest listings", exact: true })
+    .click();
   await expect(page.getByText("0.01 ETH", { exact: true })).toBeVisible();
   await expect(page.getByText("0.02 ETH", { exact: true })).toBeVisible();
   await noHorizontalOverflow(page);
@@ -281,6 +329,12 @@ test("lowest price displays server listings and profile goals require connection
     path: info.outputPath("collect-lowest.png"),
     fullPage: true,
   });
+  await page
+    .getByRole("button", { name: "Complete a set", exact: true })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "Complete a full set", exact: true })
+  ).toBeVisible();
   await page
     .getByRole("combobox", { name: "What are you collecting?" })
     .selectOption("season");
@@ -298,12 +352,14 @@ test("lowest price displays server listings and profile goals require connection
   expect(mutations).toEqual([]);
 });
 
-test("catalog errors remain distinct from empty results and support retry", async ({
+test("listing errors remain distinct from empty results and support retry", async ({
   page,
 }, info) => {
   const state = { fail: true };
   const mutations = await mockCatalog(page, state);
-  await page.goto("/collect", { waitUntil: "domcontentloaded" });
+  await page.goto("/collect?collection=memes&intent=lowest", {
+    waitUntil: "domcontentloaded",
+  });
   const alert = page
     .getByRole("alert")
     .filter({ hasText: "The catalog could not be loaded" });

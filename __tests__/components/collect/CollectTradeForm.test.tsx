@@ -53,7 +53,7 @@ it("accepts delivery to another confirmed profile wallet without changing the pa
     expect.objectContaining({ recipient: custody, quantity: "2" })
   );
   expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
-  expect(screen.getByText(`Wallet: ${own}`)).toBeInTheDocument();
+  expect(screen.getByText(`Paying wallet: ${own}`)).toBeInTheDocument();
 });
 it("requires explicit external delivery acknowledgement and clears it on destination changes", () => {
   const base = props();

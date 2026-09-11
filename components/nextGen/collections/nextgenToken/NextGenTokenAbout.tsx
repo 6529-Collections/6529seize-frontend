@@ -24,14 +24,12 @@ import {
   printMintDate,
 } from "@/helpers/Helpers";
 import useCapacitor from "@/hooks/useCapacitor";
-import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useIdentity } from "@/hooks/useIdentity";
 import { commonApiFetch } from "@/services/api/common-api";
 import { faFire } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
 import Link from "next/link";
-import CollectEntryLink from "@/components/collect/CollectEntryLink";
 import type { ReactNode } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { Tooltip } from "react-tooltip";
@@ -68,7 +66,6 @@ function DetailRow(
 }
 
 export default function NextgenTokenAbout(props: Readonly<Props>) {
-  const locale = useBrowserLocale();
   const capacitor = useCapacitor();
   const { country } = useCookieConsent();
   const { connectedProfile } = useAuth();
@@ -344,16 +341,6 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
         </DetailRow>
         <DetailRow label="Image Licence">{props.collection.licence}</DetailRow>
       </dl>
-      {props.collection.id === 1 && (
-        <div className="tw-py-3">
-          <CollectEntryLink
-            collection="pebbles"
-            intent="specific"
-            tokenId={String(props.token.id)}
-            locale={locale}
-          />
-        </div>
-      )}
     </section>
   );
 }

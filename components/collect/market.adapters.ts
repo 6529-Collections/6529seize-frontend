@@ -75,7 +75,15 @@ export function marketOperationReview(
         value: marketAssetLabel(operation.asset_key, locale),
       },
       { label: t(locale, "collect.trade.quantity"), value: operation.quantity },
-      { label: t(locale, "collect.trade.payer"), value: operation.wallet },
+      {
+        label: t(
+          locale,
+          action === "buy"
+            ? "collect.trade.payingWallet"
+            : "collect.trade.payer"
+        ),
+        value: operation.wallet,
+      },
       {
         label: t(locale, "collect.trade.destination"),
         value: operation.nft_recipient ?? operation.recipient,
