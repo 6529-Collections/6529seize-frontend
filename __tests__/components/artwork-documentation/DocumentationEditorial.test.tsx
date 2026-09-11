@@ -116,7 +116,7 @@ describe("editorial artwork documentation", () => {
     );
     const input = within(modal).getByRole("textbox", { name: "Language tag" });
     await user.clear(input);
-    await user.type(input, "fr-CA");
+    await user.type(input, "FR-ca");
     await user.tab();
     expect(onChange).not.toHaveBeenCalled();
     expect(modal).toBeInTheDocument();

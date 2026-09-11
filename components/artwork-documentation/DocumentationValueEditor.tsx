@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import LanguageTagCorrection from "./DocumentationLanguageTagCorrection";
 import { documentationLanguageName } from "./DocumentationRecordValue";
 import {
@@ -560,16 +560,22 @@ function ListEditor(
 
 function DateEditor(props: Props) {
   const { msg } = useDocumentationMessages();
+  const formatHintId = useId();
   const current = recordValue(props.value ?? initialValue({ kind: "date" }));
   const precision =
     typeof current["precision"] === "string" ? current["precision"] : "year";
   const endpointPrecision =
-    typeof current["endpoint_precision"] === "string"
+    typeof current["endpoint_precision"] === "string" &&
+    ["year", "month", "day"].includes(current["endpoint_precision"])
       ? current["endpoint_precision"]
       : "day";
   const format = precision === "range" ? endpointPrecision : precision;
+  const dateDescription = [props.describedBy, formatHintId]
+    .filter(Boolean)
+    .join(" ");
   const update = (field: string, value: FieldValue) => {
     const changed = { ...current, [field]: value };
+    if (value === "") delete changed[field];
     if (changed["precision"] !== "range") {
       delete changed["end"];
       delete changed["endpoint_precision"];
@@ -636,12 +642,20 @@ function DateEditor(props: Props) {
               placeholder={msg("editorial.dateFormat." + format)}
               value={typeof current[field] === "string" ? current[field] : ""}
               disabled={props.disabled}
-              aria-describedby={props.describedBy}
+              aria-describedby={dateDescription}
               onChange={(event) => update(field, event.target.value)}
             />
           </label>
         ))}
       </div>
+      <p
+        id={formatHintId}
+        className="tw-mb-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-400"
+      >
+        {msg("editorial.dateFormatHelp", {
+          format: msg("editorial.dateFormat." + format),
+        })}
+      </p>
       <label className="tw-mt-3 tw-flex tw-min-h-11 tw-items-center tw-gap-3 tw-text-sm tw-text-iron-300">
         <input
           type="checkbox"

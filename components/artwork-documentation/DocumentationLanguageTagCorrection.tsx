@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { compareLocalized } from "@/i18n/format";
 import { documentationLanguageName } from "./DocumentationRecordValue";
 import {
   DocumentationButton,
@@ -70,7 +71,7 @@ export default function LanguageTagCorrection({
       value,
       label: documentationLanguageName(value, locale),
     }))
-    .sort((a, b) => new Intl.Collator(locale).compare(a.label, b.label));
+    .sort((a, b) => compareLocalized(locale, a.label, b.label, {}));
   useEffect(() => {
     const element = dialog.current;
     const previous = document.activeElement;
@@ -116,7 +117,7 @@ export default function LanguageTagCorrection({
             else select.current?.focus();
             return;
           }
-          onApply(tag);
+          onApply(canonical);
         }}
         className="tw-space-y-5"
       >

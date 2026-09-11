@@ -27,6 +27,7 @@ export const ARTWORK_DOCUMENTATION_EDITORIAL_MESSAGES = {
   "artworkDocumentation.editorial.dateFormat.year": "YYYY",
   "artworkDocumentation.editorial.dateFormat.month": "YYYY-MM",
   "artworkDocumentation.editorial.dateFormat.day": "YYYY-MM-DD",
+  "artworkDocumentation.editorial.dateFormatHelp": "Use the format {format}.",
   "artworkDocumentation.editorial.recordInPreparation":
     "Artwork preview not available",
   "artworkDocumentation.editorial.artistProfile": "Artist profile: @{handle}",
@@ -64,7 +65,8 @@ export const ARTWORK_DOCUMENTATION_EDITORIAL_MESSAGES = {
   "artworkDocumentation.catalogue.entriesSupplied": "Entries supplied",
   "artworkDocumentation.catalogue.noEntriesRecorded": "No entries recorded",
   "artworkDocumentation.catalogue.artistReviewed": "Reviewed by the artist",
-  "artworkDocumentation.catalogue.approximate": "Approximately",
+  "artworkDocumentation.catalogue.approximate": "Approximately {date}",
+  "artworkDocumentation.catalogue.dateRange": "{start} – {end}",
   "artworkDocumentation.catalogue.section.identity": "The artist",
   "artworkDocumentation.catalogue.section.artwork": "About the work",
   "artworkDocumentation.catalogue.section.files": "Files",
