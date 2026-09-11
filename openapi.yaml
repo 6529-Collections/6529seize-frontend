@@ -9556,6 +9556,7 @@ paths:
         installation can be claimed only with a token matching every existing
         registration on that device.
       operationId: revokePushInstallation
+      security: []
       x-6529-router:
         enabled: true
         auth: none

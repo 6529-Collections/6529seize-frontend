@@ -226,3 +226,51 @@ it("persists the final unsigned revision and refuses overflow without losing cle
     PushNotifications.removeAllDeliveredNotifications
   ).not.toHaveBeenCalled();
 });
+
+it("replays logout without AbortSignal.timeout on older native WebViews", async () => {
+  const descriptor = Object.getOwnPropertyDescriptor(AbortSignal, "timeout");
+  Object.defineProperty(AbortSignal, "timeout", {
+    value: undefined,
+    configurable: true,
+  });
+  try {
+    await queueNativePushLogout(null, true);
+    await flushPendingPushLogouts();
+    expect(post).toHaveBeenCalledWith(
+      expect.objectContaining({ signal: expect.any(AbortSignal) })
+    );
+    expect(storage().pending).toEqual([]);
+  } finally {
+    if (descriptor) Object.defineProperty(AbortSignal, "timeout", descriptor);
+    else Reflect.deleteProperty(AbortSignal, "timeout");
+  }
+});
+
+it("aborts a stalled logout and retains it for retry without leaving timers", async () => {
+  jest.useFakeTimers();
+  try {
+    post.mockImplementation(
+      ({ signal }) =>
+        new Promise((_, reject) => {
+          signal!.addEventListener(
+            "abort",
+            () => reject(new Error("aborted")),
+            { once: true }
+          );
+        })
+    );
+    await queueNativePushLogout(null, true);
+    const flush = flushPendingPushLogouts();
+    await jest.advanceTimersByTimeAsync(15000);
+    await flush;
+    expect(post.mock.calls[0]![0].signal!.aborted).toBe(true);
+    expect(storage().pending).toHaveLength(1);
+    expect(jest.getTimerCount()).toBe(0);
+    post.mockResolvedValue({ revision: 1 });
+    await flushPendingPushLogouts();
+    expect(storage().pending).toEqual([]);
+    expect(jest.getTimerCount()).toBe(0);
+  } finally {
+    jest.useRealTimers();
+  }
+});

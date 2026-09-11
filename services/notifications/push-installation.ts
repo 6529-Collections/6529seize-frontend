@@ -209,18 +209,30 @@ export async function queueNativePushLogout(
   void flushPendingPushLogouts();
 }
 
+async function sendPushLogout(
+  job: ApiRevokePushInstallationRequest
+): Promise<void> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15000);
+  try {
+    await commonApiPost<ApiRevokePushInstallationRequest, unknown>({
+      endpoint: "push-notifications/installations/revoke",
+      body: job,
+      includeWalletAuth: false,
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
 async function drainPushLogouts(): Promise<boolean> {
   let reconciled = false;
   for (;;) {
     const job = await serialized(async () => (await readState()).pending[0]);
     if (!job) return reconciled;
     try {
-      await commonApiPost<ApiRevokePushInstallationRequest, unknown>({
-        endpoint: "push-notifications/installations/revoke",
-        body: job,
-        includeWalletAuth: false,
-        signal: AbortSignal.timeout(15000),
-      });
+      await sendPushLogout(job);
     } catch {
       // Retry on app activation/reconnect and before any new registration.
       return reconciled;

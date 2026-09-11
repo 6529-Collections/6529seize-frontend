@@ -567,11 +567,52 @@ export const registerPushNotificationWithRetry = async (
     });
     return false;
   }
-  const installation = await preparePushInstallationRegistration(
+  let installation: Awaited<
+    ReturnType<typeof preparePushInstallationRegistration>
+  >;
+  try {
+    installation = await preparePushInstallationRegistration(
+      deviceId,
+      token,
+      registrationJwt
+    );
+  } catch {
+    // Storage/proof failures must settle the shared registration promise without
+    // logging potentially sensitive storage contents.
+    Sentry.captureException(new Error("Push installation preparation failed"), {
+      tags: {
+        component: "NotificationsProvider",
+        operation: "preparePushInstallationRegistration",
+      },
+      extra: { profile_id: profileId, platform: deviceInfo.platform },
+    });
+    return false;
+  }
+  return registerPreparedPushNotificationWithRetry({
     deviceId,
+    deviceInfo,
     token,
-    registrationJwt
-  );
+    profileId,
+    registrationJwt,
+    installation,
+  });
+};
+
+const registerPreparedPushNotificationWithRetry = async ({
+  deviceId,
+  deviceInfo,
+  token,
+  profileId,
+  registrationJwt,
+  installation,
+}: {
+  deviceId: string;
+  deviceInfo: DeviceInfo;
+  token: string;
+  profileId: string;
+  registrationJwt: string;
+  installation: Awaited<ReturnType<typeof preparePushInstallationRegistration>>;
+}): Promise<boolean> => {
   for (let attempt = 0; attempt < PUSH_REGISTRATION_TOTAL_ATTEMPTS; attempt++) {
     if (getUsablePushAuthJwt() !== registrationJwt) {
       console.warn(

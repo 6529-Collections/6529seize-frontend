@@ -502,6 +502,46 @@ describe("push registration behavior", () => {
     sentry.addBreadcrumb.mockClear();
   });
 
+  it("allows a waiting registration to continue after installation preparation fails", async () => {
+    const {
+      preparePushInstallationRegistration,
+    } = require("@/services/notifications/push-installation");
+    const { commonApiPost } = require("@/services/api/common-api");
+    const sentry = require("@sentry/nextjs");
+    const { registrationCallback } = await setupRegistrationCallback();
+    let rejectPreparation!: (error: Error) => void;
+    preparePushInstallationRegistration.mockImplementationOnce(
+      () =>
+        new Promise((_, reject) => {
+          rejectPreparation = reject;
+        })
+    );
+    const first = registrationCallback({ value: "old-token" });
+    await waitFor(() =>
+      expect(preparePushInstallationRegistration).toHaveBeenCalledTimes(1)
+    );
+    const second = registrationCallback({ value: "new-token" });
+    await act(async () => {
+      rejectPreparation(new Error("sensitive storage error"));
+      await Promise.all([first, second]);
+    });
+    expect(preparePushInstallationRegistration).toHaveBeenCalledTimes(2);
+    expect(commonApiPost).toHaveBeenCalledTimes(1);
+    expect(commonApiPost).toHaveBeenCalledWith(
+      expect.objectContaining({
+        body: expect.objectContaining({ token: "new-token" }),
+      })
+    );
+    expect(sentry.captureException).toHaveBeenCalledWith(
+      new Error("Push installation preparation failed"),
+      expect.objectContaining({
+        tags: expect.objectContaining({
+          operation: "preparePushInstallationRegistration",
+        }),
+      })
+    );
+  });
+
   it("skips registration when auth token is unavailable", async () => {
     const { commonApiPost } = require("@/services/api/common-api");
     const {
