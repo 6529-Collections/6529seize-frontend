@@ -1,5 +1,3 @@
-import type { ApiCollectAnalysis } from "@/generated/models/ApiCollectAnalysis";
-import type { ApiCollectAnalysisRequest } from "@/generated/models/ApiCollectAnalysisRequest";
 import type { ApiCollectAssetsPage } from "@/generated/models/ApiCollectAssetsPage";
 import type { ApiCollectCapabilities } from "@/generated/models/ApiCollectCapabilities";
 import type { ApiCollectCatalog } from "@/generated/models/ApiCollectCatalog";
@@ -42,24 +40,10 @@ export const fetchCollectAssets = (options: {
       page_size: "24",
     },
   });
-export const analyzeCollectGoal = (body: ApiCollectAnalysisRequest) =>
-  commonApiPost<ApiCollectAnalysisRequest, ApiCollectAnalysis>({
-    endpoint: "collect/analyses",
-    body,
-    errorMode: "structured",
-  });
-
 export const createCollectPlan = (body: ApiCollectPlanRequest) =>
   commonApiPost<ApiCollectPlanRequest, ApiCollectPlan>({
     endpoint: "collect/plans",
     body,
-    errorMode: "structured",
-  });
-export const fetchCollectPlan = (id: string, signal?: AbortSignal) =>
-  commonApiFetch<ApiCollectPlan>({
-    endpoint: `collect/plans/${encodeURIComponent(id)}`,
-    signal,
-    cache: "no-store",
     errorMode: "structured",
   });
 export const advanceCollectPlan = (id: string, signal?: AbortSignal) =>

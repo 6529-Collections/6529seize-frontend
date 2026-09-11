@@ -5,7 +5,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import type { CollectOrderView } from "./collect.types";
 
-export interface CollectOrdersViewProps {
+interface CollectOrdersViewProps {
   readonly orders: readonly CollectOrderView[];
   readonly loading: boolean;
   readonly authenticated: boolean;

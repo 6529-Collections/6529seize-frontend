@@ -10,7 +10,7 @@ import { COLLECT_INPUT_CLASS } from "./CollectGoalForm";
 import { validateCollectTrade } from "./collect-form.validation";
 import type { CollectTradeAction, CollectTradeDraft } from "./collect.types";
 
-export interface CollectTradeFormProps {
+interface CollectTradeFormProps {
   readonly action: CollectTradeAction;
   readonly draft: CollectTradeDraft;
   readonly maxQuantity: string;

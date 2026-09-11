@@ -14,7 +14,7 @@ import type {
 export const COLLECT_INPUT_CLASS =
   "tw-block tw-min-h-11 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-sm tw-text-iron-100 placeholder:tw-text-iron-500 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400";
 
-export interface CollectGoalFormProps {
+interface CollectGoalFormProps {
   readonly draft: CollectGoalDraft;
   readonly definitions: readonly CollectGoalOption[];
   readonly profile: CollectProfileView | null;

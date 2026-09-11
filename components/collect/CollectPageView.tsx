@@ -34,7 +34,7 @@ export const COLLECT_INTENTS: readonly CollectIntent[] = [
   "tdh",
 ];
 
-export interface CollectPageViewProps {
+interface CollectPageViewProps {
   readonly catalog: CollectCatalogView;
   readonly collection: CollectCollection;
   readonly intent: CollectIntent;

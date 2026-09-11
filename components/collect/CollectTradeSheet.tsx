@@ -11,7 +11,7 @@ import type {
   CollectTradeStage,
 } from "./collect.types";
 
-export interface CollectTradeSheetProps {
+interface CollectTradeSheetProps {
   readonly open: boolean;
   readonly review: CollectTradeReview | null;
   readonly stage: CollectTradeStage;

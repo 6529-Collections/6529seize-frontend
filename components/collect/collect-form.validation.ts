@@ -15,7 +15,7 @@ export function isPositiveEthAmount(value: string): boolean {
   return /[1-9]/.test(value);
 }
 
-export const isPositiveWholeQuantity = (value: string): boolean =>
+const isPositiveWholeQuantity = (value: string): boolean =>
   /^[1-9]\d{0,2}$/.test(value) && BigInt(value) <= 100n;
 
 export function validateCollectGoal(

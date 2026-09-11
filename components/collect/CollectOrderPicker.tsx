@@ -6,7 +6,7 @@ import { t } from "@/i18n/messages";
 import { useId } from "react";
 import { marketAmount } from "./market.adapters";
 
-export default function CollectOrderPicker({
+function CollectOrderPicker({
   orders,
   value,
   onChange,

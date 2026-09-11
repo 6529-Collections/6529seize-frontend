@@ -1,6 +1,5 @@
-import CollectTradeForm, {
-  type CollectTradeFormProps,
-} from "@/components/collect/CollectTradeForm";
+import CollectTradeForm from "@/components/collect/CollectTradeForm";
+import type { ComponentProps } from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 
@@ -25,7 +24,7 @@ jest.mock("@/components/collect/CollectRecipientPicker", () => ({
 const own = "0x1111111111111111111111111111111111111111";
 const custody = "0x2222222222222222222222222222222222222222";
 const gift = "0x3333333333333333333333333333333333333333";
-function props(): CollectTradeFormProps {
+function props(): ComponentProps<typeof CollectTradeForm> {
   return {
     action: "buy",
     draft: {

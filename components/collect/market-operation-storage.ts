@@ -11,7 +11,7 @@ const isOptionalHash = (value: unknown): value is Hex | undefined =>
   (typeof value === "string" &&
     isHex(value, { strict: true }) &&
     value.length === 66);
-export interface SavedMarketIntent {
+interface SavedMarketIntent {
   readonly request: ApiMarketPrepareRequest;
   readonly transactionHash?: Hex;
   readonly approvalHash?: Hex;

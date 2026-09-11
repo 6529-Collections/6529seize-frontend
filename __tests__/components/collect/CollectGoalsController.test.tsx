@@ -1,5 +1,6 @@
 import CollectGoalsController from "@/components/collect/CollectGoalsController";
-import type { CollectGoalFormProps } from "@/components/collect/CollectGoalForm";
+import type CollectGoalForm from "@/components/collect/CollectGoalForm";
+import type { ComponentProps } from "react";
 import type { ApiCollectCatalog } from "@/generated/models/ApiCollectCatalog";
 import type { ApiCollectPlan } from "@/generated/models/ApiCollectPlan";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
@@ -23,7 +24,7 @@ jest.mock("@/services/api/collect-api", () => ({
 }));
 jest.mock("@/components/collect/CollectGoalForm", () => ({
   __esModule: true,
-  default: (props: CollectGoalFormProps) => (
+  default: (props: ComponentProps<typeof CollectGoalForm>) => (
     <button
       disabled={props.loading}
       onClick={() => props.onSubmit(props.draft)}
