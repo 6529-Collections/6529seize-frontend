@@ -271,7 +271,7 @@ function DocumentationLaneReviews({
         return (
           <div
             key={lane}
-            className="tw-border-b tw-border-solid tw-border-iron-800 tw-pb-4"
+            className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-pb-4"
           >
             <h3 className="tw-text-base tw-font-semibold">
               {msg(`lane.${lane}`)}
