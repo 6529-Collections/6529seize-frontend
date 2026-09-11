@@ -31,6 +31,7 @@ export function useMarketSettlement(
       QueryKey.MARKET_ORDERS,
       QueryKey.MARKET_LISTINGS,
       QueryKey.COLLECT_RULES,
+      QueryKey.COLLECT_ANALYSIS,
       QueryKey.PROFILE_COLLECTED,
       QueryKey.PROFILE,
       STATS_QUERY_KEY,

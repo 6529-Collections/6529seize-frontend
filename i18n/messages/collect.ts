@@ -1,4 +1,23 @@
 export const COLLECT_MESSAGES = {
+  "collect.buy.atPrice": "Buy {price}",
+  "collect.buy.deliverTo": "Deliver to",
+  "collect.buy.changeDelivery": "Change",
+  "collect.buy.doneDelivery": "Done",
+  "collect.buy.chooseDelivery": "Choose a wallet",
+  "collect.buy.otherListings": "Other listings",
+  "collect.buy.includedFees": "Fees included in price",
+  "collect.buy.listingChanged":
+    "This listing changed or is no longer available. Review the current price before buying.",
+  "collect.buy.editPurchase": "Edit purchase",
+  "collect.selection.title": "Purchase selection",
+  "collect.selection.count": "{count} selected",
+  "collect.selection.estimate": "Estimated {price} · gas added at review",
+  "collect.selection.clear": "Clear",
+  "collect.selection.review": "Review purchase",
+  "collect.selection.addArtwork": "Add {title} to selection",
+  "collect.selection.removeArtwork": "Remove {title} from selection",
+  "collect.list.chooseOwner":
+    "Connect a wallet holding this artwork to list it for sale.",
   "collect.acquire": "Collect",
   "collect.acquireFor": "Collect {title}",
   "collect.menu.offer": "Make an offer",
