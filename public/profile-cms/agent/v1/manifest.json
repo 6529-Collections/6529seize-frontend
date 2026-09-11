@@ -8,13 +8,13 @@
   "files": [
     {
       "name": "main.mjs",
-      "bytes": 921,
-      "hash": "sha256:ba5fd659c954c3b4ed3a2ef7684b94eafd06b8d00ec909ffd4eebc5239d88051"
+      "bytes": 1166,
+      "hash": "sha256:3e6b519d68e463e57a2e97a3b8c93d170011ef0b4eab5cee10c50cd12479688f"
     },
     {
       "name": "api.mjs",
-      "bytes": 7106,
-      "hash": "sha256:a1b72cb4d28615d3ca963a02dd4344c73f10ed9e6c8d722866da697770f451b1"
+      "bytes": 7230,
+      "hash": "sha256:8426a7df0d3779bae35d45916f05e4ce519c3102a77b026625cd19bb370d9562"
     },
     {
       "name": "tools.mjs",
@@ -33,13 +33,13 @@
     },
     {
       "name": "schemas.json",
-      "bytes": 28907,
-      "hash": "sha256:ea67061a7450432847306f9af4fc4ba7398ee0331a68e82f397f4c2e38b4fcb0"
+      "bytes": 28933,
+      "hash": "sha256:4e37a088f46c2603516032e8a4654851f45b5560a9ced6dff3fa299c0e401583"
     }
   ],
   "archive": {
     "name": "6529-cms-agent.zip",
-    "bytes": 55710,
-    "hash": "sha256:d426fce33d204aeaf32e1a67316da597438b353ddf94b9fd0432d3474d859dfa"
+    "bytes": 56106,
+    "hash": "sha256:e1efb50388a9e4bb48b337548af1d686bafdc810560680eb8faceb6d012535a5"
   }
 }

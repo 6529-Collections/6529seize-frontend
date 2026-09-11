@@ -25,58 +25,58 @@ export const ART_TEMPLATES: readonly CmsStudioTemplate[] = [
     siteTitle: "Meme Notes",
     family: "collector",
     description:
-      "A collector's reading of 6529 art, organized around ideas and recurring themes.",
+      "A collector's selection of The Memes with themes, notes and artist credits.",
     presentation: style("gallery", "night", "sans", "balanced"),
     pages: [
       page(
         "studio",
-        "Messages worth returning to.",
-        "A collector's notebook about images, ideas, and the conversations they make possible.",
+        "Four cards from The Memes",
+        "My starting selection: FirstGM, NakamotoFreedom, Sgt. Pepe and SeizeJPGs. Each card links back to its collection record.",
         memeImage(8, "half"),
-        heading("A way into the collection"),
+        heading("Why these four?"),
         text(
-          "I begin with the image, then read its title and context, then return to the image. Each pass changes what becomes visible."
+          "I wanted a small selection that I could explain to a friend. It starts with a greeting, then moves to freedom, a familiar meme character and collecting images. The notes are my reading of the works, not the artists' statements."
         ),
-        pageLink("Read the collecting notes", "notes"),
-        pageLink("Explore the themes", "themes"),
+        pageLink("Collecting notes", "notes"),
+        pageLink("View the selection", "themes"),
         memeCredit(8),
-        externalLink("Explore The Memes", SOURCE_LINKS.memes)
+        externalLink("Browse The Memes", SOURCE_LINKS.memes)
       ),
       page(
         "themes",
-        "Images that carry an idea.",
-        "A demonstration selection of credited CC0 works, without a claim of token ownership.",
-        heading("Freedom to choose"),
+        "The selection",
+        "Four credited works grouped around greetings, freedom and digital culture.",
+        heading("Freedom and participation"),
         memeImage(4, "two_thirds"),
         text(
-          "How does an image make an idea recognizable without closing down its possible meanings?",
+          "NakamotoFreedom is my starting point for this group. I keep the title and source beside the image so readers can follow the card's own record before reading my notes.",
           "third"
         ),
         memeCredit(4),
-        heading("A shared visual language"),
+        heading("Greetings and digital culture"),
         memeImage(37, "half"),
         memeImage(2, "half"),
         memeCredit(37),
         memeCredit(2),
-        pageLink("Read why sequence matters", "notes")
+        pageLink("How I chose the order", "notes")
       ),
       page(
         "notes",
-        "Collecting as a form of reading.",
-        "How images become a shared vocabulary, and why context stays with the work.",
-        heading("A selection is an argument"),
+        "Collecting notes",
+        "What I look for when choosing a card and what I record once it is on my list.",
+        heading("Start with a short selection"),
         text(
-          "Placing works together suggests a relationship. The interesting part is often where that relationship becomes unstable: a shared color, a different rhythm, a title that changes the reading."
+          "I chose four cards with different jobs on the page. FirstGM opens the selection; the other cards lead into topics I want to discuss. Keeping the list short makes it easier to explain each choice."
         ),
         quote(
-          "A collection can be a conversation rather than a checklist.",
-          "From the collecting notebook"
+          "Before adding another card, write one sentence about why it belongs here.",
+          "My collection checklist"
         ),
-        heading("Keeping the record clear"),
+        heading("Record the source"),
         text(
-          "A personal response belongs beside accurate attribution. Ownership, edition, and capture dates should come from selected sources, not from the appearance of an image on a page."
+          "For each entry I keep the card number, title, artist and collection link. My display list is separate from my wallet holdings; a card can be on one list without being on the other."
         ),
-        externalLink("Read about 6529", SOURCE_LINKS.about)
+        externalLink("About 6529", SOURCE_LINKS.about)
       ),
     ],
   }),
@@ -86,62 +86,68 @@ export const ART_TEMPLATES: readonly CmsStudioTemplate[] = [
     siteTitle: "After the Signal",
     family: "artist",
     description:
-      "A finite exhibition with an opening essay, an ordered art sequence, and a readable catalog.",
+      "A three-work exhibition with an introduction, image sequence and catalogue.",
     presentation: style("gallery", "paper", "serif", "airy"),
     pages: [
       page(
         "studio",
-        "After the signal.",
-        "An example exhibition in three movements: a line becomes a field, a field leaves an impression, and an impression becomes a rhythm.",
-        kicker("A digital exhibition · Three example works"),
-        image(ART.signal, "01 / Quiet Signal — original example artwork."),
-        text(
-          "The sequence asks a simple question: what remains after the first impression has passed? Move through the works slowly, or open the catalog for a concise view of the whole exhibition."
+        "After the Signal",
+        "Three digital images: blue curved lines, a reflective loop on orange and a dark grid crossed by lights.",
+        kicker("Digital exhibition · Three works"),
+        image(
+          ART.signal,
+          "01 / Quiet Signal — blue lines with a red cluster at the lower right."
         ),
-        pageLink("Begin the sequence", "first-movement"),
-        pageLink("Open the catalog", "catalog")
+        text(
+          "The exhibition starts with Quiet Signal, then places Afterimage beside Night Grid. Follow the sequence for notes on each image, or open the catalogue to compare all three."
+        ),
+        pageLink("Start with Quiet Signal", "first-movement"),
+        pageLink("View the catalogue", "catalog")
       ),
       page(
         "first-movement",
-        "01 — A line becomes a field.",
-        "Repetition gives the eye something to follow. A small interruption gives it a reason to stop.",
+        "01 — Quiet Signal",
+        "Fine blue lines overlap in broad curves against a cream background.",
         image(ART.signal, ART_CAPTIONS.signal),
         text(
-          "The first movement introduces a continuous gesture and the space around it. Look at the edges before returning to the center."
+          "Near the lower-right edge, a small cluster of red lines breaks the blue pattern. At full size, the narrow gaps between the lines are easier to distinguish."
         ),
-        pageLink("Next: an impression remains", "second-movement"),
+        pageLink("Next: Afterimage and Night Grid", "second-movement"),
         pageLink("Exhibition introduction", "studio")
       ),
       page(
         "second-movement",
-        "02 — An impression remains.",
-        "The second movement shifts attention from the signal itself to its afterimage.",
+        "02 — Afterimage",
+        "A reflective, twisted loop hangs above a shadow on an orange background.",
         image(ART.afterimage, ART_CAPTIONS.afterimage, "two_thirds"),
         text(
-          "Here, the pause becomes part of the composition. What seems quiet on first viewing may carry the memory of a stronger mark.",
+          "The wide bright reflection follows the outside of the loop. Darker reflections and the opening through its centre make the twist easier to read.",
           "third"
         ),
-        image(ART.grid, "03 / Night Grid — original example artwork."),
-        heading("03 — A rhythm returns"),
+        image(
+          ART.grid,
+          "03 / Night Grid — a dark grid crossed by a diagonal strip of lights."
+        ),
+        heading("03 — Night Grid"),
         text(
-          "The final image gathers separate marks into a new rhythm. It closes the sequence without resolving every difference."
+          "Small yellow and green cells sit inside a dark rectangular grid. The brightest strip runs from the lower left to the upper right, passing a round junction near the centre."
         ),
         pageLink("View all three works", "catalog")
       ),
       page(
         "catalog",
-        "An exhibition in three works.",
-        "A conventional catalog accompanies the sequence so the exhibition can be read, revisited, and shared without an immersive viewer.",
+        "Exhibition catalogue",
+        "Quiet Signal, Afterimage and Night Grid, in their exhibition order.",
         gallery(
-          "The sequence",
+          "All three works",
           [ART.signal, ART.afterimage, ART.grid],
           "editorial"
         ),
-        heading("Exhibition notes"),
+        heading("About this selection"),
         text(
-          "Quiet Signal, Afterimage, and Night Grid are original example artworks generated for this template library. This demonstration has no claimed venue, sale, artist affiliation, or NFT ownership."
+          "These three digital images were generated for the 6529 template library. The sequence compares curved lines, a reflective form and a dense grid; it does not represent a dated series by an existing artist."
         ),
-        pageLink("Return to the opening", "studio")
+        pageLink("Back to the introduction", "studio")
       ),
     ],
   }),
@@ -151,59 +157,65 @@ export const ART_TEMPLATES: readonly CmsStudioTemplate[] = [
     siteTitle: "Rowan Collection",
     family: "collector",
     description:
-      "Collection highlights, focused catalog pages, and a statement of collecting intent.",
+      "Collection highlights, a focused catalogue and a statement of collecting interests.",
     presentation: style("gallery", "stone", "sans", "compact"),
     pages: [
       page(
         "studio",
-        "The Rowan collection.",
-        "A fictional collection exploring systems, repetition, and the small gestures that unsettle them.",
-        gallery("Selected example works", [
+        "Rowan Collection",
+        "Digital images built around lines, grids and strong colour contrasts.",
+        gallery("Collection highlights", [
           ART.signal,
           ART.grid,
           ART.afterimage,
         ]),
-        heading("Two paths through the collection"),
+        heading("Explore the collection"),
         card(
-          "Lines and fields",
-          "A focused selection about continuity, interruption, and movement."
+          "Lines and grids",
+          "A closer look at Quiet Signal and Night Grid, from small repeated details to the overall composition."
         ),
         card(
-          "The collecting notebook",
-          "The questions behind the selection, recorded in plain language."
+          "Collecting notes",
+          "Why I choose a work and the information I keep beside it."
         ),
-        pageLink("Explore lines and fields", "lines-and-fields"),
-        pageLink("Read the collecting statement", "statement")
+        pageLink("View lines and grids", "lines-and-fields"),
+        pageLink("Collecting approach", "statement")
       ),
       page(
         "lines-and-fields",
-        "Lines and fields.",
-        "An example catalog group with deliberate sequence and room for each work.",
-        image(ART.signal, "Quiet Signal — example work, no ownership claim."),
-        heading("A continuous gesture"),
-        text(
-          "The image suggests a system that remains open to variation. Its interest lies as much in the space between marks as in the marks themselves."
+        "Lines and grids",
+        "Two images that use repeated elements in different ways.",
+        image(
+          ART.signal,
+          "Quiet Signal — fine blue curves with a small red cluster."
         ),
-        image(ART.grid, "Night Grid — example work, no ownership claim."),
-        pageLink("Read the collecting statement", "statement")
+        heading("Curved lines"),
+        text(
+          "The blue lines in Quiet Signal overlap without forming a regular grid. The red cluster sits close to the edge, well away from the broadest blue curves."
+        ),
+        image(
+          ART.grid,
+          "Night Grid — small illuminated cells and a bright diagonal strip."
+        ),
+        pageLink("Collecting approach", "statement")
       ),
       page(
         "statement",
-        "A collection of questions.",
-        "The fictional Rowan collection begins with attention rather than completion.",
-        heading("What connects the works"),
+        "What I collect",
+        "I look for digital images that have a clear shape at thumbnail size and details worth opening at full size.",
+        heading("Why these works"),
         text(
-          "A recurring interest in structure gives the collection a center. Contradictory works keep it from becoming an illustration of one fixed idea."
+          "Quiet Signal and Night Grid both contain many small elements, but their structures differ. Afterimage adds a single large form and a much warmer colour. I prefer that mix to a page of very similar images."
         ),
-        heading("How the record is kept"),
+        heading("My catalogue fields"),
         text(
-          "Each actual catalog entry would distinguish artist attribution, source, relationship to the collection, and date of observation. A work can be studied or displayed without being owned."
+          "I record the title, artist or source, file link and a short note about the image. I keep acquisition records separately and do not treat an image on this page as proof of ownership."
         ),
         quote(
-          "The best addition changes the works already here.",
-          "Example collecting principle"
+          "Save the original source link before adding a work to the catalogue.",
+          "Rowan's catalogue checklist"
         ),
-        pageLink("Return to highlights", "studio")
+        pageLink("Back to highlights", "studio")
       ),
     ],
   }),
@@ -213,58 +225,58 @@ export const ART_TEMPLATES: readonly CmsStudioTemplate[] = [
     siteTitle: "The Cabinet",
     family: "collector",
     description:
-      "A personal cabinet of art, reading, objects, and links, each with a reason to be there.",
+      "A personal reference shelf for art, reading and annotated links.",
     presentation: style("signature", "stone", "serif", "balanced"),
     pages: [
       page(
         "studio",
-        "Things worth keeping.",
-        "A cabinet of images, ideas, and useful references. The connections are personal; the doors are open.",
+        "Art and reference shelf",
+        "A small collection of images I like and sources I use when publishing my own pages.",
         image(
           ART.afterimage,
-          "An image for the art shelf — original example artwork.",
+          "Afterimage — a reflective loop against orange.",
           "two_thirds"
         ),
         card(
-          "A place for the unexpected",
-          "A cabinet becomes interesting when something refuses to fit its categories.",
+          "Currently on the desk",
+          "An image selection, notes on display sizes and a license guide I check before reusing someone else's work.",
           "third"
         ),
-        heading("Open a shelf"),
-        pageLink("The art shelf", "art-shelf"),
-        pageLink("The reading shelf", "reading-shelf"),
+        heading("Browse the shelves"),
+        pageLink("Art shelf", "art-shelf"),
+        pageLink("Reference shelf", "reading-shelf"),
         quote(
-          "Keep the thing, and keep a note about why it matters.",
-          "Cabinet rule"
+          "When I save a link, I add the title and the reason I expect to use it again.",
+          "My filing rule"
         )
       ),
       page(
         "art-shelf",
-        "A shelf for looking.",
-        "Three images arranged as a conversation about rhythm and pause.",
+        "Art shelf",
+        "Three images selected for different colours and shapes: blue curves, an orange loop and a dark grid.",
         image(ART.signal, ART_CAPTIONS.signal, "half"),
         image(ART.grid, ART_CAPTIONS.grid, "half"),
         text(
-          "The first image unfolds; the second gathers. Their difference makes each one easier to see."
+          "I use this shelf to compare images before arranging a page. The orange image is the strongest colour contrast; the blue lines and dark grid reward a larger view."
         ),
         image(ART.afterimage, ART_CAPTIONS.afterimage),
-        pageLink("Visit the reading shelf", "reading-shelf")
+        pageLink("Reference shelf", "reading-shelf")
       ),
       page(
         "reading-shelf",
-        "Useful things to return to.",
-        "A short shelf of public sources, with an annotation instead of a star rating.",
-        heading("The permission to share"),
+        "Reference shelf",
+        "A license guide and an encyclopedia, with notes on how I use each.",
+        heading("Checking reuse permissions"),
         text(
-          "Creative Commons explains a vocabulary for sharing work while making the conditions clear."
+          "I use the Creative Commons guide to check which license an image carries and whether attribution or other conditions apply."
         ),
         externalLink("Creative Commons licenses", SOURCE_LINKS.licenses),
-        heading("An open encyclopedia"),
+        heading("Finding background and sources"),
         text(
-          "Wikipedia is also a useful model of a record that can be revised, discussed, and traced back to sources."
+          "Wikipedia is often my first stop for an unfamiliar term. For a claim I plan to publish, I follow the references and check the original source."
         ),
-        externalLink("Visit Wikipedia", SOURCE_LINKS.wikipedia),
-        pageLink("Return to the cabinet", "studio")
+        externalLink("Open Wikipedia", SOURCE_LINKS.wikipedia),
+        pageLink("Back to the cabinet", "studio")
       ),
     ],
   }),
@@ -274,52 +286,52 @@ export const ART_TEMPLATES: readonly CmsStudioTemplate[] = [
     siteTitle: "Common Shapes",
     family: "artist",
     description:
-      "An artist's home with selected works, a complete series, and a statement of practice.",
+      "An artist portfolio with selected images, a series page and studio notes.",
     presentation: style("gallery", "paper", "sans", "airy"),
     pages: [
       page(
         "studio",
-        "Common Shapes.",
-        "A fictional visual practice working with repetition, material memory, and the point where a system becomes a gesture.",
+        "Common Shapes",
+        "Rae Ellis makes digital images using vector lines, layered shapes and simple 3D forms.",
         image(ART.signal, ART_CAPTIONS.signal),
-        kicker("Selected series / Quiet structures"),
+        kicker("Selected series / Lines, loops and grids"),
         text(
-          "The work begins with a rule, then follows the places where that rule bends. An image may look settled while its parts remain in motion."
+          "I'm interested in images with a clear shape from a distance and enough detail to hold up close. My current work moves between fine line drawings and single objects with strong lighting."
         ),
-        pageLink("View Quiet structures", "quiet-structures"),
-        pageLink("Read the artist statement", "statement")
+        pageLink("View the series", "quiet-structures"),
+        pageLink("Studio notes", "statement")
       ),
       page(
         "quiet-structures",
-        "Quiet structures.",
-        "An example body of work considered as a sequence rather than a set of isolated images.",
+        "Lines, loops and grids",
+        "A reference set for a new series of line drawings and object studies.",
         gallery(
-          "Three studies",
+          "Three digital studies",
           [ART.signal, ART.afterimage, ART.grid],
           "editorial"
         ),
-        heading("A working vocabulary"),
+        heading("Developing the series"),
         text(
-          "Line, interval, repetition, and interruption form a deliberately small vocabulary. Each study tests how much variation that vocabulary can hold."
+          "I am using three references to plan the next set: the narrow curved lines in Quiet Signal, the wide reflections in Afterimage and the small lights in Night Grid. The first new studies will use just blue and cream."
         ),
-        pageLink("Notes on the practice", "statement")
+        pageLink("Read the studio notes", "statement")
       ),
       page(
         "statement",
-        "The rule and the gesture.",
-        "An example artist statement for the fictional Common Shapes practice.",
+        "About Rae Ellis",
+        "I'm a digital artist working with drawing software and 3D tools. Most projects begin as small tests before I decide which ones need a larger image.",
         text(
-          "I begin with repeated actions because they make small differences visible. The work follows what happens when a measured system encounters a less predictable hand.\n\nThe result is not a diagram of control. It is a record of negotiation between an intention and the marks that survive it."
+          "My working files usually contain several versions of the same idea. I change one thing at a time: line spacing, the angle of a form or the position of a light. I keep a sheet of small exports beside the finished image so I can see which decisions made a difference.\n\nI also make simple printed booklets to check image order. A pair that works on a large screen can be difficult to read across a small spread."
         ),
-        heading("About this example"),
+        heading("On the desk"),
         text(
-          "Common Shapes is a fictional practice. The displayed works are original demonstration assets made for the 6529 template library; they are not attributed to an existing artist."
+          "A blue-and-cream line series, a set of reflective loop studies and a short booklet that puts the two together. The current priority is finishing six line studies before adding another colour."
         ),
-        heading("A place for the record"),
+        heading("Image credits"),
         text(
-          "An actual studio can add a biography, exhibition history, CV, and contact destinations as those materials are supplied. This example does not invent credentials or exhibition venues."
+          "The three reference images shown here were generated for the 6529 template library. Their titles and rights information remain in the asset records."
         ),
-        pageLink("Return to selected work", "studio")
+        pageLink("Back to selected images", "studio")
       ),
     ],
   }),
@@ -329,61 +341,64 @@ export const ART_TEMPLATES: readonly CmsStudioTemplate[] = [
     siteTitle: "Surface Studies",
     family: "artist",
     description:
-      "A work-led portfolio with careful scale, alternate views, and context for the chosen medium.",
+      "An artist portfolio with a featured image, lighting studies and working notes.",
     presentation: style("gallery", "night", "sans", "airy"),
     pages: [
       page(
         "studio",
-        "The surface, the interval.",
-        "A fictional portfolio of digital image studies, presented at different scales without forcing them into one shape.",
-        image(ART.afterimage, "Afterimage — original example digital artwork."),
-        heading("Read the image at two speeds"),
-        text(
-          "A broad view establishes the composition. A focused study lets the eye return to edges, overlaps, and intervals."
+        "Surface Studies",
+        "Lena Park's portfolio of digital object studies, with notes on shape, lighting and surface.",
+        image(
+          ART.afterimage,
+          "Afterimage — a reflective loop on an orange background."
         ),
-        pageLink("Study the first work", "image-study"),
-        pageLink("Read the medium notes", "medium-notes")
+        heading("Featured study: Afterimage"),
+        text(
+          "A reflective loop against orange is the starting reference for a set of lighting experiments. I want to compare how much of the shape can be described by a single broad reflection."
+        ),
+        pageLink("View Afterimage", "image-study"),
+        pageLink("Process notes", "medium-notes")
       ),
       page(
         "image-study",
-        "Image study 01.",
-        "A page for the complete work and the observations that accompany it.",
+        "Afterimage",
+        "A reflective loop, an orange background and a shadow that separates the form from the surface below it.",
         image(
           ART.afterimage,
-          "Complete example work; the image is shown without an imposed crop."
+          "Afterimage, shown in its full portrait composition."
         ),
         text(
-          "The broad shape reads quickly. The more interesting movement appears where neighboring forms nearly meet. A detail view can help with looking, but should always lead back to the complete work."
+          "For my next object study I want to keep the loop simple and test three light positions. The reference is useful because its bright outside edge and dark inner reflection describe the twist without adding texture."
         ),
         image(
           ART.signal,
-          "A companion image study — original example artwork.",
+          "Quiet Signal — overlapping blue lines and a red accent.",
           "half"
         ),
         image(
           ART.grid,
-          "A companion image study — original example artwork.",
+          "Night Grid — a diagonal strip of lights across a dark grid.",
           "half"
         ),
-        pageLink("Read the medium notes", "medium-notes")
+        pageLink("Process notes", "medium-notes")
       ),
       page(
         "medium-notes",
-        "Let the medium set the terms.",
-        "A concise example note on presenting digital images with care.",
-        heading("Scale and context"),
+        "Working with 3D forms",
+        "I build small digital scenes to test shape and light before committing to a larger composition.",
+        heading("One material at a time"),
         text(
-          "The display image describes one representation of a work. Physical dimensions, print processes, playback duration, and installation requirements belong in the record when they actually apply."
+          "I start with a plain surface and one light. Once the silhouette reads clearly, I compare a matte finish with a reflective one. I save both versions; a more complicated material is not always the better choice."
         ),
-        heading("Multiple views"),
+        heading("Test sheet"),
         text(
-          "A second view should answer a different question. Use it to explain surface, scale, or installation rather than repeating the same image without context."
+          "The next sheet will show the same loop with the light above, beside and behind it. I will keep the camera and background fixed so the differences come from the lighting. The images on this site are the reference set for those tests."
         ),
         quote(
-          "Presentation should make the work easier to encounter.",
-          "Example studio note"
+          "Keep the camera fixed for the first three renders. Change only the light.",
+          "Lena's render notes"
         ),
-        pageLink("Return to the portfolio", "studio")
+        pageLink("Back to the portfolio", "studio")
       ),
     ],
   }),
@@ -393,59 +408,66 @@ export const ART_TEMPLATES: readonly CmsStudioTemplate[] = [
     siteTitle: "Studio Notebook",
     family: "artist",
     description:
-      "Studio experiments, observations, and finished outcomes connected through a reading sequence.",
+      "An artist's working journal with a planned series, reference images and next-session notes.",
     presentation: style("journal", "stone", "mono", "balanced"),
     pages: [
       page(
         "studio",
-        "Work, before it settles.",
-        "A fictional process journal about testing a small vocabulary of marks and noticing what changes.",
-        kicker("Notebook entry 01"),
-        heading("A rule with room in it"),
+        "Planning a blue-line series",
+        "Rae's working journal: six planned line studies, a limited palette and notes from the reference images.",
+        kicker("Entry 01 · Line spacing"),
+        heading("Six studies, two colours"),
         text(
-          "The first experiment uses one repeated gesture. The useful discoveries arrive when the gesture stops behaving exactly as expected."
+          "I'm planning six blue-and-cream images. The first sheet will compare tightly packed lines with wider gaps before I add any red."
         ),
-        pageLink("Open the experiment", "a-rule-with-room"),
-        kicker("Notebook entry 02"),
+        pageLink("Read the first entry", "a-rule-with-room"),
+        kicker("Entry 02 · Reference sheet"),
         image(ART.grid, ART_CAPTIONS.grid, "half"),
         text(
-          "A later study changes the spacing rather than the mark. The entire image begins to behave differently.",
+          "Night Grid gives me a second spacing reference: small bright cells with much larger dark gaps. I want to compare that structure with Quiet Signal's nearly continuous curves.",
           "half"
         ),
-        pageLink("See the outcome", "outcome")
+        pageLink("View the reference sheet", "outcome")
       ),
       page(
         "a-rule-with-room",
-        "A rule with room in it.",
-        "Example process entry: repeated actions, observed differences, and a decision about what to keep.",
-        heading("Starting condition"),
+        "Six studies, two colours",
+        "The question for this week's drawings: how far apart can the lines move before the curved band stops reading as one shape?",
+        heading("Set up the test"),
         text(
-          "Repeat a line, then interrupt the sequence only once. Compare an interruption at the edge with one near the center."
+          "Use the same canvas and one blue curve for all six studies. Duplicate the curve at three spacings, then make a second version of each with one section removed. Keep the background cream."
         ),
-        image(ART.signal, "Example image for the process note."),
-        heading("Observation"),
+        image(
+          ART.signal,
+          "Reference: Quiet Signal, with fine blue lines and a red cluster at the edge."
+        ),
+        heading("First decision"),
         text(
-          "The interruption changes how the surrounding marks are read. What looked uniform starts to reveal small differences."
+          "Quiet Signal has very narrow gaps where the bands overlap. I want more space in my first sheet so I can judge the line shape. I will leave out the red accent until the six blue versions are ready to compare."
         ),
-        heading("Next test"),
+        heading("Next session"),
         text(
-          "Keep the marks and change the interval. Treat the new image as a separate experiment, not an improvement by default."
+          "Export the six studies at the same size and print them on one sheet. Mark the two with the clearest curves, then use those for a second test with a short red section near the edge."
         ),
-        pageLink("Follow the work to its outcome", "outcome")
+        pageLink("View the reference sheet", "outcome")
       ),
       page(
         "outcome",
-        "What the experiment leaves behind.",
-        "A finished selection linked to the questions that produced it.",
-        gallery("An example sequence", [ART.signal, ART.grid, ART.afterimage]),
+        "Reference sheet and next steps",
+        "Three references for line spacing, dark gaps and the relationship between a small detail and a large form.",
+        gallery("Quiet Signal, Night Grid and Afterimage", [
+          ART.signal,
+          ART.grid,
+          ART.afterimage,
+        ]),
         text(
-          "The sequence preserves three different answers rather than choosing one winner. Looking at them together makes the decisions behind each image more visible."
+          "Quiet Signal is the main line reference. Night Grid is useful for its larger dark gaps, and Afterimage reminds me to check whether the overall shape is clear before adding detail. These are references for the planned drawings, not the finished six-study series."
         ),
         quote(
-          "The process is useful when it helps someone see the work differently.",
-          "Example notebook conclusion"
+          "Finish the six blue studies before trying another palette.",
+          "Rae's next-session note"
         ),
-        pageLink("Return to the first experiment", "a-rule-with-room")
+        pageLink("Back to the first entry", "a-rule-with-room")
       ),
     ],
   }),
@@ -455,61 +477,52 @@ export const ART_TEMPLATES: readonly CmsStudioTemplate[] = [
     siteTitle: "Common Shapes Editions",
     family: "artist",
     description:
-      "Works and edition context, with clear provenance and only genuine external destinations.",
+      "A work catalogue with media details, edition status and rights notes.",
     presentation: style("gallery", "ink", "sans", "balanced"),
     pages: [
       page(
         "studio",
-        "A work, and its forms.",
-        "An example edition catalog explaining the relationship between an image, its presentation, and its record.",
-        image(
-          ART.signal,
-          "Quiet Signal — original example artwork; no edition is offered for sale."
-        ),
-        heading("Selected work"),
+        "Common Shapes Editions",
+        "An artwork catalogue with a separate record for each image and its edition details.",
+        image(ART.signal, "Quiet Signal — fine blue curves with a red accent."),
+        heading("Featured work: Quiet Signal"),
         text(
-          "This demonstration shows how a work can have a dedicated record before any sale or mint destination is configured."
+          "Open the work record for the image, medium and current edition status."
         ),
-        pageLink("Open the work record", "quiet-signal"),
-        pageLink("Read the edition notes", "edition-notes")
+        pageLink("View the work record", "quiet-signal"),
+        pageLink("Catalogue notes", "edition-notes")
       ),
       page(
         "quiet-signal",
-        "Quiet Signal.",
-        "A complete example artwork record, separate from any marketplace listing or financial claim.",
-        image(
-          ART.signal,
-          "Original example artwork generated for the 6529 template library."
-        ),
-        heading("Record"),
-        card("Medium", "Digital example artwork."),
+        "Quiet Signal",
+        "A landscape digital image of overlapping blue lines with a small cluster of red lines near the lower-right edge.",
+        image(ART.signal, "Quiet Signal, shown without a crop."),
+        heading("Work details"),
+        card("Medium", "Digital image, PNG."),
         card(
           "Edition status",
-          "Demonstration only. No edition size, price, availability, or token contract is asserted."
+          "Sample catalogue entry. No edition is offered for sale."
         ),
-        heading("About the image"),
+        heading("Image description"),
         text(
-          "A continuous form moves through a measured field. A brief change of color gives the eye a point of orientation."
+          "The curved blue bands cross over a cream background. Closely spaced lines make darker areas where the bands overlap; the red accent is confined to one corner."
         ),
-        pageLink("How edition records are described", "edition-notes")
+        pageLink("Catalogue notes", "edition-notes")
       ),
       page(
         "edition-notes",
-        "Be precise about the edition.",
-        "An edition page should make the actual relationship between work, artist, token, and destination understandable.",
-        heading("A record before an action"),
+        "Edition and rights notes",
+        "How the catalogue separates the image file, edition information and reuse permissions.",
+        heading("Edition details"),
         text(
-          "Add supplied edition details and source links to the work record. If an authentic external destination is absent, omit the purchase action rather than substituting a generic marketplace."
+          "An edition record includes its size, publisher and original release link. If those details are not available, the record stays incomplete and has no purchase link."
         ),
-        heading("Rights and attribution"),
+        heading("Rights information"),
         text(
-          "Describe display permissions separately from ownership. An NFT or a downloaded file does not automatically grant copyright or reproduction rights."
+          "The file's rights statement is kept beside the artwork record. A purchase record and permission to reproduce an image are separate pieces of information."
         ),
-        externalLink(
-          "Learn about Creative Commons licenses",
-          SOURCE_LINKS.licenses
-        ),
-        pageLink("Return to the work", "quiet-signal")
+        externalLink("Creative Commons license guide", SOURCE_LINKS.licenses),
+        pageLink("Back to Quiet Signal", "quiet-signal")
       ),
     ],
   }),
@@ -519,58 +532,71 @@ export const ART_TEMPLATES: readonly CmsStudioTemplate[] = [
     siteTitle: "Common Shapes Archive",
     family: "artist",
     description:
-      "A body of work organized into periods, series, and contextual essays.",
+      "An artist's project archive with grouped studies and notes on their development.",
     presentation: style("editorial", "paper", "serif", "compact"),
     pages: [
       page(
         "studio",
-        "A vocabulary, over time.",
-        "A fictional retrospective organized by creative periods rather than invented dates or exhibition credentials.",
-        heading("The early studies"),
-        text("A period of isolated gestures and open space."),
-        pageLink("View the early studies", "early-studies"),
-        heading("The later structures"),
+        "Common Shapes: project archive",
+        "An archive of Rae's project notes, grouped into object studies and line studies.",
+        heading("Object studies"),
         text(
-          "A shift toward repetition, accumulated marks, and denser fields."
+          "Notes for simple 3D forms, using Afterimage as a reference for shape and lighting."
         ),
-        pageLink("View the later structures", "later-structures"),
+        pageLink("Object study notes", "early-studies"),
+        heading("Line studies"),
+        text(
+          "Plans for blue-line drawings and darker grid compositions, with the reference images kept beside them."
+        ),
+        pageLink("Line study notes", "later-structures"),
         image(ART.afterimage, ART_CAPTIONS.afterimage),
-        pageLink("Read the retrospective essay", "essay")
+        pageLink("How the projects developed", "essay")
       ),
       page(
         "early-studies",
-        "An isolated gesture.",
-        "The first period in this fictional archive gives each mark enough space to be seen on its own.",
-        image(ART.afterimage, "Early study — original example artwork."),
-        text(
-          "The apparent simplicity creates a demanding kind of attention. Without a dense field to guide the eye, the position of each form becomes consequential."
+        "Object study notes",
+        "A project folder for loop shapes and controlled lighting tests.",
+        image(
+          ART.afterimage,
+          "Reference: Afterimage — a reflective loop on orange."
         ),
-        pageLink("Continue to later structures", "later-structures"),
-        pageLink("Read the essay", "essay")
+        text(
+          "I began this folder with a plan for a simple loop and three light positions. Afterimage is the reference for the broad highlight and the shadow below the form. The next test needs a fixed camera so I can compare the lighting directly."
+        ),
+        pageLink("Line study notes", "later-structures"),
+        pageLink("How the projects developed", "essay")
       ),
       page(
         "later-structures",
-        "An accumulated rhythm.",
-        "The later period returns to earlier gestures and places them in conversation.",
-        image(ART.signal, "Later study — original example artwork.", "half"),
-        image(ART.grid, "Later study — original example artwork.", "half"),
-        text(
-          "Repetition changes the unit of attention. The individual mark remains visible, but the relationships between marks become equally important."
+        "Line study notes",
+        "A project folder for repeated blue curves and grids with larger dark gaps.",
+        image(
+          ART.signal,
+          "Reference: Quiet Signal — blue curved lines on cream.",
+          "half"
         ),
-        pageLink("Read the retrospective essay", "essay")
+        image(
+          ART.grid,
+          "Reference: Night Grid — small lights in a dark grid.",
+          "half"
+        ),
+        text(
+          "The line project starts with six blue-and-cream studies. The grid project will follow after I have compared the line spacing. I keep separate folders so the second idea does not replace the first before it is finished."
+        ),
+        pageLink("How the projects developed", "essay")
       ),
       page(
         "essay",
-        "Change without a clean break.",
-        "An example essay connecting the periods of a fictional body of work.",
+        "From one project to the next",
+        "Why I keep short project notes with the reference images and working files.",
         text(
-          "A retrospective can make development look more orderly than it felt. The useful task is to preserve both the continuities and the unresolved questions.\n\nHere, an interest in intervals connects an open early image with a denser later one. The works do not need to look alike to share a concern."
+          "The object tests and line studies use different tools, but both need a controlled comparison. In one folder I keep the camera fixed and move the light. In the other I keep the curve fixed and change the spacing.\n\nI write the next action at the end of each session. It saves me from opening the files a week later and spending the first hour remembering which version I meant to continue."
         ),
-        heading("Reading the archive"),
+        heading("What stays in each folder"),
         text(
-          "Periods are editorial groupings. Actual creation dates, exhibition history, and ownership should be recorded only when supplied, with undated work left honestly undated."
+          "The project question, reference credits, working files, small comparison exports and a note explaining which version to continue. Finished work will get its own catalogue entry when it is ready."
         ),
-        pageLink("Return to the overview", "studio")
+        pageLink("Back to the project archive", "studio")
       ),
     ],
   }),

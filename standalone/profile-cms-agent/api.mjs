@@ -183,7 +183,12 @@ export function createAgentApi(configuration, fetchRequest = globalThis.fetch) {
         );
         if (response.status >= 300 && response.status < 400)
           throw invalidResponse();
-        const result = await readResponse(response, [token, stagingKey]);
+        const result = await readResponse(response, [token, stagingKey]).catch(
+          (error) => {
+            if (response.ok) throw error;
+            return undefined;
+          }
+        );
         if (!response.ok)
           throw new AgentError(
             errorCode(result),

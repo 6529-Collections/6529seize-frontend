@@ -4,6 +4,8 @@ import {
 } from "@/lib/profile-cms/agent-kit";
 import { instantiateCmsStudioTemplate } from "@/lib/profile-cms/studio/templates";
 import { withComputedCmsHashes } from "@/lib/profile-cms/protocol/v1";
+import fs from "node:fs";
+import path from "node:path";
 
 it("exports the complete multipage document and file proposal contract without mutating the source", () => {
   const original = instantiateCmsStudioTemplate(
@@ -28,4 +30,17 @@ it("exports the complete multipage document and file proposal contract without m
   expect(Object.keys(kit)).not.toEqual(
     expect.arrayContaining(["token", "authorization", "api_key"])
   );
+});
+
+it("resolves the proposal package reference to its emitted public schema", () => {
+  const kit = createCmsAgentKit(
+    instantiateCmsStudioTemplate("artist-studio", "ExampleProfile")
+  );
+  const schemaUrl = new URL(kit.proposal_schema.properties.candidate_package.$ref);
+  expect(schemaUrl.origin).toBe("https://6529.io");
+  const emitted = JSON.parse(
+    fs.readFileSync(path.join(process.cwd(), "public", schemaUrl.pathname), "utf8")
+  );
+  expect(emitted.$id).toBe(schemaUrl.href);
+  expect(emitted).toEqual(kit.package_schema);
 });

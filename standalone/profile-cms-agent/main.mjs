@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import schemas from "./schemas.json" with { type: "json" };
+import { readFile } from "node:fs/promises";
 import { createAgentApi } from "./api.mjs";
 import { createToolHandler } from "./tools.mjs";
 import { startStdioServer } from "./server.mjs";
@@ -7,6 +7,10 @@ import { startStdioServer } from "./server.mjs";
 async function main() {
   if (Number(process.versions.node.split(".")[0]) < 22)
     throw new Error("Node.js 22 or newer is required.");
+  const schemas = JSON.parse(
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- The schema URL is a fixed sibling of this module, with no external path input.
+    await readFile(new URL("./schemas.json", import.meta.url), "utf8")
+  );
   const api = createAgentApi({
     environment: process.env.CMS_AGENT_ENV,
     token: process.env.CMS_AGENT_TOKEN,

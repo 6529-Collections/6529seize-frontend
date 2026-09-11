@@ -190,6 +190,26 @@ test("response redirects, oversized streams, malformed JSON and credential echoe
     );
 });
 
+test("non-JSON gateway errors retain status and safe retry guidance without retrying", async () => {
+  for (const status of [429, 502, 503]) {
+    let calls = 0;
+    const api = createAgentApi({ token }, async () => {
+      calls++;
+      return new Response(`<html>gateway error ${token}</html>`, { status });
+    });
+    await assert.rejects(api.request("proposals", candidate), (error) => {
+      assert.equal(error.code, "cms_adapter_api_error");
+      assert.equal(error.status, status);
+      assert.equal(error.message.includes(token), false);
+      assert.equal(error.message.includes("<html>"), false);
+      if (status === 503)
+        assert.match(error.message, /same submission and idempotency key/);
+      return true;
+    });
+    assert.equal(calls, 1);
+  }
+});
+
 test("cancellation reaches the HTTP request without retrying", async () => {
   const controller = new AbortController();
   let calls = 0;
