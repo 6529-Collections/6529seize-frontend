@@ -9,6 +9,7 @@ import CollectRecipientPicker from "./CollectRecipientPicker";
 import { COLLECT_INPUT_CLASS } from "./CollectGoalForm";
 import { validateCollectTrade } from "./collect-form.validation";
 import type { CollectTradeAction, CollectTradeDraft } from "./collect.types";
+import { isCollectProfileWallet } from "./collect-recipient.helpers";
 
 interface CollectTradeFormProps {
   readonly action: CollectTradeAction;
@@ -34,10 +35,7 @@ export default function CollectTradeForm(props: CollectTradeFormProps) {
   const external =
     hasRecipient &&
     Boolean(props.draft.recipient) &&
-    !props.recipientProfile?.wallets?.some(
-      (wallet) =>
-        wallet.wallet.toLowerCase() === props.draft.recipient.toLowerCase()
-    );
+    !isCollectProfileWallet(props.recipientProfile, props.draft.recipient);
   const change = (patch: Partial<CollectTradeDraft>) => {
     setInvalid(null);
     props.onChange({
@@ -72,7 +70,9 @@ export default function CollectTradeForm(props: CollectTradeFormProps) {
       }}
     >
       <p className="tw-m-0 tw-break-all tw-text-xs tw-leading-5 tw-text-iron-300">
-        {t(locale, "collect.orders.maker", { wallet: props.makerLabel })}
+        {props.action === "buy"
+          ? `${t(locale, "collect.trade.payingWallet")}: ${props.makerLabel}`
+          : t(locale, "collect.orders.maker", { wallet: props.makerLabel })}
       </p>
       {props.action === "offer" && (
         <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300">
@@ -150,6 +150,7 @@ export default function CollectTradeForm(props: CollectTradeFormProps) {
           <CollectRecipientPicker
             key={props.recipientProfile?.id ?? "no-profile"}
             profile={props.recipientProfile}
+            payingWallet={props.makerLabel}
             value={props.draft.recipient}
             invalid={invalid === "recipient"}
             errorId={`${id}-error`}

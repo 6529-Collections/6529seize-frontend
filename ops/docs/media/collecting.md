@@ -70,8 +70,10 @@ cannot be loaded, use **Try again** or return to the collection page.
 
 ### Buy for another wallet
 
-The recipient picker follows minting: choose a wallet in your profile or enter
-a third-party wallet. Check the resolved address before authorization. The NFT
+The recipient picker follows minting and shows your profile's confirmed wallets
+automatically. Choose one, or use **Send to a fren** to search a profile or ENS
+name, or enter another wallet. Check the full resolved address before
+authorization. The paying wallet is separate from the recipient. The NFT
 is delivered directly to the chosen recipient in the purchase transaction.
 There is no separate onward transfer. A Safe can receive a purchase from a
 supported paying wallet.

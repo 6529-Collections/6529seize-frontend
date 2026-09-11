@@ -1,6 +1,9 @@
 import CollectTradeController from "@/components/collect/CollectTradeController";
 import type { ApiMarketOperation } from "@/generated/models/ApiMarketOperation";
-import type { CollectTradeReview } from "@/components/collect/collect.types";
+import type {
+  CollectTradeDraft,
+  CollectTradeReview,
+} from "@/components/collect/collect.types";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
 
@@ -13,10 +16,15 @@ interface RecoveryQuery {
   enabled?: boolean;
 }
 const mockQueries: RecoveryQuery[] = [];
+let mockPayingWallet = "0x1111111111111111111111111111111111111111";
 const mockAuth = {
   connectedProfile: {
     id: "new-profile",
     primary_wallet: "0x1111111111111111111111111111111111111111",
+    wallets: [
+      { wallet: "0x1111111111111111111111111111111111111111" },
+      { wallet: "0x2222222222222222222222222222222222222222" },
+    ],
   },
   activeProfileProxy: null as object | null,
   isAuthenticated: true,
@@ -24,7 +32,7 @@ const mockAuth = {
 jest.mock("@/components/auth/Auth", () => ({ useAuth: () => mockAuth }));
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: () => ({
-    address: mockAuth.connectedProfile.primary_wallet,
+    address: mockPayingWallet,
     seizeConnect: jest.fn(),
   }),
 }));
@@ -92,7 +100,9 @@ jest.mock("@/components/collect/market.adapters", () => ({
 }));
 jest.mock("@/components/collect/CollectTradeForm", () => ({
   __esModule: true,
-  default: () => null,
+  default: ({ draft }: { draft: CollectTradeDraft }) => (
+    <output aria-label="Trade recipient">{draft.recipient}</output>
+  ),
 }));
 jest.mock("@/components/collect/CollectOrderPicker", () => ({
   CollectOrderBook: () => null,
@@ -119,6 +129,7 @@ beforeEach(() => {
   mockRecover.mockResolvedValue(undefined);
   mockAuth.isAuthenticated = true;
   mockAuth.activeProfileProxy = null;
+  mockPayingWallet = mockAuth.connectedProfile.primary_wallet;
 });
 it("keeps recovery bound to the original operation after the funding wallet changes profiles", async () => {
   render(
@@ -187,3 +198,25 @@ it.each(["unauthenticated", "proxy"])(
     expect(mockRecover).not.toHaveBeenCalled();
   }
 );
+
+it("defaults a new purchase to the confirmed paying wallet", () => {
+  mockPayingWallet = "0x2222222222222222222222222222222222222222";
+  render(<CollectTradeController action="buy" onClose={jest.fn()} />);
+  expect(screen.getByLabelText("Trade recipient")).toHaveTextContent(
+    mockPayingWallet
+  );
+});
+
+it("keeps an explicitly selected plan recipient instead of the paying wallet", () => {
+  mockPayingWallet = "0x2222222222222222222222222222222222222222";
+  render(
+    <CollectTradeController
+      action="buy"
+      initialRecipient="0x3333333333333333333333333333333333333333"
+      onClose={jest.fn()}
+    />
+  );
+  expect(screen.getByLabelText("Trade recipient")).toHaveTextContent(
+    "0x3333333333333333333333333333333333333333"
+  );
+});

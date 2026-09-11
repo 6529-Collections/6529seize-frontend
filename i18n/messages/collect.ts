@@ -72,6 +72,7 @@ export const COLLECT_MESSAGES = {
   "collect.trade.approvalSpender": "Approved operator",
   "collect.trade.fees": "Signed order fees",
   "collect.trade.payer": "Wallet paying or selling",
+  "collect.trade.payingWallet": "Paying wallet",
   "collect.trade.destination": "NFT recipient",
   "collect.trade.asset": "Artwork",
   "collect.trade.network": "Network",
@@ -183,8 +184,10 @@ export const COLLECT_MESSAGES = {
   "collect.trade.recipient": "Receiving wallet address",
   "collect.recipient.mode": "Where to receive the artwork",
   "collect.recipient.myProfile": "My profile wallets",
-  "collect.recipient.other": "Another recipient",
+  "collect.recipient.other": "Send to a fren",
   "collect.recipient.chooseWallet": "Choose a receiving wallet",
+  "collect.recipient.walletsUnavailable":
+    "Your profile’s confirmed wallets are not available. You can enter a receiving address with Send to a fren.",
   "collect.recipient.search": "Find a profile, ENS or wallet",
   "collect.recipient.direct": "Or enter a wallet address directly",
   "collect.recipient.inProfile":
