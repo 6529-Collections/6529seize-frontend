@@ -131,6 +131,9 @@ push to open the matching app route.
   of every registration automatically. Cleanup stays pending; support must verify
   the installation and reconcile those registrations. A device ID alone is not
   enough to authorize deleting other profiles.
+- Signing out before the phone first registers for push requires a valid saved
+  native session. If that proof is missing or expires before the phone reconnects,
+  cleanup stays pending and support must verify ownership before recovery.
 - An unreadable installation credential or a changed device ID stops push
   registration rather than replacing the credential and losing pending cleanup.
 - If secure-storage read fails with a known recoverable pattern (missing key or
