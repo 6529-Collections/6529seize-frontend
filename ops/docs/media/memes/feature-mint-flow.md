@@ -5,6 +5,8 @@
 - `/the-memes/mint` is the mint route for the current latest The Memes drop.
 - The page combines artwork, drop details, countdown status, recipient
   selection, phase-aware mint controls, and transaction status.
+- On desktop, artwork aligns with the top of the drop details. On mobile,
+  artwork appears above the details and mint controls.
 - The same mint data and widget are also reused by the standalone latest-mint
   shell documented in
   [Standalone The Memes Mint Page](feature-standalone-mint-page.md).
