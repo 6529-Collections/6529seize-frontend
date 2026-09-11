@@ -125,7 +125,7 @@ export default function DocumentationAccess({
         disabled={busy}
       />
       {artist ? (
-        <fieldset className="tw-space-y-3">
+        <fieldset className="tw-m-0 tw-min-w-0 tw-space-y-3 tw-border-0 tw-p-0">
           <legend className="tw-mb-3 tw-text-sm tw-font-medium">
             {msg("editorPermissions")}
           </legend>
