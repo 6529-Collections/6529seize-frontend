@@ -14,7 +14,10 @@
 import { HttpFile } from '../http/http';
 
 export class ApiCollectPlanOptions {
-    'budget_wei': string;
+    /**
+    * Optional analysis cost cap including estimated gas. Omit to estimate the cost of all missing NFTs. This does not authorize execution or change any transaction spending limit.
+    */
+    'budget_wei'?: string;
     'recipient': string;
     'expected_analysis_id'?: string;
 

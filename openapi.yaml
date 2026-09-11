@@ -20555,6 +20555,10 @@ components:
       properties:
         budget_wei:
           type: string
+          description: >-
+            Optional analysis cost cap including estimated gas. Omit to estimate
+            the cost of all missing NFTs. This does not authorize execution or
+            change any transaction spending limit.
           pattern: ^(0|[1-9][0-9]{0,77})$
           maxLength: 78
         recipient:
@@ -20563,7 +20567,6 @@ components:
         expected_analysis_id:
           type: string
       required:
-        - budget_wei
         - recipient
     ApiCollectPlanRemaining:
       type: object

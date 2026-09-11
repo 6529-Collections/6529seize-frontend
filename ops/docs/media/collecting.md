@@ -44,10 +44,14 @@ card page.
    full set directly; Pebbles offers its named sets.
 2. Connect your profile to inspect its holdings. Wallet controls describe where
    NFTs are held, which wallet pays or signs, and where a purchase is delivered.
-3. Choose the season, artist or Pebbles set when applicable, then
-   **Copies per NFT** and budget.
+3. Choose the season, artist or Pebbles set when applicable. Type a name in
+   the selector to filter its options; artist names can be searched directly.
+   Set **Copies per NFT** and, optionally, a **Budget cap (ETH, optional)**.
    Copies per NFT is the total you want to hold of each required NFT, including
    copies already in your profile.
+   Leave the budget cap blank to estimate the full goal. An entered cap includes
+   estimated gas. This is an analysis constraint; buying still requires a fresh
+   price review and wallet approval.
    Review missing requirements, checked artworks, unavailable items and the
    proposed purchases. A partial plan leaves its unfilled requirements visible.
 4. Select an exact artwork and available order. Review quantity, currency,

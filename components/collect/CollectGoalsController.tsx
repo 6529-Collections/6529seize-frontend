@@ -113,7 +113,8 @@ export default function CollectGoalsController({
   }, [plan, scanError, onPlan, scope]);
   const submit = (value: CollectGoalDraft) => {
     if (!profile?.id || !catalog) return;
-    const validBudget = isPositiveEthAmount(value.budgetEth);
+    const validBudget =
+      value.budgetEth === "" || isPositiveEthAmount(value.budgetEth);
     setBudgetError(!validBudget);
     if (!validBudget) return;
     const valid =
@@ -131,7 +132,9 @@ export default function CollectGoalsController({
       {
         goal: collectAnalysisRequest(profile.id, catalog, value),
         options: {
-          budget_wei: parseEther(value.budgetEth).toString(),
+          ...(value.budgetEth === ""
+            ? {}
+            : { budget_wei: parseEther(value.budgetEth).toString() }),
           recipient,
         },
       },
@@ -152,6 +155,7 @@ export default function CollectGoalsController({
     <div className="tw-space-y-4">
       <CollectGoalForm
         draft={draft}
+        budgetOptional
         {...(completion ? { completion } : {})}
         definitions={collectGoalOptions(catalog, draft, locale)}
         profile={

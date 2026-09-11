@@ -208,6 +208,10 @@ export const COLLECT_MESSAGES = {
   "collect.goal.selectSet": "Select a set",
   "collect.goal.targetCount": "Copies per NFT",
   "collect.goal.budget": "Maximum budget (ETH)",
+  "collect.goal.optionalBudget": "Budget cap (ETH, optional)",
+  "collect.goal.optionalBudgetHint":
+    "Leave blank to estimate the full goal. A cap includes estimated gas.",
+  "collect.goal.noMatches": "No matches. Try another name.",
   "collect.goal.budgetHint": "Includes purchases and a gas reserve.",
   "collect.goal.horizon": "Projection horizon",
   "collect.goal.horizonDays": "{days} days",
