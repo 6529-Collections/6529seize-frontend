@@ -142,6 +142,24 @@ test("validation retains warnings and the server-normalized complete candidate",
   assert.deepEqual(await tool("cms_validate_candidate", candidate), result);
 });
 
+test("candidate hashes use the fixed protocol pattern before any API call", async () => {
+  let calls = 0;
+  const tool = createToolHandler(
+    createAgentApi({ token }, async () => {
+      calls++;
+      return response({ valid: true });
+    }),
+    {}
+  );
+  for (const value of [hash.toUpperCase(), `${hash}\n`, "sha256:(a+)+$", 42])
+    await assert.rejects(
+      tool("cms_validate_candidate", { ...candidate, base_package_hash: value })
+    );
+  assert.equal(calls, 0);
+  await tool("cms_validate_candidate", candidate);
+  assert.equal(calls, 1);
+});
+
 test("proposal dispositions pass through without inferring publication", async () => {
   for (const status of ["pending", "rejected", "applied"]) {
     const tool = createToolHandler(

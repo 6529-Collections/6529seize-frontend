@@ -1,7 +1,7 @@
 import { assertBoundedJson, invalidArguments, UUID_PATTERN } from "./api.mjs";
 
-const CANDIDATE_SCHEMA = "6529.cms.agent_candidate.v1";
-const hash = { type: "string", pattern: "^sha256:[a-f0-9]{64}$" };
+const HASH_PATTERN = /^sha256:[a-f0-9]{64}$/;
+const hash = { type: "string", pattern: HASH_PATTERN.source };
 const baseProperties = {
   draft_id: { type: "string", minLength: 1, maxLength: 100 },
   base_version: { type: "integer", minimum: 1 },
@@ -107,7 +107,9 @@ function validateField(value, schema) {
     throw invalidArguments();
   if (
     schema.pattern &&
-    (value.length !== 71 || !new RegExp(schema.pattern).test(value))
+    (schema.pattern !== HASH_PATTERN.source ||
+      value.length !== 71 ||
+      !HASH_PATTERN.test(value))
   )
     throw invalidArguments();
   if (
