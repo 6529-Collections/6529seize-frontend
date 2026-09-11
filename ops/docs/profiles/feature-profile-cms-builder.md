@@ -180,8 +180,9 @@ For independent verification and an archival HTML copy, use
 ## Limitations / Notes
 
 - The **More tools** menu provides optional **JSON** and **Agent** workspaces.
-  The file-based agent workflow is described separately; a connected MCP agent
-  service is not available.
+  Bring your own agent through complete website file exchange or temporary
+  access to one saved draft with the downloadable local MCP adapter. Review
+  proposals before accepting them; saving and publication remain owner actions.
 - Wallet signing for publication is separate from an on-chain transaction.
 - Unpublishing does not delete immutable storage, other people's copies, or
   external media. A publication receipt alone is not an offline media backup.

@@ -1,3 +1,4 @@
+import profileCmsAgentMessages from "@/i18n/messages/profileCmsAgent.fr-FR.json";
 import studioTemplateDescriptions from "@/i18n/messages/studioTemplateDescriptions.fr-FR.json";
 import profileCmsStudioUploadMessages from "@/i18n/messages/profileCmsStudioUpload.fr-FR.json";
 import studioWalletImportMessages from "@/i18n/messages/studioWalletImport.fr-FR.json";
@@ -14,6 +15,7 @@ import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.fr-FR.jso
 
 export const FR_FR_MESSAGES = {
   ...profileCmsStudioMessages,
+  ...profileCmsAgentMessages,
   ...studioTemplateDescriptions,
   ...profileCmsStudioUploadMessages,
   ...studioWalletImportMessages,

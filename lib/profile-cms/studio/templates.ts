@@ -18,6 +18,7 @@ import { ART_TEMPLATES } from "./templates-art";
 import { ORGANIZATION_TEMPLATES } from "./templates-organizations";
 import { CMS_STUDIO_MEME_TEMPLATES } from "./templates-memes";
 import type { CmsStudioTemplate } from "./template-types";
+import { getCmsStudioTemplateNavigationLabel } from "./template-navigation";
 
 export const CMS_STUDIO_CORE_TEMPLATES: readonly CmsStudioTemplate[] = [
   ...PERSONAL_TEMPLATES,
@@ -156,7 +157,10 @@ function instantiatePages(
         description: item.description,
         locale: "en",
         canonical_url: `https://6529.io/${handle}/${item.slug}`,
-        navigation_label: navigationLabel(item.slug),
+        navigation_label: getCmsStudioTemplateNavigationLabel(
+          template.id,
+          item.slug
+        ),
         search: "include",
         robots: "index",
         last_updated: createdAt,
@@ -165,11 +169,6 @@ function instantiatePages(
       source: { source_packet_id: `source-template-${template.id}` },
     };
   });
-}
-
-function navigationLabel(slug: string): string {
-  const words = slug.replaceAll("-", " ");
-  return words.charAt(0).toUpperCase() + words.slice(1);
 }
 
 function referencedTemplateAssets(pages: readonly CmsPageV1[]): CmsAssetV1[] {
