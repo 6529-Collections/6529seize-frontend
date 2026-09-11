@@ -815,7 +815,7 @@ describe("WaveDropReactions", () => {
     });
   });
 
-  it("blocks reaction chips while a rejected session is recovering", async () => {
+  it("recovers after a raw 401 and sends another reaction only on an explicit retry", async () => {
     mockUseEmoji.mockReturnValue(
       createEmojiContextValue(
         [
@@ -831,6 +831,8 @@ describe("WaveDropReactions", () => {
     requestAuthMock.mockReturnValueOnce(recovery.promise);
     (commonApi.commonApiPost as jest.Mock).mockRejectedValueOnce(
       createStructuredReactionError({
+        body: "Unauthorized",
+        headers: new Headers({ "Content-Type": "application/json" }),
         message: "Unauthorized",
         status: 401,
       })
@@ -861,6 +863,10 @@ describe("WaveDropReactions", () => {
       });
       expect(button).toBeDisabled();
     });
+    expect(setToastMock).toHaveBeenCalledWith({
+      message: "Unauthorized",
+      type: "error",
+    });
     fireEvent.click(button);
     expect(commonApi.commonApiPost).toHaveBeenCalledTimes(1);
 
@@ -871,6 +877,27 @@ describe("WaveDropReactions", () => {
 
     await waitFor(() => expect(button).toBeEnabled());
     expect(commonApi.commonApiPost).toHaveBeenCalledTimes(1);
+    expect(button).toHaveTextContent("1");
+    expect(button).not.toHaveClass("tw-border-primary-500");
+
+    (commonApi.commonApiPost as jest.Mock).mockResolvedValueOnce({});
+    fireEvent.click(button);
+
+    await waitFor(() => {
+      expect(commonApi.commonApiPost).toHaveBeenCalledTimes(2);
+      expect(button).toBeEnabled();
+    });
+    expect(commonApi.commonApiPost).toHaveBeenLastCalledWith({
+      endpoint: "drops/test-drop/reaction",
+      body: { reaction: ":gm:" },
+      errorMode: "structured",
+      signal: expect.any(AbortSignal),
+    });
+    expect(button).toHaveTextContent("2");
+    expect(button).toHaveClass("tw-border-primary-500");
+    expect(commonApi.commonApiDelete).not.toHaveBeenCalled();
+    expect(requestAuthMock).toHaveBeenCalledTimes(1);
+    expect(setToastMock).toHaveBeenCalledTimes(1);
   });
 
   it("shows rate-limit guidance and rolls back chip state after a 429", async () => {
