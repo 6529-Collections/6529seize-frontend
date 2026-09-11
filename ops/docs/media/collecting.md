@@ -26,7 +26,9 @@ Sets also link to relevant collecting goals.
 The **Listings and Offers** section on a supported artwork's page has a
 **Collect** action that opens purchase review on the same page. Its more-actions
 menu contains **Make an offer**, **List for sale** and **Review offers**.
-Current orders and terms are checked before a purchase can proceed.
+These actions open a dialog immediately, with a loading message while the
+artwork and trading tools load. Current orders and terms are checked before a
+purchase can proceed.
 
 **Browse artwork** links in Collecting tools return to the original collection
 pages. The planner has no separate artwork search or browsing grid. Existing
@@ -136,6 +138,11 @@ on-chain autonomous mandate.
   fees even when incoming proceeds fund those fees.
 
 ## Failure and Recovery
+
+If the artwork cannot be loaded for trading, choose **Try again** in the dialog.
+Loading, retry and review stay in the same dialog. **Close** or **Escape** returns
+you to the card. Closing while it loads cancels that attempt; the review will
+not open later when loading finishes.
 
 If an order changes, refresh its available terms and review again. The site
 does not substitute a different NFT into an exact-item purchase.

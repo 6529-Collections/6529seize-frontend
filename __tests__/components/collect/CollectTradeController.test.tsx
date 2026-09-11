@@ -1,4 +1,5 @@
 import CollectTradeController from "@/components/collect/CollectTradeController";
+import { CollectTradeDialog } from "@/components/collect/CollectTradeSheet";
 import type { ApiMarketOperation } from "@/generated/models/ApiMarketOperation";
 import type {
   CollectTradeDraft,
@@ -219,4 +220,37 @@ it("keeps an explicitly selected plan recipient instead of the paying wallet", (
   expect(screen.getByLabelText("Trade recipient")).toHaveTextContent(
     "0x3333333333333333333333333333333333333333"
   );
+});
+
+it("keeps embedded recovery in the existing dialog without creating a second modal", async () => {
+  render(
+    <CollectTradeDialog open title="Meme card" onClose={jest.fn()}>
+      <CollectTradeController
+        action="buy"
+        initialOperation={operation}
+        presentation="contents"
+        onClose={jest.fn()}
+      />
+    </CollectTradeDialog>
+  );
+  expect(screen.getAllByRole("dialog")).toHaveLength(1);
+  expect(screen.getByRole("dialog", { name: "Meme card" })).toContainElement(
+    screen.getByRole("status")
+  );
+  expect(screen.getByRole("status")).toHaveTextContent("Checking the outcome");
+  expect(
+    screen.queryByRole("button", { name: "Continue to wallet" })
+  ).not.toBeInTheDocument();
+  const hash = `0x${"d".repeat(64)}`;
+  fireEvent.change(
+    screen.getByRole("textbox", { name: "Transaction hash from your wallet" }),
+    { target: { value: hash } }
+  );
+  fireEvent.click(
+    screen.getByRole("button", { name: "Check this transaction" })
+  );
+  await waitFor(() =>
+    expect(mockRecover).toHaveBeenCalledWith(operation, hash)
+  );
+  expect(mockConfirm).not.toHaveBeenCalled();
 });

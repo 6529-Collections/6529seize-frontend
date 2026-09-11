@@ -40,7 +40,9 @@ import { MARKET_ZERO, validateMarketOperation } from "./market-validation";
 import { readMarketIntent, saveMarketIntent } from "./market-operation-storage";
 import { CollectOrderBook } from "./CollectOrderPicker";
 import CollectTradeForm from "./CollectTradeForm";
-import CollectTradeSheet from "./CollectTradeSheet";
+import CollectTradeSheet, {
+  type CollectTradePresentation,
+} from "./CollectTradeSheet";
 import CollectTransactionRecovery from "./CollectTransactionRecovery";
 import CollectAssetMedia from "./CollectAssetMedia";
 import { useMarketExecution } from "./useMarketExecution";
@@ -111,6 +113,7 @@ export default function CollectTradeController({
   onClose,
   onSettled,
   onMarketChange,
+  presentation = "dialog",
 }: {
   readonly asset?: ApiCollectAsset;
   readonly action: CollectTradeAction;
@@ -122,6 +125,7 @@ export default function CollectTradeController({
   readonly onClose: () => void;
   readonly onSettled?: () => void;
   readonly onMarketChange?: () => void;
+  readonly presentation?: CollectTradePresentation;
 }) {
   const locale = useBrowserLocale();
   const { connectedProfile, activeProfileProxy, isAuthenticated } = useAuth();
@@ -362,6 +366,7 @@ export default function CollectTradeController({
   return (
     <CollectTradeSheet
       open
+      presentation={presentation}
       review={review}
       title={asset?.name}
       stage={stage}

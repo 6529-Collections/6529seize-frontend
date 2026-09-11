@@ -18,6 +18,7 @@ import type {
   CollectTradeAction,
 } from "./collect.types";
 import CollectTradeActions from "./CollectTradeActions";
+import { CollectTradeDialog } from "./CollectTradeSheet";
 
 const CollectTradeController = lazy(() => import("./CollectTradeController"));
 const MAX_DETAIL_LOOKUP_PAGES = 100;
@@ -52,21 +53,12 @@ function isExactAsset(
   );
 }
 
-function PendingTrade({
-  locale,
-  onClose,
-}: {
-  readonly locale: SupportedLocale;
-  readonly onClose: () => void;
-}) {
+function PendingTrade({ locale }: { readonly locale: SupportedLocale }) {
   return (
-    <div className="tw-mt-2 tw-flex tw-flex-wrap tw-items-center tw-gap-2">
+    <div className="tw-px-4 md:tw-px-6">
       <p role="status" className="tw-m-0 tw-text-xs tw-text-iron-400">
         {t(locale, "collect.detail.loading")}
       </p>
-      <Button variant="tertiary" size="sm" onClick={onClose}>
-        {t(locale, "collect.trade.close")}
-      </Button>
     </div>
   );
 }
@@ -124,11 +116,10 @@ function DetailTrade({
     retry: false,
     staleTime: 0,
   });
-  if (lookup.isPending)
-    return <PendingTrade locale={locale} onClose={onClose} />;
+  if (lookup.isPending) return <PendingTrade locale={locale} />;
   if (lookup.isError)
     return (
-      <div className="tw-mt-2 tw-space-y-2">
+      <div className="tw-space-y-2 tw-px-4 md:tw-px-6">
         <p role="alert" className="tw-m-0 tw-text-xs tw-text-iron-300">
           {t(locale, "collect.detail.unavailable")}
         </p>
@@ -140,15 +131,13 @@ function DetailTrade({
           >
             {t(locale, "collect.retry")}
           </Button>
-          <Button variant="tertiary" size="sm" onClick={onClose}>
-            {t(locale, "collect.trade.close")}
-          </Button>
         </div>
       </div>
     );
   return (
-    <Suspense fallback={<PendingTrade locale={locale} onClose={onClose} />}>
+    <Suspense fallback={<PendingTrade locale={locale} />}>
       <CollectTradeController
+        presentation="contents"
         asset={lookup.data}
         action={action}
         onClose={onClose}
@@ -180,17 +169,19 @@ function DetailActions(props: CollectDetailActionsProps) {
         }}
       />
       {action && (
-        <DetailTrade
-          key={action}
-          collection={props.collection}
-          tokenId={props.tokenId}
-          locale={props.locale}
-          action={action}
-          onClose={close}
-          {...(props.onMarketChange
-            ? { onMarketChange: props.onMarketChange }
-            : {})}
-        />
+        <CollectTradeDialog open title={props.title} onClose={close}>
+          <DetailTrade
+            key={action}
+            collection={props.collection}
+            tokenId={props.tokenId}
+            locale={props.locale}
+            action={action}
+            onClose={close}
+            {...(props.onMarketChange
+              ? { onMarketChange: props.onMarketChange }
+              : {})}
+          />
+        </CollectTradeDialog>
       )}
     </div>
   );
