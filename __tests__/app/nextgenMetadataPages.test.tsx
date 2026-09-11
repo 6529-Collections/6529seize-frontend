@@ -2,7 +2,10 @@ import { generateMetadata as generateNextGenCollectionMetadata } from "@/app/nex
 import { generateNextgenCollectionMetadata } from "@/app/nextgen/collection/[collection]/page-utils";
 import { generateMetadata as generateNextGenMetadata } from "@/app/nextgen/[[...view]]/page";
 import { generateMetadata as generateNextGenAdminMetadata } from "@/app/nextgen/manager/page";
-import { generateMetadata as generateNextGenTokenMetadata } from "@/app/nextgen/token/[token]/[[...view]]/page";
+import NextGenTokenPage, {
+  generateMetadata as generateNextGenTokenMetadata,
+} from "@/app/nextgen/token/[token]/[[...view]]/page";
+import { render } from "@testing-library/react";
 import { NEXTGEN_CONTRACT } from "@/constants/constants";
 import { commonApiFetch } from "@/services/api/common-api";
 import type { NextGenCollection, NextGenToken } from "@/entities/INextgen";
@@ -345,4 +348,38 @@ describe("NextGen metadata", () => {
       `/api/og-metadata/nfts/${NEXTGEN_CONTRACT}/10000000042`
     );
   });
+
+  it.each([
+    [undefined, ""],
+    ["display-center", "/display-center"],
+    ["rarity", "/rarity"],
+    ["unsupported", ""],
+  ])(
+    "keeps %s view metadata and JSON-LD on the same canonical token URL",
+    async (view, suffix) => {
+      mockNextgenFetches();
+      const params = Promise.resolve({
+        token: "42",
+        view: view ? [view] : undefined,
+      });
+      const metadata = await generateNextGenTokenMetadata({ params });
+      const { container } = render(
+        await NextGenTokenPage({ params, searchParams: Promise.resolve({}) })
+      );
+      const script = container.querySelector(
+        'script[type="application/ld+json"]'
+      );
+      const jsonLd = JSON.parse(script?.textContent ?? "{}") as {
+        "@graph": Record<string, unknown>[];
+      };
+      const canonical = `https://test.6529.io/nextgen/token/10000000042${suffix}`;
+      expect(metadata.alternates?.canonical).toBe(canonical);
+      expect(jsonLd["@graph"]).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ "@type": "VisualArtwork", url: canonical }),
+          expect.objectContaining({ "@type": "WebPage", url: canonical }),
+        ])
+      );
+    }
+  );
 });

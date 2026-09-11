@@ -493,7 +493,15 @@ const NftTextLines = ({
       }}
     >
       {getKeyedLines(lines).map(({ key, value: line }) => (
-        <div key={key} style={{ display: "flex", whiteSpace: "nowrap", width }}>
+        <div
+          key={key}
+          style={{
+            display: "flex",
+            overflow: "hidden",
+            whiteSpace: "nowrap",
+            width,
+          }}
+        >
           {line}
         </div>
       ))}

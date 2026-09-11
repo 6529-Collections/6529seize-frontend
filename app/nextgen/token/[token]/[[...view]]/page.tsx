@@ -28,6 +28,14 @@ const getFirstUsableImage = (
   ...sources: readonly (string | null | undefined)[]
 ): string | undefined => sources.find(isUsableImageSource);
 
+const getTokenPath = (tokenId: number, view: NextgenCollectionView): string => {
+  const viewPath =
+    view === NextgenCollectionView.ABOUT
+      ? ""
+      : `/${view.toLowerCase().replaceAll(" ", "-")}`;
+  return `/nextgen/token/${tokenId}${viewPath}`;
+};
+
 export async function generateMetadata({
   params,
 }: {
@@ -63,12 +71,8 @@ export async function generateMetadata({
   const description = [baseTitle, data.collection.artist.trim(), "NextGen"]
     .filter(Boolean)
     .join(" · ");
-  const viewPath =
-    viewDisplay.length > 0
-      ? `/${viewDisplay.toLowerCase().replaceAll(" ", "-")}`
-      : "";
   const canonical = canonicalUrl(
-    `/nextgen/token/${data.token?.id ?? data.tokenId}${viewPath}`
+    getTokenPath(data.token?.id ?? data.tokenId, resolvedView)
   );
   const metadata = getAppMetadata(
     getLargeSocialCardMetadata({
@@ -120,9 +124,7 @@ export default async function NextGenTokenPage({
     notFound();
   }
   const resolvedView = getContentView(view?.[0] ?? "");
-  const viewPath =
-    resolvedView === NextgenCollectionView.ABOUT ? "" : `/${resolvedView}`;
-  const path = `/nextgen/token/${token}${viewPath}`;
+  const path = getTokenPath(data.token?.id ?? data.tokenId, resolvedView);
   return (
     <>
       <JsonLdScript

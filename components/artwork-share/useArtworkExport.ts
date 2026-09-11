@@ -16,6 +16,54 @@ interface PreparedExport {
 
 const MAX_EXPORT_BYTES = 8 * 1024 * 1024;
 
+function assertExportActive(signal: AbortSignal) {
+  if (signal.aborted) throw new Error("Artwork export was aborted");
+}
+
+async function readExportBlob(response: Response, signal: AbortSignal) {
+  const reader = response.body?.getReader();
+  if (!reader) throw new Error("Artwork export body is unavailable");
+
+  let complete = false;
+  let cancelled = false;
+  const cancel = () => {
+    if (cancelled) return;
+    cancelled = true;
+    void reader.cancel().catch(() => undefined);
+  };
+  signal.addEventListener("abort", cancel, { once: true });
+  try {
+    const contentLength = response.headers.get("content-length");
+    if (
+      contentLength !== null &&
+      (!/^\d+$/.test(contentLength) || Number(contentLength) > MAX_EXPORT_BYTES)
+    ) {
+      throw new Error("Unexpected artwork export size");
+    }
+    const chunks: BlobPart[] = [];
+    let bytes = 0;
+    assertExportActive(signal);
+    for (;;) {
+      const { done, value } = await reader.read();
+      assertExportActive(signal);
+      if (done) {
+        if (bytes === 0) throw new Error("Unexpected artwork export size");
+        complete = true;
+        return new Blob(chunks, { type: "image/png" });
+      }
+      bytes += value.byteLength;
+      if (bytes > MAX_EXPORT_BYTES) {
+        throw new Error("Unexpected artwork export size");
+      }
+      if (value.byteLength > 0) chunks.push(value);
+    }
+  } finally {
+    signal.removeEventListener("abort", cancel);
+    if (!complete) cancel();
+    reader.releaseLock();
+  }
+}
+
 export function useArtworkExport(url: string, filename: string) {
   const [attempt, setAttempt] = useState(0);
   const [prepared, setPrepared] = useState<PreparedExport>();
@@ -38,10 +86,7 @@ export function useArtworkExport(url: string, filename: string) {
         ) {
           throw new Error("Artwork export is unavailable");
         }
-        const blob = await response.blob();
-        if (blob.size === 0 || blob.size > MAX_EXPORT_BYTES) {
-          throw new Error("Unexpected artwork export size");
-        }
+        const blob = await readExportBlob(response, controller.signal);
         if (controller.signal.aborted)
           throw new Error("Artwork export timed out");
         if (disposed) return;
@@ -53,6 +98,7 @@ export function useArtworkExport(url: string, filename: string) {
           state: { status: "ready", file, previewUrl },
         });
       } catch {
+        controller.abort();
         if (!disposed)
           setPrepared({ url, filename, state: { status: "error" } });
       } finally {
