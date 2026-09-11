@@ -12,6 +12,8 @@ import {
   $isRangeSelection,
   createEditor,
   DELETE_CHARACTER_COMMAND,
+  COMMAND_PRIORITY_LOW,
+  FORMAT_TEXT_COMMAND,
   UNDO_COMMAND,
   REDO_COMMAND,
   type LexicalEditor,
@@ -224,6 +226,73 @@ describe("editor inline formatting", () => {
     await typeText("~test~");
     await backspace();
     expect(root.textContent).toBe("prefix ~testsuffix");
+  });
+
+  it.each([
+    {
+      name: "an explicit format command",
+      change: () => {
+        editor.dispatchCommand(FORMAT_TEXT_COMMAND, "bold");
+      },
+    },
+    {
+      name: "a node style update without a text change",
+      change: () => {
+        $getRoot().getAllTextNodes()[0]?.setStyle("color: red");
+      },
+    },
+    {
+      name: "cursor movement away and back",
+      change: () => {
+        $getRoot().getAllTextNodes()[0]?.select(0, 0);
+      },
+    },
+  ])("uses normal deletion after $name", async ({ change }) => {
+    await typeText("~hi~");
+    await update(change);
+    await update(() => {
+      $getRoot().getAllTextNodes()[0]?.selectEnd();
+    });
+    // Observe normal command fallthrough before jsdom's unsupported native
+    // Selection.modify is reached. The shortcut must not restore old content.
+    const normalDelete = jest.fn(() => true);
+    const unregister = editor.registerCommand(
+      DELETE_CHARACTER_COMMAND,
+      normalDelete,
+      COMMAND_PRIORITY_LOW
+    );
+    try {
+      await backspace();
+      expect(normalDelete).toHaveBeenCalledTimes(1);
+      expect(root.textContent).toBe("hi");
+    } finally {
+      unregister();
+    }
+  });
+
+  it("does not restore over a content update in the same command transaction", async () => {
+    await typeText("~hi~");
+    const normalDelete = jest.fn(() => true);
+    const unregister = editor.registerCommand(
+      DELETE_CHARACTER_COMMAND,
+      normalDelete,
+      COMMAND_PRIORITY_LOW
+    );
+    try {
+      await update(() => {
+        $getRoot().getAllTextNodes()[0]?.setStyle("color: red");
+        editor.dispatchCommand(DELETE_CHARACTER_COMMAND, true);
+      });
+      expect(normalDelete).toHaveBeenCalledTimes(1);
+      expect(root.textContent).toBe("hi");
+      expect(
+        editor
+          .getEditorState()
+          .read(() => $getRoot().getAllTextNodes()[0]?.getStyle())
+      ).toBe("color: red");
+    } finally {
+      unregister();
+    }
   });
 
   it("supports undo and redo of shortcut reversal", async () => {

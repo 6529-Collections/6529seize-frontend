@@ -1,5 +1,5 @@
 import type { Transformer, TextFormatTransformer } from "@lexical/markdown";
-import { $restoreEditorState, mergeRegister } from "@lexical/utils";
+import { $dfs, $restoreEditorState, mergeRegister } from "@lexical/utils";
 import {
   $addUpdateTag,
   $getRoot,
@@ -10,6 +10,7 @@ import {
   CLICK_COMMAND,
   COMMAND_PRIORITY_HIGH,
   DELETE_CHARACTER_COMMAND,
+  FORMAT_TEXT_COMMAND,
   KEY_DOWN_COMMAND,
   type EditorState,
   type LexicalEditor,
@@ -44,7 +45,7 @@ function readCursor(state: EditorState) {
           : 0,
       nodeFormats: $isTextNode(node)
         ? new Set(INLINE_FORMATS.filter((format) => node.hasFormat(format)))
-        : new Set(),
+        : new Set<TextFormatType>(),
       size: $getRoot().getTextContentSize(),
       touchedFormats: selection
         .getNodes()
@@ -119,6 +120,23 @@ function resetDeletedFormats(
   }
 }
 
+function hasSameCursor(previous: Cursor, current: Cursor): boolean {
+  return (
+    previous.selection.isCollapsed() &&
+    current.selection.isCollapsed() &&
+    previous.selection.anchor.is(current.selection.anchor)
+  );
+}
+
+function $hasSameNodes(previous: EditorState): boolean {
+  const currentNodes = $dfs().map(({ node }) => node);
+  const previousNodes = previous.read(() => $dfs().map(({ node }) => node));
+  return (
+    previousNodes.length === currentNodes.length &&
+    previousNodes.every((node, index) => node === currentNodes[index])
+  );
+}
+
 export function registerInlineFormatEditing(
   editor: LexicalEditor,
   transformers: Transformer[]
@@ -139,22 +157,48 @@ export function registerInlineFormatEditing(
     return false;
   };
 
+  const retainShortcut = (
+    previous: Cursor,
+    current: Cursor,
+    prevEditorState: EditorState,
+    editorState: EditorState
+  ): boolean => {
+    // Selection reconciliation and no-op plugin updates may create a new
+    // EditorState without changing any document node or moving the cursor.
+    // Retain the shortcut only across those updates, never across content edits.
+    if (
+      !(pending || shortcut) ||
+      !hasSameCursor(previous, current) ||
+      !editorState.read(() => $hasSameNodes(prevEditorState))
+    )
+      return false;
+    if (pending?.typed === prevEditorState) pending.typed = editorState;
+    if (shortcut?.converted === prevEditorState)
+      shortcut.converted = editorState;
+    return true;
+  };
+
   return mergeRegister(
     editor.registerUpdateListener(({ editorState, prevEditorState, tags }) => {
-      const candidate = pending;
-      clearShortcut();
       if (
         tags.has("historic") ||
         tags.has("collaboration") ||
         editor.isComposing()
       ) {
+        clearShortcut();
         return;
       }
       const previous = readCursor(prevEditorState);
       const current = readCursor(editorState);
       if (!previous || !current) {
+        clearShortcut();
         return;
       }
+      if (retainShortcut(previous, current, prevEditorState, editorState)) {
+        return;
+      }
+      const candidate = pending;
+      clearShortcut();
       const removed = previous.size - current.size;
       if (
         candidate?.typed === prevEditorState &&
@@ -198,8 +242,10 @@ export function registerInlineFormatEditing(
           editor.isComposing() ||
           !$isRangeSelection(selection) ||
           !selection.isCollapsed() ||
-          !selection.is(convertedSelection ?? null) ||
-          editor.getEditorState() !== saved.converted
+          !$isRangeSelection(convertedSelection) ||
+          !selection.anchor.is(convertedSelection.anchor) ||
+          editor.getEditorState() !== saved.converted ||
+          !$hasSameNodes(saved.converted)
         ) {
           return false;
         }
@@ -225,6 +271,11 @@ export function registerInlineFormatEditing(
         }
         return false;
       },
+      COMMAND_PRIORITY_HIGH
+    ),
+    editor.registerCommand(
+      FORMAT_TEXT_COMMAND,
+      clearShortcut,
       COMMAND_PRIORITY_HIGH
     ),
     editor.registerCommand(CLICK_COMMAND, clearShortcut, COMMAND_PRIORITY_HIGH),
